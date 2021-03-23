@@ -1,0 +1,1 @@
+A simple text file for Azure to chew on.
