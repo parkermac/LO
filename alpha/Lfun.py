@@ -6,7 +6,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 # get initial version of Ldir when this module is loaded
-alp = Path(__file__).parent # path to where this file lives
+alp = Path(__file__).absolute().parent # path to where this file lives
 alp_user = Path(str(alp).replace('LO','LO_user'))
 if (alp_user / 'user_get_lo_info.py').is_file():
     print(' Using user_get_lo_info.py '.center(60,'>'))
@@ -25,6 +25,10 @@ Ldir = glo.Ldir.copy()
 
 # this it the one place where the model time reference is set
 modtime0 = datetime(1970,1,1,0,0)
+
+# correct string for time units in ROMS forcing files
+# see notes in Evernote, Run Log 9, 2020.10.06
+roms_time_units = 'seconds since 1970-01-01 00:00:00'
 
 # format used for naming day folders
 ds_fmt = '%Y.%m.%d'

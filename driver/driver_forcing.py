@@ -3,9 +3,12 @@ This runs any of the forcing or post-processing jobs.
 
 It can be run for a single forecast or over a range of past days.
 
-To test on mac from ipython:
+Test on mac from ipython:
+run driver_forcing -g cas6 -t v3 -r backfill -s continuation -0 2019.07.04 -test True -f [FRC]
+where [FRC] = ftest, tide0, etc.
 
-run driver_forcing -g cas6 -t v3 -f ftest -r backfill -s continuation -0 2019.07.04 -test True
+Test on mac from command line:
+python ./driver_forcing.py -g cas6 -t v3 -r backfill -s continuation -0 2019.07.04 -test True -f [FRC]
 
 """
 
@@ -15,7 +18,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import subprocess
 
-pth = Path(__file__).parent.parent / 'alpha'
+pth = Path(__file__).absolute().parent.parent / 'alpha'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import Lfun, zfun
@@ -81,7 +84,7 @@ while dt <= dt1:
     cmd_list = ['python3', str(fpth),
                 '-g', args.gridname, '-t', args.tag, '-f', args.frc,
                 '-r', args.run_type, '-s', args.start_type,
-                '-d', dt.strftime(ds_fmt), '-test', str(args.testing)]
+                '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing)]
     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     with open(out_pth / 'Info' / 'screen_output.txt', 'w') as fout:
