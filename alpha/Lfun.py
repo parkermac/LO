@@ -21,7 +21,7 @@ if False:
     reload(glo)
     
 # initialize Ldir for this module
-Ldir = glo.Ldir.copy()
+Ldir = glo.Ldir0.copy()
 
 # this it the one place where the model time reference is set
 modtime0 = datetime(1970,1,1,0,0)
@@ -46,7 +46,10 @@ def Lstart(gridname='BLANK', tag='BLANK', ex_name='BLANK'):
     Ldir['gtagex'] = gridname + '_' + tag + '_' + ex_name
     Ldir['grid'] = Ldir['data'] / 'grids' / gridname
     Ldir['forecast_days'] = 3
-    return Ldir
+    Ldir['ds_fmt'] = ds_fmt
+    return Ldir.copy()
+    # the use of copy() means different calls to Lstart (e.g. when importing
+    # plotting_functions) to not overwrite each other
 
 def make_dir(pth, clean=False):
     """
@@ -108,7 +111,7 @@ def date_list_utility(dt0, dt1):
     date_list = []
     dt = dt0
     while dt <= dt1:
-        date_list.append(dt.strftime('%Y.%m.%d'))
+        date_list.append(dt.strftime(ds_fmt))
         dt = dt + timedelta(days=1)
     return date_list
 
@@ -140,8 +143,8 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=1):
     A function for getting list of history files.
     - list items are strings of the full path
     """
-    dt0 = datetime.strptime(ds0, '%Y.%m.%d')
-    dt1 = datetime.strptime(ds1, '%Y.%m.%d')
+    dt0 = datetime.strptime(ds0, ds_fmt)
+    dt1 = datetime.strptime(ds1, ds_fmt)
     dir0 = Ldir['roms'] / 'output' / Ldir['gtagex']
     if list_type == 'snapshot':
         # a single file name in a list

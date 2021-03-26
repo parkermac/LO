@@ -47,15 +47,15 @@ elif (str(HOME) == '/home/parker') & ('perigee' in HOSTNAME):
     roms1 = Path('/boildat1/parker/LO_roms')
     roms2 = Path('/data2/parker/LO_roms')
   
-Ldir = dict()
-Ldir['lo_env'] = lo_env
-Ldir['parent'] = parent
-Ldir['LO'] = LO
-Ldir['LOo'] = LOo
-Ldir['LOu'] = LOu
-Ldir['data'] = data
-Ldir['roms'] = roms
-Ldir['roms1'] = roms1
-Ldir['roms2'] = roms2
-Ldir['which_matlab'] = which_matlab
+Ldir0 = dict()
+Ldir0['lo_env'] = lo_env
+Ldir0['parent'] = parent
+Ldir0['LO'] = LO
+Ldir0['LOo'] = LOo
+Ldir0['LOu'] = LOu
+Ldir0['data'] = data
+Ldir0['roms'] = roms
+Ldir0['roms1'] = roms1
+Ldir0['roms2'] = roms2
+Ldir0['which_matlab'] = which_matlab
 

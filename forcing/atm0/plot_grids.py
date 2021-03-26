@@ -11,7 +11,7 @@ if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import Lfun
 Ldir = Lfun.Lstart(gridname='cas6')
-import pfun
+import plotting_functions as pfun
 
 import netCDF4 as nc
 import matplotlib.pyplot as plt

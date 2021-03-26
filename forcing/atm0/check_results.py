@@ -11,7 +11,7 @@ pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import Lfun
-import pfun
+import plotting_functions as pfun
 
 date_string = '2017.04.20'
 
