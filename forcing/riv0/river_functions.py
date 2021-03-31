@@ -1,13 +1,7 @@
-# -*- coding: utf-8 -*-
 """
-Created on Thu Jul 21 14:11:16 2016
-
-@author: PM5
-
 Some extra river functions.
 
 """
-
 
 import os
 import netCDF4 as nc
@@ -16,8 +10,6 @@ import river_class
 import numpy as np
 from datetime import datetime
 import Lfun # assume path is provided by calling function
-
-ncformat = 'NETCDF3_64BIT_OFFSET' # NETCDF3_CLASSIC'
 
 def get_tc_rn(df):
     # makes a new column in df called 'tc_rn' which is the name of a
@@ -55,7 +47,7 @@ def get_qt(df, dt_ind, yd_ind, Ldir, dt1, days):
     filterwarnings('ignore') # skip some warning messages
     qt_df_dict = dict()
     for rn in df.index:
-        print(10*'#' + ' ' + rn + ' ' + 10*'#')
+        print(rn.center(60,'-'))
         # initialize a qt (flow vs. time) DataFrame for this river
         qt_df = pd.DataFrame(index=dt_ind,
                              columns=['clim','his','usgs','ec','nws','final',
@@ -162,7 +154,7 @@ def write_to_nc(out_fn, S, df, qt_df_dict, dt_ind):
         os.remove(out_fn)
     except OSError:
         pass # assume error was because the file did not exist
-    foo = nc.Dataset(out_fn, 'w', format=ncformat)
+    foo = nc.Dataset(out_fn, 'w')
     
     nriv = len(df)
     N = S['N']
@@ -181,7 +173,7 @@ def write_to_nc(out_fn, S, df, qt_df_dict, dt_ind):
     v_var = foo.createVariable('river_name', 'c', ('slen', 'river'))
     rr = 0
     for rn in df.index:
-        print('- ' + rn)
+        #print('- ' + rn)
         cc = 0
         for ch in rn:
             v_var[cc, rr] = ch
@@ -195,7 +187,7 @@ def write_to_nc(out_fn, S, df, qt_df_dict, dt_ind):
         v_var[count] = Lfun.datetime_to_modtime(item_dt)
         count += 1
     v_var.long_name = 'river runoff time'
-    v_var.units = "seconds since 1970-01-01 00:00:00"
+    v_var.units = Lfun.roms_time_units
 
     v_var = foo.createVariable('river_direction', float, ('river'))
     count = 0
@@ -278,21 +270,11 @@ def write_to_nc(out_fn, S, df, qt_df_dict, dt_ind):
     v_var = foo.createVariable('river_Vshape', float, ('s_rho', 'river'))
     count = 0
     for rn in df.index:
-        if False:
-            # copied from old matlab code, and simplified
-            #   %linear decay from surface value to 0, fixed by sng 7/2011
-            v_var[:, count] = np.linspace(0,2/N,N)
-            count += 1
-        else:
-            # new version 2019.01.20 PM, because the one above put
-            # too much transport in the thin upper layers, which
-            # caused VERY high velocities - and may have been the source
-            # of blowups.
-            csw = S['Cs_w']
-            dcsw = np.diff(csw)
-            v_var[:, count] = dcsw
-            count += 1
-            # should end up with velocity constant over depth
+        csw = S['Cs_w']
+        dcsw = np.diff(csw)
+        v_var[:, count] = dcsw
+        count += 1
+        # should end up with velocity constant over depth
     v_var.long_name = 'river runoff mass transport vertical profile'
     v_var.requires = "must sum to 1 over s_rho"
 
@@ -308,7 +290,7 @@ def add_bio(out_fn, df, yd_ind):
                'oxygen':'MicroMolar O',
                'alkalinity':'MicroMolar',
                'TIC':'MicroMolar C'}
-    foo = nc.Dataset(out_fn, 'a', format=ncformat)
+    foo = nc.Dataset(out_fn, 'a')
     Vs = foo['river_Vshape'][:]
     N, nriv = Vs.shape
     for vn in vn_dict.keys():      

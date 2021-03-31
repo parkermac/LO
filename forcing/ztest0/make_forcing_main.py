@@ -1,9 +1,11 @@
 """
-This is the main program for making the FTEST forcing file.
+This is the main program for making the ZTEST forcing file.  This is intended
+to be a template to copy for making all the other make_forcing_main.py
+in forcing.
 
 Test on mac in ipython:
 
-run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2019.07.04 -test True -f ftest
+run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2019.07.04 -test True -f ztest0
 
 """
 
@@ -14,7 +16,7 @@ from datetime import datetime
 pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
-import forcing_functions as ffun
+import forcing_argfun as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing
 result_dict = dict()

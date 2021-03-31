@@ -14,7 +14,7 @@ from datetime import datetime
 pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
-import forcing_functions as ffun
+import forcing_argfun as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing
 result_dict = dict()

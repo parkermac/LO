@@ -47,6 +47,8 @@ def Lstart(gridname='BLANK', tag='BLANK', ex_name='BLANK'):
     Ldir['grid'] = Ldir['data'] / 'grids' / gridname
     Ldir['forecast_days'] = 3
     Ldir['ds_fmt'] = ds_fmt
+    Ldir['roms_time_units'] = roms_time_units
+    Ldir['modtime0'] = modtime0
     return Ldir.copy()
     # the use of copy() means different calls to Lstart (e.g. when importing
     # plotting_functions) to not overwrite each other

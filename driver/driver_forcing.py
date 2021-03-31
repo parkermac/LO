@@ -5,7 +5,7 @@ It can be run for a single forecast or over a range of past days.
 
 Test on mac from ipython:
 run driver_forcing -g cas6 -t v3 -r backfill -s continuation -0 2019.07.04 -test True -f [FRC]
-where [FRC] = ftest, tide0, etc.
+where [FRC] = ztest0, tide0, etc.
 
 Test on mac from command line:
 python ./driver_forcing.py -g cas6 -t v3 -r backfill -s continuation -0 2019.07.04 -test True -f [FRC]

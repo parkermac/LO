@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul 21 08:52:07 2016
-
-@author: PM5
-"""
-
 """
 The river class code.  This version gets Temperature instead of flow.
 

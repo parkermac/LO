@@ -1,8 +1,6 @@
 """
-Shared helper functions for the forcing code.
+Shared helper functions for the forcing code, especially for argument passing.
 
-Note that the instance of Ldir created here is completely independent of that created by
-driver_forcing because this is called as a subprocess.
 """
 import argparse
 import sys
@@ -28,7 +26,7 @@ def intro():
     argsd = args.__dict__
     for a in ['gridname', 'tag', 'frc', 'run_type', 'start_type', 'date_string']:
         if argsd[a] == None:
-            print('*** Missing required argument to forcing_functions.intro(): ' + a)
+            print('*** Missing required argument to forcing_argfun.intro(): ' + a)
             sys.exit()
         
     # get the dict Ldir
@@ -44,7 +42,7 @@ def intro():
     Lfun.make_dir(out_pth / 'Info')
     Lfun.make_dir(out_pth / 'Data')
 
-    return Ldir
+    return Ldir.copy()
     
 def finale(Ldir, result_dict):
     out_pth = Path(Ldir['LOo']) / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
