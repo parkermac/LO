@@ -264,7 +264,7 @@ if __name__ == '__main__':
     
     if False:
         print(' TESTING copy_to_azure() '.center(60,'-'))
-        input_filename = Ldir['LO'] / 'x_misc' / 'az_testfile.txt'
+        input_filename = Ldir['data'] / 'accounts' / 'az_testfile.txt'
         output_filename = input_filename.name
         container_name = 'pm-share'
         az_dict = copy_to_azure(input_filename, output_filename, container_name, Ldir)
@@ -275,7 +275,7 @@ if __name__ == '__main__':
             print('EXCEPTION')
             print(az_dict['exception'])
             
-    if True:
+    if False:
         print(' TESTING get_fn_list() '.center(60,'-'))
         Ldir = Lstart(gridname='cas6', tag='v3', ex_name='lo8b')
         list_type = 'allhours'

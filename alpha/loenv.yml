@@ -1,0 +1,38 @@
+name: loenv
+channels:
+  - conda-forge
+dependencies:
+  # from Rob Hetland
+  - cf_xarray
+  - dask
+  - jupyter
+  - jupyterlab
+  - netcdf4
+  - numba >= 0.49
+  - numpy
+  - xarray
+  - xgcm
+  - cartopy
+  - cmocean
+  - datashader
+  - geoviews
+  - holoviews
+  - hvplot
+  - matplotlib
+  - zarr
+  - nodejs
+  - dask-labextension
+  # my additions
+  - seawater
+  - gsw
+  - ephem
+  - UTide
+  - beautifulsoup4
+  - lxml
+  - pip
+  - pip:
+    - azure-storage-blob
+    - PyCO2SYS
+  # and some non-python tools
+  - ffmpeg
+  - nco
