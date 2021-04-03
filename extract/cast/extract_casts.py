@@ -1,9 +1,9 @@
 """
-This is the code for doing cast extractions.
+This is code for doing cast extractions.
 
 Test on mac in ipython:
 
-run extract_casts.py -g cas6 -t v3 -x lo8b -test True
+run extract_casts.py -g cas6 -t v3 -x lo8b -a1 blank -test True
 
 """
 
@@ -30,27 +30,14 @@ import netCDF4 as nc
 import Lfun
 import numpy as np
 
-if Ldir['a1'] == 'woac2':
-    pth = Ldir['parent'] / 'ptools_output' / 'woac2' / 'sta_df.p'
-    if pth.is_file():
-        sta_df = pd.read_pickle(pth)
-
-if Ldir['testing']:
+def get_cast(out_fn, fn, lon, lat):
     
     # Set the filename (and hence the time) and location
-    fn = Ldir['roms'] / 'output' / Ldir['gtagex'] / 'f2019.07.04' / 'ocean_his_0001.nc'
-    lon = -123.228000
-    lat = 48.240300
     
     # Find indicies nearest to the location
     G, S, T = zrfun.get_basic_info(fn)
     ix = zfun.find_nearest_ind(G['lon_rho'][0,:], lon)
     iy = zfun.find_nearest_ind(G['lat_rho'][:,0], lat)
-    
-    # Create the output directory and name the output file
-    out_dir = Ldir['LOo'] / 'extract' / 'moor' / 'test'
-    Lfun.make_dir(out_dir)
-    out_fn = out_dir / 'test.nc'
     
     # Run ncks to do the extraction, overwriting any existing file
     cmd_list = ['ncks', '-d', 'xi_rho,'+str(ix), '-d', 'eta_rho,'+str(iy),
@@ -79,16 +66,21 @@ if Ldir['testing']:
     vv.long_name = 'vertical position on s_w grid, positive up, zero at surface'
     vv.units = 'm'
     vv[:] = z_w
-    # and check on the results
-    for vn in foo.variables:
-        print('%14s: %s' % (vn, str(foo[vn].shape)))
     # Note that z_rho and z_w do not have singleton dimensions
+    
     # Also add units to salt
     foo['salt'].units = 'g kg-1'
     foo.close()
     
+    # and check on the results
+    if Ldir['testing']:
+        foo = nc.Dataset(out_fn)
+        for vn in foo.variables:
+            print('%14s: %s' % (vn, str(foo[vn].shape)))
+        foo.close()
+    
     # plot for reality check
-    if Ldir['lo_env'] == 'pm_mac':
+    if (Ldir['lo_env'] == 'pm_mac') and Ldir['testing']:
         a = nc. Dataset(out_fn)
         import matplotlib.pyplot as plt
         plt.close('all')
@@ -106,8 +98,53 @@ if Ldir['testing']:
             ii += 1
         a.close()
         plt.show()
+        
+def get_his_fn_from_dt(Ldir, dt):
+    # This creates the Path of a history file from its datetime
+    date_string = dt.strftime(Ldir['ds_fmt'])
+    his_num = ('0000' + str(dt.hour))[-4:]
+    fn = Ldir['roms'] / 'output' / Ldir['gtagex'] / ('f' + date_string) / ('ocean_his_' + his_num + '.nc')
+    return fn
+
+if Ldir['a1'] == 'blank':
+    folder = 'blank'
+    out_dir = Ldir['LOo'] / 'extract' / 'cast' / folder
+    Lfun.make_dir(out_dir)
     
+    cruise = 'TEST'
+    sn = 0
+    out_fn = out_dir / (cruise + '_' + str(int(sn)) + '.nc')
+    dt = datetime(2019,7,4,2)
+    fn = get_his_fn_from_dt(Ldir, dt)
+    lon = -123.228000
+    lat = 48.240300
     
+    get_cast(out_fn, fn, lon, lat)
+    
+elif Ldir['a1'] == 'woac':
+    folder = 'woac'
+    out_dir = Ldir['LOo'] / 'extract' / 'cast' / folder
+    Lfun.make_dir(out_dir)
+    
+    pth = Ldir['parent'] / 'ptools_output' / 'woac2' / 'sta_df.p'
+    if pth.is_file():
+        sta_df = pd.read_pickle(pth)
+    cruises = sta_df['Cruise'].unique()
+    for cruise in cruises:
+        c_df = sta_df[sta_df['Cruise']==cruise]
+        for sn in c_df.index:
+            lon = c_df.loc[sn,'Longitude']
+            lat = c_df.loc[sn,'Latitude']
+            dt = c_df.loc[sn,'Datetime']
+            out_fn = out_dir / (cruise + '_' + str(int(sn)) + '.nc')
+            fn = get_his_fn_from_dt(Ldir, dt)
+            if Ldir['testing']:
+                print('\ncruise=%s sn=%d lon=%0.2f lat=%0.2f' % (cruise, sn, lon, lat))
+                print(str(out_fn))
+                print(fn)
+            else:
+                get_cast(out_fn, fn, lon, lat)
+                
 # -------------------------------------------------------
 
 # test for success
