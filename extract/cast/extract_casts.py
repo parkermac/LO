@@ -102,7 +102,7 @@ def get_cast(out_fn, fn, lon, lat):
 def get_his_fn_from_dt(Ldir, dt):
     # This creates the Path of a history file from its datetime
     date_string = dt.strftime(Ldir['ds_fmt'])
-    his_num = ('0000' + str(dt.hour))[-4:]
+    his_num = ('0000' + str(dt.hour + 1))[-4:]
     fn = Ldir['roms'] / 'output' / Ldir['gtagex'] / ('f' + date_string) / ('ocean_his_' + his_num + '.nc')
     return fn
 
