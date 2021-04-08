@@ -27,8 +27,7 @@ import subprocess
 cmd = Ldir['which_matlab']
 
 date_string = Ldir['date_string']
-out_pth = Path(Ldir['LOo']) / Ldir['gtag'] / ('f' + date_string) / Ldir['frc']
-out_dir = str(out_pth)
+out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + date_string) / Ldir['frc']
 
 # This chdir is required to get matlab to find the function if it is
 # run by the driver.  If you are running this program on its own it should
@@ -39,7 +38,7 @@ os.chdir(this_dir)
 func = ("make_forcing_worker(\'" +
     str(Ldir['grid']) + "\',\'" +
     str(Ldir['data']) + '/tide' + "\',\'" +
-    out_dir + "\',\'" +
+    str(out_dir) + "\',\'" +
     date_string + "\')")
     
 if Ldir['testing']:
@@ -60,7 +59,7 @@ print(stderr.decode())
 # -------------------------------------------------------
 
 # test for success
-if (len(stderr)==0) and (out_pth / 'tides.nc').is_file():
+if (len(stderr)==0) and (out_dir / 'tides.nc').is_file():
     result_dict['result'] = 'success' # success or fail
 else:
     result_dict['result'] = 'fail'

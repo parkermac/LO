@@ -29,6 +29,8 @@ dependencies:
   - UTide
   - beautifulsoup4
   - lxml
+  - xlrd
+  - openpyxl
   - pip
   - pip:
     - azure-storage-blob

@@ -40,14 +40,17 @@ import atm_fun as afun
 from importlib import reload
 reload(afun)
 
-# Set where are files located, and other situational choices
+# Set where are files located, and other situational choices.
 do_d3 = True
 do_d4 = True
 if Ldir['lo_env'] == 'pm_mac':
-    wrf_dir = str(Ldir['data']) + '/wrf/' # a string, not a Path object
+    wrf_dir = Ldir['data'] / 'wrf'
     Ldir['run_type'] == 'backfill'
+elif 'boiler' in Ldir['lo_env']:
+    wrf_dir = Path('/data1/darr/wrf_crons/wrfout')
 else:
-    wrf_dir = '/data1/darr/wrf_crons/wrfout/' # boiler only
+    print('WRF file location not yet supported on this machine.')
+    sys.exit()
     
 # Create list of hours
 if Ldir['run_type'] == 'backfill':
@@ -60,15 +63,15 @@ elif Ldir['run_type'] == 'forecast':
 # regardless of whether or not the files exist, composed of string versions
 # of the full path to each file.
 d_str = Ldir['date_string'].replace('.','')
-in_dir = wrf_dir + d_str + '00/'
+in_dir = wrf_dir / (d_str + '00')
 d2_list = []
 d3_list = []
 d4_list = []
 for hr in hr_vec:
     hr_str = ('0' + str(hr))[-2:]
-    d2_list.append(in_dir + 'wrfout.ocean_d2.' + d_str + '00.f' + hr_str + '.0000')
-    d3_list.append(in_dir + 'wrfout.ocean_d3.' + d_str + '00.f' + hr_str + '.0000')
-    d4_list.append(in_dir + 'wrfout.ocean_d4.' + d_str + '00.f' + hr_str + '.0000')
+    d2_list.append(in_dir / ('wrfout.ocean_d2.' + d_str + '00.f' + hr_str + '.0000'))
+    d3_list.append(in_dir / ('wrfout.ocean_d3.' + d_str + '00.f' + hr_str + '.0000'))
+    d4_list.append(in_dir / ('wrfout.ocean_d4.' + d_str + '00.f' + hr_str + '.0000'))
     
 # Create dict that relates a d2 filename to a time index (used when writing to NetCDF)
 d2i_dict = {}
@@ -77,18 +80,18 @@ for i, v in enumerate(d2_list):
         
 # Check for existence of files. If any d2 are missing then exit.
 for fn in d2_list:
-    if not os.path.isfile(fn):
-        print('** Missing file: ' + fn)
+    if not fn.is_file():
+        print('** Missing file: ' + str(fn))
         # this would be the place to invoke a Plan B
         sys.exit()
 # For d3 and d4 just make sure we have the first one, so that we can get the grid
 for fn in [d3_list[0]]:
-    if not os.path.isfile(fn):
-        print('** Missing file: ' + fn)
+    if not fn.is_file():
+        print('** Missing file: ' + str(fn))
         do_d3 = False
 for fn in [d4_list[0]]:
-    if not os.path.isfile(fn):
-        print('** Missing file: ' + fn)
+    if not fn.is_file():
+        print('** Missing file: ' + str(fn))
         do_d4 = False
 
 # Create vector of time, in model format (seconds since whenever)
@@ -101,7 +104,7 @@ for hr in hr_vec:
 mod_time_vec = np.array(mod_time_list)
 
 # Get ROMS model grid that we will interpolate to
-gds = nc.Dataset(str(Ldir['grid']) + '/grid.nc')
+gds = nc.Dataset(Ldir['grid'] / 'grid.nc')
 lon = gds['lon_rho'][:]
 lat = gds['lat_rho'][:]
 gds.close()
@@ -133,13 +136,10 @@ NT = len(mod_time_list)
 nc_out_dict = {}
 for vn in outvar_list:
     # name output file
-    out_fn = str(Ldir['LOo'] / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']) + '/' + vn + '.nc'
+    out_fn = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc'] / (vn + '.nc')
     # print(out_fn)
     nc_out_dict[vn] = out_fn
-    try: # get rid of the old version, if it exists
-        os.remove(out_fn)
-    except OSError:
-        pass # assume error was because the file did not exist
+    out_fn.unlink(missing_ok=True) # get rid of any old version
     foo = nc.Dataset(out_fn, 'w')
     # create dimensions
     timename = afun.timename_dict[vn]
@@ -218,17 +218,17 @@ dall_list = zip(d2_list, d3_list, d4_list)
 # Note that this always works because we made our lists synthetically without regard
 # for if the files existed.
 for fn2, fn3, fn4 in dall_list:
-    print('Working on ' + fn2.split('/')[-1] + ' and etc.')
+    print('Working on ' + str(fn2).split('/')[-1] + ' and etc.')
     
     # flags to allow processing more files
     do_this_d3 = True
     do_this_d4 = True
     
     # if we are missing a d3 or d4 file then we don't work on it
-    if not os.path.isfile(fn3):
+    if not fn3.is_file():
         print(' - missing ' + fn3)
         do_this_d3 = False
-    if not os.path.isfile(fn4):
+    if not fn4.is_file():
         print(' - missing ' + fn4)
         do_this_d4 = False
     
@@ -280,7 +280,7 @@ for fn2, fn3, fn4 in dall_list:
 result_dict['result'] = 'success'
 for vn in outvar_list:
     fn = nc_out_dict[vn]
-    if os.path.isfile(fn):
+    if fn.is_file():
         pass
     else:
        result_dict['result'] = 'fail'

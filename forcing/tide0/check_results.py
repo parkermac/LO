@@ -9,7 +9,7 @@ import netCDF4 as nc
 import matplotlib.pyplot as plt
 import numpy as np
 
-fn0 = '/Users/pm8/Documents/LO_output/cas6_v3/f2019.07.04/tide0/tides.nc'
+fn0 = '/Users/pm8/Documents/LO_output/forcing/cas6_v3/f2019.07.04/tide0/tides.nc'
 
 fn2 = '/Users/pm8/Documents/LiveOcean_output/cas6_v3/f2019.07.04/tide2/tides.nc'
 

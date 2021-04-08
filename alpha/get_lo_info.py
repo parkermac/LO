@@ -2,7 +2,7 @@
 This is the one place where you set the path structure of the LO code.
 The info is stored in the dict Ldir.
 
-All paths are stored as pathlib.Path objects
+All paths are pathlib.Path objects
 
 This program is meant to be loaded as a module by Lfun which then adds more
 entries to the Ldir dict based on which model run you are workgin on.
@@ -35,7 +35,7 @@ except KeyError:
 
 if str(HOME) == '/Users/pm8':
     lo_env = 'pm_mac'
-    roms = parent / 'LiveOcean_roms'
+    roms1 = parent / 'LiveOcean_roms'
     which_matlab = '/Applications/MATLAB_R2020a.app/bin/matlab'
 
 elif (str(HOME) == '/home/parker') & ('boiler' in HOSTNAME):
@@ -44,9 +44,8 @@ elif (str(HOME) == '/home/parker') & ('boiler' in HOSTNAME):
 
 elif (str(HOME) == '/home/parker') & ('perigee' in HOSTNAME):
     lo_env = 'pm_perigee'
-    roms = Path('/data1/parker/LiveOcean_roms')
-    roms1 = Path('/boildat1/parker/LO_roms')
-    roms2 = Path('/data2/parker/LO_roms')
+    roms1 = Path('/data1/parker/LiveOcean_roms')
+    roms2 = Path('/boildat1/parker/LiveOcean_roms')
   
 Ldir0 = dict()
 Ldir0['lo_env'] = lo_env

@@ -50,7 +50,7 @@ Info['datestring_start'] = dt0.strftime(dsf)
 Info['datestring_end'] = dt1.strftime(dsf)
 
 #%% Load a dataframe with info for rivers to get
-ri_fn = str(Ldir['grid']) + '/river_info.csv'
+ri_fn = Ldir['grid'] / 'river_info.csv'
 df = pd.read_csv(ri_fn, index_col='rname')
 
 #%% associate rivers with ones that have temperature climatology data
@@ -60,13 +60,13 @@ df = rivfun.get_tc_rn(df)
 qt_df_dict = rivfun.get_qt(df, dt_ind, yd_ind, Ldir, dt1, days)
 
 #%% get dict S
-S_fn = str(Ldir['grid']) + '/S_COORDINATE_INFO.csv'
+S_fn = Ldir['grid'] / 'S_COORDINATE_INFO.csv'
 S_info_dict = pd.read_csv(S_fn, index_col='ITEMS').to_dict()['VALUES']
 
 S = zrfun.get_S(S_info_dict)
 
 #%% save the output to NetCDF
-out_fn = str(Ldir['LOo'] / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']) + '/rivers.nc'
+out_fn = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc'] / 'rivers.nc'
 rivfun.write_to_nc(out_fn, S, df, qt_df_dict, dt_ind)
 
 # add biogeochemical variables
@@ -76,7 +76,7 @@ rivfun.add_bio(out_fn, df, yd_ind)
 
 # test for success
 
-if os.path.isfile(out_fn):
+if out_fn.is_file():
     result_dict['result'] = 'success'
 else:
     result_dict['result'] = 'fail'

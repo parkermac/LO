@@ -3,7 +3,7 @@ This is code for doing cast extractions.
 
 Test on mac in ipython:
 
-run extract_casts.py -g cas6 -t v3 -x lo8b -a1 blank -test True
+run extract_casts.py -g cas6 -t v3 -x lo8b -roms roms1 -a1 blank -test True
 
 """
 
@@ -32,7 +32,7 @@ import numpy as np
 
 def get_cast(out_fn, fn, lon, lat):
     
-    # Set the filename (and hence the time) and location
+    # This function does the cast extraction and saves it to a NetCDF file.
     
     # Find indicies nearest to the location
     G, S, T = zrfun.get_basic_info(fn)
@@ -110,7 +110,6 @@ if Ldir['a1'] == 'blank':
     folder = 'blank'
     out_dir = Ldir['LOo'] / 'extract' / 'cast' / folder
     Lfun.make_dir(out_dir)
-    
     cruise = 'TEST'
     sn = 0
     out_fn = out_dir / (cruise + '_' + str(int(sn)) + '.nc')
@@ -118,17 +117,17 @@ if Ldir['a1'] == 'blank':
     fn = get_his_fn_from_dt(Ldir, dt)
     lon = -123.228000
     lat = 48.240300
-    
     get_cast(out_fn, fn, lon, lat)
     
 elif Ldir['a1'] == 'woac':
     folder = 'woac'
-    out_dir = Ldir['LOo'] / 'extract' / 'cast' / folder
+    out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'cast' / folder
+    # Question: I should add gtagex somewhere in the path, but where?
     Lfun.make_dir(out_dir)
     
-    pth = Ldir['parent'] / 'ptools_output' / 'woac2' / 'sta_df.p'
-    if pth.is_file():
-        sta_df = pd.read_pickle(pth)
+    sta_fn = Ldir['parent'] / 'ptools_output' / 'woac2' / 'sta_df.p'
+    if sta_fn.is_file():
+        sta_df = pd.read_pickle(sta_fn)
     cruises = sta_df['Cruise'].unique()
     for cruise in cruises:
         c_df = sta_df[sta_df['Cruise']==cruise]
@@ -147,7 +146,7 @@ elif Ldir['a1'] == 'woac':
                 
 # -------------------------------------------------------
 
-# test for success
+# test for success 
 if True:
     result_dict['result'] = 'success' # success or fail
 else:

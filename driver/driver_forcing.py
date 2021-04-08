@@ -6,9 +6,13 @@ It can be run for a single forecast or over a range of past days.
 Test on mac from ipython:
 run driver_forcing -g cas6 -t v3 -r backfill -s continuation -0 2019.07.04 -test True -f [FRC]
 where [FRC] = ztest0, tide0, etc.
+- or for atm0:
+run driver_forcing -g cas6 -t v3 -r backfill -s continuation -0 2017.04.20 -test True -f atm0
 
 Test on mac from command line:
 python ./driver_forcing.py -g cas6 -t v3 -r backfill -s continuation -0 2019.07.04 -test True -f [FRC]
+- or for atm0:
+python ./driver_forcing.py -g cas6 -t v3 -r backfill -s continuation -0 2017.04.20 -test True -f atm0
 
 """
 
@@ -73,24 +77,24 @@ dt = dt0
 while dt <= dt1:
     
     # make clean output directories
-    out_pth = Path(Ldir['LOo']) / Ldir['gtag'] / ('f' + dt.strftime(Lfun.ds_fmt)) / args.frc
-    print(('Creating %s' % (str(out_pth))).center(60,'-'))
-    Lfun.make_dir(out_pth, clean=True)
-    (out_pth / 'Data').mkdir(parents=True, exist_ok=True)
-    (out_pth / 'Info').mkdir(parents=True, exist_ok=True)
+    out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + dt.strftime(Lfun.ds_fmt)) / args.frc
+    print(('Creating %s' % (str(out_dir))).center(60,'-'))
+    Lfun.make_dir(out_dir, clean=True)
+    Lfun.make_dir(out_dir / 'Data')
+    Lfun.make_dir(out_dir / 'Info')
     
     # run the code
-    fpth = Path(Ldir['LO']) / 'forcing' / args.frc / 'make_forcing_main.py'
-    cmd_list = ['python3', str(fpth),
+    f_fn = Ldir['LO'] / 'forcing' / args.frc / 'make_forcing_main.py'
+    cmd_list = ['python3', str(f_fn),
                 '-g', args.gridname, '-t', args.tag, '-f', args.frc,
                 '-r', args.run_type, '-s', args.start_type,
                 '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing)]
     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
-    with open(out_pth / 'Info' / 'screen_output.txt', 'w') as fout:
+    with open(out_dir / 'Info' / 'screen_output.txt', 'w') as fout:
         fout.write(stdout.decode())
     if len(stderr) > 0:
-        with open(out_pth / 'Info' / 'subprocess_error.txt', 'w') as ffout:
+        with open(out_dir / 'Info' / 'subprocess_error.txt', 'w') as ffout:
             ffout.write(stderr.decode())
             
     if args.testing:

@@ -14,6 +14,7 @@ def intro():
     parser.add_argument('-t', '--tag', type=str)        # e.g. v3
     parser.add_argument('-x', '--ex_name', type=str)    # e.g. lo8b
     # optional arguments
+    parser.add_argument('-roms', '--which_roms', type=str, default='') # roms1 or roms2
     parser.add_argument('-0', '--ds0', type=str, default='')        # e.g. 2019.07.04
     parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
     parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_string)
@@ -35,10 +36,12 @@ def intro():
     # get the dict Ldir
     Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
     # add more entries to Ldir for possible use by extractors
-    for a in ['ds0', 'ds1', 'testing', 'a1', 'a2', 'a3']:
+    for a in ['which_roms', 'ds0', 'ds1', 'testing', 'a1', 'a2', 'a3']:
         Ldir[a] = argsd[a]
     if len(Ldir['ds1'])==0:
         Ldir['ds1'] = Ldir['ds0']
+    if len(args.which_roms) > 0:
+        Ldir['roms'] = Ldir[args.which_roms]
         
     return Ldir.copy()
     

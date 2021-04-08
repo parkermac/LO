@@ -35,10 +35,10 @@ Lat = dsg['lat_rho'][:]
 dsg.close()
 
 # new
-indir = str(Ldir['LOo']) + '/' + Ldir['gtag'] +'/f' + date_string + '/atm0'
+indir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + date_string) / 'atm0'
 
 #old
-indiro = str(Ldir['parent']) + '/LiveOcean_output/cas6_v3/f' + date_string + '/atm1'
+indiro = Ldir['parent'] / 'LiveOcean_output' / 'cas6_v3' / ('f' + date_string) / 'atm1'
     
 #%% plotting
 aa = [-130, -122, 42, 52]
@@ -53,8 +53,8 @@ else:
 
 for vn in outvar_list:
     
-    ds = nc.Dataset(indir + '/' + vn + '.nc')
-    dso = nc.Dataset(indiro + '/' + vn + '.nc')
+    ds = nc.Dataset(indir / (vn + '.nc'))
+    dso = nc.Dataset(indiro / (vn + '.nc'))
     
     vmin = lim_dict[vn][0]
     vmax = lim_dict[vn][1]

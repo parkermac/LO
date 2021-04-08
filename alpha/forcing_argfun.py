@@ -37,21 +37,21 @@ def intro():
         
     # create the expected output directories if needed
     # (a convenience when running make_forcing_main.py on its own while testing)
-    out_pth = Path(Ldir['LOo']) / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
-    Lfun.make_dir(out_pth)
-    Lfun.make_dir(out_pth / 'Info')
-    Lfun.make_dir(out_pth / 'Data')
+    out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
+    Lfun.make_dir(out_dir)
+    Lfun.make_dir(out_dir / 'Info')
+    Lfun.make_dir(out_dir / 'Data')
 
     return Ldir.copy()
     
 def finale(Ldir, result_dict):
-    out_pth = Path(Ldir['LOo']) / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
+    out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
     time_format = '%Y.%m.%d %H:%M:%S'
     s1 = '%s, %s\n' % ('start', result_dict['start_dt'].strftime(time_format))
     s2 = '%s, %s\n' % ('end', result_dict['end_dt'].strftime(time_format))
     s3 = '%s, %s\n' % ('result', result_dict['result'])
-    if out_pth.is_dir():
-        with open(out_pth / 'Info' / 'results.txt', 'w') as ffout:
+    if out_dir.is_dir():
+        with open(out_dir / 'Info' / 'results.txt', 'w') as ffout:
             ffout.write(s1 + s2 + s3)
     else:
         print(' results.txt '.center(60,'+'))

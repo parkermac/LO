@@ -55,12 +55,12 @@ def get_qt(df, dt_ind, yd_ind, Ldir, dt1, days):
         rs = df.loc[rn] # a Series with info for this river
         riv = river_class.River(rn, rs)
         # Get climatology (using squeeze=True returns a Series)
-        clim = pd.read_csv(str(Ldir['data']) + '/rivers/Data_clim/' + rn + '.csv',
+        clim = pd.read_csv(Ldir['data'] / 'rivers' / 'Data_clim' / (rn + '.csv'),
                         header=None, index_col=0, squeeze=True)
         qt_clim_yd = clim.loc[yd_ind] # clip just the needed values
         # Get T climatology (using squeeze=True returns a Series)
         tc_rn = df.loc[rn, 'tc_rn']
-        T_clim = pd.read_csv(str(Ldir['data']) + '/rivers/Data_T_clim/' + tc_rn + '.csv',
+        T_clim = pd.read_csv(Ldir['data'] / 'rivers' / 'Data_T_clim' / (tc_rn + '.csv'),
                         header=None, index_col=0, squeeze=True)
         T_clim_yd = T_clim.loc[yd_ind] # clip just the needed values
         # start to populate the qt DataFrame
@@ -68,8 +68,7 @@ def get_qt(df, dt_ind, yd_ind, Ldir, dt1, days):
 
         # Get historical record (a Series)
         try:
-            his = pd.read_pickle(str(Ldir['data']) + '/rivers/Data_historical/'
-                        + rn + '.p')
+            his = pd.read_pickle(Ldir['data'] / 'rivers' / 'Data_historical' / (rn + '.p'))
             if dt1 <= his.index[-1]:
                 # fill with historical data if the timing is right
                 qt_df['his'] = his.reindex(dt_ind)
@@ -149,11 +148,7 @@ def dt64_to_dt(dt64):
     
 def write_to_nc(out_fn, S, df, qt_df_dict, dt_ind):
     
-    # get rid of the old version, if it exists
-    try:
-        os.remove(out_fn)
-    except OSError:
-        pass # assume error was because the file did not exist
+    out_fn.unlink(missing_ok=True)# get rid of the old version, if it exists
     foo = nc.Dataset(out_fn, 'w')
     
     nriv = len(df)
