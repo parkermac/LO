@@ -1,0 +1,540 @@
+
+------------------- getting usgs nooksack-------------------
+
+-------------------- getting usgs samish--------------------
+
+--------------------- getting usgs hoko---------------------
+
+-------------------- getting usgs elwha---------------------
+
+------------------ getting usgs dungeness-------------------
+
+----------------- getting usgs dosewallips------------------
+
+------------------ getting usgs duckabush-------------------
+
+-------------------- getting usgs hamma---------------------
++++++++++++ combining to form Hamma Hamma River ++++++++++++
+
+------------------ getting usgs skokomish-------------------
+++++++++++++ combining to form Skokomish River +++++++++++++
+
+------------------ getting usgs deschutes-------------------
+
+------------------ getting usgs nisqually-------------------
+
+------------------- getting usgs puyallup-------------------
+
+-------------------- getting usgs green---------------------
+
+-------------------- getting usgs cedar---------------------
+
+------------------ getting usgs snohomish-------------------
+
+---------------- getting usgs stillaguamish-----------------
+
+-------------------- getting usgs skagit--------------------
+
+------------------- getting usgs calawah--------------------
+
+--------------------- getting usgs hoh----------------------
+
+-------------------- getting usgs queets--------------------
+
+------------------- getting usgs quinault-------------------
+
+------------------ getting usgs humptulips------------------
+
+------------------- getting usgs chehalis-------------------
+
+------------------- getting usgs willapa--------------------
+
+------------------- getting usgs naselle--------------------
+
+------------------- getting usgs columbia-------------------
+
+------------------- getting usgs nehalem--------------------
+
+-------------------- getting usgs wilson--------------------
+
+------------------- getting usgs nestucca-------------------
+
+-------------------- getting usgs siletz--------------------
+
+-------------------- getting usgs alsea---------------------
+
+------------------- getting usgs siuslaw--------------------
+
+-------------------- getting usgs umpqua--------------------
+
+------------------- getting usgs coquille-------------------
+
+----------------- getting usgs nf_skokomish-----------------
+
+----------------- getting usgs sf_skokomish-----------------
+------------ 1980 getting ec historical clowhom-------------
+------------ 1981 getting ec historical clowhom-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------ 1982 getting ec historical clowhom-------------
+------------ 1983 getting ec historical clowhom-------------
+------------ 1984 getting ec historical clowhom-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------ 1985 getting ec historical clowhom-------------
+------------ 1986 getting ec historical clowhom-------------
+------------ 1987 getting ec historical clowhom-------------
+------------ 1988 getting ec historical clowhom-------------
+------------ 1989 getting ec historical clowhom-------------
+------------ 1990 getting ec historical clowhom-------------
+------------ 1991 getting ec historical clowhom-------------
+------------ 1992 getting ec historical clowhom-------------
+------------ 1993 getting ec historical clowhom-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------ 1994 getting ec historical clowhom-------------
+------------ 1995 getting ec historical clowhom-------------
+------------ 1996 getting ec historical clowhom-------------
+------------ 1997 getting ec historical clowhom-------------
+------------ 1998 getting ec historical clowhom-------------
+------------ 1999 getting ec historical clowhom-------------
+------------ 2000 getting ec historical clowhom-------------
+------------ 2001 getting ec historical clowhom-------------
+------------ 2002 getting ec historical clowhom-------------
+------------ 2003 getting ec historical clowhom-------------
+------------ 2004 getting ec historical clowhom-------------
+------------ 2005 getting ec historical clowhom-------------
+------------ 2006 getting ec historical clowhom-------------
+------------ 2007 getting ec historical clowhom-------------
+------------ 2008 getting ec historical clowhom-------------
+------------ 2009 getting ec historical clowhom-------------
+------------ 2010 getting ec historical clowhom-------------
+------------ 2011 getting ec historical clowhom-------------
+------------ 2012 getting ec historical clowhom-------------
+------------ 2013 getting ec historical clowhom-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------ 2014 getting ec historical clowhom-------------
+------------ 2015 getting ec historical clowhom-------------
+------------ 2016 getting ec historical clowhom-------------
+------------ 2017 getting ec historical clowhom-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------ 2018 getting ec historical clowhom-------------
+------------ 2019 getting ec historical clowhom-------------
+------------------ 2020 getting ec clowhom------------------
+------------ 1980 getting ec historical squamish------------
+------------ 1981 getting ec historical squamish------------
+------------ 1982 getting ec historical squamish------------
+------------ 1983 getting ec historical squamish------------
+------------ 1984 getting ec historical squamish------------
+------------ 1985 getting ec historical squamish------------
+------------ 1986 getting ec historical squamish------------
+------------ 1987 getting ec historical squamish------------
+------------ 1988 getting ec historical squamish------------
+------------ 1989 getting ec historical squamish------------
+------------ 1990 getting ec historical squamish------------
+------------ 1991 getting ec historical squamish------------
+------------ 1992 getting ec historical squamish------------
+------------ 1993 getting ec historical squamish------------
+------------ 1994 getting ec historical squamish------------
+------------ 1995 getting ec historical squamish------------
+------------ 1996 getting ec historical squamish------------
+------------ 1997 getting ec historical squamish------------
+------------ 1998 getting ec historical squamish------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------ 1999 getting ec historical squamish------------
+------------ 2000 getting ec historical squamish------------
+------------ 2001 getting ec historical squamish------------
+------------ 2002 getting ec historical squamish------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------ 2003 getting ec historical squamish------------
+------------ 2004 getting ec historical squamish------------
+------------ 2005 getting ec historical squamish------------
+------------ 2006 getting ec historical squamish------------
+------------ 2007 getting ec historical squamish------------
+------------ 2008 getting ec historical squamish------------
+------------ 2009 getting ec historical squamish------------
+------------ 2010 getting ec historical squamish------------
+------------ 2011 getting ec historical squamish------------
+------------ 2012 getting ec historical squamish------------
+------------ 2013 getting ec historical squamish------------
+------------ 2014 getting ec historical squamish------------
+------------ 2015 getting ec historical squamish------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------ 2016 getting ec historical squamish------------
+------------ 2017 getting ec historical squamish------------
+------------ 2018 getting ec historical squamish------------
+------------ 2019 getting ec historical squamish------------
+----------------- 2020 getting ec squamish------------------
+------------- 1980 getting ec historical fraser-------------
+------------- 1981 getting ec historical fraser-------------
+------------- 1982 getting ec historical fraser-------------
+------------- 1983 getting ec historical fraser-------------
+------------- 1984 getting ec historical fraser-------------
+------------- 1985 getting ec historical fraser-------------
+------------- 1986 getting ec historical fraser-------------
+------------- 1987 getting ec historical fraser-------------
+------------- 1988 getting ec historical fraser-------------
+------------- 1989 getting ec historical fraser-------------
+------------- 1990 getting ec historical fraser-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------- 1991 getting ec historical fraser-------------
+------------- 1992 getting ec historical fraser-------------
+------------- 1993 getting ec historical fraser-------------
+------------- 1994 getting ec historical fraser-------------
+------------- 1995 getting ec historical fraser-------------
+------------- 1996 getting ec historical fraser-------------
+------------- 1997 getting ec historical fraser-------------
+------------- 1998 getting ec historical fraser-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------- 1999 getting ec historical fraser-------------
+------------- 2000 getting ec historical fraser-------------
+------------- 2001 getting ec historical fraser-------------
+------------- 2002 getting ec historical fraser-------------
+------------- 2003 getting ec historical fraser-------------
+------------- 2004 getting ec historical fraser-------------
+------------- 2005 getting ec historical fraser-------------
+------------- 2006 getting ec historical fraser-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------- 2007 getting ec historical fraser-------------
+------------- 2008 getting ec historical fraser-------------
+------------- 2009 getting ec historical fraser-------------
+------------- 2010 getting ec historical fraser-------------
+------------- 2011 getting ec historical fraser-------------
+------------- 2012 getting ec historical fraser-------------
+------------- 2013 getting ec historical fraser-------------
+------------- 2014 getting ec historical fraser-------------
+------------- 2015 getting ec historical fraser-------------
+------------- 2016 getting ec historical fraser-------------
+------------- 2017 getting ec historical fraser-------------
+------------- 2018 getting ec historical fraser-------------
+------------- 2019 getting ec historical fraser-------------
+------------------ 2020 getting ec fraser-------------------
+------------- 1980 getting ec historical tsolum-------------
+------------- 1981 getting ec historical tsolum-------------
+------------- 1982 getting ec historical tsolum-------------
+------------- 1983 getting ec historical tsolum-------------
+------------- 1984 getting ec historical tsolum-------------
+------------- 1985 getting ec historical tsolum-------------
+------------- 1986 getting ec historical tsolum-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------- 1987 getting ec historical tsolum-------------
+------------- 1988 getting ec historical tsolum-------------
+------------- 1989 getting ec historical tsolum-------------
+------------- 1990 getting ec historical tsolum-------------
+------------- 1991 getting ec historical tsolum-------------
+------------- 1992 getting ec historical tsolum-------------
+------------- 1993 getting ec historical tsolum-------------
+------------- 1994 getting ec historical tsolum-------------
+------------- 1995 getting ec historical tsolum-------------
+------------- 1996 getting ec historical tsolum-------------
+------------- 1997 getting ec historical tsolum-------------
+------------- 1998 getting ec historical tsolum-------------
+------------- 1999 getting ec historical tsolum-------------
+------------- 2000 getting ec historical tsolum-------------
+------------- 2001 getting ec historical tsolum-------------
+------------- 2002 getting ec historical tsolum-------------
+------------- 2003 getting ec historical tsolum-------------
+------------- 2004 getting ec historical tsolum-------------
+------------- 2005 getting ec historical tsolum-------------
+------------- 2006 getting ec historical tsolum-------------
+------------- 2007 getting ec historical tsolum-------------
+------------- 2008 getting ec historical tsolum-------------
+------------- 2009 getting ec historical tsolum-------------
+------------- 2010 getting ec historical tsolum-------------
+------------- 2011 getting ec historical tsolum-------------
+------------- 2012 getting ec historical tsolum-------------
+------------- 2013 getting ec historical tsolum-------------
+------------- 2014 getting ec historical tsolum-------------
+------------- 2015 getting ec historical tsolum-------------
+------------- 2016 getting ec historical tsolum-------------
+------------- 2017 getting ec historical tsolum-------------
+------------- 2018 getting ec historical tsolum-------------
+------------- 2019 getting ec historical tsolum-------------
+------------------ 2020 getting ec tsolum-------------------
+------------- 1980 getting ec historical oyster-------------
+------------- 1981 getting ec historical oyster-------------
+------------- 1982 getting ec historical oyster-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------- 1983 getting ec historical oyster-------------
+------------- 1984 getting ec historical oyster-------------
+------------- 1985 getting ec historical oyster-------------
+------------- 1986 getting ec historical oyster-------------
+------------- 1987 getting ec historical oyster-------------
+------------- 1988 getting ec historical oyster-------------
+------------- 1989 getting ec historical oyster-------------
+------------- 1990 getting ec historical oyster-------------
+------------- 1991 getting ec historical oyster-------------
+------------- 1992 getting ec historical oyster-------------
+------------- 1993 getting ec historical oyster-------------
+------------- 1994 getting ec historical oyster-------------
+------------- 1995 getting ec historical oyster-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------- 1996 getting ec historical oyster-------------
+------------- 1997 getting ec historical oyster-------------
+------------- 1998 getting ec historical oyster-------------
+------------- 1999 getting ec historical oyster-------------
+------------- 2000 getting ec historical oyster-------------
+------------- 2001 getting ec historical oyster-------------
+------------- 2002 getting ec historical oyster-------------
+------------- 2003 getting ec historical oyster-------------
+------------- 2004 getting ec historical oyster-------------
+------------- 2005 getting ec historical oyster-------------
+------------- 2006 getting ec historical oyster-------------
+------------- 2007 getting ec historical oyster-------------
+------------- 2008 getting ec historical oyster-------------
+------------- 2009 getting ec historical oyster-------------
+------------- 2010 getting ec historical oyster-------------
+------------- 2011 getting ec historical oyster-------------
+------------- 2012 getting ec historical oyster-------------
+------------- 2013 getting ec historical oyster-------------
+------------- 2014 getting ec historical oyster-------------
+------------- 2015 getting ec historical oyster-------------
+------------- 2016 getting ec historical oyster-------------
+------------- 2017 getting ec historical oyster-------------
+------------- 2018 getting ec historical oyster-------------
+------------- 2019 getting ec historical oyster-------------
+------------------ 2020 getting ec oyster-------------------
+----------- 1980 getting ec historical englishman-----------
+----------- 1981 getting ec historical englishman-----------
+----------- 1982 getting ec historical englishman-----------
+----------- 1983 getting ec historical englishman-----------
+----------- 1984 getting ec historical englishman-----------
+----------- 1985 getting ec historical englishman-----------
+----------- 1986 getting ec historical englishman-----------
+----------- 1987 getting ec historical englishman-----------
+----------- 1988 getting ec historical englishman-----------
+----------- 1989 getting ec historical englishman-----------
+----------- 1990 getting ec historical englishman-----------
+----------- 1991 getting ec historical englishman-----------
+----------- 1992 getting ec historical englishman-----------
+----------- 1993 getting ec historical englishman-----------
+----------- 1994 getting ec historical englishman-----------
+----------- 1995 getting ec historical englishman-----------
+----------- 1996 getting ec historical englishman-----------
+----------- 1997 getting ec historical englishman-----------
+----------- 1998 getting ec historical englishman-----------
+----------- 1999 getting ec historical englishman-----------
+----------- 2000 getting ec historical englishman-----------
+----------- 2001 getting ec historical englishman-----------
+----------- 2002 getting ec historical englishman-----------
+----------- 2003 getting ec historical englishman-----------
+----------- 2004 getting ec historical englishman-----------
+----------- 2005 getting ec historical englishman-----------
+----------- 2006 getting ec historical englishman-----------
+----------- 2007 getting ec historical englishman-----------
+----------- 2008 getting ec historical englishman-----------
+----------- 2009 getting ec historical englishman-----------
+----------- 2010 getting ec historical englishman-----------
+----------- 2011 getting ec historical englishman-----------
+----------- 2012 getting ec historical englishman-----------
+----------- 2013 getting ec historical englishman-----------
+----------- 2014 getting ec historical englishman-----------
+----------- 2015 getting ec historical englishman-----------
+----------- 2016 getting ec historical englishman-----------
+----------- 2017 getting ec historical englishman-----------
+----------- 2018 getting ec historical englishman-----------
+----------- 2019 getting ec historical englishman-----------
+---------------- 2020 getting ec englishman-----------------
+------------ 1980 getting ec historical cowichan------------
+------------ 1981 getting ec historical cowichan------------
+------------ 1982 getting ec historical cowichan------------
+------------ 1983 getting ec historical cowichan------------
+------------ 1984 getting ec historical cowichan------------
+------------ 1985 getting ec historical cowichan------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+------------ 1986 getting ec historical cowichan------------
+------------ 1987 getting ec historical cowichan------------
+------------ 1988 getting ec historical cowichan------------
+------------ 1989 getting ec historical cowichan------------
+------------ 1990 getting ec historical cowichan------------
+------------ 1991 getting ec historical cowichan------------
+------------ 1992 getting ec historical cowichan------------
+------------ 1993 getting ec historical cowichan------------
+------------ 1994 getting ec historical cowichan------------
+------------ 1995 getting ec historical cowichan------------
+------------ 1996 getting ec historical cowichan------------
+------------ 1997 getting ec historical cowichan------------
+------------ 1998 getting ec historical cowichan------------
+------------ 1999 getting ec historical cowichan------------
+------------ 2000 getting ec historical cowichan------------
+------------ 2001 getting ec historical cowichan------------
+------------ 2002 getting ec historical cowichan------------
+------------ 2003 getting ec historical cowichan------------
+------------ 2004 getting ec historical cowichan------------
+------------ 2005 getting ec historical cowichan------------
+------------ 2006 getting ec historical cowichan------------
+------------ 2007 getting ec historical cowichan------------
+------------ 2008 getting ec historical cowichan------------
+------------ 2009 getting ec historical cowichan------------
+------------ 2010 getting ec historical cowichan------------
+------------ 2011 getting ec historical cowichan------------
+------------ 2012 getting ec historical cowichan------------
+------------ 2013 getting ec historical cowichan------------
+------------ 2014 getting ec historical cowichan------------
+------------ 2015 getting ec historical cowichan------------
+------------ 2016 getting ec historical cowichan------------
+------------ 2017 getting ec historical cowichan------------
+------------ 2018 getting ec historical cowichan------------
+------------ 2019 getting ec historical cowichan------------
+----------------- 2020 getting ec cowichan------------------
+------------ 1980 getting ec historical nanaimo-------------
+------------ 1981 getting ec historical nanaimo-------------
+------------ 1982 getting ec historical nanaimo-------------
+------------ 1983 getting ec historical nanaimo-------------
+------------ 1984 getting ec historical nanaimo-------------
+------------ 1985 getting ec historical nanaimo-------------
+------------ 1986 getting ec historical nanaimo-------------
+------------ 1987 getting ec historical nanaimo-------------
+------------ 1988 getting ec historical nanaimo-------------
+------------ 1989 getting ec historical nanaimo-------------
+------------ 1990 getting ec historical nanaimo-------------
+------------ 1991 getting ec historical nanaimo-------------
+------------ 1992 getting ec historical nanaimo-------------
+------------ 1993 getting ec historical nanaimo-------------
+------------ 1994 getting ec historical nanaimo-------------
+------------ 1995 getting ec historical nanaimo-------------
+------------ 1996 getting ec historical nanaimo-------------
+------------ 1997 getting ec historical nanaimo-------------
+------------ 1998 getting ec historical nanaimo-------------
+------------ 1999 getting ec historical nanaimo-------------
+------------ 2000 getting ec historical nanaimo-------------
+------------ 2001 getting ec historical nanaimo-------------
+------------ 2002 getting ec historical nanaimo-------------
+------------ 2003 getting ec historical nanaimo-------------
+------------ 2004 getting ec historical nanaimo-------------
+------------ 2005 getting ec historical nanaimo-------------
+------------ 2006 getting ec historical nanaimo-------------
+------------ 2007 getting ec historical nanaimo-------------
+------------ 2008 getting ec historical nanaimo-------------
+------------ 2009 getting ec historical nanaimo-------------
+------------ 2010 getting ec historical nanaimo-------------
+------------ 2011 getting ec historical nanaimo-------------
+------------ 2012 getting ec historical nanaimo-------------
+------------ 2013 getting ec historical nanaimo-------------
+------------ 2014 getting ec historical nanaimo-------------
+------------ 2015 getting ec historical nanaimo-------------
+------------ 2016 getting ec historical nanaimo-------------
+------------ 2017 getting ec historical nanaimo-------------
+------------ 2018 getting ec historical nanaimo-------------
+------------ 2019 getting ec historical nanaimo-------------
+------------------ 2020 getting ec nanaimo------------------
+------------ 1980 getting ec historical sanjuan-------------
+------------ 1981 getting ec historical sanjuan-------------
+------------ 1982 getting ec historical sanjuan-------------
+------------ 1983 getting ec historical sanjuan-------------
+------------ 1984 getting ec historical sanjuan-------------
+------------ 1985 getting ec historical sanjuan-------------
+------------ 1986 getting ec historical sanjuan-------------
+------------ 1987 getting ec historical sanjuan-------------
+------------ 1988 getting ec historical sanjuan-------------
+------------ 1989 getting ec historical sanjuan-------------
+------------ 1990 getting ec historical sanjuan-------------
+------------ 1991 getting ec historical sanjuan-------------
+------------ 1992 getting ec historical sanjuan-------------
+------------ 1993 getting ec historical sanjuan-------------
+------------ 1994 getting ec historical sanjuan-------------
+------------ 1995 getting ec historical sanjuan-------------
+------------ 1996 getting ec historical sanjuan-------------
+------------ 1997 getting ec historical sanjuan-------------
+------------ 1998 getting ec historical sanjuan-------------
+------------ 1999 getting ec historical sanjuan-------------
+------------ 2000 getting ec historical sanjuan-------------
+------------ 2001 getting ec historical sanjuan-------------
+------------ 2002 getting ec historical sanjuan-------------
+------------ 2003 getting ec historical sanjuan-------------
+------------ 2004 getting ec historical sanjuan-------------
+------------ 2005 getting ec historical sanjuan-------------
+------------ 2006 getting ec historical sanjuan-------------
+------------ 2007 getting ec historical sanjuan-------------
+------------ 2008 getting ec historical sanjuan-------------
+------------ 2009 getting ec historical sanjuan-------------
+------------ 2010 getting ec historical sanjuan-------------
+------------ 2011 getting ec historical sanjuan-------------
+------------ 2012 getting ec historical sanjuan-------------
+------------ 2013 getting ec historical sanjuan-------------
+------------ 2014 getting ec historical sanjuan-------------
+------------ 2015 getting ec historical sanjuan-------------
+------------ 2016 getting ec historical sanjuan-------------
+------------ 2017 getting ec historical sanjuan-------------
+------------ 2018 getting ec historical sanjuan-------------
+------------ 2019 getting ec historical sanjuan-------------
+------------------ 2020 getting ec sanjuan------------------
+------------- 1980 getting ec historical sarita-------------
+------------- 1981 getting ec historical sarita-------------
+------------- 1982 getting ec historical sarita-------------
+------------- 1983 getting ec historical sarita-------------
+------------- 1984 getting ec historical sarita-------------
+------------- 1985 getting ec historical sarita-------------
+------------- 1986 getting ec historical sarita-------------
+------------- 1987 getting ec historical sarita-------------
+------------- 1988 getting ec historical sarita-------------
+------------- 1989 getting ec historical sarita-------------
+------------- 1990 getting ec historical sarita-------------
+------------- 1991 getting ec historical sarita-------------
+------------- 1992 getting ec historical sarita-------------
+------------- 1993 getting ec historical sarita-------------
+------------- 1994 getting ec historical sarita-------------
+------------- 1995 getting ec historical sarita-------------
+------------- 1996 getting ec historical sarita-------------
+------------- 1997 getting ec historical sarita-------------
+------------- 1998 getting ec historical sarita-------------
+------------- 1999 getting ec historical sarita-------------
+------------- 2000 getting ec historical sarita-------------
+------------- 2001 getting ec historical sarita-------------
+------------- 2002 getting ec historical sarita-------------
+------------- 2003 getting ec historical sarita-------------
+------------- 2004 getting ec historical sarita-------------
+------------- 2005 getting ec historical sarita-------------
+------------- 2006 getting ec historical sarita-------------
+------------- 2007 getting ec historical sarita-------------
+------------- 2008 getting ec historical sarita-------------
+------------- 2009 getting ec historical sarita-------------
+------------- 2010 getting ec historical sarita-------------
+------------- 2011 getting ec historical sarita-------------
+------------- 2012 getting ec historical sarita-------------
+------------- 2013 getting ec historical sarita-------------
+------------- 2014 getting ec historical sarita-------------
+------------- 2015 getting ec historical sarita-------------
+------------- 2016 getting ec historical sarita-------------
+------------- 2017 getting ec historical sarita-------------
+------------- 2018 getting ec historical sarita-------------
+------------- 2019 getting ec historical sarita-------------
+------------------ 2020 getting ec sarita-------------------
+-------------- 1980 getting ec historical gold--------------
+-------------- 1981 getting ec historical gold--------------
+-------------- 1982 getting ec historical gold--------------
+-------------- 1983 getting ec historical gold--------------
+-------------- 1984 getting ec historical gold--------------
+-------------- 1985 getting ec historical gold--------------
+-------------- 1986 getting ec historical gold--------------
+-------------- 1987 getting ec historical gold--------------
+-------------- 1988 getting ec historical gold--------------
+-------------- 1989 getting ec historical gold--------------
+-------------- 1990 getting ec historical gold--------------
+-------------- 1991 getting ec historical gold--------------
+-------------- 1992 getting ec historical gold--------------
+-------------- 1993 getting ec historical gold--------------
+-------------- 1994 getting ec historical gold--------------
+-------------- 1995 getting ec historical gold--------------
+-------------- 1996 getting ec historical gold--------------
+-------------- 1997 getting ec historical gold--------------
+-------------- 1998 getting ec historical gold--------------
+-------------- 1999 getting ec historical gold--------------
+-------------- 2000 getting ec historical gold--------------
+-------------- 2001 getting ec historical gold--------------
+-------------- 2002 getting ec historical gold--------------
+-------------- 2003 getting ec historical gold--------------
+-------------- 2004 getting ec historical gold--------------
+-------------- 2005 getting ec historical gold--------------
+-------------- 2006 getting ec historical gold--------------
+-------------- 2007 getting ec historical gold--------------
+-------------- 2008 getting ec historical gold--------------
+-------------- 2009 getting ec historical gold--------------
+-------------- 2010 getting ec historical gold--------------
+-------------- 2011 getting ec historical gold--------------
+-------------- 2012 getting ec historical gold--------------
+-------------- 2013 getting ec historical gold--------------
+-------------- 2014 getting ec historical gold--------------
+-------------- 2015 getting ec historical gold--------------
+-------------- 2016 getting ec historical gold--------------
+-------------- 2017 getting ec historical gold--------------
+-------------- 2018 getting ec historical gold--------------
+-------------- 2019 getting ec historical gold--------------
+------------------- 2020 getting ec gold--------------------

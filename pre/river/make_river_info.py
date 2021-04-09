@@ -199,7 +199,8 @@ for rn in df.index:
 # save to a csv file
 ri_fn = ri_dir / 'river_info.csv'
 
-df_final = df[['usgs', 'ec', 'nws', 'ratio', 'depth', 'width', 'max_dist']]
+df_final = df[['usgs', 'ec', 'nws', 'ratio', 'depth', 'width', 'max_dist']].copy()
+df_final['flow_units'] = 'm3/s'
 df_final.index.name = 'rname'
 
 df_final.to_csv(ri_fn)
