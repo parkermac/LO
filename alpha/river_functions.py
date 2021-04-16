@@ -5,6 +5,7 @@ The input 'rs' is a pandas Series pulled from the river_info DataFrame.
 The input 'days' is a tuple of datetimes.
 """
 
+import sys
 import pandas as pd
 import urllib
 import xml.etree.ElementTree as ET
@@ -12,8 +13,10 @@ from datetime import datetime
 import requests
 import bs4
 import numpy as np
+
+timeout = 30
     
-def get_usgs_data(rs, days):
+def get_usgs_data_custom(rs, days, temperature=False):
     """
     A wrapper for get_usgs_data_sub() that deals with any rivers
     requiring special handling.
@@ -22,28 +25,38 @@ def get_usgs_data(rs, days):
         print(' combining to form Skokomish River '.center(60,'+'))
         rs.usgs = 12060500
         rs.ratio = 1.4417
-        rs, qt1 = get_usgs_data_sub(rs, days)
+        rs, qt1 = get_usgs_data(rs, days, temperature=temperature)
+        got1 = rs.got_data
         rs.usgs = 12059500
         rs.ratio = 1.0
-        rs, qt2 = get_usgs_data_sub(rs, days)
+        rs, qt2 = get_usgs_data(rs, days, temperature=temperature)
+        rs.got_data = rs.got_data and got1
         qt = qt1 + qt2
     elif rs.name == 'hamma':
         print(' combining to form Hamma Hamma River '.center(60,'+'))
         rs.usgs = 12060500
         rs.ratio = 1.4417
-        rs, qt1 = get_usgs_data_sub(rs, days)
+        rs, qt1 = get_usgs_data(rs, days, temperature=temperature)
+        got1 = rs.got_data
         rs.usgs = 12059500
         rs.ratio = 1.0
-        rs, qt2 = get_usgs_data_sub(rs, days)
+        rs, qt2 = get_usgs_data(rs, days, temperature=temperature)
+        rs.got_data = rs.got_data and got1
         qt = 0.4125 * (qt1 + qt2)
     else:
-        rs, qt = get_usgs_data_sub(rs, days)
+        print(' River not supported for custom extraction! '.center(60,'*'))
+        qt = ''
+        rs['got_data'] = False
     return rs, qt
 
-def get_usgs_data_sub(rs, days):
+def get_usgs_data(rs, days, temperature=False):
     """
-    This gets USGS data for a past time period specfied by 'days',
+    This gets USGS data for a past time period specified by 'days',
     a tuple of datetimes.  If 'days is empty then we get the most recent 6 days.
+    The default is that it returns a pandas Series that is a timeseries of flow
+    (m3/s).
+    
+    Use temperature=True to get temperature (degC) instead of flow.
     """
     # Set the time period to get.
     if len(days) == 2:
@@ -53,12 +66,17 @@ def get_usgs_data_sub(rs, days):
         # This gets the most recent 6 days (daily intervals?)
         time_str = '&period=P6D'
     # Form the url.
-    url_str = ('http://waterservices.usgs.gov/nwis/dv/'
-        + '?format=waterml,1.1&sites=' + str(int(rs.usgs))
-        + time_str + '&parameterCd=00060')
+    if temperature:
+        url_str = ('http://waterservices.usgs.gov/nwis/dv/'
+            + '?format=waterml,1.1&sites=' + str(int(rs.usgs))
+            + time_str + '&parameterCd=00010')
+    else:
+        url_str = ('http://waterservices.usgs.gov/nwis/dv/'
+            + '?format=waterml,1.1&sites=' + str(int(rs.usgs))
+            + time_str + '&parameterCd=00060')
     try:
         # Get the XML.
-        file = urllib.request.urlopen(url_str, timeout=10)
+        file = urllib.request.urlopen(url_str, timeout=timeout)
         tree = ET.parse(file)
         root = tree.getroot()
         # Extract the data from the XML.
@@ -73,11 +91,15 @@ def get_usgs_data_sub(rs, days):
                 Q.append(float(e0.text))
                 T.append(pd.to_datetime(e0.get('dateTime')))
             if e0.tag == aa+'unitCode' and flag:
-                rs.flow_units = e0.text
+                if temperature:
+                    rs.temp_units = e0.text
+                else:
+                    rs.flow_units = e0.text
                 flag = False
         qt = pd.Series(Q, index=T)
         rs, qt = fix_units(rs, qt)
-        qt = float(rs.ratio) * qt
+        if not temperature:
+            qt = float(rs.ratio) * qt
         # Note: this resampling of daily data just moves the timestamp to noon
         # of the day it started at.  Data is unchanged.
         qt = qt.resample('D', label='right', offset='-12h').mean()
@@ -89,12 +111,14 @@ def get_usgs_data_sub(rs, days):
     return rs, qt
 
 def get_nws_data(rs):
-    # This gets NWS forecast data.
+    """
+    This gets NWS forecast data.
+    """
     url_str = ('http://www.nwrfc.noaa.gov/xml/xml.cgi?id=' + rs.nws +
                '&pe=HG&dtype=b&numdays=10')
     try:
         # get the XML
-        file = urllib.request.urlopen(url_str, timeout=10)
+        file = urllib.request.urlopen(url_str, timeout=timeout)
         tree = ET.parse(file)
         root = tree.getroot()
         flag = True
@@ -129,7 +153,7 @@ def get_nws_data(rs):
         rs['got_data'] = False
     return rs, qt
 
-def get_ec_data(rs, days):
+def get_ec_data(rs, days, temperature=False):
     """
     Gets Environment Canada data, using code cribbed from:
     https://bitbucket.org/douglatornell/ecget/src/.
@@ -137,11 +161,15 @@ def get_ec_data(rs, days):
     To get longer records use get_ec_data_historical().
     """
     try:
-        PARAM_IDS = {'discharge': 47,}
+        PARAM_IDS = {'discharge': 47, 'temperature': 5}
+        if temperature:
+            prm1 = PARAM_IDS['temperature']
+        else:
+            prm1 = PARAM_IDS['discharge']
         params = {
             'mode': 'Table',
             'type': 'realTime',
-            'prm1': PARAM_IDS['discharge'],
+            'prm1': prm1,
             'prm2': -1,
             'stn': rs.ec,
             'startDate': days[0].strftime('%Y-%m-%d'),
@@ -150,7 +178,7 @@ def get_ec_data(rs, days):
         DATA_URL = 'http://wateroffice.ec.gc.ca/report/real_time_e.html'
         DISCLAIMER_COOKIE = {'disclaimer': 'agree'}
         response = requests.get(DATA_URL, params=params,
-                                cookies=DISCLAIMER_COOKIE, timeout=10)
+                                cookies=DISCLAIMER_COOKIE, timeout=timeout)
         soup = bs4.BeautifulSoup(response.content, 'lxml')
         table = soup.find('table')
         table_body = table.find('tbody')
@@ -164,8 +192,9 @@ def get_ec_data(rs, days):
         for item in data:
             d_dict[pd.to_datetime(item[0])] = float(item[1].replace(',',''))
         qt = pd.Series(d_dict)
-        #rs.fix_units() # not needed
-        qt = float(rs.ratio) * qt
+        rs, qt = fix_units(rs, qt)
+        if not temperature:
+            qt = float(rs.ratio) * qt
         qt = qt.resample('D', label='right', offset='-12h').mean()
         
         # NEW 2019.03.20 to deal with the problem that when you request date from
@@ -203,7 +232,7 @@ def get_ec_data_historical(rs, year):
         DATA_URL = 'http://wateroffice.ec.gc.ca/report/historical_e.html'
         DISCLAIMER_COOKIE = {'disclaimer': 'agree'}
         response = requests.get(DATA_URL, params=params,
-                                cookies=DISCLAIMER_COOKIE, timeout=10)
+                                cookies=DISCLAIMER_COOKIE, timeout=timeout)
         soup = bs4.BeautifulSoup(response.content, 'lxml')
         if (str(year) + ' Daily Discharge') in soup.text:
             # we do the test above because the website will return the
@@ -245,15 +274,26 @@ def get_ec_data_historical(rs, year):
     return rs, qt
 
 def fix_units(rs, qt):
-    # fix units
+    # fix flow units
     if rs.flow_units == 'kcfs':
         qt = qt*28.3168466
         rs.flow_units = 'm3/s'
     elif (rs.flow_units == 'cubic feet per second') or (rs.flow_units == 'ft3/s'):
         qt = qt*0.0283168466
         rs.flow_units = 'm3/s'
-    else:
+    elif rs.flow_units == 'm3/s':
         pass
+    else:
+        print('ERROR: Unrecognized flow units!')
+        sys.exit()
+    # fix temperature units
+    if rs.temp_units == 'deg C':
+        rs.temp_units = 'degC'
+    elif rs.temp_units == 'degC':
+        pass
+    else:
+        print('ERROR: Unrecognized temperature units!')
+        sys.exit()
     return rs, qt
     
 # testing
@@ -265,7 +305,7 @@ if __name__ == '__main__':
     df = pd.read_csv(ri_fn, index_col='rname')
     
     if False:
-        # test usgs
+        # test usgs standard case
         rn = 'skagit'
         print('\n'+(' testing usgs ' + rn).center(60,'-'))
         rs = df.loc[rn].copy()
@@ -273,16 +313,36 @@ if __name__ == '__main__':
         rs, qt = get_usgs_data(rs, days)
         print(rs)
         print(qt)
-        # test usgs some more
+        
+        # test usgs temperature
+        rn = 'skagit'
+        print('\n'+(' testing usgs temperature ' + rn).center(60,'-'))
+        rs = df.loc[rn].copy()
+        days = (datetime(2018,1,1), datetime(2018,1,10))
+        rs, qt = get_usgs_data(rs, days, temperature=True)
+        print(rs)
+        print(qt)
+        
+        # test usgs for a "custom" river
         rn = 'skokomish'
-        print('\n'+(' testing usgs ' + rn).center(60,'-'))
+        print('\n'+(' testing usgs custom ' + rn).center(60,'-'))
         rs = df.loc[rn].copy()
         days = ()
-        rs, qt = get_usgs_data(rs, days)
+        rs, qt = get_usgs_data_custom(rs, days)
+        print(rs)
+        print(qt)
+        
+        # test usgs for a river that is not on the custom list
+        # should throw an error
+        rn = 'skagit'
+        print('\n'+(' testing usgs custom ' + rn).center(60,'-'))
+        rs = df.loc[rn].copy()
+        days = ()
+        rs, qt = get_usgs_data_custom(rs, days)
         print(rs)
         print(qt)
     
-    if False:
+    if True:
         # test nws
         rn = 'puyallup'
         print('\n'+(' testing nws ' + rn).center(60,'-'))
@@ -291,7 +351,7 @@ if __name__ == '__main__':
         print(rs)
         print(qt)
         
-    if True:
+    if False:
         # test ec
         rn = 'fraser'
         for year in range(2017,2022):
@@ -301,9 +361,20 @@ if __name__ == '__main__':
             rs, qt = get_ec_data(rs, days)
             print(rs)
             print(qt)
-            
+    
     if False:
-        # test ec
+        # test ec temperature
+        rn = 'fraser'
+        for year in range(2017,2022):
+            print('\n'+(str(year) + ': testing ec temperature ' + rn).center(60,'-'))
+            rs = df.loc[rn].copy()
+            days = (datetime(year,1,1), datetime(year,1,10))
+            rs, qt = get_ec_data(rs, days, temperature=True)
+            print(rs)
+            print(qt)
+    
+    if False:
+        # test ec historical
         rn = 'fraser'
         for year in range(2017,2022):
             print('\n'+(str(year) + ': testing ec historical ' + rn).center(60,'-'))

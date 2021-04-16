@@ -74,57 +74,65 @@
 ----------------- getting usgs sf_skokomish-----------------
 ------------ 1980 getting ec historical clowhom-------------
 ------------ 1981 getting ec historical clowhom-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 1982 getting ec historical clowhom-------------
 ------------ 1983 getting ec historical clowhom-------------
 ------------ 1984 getting ec historical clowhom-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
 ------------ 1985 getting ec historical clowhom-------------
 ------------ 1986 getting ec historical clowhom-------------
 ------------ 1987 getting ec historical clowhom-------------
 ------------ 1988 getting ec historical clowhom-------------
 ------------ 1989 getting ec historical clowhom-------------
 ------------ 1990 getting ec historical clowhom-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 1991 getting ec historical clowhom-------------
 ------------ 1992 getting ec historical clowhom-------------
 ------------ 1993 getting ec historical clowhom-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 1994 getting ec historical clowhom-------------
 ------------ 1995 getting ec historical clowhom-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 1996 getting ec historical clowhom-------------
 ------------ 1997 getting ec historical clowhom-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 1998 getting ec historical clowhom-------------
 ------------ 1999 getting ec historical clowhom-------------
 ------------ 2000 getting ec historical clowhom-------------
 ------------ 2001 getting ec historical clowhom-------------
 ------------ 2002 getting ec historical clowhom-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 2003 getting ec historical clowhom-------------
 ------------ 2004 getting ec historical clowhom-------------
 ------------ 2005 getting ec historical clowhom-------------
 ------------ 2006 getting ec historical clowhom-------------
 ------------ 2007 getting ec historical clowhom-------------
 ------------ 2008 getting ec historical clowhom-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 2009 getting ec historical clowhom-------------
 ------------ 2010 getting ec historical clowhom-------------
 ------------ 2011 getting ec historical clowhom-------------
 ------------ 2012 getting ec historical clowhom-------------
 ------------ 2013 getting ec historical clowhom-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 2014 getting ec historical clowhom-------------
 ------------ 2015 getting ec historical clowhom-------------
 ------------ 2016 getting ec historical clowhom-------------
 ------------ 2017 getting ec historical clowhom-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 2018 getting ec historical clowhom-------------
 ------------ 2019 getting ec historical clowhom-------------
 ------------------ 2020 getting ec clowhom------------------
 ------------ 1980 getting ec historical squamish------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 1981 getting ec historical squamish------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 1982 getting ec historical squamish------------
 ------------ 1983 getting ec historical squamish------------
 ------------ 1984 getting ec historical squamish------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 1985 getting ec historical squamish------------
 ------------ 1986 getting ec historical squamish------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 1987 getting ec historical squamish------------
 ------------ 1988 getting ec historical squamish------------
 ------------ 1989 getting ec historical squamish------------
@@ -137,12 +145,11 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------ 1996 getting ec historical squamish------------
 ------------ 1997 getting ec historical squamish------------
 ------------ 1998 getting ec historical squamish------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
 ------------ 1999 getting ec historical squamish------------
 ------------ 2000 getting ec historical squamish------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 2001 getting ec historical squamish------------
 ------------ 2002 getting ec historical squamish------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
 ------------ 2003 getting ec historical squamish------------
 ------------ 2004 getting ec historical squamish------------
 ------------ 2005 getting ec historical squamish------------
@@ -152,11 +159,13 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------ 2009 getting ec historical squamish------------
 ------------ 2010 getting ec historical squamish------------
 ------------ 2011 getting ec historical squamish------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 2012 getting ec historical squamish------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 2013 getting ec historical squamish------------
 ------------ 2014 getting ec historical squamish------------
 ------------ 2015 getting ec historical squamish------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------ 2016 getting ec historical squamish------------
 ------------ 2017 getting ec historical squamish------------
 ------------ 2018 getting ec historical squamish------------
@@ -169,11 +178,11 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------- 1984 getting ec historical fraser-------------
 ------------- 1985 getting ec historical fraser-------------
 ------------- 1986 getting ec historical fraser-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 1987 getting ec historical fraser-------------
 ------------- 1988 getting ec historical fraser-------------
 ------------- 1989 getting ec historical fraser-------------
 ------------- 1990 getting ec historical fraser-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
 ------------- 1991 getting ec historical fraser-------------
 ------------- 1992 getting ec historical fraser-------------
 ------------- 1993 getting ec historical fraser-------------
@@ -181,9 +190,10 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------- 1995 getting ec historical fraser-------------
 ------------- 1996 getting ec historical fraser-------------
 ------------- 1997 getting ec historical fraser-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 1998 getting ec historical fraser-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
 ------------- 1999 getting ec historical fraser-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 2000 getting ec historical fraser-------------
 ------------- 2001 getting ec historical fraser-------------
 ------------- 2002 getting ec historical fraser-------------
@@ -191,7 +201,6 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------- 2004 getting ec historical fraser-------------
 ------------- 2005 getting ec historical fraser-------------
 ------------- 2006 getting ec historical fraser-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
 ------------- 2007 getting ec historical fraser-------------
 ------------- 2008 getting ec historical fraser-------------
 ------------- 2009 getting ec historical fraser-------------
@@ -200,10 +209,13 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------- 2012 getting ec historical fraser-------------
 ------------- 2013 getting ec historical fraser-------------
 ------------- 2014 getting ec historical fraser-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 2015 getting ec historical fraser-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 2016 getting ec historical fraser-------------
 ------------- 2017 getting ec historical fraser-------------
 ------------- 2018 getting ec historical fraser-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 2019 getting ec historical fraser-------------
 ------------------ 2020 getting ec fraser-------------------
 ------------- 1980 getting ec historical tsolum-------------
@@ -211,9 +223,9 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------- 1982 getting ec historical tsolum-------------
 ------------- 1983 getting ec historical tsolum-------------
 ------------- 1984 getting ec historical tsolum-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 1985 getting ec historical tsolum-------------
 ------------- 1986 getting ec historical tsolum-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
 ------------- 1987 getting ec historical tsolum-------------
 ------------- 1988 getting ec historical tsolum-------------
 ------------- 1989 getting ec historical tsolum-------------
@@ -221,13 +233,16 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------- 1991 getting ec historical tsolum-------------
 ------------- 1992 getting ec historical tsolum-------------
 ------------- 1993 getting ec historical tsolum-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 1994 getting ec historical tsolum-------------
 ------------- 1995 getting ec historical tsolum-------------
 ------------- 1996 getting ec historical tsolum-------------
 ------------- 1997 getting ec historical tsolum-------------
 ------------- 1998 getting ec historical tsolum-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 1999 getting ec historical tsolum-------------
 ------------- 2000 getting ec historical tsolum-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 2001 getting ec historical tsolum-------------
 ------------- 2002 getting ec historical tsolum-------------
 ------------- 2003 getting ec historical tsolum-------------
@@ -249,12 +264,13 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------- 2019 getting ec historical tsolum-------------
 ------------------ 2020 getting ec tsolum-------------------
 ------------- 1980 getting ec historical oyster-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 1981 getting ec historical oyster-------------
 ------------- 1982 getting ec historical oyster-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
 ------------- 1983 getting ec historical oyster-------------
 ------------- 1984 getting ec historical oyster-------------
 ------------- 1985 getting ec historical oyster-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 1986 getting ec historical oyster-------------
 ------------- 1987 getting ec historical oyster-------------
 ------------- 1988 getting ec historical oyster-------------
@@ -265,7 +281,6 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------- 1993 getting ec historical oyster-------------
 ------------- 1994 getting ec historical oyster-------------
 ------------- 1995 getting ec historical oyster-------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
 ------------- 1996 getting ec historical oyster-------------
 ------------- 1997 getting ec historical oyster-------------
 ------------- 1998 getting ec historical oyster-------------
@@ -286,6 +301,7 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------- 2013 getting ec historical oyster-------------
 ------------- 2014 getting ec historical oyster-------------
 ------------- 2015 getting ec historical oyster-------------
+HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=30)
 ------------- 2016 getting ec historical oyster-------------
 ------------- 2017 getting ec historical oyster-------------
 ------------- 2018 getting ec historical oyster-------------
@@ -338,7 +354,6 @@ HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (rea
 ------------ 1983 getting ec historical cowichan------------
 ------------ 1984 getting ec historical cowichan------------
 ------------ 1985 getting ec historical cowichan------------
-HTTPSConnectionPool(host='wateroffice.ec.gc.ca', port=443): Read timed out. (read timeout=10)
 ------------ 1986 getting ec historical cowichan------------
 ------------ 1987 getting ec historical cowichan------------
 ------------ 1988 getting ec historical cowichan------------

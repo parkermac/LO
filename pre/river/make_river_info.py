@@ -1,5 +1,9 @@
 """
 This makes the file river_info.csv, and the individual river lon, lat: tracks.
+
+This code is pretty specific to the "cas6_v3" rivers, and so we name the
+output directory accordingly.
+
 """
 
 import sys
@@ -16,10 +20,9 @@ import numpy as np
 import pandas as pd
 
 # make places for output
-ri_name = 'pnw_all_2021_04'
-ri_dir = Ldir['LOo'] / 'pre' / 'river' / 'pnw_all_2021_04'
+ri_dir = Ldir['LOo'] / 'pre' / 'river' / 'cas6_v3'
 rit_dir = ri_dir / 'tracks'
-Lfun.make_dir(ri_dir, clean=True)
+Lfun.make_dir(ri_dir)
 Lfun.make_dir(rit_dir)
 
 # load information from SNG
@@ -51,9 +54,7 @@ for ii in range(NC):
     df_tr = pd.DataFrame()
     df_tr['lon'] = lon
     df_tr['lat'] = lat
-    df_tr.index.name = 'ind'
-    fn_tr = rit_dir / (rn + '.csv')
-    df_tr.to_csv(fn_tr)
+    df_tr.to_pickle(rit_dir / (rn + '.p'))
     #
     # save other information for use in a DataFrame
     depth[ii] = a[3].flatten()[0]
@@ -64,11 +65,9 @@ for ii in range(NC):
 
 # initialize a DataFrame to organize the info
 df = pd.DataFrame(index=name, columns=['usgs', 'usgs_sng', 'usgs_ecy', 'usgs_nws',
-        'ratio', 'ratio_sng', 'ratio_ecy', 'nws', 'ec', 'depth', 'width', 'max_dist'])
+        'ratio', 'ratio_sng', 'ratio_ecy', 'nws', 'ec', 'depth'])
 df['ratio_sng'] = ratio_sng
 df['depth'] = depth
-df['width'] = width
-df['max_dist'] = max_dist
 
 # info from lists from Sarah
 
@@ -191,22 +190,19 @@ for rn in df.index:
         df.loc[rn,'ratio'] = 1.0
     if pd.isnull(df.loc[rn,'depth']):
         df.loc[rn,'depth'] = 5.0
-    if pd.isnull(df.loc[rn,'width']):
-        df.loc[rn,'width'] = 2.0
-    if pd.isnull(df.loc[rn,'max_dist']):
-        df.loc[rn,'max_dist'] = 0.1
 
-# save to a csv file
+# save to a csv file (we save as a csv so it is easier to look at later)
 ri_fn = ri_dir / 'river_info.csv'
 
-df_final = df[['usgs', 'ec', 'nws', 'ratio', 'depth', 'width', 'max_dist']].copy()
+df_final = df[['usgs', 'ec', 'nws', 'ratio', 'depth']].copy()
 df_final['flow_units'] = 'm3/s'
+df_final['temp_units'] = 'degC'
 df_final.index.name = 'rname'
 
 df_final.to_csv(ri_fn)
 
 # NOTE: I compared this csv to the one created by the LiveOcean version of this code
-# and they were identical to withing some round off error.
+# and they were identical to within some round off error.
 
 # here is how you would read it back into a DataFrame
 # df1 = pd.read_csv(ri_fn, index_col='rname')
