@@ -7,7 +7,7 @@ The output goes into:
 where [gtag] could be something like "cas6_v3".  There is no perfect way to name things, but a given collection of rivers is often associated with a specific grid and forcing tag.
 
 ================================================================================
-* make_river_info.py - rganizes river info from different sources.
+* make_river_info.py - organizes river info from different sources.
 
 INPUT:
 Information for Sarah Gidding, Ecology, and other places.
@@ -20,10 +20,10 @@ OUTPUT:
 * make_historical.py - the main tool for getting historical flow data.
 
 INPUT:
-Raw data from XML (USGS), or scraped from html (EC)...
+Raw data from XML (USGS), or scraped from html (EC), using the functions in river_functions.py.  For the USGS data you can simply had it a date range and it will quickly return 40 years of daily flow data.  For EC data it is more complicated.  I think that it works like this: over a range in the last 18 months you can gate data using a date range, just like for USGS.  Earlier than this you need to scrape the "historical" date from a table on a web page, a year at a time.  When I did this in April 2021, I was able to get historical data through 2019, and current data for 2020.  In previous work on this archive I sometimes encountered times (maybe later in the year) when there was a gap between the two data sources.  A workaround (currently commented out in the code) is to use as-run river extractions from LiveOcean forcing files.
 
 OUTPUT:
-(*)/Data_historical/ALL_flow_[year0]_[year1].p - a pickled DataFrame of daily (at noon) flow [m3/s] over many years, e.g. 1980-2020, organized by mean size, with scaling factors applied, which looks like:
+(++) = (*)/Data_historical/ALL_flow_[year0]_[year1].p - a pickled DataFrame of daily (at noon) flow [m3/s] over many years, e.g. 1980-2020, organized by mean size, with scaling factors applied, which looks like:
 
 In [2]: all_df
 Out[2]: 
@@ -41,8 +41,33 @@ Out[2]:
 2020-12-31 12:00:00  6781.193830  1614.9960  161.358431  ...  32.050593     22.738428  0.649260
 
 ================================================================================
-* get_all_flow_df.py - a convenience function for loading the DataFrame created by make_historical.py
+* get_all_flow_df.py - a convenience function for loading the DataFrame (++) created by make_historical.py
 
 ================================================================================
-* add_ec_historical.py - an interactive program for adding historical EC rivers, one year at a time, to the DataFrame created by make_historical.py.  It exists because make_historical sometimes skips a year due to server timeouts.
+* add_ec_historical.py - an interactive program for adding historical EC rivers, one year at a time, to the DataFrame (++) created by make_historical.py.  It exists because make_historical sometimes skips a year due to server timeouts, and it is quicker to fill in important rivers like the Fraser by hand than to run make_historical many times.
+
+================================================================================
+* plot_historical.py reads in (++) and makes time series plots for each river (9 per figure).
+
+OUTPUT:
+(*)/Data_historical/ALL_flow_plot_[1-6].png
+
+================================================================================
+* make_historical_temperature.py -  is much like make_historical, but for temperature.
+
+INPUT: like for make_historical, but for EC data we only query the last year.
+
+OUTPUT:
+(++T) = (*)/Data_historical/ALL_temperature_[year0]_[year1].p
+
+================================================================================
+* plot_historical_temperature.py reads in (++T) and makes time series plots.
+
+OUTPUT
+(*)/Data_historical/ALL_temperature_usgs_plot_1.png (currently 12 rivers)
+(*)/Data_historical/ALL_temperature_ec_plot_1.png (currently 6 rivers)
+
+================================================================================
+================================================================================
+
 
