@@ -24,9 +24,6 @@ Raw data from XML (USGS), or scraped from html (EC), using the functions in rive
 
 OUTPUT:
 (++) = (*)/Data_historical/ALL_flow_[year0]_[year1].p - a pickled DataFrame of daily (at noon) flow [m3/s] over many years, e.g. 1980-2020, organized by mean size, with scaling factors applied, which looks like:
-
-In [2]: all_df
-Out[2]: 
                         columbia     fraser    squamish  ...  deschutes  nf_skokomish    wilson
 1980-01-01 12:00:00          NaN   934.0128         NaN  ...        NaN      6.824360       NaN
 1980-01-02 12:00:00          NaN   918.8256         NaN  ...        NaN      6.031488       NaN
@@ -68,6 +65,32 @@ OUTPUT
 (*)/Data_historical/ALL_temperature_ec_plot_1.png (currently 6 rivers)
 
 ================================================================================
+* make_climatology.py - averages the flow and temperature historical records by yearday.  There are no missing values, so these can be used as a backup plan when there is missing data.  Note that only about a third of the rivers have enough temperature data to make climatologies, and that for EC rivers the data is just from the last year.
+
+INPUT:
+(++) and (++T)
+
+PLOT OUTPUT:
+(*)/Data_historical/CLIM_flow_plot.png
+(*)/Data_historical/CLIM_temp_plot.png
+
+OUTPUT:
+(*)/Data_historical/CLIM_flow_[year0]_[year1].p
+(*)/Data_historical/CLIM_temp_[year0]_[year1].p
+which are pickled Dataframes that look like:
+        columbia       fraser    squamish     clowhom  ...  dungeness  deschutes  nf_skokomish    wilson
+1    7576.033848  1072.712859  166.252107  247.498092  ...  12.801400  19.496954      7.566814  0.434497
+2    7497.434094  1076.630927  195.249401  299.487419  ...  13.702930  19.988004      8.041846  0.442161
+3    7459.116713  1083.743863  210.613707  303.830145  ...  13.907126  20.403584      8.105456  0.446619
+4    7600.596272  1120.439649  209.064770  405.648362  ...  15.416402  18.821637      8.157324  0.451402
+5    7586.841314  1087.679571  209.648390  396.917928  ...  16.077416  20.875031      8.282125  0.540191
+..           ...          ...         ...         ...  ...        ...        ...           ...       ...
+362  6720.410019  1141.341893  182.373620  264.022683  ...  13.188001  22.696259      8.268105  0.499669
+363  7120.253521  1130.302068  175.401125  255.510735  ...  12.598818  22.151807      8.219068  0.512987
+364  7483.056888  1107.785854  173.989952  215.525272  ...  12.031428  22.184056      7.490773  0.505190
+365  7487.805624  1085.838498  163.153582  208.123746  ...  11.523762  22.732303      7.370944  0.467800
+366  7525.558068  1205.385382  115.413047  175.890028  ...  13.043897  26.937935     10.197154  0.425753
+
 ================================================================================
 
 
