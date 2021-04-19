@@ -11,8 +11,6 @@ import zfun
 Ldir = Lfun.Lstart()
 
 import river_functions as rivf
-from importlib import reload
-reload(rivf)
 
 from datetime import datetime, timedelta
 import pandas as pd
@@ -20,7 +18,6 @@ import numpy as np
 
 # set the gtag for this case (could make it a command line argument)
 gtag = 'cas6_v3'
-
 # Load a dataframe with info for rivers to get
 ri_fn = Ldir['LOo'] / 'pre' / 'river' / gtag / 'river_info.csv'
 ri_df = pd.read_csv(ri_fn, index_col='rname')
