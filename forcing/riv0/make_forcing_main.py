@@ -7,6 +7,8 @@ Test on mac in ipython:
 
 run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2019.07.04 -test True -f riv0
 
+run make_forcing_main.py -g cas6 -t v3 -r forecast -s continuation -d [Today's date] -test False -f riv0
+
 """
 
 from pathlib import Path
@@ -34,17 +36,9 @@ reload(rivfun)
 
 # set up the time index for the record
 dsf = Ldir['ds_fmt']
-
-# set first and last times to be at noon
 dt0 = datetime.strptime(Ldir['date_string'],dsf) - timedelta(days=2.5)
 dt1 = datetime.strptime(Ldir['date_string'],dsf) + timedelta(days=4.5)
 days = (dt0, dt1)
-
-day_list = []
-this_day = dt0
-while this_day <= dt1:
-    day_list.append(this_day)
-    this_day += timedelta(days=1)
     
 # pandas Index objects
 dt_ind = pd.date_range(start=dt0, end=dt1)
@@ -75,7 +69,7 @@ gri_fn = Ldir['grid'] / 'river_info.csv'
 gri_df = pd.read_csv(gri_fn, index_col='rname')
 
 if Ldir['testing']:
-    gri_df = gri_df.loc[['skagit', 'fraser'],:]
+    gri_df = gri_df.loc[['columbia'],:]
 
 # associate rivers with ones that have temperature climatology data
 ri_df = rivfun.get_tc_rn(ri_df)

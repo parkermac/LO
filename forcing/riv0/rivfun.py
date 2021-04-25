@@ -3,7 +3,7 @@ Some extra river functions.
 
 """
 
-import os
+import sys
 import netCDF4 as nc
 import pandas as pd
 import numpy as np
@@ -22,22 +22,24 @@ def get_tc_rn(ri_df):
     for rn in ri_df.index:
         if rn in ['coquille']:
             tc_rn = 'umpqua'
-        elif rn in ['alsea', 'cowichan']: # check cowichan
-            tc_rn = 'siuslaw'
-        elif rn in ['wilson', 'naselle', 'willapa', 'chehalis', 'humptulips',
-                    'quinault', 'queets', 'hoh', 'calawah', 'hoko', 'elwha',
-                    'dungeness', 'gold', 'sarita', 'sanjuan']:
+        elif rn in ['wilson']:
             tc_rn = 'nehalem'
+        elif rn in ['naselle', 'willapa', 'chehalis', 'humptulips',
+                    'queets', 'hoh', 'calawah', 'hoko', 'elwha',
+                    'dungeness']:
+            tc_rn = 'quinault'
         elif rn in ['dosewallips', 'duckabush', 'hamma', 'skokomish', 'deschutes',
                     'nisqually', 'puyallup', 'green', 'snohomish',
-                    'stillaguamish', 'nf_skokomish', 'sf_skokomish']:
+                    'stillaguamish']:#, 'nf_skokomish', 'sf_skokomish']:
             tc_rn = 'cedar'
-        elif rn in ['skagit', 'samish']:
+        elif rn in ['samish']:
             tc_rn = 'nooksack'
-        elif rn in ['clowhom', 'squamish']:
-            tc_rn = 'fraser'
-        elif rn in ['oyster', 'tsolum', 'englishman']:
+        elif rn in ['squamish']:
+            tc_rn = 'clowhom'
+        elif rn in ['oyster', 'tsolum', 'englishman', 'cowichan']:
             tc_rn = 'nanaimo'
+        elif rn in ['gold']:
+            tc_rn = 'sarita'
         else:
             tc_rn = rn
         ri_df.loc[rn, 'tc_rn'] = tc_rn
@@ -52,8 +54,12 @@ def get_qt(gri_df, ri_df, dt_ind, yd_ind, Ldir, dt1, days):
     # initialize output dict
     qt_df_dict = dict()
     for rn in gri_df.index:
+        
+        # initialize screen output
+        sout = '-- ' + rn + ': '
+        
         rs = ri_df.loc[rn].copy() # a series with info for this river
-        print(rn.center(60,'-'))
+        rs['got_data'] = False
         # initialize a qt (flow and temperature vs. time) DataFrame for this river
         qt_df = pd.DataFrame(index=dt_ind, columns=['clim','his','usgs','ec','nws','final','temperature'])
         # fill with historical and climatological fields
@@ -62,68 +68,70 @@ def get_qt(gri_df, ri_df, dt_ind, yd_ind, Ldir, dt1, days):
         try:
             qt_df.loc[:, 'his'] = Hflow_df.loc[dt_ind,rn].copy()
         except KeyError:
-            pass # recent times will not be in the historcal record
+            pass # recent times will not be in the historical record
 
         if pd.notnull(qt_df.loc[:, 'his']).all():
             qt_df['final'] = qt_df['his']
-            print(' filled from historical')
-        else:
-            # otherwise try (sequentially) to fill from
-            # nws, or usgs, or ec
-            if pd.notnull(rs.nws) and Ldir['run_type'] == 'forecast':
-                rs, qt = rivf.get_nws_data(rs)
-                if rs['got_data']:
-                    qt_df['nws'] = qt.reindex(dt_ind)
-                    qt_df['final'] = qt_df['nws']
-                    print(' filled from nws forecast')
-            elif pd.notnull(rs.usgs):
-                if rn in ['skokomish', 'hamma']:
-                    rs, qt = rivf.get_usgs_data_custom(rs, days)
-                else:
-                    rs, qt = rivf.get_usgs_data(rs, days)
-                if rs['got_data']:
-                    qt_df['usgs'] = qt
-                    qt_df['final'] = qt_df['usgs']
-                    print(' filled from usgs')
-            elif pd.notnull(rs.ec):
-                rs, qt = rivf.get_ec_data(rs, days)
-                if rs['got_data']:
-                    qt_df['ec'] = qt
-                    qt_df['final'] = qt_df['ec']
-                    print(' filled from ec')
+            sout += 'filled from historical '
+            rs.got_data = True
+            
+        # otherwise try (sequentially) to fill from
+        # nws, or usgs, or ec
+        if pd.notnull(rs.nws) and (Ldir['run_type'] == 'forecast'):
+            rs, qt = rivf.get_nws_data(rs)
+            if rs.got_data:
+                qt_df['nws'] = qt.reindex(dt_ind)
+                qt_df['final'] = qt_df['nws']
+                sout += 'filled from nws forecast '
+                
+        if (not rs.got_data) and pd.notnull(rs.usgs):
+            if rn in ['skokomish', 'hamma']:
+                rs, qt = rivf.get_usgs_data_custom(rs, days)
+            else:
+                rs, qt = rivf.get_usgs_data(rs, days)
+            if rs.got_data:
+                qt_df['usgs'] = qt
+                qt_df['final'] = qt_df['usgs']
+                sout += 'filled from usgs '
+                
+        if (not rs.got_data) and pd.notnull(rs.ec):
+            rs, qt = rivf.get_ec_data(rs, days)
+            if rs.got_data:
+                qt_df['ec'] = qt
+                qt_df['final'] = qt_df['ec']
+                sout += 'filled from ec '
         
         # check results and fill with extrapolation (ffill) or climatology
         if ( pd.isnull(qt_df['final'].values).any() and
                 not pd.isnull(qt_df['final'].values).all() ):
             qt_df['final'] = qt_df['final'].ffill(axis=0)
-            print(' extended by ffill')
+            sout += ':: extended by ffill'
         if pd.isnull(qt_df['final'].values).any():
             qt_df['final'] = qt_df['clim']
-            print( 'WARNING: still missing values after ffill: all filled with climatology')
+            sout += '!! still missing values after ffill - all filled with climatology'
         if (qt_df['final'].values < 0).any():
             qt_df['final'] = qt_df['clim']
-            print( 'WARNING: negative values: all filled with climatology')
+            sout += '!! negative values - all filled with climatology'
         if pd.isnull(qt_df['final'].values).any():
-            print( '>>>>>>> flow has missing values!! <<<<<<<<<')
+            sout += '>>>>>>> flow has missing values!! <<<<<<<<<'
         # Temperature data
         if pd.isnull(qt_df['temperature'].values).any():
-            print( '>>>>>>> temp has missing values!! <<<<<<<<<')
+            sout += '>>>>>>> temp has missing values!! <<<<<<<<<'
         # save in the dict
         qt_df_dict[rn] = qt_df
         
+        # screen output
+        print(sout)
+        sys.stdout.flush()
+        
     return qt_df_dict
-    
-def dt64_to_dt(dt64):
-    # convert numpy datetime64 to datetime
-    dt = datetime.utcfromtimestamp(dt64.astype('datetime64[ns]').tolist()/1e9)
-    return dt
-    
+        
 def write_to_nc(out_fn, S, gri_df, qt_df_dict, dt_ind):
     
     out_fn.unlink(missing_ok=True)# get rid of the old version, if it exists
     foo = nc.Dataset(out_fn, 'w')
     
-    nriv = len(gri_df)
+    nriv = len(gri_df.index)
     N = S['N']
     ndt = len(dt_ind)
 
@@ -131,28 +139,27 @@ def write_to_nc(out_fn, S, gri_df, qt_df_dict, dt_ind):
     foo.createDimension('s_rho', N)
     foo.createDimension('river_time', ndt)
 
-    v_var = foo.createVariable('river', float, ('river'))
+    v_var = foo.createVariable('river', float, ('river',))
     v_var[:] = np.arange(1, nriv+1)
     v_var.long_name = 'river runoff identification number'
     
-    # make a dict to relate river name to a number
+    # make a dict to relate river name to a number (not the same as the river number above)
     rlist = gri_df.index.to_list()
-    rc = dict(zip(rlist, range(len(rlist))))
+    rc = dict(zip(rlist, range(nriv)))
 
-    v_var = foo.createVariable('river_name', str, ('river'))
+    v_var = foo.createVariable('river_name', str, ('river',))
     for rn in gri_df.index:
         v_var[rc[rn]] = rn
 
-    v_var = foo.createVariable('river_time', float, ('river_time'))
+    v_var = foo.createVariable('river_time', float, ('river_time',))
     count = 0
-    for item in dt_ind.values:
-        item_dt = dt64_to_dt(item)
-        v_var[count] = Lfun.datetime_to_modtime(item_dt)
+    for item in dt_ind:
+        v_var[count] = Lfun.datetime_to_modtime(item)
         count += 1
     v_var.long_name = 'river runoff time'
     v_var.units = Lfun.roms_time_units
 
-    v_var = foo.createVariable('river_direction', float, ('river'))
+    v_var = foo.createVariable('river_direction', float, ('river',))
     for rn in gri_df.index:
         v_var[rc[rn]] = gri_df.loc[rn, 'idir']
     v_var.long_name = 'river runoff direction'
@@ -160,7 +167,7 @@ def write_to_nc(out_fn, S, gri_df, qt_df_dict, dt_ind):
     v_var.flag_meanings = "flow across u-face, flow across v-face"
     v_varLwSrc_True = "flag not used"
 
-    v_var = foo.createVariable('river_Xposition', float, ('river'))
+    v_var = foo.createVariable('river_Xposition', float, ('river',))
     for rn in gri_df.index:
         if gri_df.loc[rn, 'idir'] == 0:
             v_var[rc[rn]] = gri_df.loc[rn, 'col_py'] + 1
@@ -170,7 +177,7 @@ def write_to_nc(out_fn, S, gri_df, qt_df_dict, dt_ind):
     v_var.LuvSrc_True_meaning = "i point index of U or V face source/sink"
     v_var.LwSrc_True_meaning = "i point index of RHO center source/sink" ;
 
-    v_var = foo.createVariable('river_Eposition', float, ('river'))
+    v_var = foo.createVariable('river_Eposition', float, ('river',))
     for rn in gri_df.index:
         if gri_df.loc[rn, 'idir'] == 0:
             v_var[rc[rn]] = gri_df.loc[rn, 'row_py']

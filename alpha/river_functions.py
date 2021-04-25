@@ -9,12 +9,13 @@ import sys
 import pandas as pd
 import urllib
 import xml.etree.ElementTree as ET
-from datetime import datetime
+from datetime import datetime, timedelta
 import requests
 import bs4
 import numpy as np
 
-timeout = 30
+timeout = 10
+print_exception = False
     
 def get_usgs_data_custom(rs, days, temperature=False):
     """
@@ -31,7 +32,10 @@ def get_usgs_data_custom(rs, days, temperature=False):
         rs.ratio = 1.0
         rs, qt2 = get_usgs_data(rs, days, temperature=temperature)
         rs.got_data = rs.got_data and got1
-        qt = qt1 + qt2
+        if rs.got_data:
+            qt = qt1 + qt2
+        else:
+            qt = ''
     elif rs.name == 'hamma':
         print(' combining to form Hamma Hamma River '.center(60,'+'))
         rs.usgs = 12060500
@@ -42,7 +46,10 @@ def get_usgs_data_custom(rs, days, temperature=False):
         rs.ratio = 1.0
         rs, qt2 = get_usgs_data(rs, days, temperature=temperature)
         rs.got_data = rs.got_data and got1
-        qt = 0.4125 * (qt1 + qt2)
+        if rs.got_data:
+            qt = 0.4125 * (qt1 + qt2)
+        else:
+            qt = ''
     else:
         print(' River not supported for custom extraction! '.center(60,'*'))
         qt = ''
@@ -106,7 +113,8 @@ def get_usgs_data(rs, days, temperature=False):
         rs['got_data'] = True
     except Exception as e:
         qt = ''
-        print(e)
+        if print_exception:
+            print(e)
         rs['got_data'] = False
     return rs, qt
 
@@ -149,7 +157,8 @@ def get_nws_data(rs):
         rs['got_data'] = True
     except Exception as e:
         qt = ''
-        print(e)
+        if print_exception:
+            print(e)
         rs['got_data'] = False
     return rs, qt
 
@@ -210,7 +219,8 @@ def get_ec_data(rs, days, temperature=False):
             rs['got_data'] = True
     except Exception as e:
         qt = ''
-        print(e)
+        if print_exception:
+            print(e)
         rs['got_data'] = False
     return rs, qt
 
@@ -269,7 +279,8 @@ def get_ec_data_historical(rs, year):
             rs['got_data'] = False
     except Exception as e:
         qt = ''
-        print(e)
+        if print_exception:
+            print(e)
         rs['got_data'] = False
     return rs, qt
 
@@ -298,10 +309,11 @@ def fix_units(rs, qt):
     
 # testing
 if __name__ == '__main__':
+    print_exception = True
     import Lfun
     Ldir = Lfun.Lstart()
     # Load a dataframe with info for rivers to get
-    ri_fn = Ldir['LOo'] / 'pre' / 'river' / 'pnw_all_2021_04' / 'river_info.csv'
+    ri_fn = Ldir['LOo'] / 'pre' / 'river' / 'cas6_v3' / 'river_info.csv'
     df = pd.read_csv(ri_fn, index_col='rname')
     
     if False:
@@ -309,11 +321,26 @@ if __name__ == '__main__':
         rn = 'skagit'
         print('\n'+(' testing usgs ' + rn).center(60,'-'))
         rs = df.loc[rn].copy()
+        dsf = Ldir['ds_fmt']
         days = (datetime(2018,1,1), datetime(2018,1,10))
         rs, qt = get_usgs_data(rs, days)
         print(rs)
         print(qt)
         
+    if True:
+        # test usgs standard case for a forecast time period
+        rn = 'columbia'
+        print('\n'+(' testing usgs ' + rn).center(60,'-'))
+        rs = df.loc[rn].copy()
+        ds0 = datetime.now().strftime(Lfun.ds_fmt)
+        dt0 = datetime.strptime(ds0,Lfun.ds_fmt) - timedelta(days=2.5)
+        dt1 = datetime.strptime(ds0,Lfun.ds_fmt) + timedelta(days=4.5)
+        days = (dt0, dt1)
+        rs, qt = get_usgs_data(rs, days)
+        print(rs)
+        print(qt)
+        
+    if False:
         # test usgs temperature
         rn = 'skagit'
         print('\n'+(' testing usgs temperature ' + rn).center(60,'-'))
@@ -323,26 +350,30 @@ if __name__ == '__main__':
         print(rs)
         print(qt)
         
+    if False:
         # test usgs for a "custom" river
-        rn = 'skokomish'
+        rn = 'hamma'
+        rs = df.loc[rn].copy()
+        days = (datetime(2021,4,16), datetime(2021,4,23))
         print('\n'+(' testing usgs custom ' + rn).center(60,'-'))
         rs = df.loc[rn].copy()
-        days = ()
-        rs, qt = get_usgs_data_custom(rs, days)
-        print(rs)
-        print(qt)
-        
-        # test usgs for a river that is not on the custom list
-        # should throw an error
-        rn = 'skagit'
-        print('\n'+(' testing usgs custom ' + rn).center(60,'-'))
-        rs = df.loc[rn].copy()
-        days = ()
         rs, qt = get_usgs_data_custom(rs, days)
         print(rs)
         print(qt)
     
-    if True:
+    if False:
+        # test usgs for a river that is not on the custom list
+        # should throw an error
+        rn = 'skagit'
+        rs = df.loc[rn].copy()
+        days = (datetime(2018,1,1), datetime(2018,1,10))
+        print('\n'+(' testing usgs custom ' + rn).center(60,'-'))
+        rs = df.loc[rn].copy()
+        rs, qt = get_usgs_data_custom(rs, days)
+        print(rs)
+        print(qt)
+    
+    if False:
         # test nws
         rn = 'puyallup'
         print('\n'+(' testing nws ' + rn).center(60,'-'))
