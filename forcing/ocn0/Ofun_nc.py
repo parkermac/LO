@@ -13,17 +13,11 @@ import netCDF4 as nc
 import numpy as np
 import Lfun
 
-ncformat = 'NETCDF3_64BIT_OFFSET'
-
 def make_clm_file(Ldir, nc_dir, fh_dir, c_dict, dt_list, S, G):
     # name output file
-    clm_fn = nc_dir + 'ocean_clm.nc'
-    # get rid of the old version, if it exists
-    try:
-        os.remove(clm_fn)
-    except OSError:
-        pass # assume error was because the file did not exist
-    foo = nc.Dataset(clm_fn, 'w', format=ncformat)
+    clm_fn = nc_dir / 'ocean_clm.nc'
+    clm_fn.unlink(missing_ok=True)
+    foo = nc.Dataset(clm_fn, 'w')
     # create dimensions
     for vn in ['salt', 'temp', 'v3d', 'v2d', 'zeta', 'ocean']:
         foo.createDimension(vn+'_time', len(dt_list)) # could use None
@@ -88,15 +82,11 @@ def make_clm_file(Ldir, nc_dir, fh_dir, c_dict, dt_list, S, G):
         
 def make_ini_file(nc_dir):
     # Initial condition, copied from first time of ocean_clm.nc
-    ds1 = nc.Dataset(nc_dir + 'ocean_clm.nc', mode='r')
+    ds1 = nc.Dataset(nc_dir / 'ocean_clm.nc', mode='r')
     # name output file
-    ini_fn = nc_dir + 'ocean_ini.nc'
-    # get rid of the old version, if it exists
-    try:
-        os.remove(ini_fn)
-    except OSError:
-        pass # assume error was because the file did not exist
-    ds2 = nc.Dataset(ini_fn, 'w', format=ncformat)
+    ini_fn = nc_dir / 'ocean_ini.nc'
+    ini_fn.unlink(missing_ok=True)
+    ds2 = nc.Dataset(ini_fn, 'w')
     # Copy dimensions
     for dname, the_dim in ds1.dimensions.items():
         if 'time' in dname:
@@ -118,15 +108,11 @@ def make_ini_file(nc_dir):
 
 def make_bry_file(nc_dir):
     # Boundary conditions, copied from edges of ocean_clm.nc
-    ds1 = nc.Dataset(nc_dir + 'ocean_clm.nc', mode='r')
+    ds1 = nc.Dataset(nc_dir / 'ocean_clm.nc', mode='r')
     # name output file
-    bry_fn = nc_dir + 'ocean_bry.nc'
-    # get rid of the old version, if it exists
-    try:
-        os.remove(bry_fn)
-    except OSError:
-        pass # assume error was because the file did not exist
-    ds2 = nc.Dataset(bry_fn, 'w', format=ncformat)
+    bry_fn = nc_dir / 'ocean_bry.nc'
+    bry_fn.unlink(missing_ok=True)
+    ds2 = nc.Dataset(bry_fn, 'w')
     # Copy dimensions
     for dname, the_dim in ds1.dimensions.items():
         ds2.createDimension(dname, len(the_dim) if not the_dim.isunlimited() else None)

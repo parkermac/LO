@@ -15,13 +15,15 @@ import requests
 
 import Ofun_CTD
 
-hpth = os.path.abspath('../hycom2/')
-if hpth not in sys.path:
-    sys.path.append(hpth)
+from pathlib import Path
+hpth = Path(__file__).absolute().parent.parent.parent / 'pre' / 'hycom'
+if str(hpth) not in sys.path:
+    sys.path.append(str(hpth))
 import hfun
 
 import zfun
 import zrfun
+import Lfun
 
 verbose = False
 
@@ -60,7 +62,7 @@ def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
     west = aa[0] + 360
     east = aa[1] + 360
     # name full output file
-    full_fn_out = h_out_dir + 'forecast_ncks.nc'
+    full_fn_out = str(h_out_dir) + 'forecast_ncks.nc'
     # time limits
     dstr0 = dt0.strftime('%Y-%m-%dT00:00') 
     dstr1 = dt1.strftime('%Y-%m-%dT00:00')
@@ -92,7 +94,7 @@ def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
     for ii in range(NT):
         hdt = hdt_list[ii]
         iis = str(ii)
-        fn_out = h_out_dir + 'h'+ hdt.strftime('%Y.%m.%d') + '.nc'
+        fn_out = str(h_out_dir) + 'h'+ hdt.strftime(lfun.ds_fmt) + '.nc'
         cmd_list = ['ncks',
             '-d', 'time,'+iis+','+iis,
             '-O', full_fn_out, fn_out]
@@ -107,7 +109,7 @@ def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
         got_ncks = False
     return got_ncks
 
-def get_data_oneday(this_dt, fn_out, testing_fmrc):
+def get_data_oneday(this_dt, out_fn, testing_fmrc):
     """"
     Code to get hycom data using the new FMRC_best file. It gets only a single time,
     per the new guidance from Michael McDonald at HYCOM, 202.03.16.
@@ -119,12 +121,9 @@ def get_data_oneday(this_dt, fn_out, testing_fmrc):
         raise ValueError('Artificial error for testing')
 
     # get rid of the old version, if it exists
-    try:
-        os.remove(fn_out)
-    except OSError:
-        pass # assume error was because the file did not exist
+    out_fn.unlink(missing_ok=True)
 
-    dstr = this_dt.strftime('%Y.%m.%d')
+    dstr = this_dt.strftime(Lfun.ds_fmt)
     # time string in HYCOM format
     dstr_hy = this_dt.strftime('%Y-%m-%d-T00:00:00Z')
     
@@ -168,7 +167,7 @@ def get_data_oneday(this_dt, fn_out, testing_fmrc):
         try:
             r = requests.get(url, timeout=200)
             if r.ok:
-                with open(fn_out,'wb') as f:
+                with open(out_fn,'wb') as f:
                     f.write(r.content)
                 got_fmrc = True
                 r.close()
@@ -197,22 +196,22 @@ def get_hnc_short_list(this_dt, Ldir):
     elif this_dt >= datetime(2018,12,7):
         hy_list = hy_list[ihy_split:]
     # create a list of daily HYCOM NetCDF files in the archive
-    hy_in_dir = Ldir['data'] + 'hycom2/'
+    hy_in_dir = Ldir['data'] / 'hycom'
     hnc_list = []
     for hy in hy_list:
-        in_dir = hy_in_dir + hy + '/'
+        in_dir = hy_in_dir / hy
         hnc_list0 = os.listdir(in_dir)
-        hnc_list1 = [in_dir + item for item in hnc_list0 if '.nc' in item]
+        hnc_list1 = [in_dir / item for item in hnc_list0 if '.nc' in str(item)]
         hnc_list1.sort()
         hnc_list += hnc_list1
     # remove repeated days
     seen = []
     hnc_unique_list = []
     for hnc in hnc_list:
-        dd = hnc.split('/')[-1]
+        dd = str(hnc).split('/')[-1]
         if dd not in seen:
             seen.append(dd)
-            hnc_unique_list.append(hnc)
+            hnc_unique_list.append(str(hnc))
     # then find the index of the start of the current day
     # but if it is missing search for the most recent past one that exists
     keep_looking = True
@@ -247,6 +246,8 @@ def get_hnc_short_list(this_dt, Ldir):
     return hnc_short_list
 
 def convert_extraction_oneday(fn):
+    # fn can be either a path object or a string, in either case
+    # corresponding to a NetCDF file.
     
     testing = False
     
@@ -357,7 +358,7 @@ def time_filter(in_dir, h_list, out_dir, Ldir):
             aa = dict()
             for n in range(nfilt):
                 nn = n + nt
-                fn = in_dir + h_list[nn]
+                fn = in_dir / h_list[nn]
                 a = pickle.load(open(fn, 'rb'))
                 for v in vl:
                     if n == 0:
@@ -369,14 +370,14 @@ def time_filter(in_dir, h_list, out_dir, Ldir):
             dt = datetime.strptime(dts, '%Y.%m.%d')
             aa['dt'] = dt
             # print('   ' + out_name)
-            pickle.dump(aa, open(out_dir + out_name, 'wb'))
+            pickle.dump(aa, open(out_dir / out_name, 'wb'))
     else:
         print('--Using block average')
         # make a simple average and use it for everything
         fac_list = list(nh * np.ones(nh))
         aa = dict()
         for n in range(nh):
-            fn = in_dir + h_list[n]
+            fn = in_dir / h_list[n]
             a = pickle.load(open(fn, 'rb'))
             for v in vl:
                 if n == 0:
@@ -389,20 +390,20 @@ def time_filter(in_dir, h_list, out_dir, Ldir):
             nd = 3
         # saving the first file
         out_name0 = 'fh' + dts0 + '.p' 
-        aa['dt'] = dt0           
+        aa['dt'] = dt0
         # print('   ' + out_name0)
-        pickle.dump(aa, open(out_dir + out_name0, 'wb'))
+        pickle.dump(aa, open(out_dir / out_name0, 'wb'))
         # saving the last file
         dt1 = dt0 + timedelta(days=nd)
         dts1 = datetime.strftime(dt1, '%Y.%m.%d')
         out_name1 = 'fh' + dts1 + '.p'            
         aa['dt'] = dt1           
         # print('   ' + out_name1)
-        pickle.dump(aa, open(out_dir + out_name1, 'wb'))
+        pickle.dump(aa, open(out_dir / out_name1, 'wb'))
 
 def get_coords(in_dir):
     # get coordinate fields and sizes
-    coord_dict = pickle.load(open(in_dir + 'coord_dict.p', 'rb'))
+    coord_dict = pickle.load(open(in_dir / 'coord_dict.p', 'rb'))
     lon = coord_dict['lon']
     lat = coord_dict['lat']
     z = coord_dict['z']

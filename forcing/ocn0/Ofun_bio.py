@@ -7,14 +7,12 @@ import numpy as np
 import matplotlib.path as mpath
 import zfun
 
-ncformat = 'NETCDF3_64BIT_OFFSET'
-
 verbose = False
 
 def add_bio(nc_dir, G, add_CTD=False):
     print('-Writing bio variables to ocean_clm.nc')
     # name output file
-    clm_fn = nc_dir + 'ocean_clm.nc'
+    clm_fn = nc_dir / 'ocean_clm.nc'
     foo = nc.Dataset(clm_fn)
     vn_dict =  {'NO3':'MicroMolar',
                'phytoplankton':'MicroMolar N',
@@ -29,7 +27,7 @@ def add_bio(nc_dir, G, add_CTD=False):
     salt = foo['salt'][:]
     foo.close()
     for vn in vn_dict.keys():
-        foo = nc.Dataset(clm_fn, 'a', format=ncformat)
+        foo = nc.Dataset(clm_fn, 'a')
         vv = foo.createVariable(vn, float, ('salt_time', 's_rho', 'eta_rho', 'xi_rho'))
         vv.long_name = vn + ' climatology'
         vv.units = vn_dict[vn]
