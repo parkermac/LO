@@ -25,3 +25,4 @@ Pair.nc, Tair.nc, Vwind.nc, rain.nc, Qair.nc, Uwind.nc, lwrad_down.nc, and swrad
 ---
 
 `check_results.py` makes plots comparing all fields for a given day as produced by the old LiveOcean/forcing/atm1 code and this new code, to make sure everything looks right.
+
