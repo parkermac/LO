@@ -12,11 +12,7 @@ from scipy.spatial import cKDTree
 from datetime import datetime
 
 import Ofun
-
-pth = os.path.abspath('../../alpha')
-if pth not in sys.path:
-    sys.path.append(pth)
-import zfun
+import zfun # alpha is already on path
 
 def get_casts(Ldir):
         
@@ -24,16 +20,16 @@ def get_casts(Ldir):
     month = 1
     
     # +++ load ecology CTD cast data +++
-    dir0 = Ldir['parent'] + 'ptools_data/ecology/'
+    dir0 = Ldir['parent'] / 'ptools_data' / 'ecology'
     # load processed station info and data
-    sta_df = pd.read_pickle(dir0 + 'sta_df.p')
+    sta_df = pd.read_pickle(dir0 / 'sta_df.p')
     # add Canadian data
-    dir1 = Ldir['parent'] + 'ptools_data/canada/'
+    dir1 = Ldir['parent'] / 'ptools_data' / 'canada'
     # load processed station info and data
-    sta_df_ca = pd.read_pickle(dir1 + 'sta_df.p')
+    sta_df_ca = pd.read_pickle(dir1 / 'sta_df.p')
     sta_df = pd.concat((sta_df, sta_df_ca), sort=False)
-    Casts = pd.read_pickle(dir0 + 'Casts_' + str(year) + '.p')
-    Casts_ca = pd.read_pickle(dir1 + 'Casts_' + str(year) + '.p')
+    Casts = pd.read_pickle(dir0 / ('Casts_' + str(year) + '.p'))
+    Casts_ca = pd.read_pickle(dir1 / ('Casts_' + str(year) + '.p'))
     Casts = pd.concat((Casts, Casts_ca), sort=False)
 
     # limit the stations used, if desired
@@ -97,7 +93,7 @@ def get_orig(Cast_dict, sta_df, X, Y, fld, lon, lat, zz, vn):
         # the chosen hycom level
         czbot = -sta_df.loc[station,'Max_Depth']
         if czbot <= zz:
-            # becasue we used find_nearest above we should always
+            # because we used find_nearest above we should always
             # get data in the steps below
             if vn == 't3d':
                 this_fld = Cast.iloc[izc]['Temperature']

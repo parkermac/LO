@@ -10,13 +10,11 @@ if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import Lfun
 import zfun
+import hycom_functions as hfun
 Ldir = Lfun.Lstart()
 
 import pickle
 
-import hfun
-from importlib import reload
-reload(hfun)
 
 # initial experiment list
 h_list = list(hfun.hy_dict.keys())

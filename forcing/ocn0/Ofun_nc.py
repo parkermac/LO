@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Tue Mar 14 13:51:06 2017
-
-@author: PM5
-
 Functions for writing saved fields to ROMS NetCDF.
 """
 
@@ -97,7 +91,8 @@ def make_ini_file(nc_dir):
     for v_name, varin in ds1.variables.items():
         outVar = ds2.createVariable(v_name, varin.datatype, varin.dimensions)
         # Copy variable attributes, {} is a dict comprehension, cool!
-        outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip() for k in varin.ncattrs()})
+        outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip()
+                for k in varin.ncattrs()})
         if varin.ndim > 1:
             outVar[:] = varin[0,:]
         else:
@@ -134,7 +129,8 @@ def make_bry_file(nc_dir):
                 elif bname in ['west', 'east']:
                     outdims = tuple([item for item in varin.dimensions if item[:2] != 'xi'])
                 outVar = ds2.createVariable(outname, varin.datatype, outdims)    
-                outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip() for k in varin.ncattrs()})
+                outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip()
+                        for k in varin.ncattrs()})
                 if varin.ndim == 4:
                     if bname == 'north':
                         outVar[:] = varin[:,:,-1,:]
@@ -157,7 +153,8 @@ def make_bry_file(nc_dir):
             outname = v_name
             outdims = tuple([item for item in varin.dimensions])
             outVar = ds2.createVariable(outname, varin.datatype, outdims)    
-            outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip() for k in varin.ncattrs()})
+            outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip()
+                    for k in varin.ncattrs()})
             outVar[:] = varin[:]    
     ds1.close()
     ds2.close()

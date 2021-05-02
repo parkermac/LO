@@ -14,15 +14,12 @@ if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import Lfun
 import zfun
+import hycom_functions as hfun
 Ldir = Lfun.Lstart()
 
 import pickle
 import netCDF4 as nc
 from datetime import datetime, timedelta
-
-import hfun
-from importlib import reload
-reload(hfun)
 
 # optional command line input
 import argparse

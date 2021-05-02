@@ -10,6 +10,7 @@ pth = os.path.abspath('../../alpha')
 if pth not in sys.path:
     sys.path.append(pth)
 import Lfun
+import hycom_functions as hfun
 
 Ldir = Lfun.Lstart()
 fn_out = Ldir['LOo'] + 'misc/hycom_test.nc'
@@ -22,10 +23,6 @@ import netCDF4 as nc
 from urllib.request import urlretrieve
 from urllib.error import URLError
 from socket import timeout
-
-import hfun
-from importlib import reload
-reload(hfun)
 
 # ** USER **********************************
 

@@ -1,5 +1,5 @@
 """
-Functions for the new ocean forcing.
+Functions for getting and processing the ocean forcing.
 
 """
 import os, sys
@@ -15,21 +15,20 @@ import requests
 
 import Ofun_CTD
 
-from pathlib import Path
-hpth = Path(__file__).absolute().parent.parent.parent / 'pre' / 'hycom'
-if str(hpth) not in sys.path:
-    sys.path.append(str(hpth))
-import hfun
-
 import zfun
 import zrfun
 import Lfun
+import hycom_functions as hfun
 
 verbose = False
 
 def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
-    # Plan A: use ncks
+    """
+    Plan A for forecast case: get hycom fields in one pile using ncks, and them split it up
+    into the same one-file-per-day that we have in LO_output/hycom.
     
+    Not that this is hard-coded to use GLBy0.08.
+    """
     if testing_ncks:
         # generate an error
         raise ValueError('Artificial error for testing')
@@ -62,7 +61,7 @@ def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
     west = aa[0] + 360
     east = aa[1] + 360
     # name full output file
-    full_fn_out = str(h_out_dir) + 'forecast_ncks.nc'
+    full_fn_out = str(h_out_dir) + '/forecast_ncks.nc'
     # time limits
     dstr0 = dt0.strftime('%Y-%m-%dT00:00') 
     dstr1 = dt1.strftime('%Y-%m-%dT00:00')
@@ -90,11 +89,12 @@ def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
         print('')
         print('Split up into separate output files:')
     # split up the files, again using ncks
+    # (does this delete the forecast_ncks.nc file?)
     NT = len(hdt_list)
     for ii in range(NT):
         hdt = hdt_list[ii]
         iis = str(ii)
-        fn_out = str(h_out_dir) + 'h'+ hdt.strftime(lfun.ds_fmt) + '.nc'
+        fn_out = str(h_out_dir) + 'h'+ hdt.strftime(Lfun.ds_fmt) + '.nc'
         cmd_list = ['ncks',
             '-d', 'time,'+iis+','+iis,
             '-O', full_fn_out, fn_out]
@@ -111,8 +111,12 @@ def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
 
 def get_data_oneday(this_dt, out_fn, testing_fmrc):
     """"
-    Code to get hycom data using the new FMRC_best file. It gets only a single time,
-    per the new guidance from Michael McDonald at HYCOM, 202.03.16.
+    Plan B for forecast case: hycom data using the FMRC_best file.
+    It gets only a single time, per the new guidance from Michael McDonald
+    at HYCOM, 2020.03.16.
+    
+    Note that this hard-codes HYCOM experiment info like GLBy0.08/expt_93.0
+    and so could fail when this is superseded.
     """
     testing = False
     
@@ -185,10 +189,15 @@ def get_data_oneday(this_dt, out_fn, testing_fmrc):
     return got_fmrc
 
 def get_hnc_short_list(this_dt, Ldir):
+    """
+    This makes a list of strings giving the full paths to the LO_data/hycom
+    extractions to use for this backfill day.  It accounts for possible gaps
+    in time.
+    """
     # initial experiment list
     hy_list = list(hfun.hy_dict.keys())
     hy_list.sort()
-    # only use part of hy_list, splitting based on the change of gridsize
+    # only use part of hy_list, splitting based on the change of grid size
     # between hy5 and hy6
     ihy_split = hy_list.index('hy6')
     if this_dt <= datetime(2018,12,6):
@@ -215,13 +224,13 @@ def get_hnc_short_list(this_dt, Ldir):
     # then find the index of the start of the current day
     # but if it is missing search for the most recent past one that exists
     keep_looking = True
-    dt_now = this_dt#datetime.strptime(Ldir['date_string'], '%Y.%m.%d')
+    dt_now = this_dt
     it0 = None
     counter = 0
     maxcount = 100 # this handles the biggest gap we have
     while keep_looking and counter < maxcount:
         dt_next = dt_now - timedelta(days=counter)
-        dts_next = datetime.strftime(dt_next, '%Y.%m.%d')
+        dts_next = datetime.strftime(dt_next, Lfun.ds_fmt)
         try:
             it0 = [i for i, s in enumerate(hnc_unique_list) if dts_next in s]
             it0 = it0[0]
@@ -246,18 +255,28 @@ def get_hnc_short_list(this_dt, Ldir):
     return hnc_short_list
 
 def convert_extraction_oneday(fn):
-    # fn can be either a path object or a string, in either case
-    # corresponding to a NetCDF file.
+    """
+    This converts a single-day hycom NetCDF extraction file into a
+    pickled dict of fields, doing some renaming and packing things
+    bottom to top.  It could probably be skipped over in future
+    versions, and is here because subsequent workflow depends on the
+    pickled dict existing.
+    """
     
     testing = False
     
     # initialize an output dict
     out_dict = dict()
+    
+    # load the file
     ds = nc.Dataset(fn)
+    # fn can be either a Path object or a string, in either case
+    # corresponding to a NetCDF file.
     
-    # print('opening ' + fn)
+    if testing:
+        print('opening ' + fn)
     
-    # get time info for the forecast
+    # get time info
     t = ds['time'][0]
     if isinstance(t, np.ma.MaskedArray):
         th = t.data
@@ -283,7 +302,7 @@ def convert_extraction_oneday(fn):
         
     # get full coordinates (vectors for the plaid grid)
     lon = ds.variables['lon'][:] - 360  # convert from 0:360 to -360:0 format
-    lat = ds.variables['lat'][:]    
+    lat = ds.variables['lat'][:]
     # and save them   
     out_dict['lon'] = lon
     out_dict['lat'] = lat
@@ -323,7 +342,8 @@ def convert_extraction_oneday(fn):
 
 def time_filter(in_dir, h_list, out_dir, Ldir):
     """
-    Filter the files that ended up in data_dir
+    Filter the files in time to get rid of inertial oscillations that
+    are aliased in the daily sampling.
     """
     print('-Filtering in time')
     vl = ['ssh', 'u3d', 'v3d', 't3d', 's3d']
@@ -349,7 +369,7 @@ def time_filter(in_dir, h_list, out_dir, Ldir):
     nd_f = Ldir['forecast_days']
     nhmin_f = nfilt + nd_f
     nhmin_b = nfilt + 1
-    rtp = Ldir['run_type']   
+    rtp = Ldir['run_type']
     if ((nh==nhmin_b and rtp=='backfill') or (nh>=nhmin_f and rtp=='forecast')) and no_gaps:
         print('--Using Hanning window')
         fac_list = fac_list_H
@@ -402,7 +422,9 @@ def time_filter(in_dir, h_list, out_dir, Ldir):
         pickle.dump(aa, open(out_dir / out_name1, 'wb'))
 
 def get_coords(in_dir):
-    # get coordinate fields and sizes
+    """
+    get coordinate fields and sizes
+    """
     coord_dict = pickle.load(open(in_dir / 'coord_dict.p', 'rb'))
     lon = coord_dict['lon']
     lat = coord_dict['lat']
@@ -417,6 +439,9 @@ def get_coords(in_dir):
     return (lon, lat, z, L, M, N, X, Y)
 
 def checknan(fld):
+    """
+    A utility function that issues a working if there are nans in fld.
+    """
     if np.isnan(fld).sum() > 0:
         print('WARNING: nans in data field')    
 
@@ -456,6 +481,11 @@ def extrap_nearest_to_masked(X, Y, fld, fld0=0):
         return fldd
 
 def get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir, add_CTD=False):
+    """
+    Make use of extrap_nearest_to_masked() to fill fields completely
+    before interpolating to the ROMS grid.  It also adds CTD data if asked to,
+    creates ubar and vbar, and converts the temperature to potential temperature.
+    """
     b = pickle.load(open(in_fn, 'rb'))
     vn_list = list(b.keys())    
     # check that things are the expected shape
@@ -538,7 +568,9 @@ def get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir, add_CTD=False):
     return V
 
 def get_xyr(G, vn):
-    # ROMS lon, lat arrays
+    """
+    A utility function for getting any of the ROMS grids.
+    """
     if vn in ['ssh', 'theta', 's3d']:
         xr = G['lon_rho']
         yr = G['lat_rho']
@@ -553,7 +585,10 @@ def get_xyr(G, vn):
     return xr, yr
 
 def get_zr(G, S, vn):
-    # get z on the ROMS grids
+    """
+    A utility function to get the ROMS z coordinate on any of
+    the ROMS grids.
+    """
     h = G['h']
     if vn in ['theta', 's3d']:
         zr = zrfun.get_z(h, 0*h, S, only_rho=True)
@@ -573,10 +608,12 @@ def get_zr(G, S, vn):
     return zr
 
 def get_zinds(h, S, z):
-    # Precalculate the array of indices to go from HYCOM z to ROMS z.
-    # This just finds the vertical index in HYCOM z for each ROMS z_rho
-    # value in the whole 3D array, with the index being the UPPER one of
-    # the two HYCOM z indices that any ROMS z falls between.
+    """
+    Precalculate the array of indices to go from HYCOM z to ROMS z.
+    This just finds the vertical index in HYCOM z for each ROMS z_rho
+    value in the whole 3D array, with the index being the UPPER one of
+    the two HYCOM z indices that any ROMS z falls between.
+    """
     tt0 = time.time()
     zr = zrfun.get_z(h, 0*h, S, only_rho=True)
     zrf = zr.flatten()
@@ -594,13 +631,15 @@ def get_zinds(h, S, z):
         print(' --create zinds array took %0.1f seconds' % (time.time() - tt0))
     return zinds
 
-def get_interpolated_alt(G, S, b, lon, lat, z, N, zinds):
-    # This does the horizontal and vertical interpolation to get from
-    # extrapolated, filtered HYCOM fields to ROMS fields.
-    #
-    # We use fast nearest neighbor interpolation as much as possible.
-    # Also we interpolate everything to the ROMS rho grid, and then crudely
-    # interpolate to the u and v grids at the last moment.  Much simpler.
+def get_interpolated(G, S, b, lon, lat, z, N, zinds):
+    """
+    This does the horizontal and vertical interpolation to get from
+    extrapolated, filtered HYCOM fields to ROMS fields.
+
+    We use fast nearest neighbor interpolation as much as possible.
+    Also we interpolate everything to the ROMS rho grid, and then crudely
+    interpolate to the u and v grids at the last moment.  Much simpler.
+    """
     
     # start input dict
     c = {}

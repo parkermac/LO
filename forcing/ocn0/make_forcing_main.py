@@ -4,9 +4,16 @@ extractions.
 
 Test on mac in ipython:
 
-run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2019.07.04 -test True -f ocn0
+run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2019.07.04 -f ocn0 -test True
 
+This one adds CTD data for the initial condition:
+run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2016.12.15 -f ocn0
+
+Forecast version:
 run make_forcing_main.py -g cas6 -t v3 -r forecast -s continuation -f ocn0 -d [TODAY]
+
+NOTE: I haven't yet made much use of the Ldir['testing'] flag, and instead there are some ad hoc
+flags like verbose, testing_ncks, an testing_fmrc.
 
 """
 
@@ -39,11 +46,13 @@ import Ofun
 import Ofun_nc
 import Ofun_CTD
 import Ofun_bio
-from importlib import reload
-reload(Ofun)
-reload(Ofun_nc)
-reload(Ofun_CTD)
-reload(Ofun_bio)
+
+if Ldir['testing']:
+    from importlib import reload
+    reload(Ofun)
+    reload(Ofun_nc)
+    reload(Ofun_CTD)
+    reload(Ofun_bio)
 
 # defaults
 planB = False
@@ -56,9 +65,10 @@ verbose = False
 testing_ncks = False
 testing_fmrc = False
 
-# this is created, along with Info and Data subdirectories, by ffun.intro()
+# this directory is created, along with Info and Data subdirectories, by ffun.intro()
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
 
+# datetime of the day we are working on
 this_dt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
 
 # *** automate when to set add_CTD to True ***
@@ -66,6 +76,7 @@ if this_dt == datetime(2016,12,15):
     print('WARNING: adding CTD data to extrapolation!!')
     add_CTD = True
     
+# this is where all the pre-processed files will go
 h_out_dir = out_dir / 'Data'
 Lfun.make_dir(h_out_dir, clean=True)
     
@@ -136,14 +147,15 @@ if planC == False:
             
     elif Ldir['run_type'] == 'forecast':
         hnc_list = sorted([item.name for item in h_out_dir.iterdir()
-                if item.name[0]=='h' and item.name[-3:]== '.nc'])
+                if item.name[0]=='h' and item.name[-3:]=='.nc'])
         for item in hnc_list:
             a = Ofun.convert_extraction_oneday(h_out_dir / item)
             out_fn = h_out_dir / item.replace('.nc','.p')
             pickle.dump(a, open(out_fn, 'wb'))
             sys.stdout.flush()
             
-    hp_list = sorted([item.name for item in h_out_dir.iterdir() if (item.name[0]=='h' and item.name[-2:]== '.p')])
+    hp_list = sorted([item.name for item in h_out_dir.iterdir()
+            if (item.name[0]=='h' and item.name[-2:]=='.p')])
         
     # copy in the coordinates (assume those from first file work)
     this_h_dict = pickle.load(open(h_out_dir / hp_list[0], 'rb'))
@@ -152,14 +164,13 @@ if planC == False:
         coord_dict[vn] = this_h_dict[vn]
     pickle.dump(coord_dict, open(h_out_dir / 'coord_dict.p', 'wb'))
     
-    #%% filter in time
+    # filter in time
     Ofun.time_filter(h_out_dir, hp_list, h_out_dir, Ldir)
 
-    #%% extrapolate
+    # extrapolate
     lon, lat, z, L, M, N, X, Y = Ofun.get_coords(h_out_dir)
-    
-    fh_list = sorted([item.name for item in h_out_dir.iterdir() if item.name[:2]=='fh'])
-        
+    fh_list = sorted([item.name for item in h_out_dir.iterdir()
+            if item.name[:2]=='fh'])
     for fn in fh_list:
         print('-Extrapolating ' + fn)
         in_fn = h_out_dir / fn
@@ -173,9 +184,9 @@ if planC == False:
     S_fn = Ldir['grid'] / 'S_COORDINATE_INFO.csv'
     S_info_dict = pd.read_csv(S_fn, index_col='ITEMS').to_dict()['VALUES']
     S = zrfun.get_S(S_info_dict)
-    
-    xfh_list = sorted([item.name for item in h_out_dir.iterdir() if item.name[:3]=='xfh'])
-    
+    # make list of files to process
+    xfh_list = sorted([item.name for item in h_out_dir.iterdir()
+            if item.name[:3]=='xfh'])
     # HyCOM grid info
     lon, lat, z, L, M, N, X, Y = Ofun.get_coords(h_out_dir)
     # load a dict of hycom fields
@@ -187,7 +198,7 @@ if planC == False:
         print('-Interpolating ' + fn + ' to ROMS grid')
         b = pickle.load(open(h_out_dir / fn, 'rb'))
         dt_list.append(b['dt'])
-        c = Ofun.get_interpolated_alt(G, S, b, lon, lat, z, N, zinds)
+        c = Ofun.get_interpolated(G, S, b, lon, lat, z, N, zinds)
         c_dict[count] = c
         count += 1
     # Write to ROMS forcing files
@@ -216,6 +227,7 @@ if do_bio and (planC==False):
 Ofun_nc.make_ini_file(out_dir)
 Ofun_nc.make_bry_file(out_dir)
 
+# check results
 nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
 result_dict['result'] = 'success'
 for fn in nc_list:

@@ -12,14 +12,12 @@ if pth not in sys.path:
 import Lfun
 Ldir = Lfun.Lstart()
 import zfun
+import hycom_functions as hfun
 
 import pickle
 import netCDF4 as nc
 from datetime import datetime, timedelta
 
-import hfun
-from importlib import reload
-reload(hfun)
 
 # optional command line input
 import argparse
