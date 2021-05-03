@@ -12,13 +12,13 @@ Check out today's model output at [LiveOcean](http://faculty.washington.edu/pmac
 
 ---
 
-### Why would you clone this repo?
+## Why would you clone this repo?
 
 The main users of this repo are people who are in some way collaborating with me and want to use any of my post-processing tools.
 
 ---
 
-### Installation
+## Installation
 
 *All the instructions assume you are working from the linux (bash) command line. When I say "go to" I mean navigate to that place, and "do" means enter that command from the linux command line and hit return.*
 
@@ -30,16 +30,17 @@ git clone https://github.com/parkermac/LO.git
 and LO and all its sub-folders will appear. To get any changes I may make, go to any folder in LO and do:
 ```
 git pull
-``` 
+```
+
 
 ---
 
-### Top-level organization
+## Top-level organization
 
 These four directories are assumed to be somewhere, all at the same level in the file structure.
 
 - LO_data: contains large binaries that change infrequently, especially for making grids or forcing files.  I maintain these by hand on my laptop and on my remote linux machines.
-- **LO: is this code.**
+- **LO: is this repo.**
 - LO_output: is where most output from the LO code ends up, e.g. model forcing files, mooring extractions, plots, etc. It is expected that the contents will change frequently and that they are specific to a given user or machine.
 - LO_user: is a placeholder that a user should create to house modified version of the LO code.
 
@@ -47,7 +48,7 @@ LO_output is typically made, if needed, by the code that writes to it. LO_user h
 
 ---
 
-### Organization of LO and relation to LO_output
+## Organization of LO and relation to LO_output
 
 | LO | LO_output |
 | --- | --- |
@@ -58,6 +59,3 @@ LO_output is typically made, if needed, by the code that writes to it. LO_user h
 | dot_in: code (one folder for each [gtagex]) for making the .in file for a ROMS run for a given day |
 | post: code for automated post-processing of the daily forecast, e.g. for the movies that are sent to the LiveOcean website | post/[gtagex]/layers, etc. |
 | extract: code for various types of extractions, plotting, particle tracking, and so on | extract/[gtagex]/cast, etc. |
-
-
-
