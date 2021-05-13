@@ -243,7 +243,7 @@ ad_LBC(isTvar) ==   RadNud     RadNud     Clo     Clo \    ! idbio(1), NO3
 
   LnudgeTCLM == 9*T
 
-  SSFNAME == $force_dir$/$riv_dir$/rivers.nc
+  SSFNAME == $force_dir$/$riv$/rivers.nc
 
 
 ! Logical switches (TRUE/FALSE) to activate writing of biological tracers
