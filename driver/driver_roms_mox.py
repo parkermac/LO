@@ -104,7 +104,7 @@ while dt <= dt1:
     # Set some useful paths
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
     log_file = roms_out_dir / 'log.txt'
-    roms_ex_dir = str(Ldir['roms_code'] / 'makefiles' / Ldir['ex_name'])
+    roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
     
     # Loop over blow ups
     blow_ups = 0
