@@ -9,7 +9,7 @@ run make_dot_in -g cas6 -t v3 -x lo8b -r backfill -s continuation -d 2019.07.04 
 If you are using an alternate tag then run like:
 run make_dot_in -g cas6 -t v3 -t v3a -x lo8b -r backfill -s continuation -d 2019.07.04 -bu 0 -np 196
 But note that the resulting gtagex should be the same as the folder this is in, and it
-will throw a WARNING pointing this out if it is not.
+will throw a WARNING pointing this out if it is not, and then exit.
 """
 
 # NOTE: we limit the imports to modules that exist in python3 on mox
@@ -32,10 +32,13 @@ ppth = Path(__file__).absolute().parent.name
 gridname_check, tag_check, ex_name_check = (str(ppth)).split('_')
 if Ldir['gridname'] != gridname_check:
     print('WARNING: gridname mismatch')
+    sys.exit()
 if Ldir['tag'] != tag_check:
     print('WARNING: tag mismatch')
+    sys.exit()
 if Ldir['ex_name'] != ex_name_check:
     print('WARNING: ex_name mismatch')
+    sys.exit()
 
 from datetime import datetime, timedelta
 fdt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
@@ -140,7 +143,7 @@ D['dstart'] = int(Lfun.datetime_to_modtime(fdt) / 86400.)
 D['grid_dir'] = Ldir['grid']
 force_dir = Ldir['LOo'] / Ldir['gtag'] / ('f' + Ldir['date_string'])
 D['force_dir'] = force_dir
-D['roms_dir'] = Ldir['roms']
+D['roms_code_dir'] = Ldir['roms_code']
 
 # get horizontal coordinate info
 with open(Ldir['grid'] / 'XY_COORDINATE_INFO.csv','r') as xyf:
@@ -156,9 +159,9 @@ with open(Ldir['grid'] / 'S_COORDINATE_INFO.csv','r') as sf:
             D[ltup[0]] = int(ltup[1])
 
 # the output directory and the one from the day before
-out_dir = Ldir['roms'] / 'output' / Ldir['gtagex_alt'] / ('f' + Ldir['date_string'])
+out_dir = Ldir['roms_out'] / Ldir['gtagex_alt'] / ('f' + Ldir['date_string'])
 D['out_dir'] = out_dir
-out_dir_yesterday = Ldir['roms'] / 'output' / Ldir['gtagex_alt'] / ('f' + date_string_yesterday)
+out_dir_yesterday = Ldir['roms_out'] / Ldir['gtagex_alt'] / ('f' + date_string_yesterday)
 Lfun.make_dir(out_dir, clean=True) # make sure it exists and is empty
 
 if Ldir['start_type'] == 'continuation':

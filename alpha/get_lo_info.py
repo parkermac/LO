@@ -51,6 +51,9 @@ elif (str(HOME) == '/home/parker') & ('perigee' in HOSTNAME):
     lo_env = 'pm_perigee'
     roms_out1 = Path('/data1/parker/LiveOcean_roms/output')
     roms_out2 = Path('/boildat1/parker/LiveOcean_roms/output')
+    
+elif (str(HOME) == '/usr/lusers/pmacc'):
+    lo_env = 'pm_mox'
   
 Ldir0 = dict()
 Ldir0['lo_env'] = lo_env

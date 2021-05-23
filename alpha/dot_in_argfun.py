@@ -2,10 +2,15 @@
 Shared helper functions for the dot_in code, especially for argument passing.
 
 The new argument "tag_alt" is intended to facilitate different versions of a
-ROMS run, where you change one piece of the forcing.  The dot_in code will
-look to [gridname]_[tag] for forcing, but all other aspects will refer to
-[gridname]_[tag_alt]_[ex_name], including the naming of the folder in LO/dot_in,
-and the path to ROMS history files.
+ROMS run, where you change one piece of the forcing.
+
+The dot_in code will look to [gridname]_[tag] for forcing.
+
+All other aspects will refer to [gridname]_[tag_alt]_[ex_name] = [gtagex_alt].
+
+This includes checking that the name of the folder is LO/dot_in/[gtagex_alt].
+
+The path to ROMS history files will be Ldir['roms_out']/[gtagex_alt].
 
 """
 import argparse
