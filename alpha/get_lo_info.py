@@ -5,7 +5,7 @@ The info is stored in the dict Ldir.
 All paths are pathlib.Path objects
 
 This program is meant to be loaded as a module by Lfun which then adds more
-entries to the Ldir dict based on which model run you are workgin on.
+entries to the Ldir dict based on which model run you are working on.
 
 Users should not edit this directly but instead should copy it to
 LO_user/alpha/user_get_lo_info.py where LO_user is at the same level as LO.
@@ -20,9 +20,14 @@ LO = parent / 'LO'
 LOo = parent / 'LO_output'
 LOu = parent / 'LO_user'
 data = parent / 'LO_data'
-roms = parent / 'LO_roms'
-roms1 = parent / 'BLANK'
-roms2 = parent / 'BLANK'
+
+# This is where the ROMS source code, makefiles, and executables are
+roms_code = parent / 'LiveOcean_roms'
+
+# These are places where the ROMS history files are kept
+roms_out = parent / 'LO_roms'
+roms_out1 = parent / 'BLANK' # placeholder
+roms_out2 = parent / 'BLANK' # placeholder
 
 # default for linux machines
 which_matlab = '/usr/local/bin/matlab'
@@ -35,17 +40,17 @@ except KeyError:
 
 if str(HOME) == '/Users/pm8':
     lo_env = 'pm_mac'
-    roms1 = parent / 'LiveOcean_roms'
+    roms_out1 = parent / 'LiveOcean_roms' / 'output'
     which_matlab = '/Applications/MATLAB_R2020a.app/bin/matlab'
 
 elif (str(HOME) == '/home/parker') & ('boiler' in HOSTNAME):
     lo_env = 'pm_boiler'
-    roms1 = Path('/pgdat1/parker/LO_roms')
+    roms_out1 = Path('/data1/parker/LiveOcean_roms/output')
 
 elif (str(HOME) == '/home/parker') & ('perigee' in HOSTNAME):
     lo_env = 'pm_perigee'
-    roms1 = Path('/data1/parker/LiveOcean_roms')
-    roms2 = Path('/boildat1/parker/LiveOcean_roms')
+    roms_out1 = Path('/data1/parker/LiveOcean_roms/output')
+    roms_out2 = Path('/boildat1/parker/LiveOcean_roms/output')
   
 Ldir0 = dict()
 Ldir0['lo_env'] = lo_env
@@ -54,8 +59,9 @@ Ldir0['LO'] = LO
 Ldir0['LOo'] = LOo
 Ldir0['LOu'] = LOu
 Ldir0['data'] = data
-Ldir0['roms'] = roms
-Ldir0['roms1'] = roms1
-Ldir0['roms2'] = roms2
+Ldir0['roms_code'] = roms_code
+Ldir0['roms_out'] = roms_out
+Ldir0['roms_out1'] = roms_out1
+Ldir0['roms_out2'] = roms_out2
 Ldir0['which_matlab'] = which_matlab
 

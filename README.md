@@ -1,4 +1,6 @@
-# LO is the code base for running the LiveOcean collection of regional ocean simulations.
+# README for LO
+
+LO is the code base for running the LiveOcean collection of regional ocean simulations.
 
 The code here handles all the non-research tasks of making model (e.g. ROMS) forcing files, running the model on a remote linux cluster, and post-processing of model output.  Many of the post-processing tasks, such as mooring- cast- and layer extractions, and particle tracking, are designed for other users to be able to run from the linux command line, or modify if needed.
 

@@ -23,6 +23,8 @@ if str(pth) not in sys.path:
 import dot_in_argfun as dfun
 import Lfun
 
+dot_in_dir = Path(__file__).absolute().parent
+
 Ldir = dfun.intro() # this handles all the argument passing
 
 # check that the folder name matches the arguments (cludgey)
@@ -174,7 +176,7 @@ D['ini_fullname'] = ini_fullname
 # END DERIVED VALUES
 
 ## create .in ##########################
-f = open('BLANK.in','r')
+f = open(dot_in_dir / 'BLANK.in','r')
 f2 = open(out_dir / 'liveocean.in','w')
 for line in f:
     for var in D.keys():
@@ -189,7 +191,7 @@ f2.close()
 
 ## npzd2o_Banas.in ###########
 
-f = open('npzd2o_Banas_BLANK.in','r')
+f = open(dot_in_dir / 'npzd2o_Banas_BLANK.in','r')
 bio_dot_in_name = 'npzd2o_Banas.in'
 f3 = open(out_dir / bio_dot_in_name,'w')
 for line in f:

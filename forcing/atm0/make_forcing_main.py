@@ -3,8 +3,9 @@ This is the main program for making the ATM forcing file.
 
 Test on mac in ipython:
 
-run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2017.04.20 -test True -f atm0
-
+run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2019.07.04 -test True -f atm0
+or
+run make_forcing_main.py -g cas6 -t v3 -r forecast -s continuation -d 2019.07.04 -f atm0
 """
 
 from pathlib import Path

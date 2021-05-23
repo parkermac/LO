@@ -1,4 +1,4 @@
-# ocn0 forcing
+# README for the ocn0 forcing
 
 These programs create the ocean files used to force a roms run, typically for a single day or a 3 day forecast.  They bring in hycom data from archived extractions for backfill, or from a web source for a forecast.
 

@@ -6,13 +6,9 @@ It can be run for a single forecast or over a range of past days.
 Test on mac from ipython:
 run driver_forcing -g cas6 -t v3 -r backfill -s continuation -0 2019.07.04 -test True -f [FRC]
 where [FRC] = ztest0, tide0, etc.
-- or for atm0:
-run driver_forcing -g cas6 -t v3 -r backfill -s continuation -0 2017.04.20 -test True -f atm0
 
 Test on mac from command line:
 python ./driver_forcing.py -g cas6 -t v3 -r backfill -s continuation -0 2019.07.04 -test True -f [FRC]
-- or for atm0:
-python ./driver_forcing.py -g cas6 -t v3 -r backfill -s continuation -0 2017.04.20 -test True -f atm0
 
 """
 

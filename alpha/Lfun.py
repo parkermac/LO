@@ -121,9 +121,9 @@ def fn_list_utility(dt0, dt1, Ldir, hourmax=24):
     """
     INPUT: start and end datetimes
     OUTPUT: list of all history files expected to span the dates
-    - list items are strings of the full path
+    - list items are Path objects
     """
-    dir0 = Ldir['roms'] / 'output' / Ldir['gtagex']
+    dir0 = Ldir['roms_out'] / Ldir['gtagex']
     fn_list = []
     date_list = date_list_utility(dt0, dt1)
     for dl in date_list:
@@ -135,7 +135,7 @@ def fn_list_utility(dt0, dt1, Ldir, hourmax=24):
             # skip hour zero on subsequent days because it is a repeat
         for nhis in range(hourmin+1, hourmax+2):
             nhiss = ('0000' + str(nhis))[-4:]
-            fn = str(dir0) + '/' + f_string + '/ocean_his_' + nhiss + '.nc'
+            fn = dir0 / f_string / ('ocean_his_' + nhiss + '.nc')
             fn_list.append(fn)
     return fn_list
     
@@ -147,12 +147,11 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=1):
     """
     dt0 = datetime.strptime(ds0, ds_fmt)
     dt1 = datetime.strptime(ds1, ds_fmt)
-    dir0 = Ldir['roms'] / 'output' / Ldir['gtagex']
+    dir0 = Ldir['roms_out'] / Ldir['gtagex']
     if list_type == 'snapshot':
         # a single file name in a list
         his_string = ('0000' + str(his_num))[-4:]
-        fn_list = [str(dir0) + '/' + 'f' + ds0 +
-                   '/ocean_his_' + his_string + '.nc']
+        fn_list = [dir0 / ('f' + ds0) / ('ocean_his_' + his_string + '.nc')]
     elif list_type == 'hourly':
         # list of hourly files over a date range
         fn_list = fn_list_utility(dt0,dt1,Ldir)
@@ -163,11 +162,11 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=1):
         date_list = date_list_utility(dt0, dt1)
         for dl in date_list:
             f_string = 'f' + dl
-            fn = (str(dir0) + '/' + f_string + '/ocean_his_0021.nc')
+            fn = dir0 / f_string / 'ocean_his_0021.nc'
             fn_list.append(fn)
     elif list_type == 'allhours':
         # a list of all the history files in a directory
-        # (this is the only list_type that actully finds files)
+        # (this is the only list_type that actually finds files)
         in_dir = dir0 / ('f' + ds0)
         fn_list = [ff for ff in in_dir.glob('ocean_his*nc')]
         fn_list.sort()
@@ -245,7 +244,7 @@ def copy_to_azure(input_filename, output_filename, container_name, Ldir):
 if __name__ == '__main__':
     # TESTING: run Lfun will execute these
     
-    if False:
+    if True:
         print(' TESTING Lstart() '.center(60,'-'))
         Ldir = Lstart(gridname='cas6', tag='v3', ex_name='lo8b')
         print(' Ldir seen by make_forcing_main '.center(60,'+'))
@@ -278,6 +277,7 @@ if __name__ == '__main__':
     if False:
         print(' TESTING get_fn_list() '.center(60,'-'))
         Ldir = Lstart(gridname='cas6', tag='v3', ex_name='lo8b')
+        Ldir['roms_out'] = Ldir['roms_out1']
         list_type = 'allhours'
         ds0 = '2019.07.04'
         ds1 = '2019.07.05'
@@ -290,9 +290,7 @@ if __name__ == '__main__':
     if False:
         print(' TESTING choose_item() '.center(60,'-'))
         Ldir = Lstart(gridname='cas6', tag='v3', ex_name='lo8b')
-        dir0 = Ldir['roms'] / 'output' / Ldir['gtagex']
-        ds0 = '2019.07.04'
-        in_dir = dir0 / ('f' + ds0)
+        in_dir = Ldir['roms_out1'] / Ldir['gtagex'] / 'f2019.07.04'
         my_item = choose_item(in_dir, tag='.nc', exclude_tag='')
         print(my_item)
     
