@@ -51,7 +51,7 @@ parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
 parser.add_argument('-np', '--np_num', type=int) # e.g. 196, number of cores
 parser.add_argument('-N', '--cores_per_node', type=int) # 28 or 32 on mox, number of cores per node
-parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_string)
+parser.add_argument('-test', '--testing', default=False, type=boolean_string)
 args = parser.parse_args()
 
 # check for required arguments
