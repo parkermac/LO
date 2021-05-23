@@ -123,7 +123,7 @@ while dt <= dt1:
         
         # Create batch script
         cmd_list = ['python3', str(roms_ex_dir / 'make_back_batch.py'),
-            '-xp', str(roms_out_dir +'/'),
+            '-xp', str(roms_out_dir) +'/',
             '-np', str(args.np_num),
             '-N', str(args.cores_per_node),
             '-x', Ldir['ex_name']]
