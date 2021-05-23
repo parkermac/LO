@@ -15,6 +15,10 @@ To test on mac in ipython
 
 run driver_roms_mox -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2019.07.04 -np 196 -N 28
 
+to test on mox
+
+python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.23 -np 196 -N 28 > log.txt &
+
 """
 
 import sys
@@ -122,7 +126,7 @@ while dt <= dt1:
 
         # Run ROMS using the batch script
         cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
-            str(roms_ex_dir / 'lo_back_batch.sh', '&']
+            str(roms_ex_dir / 'lo_back_batch.sh'), '&']
         ret1 = subprocess.call(cmd_list)
         print('Return code = ' + str(ret1) + ' (0=success)')
         
