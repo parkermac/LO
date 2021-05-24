@@ -84,30 +84,43 @@ else:
 print((' Running ROMS %s for %s to %s ' % (args.run_type, ds0, ds1)).center(60,'*'))
 sys.stdout.flush()
 
+def messages(stdout, stderr, mtitle, args.testing):
+    # utility function for displaying subprocess info
+    if args.testing:
+        print((' ' + mtitle + ' ').center(60,'='))
+        print(' sdtout '.center(60,'-'))
+        print(stdout.decode())
+        print(' stderr '.center(60,'-'))
+        print(stderr.decode())
+        sys.stdout.flush()
+
 # Loop over days
 dt = dt0
 while dt <= dt1:
+    f_string = 'f' + dt.strftime(Lfun.ds_fmt)
     
     # Copy the forcing files for this day from the computer that made them (e.g. boiler)
     remote_dir='parker@boiler.ocean.washington.edu:/data1/parker'
-    f_string = 'f' + dt.strftime(Lfun.ds_fmt)
-    # make sure the directory exists where we are copying files to
-    Lfun.make_dir(Ldir['LOo'] / 'forcing' / Ldir['gtag'])
     
-    if not args.testing:
+    # make sure the directory exists where we are copying files to
+    force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string
+    Lfun.make_dir(force_dir, clean=True)
+    
+    dot_in_dir = Ldir['LO'] / 'dot_in' / Ldir['gtagex']
+    force_dict = dict()
+    with open(dot_in_dir / 'forcing_list.csv', 'r') as f:
+        for line in f:
+            which_force, force_choice = line.strip().split(',')
+            force_dict[which_force] = force_choice
+    
+    for force in force_dict.keys():
+        force_choice = force_dict[force]
         cmd_list = ['scp','-r',
-            remote_dir + '/LiveOcean_output/' + Ldir['gtag'] + '/' + f_string,
-            str(Ldir['LOo']) + '/forcing/' + Ldir['gtag'] + '/' + f_string]
+            remote_dir + '/LiveOcean_output/' + Ldir['gtag'] + '/' + f_string + '/' + force_choice,
+            str(force_dir)]
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
-        if args.testing:
-            print(' Copy forcing '.center(60,'='))
-            print('\n' + ' sdtout '.center(60,'-'))
-            print(stdout.decode())
-            print('\n' + ' stderr '.center(60,'-'))
-            print(stderr.decode())
-            sys.stdout.flush()
-        
+        messages(stdout, stderr, 'Copy forcing ' + force_choice, args.testing)
     
     # Set some useful paths
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
@@ -116,13 +129,9 @@ while dt <= dt1:
     
     # Loop over blow ups
     blow_ups = 0
-    if args.testing:
-        blow_ups_max = 0
-    else:
-        blow_ups_max = 7
-        
     roms_worked = False
     while blow_ups <= blow_ups_max:
+        print((' Blow-ups = ' + str(blow_ups) + ' ').center(60,'.'))
     
         # Make the dot_in file.  NOTE: out_dir is made clean by make_dot_in.py
         f_fn = Ldir['LO'] / 'dot_in' / Ldir['gtagex'] / 'make_dot_in.py'
@@ -133,13 +142,7 @@ while dt <= dt1:
                     '-bu', str(blow_ups), '-np', str(args.np_num)]
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
-        if args.testing:
-            print(' Make dot in '.center(60,'='))
-            print('\n' + ' sdtout '.center(60,'-'))
-            print(stdout.decode())
-            print('\n' + ' stderr '.center(60,'-'))
-            print(stderr.decode())
-            sys.stdout.flush()
+        messages(stdout, stderr, 'Make dot in', args.testing)
         
         # Create batch script
         cmd_list = ['python3', str(roms_ex_dir / 'make_back_batch_LO_version.py'),
@@ -149,44 +152,38 @@ while dt <= dt1:
             '-x', Ldir['ex_name']]
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
-        if args.testing:
-            print(' Create batch script '.center(60,'='))
-            print('\n' + ' sdtout '.center(60,'-'))
-            print(stdout.decode())
-            print('\n' + ' stderr '.center(60,'-'))
-            print(stderr.decode())
-            sys.stdout.flush()
+        messages(stdout, stderr, 'Create batch script', args.testing)
             
-
-    #     # Run ROMS using the batch script
-    #     cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
-    #         str(roms_ex_dir / 'lo_back_batch_LO_version.sh'), '&']
-    #     ret1 = subprocess.call(cmd_list)
-    #     print('Return code = ' + str(ret1) + ' (0=success)')
-    #
-    #     # check log file to see if it worked
-    #     roms_worked = False
-    #     keep_looking = True
-    #     while keep_looking:
-    #         time.sleep(10)
-    #         if log_file.is_file():
-    #             with open(log_file, 'r') as ff:
-    #                 for line in ff:
-    #                     if ('Blowing-up' in line) or ('BLOWUP' in line):
-    #                         roms_worked = False
-    #                         keep_looking = False
-    #                         break
-    #                     elif 'ERROR' in line:
-    #                         roms_worked = False
-    #                         keep_looking = False
-    #                         break
-    #                     elif 'ROMS/TOMS: DONE' in line:
-    #                         roms_worked = True
-    #                         keep_looking = False
-    #                         break
-    #
         if args.testing:
             roms_worked = True
+        else:
+            # Run ROMS using the batch script
+            cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
+                str(roms_ex_dir / 'lo_back_batch_LO_version.sh'), '&']
+            ret1 = subprocess.call(cmd_list)
+            print('Return code = ' + str(ret1) + ' (0=success)')
+
+            # check log file to see if it worked
+            roms_worked = False
+            keep_looking = True
+            while keep_looking:
+                time.sleep(10)
+                if log_file.is_file():
+                    with open(log_file, 'r') as ff:
+                        for line in ff:
+                            if ('Blowing-up' in line) or ('BLOWUP' in line):
+                                roms_worked = False
+                                keep_looking = False
+                                break
+                            elif 'ERROR' in line:
+                                roms_worked = False
+                                keep_looking = False
+                                break
+                            elif 'ROMS/TOMS: DONE' in line:
+                                roms_worked = True
+                                keep_looking = False
+                                break
+
             
         if roms_worked: # test that run completed successfully
             break
@@ -200,9 +197,9 @@ while dt <= dt1:
         # TO DO: delete history files on mox for the day before yesterday
 
         dt += timedelta(days=1)
-    # else:
-    #     print('ROMS did not work for ' + dt.strftime(Lfun.ds_fmt))
-    #     sys.exit()
+    else:
+        print('ROMS did not work for ' + dt.strftime(Lfun.ds_fmt))
+        sys.exit()
     
 
 
