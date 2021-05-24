@@ -83,7 +83,9 @@ D['ndtfast'] = 20
 his_interval = 3600 # seconds to define and write to history files
 rst_interval = 10 # days between writing to the restart file (e.g. 5)
 
-# which forcings to look for (search the csv file in this directory)
+# Find which forcings to look for (search the csv file in this directory).
+# We use the csv file because driver_roms_mox.py also uses it to copy forcing
+# without extra stuff.
 this_dir = ppth = Path(__file__).absolute().parent
 with open(this_dir / 'forcing_list.csv', 'r') as f:
     for line in f:
