@@ -132,6 +132,7 @@ while dt <= dt1:
     roms_worked = False
     while blow_ups <= blow_ups_max:
         print((' Blow-ups = ' + str(blow_ups) + ' ').center(60,'.'))
+        sys.stdout.flush()
     
         # Make the dot_in file.  NOTE: out_dir is made clean by make_dot_in.py
         f_fn = Ldir['LO'] / 'dot_in' / Ldir['gtagex'] / 'make_dot_in.py'
