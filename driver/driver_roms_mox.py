@@ -84,9 +84,9 @@ else:
 print((' Running ROMS %s for %s to %s ' % (args.run_type, ds0, ds1)).center(60,'*'))
 sys.stdout.flush()
 
-def messages(stdout, stderr, mtitle, args.testing):
+def messages(stdout, stderr, mtitle, test_flag):
     # utility function for displaying subprocess info
-    if args.testing:
+    if test_flag:
         print((' ' + mtitle + ' ').center(60,'='))
         print(' sdtout '.center(60,'-'))
         print(stdout.decode())
