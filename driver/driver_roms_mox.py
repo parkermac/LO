@@ -17,7 +17,7 @@ run driver_roms_mox -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2019.07
 
 to test on mox
 
-python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.23 -np 196 -N 28 > log.txt &
+python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.24 -np 196 -N 28 -test True > driver_log.txt &
 
 """
 
@@ -61,10 +61,6 @@ for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'ds0', 'np_num
         print('*** Missing required argument for driver_roms_mox.py: ' + a)
         sys.exit()
 
-if args.testing:
-    from importlib import reload
-    reload(Lfun)
-
 # get Ldir
 Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
 
@@ -86,6 +82,7 @@ else:
     print('Error: Unknown run_type')
     sys.exit()
 print((' Running ROMS %s for %s to %s ' % (args.run_type, ds0, ds1)).center(60,'-'))
+sys.stdout.flush()
 
 # Loop over days
 dt = dt0
@@ -93,13 +90,21 @@ while dt <= dt1:
     
     # Copy the forcing files for this day from the computer that made them (e.g. boiler)
     remote_dir='parker@boiler.ocean.washington.edu:/data1/parker'
-    local_dir=str(Ldir['parent'])
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
+    # make sure the directory exists where we are copying files to
+    Lfun.make_dir(Ldir['LOo'] / 'forcing' / Ldir['gtag'])
+    
     cmd_list = ['scp','-r',
         remote_dir + '/LiveOcean_output/' + Ldir['gtag'] + '/' + f_string,
         str(Ldir['LOo']) + '/forcing/' + Ldir['gtag'] + '/' + f_string]
     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = proc.communicate()    
+    stdout, stderr = proc.communicate()
+    if args.testing:
+        print(' Copy forcing '.center(60,'='))
+        print('\n' + ' sdtout '.center(60,'-'))
+        print(stdout.decode())
+        print('\n' + ' stderr '.center(60,'-'))
+        print(stderr.decode())
     
     # Set some useful paths
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
@@ -120,6 +125,12 @@ while dt <= dt1:
                     '-bu', str(blow_ups), '-np', str(args.np_num)]
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
+        if args.testing:
+        print(' Make dot in '.center(60,'='))
+            print('\n' + ' sdtout '.center(60,'-'))
+            print(stdout.decode())
+            print('\n' + ' stderr '.center(60,'-'))
+            print(stderr.decode())
         
         # Create batch script
         cmd_list = ['python3', str(roms_ex_dir / 'make_back_batch.py'),
@@ -129,49 +140,54 @@ while dt <= dt1:
             '-x', Ldir['ex_name']]
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
+        print(' Create batch script '.center(60,'='))
+            print('\n' + ' sdtout '.center(60,'-'))
+            print(stdout.decode())
+            print('\n' + ' stderr '.center(60,'-'))
+            print(stderr.decode())
 
-        # Run ROMS using the batch script
-        cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
-            str(roms_ex_dir / 'lo_back_batch.sh'), '&']
-        ret1 = subprocess.call(cmd_list)
-        print('Return code = ' + str(ret1) + ' (0=success)')
-        
-        # check log file to see if it worked
-        roms_worked = False
-        keep_looking = True
-        while keep_looking:
-            time.sleep(10)
-            if log_file.is_file():
-                with open(log_file, 'r') as ff:
-                    for line in ff:
-                        if ('Blowing-up' in line) or ('BLOWUP' in line):
-                            roms_worked = False
-                            keep_looking = False
-                            break
-                        elif 'ERROR' in line:
-                            roms_worked = False
-                            keep_looking = False
-                            break
-                        elif 'ROMS/TOMS: DONE' in line:
-                            roms_worked = True
-                            keep_looking = False
-                            break
-        
-        if roms_worked: # test that run completed successfully
-            break
-        else:
-            blow_ups += 1
-    
-    if roms_worked:
-        
-        # TO DO: copy history files to boiler
-        
-        # TO DO: delete history files on mox for the day before yesterday
-        
-        dt += timedelta(days=1)
-    else:
-        print('ROMS did not work for ' + dt.strftime(Lfun.ds_fmt))
-        sys.exit()
+    #     # Run ROMS using the batch script
+    #     cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
+    #         str(roms_ex_dir / 'lo_back_batch.sh'), '&']
+    #     ret1 = subprocess.call(cmd_list)
+    #     print('Return code = ' + str(ret1) + ' (0=success)')
+    #
+    #     # check log file to see if it worked
+    #     roms_worked = False
+    #     keep_looking = True
+    #     while keep_looking:
+    #         time.sleep(10)
+    #         if log_file.is_file():
+    #             with open(log_file, 'r') as ff:
+    #                 for line in ff:
+    #                     if ('Blowing-up' in line) or ('BLOWUP' in line):
+    #                         roms_worked = False
+    #                         keep_looking = False
+    #                         break
+    #                     elif 'ERROR' in line:
+    #                         roms_worked = False
+    #                         keep_looking = False
+    #                         break
+    #                     elif 'ROMS/TOMS: DONE' in line:
+    #                         roms_worked = True
+    #                         keep_looking = False
+    #                         break
+    #
+    #     if roms_worked: # test that run completed successfully
+    #         break
+    #     else:
+    #         blow_ups += 1
+    #
+    # if roms_worked:
+    #
+    #     # TO DO: copy history files to boiler
+    #
+    #     # TO DO: delete history files on mox for the day before yesterday
+    #
+    #     dt += timedelta(days=1)
+    # else:
+    #     print('ROMS did not work for ' + dt.strftime(Lfun.ds_fmt))
+    #     sys.exit()
     
 
 
