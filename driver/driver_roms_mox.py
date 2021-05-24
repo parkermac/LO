@@ -102,11 +102,6 @@ while dt <= dt1:
     # Copy the forcing files for this day from the computer that made them (e.g. boiler)
     remote_dir='parker@boiler.ocean.washington.edu:/data1/parker'
     
-    # make sure the directory exists where we are copying files to
-    force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string
-    if args.testing:
-        print(str(force_dir))
-    Lfun.make_dir(force_dir, clean=True)
     
     dot_in_dir = Ldir['LO'] / 'dot_in' / Ldir['gtagex']
     if args.testing:
@@ -116,7 +111,12 @@ while dt <= dt1:
         for line in f:
             which_force, force_choice = line.strip().split(',')
             force_dict[which_force] = force_choice
-    
+            
+    # make sure the directory exists where we are copying files to
+    force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string
+    if args.testing:
+        print(str(force_dir))
+    # Lfun.make_dir(force_dir, clean=True)
     # for force in force_dict.keys():
     #     force_choice = force_dict[force]
     #     cmd_list = ['scp','-r',
