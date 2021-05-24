@@ -142,7 +142,7 @@ while dt <= dt1:
             sys.stdout.flush()
         
         # Create batch script
-        cmd_list = ['python3', str(roms_ex_dir / 'make_back_batch.py'),
+        cmd_list = ['python3', str(roms_ex_dir / 'make_back_batch_LO_version.py'),
             '-xp', str(roms_out_dir) +'/',
             '-np', str(args.np_num),
             '-N', str(args.cores_per_node),
@@ -160,7 +160,7 @@ while dt <= dt1:
 
     #     # Run ROMS using the batch script
     #     cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
-    #         str(roms_ex_dir / 'lo_back_batch.sh'), '&']
+    #         str(roms_ex_dir / 'lo_back_batch_LO_version.sh'), '&']
     #     ret1 = subprocess.call(cmd_list)
     #     print('Return code = ' + str(ret1) + ' (0=success)')
     #
