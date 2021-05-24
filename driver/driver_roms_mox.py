@@ -104,9 +104,13 @@ while dt <= dt1:
     
     # make sure the directory exists where we are copying files to
     force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string
+    if args.testing:
+        print(str(force_dir))
     Lfun.make_dir(force_dir, clean=True)
     
     dot_in_dir = Ldir['LO'] / 'dot_in' / Ldir['gtagex']
+    if args.testing:
+        print(str(dot_in_dir))
     force_dict = dict()
     with open(dot_in_dir / 'forcing_list.csv', 'r') as f:
         for line in f:
@@ -124,11 +128,16 @@ while dt <= dt1:
     
     # Set some useful paths
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
+    if args.testing:
+        print(str(roms_out_dir))
     log_file = roms_out_dir / 'log.txt'
     roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
+    if args.testing:
+        print(str(roms_ex_dir))
     
     # Loop over blow ups
     blow_ups = 0
+    blow_ups_max = 7
     roms_worked = False
     while blow_ups <= blow_ups_max:
         print((' Blow-ups = ' + str(blow_ups) + ' ').center(60,'.'))
