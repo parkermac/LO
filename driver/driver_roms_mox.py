@@ -17,7 +17,7 @@ run driver_roms_mox -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2019.07
 
 to test on mox
 
-python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.24 -np 196 -N 28 -test True > driver_log.txt &
+python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.24 -np 196 -N 28 -test True
 
 """
 
@@ -126,7 +126,7 @@ while dt <= dt1:
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
         if args.testing:
-        print(' Make dot in '.center(60,'='))
+            print(' Make dot in '.center(60,'='))
             print('\n' + ' sdtout '.center(60,'-'))
             print(stdout.decode())
             print('\n' + ' stderr '.center(60,'-'))
@@ -140,7 +140,8 @@ while dt <= dt1:
             '-x', Ldir['ex_name']]
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
-        print(' Create batch script '.center(60,'='))
+        if args.testing:
+            print(' Create batch script '.center(60,'='))
             print('\n' + ' sdtout '.center(60,'-'))
             print(stdout.decode())
             print('\n' + ' stderr '.center(60,'-'))
