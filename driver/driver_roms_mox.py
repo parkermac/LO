@@ -164,7 +164,7 @@ while dt <= dt1:
         stdout, stderr = proc.communicate()
         messages(stdout, stderr, 'Create batch script', args.testing)
             
-        if args.testing:
+        if False: #args.testing:
             roms_worked = True
         else:
             # Run ROMS using the batch script
