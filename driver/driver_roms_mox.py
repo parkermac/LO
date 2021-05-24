@@ -117,14 +117,14 @@ while dt <= dt1:
             which_force, force_choice = line.strip().split(',')
             force_dict[which_force] = force_choice
     
-    for force in force_dict.keys():
-        force_choice = force_dict[force]
-        cmd_list = ['scp','-r',
-            remote_dir + '/LiveOcean_output/' + Ldir['gtag'] + '/' + f_string + '/' + force_choice,
-            str(force_dir)]
-        proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
-        messages(stdout, stderr, 'Copy forcing ' + force_choice, args.testing)
+    # for force in force_dict.keys():
+    #     force_choice = force_dict[force]
+    #     cmd_list = ['scp','-r',
+    #         remote_dir + '/LiveOcean_output/' + Ldir['gtag'] + '/' + f_string + '/' + force_choice,
+    #         str(force_dir)]
+    #     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    #     stdout, stderr = proc.communicate()
+    #     messages(stdout, stderr, 'Copy forcing ' + force_choice, args.testing)
     
     # Set some useful paths
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
