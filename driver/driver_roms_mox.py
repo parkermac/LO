@@ -81,7 +81,7 @@ elif args.run_type == 'backfill':
 else:
     print('Error: Unknown run_type')
     sys.exit()
-print((' Running ROMS %s for %s to %s ' % (args.run_type, ds0, ds1)).center(60,'-'))
+print((' Running ROMS %s for %s to %s ' % (args.run_type, ds0, ds1)).center(60,'*'))
 sys.stdout.flush()
 
 # Loop over days
@@ -94,17 +94,20 @@ while dt <= dt1:
     # make sure the directory exists where we are copying files to
     Lfun.make_dir(Ldir['LOo'] / 'forcing' / Ldir['gtag'])
     
-    cmd_list = ['scp','-r',
-        remote_dir + '/LiveOcean_output/' + Ldir['gtag'] + '/' + f_string,
-        str(Ldir['LOo']) + '/forcing/' + Ldir['gtag'] + '/' + f_string]
-    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    stdout, stderr = proc.communicate()
-    if args.testing:
-        print(' Copy forcing '.center(60,'='))
-        print('\n' + ' sdtout '.center(60,'-'))
-        print(stdout.decode())
-        print('\n' + ' stderr '.center(60,'-'))
-        print(stderr.decode())
+    if not args.testing:
+        cmd_list = ['scp','-r',
+            remote_dir + '/LiveOcean_output/' + Ldir['gtag'] + '/' + f_string,
+            str(Ldir['LOo']) + '/forcing/' + Ldir['gtag'] + '/' + f_string]
+        proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = proc.communicate()
+        if args.testing:
+            print(' Copy forcing '.center(60,'='))
+            print('\n' + ' sdtout '.center(60,'-'))
+            print(stdout.decode())
+            print('\n' + ' stderr '.center(60,'-'))
+            print(stderr.decode())
+            sys.stdout.flush()
+        
     
     # Set some useful paths
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
@@ -113,8 +116,13 @@ while dt <= dt1:
     
     # Loop over blow ups
     blow_ups = 0
+    if args.testing:
+        blow_ups_max = 0
+    else:
+        blow_ups_max = 7
+        
     roms_worked = False
-    while blow_ups <= 7:
+    while blow_ups <= blow_ups_max:
     
         # Make the dot_in file.  NOTE: out_dir is made clean by make_dot_in.py
         f_fn = Ldir['LO'] / 'dot_in' / Ldir['gtagex'] / 'make_dot_in.py'
@@ -131,6 +139,7 @@ while dt <= dt1:
             print(stdout.decode())
             print('\n' + ' stderr '.center(60,'-'))
             print(stderr.decode())
+            sys.stdout.flush()
         
         # Create batch script
         cmd_list = ['python3', str(roms_ex_dir / 'make_back_batch.py'),
@@ -146,6 +155,8 @@ while dt <= dt1:
             print(stdout.decode())
             print('\n' + ' stderr '.center(60,'-'))
             print(stderr.decode())
+            sys.stdout.flush()
+            
 
     #     # Run ROMS using the batch script
     #     cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
@@ -174,18 +185,21 @@ while dt <= dt1:
     #                         keep_looking = False
     #                         break
     #
-    #     if roms_worked: # test that run completed successfully
-    #         break
-    #     else:
-    #         blow_ups += 1
+        if args.testing:
+            roms_worked = True
+            
+        if roms_worked: # test that run completed successfully
+            break
+        else:
+            blow_ups += 1
     #
-    # if roms_worked:
-    #
-    #     # TO DO: copy history files to boiler
-    #
-    #     # TO DO: delete history files on mox for the day before yesterday
-    #
-    #     dt += timedelta(days=1)
+    if roms_worked:
+
+        # TO DO: copy history files to boiler
+
+        # TO DO: delete history files on mox for the day before yesterday
+
+        dt += timedelta(days=1)
     # else:
     #     print('ROMS did not work for ' + dt.strftime(Lfun.ds_fmt))
     #     sys.exit()
