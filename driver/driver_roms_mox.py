@@ -108,15 +108,16 @@ while dt <= dt1:
     force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string
     Lfun.make_dir(force_dir, clean=True)
     
-    # Copy the forcing files, one folder at a time.
-    for force in force_dict.keys():
-        force_choice = force_dict[force]
-        cmd_list = ['scp','-r',
-            remote_dir + '/LiveOcean_output/' + Ldir['gtag'] + '/' + f_string + '/' + force_choice,
-            str(force_dir)]
-        proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
-        messages(stdout, stderr, 'Copy forcing ' + force_choice, args.testing)
+    if False: # speed up testing
+        # Copy the forcing files, one folder at a time.
+        for force in force_dict.keys():
+            force_choice = force_dict[force]
+            cmd_list = ['scp','-r',
+                remote_dir + '/LiveOcean_output/' + Ldir['gtag'] + '/' + f_string + '/' + force_choice,
+                str(force_dir)]
+            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = proc.communicate()
+            messages(stdout, stderr, 'Copy forcing ' + force_choice, args.testing)
     
     # Set some useful paths.
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
