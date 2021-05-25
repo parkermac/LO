@@ -211,10 +211,10 @@ while dt <= dt1:
     if roms_worked:
 
         # Copy history files to boiler (make sure directory exists)
-        # cmd_list = ['ssh', 'parker@boiler.ocean.washington.edu', "'mkdir", '-p', "/data1/parker/LO_roms/"+Ldir['gtagex']+"'"]
-        # proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        # stdout, stderr = proc.communicate()
-        # messages(stdout, stderr, 'Make output directory on boiler', args.testing)
+        cmd_list = ['ssh', 'parker@boiler.ocean.washington.edu', 'mkdir -p /data1/parker/LO_roms/'+Ldir['gtagex']]
+        proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = proc.communicate()
+        messages(stdout, stderr, 'Make output directory on boiler', args.testing)
         
         cmd_list = ['scp','-r',str(roms_out_dir), 'parker@boiler.ocean.washington.edu:/data1/parker/LO_roms/'+Ldir['gtagex']]
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
