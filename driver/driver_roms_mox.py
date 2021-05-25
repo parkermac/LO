@@ -179,12 +179,13 @@ while dt <= dt1:
         keep_looking = True
         sleep_sec = 10
         total_look_time = 5*3600
-        nlook = int(total_look_time/sleep_sec)
+        max_look_count = int(total_look_time/sleep_sec)
         
         look_count = 0
-        while (look_count <= total_look_count) and keep_looking:
+        while (look_count <= max_look_count) and keep_looking:
             print('-- Look count = ' + str(look_count))
             if log_file.is_file():
+                # sleep a bit?
                 print('-- log file found')
                 keep_looking = False
                 with open(log_file, 'r') as ff:
