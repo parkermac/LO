@@ -172,7 +172,7 @@ while dt <= dt1:
         messages(stdout, stderr, 'Create batch script', args.testing)
             
         # Run ROMS using the batch script
-        cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
+        cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
             str(roms_ex_dir / 'lo_back_batch_LO_version.sh')] # do not need , '&' when using subprocess?
         # ret1 = subprocess.call(cmd_list)
         # print('Return code = ' + str(ret1) + ' (0=success)')
