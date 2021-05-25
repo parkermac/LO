@@ -172,63 +172,14 @@ while dt <= dt1:
         messages(stdout, stderr, 'Create batch script', args.testing)
             
         # Run ROMS using the batch script.
-        # The --wait flag will cause the subprocess to not return until the job has terminated.
         cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
             str(roms_ex_dir / 'lo_back_batch_LO_version.sh')]
+        # The --wait flag will cause the subprocess to not return until the job has terminated.
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
         messages(stdout, stderr, 'Run ROMS', args.testing)
-
-        # Check the log file to see what happended, and decide the next step.
-        # roms_worked = False
-        # if args.testing:
-        #     sleep_sec = 10
-        # else:
-        #     sleep_sec = 60
-        # total_look_time = 5*3600
-        # max_look_count = int(total_look_time/sleep_sec)
-        #
-        # keep_looking = True
-        # look_count = 0
-        # log_flag = True
-        # while (look_count <= max_look_count) and keep_looking:
-        #     print('-- Look count = ' + str(look_count))
-        #     if log_file.is_file():
-        #         if log_flag:
-        #             print('-- log file found')
-        #             log_flag = False
-        #         with open(log_file, 'r') as ff:
-        #             for line in ff:
-        #                 if ('Blowing-up' in line) or ('BLOWUP' in line):
-        #                     print('Run blew up, blow ups = ' + str(blow_ups))
-        #                     roms_worked = False
-        #                     if args.testing:
-        #                         print(line)
-        #                     keep_looking = False
-        #                     break
-        #                 elif 'ERROR' in line:
-        #                     print('Run had an error. Check the log file.')
-        #                     roms_worked = False
-        #                     if args.testing:
-        #                         print(line)
-        #                     sys.exit()
-        #                 elif 'ROMS/TOMS: DONE' in line:
-        #                     print('ROMS completed successfully.')
-        #                     roms_worked = True
-        #                     if args.testing:
-        #                         print(line)
-        #                     keep_looking = False
-        #                     break
-        #     if keep_looking:
-        #         # it takes some time to write the log file, so even if we find it, we
-        #         # may still have to keep checking for the text strings that allow us
-        #         # to make a decision.
-        #         time.sleep(sleep_sec)
-        #         look_count += 1
-        #     else:
-        #         break # escape from while loop
-        # sys.stdout.flush()
         
+        # Look in the log file to see what happened, and decide what to do.
         roms_worked = False
         with open(log_file, 'r') as ff:
             for line in ff:
@@ -237,7 +188,6 @@ while dt <= dt1:
                     roms_worked = False
                     if args.testing:
                         print(line)
-                    #keep_looking = False
                     break
                 elif 'ERROR' in line:
                     print('Run had an error. Check the log file.')
@@ -250,7 +200,6 @@ while dt <= dt1:
                     roms_worked = True
                     if args.testing:
                         print(line)
-                    #keep_looking = False
                     break
 
         if roms_worked:
@@ -260,9 +209,16 @@ while dt <= dt1:
 
     if roms_worked:
 
-        # TO DO: copy history files to boiler (make sure directory exists)
-        # ssh parker@boiler.ocean.washington.edu 'mkdir -p /data1/parker/test_dir/inner_test_dir'
-        # does not overwrite existing, makes parents if needed
+        # Copy history files to boiler (make sure directory exists)
+        cmd_list = ['ssh', 'parker@boiler.ocean.washington.edu', "'mkdir -p /data1/parker/LO_roms/"+Ldir['gtagex']+"'"]
+        proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = proc.communicate()
+        messages(stdout, stderr, 'Make output directory on boiler', args.testing)
+        
+        cmd_list = ['scp','-r',str(roms_out_dir), 'parker@boiler.ocean.washington.edu:/data1/parker/LO_roms/'+Ldir['gtagex']]
+        proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        stdout, stderr = proc.communicate()
+        messages(stdout, stderr, 'Copy ROMS output to boiler', args.testing)
 
         # TO DO: delete history files on mox for the day before yesterday
 
