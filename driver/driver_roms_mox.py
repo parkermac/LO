@@ -184,19 +184,22 @@ while dt <= dt1:
         # I think the subprocess for sbatch works as soon as the job is submitted, so we
         # need to keep looking for the log file until it exists.
         roms_worked = False
-        sleep_sec = 10
+        if args.testing:
+            sleep_sec = 10
+        else:
+            sleep_sec = 60
         total_look_time = 5*3600
         max_look_count = int(total_look_time/sleep_sec)
         
         keep_looking = True
         look_count = 0
-        flag = True
+        log_flag = True
         while (look_count <= max_look_count) and keep_looking:
             print('-- Look count = ' + str(look_count))
             if log_file.is_file():
-                if flag:
+                if log_flag:
                     print('-- log file found')
-                    flag = False
+                    log_flag = False
                 with open(log_file, 'r') as ff:
                     for line in ff:
                         if ('Blowing-up' in line) or ('BLOWUP' in line):
@@ -236,7 +239,9 @@ while dt <= dt1:
 
     if roms_worked:
 
-        # TO DO: copy history files to boiler
+        # TO DO: copy history files to boiler (make sure directory exists)
+        # ssh parker@boiler.ocean.washington.edu 'mkdir -p /data1/parker/test_dir/inner_test_dir'
+        # does not overwrite existing, makes parents if needed
 
         # TO DO: delete history files on mox for the day before yesterday
 
