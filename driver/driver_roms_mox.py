@@ -17,7 +17,7 @@ run driver_roms_mox -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2019.07
 
 to test on mox
 
-python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.24 -np 196 -N 28 -test True > driver_log.txt &
+python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.25 -np 196 -N 28 -test True > driver_log.txt &
 
 """
 
@@ -130,6 +130,7 @@ while dt <= dt1:
         print(' - roms_out_dir: ' + str(roms_out_dir))
         print(' - roms_ex_dir:  ' + str(roms_ex_dir))
         print(' - log_file:     ' + str(log_file))
+        sys.stdout.flush()
     
     # Loop over blow ups.
     blow_ups = 0
@@ -171,32 +172,48 @@ while dt <= dt1:
         messages(stdout, stderr, 'Run ROMS', args.testing)
 
         # Check the log file to see what happended, and decide the next step.
+        # I think the subprocess for sbatch works as soon as the job is submitted, so we
+        # need to keep looking for the log file until it exists.
         roms_worked = False
-        if log_file.is_file():
-            with open(log_file, 'r') as ff:
-                for line in ff:
-                    if ('Blowing-up' in line) or ('BLOWUP' in line):
-                        print('Run blew up, blow ups = ' + str(blow_ups))
-                        roms_worked = False
-                        if args.testing:
-                            print(line)
-                        break
-                    elif 'ERROR' in line:
-                        print('Run had an error. Check the log file.')
-                        roms_worked = False
-                        if args.testing:
-                            print(line)
-                        sys.exit()
-                        break
-                    elif 'ROMS/TOMS: DONE' in line:
-                        print('ROMS completed successfully.')
-                        roms_worked = True
-                        if args.testing:
-                            print(line)
-                        break
-        else:
-            print(' Missing log file! '.center(60,'^'))
-            sys.exit()
+        keep_looking = True
+        sleep_sec = 10
+        total_look_time = 5*3600
+        nlook = int(total_look_time/sleep_sec)
+        
+        look_count = 0
+        while (look_count <= total_look_count) and keep_looking:
+            print('-- Look count = ' + str(look_count))
+            if log_file.is_file():
+                print('-- log file found')
+                keep_looking = False
+                with open(log_file, 'r') as ff:
+                    for line in ff:
+                        if ('Blowing-up' in line) or ('BLOWUP' in line):
+                            print('Run blew up, blow ups = ' + str(blow_ups))
+                            roms_worked = False
+                            if args.testing:
+                                print(line)
+                            break
+                        elif 'ERROR' in line:
+                            print('Run had an error. Check the log file.')
+                            roms_worked = False
+                            if args.testing:
+                                print(line)
+                            sys.exit()
+                            break
+                        elif 'ROMS/TOMS: DONE' in line:
+                            print('ROMS completed successfully.')
+                            roms_worked = True
+                            if args.testing:
+                                print(line)
+                            break
+            else:
+                time.sleep(sleep_sec)
+                look_count += 1
+        # else:
+        #     print(' Missing log file! '.center(60,'^'))
+        #     sys.exit()
+        sys.stdout.flush()
 
         if roms_worked:
             break # escape from blow_ups loop
@@ -214,6 +231,7 @@ while dt <= dt1:
     else:
         print('ROMS did not work for ' + dt.strftime(Lfun.ds_fmt))
         sys.exit()
+    sys.stdout.flush()
     
 
 
