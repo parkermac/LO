@@ -171,66 +171,87 @@ while dt <= dt1:
         stdout, stderr = proc.communicate()
         messages(stdout, stderr, 'Create batch script', args.testing)
             
-        # Run ROMS using the batch script
+        # Run ROMS using the batch script.
+        # The --wait flag will cause the subprocess to not return until the job has terminated.
         cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
-            str(roms_ex_dir / 'lo_back_batch_LO_version.sh')] # do not need , '&' when using subprocess?
-        # ret1 = subprocess.call(cmd_list)
-        # print('Return code = ' + str(ret1) + ' (0=success)')
+            str(roms_ex_dir / 'lo_back_batch_LO_version.sh')]
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         stdout, stderr = proc.communicate()
         messages(stdout, stderr, 'Run ROMS', args.testing)
 
         # Check the log file to see what happended, and decide the next step.
-        # I think the subprocess for sbatch works as soon as the job is submitted, so we
-        # need to keep looking for the log file until it exists.
-        roms_worked = False
-        if args.testing:
-            sleep_sec = 10
-        else:
-            sleep_sec = 60
-        total_look_time = 5*3600
-        max_look_count = int(total_look_time/sleep_sec)
+        # roms_worked = False
+        # if args.testing:
+        #     sleep_sec = 10
+        # else:
+        #     sleep_sec = 60
+        # total_look_time = 5*3600
+        # max_look_count = int(total_look_time/sleep_sec)
+        #
+        # keep_looking = True
+        # look_count = 0
+        # log_flag = True
+        # while (look_count <= max_look_count) and keep_looking:
+        #     print('-- Look count = ' + str(look_count))
+        #     if log_file.is_file():
+        #         if log_flag:
+        #             print('-- log file found')
+        #             log_flag = False
+        #         with open(log_file, 'r') as ff:
+        #             for line in ff:
+        #                 if ('Blowing-up' in line) or ('BLOWUP' in line):
+        #                     print('Run blew up, blow ups = ' + str(blow_ups))
+        #                     roms_worked = False
+        #                     if args.testing:
+        #                         print(line)
+        #                     keep_looking = False
+        #                     break
+        #                 elif 'ERROR' in line:
+        #                     print('Run had an error. Check the log file.')
+        #                     roms_worked = False
+        #                     if args.testing:
+        #                         print(line)
+        #                     sys.exit()
+        #                 elif 'ROMS/TOMS: DONE' in line:
+        #                     print('ROMS completed successfully.')
+        #                     roms_worked = True
+        #                     if args.testing:
+        #                         print(line)
+        #                     keep_looking = False
+        #                     break
+        #     if keep_looking:
+        #         # it takes some time to write the log file, so even if we find it, we
+        #         # may still have to keep checking for the text strings that allow us
+        #         # to make a decision.
+        #         time.sleep(sleep_sec)
+        #         look_count += 1
+        #     else:
+        #         break # escape from while loop
+        # sys.stdout.flush()
         
-        keep_looking = True
-        look_count = 0
-        log_flag = True
-        while (look_count <= max_look_count) and keep_looking:
-            print('-- Look count = ' + str(look_count))
-            if log_file.is_file():
-                if log_flag:
-                    print('-- log file found')
-                    log_flag = False
-                with open(log_file, 'r') as ff:
-                    for line in ff:
-                        if ('Blowing-up' in line) or ('BLOWUP' in line):
-                            print('Run blew up, blow ups = ' + str(blow_ups))
-                            roms_worked = False
-                            if args.testing:
-                                print(line)
-                            keep_looking = False
-                            break
-                        elif 'ERROR' in line:
-                            print('Run had an error. Check the log file.')
-                            roms_worked = False
-                            if args.testing:
-                                print(line)
-                            sys.exit()
-                        elif 'ROMS/TOMS: DONE' in line:
-                            print('ROMS completed successfully.')
-                            roms_worked = True
-                            if args.testing:
-                                print(line)
-                            keep_looking = False
-                            break
-            if keep_looking:
-                # it takes some time to write the log file, so even if we find it, we
-                # may still have to keep checking for the text strings that allow us
-                # to make a decision.
-                time.sleep(sleep_sec)
-                look_count += 1
-            else:
-                break # escape from while loop
-        sys.stdout.flush()
+        roms_worked = False
+        with open(log_file, 'r') as ff:
+            for line in ff:
+                if ('Blowing-up' in line) or ('BLOWUP' in line):
+                    print('Run blew up, blow ups = ' + str(blow_ups))
+                    roms_worked = False
+                    if args.testing:
+                        print(line)
+                    #keep_looking = False
+                    break
+                elif 'ERROR' in line:
+                    print('Run had an error. Check the log file.')
+                    roms_worked = False
+                    if args.testing:
+                        print(line)
+                    sys.exit()
+                elif 'ROMS/TOMS: DONE' in line:
+                    print('ROMS completed successfully.')
+                    roms_worked = True
+                    if args.testing:
+                        print(line)
+                    #keep_looking = False
+                    break
 
         if roms_worked:
             break # escape from blow_ups loop
