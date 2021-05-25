@@ -6,6 +6,8 @@ replacing things like $whatever$ with meaningful values.
 To test from ipython on mac:
 run make_dot_in -g cas6 -t v3 -x lo8b -r backfill -s continuation -d 2019.07.04 -bu 0 -np 196
 
+If you call with -test True it will create dot_in that only runs ROMS for 1 hour.
+
 If you are using an alternate tag then run like:
 run make_dot_in -g cas6 -t v3 -t v3a -x lo8b -r backfill -s continuation -d 2019.07.04 -bu 0 -np 196
 But note that the resulting gtagex should be the same as the folder this is in, and it
@@ -132,11 +134,16 @@ else:
     dt = str(dtsec) + 'd0'
 D['dt'] = dt
 
+if Ldir['testing']:
+    his_interval = 10 * dtsec
+    D['ntimes'] = int(his_interval/dtsec) # run for his_interval
+else:
+    D['ntimes'] = int(days_to_run*86400/dtsec)
+
 D['ninfo'] = int(his_interval/dtsec) # how often to write info to the log file (# of time steps)
 D['nhis'] = int(his_interval/dtsec) # how often to write to the history files
 D['ndefhis'] = D['nhis'] # how often to create new history files
 D['nrst'] = int(rst_interval*86400/dtsec)
-D['ntimes'] = int(days_to_run*86400/dtsec)
 
 # file location stuff
 date_string_yesterday = fdt_yesterday.strftime(Lfun.ds_fmt)
@@ -181,7 +188,7 @@ D['ini_fullname'] = ini_fullname
 
 # END DERIVED VALUES
 
-## create .in ##########################
+## create liveocean.in ##########################
 f = open(dot_in_dir / 'BLANK.in','r')
 f2 = open(out_dir / 'liveocean.in','w')
 for line in f:
@@ -195,8 +202,7 @@ for line in f:
 f.close()
 f2.close()
 
-## npzd2o_Banas.in ###########
-
+## create npzd2o_Banas.in #######################
 f = open(dot_in_dir / 'npzd2o_Banas_BLANK.in','r')
 bio_dot_in_name = 'npzd2o_Banas.in'
 f3 = open(out_dir / bio_dot_in_name,'w')

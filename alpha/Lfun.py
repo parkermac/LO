@@ -103,6 +103,12 @@ def modtime_to_mdate_vec(mt_vec):
     md_vec = mdates.date2num(dt_list)
     return md_vec
     
+def boolean_string(s):
+    # used by argparse (also present in zfun, redundant but useful)
+    if s not in ['False', 'True']:
+        raise ValueError('Not a valid boolean string')
+    return s == 'True' # note use of ==
+
 # Functions used by postprocessing code like pan_plot or the various extractors
 
 def date_list_utility(dt0, dt1):

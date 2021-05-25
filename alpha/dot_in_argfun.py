@@ -31,6 +31,7 @@ def intro():
     parser.add_argument('-np', '--np_num', type=int) # e.g. 196, number of cores
     # optional arguments
     parser.add_argument('-ta', '--tag_alt', default='', type=str) # e.g. v3a
+    parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
     
     # get the args
     args = parser.parse_args()
@@ -52,7 +53,7 @@ def intro():
     Ldir['gtagex_alt'] = Ldir['gridname'] + '_' + argsd['tag_alt'] + '_' + Ldir['ex_name']
     
     # add more entries to Ldir for use by make_dot_in.py
-    for a in ['run_type', 'start_type', 'date_string', 'blow_ups', 'np_num', 'tag_alt']:
+    for a in ['run_type', 'start_type', 'date_string', 'blow_ups', 'np_num', 'tag_alt', 'testing']:
         Ldir[a] = argsd[a]
         
     return Ldir.copy()
