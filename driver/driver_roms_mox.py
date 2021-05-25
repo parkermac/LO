@@ -184,11 +184,11 @@ while dt <= dt1:
         # I think the subprocess for sbatch works as soon as the job is submitted, so we
         # need to keep looking for the log file until it exists.
         roms_worked = False
-        keep_looking = True
         sleep_sec = 10
         total_look_time = 5*3600
         max_look_count = int(total_look_time/sleep_sec)
         
+        keep_looking = True
         look_count = 0
         while (look_count <= max_look_count) and keep_looking:
             print('-- Look count = ' + str(look_count))
@@ -216,12 +216,11 @@ while dt <= dt1:
                                 print(line)
                             keep_looking = False
                             break
-            else:
+            if keep_looking:
                 time.sleep(sleep_sec)
                 look_count += 1
-        # else:
-        #     print(' Missing log file! '.center(60,'^'))
-        #     sys.exit()
+            else:
+                break # escape from while loop
         sys.stdout.flush()
 
         if roms_worked:
