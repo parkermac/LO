@@ -140,72 +140,73 @@ while dt <= dt1:
     
     # Loop over blow ups.
     blow_ups = 0
-    if args.testing:
-        blow_ups_max = 0
-    else:
-        blow_ups_max = 5
-    roms_worked = False
-    while blow_ups <= blow_ups_max:
-        print((' Blow-ups = ' + str(blow_ups) + ' ').center(60,'.'))
-        sys.stdout.flush()
+    blow_ups_max = 5
     
-        # Make the dot_in file.  NOTE: out_dir is made clean by make_dot_in.py
-        f_fn = Ldir['LO'] / 'dot_in' / Ldir['gtagex'] / 'make_dot_in.py'
-        cmd_list = ['python3', str(f_fn),
-                    '-g', args.gridname, '-t', args.tag, '-x', args.ex_name,
-                    '-r', args.run_type, '-s', args.start_type,
-                    '-d', dt.strftime(Lfun.ds_fmt),
-                    '-bu', str(blow_ups), '-np', str(args.np_num),
-                    '-test', str(args.testing)]
-        proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
-        messages(stdout, stderr, 'Make dot in', args.testing)
-        
-        # Create batch script
-        cmd_list = ['python3', str(roms_ex_dir / 'make_back_batch_LO_version.py'),
-            '-xp', str(roms_out_dir) +'/',
-            '-np', str(args.np_num),
-            '-N', str(args.cores_per_node),
-            '-x', Ldir['ex_name']]
-        proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
-        messages(stdout, stderr, 'Create batch script', args.testing)
-            
-        # Run ROMS using the batch script.
-        cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
-            str(roms_ex_dir / 'lo_back_batch_LO_version.sh')]
-        # The --wait flag will cause the subprocess to not return until the job has terminated.
-        proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        stdout, stderr = proc.communicate()
-        messages(stdout, stderr, 'Run ROMS', args.testing)
-        
-        # Look in the log file to see what happened, and decide what to do.
+    if not args.testing2:
         roms_worked = False
-        with open(log_file, 'r') as ff:
-            for line in ff:
-                if ('Blowing-up' in line) or ('BLOWUP' in line):
-                    print('Run blew up, blow ups = ' + str(blow_ups))
-                    roms_worked = False
-                    if args.testing:
-                        print(line)
-                    break
-                elif 'ERROR' in line:
-                    print('Run had an error. Check the log file.')
-                    roms_worked = False
-                    if args.testing:
-                        print(line)
-                    sys.exit()
-                elif 'ROMS/TOMS: DONE' in line:
-                    print('ROMS completed successfully.')
-                    roms_worked = True
-                    if args.testing:
-                        print(line)
-                    break
+        while blow_ups <= blow_ups_max:
+            print((' Blow-ups = ' + str(blow_ups) + ' ').center(60,'.'))
+            sys.stdout.flush()
+    
+            # Make the dot_in file.  NOTE: out_dir is made clean by make_dot_in.py
+            f_fn = Ldir['LO'] / 'dot_in' / Ldir['gtagex'] / 'make_dot_in.py'
+            cmd_list = ['python3', str(f_fn),
+                        '-g', args.gridname, '-t', args.tag, '-x', args.ex_name,
+                        '-r', args.run_type, '-s', args.start_type,
+                        '-d', dt.strftime(Lfun.ds_fmt),
+                        '-bu', str(blow_ups), '-np', str(args.np_num),
+                        '-test', str(args.testing)]
+            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = proc.communicate()
+            messages(stdout, stderr, 'Make dot in', args.testing)
+        
+            # Create batch script
+            cmd_list = ['python3', str(roms_ex_dir / 'make_back_batch_LO_version.py'),
+                '-xp', str(roms_out_dir) +'/',
+                '-np', str(args.np_num),
+                '-N', str(args.cores_per_node),
+                '-x', Ldir['ex_name']]
+            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = proc.communicate()
+            messages(stdout, stderr, 'Create batch script', args.testing)
+            
+            # Run ROMS using the batch script.
+            cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
+                str(roms_ex_dir / 'lo_back_batch_LO_version.sh')]
+            # The --wait flag will cause the subprocess to not return until the job has terminated.
+            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            stdout, stderr = proc.communicate()
+            messages(stdout, stderr, 'Run ROMS', args.testing)
+        
+            # Look in the log file to see what happened, and decide what to do.
+            roms_worked = False
+            with open(log_file, 'r') as ff:
+                for line in ff:
+                    if ('Blowing-up' in line) or ('BLOWUP' in line):
+                        print('Run blew up, blow ups = ' + str(blow_ups))
+                        roms_worked = False
+                        if args.testing:
+                            print(line)
+                        break
+                    elif 'ERROR' in line:
+                        print('Run had an error. Check the log file.')
+                        roms_worked = False
+                        if args.testing:
+                            print(line)
+                        sys.exit()
+                    elif 'ROMS/TOMS: DONE' in line:
+                        print('ROMS completed successfully.')
+                        roms_worked = True
+                        if args.testing:
+                            print(line)
+                        break
 
-        if roms_worked:
-            break # escape from blow_ups loop
-        else:
-            blow_ups += 1
+            if roms_worked:
+                break # escape from blow_ups loop
+            else:
+                blow_ups += 1
+    else:
+        roms_worked = True
 
     if roms_worked:
 
