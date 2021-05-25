@@ -190,10 +190,13 @@ while dt <= dt1:
         
         keep_looking = True
         look_count = 0
+        flag = True
         while (look_count <= max_look_count) and keep_looking:
             print('-- Look count = ' + str(look_count))
             if log_file.is_file():
-                print('-- log file found')
+                if flag:
+                    print('-- log file found')
+                    flag = False
                 with open(log_file, 'r') as ff:
                     for line in ff:
                         if ('Blowing-up' in line) or ('BLOWUP' in line):
@@ -217,6 +220,9 @@ while dt <= dt1:
                             keep_looking = False
                             break
             if keep_looking:
+                # it takes some time to write the log file, so even if we find it, we
+                # may still have to keep checking for the text strings that allow us
+                # to make a decision.
                 time.sleep(sleep_sec)
                 look_count += 1
             else:
