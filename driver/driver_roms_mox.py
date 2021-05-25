@@ -19,6 +19,10 @@ to test on mox
 
 python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.25 -np 196 -N 28 -test True > driver_log.txt &
 
+or, after you have copied the forcing files once...
+
+python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.25 -np 196 -N 28 -test True -test2 True > driver_log.txt &
+
 """
 
 import sys
@@ -46,6 +50,7 @@ parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omit
 parser.add_argument('-np', '--np_num', type=int) # e.g. 196, number of cores
 parser.add_argument('-N', '--cores_per_node', type=int) # 28 or 32 on mox, number of cores per node
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+parser.add_argument('-test2', '--testing2', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 # check for required arguments
@@ -106,9 +111,9 @@ while dt <= dt1:
             
     # Make sure the directory exists where we are copying forcing files to.
     force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string
-    Lfun.make_dir(force_dir, clean=True)
     
-    if False: # speed up testing
+    if not args.testing2:
+        Lfun.make_dir(force_dir, clean=True)
         # Copy the forcing files, one folder at a time.
         for force in force_dict.keys():
             force_choice = force_dict[force]
