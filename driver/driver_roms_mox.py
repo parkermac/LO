@@ -140,7 +140,10 @@ while dt <= dt1:
     
     # Loop over blow ups.
     blow_ups = 0
-    blow_ups_max = 7
+    if args.testing:
+        blow_ups_max = 0
+    else:
+        blow_ups_max = 5
     roms_worked = False
     while blow_ups <= blow_ups_max:
         print((' Blow-ups = ' + str(blow_ups) + ' ').center(60,'.'))
@@ -190,7 +193,7 @@ while dt <= dt1:
         while (look_count <= max_look_count) and keep_looking:
             print('-- Look count = ' + str(look_count))
             if log_file.is_file():
-                # sleep a bit?
+                time.sleep(10)
                 print('-- log file found')
                 keep_looking = False
                 with open(log_file, 'r') as ff:
