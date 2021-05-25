@@ -193,9 +193,7 @@ while dt <= dt1:
         while (look_count <= max_look_count) and keep_looking:
             print('-- Look count = ' + str(look_count))
             if log_file.is_file():
-                time.sleep(10)
                 print('-- log file found')
-                keep_looking = False
                 with open(log_file, 'r') as ff:
                     for line in ff:
                         print(line)
@@ -204,6 +202,7 @@ while dt <= dt1:
                             roms_worked = False
                             if args.testing:
                                 print(line)
+                            keep_looking = False
                             break
                         elif 'ERROR' in line:
                             print('Run had an error. Check the log file.')
@@ -211,12 +210,12 @@ while dt <= dt1:
                             if args.testing:
                                 print(line)
                             sys.exit()
-                            break
                         elif 'ROMS/TOMS: DONE' in line:
                             print('ROMS completed successfully.')
                             roms_worked = True
                             if args.testing:
                                 print(line)
+                            keep_looking = False
                             break
             else:
                 time.sleep(sleep_sec)
