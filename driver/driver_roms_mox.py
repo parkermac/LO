@@ -183,22 +183,22 @@ while dt <= dt1:
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Run ROMS', args.testing)
         
-            # A bit of checking to make sure that the log file exists, and that it is done being written to.
+            # A bit of checking to make sure that the log file exists...
             lcount = 0
             while not log_file.is_file():
                 time.sleep(10)
                 print('-- lcount = %d' % (lcount))
                 sys.stdout.flush()
                 lcount += 1
+            # ...and that it is done being written to.
             llcount = 0
             log_done = False
-            
             while log_done == False:
-                time.sleep(1)
+                #time.sleep(.1)
                 cmd_list = ['lsof', '-u', 'pmacc','|','grep',str(log_file)]
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
-                messages(stdout, stderr, 'Checking if log file from ROMS is done and closed.', args.testing)
+                #messages(stdout, stderr, 'Checking if log file from ROMS is done and closed.', args.testing)
                 print('-- llcount = %d' % (lcount))
                 sys.stdout.flush()
                 lcount += 1
