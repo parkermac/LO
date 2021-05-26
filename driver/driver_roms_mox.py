@@ -147,7 +147,7 @@ while dt <= dt1:
     blow_ups = 0
     blow_ups_max = 5
     
-    if not args.testing2:
+    if True:#not args.testing2:
         roms_worked = False
         while blow_ups <= blow_ups_max:
             print((' Blow-ups = ' + str(blow_ups) + ' ').center(60,'.'))
@@ -194,11 +194,11 @@ while dt <= dt1:
             log_done = False
             
             while log_done == False:
-                time.sleep(10)
+                time.sleep(1)
                 cmd_list = ['lsof', '-u', 'pmacc','|','grep',str(log_file)]
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
-                messages(stdout, stderr, 'Run ROMS', args.testing)
+                messages(stdout, stderr, 'Checking if log file from ROMS is done and closed.', args.testing)
                 print('-- llcount = %d' % (lcount))
                 sys.stdout.flush()
                 lcount += 1
