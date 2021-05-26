@@ -21,7 +21,12 @@ python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 
 
 or, after you have copied the forcing files once...
 
-python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.25 -np 196 -N 28 -test True -test2 True > driver_log.txt &
+python3 driver_roms_mox.py -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2021.05.26 -np 196 -N 28 -test True -test2 True > driver_log.txt &
+
+DEVELOPMENT NOTES:
+
+-test True makes the output verbose, and also causes the dot_in to specify a much shorter ROMS run
+-test2 True turns off other things, like runnning the dot_in code (which cleans out roms_out_dir) or running roms
 
 """
 
@@ -178,6 +183,30 @@ while dt <= dt1:
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Run ROMS', args.testing)
         
+            # A bit of checking to make sure that the log file exists, and that it is done being written to.
+            lcount = 0
+            while not log_file.is_file():
+                time.sleep(10)
+                print('-- lcount = %d' % (lcount))
+                sys.stdout.flush()
+                lcount += 1
+            llcount = 0
+            log_done = False
+            
+            while log_done == False:
+                time.sleep(10)
+                cmd_list = ['lsof', '-u', 'pmacc','|','grep',str(log_file)]
+                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                messages(stdout, stderr, 'Run ROMS', args.testing)
+                print('-- llcount = %d' % (lcount))
+                sys.stdout.flush()
+                lcount += 1
+                if str(log_file) not in stdout.decode():
+                    print('log done and closed')
+                    sys.stdout.flush()
+                    log_done = True
+            
             # Look in the log file to see what happened, and decide what to do.
             roms_worked = False
             with open(log_file, 'r') as ff:
