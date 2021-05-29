@@ -6,7 +6,7 @@ replacing things like $whatever$ with meaningful values.
 To test from ipython on mac:
 run make_dot_in -g cas6 -t v3 -x lo8 -r backfill -s continuation -d 2019.07.04 -bu 0 -np 196
 
-If you call with -test True it will create dot_in that only runs ROMS for 1 hour.
+If you call with -short_roms True it will create dot_in that only runs ROMS for 1 hour.
 
 If you are using an alternate tag then run like:
 run make_dot_in -g cas6 -t v3 -t v3a -x lo8 -r backfill -s continuation -d 2019.07.04 -bu 0 -np 196
@@ -46,7 +46,7 @@ from datetime import datetime, timedelta
 fdt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
 fdt_yesterday = fdt - timedelta(1)
 
-print('Creating dot_in for ' + Ldir['date_string'])
+print(' --- making dot_in for ' + Ldir['date_string'])
 # initialize dict to hold values that we will substitute into the dot_in file.
 D = dict()
 
@@ -134,7 +134,8 @@ else:
     dt = str(dtsec) + 'd0'
 D['dt'] = dt
 
-if Ldir['testing']:
+if Ldir['short_roms']:
+    print(' --- running short roms')
     his_interval = 10 * dtsec
     D['ntimes'] = int(his_interval/dtsec) # run for his_interval
 else:
