@@ -17,11 +17,11 @@ run driver_roms_mox -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2019.07.
 
 To test on mox
 
-python3 driver_roms_mox.py -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2021.05.26 -np 196 -N 28 -v True --short_roms True > driver_log.txt &
+python3 driver_roms_mox.py -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2021.05.29 -np 196 -N 28 -v True --short_roms True > driver_log.txt &
 
 or, after you have copied the forcing files once...
 
-python3 driver_roms_mox.py -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2021.05.26 -np 196 -N 28 -v True --get_forcing False --short_roms True > driver_log.txt &
+python3 driver_roms_mox.py -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2021.05.29 -np 196 -N 28 -v True --get_forcing False --short_roms True > driver_log.txt &
 
 DEVELOPMENT NOTES: see the "various flags to facilitate testing" part of the arguments for other testing flags
 
@@ -184,7 +184,7 @@ while dt <= dt1:
         if args.run_roms:
             # Run ROMS using the batch script.
             cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
-                str(dot_in_dir / 'lo_batch.sh')]
+                str(roms_out_dir / 'lo_batch.sh')]
             # The --wait flag will cause the subprocess to not return until the job has terminated.
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
