@@ -1,17 +1,6 @@
 """
 Shared helper functions for the dot_in code, especially for argument passing.
 
-The new argument "tag_alt" is intended to facilitate different versions of a
-ROMS run, where you change one piece of the forcing.
-
-The dot_in code will look to [gridname]_[tag] for forcing.
-
-All other aspects will refer to [gridname]_[tag_alt]_[ex_name] = [gtagex_alt].
-
-This includes checking that the name of the folder is LO/dot_in/[gtagex_alt].
-
-The path to ROMS history files will be Ldir['roms_out']/[gtagex_alt].
-
 """
 import argparse
 import sys
@@ -30,7 +19,6 @@ def intro():
     parser.add_argument('-bu', '--blow_ups', type=int) # e.g. 0
     parser.add_argument('-np', '--np_num', type=int) # e.g. 196, number of cores
     # optional arguments
-    parser.add_argument('-ta', '--tag_alt', default='', type=str) # e.g. v3a
     parser.add_argument('-short_roms', default=False, type=Lfun.boolean_string)
     
     # get the args
@@ -46,14 +34,9 @@ def intro():
         
     # get the dict Ldir
     Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
-    
-    # set tag_alt to tag if it is not provided
-    if len(args.tag_alt) == 0:
-        argsd['tag_alt'] = argsd['tag']
-    Ldir['gtagex_alt'] = Ldir['gridname'] + '_' + argsd['tag_alt'] + '_' + Ldir['ex_name']
-    
+        
     # add more entries to Ldir for use by make_dot_in.py
-    for a in ['run_type', 'start_type', 'date_string', 'blow_ups', 'np_num', 'tag_alt', 'short_roms']:
+    for a in ['run_type', 'start_type', 'date_string', 'blow_ups', 'np_num', 'short_roms']:
         Ldir[a] = argsd[a]
         
     return Ldir.copy()

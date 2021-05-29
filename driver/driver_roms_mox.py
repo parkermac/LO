@@ -23,6 +23,10 @@ or, after you have copied the forcing files once...
 
 python3 driver_roms_mox.py -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2021.05.29 -np 196 -N 28 -v True --get_forcing False --short_roms True > driver_log.txt &
 
+this one would run a day with tag=v3t075, but getting forcing from from cas6_v3 on boiler in LiveOcean
+
+python3 driver_roms_mox.py -g cas6 -t v3t075 -ta v3 -x lo8 -r backfill -s continuation -0 2018.01.01 -np 196 -N 28 -v True --short_roms True > driver_log.txt &
+
 DEVELOPMENT NOTES: see the "various flags to facilitate testing" part of the arguments for other testing flags
 
 """
@@ -44,6 +48,7 @@ parser = argparse.ArgumentParser()
 # arguments without defaults are required
 parser.add_argument('-g', '--gridname', type=str)   # e.g. cas2
 parser.add_argument('-t', '--tag', type=str)        # e.g. v3
+parser.add_argument('-ta', '--tag_alt', type=str, default='') # used to make gtag in "remote_dir"
 parser.add_argument('-x', '--ex_name', type=str)    # e.g. lo8b
 parser.add_argument('-f', '--frc', type=str)        # e.g. tide
 parser.add_argument('-r', '--run_type', type=str)   # forecast or backfill
@@ -67,9 +72,14 @@ for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'ds0', 'np_num
     if argsd[a] == None:
         print('*** Missing required argument for driver_roms_mox.py: ' + a)
         sys.exit()
+        
+# set tag_alt to tag if it is not provided
+if len(args.tag_alt) == 0:
+    argsd['tag_alt'] = argsd['tag']
 
 # get Ldir
 Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
+Ldir['gtag_alt'] = Ldir['gridname'] + '_' + argsd['tag_alt']
 
 # set time range to process
 if args.run_type == 'forecast':
@@ -137,7 +147,7 @@ while dt <= dt1:
         for force in force_dict.keys():
             force_choice = force_dict[force]
             cmd_list = ['scp','-r',
-                remote_dir + '/LiveOcean_output/' + Ldir['gtag'] + '/' + f_string + '/' + force_choice,
+                remote_dir + '/LiveOcean_output/' + Ldir['gtag_alt'] + '/' + f_string + '/' + force_choice,
                 str(force_dir)]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()

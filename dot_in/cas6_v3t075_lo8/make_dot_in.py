@@ -8,10 +8,6 @@ run make_dot_in -g cas6 -t v3 -x lo8 -r backfill -s continuation -d 2019.07.04 -
 
 If you call with -short_roms True it will create dot_in that only runs ROMS for 1 hour.
 
-If you are using an alternate tag then run like:
-run make_dot_in -g cas6 -t v3 -t v3a -x lo8 -r backfill -s continuation -d 2019.07.04 -bu 0 -np 196
-But note that the resulting gtagex should be the same as the folder this is in, and it
-will throw a WARNING pointing this out if it is not, and then exit.
 """
 
 # NOTE: we limit the imports to modules that exist in python3 on mox
@@ -170,9 +166,9 @@ with open(Ldir['grid'] / 'S_COORDINATE_INFO.csv','r') as sf:
             D[ltup[0]] = int(ltup[1])
 
 # the output directory and the one from the day before
-out_dir = Ldir['roms_out'] / Ldir['gtagex_alt'] / ('f' + Ldir['date_string'])
+out_dir = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string'])
 D['out_dir'] = out_dir
-out_dir_yesterday = Ldir['roms_out'] / Ldir['gtagex_alt'] / ('f' + date_string_yesterday)
+out_dir_yesterday = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + date_string_yesterday)
 Lfun.make_dir(out_dir, clean=True) # make sure it exists and is empty
 
 if Ldir['start_type'] == 'continuation':
