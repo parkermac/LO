@@ -13,7 +13,7 @@ of nodes of that size that I own.
 
 To test on mac in ipython
 
-run driver_roms_mox -g cas6 -t v3 -x lo8b -r backfill -s continuation -0 2019.07.04 -np 196 -N 28
+run driver_roms_mox -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2019.07.04 -np 196 -N 28 -test True -test2 True
 
 to test on mox
 
@@ -85,17 +85,19 @@ elif args.run_type == 'backfill':
 else:
     print('Error: Unknown run_type')
     sys.exit()
-print((' Running ROMS %s for %s to %s ' % (args.run_type, ds0, ds1)).center(60,'*'))
+print('Running ROMS %s\nfor %s to %s ' % (args.run_type, ds0, ds1))
 sys.stdout.flush()
 
 def messages(stdout, stderr, mtitle, test_flag):
     # utility function for displaying subprocess info
     if test_flag:
         print((' ' + mtitle + ' ').center(60,'='))
-        print(' sdtout '.center(60,'-'))
-        print(stdout.decode())
-        print(' stderr '.center(60,'-'))
-        print(stderr.decode())
+        if len(stdout) > 0:
+            print(' sdtout '.center(60,'-'))
+            print(stdout.decode())
+        if len(stderr) > 0:
+            print(' stderr '.center(60,'-'))
+            print(stderr.decode())
         sys.stdout.flush()
 
 # Loop over days
@@ -114,10 +116,10 @@ while dt <= dt1:
             which_force, force_choice = line.strip().split(',')
             force_dict[which_force] = force_choice
             
-    # Make sure the directory exists where we are copying forcing files to.
+    # Forcing directory that we will copy forcing to.
     force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string
     
-    if not args.testing2:
+    if args.testing2 == False:
         Lfun.make_dir(force_dir, clean=True)
         # Copy the forcing files, one folder at a time.
         for force in force_dict.keys():
@@ -147,15 +149,14 @@ while dt <= dt1:
     blow_ups = 0
     blow_ups_max = 5
     
-    if True:#not args.testing2:
+    if True: # make this False to avoid all these steps
         roms_worked = False
         while blow_ups <= blow_ups_max:
-            print((' Blow-ups = ' + str(blow_ups) + ' ').center(60,'.'))
+            print((' - Blow-ups = ' + str(blow_ups) + ' ').center(60,'.'))
             sys.stdout.flush()
     
-            # Make the dot_in file.  NOTE: out_dir is made clean by make_dot_in.py
-            f_fn = Ldir['LO'] / 'dot_in' / Ldir['gtagex'] / 'make_dot_in.py'
-            cmd_list = ['python3', str(f_fn),
+            # Make the dot_in file.  NOTE: roms_out_dir is made clean by make_dot_in.py
+            cmd_list = ['python3', str(dot_in_dir / 'make_dot_in.py'),
                         '-g', args.gridname, '-t', args.tag, '-x', args.ex_name,
                         '-r', args.run_type, '-s', args.start_type,
                         '-d', dt.strftime(Lfun.ds_fmt),
@@ -166,8 +167,9 @@ while dt <= dt1:
             messages(stdout, stderr, 'Make dot in', args.testing)
         
             # Create batch script
-            cmd_list = ['python3', str(roms_ex_dir / 'make_back_batch_LO_version.py'),
-                '-xp', str(roms_out_dir) +'/',
+            cmd_list = ['python3', str(dot_in_dir / 'make_batch.py'),
+                '-xd', str(roms_ex_dir),
+                '-rod', str(roms_out_dir),
                 '-np', str(args.np_num),
                 '-N', str(args.cores_per_node),
                 '-x', Ldir['ex_name']]
@@ -175,60 +177,56 @@ while dt <= dt1:
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Create batch script', args.testing)
             
-            # Run ROMS using the batch script.
-            cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
-                str(roms_ex_dir / 'lo_back_batch_LO_version.sh')]
-            # The --wait flag will cause the subprocess to not return until the job has terminated.
-            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Run ROMS', args.testing)
-        
-            # A bit of checking to make sure that the log file exists...
-            lcount = 0
-            while not log_file.is_file():
-                time.sleep(10)
-                print('-- lcount = %d' % (lcount))
-                sys.stdout.flush()
-                lcount += 1
-            # ...and that it is done being written to.
-            llcount = 0
-            log_done = False
-            while log_done == False:
-                #time.sleep(.1)
-                cmd_list = ['lsof', '-u', 'pmacc','|','grep',str(log_file)]
+            if args.testing2 == False:
+                # Run ROMS using the batch script.
+                cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
+                    str(dot_in_dir / 'lo_batch.sh')]
+                # The --wait flag will cause the subprocess to not return until the job has terminated.
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
-                #messages(stdout, stderr, 'Checking if log file from ROMS is done and closed.', args.testing)
-                print('-- llcount = %d' % (lcount))
-                sys.stdout.flush()
-                lcount += 1
-                if str(log_file) not in stdout.decode():
-                    print('log done and closed')
+                messages(stdout, stderr, 'Run ROMS', args.testing)
+        
+                # A bit of checking to make sure that the log file exists...
+                lcount = 0
+                while not log_file.is_file():
+                    time.sleep(10)
+                    print(' - lcount = %d' % (lcount))
                     sys.stdout.flush()
-                    log_done = True
-            
-            # Look in the log file to see what happened, and decide what to do.
-            roms_worked = False
-            with open(log_file, 'r') as ff:
-                for line in ff:
-                    if ('Blowing-up' in line) or ('BLOWUP' in line):
-                        print('Run blew up, blow ups = ' + str(blow_ups))
-                        roms_worked = False
-                        if args.testing:
-                            print(line)
-                        break
-                    elif 'ERROR' in line:
-                        print('Run had an error. Check the log file.')
-                        roms_worked = False
-                        if args.testing:
-                            print(line)
-                        sys.exit()
-                    elif 'ROMS/TOMS: DONE' in line:
-                        print('ROMS completed successfully.')
-                        roms_worked = True
-                        if args.testing:
-                            print(line)
-                        break
+                    lcount += 1
+                # ...and that it is done being written to.
+                llcount = 0
+                log_done = False
+                while log_done == False:
+                    time.sleep(3)
+                    cmd_list = ['lsof', '-u', 'pmacc','|','grep',str(log_file)]
+                    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    stdout, stderr = proc.communicate()
+                    print(' - llcount = %d' % (lcount))
+                    sys.stdout.flush()
+                    lcount += 1
+                    if str(log_file) not in stdout.decode():
+                        print(' - log done and closed')
+                        sys.stdout.flush()
+                        log_done = True
+                # Look in the log file to see what happened, and decide what to do.
+                roms_worked = False
+                with open(log_file, 'r') as ff:
+                    for line in ff:
+                        if ('Blowing-up' in line) or ('BLOWUP' in line):
+                            print(' - Run blew up, blow ups = ' + str(blow_ups))
+                            roms_worked = False
+                            break
+                        elif 'ERROR' in line:
+                            print(' - Run had an error. Check the log file.')
+                            roms_worked = False
+                            sys.exit()
+                        elif 'ROMS/TOMS: DONE' in line:
+                            print(' - ROMS completed successfully.')
+                            roms_worked = True
+                            break
+                sys.stdout.flush()
+            else:
+                roms_worked = True
 
             if roms_worked:
                 break # escape from blow_ups loop
@@ -237,7 +235,9 @@ while dt <= dt1:
     else:
         roms_worked = True
 
-    if roms_worked:
+    if roms_worked and (args.testing2 == False):
+        
+        print(' - SUCCESS')
 
         # Copy history files to boiler (make sure directory exists)
         cmd_list = ['ssh', 'parker@boiler.ocean.washington.edu', 'mkdir -p /data1/parker/LO_roms/'+Ldir['gtagex']]
@@ -255,7 +255,7 @@ while dt <= dt1:
         dt += timedelta(days=1)
         
     else:
-        print('ROMS did not work for ' + dt.strftime(Lfun.ds_fmt))
+        print(' - ROMS did not work for ' + dt.strftime(Lfun.ds_fmt))
         sys.exit()
     sys.stdout.flush()
     
