@@ -1,30 +1,21 @@
 """
 This runs ROMS for one or more days, allowing for either a forecast or backfill.
 
-Designed to be run from mox, and depends on other drivers having been run first on boiler
+Designed to be run from mox, and depends on other drivers having been run first on boiler.
 
 The -np and -N flags specify the total number of cores, and the
 cores per node.  For the current mox environment, acceptable choices are
--np 64 -N 32
-  or
--np 196 -N 28
-i.e. np has to be an even multiple of N, and N has to be <= the number
+-np 64 -N 32 or -np 196 -N 28
+NOTE: np has to be an even multiple of N, and N has to be <= the number
 of nodes of that size that I own.
 
-To test on mac in ipython
-
-run driver_roms_mox -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2019.07.04 -np 196 -N 28 -v True --get_forcing False --run_roms False --move_his False
-
-To test on mox
-
+- To test on mac in ipython:
+run driver_roms_mox -g cas6 -t v3t075 -x lo8 -r backfill -s continuation -0 2019.07.04 -np 196 -N 28 -v True --get_forcing False --run_roms False --move_his False
+- To test on mox:
 python3 driver_roms_mox.py -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2021.05.29 -np 196 -N 28 -v True --short_roms True > driver_log.txt &
-
-or, after you have copied the forcing files once...
-
+- or, after you have copied the forcing files once...
 python3 driver_roms_mox.py -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2021.05.29 -np 196 -N 28 -v True --get_forcing False --short_roms True > driver_log.txt &
-
-this one would run a day with tag=v3t075, but getting forcing from from cas6_v3 on boiler in LiveOcean
-
+- this one would run a day with tag=v3t075, but getting forcing from from cas6_v3 on boiler in LiveOcean:
 python3 driver_roms_mox.py -g cas6 -t v3t075 -ta v3 -x lo8 -r backfill -s continuation -0 2018.01.01 -np 196 -N 28 -v True --short_roms True > driver_log.txt &
 
 DEVELOPMENT NOTES: see the "various flags to facilitate testing" part of the arguments for other testing flags
@@ -98,7 +89,7 @@ elif args.run_type == 'backfill':
 else:
     print('Error: Unknown run_type')
     sys.exit()
-print('Running ROMS %s\nfor %s to %s ' % (args.run_type, ds0, ds1))
+print('Running ROMS %s %s-%s ' % (args.run_type, ds0, ds1))
 sys.stdout.flush()
 
 def messages(stdout, stderr, mtitle, test_flag):
@@ -117,16 +108,21 @@ def messages(stdout, stderr, mtitle, test_flag):
 dt = dt0
 while dt <= dt1:
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
+    print('>> ' + f_string + ' <<')
+    print(' > started at %s' % (datetime.now().strftime('%Y.%m.%d %H:%M:%S')))
+    sys.stdout.flush()
     
     # Set various paths.
     force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string
     dot_in_dir = Ldir['LO'] / 'dot_in' / Ldir['gtagex']
+    dot_in_shared_dir = Ldir['LO'] / 'dot_in' / 'shared'
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
     log_file = roms_out_dir / 'log.txt'
     roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
     if args.verbose:
         print(' - force_dir:    ' + str(force_dir))
         print(' - dot_in_dir:   ' + str(dot_in_dir))
+        print(' - dot_in_shared_dir: ' + str(dot_in_shared_dir))
         print(' - roms_out_dir: ' + str(roms_out_dir))
         print(' - log_file:     ' + str(log_file))
         print(' - roms_ex_dir:  ' + str(roms_ex_dir))
@@ -160,7 +156,7 @@ while dt <= dt1:
     blow_ups_max = 5
     roms_worked = False
     while blow_ups <= blow_ups_max:
-        print((' - Blow-ups = ' + str(blow_ups) + ' ').center(60,'.'))
+        print((' - Blow-ups = ' + str(blow_ups)))
         sys.stdout.flush()
 
         if args.run_dot_in:
@@ -176,7 +172,7 @@ while dt <= dt1:
             messages(stdout, stderr, 'Make dot in', args.verbose)
             
             # Create batch script
-            cmd_list = ['python3', str(dot_in_dir / 'make_batch.py'),
+            cmd_list = ['python3', str(dot_in_shared_dir / 'make_mox_batch.py'),
                 '-xd', str(roms_ex_dir),
                 '-rod', str(roms_out_dir),
                 '-np', str(args.np_num),
@@ -194,7 +190,7 @@ while dt <= dt1:
         if args.run_roms:
             # Run ROMS using the batch script.
             cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
-                str(roms_out_dir / 'lo_batch.sh')]
+                str(roms_out_dir / 'mox_batch.sh')]
             # The --wait flag will cause the subprocess to not return until the job has terminated.
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
@@ -244,7 +240,7 @@ while dt <= dt1:
             else:
                 blow_ups += 1
         else:
-            print(' -- skipped running ROMS')
+            print(' ** skipped running ROMS')
             roms_worked = True
             break # escape from blow_ups loop
 
@@ -267,11 +263,13 @@ while dt <= dt1:
             roms_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / f_string_prev
             shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
         else:
-            print(' -- skipped moving history files')
+            print(' ** skipped moving history files')
         dt += timedelta(days=1)
     else:
         print(' - ROMS FAIL for ' + dt.strftime(Lfun.ds_fmt))
         sys.exit()
+        
+    print(' > finished at %s' % (datetime.now().strftime('%Y.%m.%d %H:%M:%S')))
     sys.stdout.flush()
     
 
