@@ -257,11 +257,13 @@ while dt <= dt1:
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Copy ROMS output to boiler', args.verbose)
-            # (iii) delete roms_out_dir from the day before yesterday
+            # (iii) delete roms_out_dir and forcing files from the day before yesterday
             dt_prev = dt - timedelta(days=2)
             f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
             roms_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / f_string_prev
+            force_dir_prev = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string_prev
             shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
+            shutil.rmtree(str(force_dir_prev), ignore_errors=True)
         else:
             print(' ** skipped moving history files')
         dt += timedelta(days=1)
