@@ -22,106 +22,69 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
-import pandas as pd
-import zfun
-import zrfun
+import Lfun
+from time import time
+from datetime import timedelta
 import subprocess
 import netCDF4 as nc
-import Lfun
 import numpy as np
 
+lon = 10
+lat = 10
+
+out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor'
+Lfun.make_dir(out_dir)
+
+in_dir0 = Ldir['roms_out'] / Ldir['gtagex']
+
+dt0 = datetime.strptime(Ldir['ds0'], Ldir['ds_fmt'])
+dt1 = datetime.strptime(Ldir['ds1'], Ldir['ds_fmt'])
+
+dt = dt0
+counter = 0
+while dt <= dt1:
+    
+    tt0 = time()
+    
+    # proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    # stdout, stderr = proc.communicate()
+    
+    
+    f_string = 'f' + dt.strftime(Ldir['ds_fmt'])
+    in_dir = in_dir0 / f_string
+    out_fn = out_dir / ('moor_temp_' + str(counter) + '.nc')
+    cmd_list = ['ls', str(in_dir)]
+    p1 = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
+    cmd_list = ['grep','ocean_his']
+    p2 = subprocess.Popen(cmd_list, stdin=p1.stdout, stdout=subprocess.PIPE)
+    cmd_list = ['grep','-v','0001']
+    p3 = subprocess.Popen(cmd_list, stdin=p2.stdout, stdout=subprocess.PIPE)
+    cmd_list = ['ncrcat','-p', str(in_dir),
+        '-d', 'xi_rho,'+str(lon), '-d', 'eta_rho,'+str(lat),
+        '-d', 'xi_u,'+str(lon), '-d', 'eta_u,'+str(lat),
+        '-d', 'xi_v,'+str(lon), '-d', 'eta_v,'+str(lat),
+        '-O', str(out_fn)]
+    proc = subprocess.Popen(cmd_list, stdin=p3.stdout, stdout=subprocess.PIPE)
+    proc.communicate()
+    
+    cmd_list = ['ls', str(out_dir)]
+    pp1 = subprocess.Popen(cmd_list, stdout=subprocess.PIPE)
+    cmd_list = ['grep','moor_temp']
+    pp2 = subprocess.Popen(cmd_list, stdin=pp1.stdout, stdout=subprocess.PIPE)
+    cmd_list = ['ncrcat','-p', str(out_dir), '-O','all.nc']
+    proc = subprocess.Popen(cmd_list, stdin=pp2.stdout, stdout=subprocess.PIPE)
+    proc.communicate()
+    
+    counter += 1
+    dt += timedelta(days=1)
+    print('took %0.2f sec' % (time()-tt0))
+    sys.stdout.flush()
+    
+a = nc.Dataset(out_dir / 'all.nc')
+ot = a['ocean_time'][:]
+print(np.diff(ot))
+
 # ls | grep ocean_his | ncrcat -d xi_rho,10 -d eta_rho,10 -d xi_u,10 -d eta_u,10 -d xi_v,10 -d eta_v,10 -O moor.nc
-
-def get_moor(out_fn, fn, lon, lat):
-    
-    # This function does the cast extraction and saves it to a NetCDF file.
-    
-    # Find indicies nearest to the location
-    G, S, T = zrfun.get_basic_info(fn)
-    ix = zfun.find_nearest_ind(G['lon_rho'][0,:], lon)
-    iy = zfun.find_nearest_ind(G['lat_rho'][:,0], lat)
-    
-    # Run ncks to do the extraction, overwriting any existing file
-    cmd_list = ['ncks', '-d', 'xi_rho,'+str(ix), '-d', 'eta_rho,'+str(iy),
-        '-v', 'AKs,salt,temp,NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,h',
-        '-O', str(fn), str(out_fn)]
-    # Note: 3-D variables will retain singelton dimensions
-    # Note: We get AKs so that the s_w dimension is retained
-    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    # and check on the results
-    stdout, stderr = proc.communicate()
-    if len(stdout) > 0:
-        print('\n' + ' sdtout '.center(60,'-'))
-        print(stdout.decode())
-    if len(stderr) > 0:
-        print('\n' + ' stderr '.center(60,'-'))
-        print(stderr.decode())
-    
-    # Add z-coordinates to the file
-    foo = nc.Dataset(out_fn, 'a')
-    z_rho, z_w = zrfun.get_z(foo['h'][:], np.array([0.]), S)
-    vv = foo.createVariable('z_rho', float, ('s_rho',))
-    vv.long_name = 'vertical position on s_rho grid, positive up, zero at surface'
-    vv.units = 'm'
-    vv[:] = z_rho
-    vv = foo.createVariable('z_w', float, ('s_w',))
-    vv.long_name = 'vertical position on s_w grid, positive up, zero at surface'
-    vv.units = 'm'
-    vv[:] = z_w
-    # Note that z_rho and z_w do not have singleton dimensions
-    
-    # Also add units to salt
-    foo['salt'].units = 'g kg-1'
-    foo.close()
-    
-    # and check on the results
-    if Ldir['testing']:
-        foo = nc.Dataset(out_fn)
-        for vn in foo.variables:
-            print('%14s: %s' % (vn, str(foo[vn].shape)))
-        foo.close()
-    
-    # plot for reality check
-    if (Ldir['lo_env'] == 'pm_mac') and Ldir['testing']:
-        a = nc. Dataset(out_fn)
-        import matplotlib.pyplot as plt
-        plt.close('all')
-        fig = plt.figure(figsize=(14,8))
-        
-        v_list = ['salt', 'temp', 'oxygen']
-        NV = len(v_list)
-        ii = 1
-        for vn in v_list:
-            ax = fig.add_subplot(1,NV,ii)
-            ax.plot(a[vn][:].squeeze(), a['z_rho'][:], '-o')
-            if ii == 1:
-                ax.set_ylabel('Z [m]')
-            ax.set_title('%s [%s]' % (vn, a[vn].units))
-            ii += 1
-        a.close()
-        plt.show()
-        
-def get_his_fn_from_dt(Ldir, dt):
-    # This creates the Path of a history file from its datetime
-    date_string = dt.strftime(Ldir['ds_fmt'])
-    his_num = ('0000' + str(dt.hour + 1))[-4:]
-    fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + date_string) / ('ocean_his_' + his_num + '.nc')
-    return fn
-
-if Ldir['a1'] == 'blank':
-    folder = 'blank'
-    out_dir = Ldir['LOo'] / 'extract' / 'cast' / folder
-    Lfun.make_dir(out_dir)
-    cruise = 'TEST'
-    sn = 0
-    out_fn = out_dir / (cruise + '_' + str(int(sn)) + '.nc')
-    dt = datetime(2019,7,4,2)
-    fn = get_his_fn_from_dt(Ldir, dt)
-    lon = -123.228000
-    lat = 48.240300
-    get_cast(out_fn, fn, lon, lat)
-    
-                
 # -------------------------------------------------------
 
 # test for success 
