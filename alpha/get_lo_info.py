@@ -29,6 +29,7 @@ roms_out = parent / 'LO_roms'
 roms_out1 = parent / 'BLANK' # placeholder
 roms_out2 = parent / 'BLANK' # placeholder
 roms_out3 = parent / 'BLANK' # placeholder
+roms_out4 = parent / 'BLANK' # placeholder
 
 # default for linux machines
 which_matlab = '/usr/local/bin/matlab'
@@ -73,5 +74,6 @@ Ldir0['roms_out'] = roms_out
 Ldir0['roms_out1'] = roms_out1
 Ldir0['roms_out2'] = roms_out2
 Ldir0['roms_out3'] = roms_out3
+Ldir0['roms_out4'] = roms_out4
 Ldir0['which_matlab'] = which_matlab
 
