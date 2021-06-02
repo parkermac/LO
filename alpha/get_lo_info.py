@@ -28,6 +28,7 @@ roms_code = parent / 'LiveOcean_roms'
 roms_out = parent / 'LO_roms'
 roms_out1 = parent / 'BLANK' # placeholder
 roms_out2 = parent / 'BLANK' # placeholder
+roms_out3 = parent / 'BLANK' # placeholder
 
 # default for linux machines
 which_matlab = '/usr/local/bin/matlab'
@@ -40,17 +41,22 @@ except KeyError:
 
 if str(HOME) == '/Users/pm8':
     lo_env = 'pm_mac'
-    roms_out1 = parent / 'LiveOcean_roms' / 'output'
     which_matlab = '/Applications/MATLAB_R2020a.app/bin/matlab'
+    roms_out2 = parent / 'LiveOcean_roms' / 'output'    # LiveOcean past I
+    roms_out3 = parent / 'LiveOcean_roms' / 'output'    # LiveOcean past II (same as I)
 
 elif (str(HOME) == '/home/parker') & ('boiler' in HOSTNAME):
     lo_env = 'pm_boiler'
-    roms_out1 = Path('/data1/parker/LiveOcean_roms/output')
+    roms_out1 = Path('/data1/parker/LiveOcean_roms/output')     # LiveOcean current
+    roms_out2 = Path('/pgdat1/parker/LiveOcean_roms/output')    # LiveOcean past I
+    roms_out3 = Path('/pgdat2/parker/LiveOcean_roms/output')    # LiveOcean past II
 
 elif (str(HOME) == '/home/parker') & ('perigee' in HOSTNAME):
     lo_env = 'pm_perigee'
-    roms_out1 = Path('/data1/parker/LiveOcean_roms/output')
-    roms_out2 = Path('/boildat1/parker/LiveOcean_roms/output')
+    roms_out1 = Path('/boildat1/parker/LiveOcean_roms/output')  # LiveOcean current
+    roms_out2 = Path('/data1/parker/LiveOcean_roms/output')     # LiveOcean past I
+    roms_out3 = Path('/data2/parker/LiveOcean_roms/output')     # LiveOcean past II
+    roms_out4 = Path('/boildat1/parker/LO_roms')                # LO boiler
     
 elif (str(HOME) == '/usr/lusers/pmacc'):
     lo_env = 'pm_mox'
@@ -66,5 +72,6 @@ Ldir0['roms_code'] = roms_code
 Ldir0['roms_out'] = roms_out
 Ldir0['roms_out1'] = roms_out1
 Ldir0['roms_out2'] = roms_out2
+Ldir0['roms_out3'] = roms_out3
 Ldir0['which_matlab'] = which_matlab
 
