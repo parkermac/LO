@@ -1,0 +1,111 @@
+"""
+This is code for doing mooring extractions.
+
+Test on mac in ipython:
+
+run extract_moor_ncks.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06
+
+"""
+
+from pathlib import Path
+import sys
+from datetime import datetime
+
+pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
+if str(pth) not in sys.path:
+    sys.path.append(str(pth))
+import extract_argfun as exfun
+
+Ldir = exfun.intro() # this handles the argument passing
+result_dict = dict()
+result_dict['start_dt'] = datetime.now()
+
+# ****************** CASE-SPECIFIC CODE *****************
+
+import Lfun
+import zrfun, zfun
+from time import time
+from datetime import timedelta
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
+import numpy as np
+
+# set output location
+out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor'
+temp_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor' / ('temp_' + Ldir['sn'])
+Lfun.make_dir(out_dir)
+Lfun.make_dir(temp_dir, clean=True)
+moor_fn = out_dir / (Ldir['sn'] + '.nc')
+moor_fn.unlink(missing_ok=True)
+
+# get indices for extraction
+in_dir0 = Ldir['roms_out'] / Ldir['gtagex']
+lon = Ldir['lon']
+lat = Ldir['lat']
+G = zrfun.get_basic_info(in_dir0 / ('f' + Ldir['ds0']) / 'ocean_his_0001.nc', only_G=True)
+ilon = zfun.find_nearest_ind(G['lon_rho'][0,:], lon)
+ilat = zfun.find_nearest_ind(G['lat_rho'][:,0], lat)
+# NOTE: we should also check that this is not masked on any grid
+
+fn_list = Lfun.get_fn_list('hourly', Ldir, Ldir['ds0'], Ldir['ds1'])
+
+get_ts = True
+get_vel = False
+get_bio = False
+vn_list = 'h,zeta'
+if get_ts:
+    vn_list += ',salt,temp,AKs'
+if get_vel:
+    vn_list += ',u,v,w'
+if get_bio:
+    vn_list += ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC'
+
+# do the extraction
+counter = 1
+tt0 = time()
+for fn in fn_list:
+    
+    
+    
+    # extract one day at a time using ncrcat
+    count_str = ('0000' + str(counter))[-4:]
+    out_fn = temp_dir / ('moor_temp_' + count_str + '.nc')
+    cmd_list1 = ['ncks',
+        '-v', vn_list,
+        '-d', 'xi_rho,'+str(ilon), '-d', 'eta_rho,'+str(ilat)]
+    if get_vel:
+        cmd_list1 += ['-d', 'xi_u,'+str(ilon), '-d', 'eta_u,'+str(ilat),
+            '-d', 'xi_v,'+str(ilon), '-d', 'eta_v,'+str(ilat)]
+    cmd_list1 += ['-O', str(fn), str(out_fn)]
+    proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
+    stdin, stderr = proc.communicate()
+    
+    if np.mod(counter,24) == 0:
+        print('day %3d: took %0.2f sec' % (counter/24, time()-tt0))
+        sys.stdout.flush()
+        tt0 = time()
+        
+    
+    counter += 1
+    
+    
+# concatenate the day records into one file
+pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
+pp2 = Po(['grep','moor_temp'], stdin=pp1.stdout, stdout=Pi)
+cmd_list = ['ncrcat','-p', str(temp_dir), '-O',str(moor_fn)]
+proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi)
+proc.communicate()
+    
+# clean up
+# Lfun.make_dir(temp_dir, clean=True)
+# temp_dir.rmdir()
+
+# test for success 
+if moor_fn.is_file():
+    result_dict['result'] = 'success' # success or fail
+else:
+    result_dict['result'] = 'fail'
+
+# *******************************************************
+
+result_dict['end_dt'] = datetime.now()
