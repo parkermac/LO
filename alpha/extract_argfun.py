@@ -13,19 +13,22 @@ def intro():
     parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
     parser.add_argument('-t', '--tag', type=str)        # e.g. v3
     parser.add_argument('-x', '--ex_name', type=str)    # e.g. lo8b
-    # optional arguments
+    # optional arguments used in all cases
     parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
     parser.add_argument('-0', '--ds0', type=str, default='')        # e.g. 2019.07.04
     parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
     parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_string)
-    # more optional arguments
+    # optional arguments used by extract/moor
     parser.add_argument('-lon', type=float, default=-125)   # longitude
     parser.add_argument('-lat', type=float, default=47)     # latitude
     parser.add_argument('-sn', type=str, default='gh_test') # station name
-    # generic optional extra arguments for other situations
-    parser.add_argument('-a1', type=str, default='')
-    parser.add_argument('-a2', type=str, default='')
-    parser.add_argument('-a3', type=str, default='')
+    parser.add_argument('-lt', '--list_type', type=str, default='hourly') # list type
+    parser.add_argument('-get_tsa', type=zfun.boolean_string, default=False)
+    parser.add_argument('-get_vel', type=zfun.boolean_string, default=False)
+    parser.add_argument('-get_bio', type=zfun.boolean_string, default=False)
+    parser.add_argument('-get_surfbot', type=zfun.boolean_string, default=False)
+    # generic optional used by extract/cast
+    parser.add_argument('-cruises', type=str, default='test_cruises')
     
     # get the args
     args = parser.parse_args()
@@ -39,9 +42,11 @@ def intro():
         
     # get the dict Ldir
     Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
+    
     # add more entries to Ldir for possible use by extractors
-    for a in ['ds0', 'ds1', 'testing', 'lon', 'lat', 'sn', 'a1', 'a2', 'a3']:
-        Ldir[a] = argsd[a]
+    for a in argsd.keys():
+        if a not in Ldir.keys():
+            Ldir[a] = argsd[a]
         
     # set the end day string
     if len(Ldir['ds1'])==0:

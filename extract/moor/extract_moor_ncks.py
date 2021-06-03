@@ -3,7 +3,7 @@ This is code for doing mooring extractions.
 
 Test on mac in ipython:
 
-run extract_moor_ncks.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06
+run extract_moor_ncks.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_tsa True
 
 """
 
@@ -47,25 +47,24 @@ ilon = zfun.find_nearest_ind(G['lon_rho'][0,:], lon)
 ilat = zfun.find_nearest_ind(G['lat_rho'][:,0], lat)
 # NOTE: we should also check that this is not masked on any grid
 
-fn_list = Lfun.get_fn_list('hourly', Ldir, Ldir['ds0'], Ldir['ds1'])
+fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
 
-get_ts = True
-get_vel = False
-get_bio = False
 vn_list = 'h,zeta'
-if get_ts:
-    vn_list += ',salt,temp,AKs'
-if get_vel:
+if Ldir['get_tsa']:
+    vn_list += ',salt,temp,AKs,AKv'
+if Ldir['get_vel']:
     vn_list += ',u,v,w'
-if get_bio:
+if Ldir['get_bio']:
     vn_list += ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC'
+if Ldir['get_surfbot']:
+    pass
+    # need to populate
 
 # do the extraction
 counter = 1
 tt0 = time()
+proc_list = []
 for fn in fn_list:
-    
-    
     
     # extract one day at a time using ncrcat
     count_str = ('0000' + str(counter))[-4:]
@@ -73,21 +72,22 @@ for fn in fn_list:
     cmd_list1 = ['ncks',
         '-v', vn_list,
         '-d', 'xi_rho,'+str(ilon), '-d', 'eta_rho,'+str(ilat)]
-    if get_vel:
+    if Ldir['get_vel']:
         cmd_list1 += ['-d', 'xi_u,'+str(ilon), '-d', 'eta_u,'+str(ilat),
             '-d', 'xi_v,'+str(ilon), '-d', 'eta_v,'+str(ilat)]
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
-    stdin, stderr = proc.communicate()
+    proc_list.append(proc)
     
     if np.mod(counter,24) == 0:
         print('day %3d: took %0.2f sec' % (counter/24, time()-tt0))
         sys.stdout.flush()
         tt0 = time()
-        
     
     counter += 1
-    
+
+for proc in proc_list:
+    proc.communicate()
     
 # concatenate the day records into one file
 pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
@@ -95,6 +95,24 @@ pp2 = Po(['grep','moor_temp'], stdin=pp1.stdout, stdout=Pi)
 cmd_list = ['ncrcat','-p', str(temp_dir), '-O',str(moor_fn)]
 proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi)
 proc.communicate()
+
+# # Add z-coordinates to the file
+# foo = nc.Dataset(out_fn, 'a')
+# z_rho, z_w = zrfun.get_z(foo['h'][:], np.array([0.]), S)
+# vv = foo.createVariable('z_rho', float, ('s_rho',))
+# vv.long_name = 'vertical position on s_rho grid, positive up, zero at surface'
+# vv.units = 'm'
+# vv[:] = z_rho
+# vv = foo.createVariable('z_w', float, ('s_w',))
+# vv.long_name = 'vertical position on s_w grid, positive up, zero at surface'
+# vv.units = 'm'
+# vv[:] = z_w
+# # Note that z_rho and z_w do not have singleton dimensions
+#
+# # Also add units to salt
+# foo['salt'].units = 'g kg-1'
+# foo.close()
+
     
 # clean up
 # Lfun.make_dir(temp_dir, clean=True)

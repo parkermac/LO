@@ -3,7 +3,7 @@ This is code for doing cast extractions.
 
 Test on mac in ipython:
 
-run extract_casts.py -g cas6 -t v3 -x lo8b -ro 1 -a1 blank -test True
+run extract_casts.py -g cas6 -t v3 -x lo8b -ro 2 -test True
 
 """
 
@@ -106,11 +106,11 @@ def get_his_fn_from_dt(Ldir, dt):
     fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + date_string) / ('ocean_his_' + his_num + '.nc')
     return fn
 
-if Ldir['a1'] == 'blank':
-    folder = 'blank'
-    out_dir = Ldir['LOo'] / 'extract' / 'cast' / folder
-    Lfun.make_dir(out_dir)
-    cruise = 'TEST'
+out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'cast' / Ldir['cruises']
+Lfun.make_dir(out_dir)
+
+if Ldir['cruises'] == 'test_cruises':
+    cruise = 'MyCruise'
     sn = 0
     out_fn = out_dir / (cruise + '_' + str(int(sn)) + '.nc')
     dt = datetime(2019,7,4,2)
@@ -119,12 +119,7 @@ if Ldir['a1'] == 'blank':
     lat = 48.240300
     get_cast(out_fn, fn, lon, lat)
     
-elif Ldir['a1'] == 'woac':
-    folder = 'woac'
-    out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'cast' / folder
-    # Question: I should add gtagex somewhere in the path, but where?
-    Lfun.make_dir(out_dir)
-    
+elif Ldir['cruise'] == 'woac':
     sta_fn = Ldir['parent'] / 'ptools_output' / 'woac2' / 'sta_df.p'
     if sta_fn.is_file():
         sta_df = pd.read_pickle(sta_fn)
