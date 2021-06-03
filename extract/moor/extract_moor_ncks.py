@@ -3,7 +3,7 @@ This is code for doing mooring extractions.
 
 Test on mac in ipython:
 
-run extract_moor_ncks.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_tsa True
+run extract_moor_ncks.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_tsa True -get_vel True -bet_bio True
 
 """
 
@@ -86,8 +86,11 @@ for fn in fn_list:
     
     counter += 1
 
+tt0 = time()
 for proc in proc_list:
     proc.communicate()
+print('Total days %3d: took %0.2f sec' % (counter/24, time()-tt0))
+sys.stdout.flush()
     
 # concatenate the day records into one file
 pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
