@@ -31,10 +31,6 @@ from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import numpy as np
 import netCDF4 as nc
-from multiprocessing.pool import ThreadPool
-import multiprocessing
-ncpu = multiprocessing.cpu_count()
-print('ncpu = %d' % (ncpu))
 
 # set output location
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor'
@@ -66,9 +62,8 @@ if Ldir['get_surfbot']:
     pass
     # need to populate surface fields to get
     
-
-proc_list = []    
-def my_fun(ii):
+proc_list = []
+for ii in range(len(fn_list)):
     fn = fn_list[ii]
     # extract one day at a time using ncrcat
     count_str = ('0000' + str(ii))[-4:]
@@ -82,19 +77,15 @@ def my_fun(ii):
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
-    #counter += 1
-
-tp = ThreadPool(None) # defaults to number of processors
-tt0 = time()
-for ii in range(len(fn_list)):
-    tp.apply_async(my_fun, (ii,))
-tp.close()
-tp.join()
-# make sure everyone is finished before continuing
-for proc in proc_list:
-    proc.communicate()
-print('Total days %3d: took %0.2f sec' % (ii/24, time()-tt0))
-sys.stdout.flush()
+    
+    if np.mod(ii,24) == 0:
+        tt0 = time()
+        for proc in proc_list:
+            proc.communicate()
+        print('Day %3d: took %0.2f sec' % (ii/24, time()-tt0))
+        # make sure everyone is finished before continuing
+        sys.stdout.flush()
+        proc_list = []
     
 # concatenate the day records into one file
 # This bit of code is a nice example of how to replicate a bash pipe
