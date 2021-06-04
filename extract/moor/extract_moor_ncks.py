@@ -32,6 +32,8 @@ from subprocess import PIPE as Pi
 import numpy as np
 import netCDF4 as nc
 
+tt00 = time()
+
 # set output location
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor'
 temp_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor' / ('temp_' + Ldir['sn'])
@@ -115,6 +117,9 @@ foo.close()
 # clean up
 Lfun.make_dir(temp_dir, clean=True)
 temp_dir.rmdir()
+
+print('\nTotal Elapsed time was %0.2f sec' % (time()-tt00))
+
 
 # test for success 
 if moor_fn.is_file():
