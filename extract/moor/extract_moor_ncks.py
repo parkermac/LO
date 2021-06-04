@@ -32,10 +32,9 @@ from subprocess import PIPE as Pi
 import numpy as np
 import netCDF4 as nc
 from multiprocessing.pool import ThreadPool
-import subprocess
 import multiprocessing
 ncpu = multiprocessing.cpu_count()
-
+print('ncpu = %d' % (ncpu))
 
 # set output location
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor'
@@ -86,7 +85,6 @@ def my_fun(ii):
     #counter += 1
 
 tp = ThreadPool(None) # defaults to number of processors
-
 tt0 = time()
 for ii in range(len(fn_list)):
     tp.apply_async(my_fun, (ii,))
