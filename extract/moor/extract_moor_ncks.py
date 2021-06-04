@@ -5,6 +5,7 @@ Test on mac in ipython:
 
 run extract_moor_ncks.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_tsa True -get_vel True -get_bio True
 
+The performance on this is amazing.
 """
 
 from pathlib import Path
@@ -30,6 +31,11 @@ from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import numpy as np
 import netCDF4 as nc
+from multiprocessing.pool import ThreadPool
+import subprocess
+import multiprocessing
+ncpu = multiprocessing.cpu_count()
+
 
 # set output location
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor'
@@ -59,15 +65,14 @@ if Ldir['get_bio']:
     vn_list += ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC'
 if Ldir['get_surfbot']:
     pass
-    # need to populate
-
-# do the extraction
-counter = 1
-proc_list = []
-for fn in fn_list:
+    # need to populate surface fields to get
     
+
+proc_list = []    
+def my_fun(ii):
+    fn = fn_list[ii]
     # extract one day at a time using ncrcat
-    count_str = ('0000' + str(counter))[-4:]
+    count_str = ('0000' + str(ii))[-4:]
     out_fn = temp_dir / ('moor_temp_' + count_str + '.nc')
     cmd_list1 = ['ncks',
         '-v', vn_list,
@@ -78,17 +83,23 @@ for fn in fn_list:
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
-    counter += 1
+    #counter += 1
+
+tp = ThreadPool(None) # defaults to number of processors
 
 tt0 = time()
+for ii in range(len(fn_list)):
+    tp.apply_async(my_fun, (ii,))
+tp.close()
+tp.join()
+# make sure everyone is finished before continuing
 for proc in proc_list:
     proc.communicate()
-print('Total days %3d: took %0.2f sec' % (counter/24, time()-tt0))
+print('Total days %3d: took %0.2f sec' % (ii/24, time()-tt0))
 sys.stdout.flush()
     
 # concatenate the day records into one file
 # This bit of code is a nice example of how to replicate a bash pipe
-
 pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
 pp2 = Po(['grep','moor_temp'], stdin=pp1.stdout, stdout=Pi)
 cmd_list = ['ncrcat','-p', str(temp_dir), '-O',str(moor_fn)]
