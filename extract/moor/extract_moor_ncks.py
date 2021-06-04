@@ -3,7 +3,7 @@ This is code for doing mooring extractions.
 
 Test on mac in ipython:
 
-run extract_moor_ncks.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_tsa True -get_vel True -bet_bio True
+run extract_moor_ncks.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_tsa True -get_vel True -get_bio True
 
 """
 
@@ -29,6 +29,7 @@ from datetime import timedelta
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import numpy as np
+import netCDF4 as nc
 
 # set output location
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor'
@@ -42,7 +43,7 @@ moor_fn.unlink(missing_ok=True)
 in_dir0 = Ldir['roms_out'] / Ldir['gtagex']
 lon = Ldir['lon']
 lat = Ldir['lat']
-G = zrfun.get_basic_info(in_dir0 / ('f' + Ldir['ds0']) / 'ocean_his_0001.nc', only_G=True)
+G, S, T = zrfun.get_basic_info(in_dir0 / ('f' + Ldir['ds0']) / 'ocean_his_0001.nc')
 ilon = zfun.find_nearest_ind(G['lon_rho'][0,:], lon)
 ilat = zfun.find_nearest_ind(G['lat_rho'][:,0], lat)
 # NOTE: we should also check that this is not masked on any grid
@@ -62,7 +63,6 @@ if Ldir['get_surfbot']:
 
 # do the extraction
 counter = 1
-tt0 = time()
 proc_list = []
 for fn in fn_list:
     
@@ -78,12 +78,6 @@ for fn in fn_list:
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
-    
-    if np.mod(counter,24) == 0:
-        print('day %3d: took %0.2f sec' % (counter/24, time()-tt0))
-        sys.stdout.flush()
-        tt0 = time()
-    
     counter += 1
 
 tt0 = time()
@@ -93,33 +87,34 @@ print('Total days %3d: took %0.2f sec' % (counter/24, time()-tt0))
 sys.stdout.flush()
     
 # concatenate the day records into one file
+# This bit of code is a nice example of how to replicate a bash pipe
+
 pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
 pp2 = Po(['grep','moor_temp'], stdin=pp1.stdout, stdout=Pi)
 cmd_list = ['ncrcat','-p', str(temp_dir), '-O',str(moor_fn)]
 proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi)
 proc.communicate()
 
-# # Add z-coordinates to the file
-# foo = nc.Dataset(out_fn, 'a')
-# z_rho, z_w = zrfun.get_z(foo['h'][:], np.array([0.]), S)
-# vv = foo.createVariable('z_rho', float, ('s_rho',))
-# vv.long_name = 'vertical position on s_rho grid, positive up, zero at surface'
-# vv.units = 'm'
-# vv[:] = z_rho
-# vv = foo.createVariable('z_w', float, ('s_w',))
-# vv.long_name = 'vertical position on s_w grid, positive up, zero at surface'
-# vv.units = 'm'
-# vv[:] = z_w
-# # Note that z_rho and z_w do not have singleton dimensions
-#
-# # Also add units to salt
-# foo['salt'].units = 'g kg-1'
-# foo.close()
+# Add z-coordinates to the file
+foo = nc.Dataset(moor_fn, 'a')
+z_rho, z_w = zrfun.get_z(foo['h'][:], np.array([0.]), S)
+vv = foo.createVariable('z_rho', float, ('s_rho',))
+vv.long_name = 'vertical position on s_rho grid, positive up, zero at surface'
+vv.units = 'm'
+vv[:] = z_rho
+vv = foo.createVariable('z_w', float, ('s_w',))
+vv.long_name = 'vertical position on s_w grid, positive up, zero at surface'
+vv.units = 'm'
+vv[:] = z_w
+# Note that z_rho and z_w do not have singleton dimensions
 
+# Also add units to salt
+foo['salt'].units = 'g kg-1'
+foo.close()
     
 # clean up
-# Lfun.make_dir(temp_dir, clean=True)
-# temp_dir.rmdir()
+Lfun.make_dir(temp_dir, clean=True)
+temp_dir.rmdir()
 
 # test for success 
 if moor_fn.is_file():

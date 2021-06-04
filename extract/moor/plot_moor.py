@@ -38,8 +38,7 @@ print('end   ' + str(tind[-1]))
 
 print('info'.center(60,'-'))
 for vn in ds.variables:
-    if 'ocean_time' in ds[vn].dimensions:
-        print('%s %s' % (vn, ds[vn].shape))
+    print('%s %s' % (vn, ds[vn].shape))
 
 df = pd.DataFrame(index=tind)
 df['zeta'] = ds['zeta'][:,0,0]
