@@ -5,7 +5,9 @@ Test on mac in ipython:
 
 run extract_moor_ncks.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_tsa True -get_vel True -get_bio True
 
-The performance on this is amazing.
+The performance on this is reasonable, taking about 1/2 hour for a year of hourly records
+on perigee with cas6_v3_lo8b and all flags True.  It is possible I could make it faster by
+doing the proc.communicate step less frequently.
 """
 
 from pathlib import Path
@@ -39,8 +41,9 @@ out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor'
 temp_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor' / ('temp_' + Ldir['sn'])
 Lfun.make_dir(out_dir)
 Lfun.make_dir(temp_dir, clean=True)
-moor_fn = out_dir / (Ldir['sn'] + '.nc')
+moor_fn = out_dir / (Ldir['sn'] + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
 moor_fn.unlink(missing_ok=True)
+print(moor_fn)
 
 # get indices for extraction
 in_dir0 = Ldir['roms_out'] / Ldir['gtagex']
@@ -65,7 +68,8 @@ if Ldir['get_surfbot']:
     # need to populate surface fields to get
     
 proc_list = []
-for ii in range(len(fn_list)):
+N = len(fn_list)
+for ii in range(N):
     fn = fn_list[ii]
     # extract one day at a time using ncrcat
     count_str = ('0000' + str(ii))[-4:]
@@ -80,15 +84,14 @@ for ii in range(len(fn_list)):
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
     
-    if np.mod(ii,24) == 0:
-        tt0 = time()
+    if (np.mod(ii,100) == 0) or (ii == N-1):
+        print(' - %d out of %d' % (ii, N))
+        sys.stdout.flush()
         for proc in proc_list:
             proc.communicate()
-        print('Day %3d: took %0.2f sec' % (ii/24, time()-tt0))
         # make sure everyone is finished before continuing
-        sys.stdout.flush()
         proc_list = []
-    
+
 # concatenate the day records into one file
 # This bit of code is a nice example of how to replicate a bash pipe
 pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
