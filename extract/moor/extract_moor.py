@@ -3,11 +3,11 @@ This is code for doing mooring extractions.
 
 Test on mac in ipython:
 
-run extract_moor_ncks.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_tsa True -get_vel True -get_bio True
+run extract_moor.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_tsa True -get_vel True -get_bio True
 
-The performance on this is reasonable, taking about 1/2 hour for a year of hourly records
-on perigee with cas6_v3_lo8b and all flags True.  It is possible I could make it faster by
-doing the proc.communicate step less frequently.
+The performance on this is reasonable, taking about 24 minutes for a year of hourly records
+on perigee with cas6_v3_lo8b and all flags True.
+
 """
 
 from pathlib import Path
