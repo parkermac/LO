@@ -27,8 +27,11 @@ def intro():
     parser.add_argument('-get_vel', type=zfun.boolean_string, default=False)
     parser.add_argument('-get_bio', type=zfun.boolean_string, default=False)
     parser.add_argument('-get_surfbot', type=zfun.boolean_string, default=False)
-    # generic optional used by extract/cast
+    # generic arguments used by extract/cast
     parser.add_argument('-cruises', type=str, default='test_cruises')
+    # generic arguments used by extract/tef
+    parser.add_argument('-sect_name', type=str, default='ai1')
+    
     
     # get the args
     args = parser.parse_args()

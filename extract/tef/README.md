@@ -29,7 +29,7 @@ NOTES:
 
 ---
 
-* `tef_fun.py` module for this code. Includes `tef_fun.get_sect_df()` which returns a DataFrame of all the section names and their lon,lat endpoints. The entries in this are pasted in by hand while using `tef_section_maker.py` as documented above. Then to control which sections will be processed by later programs (like to do extractions) you comment/uncomment lines in this function. This is not great coding - it might be better to have one function that returns the info for any section name, and then make specific lists for specific projects.
+`tef_fun.py` is an important module for this code. Includes `tef_fun.get_sect_df()` which returns a DataFrame of all the section names and their lon,lat endpoints. The entries in this are pasted in by hand while using `tef_section_maker.py` as documented above. Then to control which sections will be processed by later programs (like to do extractions) you comment/uncomment lines in this function. This is not great coding - it might be better to have one function that returns the info for any section name, and then make specific lists for specific projects.
 
 ---
 

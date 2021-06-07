@@ -7,6 +7,10 @@ because it can take a few hours.  Use "-sn all" to get all sections.
 
 Takes about 10-15 hours for 39 cas6 sections, per year.
 
+To test on mac:
+
+run extract_sections -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -test True
+
 """
 
 from pathlib import Path
@@ -27,7 +31,7 @@ result_dict['start_dt'] = datetime.now()
 import Lfun
 import numpy as np
 import netCDF4 as nc
-from datetime timedelta
+from datetime import timedelta
 
 import zrfun
 import tef_fun
@@ -36,44 +40,37 @@ if Ldir['testing']:
     from importlib import reload
     reload(tef_fun)
 
-dt0 = datetime.strptime(ds0, '%Y.%m.%d')
-dt1 = datetime.strptime(ds1, '%Y.%m.%d')
+ds0 = Ldir['ds0']
+ds1 = Ldir['ds1']
+dt0 = datetime.strptime(ds0, Ldir['ds_fmt'])
+dt1 = datetime.strptime(ds1, Ldir['ds_fmt'])
 ndays = (dt1-dt0).days + 1
 
 print('Working on:')
-print(Ldir['gtagex'] + '_' + ds0 + '_' + ds1 +'\n')
+outname = 'extractions_' + ds0 + '_' + ds1
+print(outname +'\n')
 
 # make sure the output directories exist
-outdir000 = Ldir['LOo']
-Lfun.make_dir(outdir000)
-outdir00 = outdir000 + 'tef2/'
-Lfun.make_dir(outdir00)
-outdir0 = (outdir00 + Ldir['gtagex'] + '_' + ds0 + '_' + ds1 + '/')
-Lfun.make_dir(outdir0)
-outdir = outdir0 + 'extractions/'
-Lfun.make_dir(outdir)
+out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef' / outname
+Lfun.make_dir(out_dir)
 
 # get the DataFrame of all sections
 sect_df = tef_fun.get_sect_df()
 # initialize a dictionary of info for each section
 sect_info = dict()
 # select which sections to extract
-if args.sect_name == 'all':
+if Ldir['sect_name'] == 'all':
     # full list
     sect_list = [item for item in sect_df.index]
 else: # single item
-    if args.sect_name in sect_df.index:
-        sect_list = [args.sect_name]
+    if Ldir['sect_name'] in sect_df.index:
+        sect_list = [Ldir['sect_name']]
     else:
         print('That section is not available')
         sys.exit()
 
 # get list of history files to process
-if 'LO_roms' in args.run_directory:
-    LO_version = True
-else:
-    LO_version = False
-fn_list = Lfun.get_fn_list('hourly', Ldir, ds0, ds1, LO_version=LO_version)
+fn_list = Lfun.get_fn_list('hourly', Ldir, ds0, ds1)
 NT = len(fn_list)
 
 # get grid info
@@ -86,7 +83,7 @@ print('\nGetting section definitions and indices')
 for sect_name in sect_list:
     print(sect_name)
     # name output file
-    out_fn = (outdir + sect_name + '.nc')
+    out_fn = out_dir / (sect_name + '.nc')
     # get section lat, lon, and other info
     x0, x1, y0, y1 = sect_df.loc[sect_name,:]
     # get indices for this section
@@ -116,23 +113,16 @@ for fn in fn_list:
         tef_fun.add_fields(ds, count, vn_list, G, S, sinfo)
     ds.close()
     count += 1
-
-# finale
-import collections
-result_dict = collections.OrderedDict()
-result_dict['outdir'] = outdir
-time_format = '%Y.%m.%d %H:%M:%S'
-result_dict['start_time'] = start_time.strftime(time_format)
-end_time = datetime.now()
-result_dict['end_time'] = end_time.strftime(time_format)
-dt_sec = (end_time - start_time).seconds
-result_dict['total_seconds'] = str(dt_sec)
-if os.path.isfile(out_fn):
-    result_dict['result'] = 'success'
+    
+# test for success 
+if True: # placeholder for a test
+    result_dict['result'] = 'success' # success or fail
 else:
     result_dict['result'] = 'fail'
-print('')
-for k in result_dict.keys():
-    print('%s: %s' % (k, result_dict[k]))
+
+# *******************************************************
+
+result_dict['end_dt'] = datetime.now()
+
 
 
