@@ -9,7 +9,7 @@ import netCDF4 as nc
 import numpy as np
 import pandas as pd
 from scipy.spatial import cKDTree
-from datetime import datetime
+from datetime import datetime, timedelta
 
 import Ofun
 import zfun # alpha is already on path

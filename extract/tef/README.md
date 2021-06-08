@@ -1,8 +1,8 @@
 # README for the tef code
 
-## Code to do TEF extractions and processing. The code also works on the segments between TEF sections, for example to make volume-integrated budgets of volume, salt and salinity variance.
+### This is code to do TEF extractions and processing. The code also works on the segments between TEF sections, for example to make volume-integrated budgets of volume, salt and salinity variance.
 
-## WORKFLOW OVERVIEW
+#### WORKFLOW OVERVIEW
 
 In order to get to where you can run `flux_salt_budget.py` you first need to go through two separate workflows because these prepare the independent information at (1) TEF sections, and (2) segments between the sections.
 
@@ -21,7 +21,7 @@ Then you can run `flux_salt_budget.py`
 NOTES:
 - All extraction transports are positive Eastward and Northward.
 - We keep velocity and area of each cell, instead of just transport.
-- We have the option to keep more variables (e.g. NO3), but it is still clunky in implementation,
+- We have the option to keep more variables (e.g. temp, oxygen, and NO3), by editing vn_list in `extract_sections.py`, but the subsequent processing is not yet carried through the other code.
 
 ---
 
@@ -37,30 +37,34 @@ NOTES:
 
 Input: ROMS history files over some date range
 
-Output: LO_output/extract/tef/[\*]/extractions/[sect name].nc where: [\*] = cas6_v3_lo8b_2017.01.01_2017.12.31 for example
+Output: LO_output/extract/[gtagex]/tef/extractions_[\*]/[sect name].nc where:
+
+- [\*] = 2017.01.01_2017.12.31 for example
 
 Variables: ocean_time, salt, q, z0, DA0, lon, lat, h, zeta
 - salt is hourly salinity in each cell (t, z, y-or-x)
-- and any other variables like temp, oxygen, or NO3
 - q is hourly transport in each cell (t, z, y-or-x)
 - vel is velocity in each cell (t, z, y-or-x) positive to East or North
 - DA is the area of each cell (t, z, y-or-x) hence: q = vel * DA
 - z0 is the average depth of cell centers (assumes SSH=0)
-- DA0 is the average cross-sectional area of each cell (assumes SSH=0),
-
-NOTE: the actual tracer variables to be extracted are defined in `tef_fun.start_netcdf.nc()`.  Not ideal to have it hidden so deep, but it is a convenient place to create the whole list if needed.
+- DA0 is the average cross-sectional area of each cell (assumes SSH=0)
+- h is depth on the section (y-or-x) positive down
+- zeta is SSH on the section (t, y-or-x) positive up
+- ocean_time is a vector of time in seconds since (typically) 1/1/1970.
 
 ---
 
 `process_sections.py` organizes all the transports at each time into salinity bins.
 
-Input: LiveOcean_output/tef2/[\*]/extractions/[sect name].nc
+Input: the output NetCDF files from `extract_sections.py`
 
-Output: LiveOcean_output/tef2/[\*]/processed/[sect name].p
-a pickled dict with keys: ['tef_q','tef_vel','tef_da', 'tef_qs', 'sbins', 'ot', 'qnet', 'fnet', 'ssh']
+Output: LO_output/extract/[gtagex]/tef/processed_[\*]/[sect name].p
+
+- a pickled dict with keys: ['tef_q','tef_vel','tef_da', 'tef_qs', 'sbins', 'ot', 'qnet', 'fnet', 'ssh']
+
 These are defined as:
+
 - tef_q transport in salinity bins, hourly, (m3/s)
--	tef_vel velocity in salinity bins, hourly, (m/s)
 -	tef_da area in salinity bins, hourly, (m2)
 -	tef_qs salt transport in salinity bins, hourly, (g/kg m3/s)
 -	tef_qs2 salinity-squared transport in salinity bins, hourly, (g2/kg2 m3/s)
@@ -69,6 +73,7 @@ These are defined as:
 -	qnet section integrated transport (m3/s)
 -	fnet section integrated tidal energy flux (Watts)
 -	ssh section averaged ssh (m)
+
 Packed in order (time, salinity bin).
 
 NOTE: we create tef_vel as the flux-weighted velocity: tef_vel = tef_q/tef_da.
@@ -103,13 +108,19 @@ NOTE: The code with "flux_" at the start of its name is focused on the "efflux_r
 A key piece is the dict flux_fun.segs where we set up the segment names and define (i) the sections on each direction NSEW, and (ii) the rivers flowing into each segment.  This is created by hand while looking at the plots created by flux_seg_map.py below.
 
 A key item is the dict "segs" which whose keys are the segment names, and whose values are in turn dicts which define lists of sections surrounding a segment, and a list of rivers.
+
+```
 segs = {
-        'J1':{'S':[], 'N':[], 'W':['jdf1'], 'E':['jdf2'], 'R':['sanjuan', 'hoko']}, etc.
-Originally this was created by looking at the plot made by plot_thalweg_mean.py, but the same information is shown more clearly now in the plots made by flux_seg_map.py below.
+        'J1':{'S':[], 'N':[], 'W':['jdf1'], 'E':['jdf2'], 'R':['sanjuan', 'hoko']},
+        etc...
+      }
+```
+
+Originally this was created by looking at the plot made by `plot_thalweg_mean.py`, but the same information is shown more clearly now in the plots made by `flux_seg_map.py` below.
 
 Also has channel_dict, seg_dict, other things which associate lists of sections or segments with each of four "channels".
 
-flux_fun.make_dist(x,y) makes vectors of distance along lon,lat vectors x,y
+`flux_fun.make_dist(x,y)` makes vectors of distance along lon,lat vectors x,y
 
 ---
 

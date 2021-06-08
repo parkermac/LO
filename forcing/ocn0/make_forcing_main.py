@@ -19,7 +19,7 @@ flags like verbose, testing_ncks, an testing_fmrc.
 
 from pathlib import Path
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
@@ -32,7 +32,6 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
-from datetime import timedelta
 import shutil, os
 import pickle
 import netCDF4 as nc

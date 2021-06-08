@@ -6,7 +6,7 @@ Extract and save extracted fields from a sequence of hycom past days.
 # setup
 import os
 import sys
-pth = os.path.abspath('../../alpha')
+pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if pth not in sys.path:
     sys.path.append(pth)
 import Lfun

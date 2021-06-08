@@ -13,7 +13,7 @@ If you call with -short_roms True it will create dot_in that only runs ROMS for 
 # NOTE: we limit the imports to modules that exist in python3 on mox
 from pathlib import Path
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
@@ -38,7 +38,6 @@ if Ldir['ex_name'] != ex_name_check:
     print('WARNING: ex_name mismatch')
     sys.exit()
 
-from datetime import datetime, timedelta
 fdt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
 fdt_yesterday = fdt - timedelta(1)
 

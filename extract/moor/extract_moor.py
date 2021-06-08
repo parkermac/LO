@@ -12,7 +12,7 @@ on perigee with cas6_v3_lo8b and all flags True.
 
 from pathlib import Path
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
@@ -28,7 +28,6 @@ result_dict['start_dt'] = datetime.now()
 import Lfun
 import zrfun, zfun
 from time import time
-from datetime import timedelta
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import numpy as np

@@ -13,7 +13,7 @@ run make_forcing_main.py -g cas6 -t v3 -r forecast -s continuation -d [Today's d
 
 from pathlib import Path
 import sys
-from datetime import datetime
+from datetime import datetime, timedelta
 
 pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
@@ -26,7 +26,6 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 import os
-from datetime import timedelta
 import pandas as pd
 
 import zrfun

@@ -30,12 +30,13 @@ def get_sect_df():
     sect_df.loc['sog3',:] = [-124.223, -124.223,   49.220,   49.946]
     sect_df.loc['sog4',:] = [-125.356, -124.556,   50.002,   50.002]
     sect_df.loc['sog5',:] = [-125.600, -124.400,   50.200,   50.200]
+    
     # San Juans
     sect_df.loc['sji1',:] = [-123.350, -122.65,   48.438,   48.438]
     sect_df.loc['sji2',:] = [-123.449, -122.425,   48.681,   48.681]
 
-    # Channels around the San Juans
-    sect_df.loc['dp',:] = [-122.643, -122.643,   48.389,   48.425]
+    # Deception Pass
+    sect_df.loc['dp',:]  = [-122.643, -122.643,   48.389,   48.425]
 
     # Admiralty Inlet
     sect_df.loc['ai1',:] = [-122.762, -122.762,   48.141,   48.227]
@@ -166,23 +167,9 @@ def get_inds(x0, x1, y0, y1, G, verbose=False):
         
     return ii0, ii1, jj0, jj1, sdir, Lon, Lat, Mask
     
-def start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir):
+def start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir, vn_list):
     out_fn.unlink(missing_ok=True)
     ds = nc.Dataset(out_fn, 'w')
-    # generating some lists
-    vn_list = []
-    if False:
-        # all 3D variables on the s_rho grid
-        for vv in ds.variables:
-            vdim = ds.variables[vv].dimensions
-            if ( ('ocean_time' in vdim) and ('s_rho' in vdim) ):
-                vn_list.append(vv)
-    else:
-        # override
-        vn_list.append('salt')
-        # vn_list.append('oxygen')
-        # vn_list.append('temp')
-        # vn_list.append('NO3')
     # and some dicts of long names and units
     long_name_dict = dict()
     units_dict = dict()
@@ -251,8 +238,6 @@ def start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir):
     foo.date_string1 = Ldir['ds1']
 
     foo.close()
-    
-    return vn_list
     
 def add_fields(ds, count, vn_list, G, S, sinfo):
     
