@@ -162,20 +162,17 @@ def find_extrema(x, comp=5, print_info=False): # new, reduced, better described
         print(' >> indices = %s' % (str(indices)))
         print(' >> minmax = %s' % (str(minmax)))
     
-            
     return indices, minmax
-
-def calc_bulk_values(s, Qv, Vv, Av, Qs, Qs2, print_info=False):
+    
+def calc_bulk_values(s, thisQ_dict, vn_list, print_info=False, min_trans=1):
     """
     input
-    s=salinity array
-    Qv=Q(S)
-    Qs=Q*s(S)
-    Qs2=Q*s(S)*s(S)
-    min_trans=minimum transport to consider
+    s=salinity array (sedges)
+    Integrated transport arrays vs. S for a given time
+    min_trans = minimum transport to consider
     """    
     # use the find_extrema algorithm
-    ind, minmax = find_extrema(Qv, print_info=print_info)
+    ind, minmax = find_extrema(thisQ_dict['q'], print_info=print_info)
     
     # compute dividing salinities
     smin=s[0]
@@ -185,45 +182,35 @@ def calc_bulk_values(s, Qv, Vv, Av, Qs, Qs2, print_info=False):
     while i < len(ind): 
         div_sal.append(smin+DS*ind[i])
         i+=1
-        
+                
     #calculate transports etc.
-    Q_in_m=[]
-    Q_out_m=[]
-    V_in_m=[]
-    V_out_m=[]
-    A_in_m=[]
-    A_out_m=[]
-    s_in_m=[]
-    s_out_m=[]
-    s2_in_m=[]
-    s2_out_m=[]
+    in_dict = dict()
+    out_dict = dict()
+    for vn in vn_list:
+            in_dict[vn] = []
+            out_dict[vn] = []
     index=[]
     i=0
+    vn_list_short = [item for item in vn_list if item != 'q']
     while i < len(ind)-1:
         # compute the transports and sort to in and out
-        Q_i=-(Qv[ind[i+1]]-Qv[ind[i]])
-        V_i=Vv[ind[i]:ind[i+1]].mean()
-        A_i=Av[ind[i]:ind[i+1]].sum()
-        F_i =-( Qs[ind[i+1]] -Qs[ind[i]])
-        F2_i=-(Qs2[ind[i+1]]-Qs2[ind[i]])
-        #V_i=np.abs(Q_i)/np.abs(A_i) # doing this yields exactly the original TEF results
-        s_i=np.abs(F_i)/np.abs(Q_i)
-        s2_i=np.abs(F2_i)/np.abs(Q_i)
-        if Q_i<0 and np.abs(Q_i)>1:
-            Q_out_m.append(Q_i)
-            V_out_m.append(V_i)
-            A_out_m.append(A_i)
-            s_out_m.append(s_i)
-            s2_out_m.append(s2_i)
-        elif Q_i > 0 and np.abs(Q_i)>1:
-            Q_in_m.append(Q_i)
-            V_in_m.append(V_i)
-            A_in_m.append(A_i)
-            s_in_m.append(s_i)
-            s2_in_m.append(s2_i)
+        Q_i=-(thisQ_dict['q'][ind[i+1]]-thisQ_dict['q'][ind[i]])
+        if Q_i<0 and np.abs(Q_i)>min_trans:
+            out_dict['q'].append(Q_i)
+        elif Q_i > 0 and np.abs(Q_i)>min_trans:
+            in_dict['q'].append(Q_i)
         else:
             index.append(i)
+            # this allows clipping of cases with tiny transport
+        for vn in vn_list_short:
+            F_i =-(thisQ_dict[vn][ind[i+1]] - thisQ_dict[vn][ind[i]])
+            vn_i=np.abs(F_i)/np.abs(Q_i)
+            if Q_i<0 and np.abs(Q_i)>1:
+                out_dict[vn].append(vn_i)
+            elif Q_i > 0 and np.abs(Q_i)>1:
+                in_dict[vn].append(vn_i)
         i+=1
+    # remove clipped div_sal values
     div_sal = np.delete(div_sal, index)
         
-    return Q_in_m, Q_out_m, V_in_m, V_out_m, A_in_m, A_out_m, s_in_m, s_out_m, s2_in_m, s2_out_m, div_sal, ind, minmax
+    return (in_dict, out_dict, div_sal, ind, minmax)

@@ -30,6 +30,8 @@ def intro():
     # generic arguments used by extract/cast
     parser.add_argument('-cruises', type=str, default='test_cruises')
     # generic arguments used by extract/tef
+    # NOTE: the tef code shares the -get_bio argument and uses it to set a
+    # longer list of variables for extraction
     parser.add_argument('-sect_name', type=str, default='ai1')
     
     

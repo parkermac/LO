@@ -186,8 +186,6 @@ def start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir, vn_list):
     # add custom dict fields
     long_name_dict['q'] = 'transport'
     units_dict['q'] = 'm3 s-1'
-    long_name_dict['vel'] = 'velocity'
-    units_dict['vel'] = 'm s-1'
     long_name_dict['lon'] = 'longitude'
     units_dict['lon'] = 'degrees'
     long_name_dict['lat'] = 'latitude'
@@ -211,7 +209,7 @@ def start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir, vn_list):
         v_var = foo.createVariable(vv, float, ('ocean_time',))
         v_var.long_name = long_name_dict[vv]
         v_var.units = units_dict[vv]
-    for vv in vn_list + ['q', 'vel', 'DA']:
+    for vv in vn_list + ['q', 'DA']:
         v_var = foo.createVariable(vv, float, ('ocean_time', 's_rho', 'xi_sect'))
         v_var.long_name = long_name_dict[vv]
         v_var.units = units_dict[vv]
@@ -301,7 +299,6 @@ def add_fields(ds, count, vn_list, G, S, sinfo):
     q = vel * DA
     
     foo['q'][count, :, :] = q
-    foo['vel'][count, :, :] = vel
     foo['DA'][count, :, :] = DA
     foo['zeta'][count, :] = zeta
     foo['ocean_time'][count] = ds['ocean_time'][0]

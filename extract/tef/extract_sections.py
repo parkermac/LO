@@ -9,7 +9,7 @@ Takes about 10-15 hours for 39 cas6 sections, per year.
 
 To test on mac (default is to just get ai1 section):
 
-run extract_sections -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -test True
+run extract_sections -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_bio True -test True
 
 To get all sections for the same time:
 
@@ -33,9 +33,10 @@ result_dict['start_dt'] = datetime.now()
 # ****************** CASE-SPECIFIC CODE *****************
 
 # set list of variables to extract
-vn_list = ['salt']
-# vn_list = ['salt', 'temp']
-# vn_list = ['salt', 'temp', 'oxygen', 'NO3']
+if Ldir['get_bio']:
+    vn_list = ['salt', 'temp', 'oxygen', 'NO3', 'TIC', 'alkalinity']
+else:
+    vn_list = ['salt']
 
 import Lfun
 import numpy as np
