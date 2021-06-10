@@ -43,7 +43,7 @@ Lfun.make_dir(out_dir, clean=True)
 
 # =================================
 
-testing = True
+testing = False
 
 for snp in sect_list:
     print('Working on ' + snp)

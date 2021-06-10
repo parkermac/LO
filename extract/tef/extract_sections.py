@@ -13,7 +13,7 @@ run extract_sections -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -ge
 
 To get all sections for the same time:
 
-python extract_sections -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -sect_name all > log_all_test &
+python extract_sections.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -sect_name all > log_all_test &
 
 """
 
