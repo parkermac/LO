@@ -135,6 +135,7 @@ sys.stdout.flush()
 #     fn_list = [fn_list[0]]
 
 print('\nDoing initial data extraction:')
+tt000 = time()
 proc_list = []
 N = len(fn_list)
 for ii in range(N):
@@ -151,15 +152,15 @@ for ii in range(N):
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
     
-    if (np.mod(ii,10) == 0) or (ii == N-1):
-        print(' - %d out of %d' % (ii, N))
-        sys.stdout.flush()
+    Nproc = 20
+    if (np.mod(ii,Nproc) == 0) or (ii == N-1):
         tt0 = time()
         for proc in proc_list:
             proc.communicate()
-        print(' -- Elapsed time = %0.2f sec' % (time()-tt0))
+        print(' - %d out of %d: %d took %0.2f sec' % (ii, N, Nproc, time()-tt0))
         sys.stdout.flush()
         proc_list = []
+print('Elapsed time = %0.2f sec' % (time()-tt000))
 
 # write fields to NetCDF
 
