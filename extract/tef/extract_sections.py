@@ -115,17 +115,24 @@ sys.stdout.flush()
 
 tt0 = time()
 print('\nInitializing NetCDf output files:')
+sl = sect_list.copy()
+while len(sl) > 0:
+    if len(sl) >= 10:
+        print(sl[:10])
+        sl = sl[10:]
+    else:
+        print(sl)
+        sl = []
 for sect_name in sect_list:
     out_fn = out_dir / (sect_name + '.nc')
-    print(sect_name)
     ii0, ii1, jj0, jj1, sdir, NX, Lon, Lat = sect_info[sect_name]
     tef_fun.start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir, vn_list)
 print('Elapsed time = %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
 
 # do the initial data extraction
-if Ldir['testing']:
-    fn_list = [fn_list[0]]
+# if Ldir['testing']:
+#     fn_list = [fn_list[0]]
 
 print('\nDoing initial data extraction:')
 proc_list = []
@@ -157,22 +164,15 @@ for ii in range(N):
 # write fields to NetCDF
 
 # # extract and save time-dependent fields
-# count = 0
-# print('\nStarting extraction of fields:')
-# print(vn_list)
-# for fn in fn_list:
-#     if np.mod(count,24)==0:
-#         print('  working on %d of %d' % (count, NT))
-#         sys.stdout.flush()
-#     ds = nc.Dataset(fn)
-#     # loop over all sections
-#     for sect_name in sect_list:
-#         sinfo = sect_info[sect_name]
-#         # this is where we add the data from this history file
-#         # to all of the sections, each defined by sinfo
-#         tef_fun.add_fields(ds, count, vn_list, G, S, sinfo)
-#     ds.close()
-#     count += 1
+tt0 = time()
+print('\nAdding data to NetCDF files:')
+for sect_name in sect_list:
+    out_fn = out_dir / (sect_name + '.nc')
+    # this is where we add the data from this history file
+    # to all of the sections, each defined by sinfo
+    tef_fun.add_fields(out_fn, temp_dir, sect_name, vn_list, S, NT)
+print('Elapsed time = %0.2f sec' % (time()-tt0))
+sys.stdout.flush()
     
 print('\nTotal elapsed time = %d seconds' % (time()-tt00))
     

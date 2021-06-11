@@ -48,12 +48,15 @@ for ext_fn in sect_list:
     # load fields
     ds = nc.Dataset(in_dir / ext_fn)
     
+    
+    
     V = dict()
     for vn in vn_list:
-        # It may seem extravagant to read everything into memory, but
-        # even for a full year on a long section it is under 1 GB so
-        # let's give it a go.
-        V[vn] = ds[vn][:]
+        if vn in ds.variables:
+            V[vn] = ds[vn][:]
+        else:
+            print('variable %s not found' % (vn))
+            vn_list.remove(vn)
     V['salt2'] = V['salt']*V['salt']
     
     q = ds['q'][:]
@@ -103,6 +106,7 @@ for ext_fn in sect_list:
             sf = si[si.mask==False].data.flatten()
         else:
             sf = si.flatten()
+        sf = sf[~np.isnan(sf)]
         # sort into salinity bins
         inds = np.digitize(sf, sedges, right=True)
         indsf = inds.copy().flatten()
@@ -113,6 +117,7 @@ for ext_fn in sect_list:
                 XF = XI[XI.mask==False].data.flatten()
             else:
                 XF = XI.flatten()
+            XF = XF[~np.isnan(XF)]
                 
             if vn == 'q':
                 # also keep track of volume transport

@@ -79,6 +79,7 @@ else:
 # gather fields for section extractions
 tt0 = time()
 ds = nc.Dataset(fn)
+ot = ds['ocean_time'][0]
 H = ds['h'][:]
 Zeta = ds['zeta'][0,:,:]
 U = ds['u'][0,:,:,:]
@@ -122,6 +123,7 @@ for sect_name in sect_list:
     C['zeta'] = zfun.fillit(zeta)
     C['d'] = zfun.fillit(d)
     C['vel'] = zfun.fillit(vel)
+    C['ot'] = ot
     
     A[sect_name] = C
 pickle.dump(A, open(out_fn, 'wb'))

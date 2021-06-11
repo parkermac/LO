@@ -239,8 +239,66 @@ def start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir, vn_list):
     foo.date_string1 = Ldir['ds1']
 
     foo.close()
+
+def add_fields(out_fn, temp_dir, sect_name, vn_list, S, NT):
+        
+    foo = nc.Dataset(out_fn, 'a')
     
-def add_fields(ds, count, vn_list, G, S, sinfo):
+    A_list = list(temp_dir.glob('A*.p'))
+    A_list.sort()
+    count = 0
+    
+    for A_fn in A_list:
+        A = pickle.load(open(A_fn, 'rb'))
+        C = A[sect_name]
+        
+        if count == 0:
+            d = C['d']
+            NX = len(d)
+            NZ = S['N']
+            
+            h = C['h']
+            foo['h'][:] = h
+            
+            z0 = zrfun.get_z(h, 0*h, S, only_rho=True)
+            foo['z0'][:] = z0
+            
+            zw0 = zrfun.get_z(h, 0*h, S, only_w=True)
+            DZ0 = np.diff(zw0, axis=0)
+            DA0 = d.reshape((1, NX)) * DZ0
+            foo['DA0'][:] = DA0
+            
+            zeta_arr = np.nan * np.ones((NT, NX))
+            h_arr = np.nan * np.ones((NT, NX))
+            vel_arr = np.nan * np.ones((NT, NZ, NX))
+            
+        zeta_arr[count,:] = C['zeta']
+        h_arr[count,:] = h
+        vel_arr[count,:,:] = C['vel']
+        
+        for vn in vn_list:
+            foo[vn][count,:,:] = C[vn]
+            
+        foo['ocean_time'][count] = C['ot']
+        
+        count += 1
+    
+    z = zrfun.get_z(h_arr, zeta_arr, S, only_w=True)
+    # initially z is packed (z,t,x)
+    z = np.transpose(z, (1,0,2))
+    # now it should be (t,z,x)
+    DZ = np.diff(z, axis=1)
+    DA = d.reshape((1, 1, NX)) * DZ
+    q = vel_arr * DA
+    
+    foo['zeta'][:] = zeta_arr
+    foo['q'][:] = q
+    foo['DA'][:] = DA
+    
+        
+    foo.close()
+    
+def add_fields_OLD(ds, count, vn_list, G, S, sinfo):
     
     ii0, ii1, jj0, jj1, sdir, NT, NX, NZ, out_fn = sinfo
     
