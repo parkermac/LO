@@ -164,7 +164,10 @@ def get_inds(x0, x1, y0, y1, G, verbose=False):
             print('  sdir=%2s: jj0=%4d, ii0=%4d, ii1=%4d' % (sdir, jj0, ii0, ii1))
         Lon = lon[ii0:ii1+1]
         Lat = lat[jj0] * np.ones_like(Mask)
-        
+    
+    Lon = zfun.fillit(Lon)
+    Lat = zfun.fillit(Lat)
+    
     return ii0, ii1, jj0, jj1, sdir, Lon, Lat, Mask
     
 def start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir, vn_list):
