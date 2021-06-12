@@ -1,5 +1,5 @@
 """
-Plot bulk fluxes as a time series.
+Plot bulk fluxes as a time series, including all chamical tracers.
 """
 from pathlib import Path
 import sys
@@ -44,19 +44,19 @@ if testing:
     reload(flux_fun)
 
 if testing:
-    sect_list = ['ai1']
+    sect_list = ['ai4']
 else:
     sect_list = list(sect_df.index)
 
 # PLOTTING
 fs = 14
-pfun.start_plot(fs=fs, figsize=(14,10))
+pfun.start_plot(fs=fs, figsize=(17,10))
 
 for sect_name in sect_list:
 
     # ---------------------------------------------------------
 
-    tef_df, in_sign = flux_fun.get_fluxes(in_dir, sect_name)
+    tef_df, in_sign = flux_fun.get_two_layer_all(in_dir, sect_name)
     
     # some information about direction
     x0, x1, y0, y1 = sect_df.loc[sect_name,:]
@@ -79,9 +79,8 @@ for sect_name in sect_list:
     qlim_m = np.around(-1.2*tef_df['Qout'].min(), 0)
     qlim = np.max([qlim_p, qlim_m])
     
-    # Salinity vs. Time (color by Transport)
-    ax = fig.add_subplot(211)
-    tef_df[['Sin','Sout']].plot(ax=ax, legend=False, color=['r','b'])
+    ax = fig.add_subplot(321)
+    tef_df[['salt_in','salt_out']].plot(ax=ax, legend=False, color=['r','b'])
     ax.set_title('Section = ' + sect_name + ': Positive is ' + dir_str)
     ax.grid(True)
     ax.set_xticklabels([])
@@ -90,25 +89,57 @@ for sect_name in sect_list:
     ax.text(.03, .95, '(a)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
         bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
         
-    # Tranport vs. Time
-    ax = fig.add_subplot(212)
+    ax = fig.add_subplot(323)
+    tef_df[['temp_in','temp_out']].plot(ax=ax, legend=False, color=['r','b'])
+    ax.grid(True)
+    ax.set_xticklabels([])
+    ax.set_xlabel('')
+    ax.set_ylabel('Temperature')
+    ax.text(.03, .95, '(c)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
+        bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
+        
+    ax = fig.add_subplot(325)
     tef_df[['Qin','Qout']].plot(ax=ax, legend=False, color=['r','b'])
     ax.set_ylim(-qlim, qlim)
     ax.grid(True)
-    ax.set_ylabel('Transport $[1000\ m^{3}s^{-1}]$')
-    ax.text(.03, .95, '(b)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
+    ax.set_ylabel('Transport $[m^{3}s^{-1}]$')
+    ax.text(.03, .95, '(e)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
         bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
-
-    if tef_df['Sin'].mean() > tef_df['Sout'].mean():
+    if tef_df['salt_in'].mean() > tef_df['salt_out'].mean():
         pass
     else:
         print('Warning: sign logic breakdown! ' + sect_name)
-    
     ax.text(.97, .95, 'Inflow', ha='right', va='top', weight='bold', color='r',
         transform=ax.transAxes, size=1.2*fs,
         bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
     ax.text(.97, .05, 'Outflow', ha='right', va='bottom', weight='bold', color='b',
         transform=ax.transAxes, size=1.2*fs,
+        bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
+        
+    ax = fig.add_subplot(322)
+    tef_df[['NO3_in','NO3_out']].plot(ax=ax, legend=False, color=['r','b'])
+    ax.grid(True)
+    ax.set_xticklabels([])
+    ax.set_xlabel('')
+    ax.set_ylabel('NO3')
+    ax.text(.03, .95, '(b)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
+        bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
+        
+    ax = fig.add_subplot(324)
+    tef_df[['oxygen_in','oxygen_out']].plot(ax=ax, legend=False, color=['r','b'])
+    ax.grid(True)
+    ax.set_xticklabels([])
+    ax.set_xlabel('')
+    ax.set_ylabel('Oxygen')
+    ax.text(.03, .95, '(d)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
+        bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
+        
+    ax = fig.add_subplot(326)
+    tef_df[['TIC_in','TIC_out']].plot(ax=ax, legend=False, color=['r','b'])
+    tef_df[['alkalinity_in','alkalinity_out']].plot(ax=ax, legend=False, color=['r','b'], linestyle='--')
+    ax.grid(True)
+    ax.set_ylabel('TIC (solid), Alk. (dashed)')
+    ax.text(.03, .95, '(f)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
         bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
         
     fig.tight_layout()

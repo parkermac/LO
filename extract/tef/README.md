@@ -4,7 +4,7 @@
 
 #### WORKFLOW OVERVIEW
 
-In order to get to where you can run `flux_salt_budget.py` you first need to go through two separate workflows because these prepare the independent information at (1) TEF sections, and (2) segments between the sections.
+In order to get to where you can run `flux_salt_budget.py` you need to go through two separate workflows because these prepare the independent information at (1) TEF sections, and (2) segments between the sections.
 
 (1) TEF sections:
  - `extract_sections.py`
@@ -20,17 +20,17 @@ Then you can run `flux_salt_budget.py`
 
 NOTES:
 - All extraction transports are positive Eastward and Northward.
-- We keep velocity and area of each cell, instead of just transport.
-- We have the option to keep more variables (e.g. temp, oxygen, and NO3), by editing vn_list in `extract_sections.py`, but the subsequent processing is not yet carried through the other code.
 
 ---
+
+### PREAMBLE
 
 `ptools/pgrid/tef_section_maker.py` is a tool to define sections, if needed.  This is a GUI where you define section endpoints (forced to be either perfectly E-W or N-S), name the section, and define which direction is "landward" (i.e. which way is positive transport).  You can define one or more sections in a session.  At the end, when you push DONE it produces screen output suitable for pasting into new or existing lists in `tef_fun.get_sect_df()`.
 
+`tef_fun.py` is an important module for this code. Includes `tef_fun.get_sect_df()` which returns a DataFrame of all the section names and their lon,lat endpoints. To control which sections will be processed by later programs (like to do extractions) you comment/uncomment lines in this function. This is not great coding - it might be better to have one function that returns the info for any section name, and then make specific lists for specific projects.
+
 ---
-
-`tef_fun.py` is an important module for this code. Includes `tef_fun.get_sect_df()` which returns a DataFrame of all the section names and their lon,lat endpoints. The entries in this are pasted in by hand while using `tef_section_maker.py` as documented above. Then to control which sections will be processed by later programs (like to do extractions) you comment/uncomment lines in this function. This is not great coding - it might be better to have one function that returns the info for any section name, and then make specific lists for specific projects.
-
+### EXTRACTION CODE
 ---
 
 `extract_sections.py` creates a NetCDF file for each section with arrays of hourly transport and tracer values on the section, arranged as (t, z, x-or-y). Using command line arguments you can change the run and the day range. When you run the code you can decide at the command line to extract all the sections from the list, or just one. The main list is defined in `tef_fun.get_sect_df()`. Typically this will be done on a remote machine, like boiler, although the defaults are designed to work with model output I have saved on my mac.

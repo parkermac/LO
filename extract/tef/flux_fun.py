@@ -14,14 +14,96 @@ from warnings import filterwarnings
 filterwarnings('ignore') # skip some warning messages
 # associated with lines like QQp[QQ<=0] = np.nan
 
-def get_fluxes(indir, sect_name):
+def get_two_layer_all(in_dir, sect_name):
+    """
+    Form time series of 2-layer TEF quantities, from the multi-layer bulk values.
+    - works on all tracers
+    - adjust sign convention so that Qs is positive for the saltier layer and call it Qin
+    """
+    
+    bulk = pickle.load(open(in_dir / (sect_name + '.p'), 'rb'))
+    
+    QQ = bulk['q']
+    ot = bulk['ot']
+    dt = []
+    for tt in ot:
+        dt.append(Lfun.modtime_to_datetime(tt))
+
+    vn_list = ['salt', 'temp', 'oxygen', 'NO3', 'TIC', 'alkalinity']
+    vn_list = [item for item in vn_list if item in bulk.keys()]
+        
+    # separate positive and negative transports
+    QQp = QQ.copy()
+    QQp[QQ<=0] = np.nan
+    QQm = QQ.copy()
+    QQm[QQ>=0] = np.nan
+    
+    # form two-layer versions
+    Qp = np.nansum(QQp, axis=1)
+    Qm = np.nansum(QQm, axis=1)
+    QCp = dict()
+    QCm = dict()
+    for vn in vn_list:
+        QCp[vn] = np.nansum(QQp*bulk[vn], axis=1)
+        QCm[vn] = np.nansum(QQm*bulk[vn], axis=1)
+        
+    
+    # TEF versions
+    Cp = dict()
+    Cm = dict()
+    for vn in vn_list:
+        Cp[vn] = QCp[vn]/Qp
+        Cm[vn] = QCm[vn]/Qm
+        
+    # adjust sign convention so that positive flow is salty
+    SP = np.nanmean(Cp['salt'])
+    SM = np.nanmean(Cm['salt'])
+    if SP > SM:
+        # positive was inflow
+        Cin = Cp.copy()
+        Cout = Cm.copy()
+        Qin = Qp
+        Qout = Qm
+        in_sign = 1
+        
+    elif SM > SP:
+        # postive was outflow
+        Cin = Cm.copy()
+        Cout = Cp.copy()
+        Qin = -Qm
+        Qout = -Qp
+        in_sign = -1
+    else:
+        print('ambiguous sign!!')
+    
+    if False:
+        print('%s SP=%0.1f SM = %0.1f' % (sect_name, SP, SM))
+        import sys
+        sys.stdout.flush()
+        
+    # fnet = in_sign * bulk['fnet']/1e6 # net tidal energy flux [MW]
+    # qabs = bulk['qabs'] # low pass of absolute value of net transport [m3/s]
+    
+    tef_df = pd.DataFrame(index=dt)
+    tef_df['Qin']=Qin
+    tef_df['Qout']=Qout
+    for vn in vn_list:
+        tef_df[vn+'_in'] = Cin[vn]
+        tef_df[vn+'_out'] = Cout[vn]
+    return tef_df, in_sign
+
+def get_fluxes(in_dir, sect_name, old_style=False):
     # Form time series of 2-layer TEF quantities, from the multi-layer bulk values.
     # - include transports for the no-tidal-pumping version
     # - adjust sign convention so that Qs is positive for the saltier layer and call it Qin
     
-    bulk = pickle.load(open(indir + 'bulk/' + sect_name + '.p', 'rb'))
-    QQ = bulk['QQ']
-    SS = bulk['SS']
+    bulk = pickle.load(open(in_dir / (sect_name + '.p'), 'rb'))
+    if old_style:
+        QQ = bulk['QQ']
+        SS = bulk['SS']
+    else:
+        QQ = bulk['q']
+        SS = bulk['salt']
     ot = bulk['ot']
     dt = []
     for tt in ot:
@@ -33,9 +115,9 @@ def get_fluxes(indir, sect_name):
     QQm = QQ.copy()
     QQm[QQ>=0] = np.nan
         
-    # full transports
-    QQm = QQm
-    QQp = QQp
+    # # full transports
+    # QQm = QQm
+    # QQp = QQp
     
     # form two-layer versions
     Qp = np.nansum(QQp, axis=1)
@@ -80,8 +162,8 @@ def get_fluxes(indir, sect_name):
         import sys
         sys.stdout.flush()
         
-    fnet = in_sign * bulk['fnet_lp']/1e6 # net tidal energy flux [MW]
-    qabs = bulk['qabs_lp'] # low pass of absolute value of net transport [m3/s]
+    # fnet = in_sign * bulk['fnet']/1e6 # net tidal energy flux [MW]
+    # qabs = bulk['qabs'] # low pass of absolute value of net transport [m3/s]
     
     tef_df = pd.DataFrame(index=dt)
     tef_df['Qin']=Qin
@@ -91,10 +173,11 @@ def get_fluxes(indir, sect_name):
     tef_df['Sin']=Sin
     tef_df['Sout']=Sout
 
-    tef_df['Ftide'] = fnet
-    tef_df['Qtide'] = qabs
+    # tef_df['Ftide'] = fnet
+    # tef_df['Qtide'] = qabs
     
     return tef_df, in_sign
+    
     
 # desired time ranges, the "seasons"
 def get_dtr(year):

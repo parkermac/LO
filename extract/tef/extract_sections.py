@@ -3,9 +3,9 @@ Extract fields at a number of sections which may be used later for TEF analysis
 of transport and transport-weighted properties, making use of multiple subprocesses
 to speed up operation.
 
-All input parameters specified at the command line, so this can be run in the background.
+All input parameters are specified at the command line, so this can be run in the background.
 
-Takes about 10-15 hours for 39 cas6 sections, per year.
+Performance: 4 hours per year, perigee, 39 cas6 sections, -get_bio True.  FAST!
 
 To test on mac (default is to just get ai1 section):
 
@@ -135,6 +135,8 @@ sys.stdout.flush()
 #     fn_list = [fn_list[0]]
 
 print('\nDoing initial data extraction:')
+# We do extractions one hour at a time, as separate subprocess jobs.
+# Running Nproc (e.g. 20) of these in parallel makes the code much faster.
 tt000 = time()
 proc_list = []
 N = len(fn_list)
@@ -147,8 +149,7 @@ for ii in range(N):
             '-out_pth',str(Ldir['LOo'] / 'extract'),
             '-gtagex', Ldir['gtagex'],
             '-d', d, '-nhis', str(nhis),
-            '-get_bio', str(Ldir['get_bio']),
-            '-testing', str(Ldir['testing'])]
+            '-get_bio', str(Ldir['get_bio'])]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
     
