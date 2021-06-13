@@ -23,14 +23,14 @@ NOTES:
 
 ---
 
-### PREAMBLE
+#### PREAMBLE
 
 `ptools/pgrid/tef_section_maker.py` is a tool to define sections, if needed.  This is a GUI where you define section endpoints (forced to be either perfectly E-W or N-S), name the section, and define which direction is "landward" (i.e. which way is positive transport).  You can define one or more sections in a session.  At the end, when you push DONE it produces screen output suitable for pasting into new or existing lists in `tef_fun.get_sect_df()`.
 
 `tef_fun.py` is an important module for this code. Includes `tef_fun.get_sect_df()` which returns a DataFrame of all the section names and their lon,lat endpoints. To control which sections will be processed by later programs (like to do extractions) you comment/uncomment lines in this function. This is not great coding - it might be better to have one function that returns the info for any section name, and then make specific lists for specific projects.
 
 ---
-### EXTRACTION CODE
+#### EXTRACTION CODE
 ---
 
 `extract_sections.py` creates a NetCDF file for each section with arrays of hourly transport and tracer values on the section, arranged as (t, z, x-or-y). Using command line arguments you can change the run and the day range. When you run the code you can decide at the command line to extract all the sections from the list, or just one. The main list is defined in `tef_fun.get_sect_df()`. Typically this will be done on a remote machine, like boiler, although the defaults are designed to work with model output I have saved on my mac.
@@ -98,7 +98,8 @@ Input: LiveOcean_output/tef2/[*]/bulk/[sect name].p
 Output: LiveOcean_output/tef2/[*]/bulk_plots_clean/[sect name].p
 
 ---
-
+#### FLUX CODE
+---
 NOTE: The code with "flux_" at the start of its name is focused on the "efflux_reflux" concepts of Cokelet and Stewart (1985, and subsequent).  It picks up the TEF analysis from the point where we have done all the TEF sections, averaged into "bulk" inflows and outflows.  At that point we start working toward a super-simple numerical model in which the tracer concentation in "segments" (the volume in between two or more "sections") can be calculated as dynamically evolving functions of time.
 
 ---
