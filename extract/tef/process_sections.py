@@ -7,7 +7,7 @@ arguments (better for long processing jobs).
 
 PERFORMANCE: 24 minutes for a year, all section, all variables, on my mac.
 
-Running from the terminal:
+Running from the terminal (best for year-long jobs):
 
 python process_sections.py -gtagex cas6_v3_lo8b -0 2019.07.04 -1 2019.07.04 > log &
 
@@ -30,6 +30,7 @@ from time import time
 
 import Lfun
 import zfun
+import tef_fun
 
 Ldir = Lfun.Lstart()
 
@@ -57,7 +58,7 @@ sect_list = [item.name for item in in_dir.glob('*.nc')]
 out_dir = in_dir0 / ext_name.replace('extractions', 'processed')
 Lfun.make_dir(out_dir, clean=True)
 
-vn_list = ['salt', 'temp', 'oxygen', 'NO3', 'TIC', 'alkalinity', 'q']
+vn_list = tef_fun.vn_list # only use extracted variables
 
 print('\nProcessing TEF extraction:')
 print(str(in_dir))
@@ -74,14 +75,15 @@ for ext_fn in sect_list:
     # load fields
     ds = nc.Dataset(in_dir / ext_fn)
     V = dict()
+    ds_vn_list = [vn for vn in ds.variables]
     for vn in vn_list:
-        if vn in ds.variables:
+        if vn in ds_vn_list:
             V[vn] = ds[vn][:]
         else:
-            print('variable %s not found' % (vn))
-            vn_list.remove(vn)
+            print(' - variable %s not found' % (vn))
     V['salt2'] = V['salt']*V['salt']
     q = ds['q'][:]
+    V['q'] = q
     ot = ds['ocean_time'][:]
     zeta = ds['zeta'][:]
     ds.close()
@@ -115,9 +117,6 @@ for ext_fn in sect_list:
 
     # process into salinity bins
     for tt in range(NT):
-        # if np.mod(tt,1000) == 0:
-        #     print('  time %d out of %d' % (tt,NT))
-        #     sys.stdout.flush()
             
         si = V['salt'][tt,:,:].squeeze()
         if isinstance(si, np.ma.MaskedArray):

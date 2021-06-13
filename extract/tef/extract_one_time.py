@@ -23,10 +23,10 @@ import tef_fun
 
 # command line arguments
 parser = argparse.ArgumentParser()
-parser.add_argument('-pth', type=str, default='/Users/pm8/Documents/LiveOcean_roms/output')
-parser.add_argument('-out_pth', type=str, default='/Users/pm8/Documents/LO_output/extract')
-parser.add_argument('-gtagex', type=str, default='cas6_v3_lo8b')
-parser.add_argument('-d', type=str, default='2019.07.04')
+parser.add_argument('-pth', type=str)
+parser.add_argument('-out_dir', type=str)
+parser.add_argument('-gtagex', type=str)
+parser.add_argument('-d', type=str)
 parser.add_argument('-nhis', type=int, default=1)
 parser.add_argument('-get_bio', type=Lfun.boolean_string, default=True)
 parser.add_argument('-testing', type=Lfun.boolean_string, default=False)
@@ -34,16 +34,16 @@ args = parser.parse_args()
 
 nhiss = ('0000' + str(args.nhis))[-4:]
 fn = Path(args.pth) / args.gtagex / ('f' + args.d) / ('ocean_his_' + nhiss + '.nc')
-out_pth = Path(args.out_pth) / args.gtagex / 'tef_temp'
-Lfun.make_dir(out_pth)
-out_fn  = out_pth / ('A_' + args.d + '_' + nhiss + '.p')
+out_dir = Path(args.out_dir)
+Lfun.make_dir(out_dir)
+out_fn  = out_dir / ('A_' + args.d + '_' + nhiss + '.p')
 out_fn.unlink(missing_ok=True)
 
 G = zrfun.get_basic_info(fn, only_G=True)
 
 # set list of variables to extract
 if args.get_bio:
-    vn_list = ['salt', 'temp', 'oxygen', 'NO3', 'TIC', 'alkalinity']
+    vn_list = tef_fun.vn_list
 else:
     vn_list = ['salt']
 
@@ -67,7 +67,7 @@ if args.testing == True:
     print('Time to get sect_info = %0.2f sec' % (time()-tt0))
     sys.stdout.flush()
 else:
-    info_fn = out_pth / 'sect_info.p'
+    info_fn = out_dir / 'sect_info.p'
     if info_fn.is_file():
         sect_info = pickle.load(open(info_fn, 'rb'))
         sect_list = [item for item in sect_info.keys()]

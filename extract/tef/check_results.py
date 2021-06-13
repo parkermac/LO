@@ -40,8 +40,8 @@ sect_df = tef_fun.get_sect_df()
 fs = 14
 pfun.start_plot(fs=fs, figsize=(14,10))
 
-tef_df_old, in_sign_old = flux_fun.get_fluxes(in_dir_old, sect_name, old_style=True)
-tef_df, in_sign = flux_fun.get_fluxes(in_dir, sect_name)
+tef_df_old, in_sign_old = flux_fun.get_two_layer_all(in_dir_old, sect_name, old_style=True)
+tef_df, in_sign = flux_fun.get_two_layer_all(in_dir, sect_name)
 
 if in_sign_old != in_sign:
     print('** in_sign error **')
@@ -70,8 +70,8 @@ qlim = np.max([qlim_p, qlim_m])
 
 # Salinity vs. Time (color by Transport)
 ax = fig.add_subplot(211)
-tef_df[['Sin','Sout']].plot(ax=ax, legend=False, color=['r','b'], alpha=.5)
-tef_df_old[['Sin','Sout']].plot(ax=ax, legend=False, color=['r','b'], linestyle='--')
+tef_df[['salt_in','salt_out']].plot(ax=ax, legend=False, color=['r','b'], alpha=.5)
+tef_df_old[['salt_in','salt_out']].plot(ax=ax, legend=False, color=['r','b'], linestyle='--')
 ax.set_title('Section = ' + sect_name + ': Positive is ' + dir_str)
 ax.grid(True)
 ax.set_xticklabels([])
@@ -90,7 +90,7 @@ ax.set_ylabel('Transport $[m^{3}s^{-1}]$')
 ax.text(.03, .95, '(b)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
     bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
 
-if tef_df['Sin'].mean() > tef_df['Sout'].mean():
+if tef_df['salt_in'].mean() > tef_df['salt_out'].mean():
     pass
 else:
     print('Warning: sign logic breakdown! ' + sect_name)

@@ -27,31 +27,26 @@ pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import extract_argfun as exfun
-
 Ldir = exfun.intro() # this handles the argument passing
 
 from time import time
-tt00 = time()
-
-# set list of variables to extract
-if Ldir['get_bio']:
-    vn_list = ['salt', 'temp', 'oxygen', 'NO3', 'TIC', 'alkalinity']
-else:
-    vn_list = ['salt']
-
 import Lfun
 import numpy as np
 import netCDF4 as nc
 import pickle
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
-
 import zrfun
 import tef_fun
-
 if Ldir['testing']:
     from importlib import reload
     reload(tef_fun)
+    
+# set list of variables to extract
+if Ldir['get_bio']:
+    vn_list = tef_fun.vn_list
+else:
+    vn_list = ['salt']
 
 ds0 = Ldir['ds0']
 ds1 = Ldir['ds1']
@@ -59,6 +54,7 @@ dt0 = datetime.strptime(ds0, Ldir['ds_fmt'])
 dt1 = datetime.strptime(ds1, Ldir['ds_fmt'])
 ndays = (dt1-dt0).days + 1
 
+tt00 = time()
 print('Working on:')
 outname = 'extractions_' + ds0 + '_' + ds1
 print(outname)
@@ -68,7 +64,7 @@ out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef' / outname
 Lfun.make_dir(out_dir, clean=True)
 
 # make the scratch directory
-temp_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef_temp'
+temp_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / ('tef_temp_' + ds0 + '_' + ds1)
 Lfun.make_dir(temp_dir, clean=True)
 
 # get the DataFrame of all sections
@@ -146,7 +142,7 @@ for ii in range(N):
     nhis = int(fn.name.split('.')[0].split('_')[-1])
     cmd_list = ['python3', 'extract_one_time.py',
             '-pth', str(Ldir['roms_out']),
-            '-out_pth',str(Ldir['LOo'] / 'extract'),
+            '-out_dir',str(temp_dir),
             '-gtagex', Ldir['gtagex'],
             '-d', d, '-nhis', str(nhis),
             '-get_bio', str(Ldir['get_bio'])]
@@ -177,6 +173,10 @@ print('Elapsed time = %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
     
 print('\nTotal elapsed time = %d seconds' % (time()-tt00))
+
+# clean up
+Lfun.make_dir(temp_dir, clean=True)
+temp_dir.rmdir()
     
 
 

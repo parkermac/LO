@@ -12,6 +12,9 @@ import os
 import zfun
 import zrfun
 
+# long list of variables to extract
+vn_list = ['salt', 'temp', 'oxygen', 'NO3', 'TIC', 'alkalinity']
+
 def get_sect_df():
     # section definitions
     # * x and y are latitude and longitude and we require sections to be NS or EW so
@@ -298,80 +301,3 @@ def add_fields(out_fn, temp_dir, sect_name, vn_list, S, NT):
         
     foo.close()
     
-def add_fields_OLD(ds, count, vn_list, G, S, sinfo):
-    
-    ii0, ii1, jj0, jj1, sdir, NT, NX, NZ, out_fn = sinfo
-    
-    foo = nc.Dataset(out_fn, 'a')
-    
-    # get depth and dz, and dd (which is either dx or dy)
-    if sdir=='NS':
-        h = ds['h'][jj0:jj1+1,ii0:ii1+1].squeeze()
-        zeta = ds['zeta'][0,jj0:jj1+1,ii0:ii1+1].squeeze()
-        z = zrfun.get_z(h, zeta, S, only_w=True)
-        # print(h)
-        # print(zeta)
-        # print(z)
-        dz = np.diff(z, axis=0)
-        DZ = dz.mean(axis=2) # fails for a channel one point wide 2019.05.20 (oak)
-        dd = G['DY'][jj0:jj1+1,ii0:ii1+1].squeeze()
-        DD = dd.mean(axis=1)
-        zeta = zeta.mean(axis=1)
-        if count==0:
-            hh = h.mean(axis=1)
-            foo['h'][:] = hh
-            
-            z0 = zrfun.get_z(hh, 0*hh, S, only_rho=True)
-            foo['z0'][:] = z0
-            
-            zw0 = zrfun.get_z(hh, 0*hh, S, only_w=True)
-            DZ0 = np.diff(zw0, axis=0)
-            DA0 = DD.reshape((1, NX)) * DZ0
-            foo['DA0'][:] = DA0
-            
-    elif sdir=='EW':
-        h = ds['h'][jj0:jj1+1,ii0:ii1+1].squeeze()
-        zeta = ds['zeta'][0,jj0:jj1+1,ii0:ii1+1].squeeze()
-        z = zrfun.get_z(h, zeta, S, only_w=True)
-        dz = np.diff(z, axis=0)
-        DZ = dz.mean(axis=1)
-        dd = G['DX'][jj0:jj1+1,ii0:ii1+1].squeeze()
-        DD = dd.mean(axis=0)
-        zeta = zeta.mean(axis=0)
-        if count==0:
-            hh = h.mean(axis=0)
-            foo['h'][:] = hh
-            
-            z0 = zrfun.get_z(hh, 0*hh, S, only_rho=True)
-            foo['z0'][:] = z0
-            
-            zw0 = zrfun.get_z(hh, 0*hh, S, only_w=True)
-            DZ0 = np.diff(zw0, axis=0)
-            DA0 = DD.reshape((1, NX)) * DZ0
-            foo['DA0'][:] = DA0
-            
-    # and then create the array of cell areas on the section
-    DA = DD.reshape((1, NX)) * DZ
-    # then velocity and hence transport
-    if sdir=='NS':
-        vel = ds['u'][0, :, jj0:jj1+1, ii0].squeeze()
-    elif sdir=='EW':
-        vel = ds['v'][0, :, jj0, ii0:ii1+1].squeeze()
-    q = vel * DA
-    
-    foo['q'][count, :, :] = q
-    foo['DA'][count, :, :] = DA
-    foo['zeta'][count, :] = zeta
-    foo['ocean_time'][count] = ds['ocean_time'][0]
-    
-    # save the tracer fields averaged onto this section
-    for vn in vn_list:
-        if sdir=='NS':
-            vvv = (ds[vn][0,:,jj0:jj1+1,ii0].squeeze()
-                + ds[vn][0,:,jj0:jj1+1,ii1].squeeze())/2
-        elif sdir=='EW':
-            vvv = (ds[vn][0,:,jj0,ii0:ii1+1].squeeze()
-                + ds[vn][0,:,jj1,ii0:ii1+1].squeeze())/2
-        foo[vn][count,:,:] = vvv
-        
-    foo.close()

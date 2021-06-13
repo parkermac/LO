@@ -56,7 +56,7 @@ for sect_name in sect_list:
 
     # ---------------------------------------------------------
 
-    tef_df, in_sign = flux_fun.get_fluxes(in_dir, sect_name)
+    tef_df, in_sign = flux_fun.get_two_layer_all(in_dir, sect_name)
     
     # some information about direction
     x0, x1, y0, y1 = sect_df.loc[sect_name,:]
@@ -81,7 +81,7 @@ for sect_name in sect_list:
     
     # Salinity vs. Time (color by Transport)
     ax = fig.add_subplot(211)
-    tef_df[['Sin','Sout']].plot(ax=ax, legend=False, color=['r','b'])
+    tef_df[['salt_in','salt_out']].plot(ax=ax, legend=False, color=['r','b'])
     ax.set_title('Section = ' + sect_name + ': Positive is ' + dir_str)
     ax.grid(True)
     ax.set_xticklabels([])
@@ -95,11 +95,11 @@ for sect_name in sect_list:
     tef_df[['Qin','Qout']].plot(ax=ax, legend=False, color=['r','b'])
     ax.set_ylim(-qlim, qlim)
     ax.grid(True)
-    ax.set_ylabel('Transport $[1000\ m^{3}s^{-1}]$')
+    ax.set_ylabel('Transport $[m^{3}s^{-1}]$')
     ax.text(.03, .95, '(b)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
         bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
 
-    if tef_df['Sin'].mean() > tef_df['Sout'].mean():
+    if tef_df['salt_in'].mean() > tef_df['salt_out'].mean():
         pass
     else:
         print('Warning: sign logic breakdown! ' + sect_name)

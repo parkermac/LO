@@ -44,7 +44,7 @@ if testing:
     reload(flux_fun)
 
 if testing:
-    sect_list = ['ai4']
+    sect_list = ['ai1']
 else:
     sect_list = list(sect_df.index)
 

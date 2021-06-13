@@ -22,8 +22,8 @@ NOTES:
 - All extraction transports are positive Eastward and Northward.
 
 ---
-
 #### PREAMBLE
+---
 
 `ptools/pgrid/tef_section_maker.py` is a tool to define sections, if needed.  This is a GUI where you define section endpoints (forced to be either perfectly E-W or N-S), name the section, and define which direction is "landward" (i.e. which way is positive transport).  You can define one or more sections in a session.  At the end, when you push DONE it produces screen output suitable for pasting into new or existing lists in `tef_fun.get_sect_df()`.
 
@@ -33,69 +33,69 @@ NOTES:
 #### EXTRACTION CODE
 ---
 
-`extract_sections.py` creates a NetCDF file for each section with arrays of hourly transport and tracer values on the section, arranged as (t, z, x-or-y). Using command line arguments you can change the run and the day range. When you run the code you can decide at the command line to extract all the sections from the list, or just one. The main list is defined in `tef_fun.get_sect_df()`. Typically this will be done on a remote machine, like boiler, although the defaults are designed to work with model output I have saved on my mac.
+`extract_sections.py` creates a NetCDF file for each section with arrays of hourly transport and tracer values on the section, arranged as (t, z, x-or-y). Using command line arguments you can change the run, the day range, the sections to extract, and the variables extracted. Typically this will be done on a remote machine, like perigee, although the defaults are designed to work with model output I have saved on my mac.
 
-Input: ROMS history files over some date range
+**NOTE**: this code runs mulitple subprocess instances of `extract_one_time.py`, currently 20 at once (set by Nproc in `extract_sections.py`). This significantly speeds things up, but it tends to completely occupy the machine, _**so you only want to run one of these at a time**_.
+
+The **command line arguments** are set in `alpha/extract_argfun.py`, with the usual requirements for gridname, tag, ex_name, and beginning and end dates.  You also specify:
+
+- -ro, --roms_out_num, is a integer specifying where to look for the ROMS history profiles
+- -get_bio is a Boolean.  If True then you get the list in tef_fun.vn_list.  If False (the default) then vn_list = ['salt'].
+- -sect_name is a string to specify the sections to get, either a single one such as ai1, or all of them using "-sect_name all" in the command line.  The full list is hardcoded into tef_fun.get_sect_df(), so eventually we will need to rethink this to make it more general (like if I want to use these tools for an idealized case or a new grid).
+
+Input: ROMS history files over some date range, e.g. [\*] = 2017.01.01_2017.12.31
 
 Output: LO_output/extract/[gtagex]/tef/extractions_[\*]/[sect name].nc where:
 
-- [\*] = 2017.01.01_2017.12.31 for example
-
-Variables: ocean_time, salt, q, z0, DA0, lon, lat, h, zeta
-- salt is hourly salinity in each cell (t, z, y-or-x)
-- q is hourly transport in each cell (t, z, y-or-x)
-- vel is velocity in each cell (t, z, y-or-x) positive to East or North
-- DA is the area of each cell (t, z, y-or-x) hence: q = vel * DA
+Variables in the NetCDF files:
+- salt is hourly salinity in each cell (t, z, x-or-y) [same for all other variables]
+- q is hourly transport in each cell (t, z, x-or-y)
+- vel is velocity in each cell (t, z, x-or-y) positive to East or North
+- DA is the area of each cell (t, z, x-or-y) hence: q = vel * DA
 - z0 is the average depth of cell centers (assumes SSH=0)
 - DA0 is the average cross-sectional area of each cell (assumes SSH=0)
-- h is depth on the section (y-or-x) positive down
-- zeta is SSH on the section (t, y-or-x) positive up
+- h is depth on the section (x-or-y) positive down
+- zeta is SSH on the section (t, x-or-y) positive up
 - ocean_time is a vector of time in seconds since (typically) 1/1/1970.
 
 ---
 
-`process_sections.py` organizes all the transports at each time into salinity bins.
+`process_sections.py` organizes all the transports at each time into salinity bins. It accepts a shortened set of command line arguments (-gatagex, -0, -1), or you can run it without these and it will ask you to choose from available folders.
 
 Input: the output NetCDF files from `extract_sections.py`
 
 Output: LO_output/extract/[gtagex]/tef/processed_[\*]/[sect name].p
 
-- a pickled dict with keys: ['tef_q','tef_vel','tef_da', 'tef_qs', 'sbins', 'ot', 'qnet', 'fnet', 'ssh']
+- a pickled dict with keys: ['q', 'salt', 'salt2', [other variables], 'sbins', 'ot', 'qnet', 'fnet', 'ssh']
 
-These are defined as:
+These are packed in order [time, salinity bin]:
+- q is hourly transport in salinity bins (still positive East and North)
+- salt is hourly transport of salt in salinity bins
+- salt is hourly transport of salt-squared in salinity bins
+- similar for all other variables that exist in both vn_list and the input file
 
-- tef_q transport in salinity bins, hourly, (m3/s)
--	tef_da area in salinity bins, hourly, (m2)
--	tef_qs salt transport in salinity bins, hourly, (g/kg m3/s)
--	tef_qs2 salinity-squared transport in salinity bins, hourly, (g2/kg2 m3/s)
--	sbins the salinity bin centers
+The salinity bin centers (typically 1000 of them) are:
+-	sbins
+
+These are just functions of time:
 -	ot ocean time (sec from 1/1/1970)
 -	qnet section integrated transport (m3/s)
 -	fnet section integrated tidal energy flux (Watts)
 -	ssh section averaged ssh (m)
 
-Packed in order (time, salinity bin).
+---
 
-NOTE: we create tef_vel as the flux-weighted velocity: tef_vel = tef_q/tef_da.
+`bulk_calc.py` does the TEF bulk calculations, using the algorithm of Marvin Lorenz, allowing for multiple in- and outflowing layers. Like `process_sections.py` it accepts a shortened set of command line arguments (-gatagex, -0, -1), or you can run it without these and it will ask you to choose from available folders.
+
+Input: output of `process_sections.py`
+
+Output: LO_output/extract/[gtagex]/tef/bulk_[\*]/[sect name].p
+
+These are pickled dicts with keys: ['salt', 'salt2', [other variables], 'q', 'ot', 'qnet', 'fnet', 'ssh'] where 'salt', 'q', and etc. are matrices of shape (362, 30) meaning that it is one per day, at Noon, after tidal-averaging, with nan-days on the ends cut off.  The 30 is the number of "bulk" bins, so many might be filled with nan's. All variables have been tidally averaged and subsampled to one per day (at noon UTC).
 
 ---
 
-`bulk_calc.py` does the TEF bulk calculations, using the algorithm of Marvin Lorenz, allowing for multiple in- and outflowing layers
-
-Input: LiveOcean_output/tef2/[*]/processed/[sect name].p
-
-Output: LiveOcean_output/tef2/[*]/bulk/[sect name].p
-
-These are pickled dicts with keys: ['QQ', 'SS', 'SS2', 'ot', 'qnet_lp', 'fnet_lp', 'ssh_lp']
-where ot is a time vector (seconds since 1/1/1970 as usual), and QQ is a matrix of shape (362, 30) meaning that it is one per day, at Noon, after tidal-averaging, with nan-days on the ends cut off.  The 30 is the number of "bulk" bins, so many might be filled with nan's.  SS2 is salinity-squared, used later for variance budgets.
-
----
-
-* bulk_plot_clean.py plots the results of bulk_calc.py, either as a single plot to the screen, or multiple plots to png's.  You need to edit the code to run for other years.
-
-Input: LiveOcean_output/tef2/[*]/bulk/[sect name].p
-
-Output: LiveOcean_output/tef2/[*]/bulk_plots_clean/[sect name].p
+* bulk_plot.py plots the results of bulk_calc.py, either as a single plot to the screen, or multiple plots to png's.  You need to edit the code to run for other years.
 
 ---
 #### FLUX CODE

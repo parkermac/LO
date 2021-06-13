@@ -9,27 +9,32 @@ import pickle
 
 import zfun # path provided by calling code
 import Lfun
+import tef_fun
 
 from warnings import filterwarnings
 filterwarnings('ignore') # skip some warning messages
 # associated with lines like QQp[QQ<=0] = np.nan
 
-def get_two_layer_all(in_dir, sect_name):
+def get_two_layer_all(in_dir, sect_name, old_style=False):
     """
     Form time series of 2-layer TEF quantities, from the multi-layer bulk values.
     - works on all tracers
-    - adjust sign convention so that Qs is positive for the saltier layer and call it Qin
+    - adjust sign convention so that transport is positive for the saltier layer and call it Qin
     """
     
     bulk = pickle.load(open(in_dir / (sect_name + '.p'), 'rb'))
     
+    if old_style:
+        bulk['q'] = bulk['QQ']
+        bulk['salt'] = bulk['SS']
+        
     QQ = bulk['q']
     ot = bulk['ot']
     dt = []
     for tt in ot:
         dt.append(Lfun.modtime_to_datetime(tt))
 
-    vn_list = ['salt', 'temp', 'oxygen', 'NO3', 'TIC', 'alkalinity']
+    vn_list = tef_fun.vn_list
     vn_list = [item for item in vn_list if item in bulk.keys()]
         
     # separate positive and negative transports
@@ -92,93 +97,6 @@ def get_two_layer_all(in_dir, sect_name):
         tef_df[vn+'_out'] = Cout[vn]
     return tef_df, in_sign
 
-def get_fluxes(in_dir, sect_name, old_style=False):
-    # Form time series of 2-layer TEF quantities, from the multi-layer bulk values.
-    # - include transports for the no-tidal-pumping version
-    # - adjust sign convention so that Qs is positive for the saltier layer and call it Qin
-    
-    bulk = pickle.load(open(in_dir / (sect_name + '.p'), 'rb'))
-    if old_style:
-        QQ = bulk['QQ']
-        SS = bulk['SS']
-    else:
-        QQ = bulk['q']
-        SS = bulk['salt']
-    ot = bulk['ot']
-    dt = []
-    for tt in ot:
-        dt.append(Lfun.modtime_to_datetime(tt))
-        
-    # separate positive and negative transports
-    QQp = QQ.copy()
-    QQp[QQ<=0] = np.nan
-    QQm = QQ.copy()
-    QQm[QQ>=0] = np.nan
-        
-    # # full transports
-    # QQm = QQm
-    # QQp = QQp
-    
-    # form two-layer versions
-    Qp = np.nansum(QQp, axis=1)
-    QSp = np.nansum(QQp*SS, axis=1)
-    Qm = np.nansum(QQm, axis=1)
-    QSm = np.nansum(QQm*SS, axis=1)
-    
-    # TEF salinities
-    Sp = QSp/Qp
-    Sm = QSm/Qm
-        
-    # adjust sign convention so that positive flow is salty
-    SP = np.nanmean(Sp)
-    SM = np.nanmean(Sm)
-    if SP > SM:
-        
-        # initial positive was inflow
-        Sin = Sp
-        Sout = Sm
-        Qin = Qp
-        Qout = Qm
-        in_sign = 1
-        
-        QSin = QSp
-        QSout = QSm
-        
-    elif SM > SP:
-        # initial postive was outflow
-        Sin = Sm
-        Sout = Sp
-        Qin = -Qm
-        Qout = -Qp
-        in_sign = -1
-        
-        QSin = -QSm
-        QSout = -QSp
-    else:
-        print('ambiguous sign!!')
-    
-    if False:
-        print('%s SP=%0.1f SM = %0.1f' % (sect_name, SP, SM))
-        import sys
-        sys.stdout.flush()
-        
-    # fnet = in_sign * bulk['fnet']/1e6 # net tidal energy flux [MW]
-    # qabs = bulk['qabs'] # low pass of absolute value of net transport [m3/s]
-    
-    tef_df = pd.DataFrame(index=dt)
-    tef_df['Qin']=Qin
-    tef_df['Qout']=Qout
-    tef_df['QSin']=QSin
-    tef_df['QSout']=QSout
-    tef_df['Sin']=Sin
-    tef_df['Sout']=Sout
-
-    # tef_df['Ftide'] = fnet
-    # tef_df['Qtide'] = qabs
-    
-    return tef_df, in_sign
-    
-    
 # desired time ranges, the "seasons"
 def get_dtr(year):
     dtr = {}
