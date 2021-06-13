@@ -91,7 +91,7 @@ Input: output of `process_sections.py`
 
 Output: LO_output/extract/[gtagex]/tef/bulk_[\*]/[sect name].p
 
-These are pickled dicts with keys: ['salt', 'salt2', [other variables], 'q', 'ot', 'qnet', 'fnet', 'ssh'] where 'salt', 'q', and etc. are matrices of shape (362, 30) meaning that it is one per day, at Noon, after tidal-averaging, with nan-days on the ends cut off.  The 30 is the number of "bulk" bins, so many might be filled with nan's. All variables have been tidally averaged and subsampled to one per day (at noon UTC).
+These are pickled dicts with keys: ['salt', 'salt2', [other variables], 'q', 'ot', 'qnet', 'fnet', 'ssh'] where 'salt', 'q', and etc. are matrices of shape (363, 30) meaning that it is one per day, at Noon, after tidal-averaging, with nan-days on the ends cut off.  The 30 is the number of "bulk" bins, so many might be filled with nan's.
 
 ---
 

@@ -34,7 +34,7 @@ def get_two_layer_all(in_dir, sect_name, old_style=False):
     for tt in ot:
         dt.append(Lfun.modtime_to_datetime(tt))
 
-    vn_list = tef_fun.vn_list
+    vn_list = tef_fun.vn_list + ['salt2']
     vn_list = [item for item in vn_list if item in bulk.keys()]
         
     # separate positive and negative transports
