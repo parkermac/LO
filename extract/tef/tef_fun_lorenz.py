@@ -1,8 +1,6 @@
-# -*- coding: utf-8 -*-
 """
-Created on Tue Oct 16 16:01:15 2018
-
-@author: lorenz, edited by PM
+Functions from Marvin Lorenz for making multi-layer TEF calculations, for bulk_calc.
+Modifed lightly by Parker MacCready.
 """
 
 import numpy as np

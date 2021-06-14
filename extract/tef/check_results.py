@@ -40,8 +40,8 @@ sect_df = tef_fun.get_sect_df()
 fs = 14
 pfun.start_plot(fs=fs, figsize=(14,10))
 
-tef_df_old, in_sign_old = flux_fun.get_two_layer_all(in_dir_old, sect_name, old_style=True)
-tef_df, in_sign = flux_fun.get_two_layer_all(in_dir, sect_name)
+tef_df_old, in_sign_old = flux_fun.get_two_layer(in_dir_old, sect_name, old_style=True)
+tef_df, in_sign = flux_fun.get_two_layer(in_dir, sect_name)
 
 if in_sign_old != in_sign:
     print('** in_sign error **')

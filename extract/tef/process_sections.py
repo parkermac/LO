@@ -1,15 +1,14 @@
 """
 Process TEF extractions, giving transport vs. salinity for:
-volume, salt, and salinity-squared.
+volume, salt, salinity-squared and other variables.
 
 Can be run by making interactive choices in the terminal, or using command line
-arguments (better for long processing jobs).
+arguments (as when it is run by extract_sections.py).
 
 PERFORMANCE: 24 minutes for a year, all section, all variables, on my mac.
 
-Running from the terminal (best for year-long jobs):
-
-python process_sections.py -gtagex cas6_v3_lo8b -0 2019.07.04 -1 2019.07.04 > log &
+To test on mac:
+run process_sections -gtagex cas6_v3_lo8b -0 2019.07.04 -1 2019.07.06
 
 """
 

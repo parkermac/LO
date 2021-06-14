@@ -1,5 +1,6 @@
 """
-Variables and functions used by the "flux" code.
+Variables and functions used for plotting the multi-layer TEF extractions,
+and for the flux code.
 
 """
 import numpy as np
@@ -15,7 +16,7 @@ from warnings import filterwarnings
 filterwarnings('ignore') # skip some warning messages
 # associated with lines like QQp[QQ<=0] = np.nan
 
-def get_two_layer_all(in_dir, sect_name, old_style=False):
+def get_two_layer(in_dir, sect_name, old_style=False):
     """
     Form time series of 2-layer TEF quantities, from the multi-layer bulk values.
     - works on all tracers
@@ -106,6 +107,7 @@ def get_dtr(year):
     dtr['summer'] = (datetime(year,7,1,12,0,0), datetime(year,9,30,12,0,0)) # JAS
     dtr['fall'] = (datetime(year,10,1,12,0,0), datetime(year,12,31,12,0,0)) # OMD
     return dtr
+season_list = list(get_dtr(2017).keys())
 
 # Lists of 2-layer segments to use for "initial condition" experiments in the flux_engine.
 # The keys should match up with "src" values in flux_engine.py.
@@ -128,10 +130,10 @@ ic_seg2_dict = {'IC_HoodCanalInner': ['H'+str(n)+'_s' for n in range(3,9)],
                     + get_seg_list('G',6),
             }
                             
-season_list = list(get_dtr(2017).keys())
 
 # create Series of two-layer volumes
 # this is the one place to specify the ratio volume in the "salty" and "fresh" layers
+# in the box model
 def get_V(v_df):
     V = pd.Series()
     for seg_name in v_df.index:

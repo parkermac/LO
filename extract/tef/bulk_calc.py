@@ -1,9 +1,11 @@
 """
 Code to calculate a TEF time series using Marvin Lorenz' multi-layer code.
-
 Based on his code, and modified by PM.
 
-Takes about 5-27 minutes per year for 39 cas6 sections.
+PERFORMANCE: Takes about 5-27 minutes per year for 39 cas6 sections.
+
+To test on mac:
+run process_sections -gtagex cas6_v3_lo8b -0 2019.07.04 -1 2019.07.06
 
 """
 

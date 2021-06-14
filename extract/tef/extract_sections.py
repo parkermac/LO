@@ -1,21 +1,21 @@
 """
 Extract fields at a number of sections which may be used later for TEF analysis
-of transport and transport-weighted properties, making use of multiple subprocesses
-to speed up operation.
+of transport and other properties, making use of multiple subprocesses
+to speed up operation.  It also runs the process_sections.py and bulk_calc.py jobs
+unless you use -test True.  You need to run for at least three days to get any
+results at the end, because of the tidal averaging.
 
 All input parameters are specified at the command line, so this can be run in the background.
+This is essential for year-long extractions.
 
-Performance: 4 hours per year, perigee, 39 cas6 sections, -get_bio True.  FAST!
+PERFORMANCE: 4 hours per year, perigee, cas6_v3_lo8b, 39 sections, all variables.  About 5 hours
+including the processing and bulk_calc steps.  2.25 hours when just extracting salt.
 
-To test on mac (default is to just get ai1 section):
+To test on mac (default is to just get salt on section ai1):
+run extract_sections -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06
 
-run extract_sections -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -test True
-
-To get all sections for the same time:
-
-python extract_sections -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -sect_name all > log_all_test &
-
-python extract_sections.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -sect_name all > log_all_test &
+To get all sections and all variables use these flags:
+-get_bio True -sect_name all
 
 """
 
@@ -50,20 +50,18 @@ else:
 
 ds0 = Ldir['ds0']
 ds1 = Ldir['ds1']
-dt0 = datetime.strptime(ds0, Ldir['ds_fmt'])
-dt1 = datetime.strptime(ds1, Ldir['ds_fmt'])
-ndays = (dt1-dt0).days + 1
 
 tt00 = time()
-print('Working on:')
+print(' Doing TEF extraction for '.center(60,'='))
+print(' gtagex = ' + Ldir['gtagex'])
 outname = 'extractions_' + ds0 + '_' + ds1
-print(outname)
+print(' outname = ' + outname)
 
 # make sure the output directory exists
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef' / outname
 Lfun.make_dir(out_dir, clean=True)
 
-# make the scratch directory
+# make the scratch directory for holding temporary files
 temp_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / ('tef_temp_' + ds0 + '_' + ds1)
 Lfun.make_dir(temp_dir, clean=True)
 
@@ -93,10 +91,8 @@ S = zrfun.get_basic_info(fn, only_S=True)
 NZ = S['N']
 
 # Create and save the sect_info dict
-tt0 = time()
 # - make a dictionary of info for each section
 sect_info = dict()
-print('\nGetting section definitions and indices:')
 for sect_name in sect_list:
     x0, x1, y0, y1 = sect_df.loc[sect_name,:]
     # - get indices for this section
@@ -106,11 +102,8 @@ for sect_name in sect_list:
     sect_info[sect_name] = (ii0, ii1, jj0, jj1, sdir, NX, Lon, Lat)
 info_fn = temp_dir / 'sect_info.p'
 pickle.dump(sect_info, open(info_fn, 'wb'))
-print('Elapsed time = %0.2f sec' % (time()-tt0))
-sys.stdout.flush()
 
-tt0 = time()
-print('\nInitializing NetCDf output files:')
+# Initialize NetCDF output files
 sl = sect_list.copy()
 while len(sl) > 0:
     if len(sl) >= 10:
@@ -123,16 +116,11 @@ for sect_name in sect_list:
     out_fn = out_dir / (sect_name + '.nc')
     ii0, ii1, jj0, jj1, sdir, NX, Lon, Lat = sect_info[sect_name]
     tef_fun.start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir, vn_list)
-print('Elapsed time = %0.2f sec' % (time()-tt0))
-sys.stdout.flush()
 
-# do the initial data extraction
-# if Ldir['testing']:
-#     fn_list = [fn_list[0]]
-
-print('\nDoing initial data extraction:')
+print('Doing initial data extraction:')
 # We do extractions one hour at a time, as separate subprocess jobs.
 # Running Nproc (e.g. 20) of these in parallel makes the code much faster.
+# Files are saved to temp_dir.
 tt000 = time()
 proc_list = []
 N = len(fn_list)
@@ -159,24 +147,47 @@ for ii in range(N):
         proc_list = []
 print('Elapsed time = %0.2f sec' % (time()-tt000))
 
-# write fields to NetCDF
-
-# # extract and save time-dependent fields
-tt0 = time()
-print('\nAdding data to NetCDF files:')
+# Extract and save time-dependent fields
 for sect_name in sect_list:
     out_fn = out_dir / (sect_name + '.nc')
-    # this is where we add the data from this history file
-    # to all of the sections, each defined by sinfo
     tef_fun.add_fields(out_fn, temp_dir, sect_name, vn_list, S, NT)
-print('Elapsed time = %0.2f sec' % (time()-tt0))
-sys.stdout.flush()
     
-print('\nTotal elapsed time = %d seconds' % (time()-tt00))
-
-# clean up
+# Elean up
 Lfun.make_dir(temp_dir, clean=True)
 temp_dir.rmdir()
+
+# Then do the processing and bulk calculation
+if Ldir['testing'] == False:
+    
+    # processing
+    tt0 = time()
+    print(' process_sections '.center(60,'='))
+    cmd_list = ['python3', 'process_sections.py',
+            '-gtagex', Ldir['gtagex'],
+            '-0', ds0, '-1', ds1]
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+    stdout, stderr = proc.communicate()
+    #print(stdout.decode())
+    if len(stderr) > 0:
+        print(stderr.decode())
+    print('Elapsed time = %0.2f sec' % (time()-tt0))
+    
+    # bulk_calc
+    tt0 = time()
+    print(' bulk_calc '.center(60,'='))
+    cmd_list = ['python3', 'bulk_calc.py',
+            '-gtagex', Ldir['gtagex'],
+            '-0', ds0, '-1', ds1]
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+    stdout, stderr = proc.communicate()
+    #print(stdout.decode())
+    if len(stderr) > 0:
+        print(stderr.decode())
+    print('Elapsed time = %0.2f sec' % (time()-tt0))
+
+print(' Total elapsed time = %d sec '.center(60,'-') % (time()-tt00))
+print(' DONE '.center(60,'='))
+
     
 
 

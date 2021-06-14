@@ -1,12 +1,11 @@
 """
-TEF functions.
+Functions used the by TEF section extraction and processing code.
 """
 import pandas as pd
 import netCDF4 as nc
 import numpy as np
 import pickle
-import matplotlib.pyplot as plt
-import os
+import sys
 
 # path to alpha provided by driver
 import zfun
@@ -15,74 +14,80 @@ import zrfun
 # long list of variables to extract
 vn_list = ['salt', 'temp', 'oxygen', 'NO3', 'TIC', 'alkalinity']
 
-def get_sect_df():
+def get_sect_df(gridname='cas6'):
     # section definitions
     # * x and y are latitude and longitude and we require sections to be NS or EW so
     # either x0=x1 or y0=y1
     sect_df = pd.DataFrame(columns=['x0', 'x1', 'y0', 'y1'])
     
-    # Juan de Fuca
-    sect_df.loc['jdf1',:] = [-124.673, -124.673,   48.371,   48.632]
-    sect_df.loc['jdf2',:] = [-124.276, -124.276,   48.213,   48.542]
-    sect_df.loc['jdf3',:] = [-123.865, -123.865,   48.110,   48.443]
-    sect_df.loc['jdf4',:] = [-123.363, -123.363,   48.069,   48.461]
+    if gridname == 'cas6':
+        # Juan de Fuca
+        sect_df.loc['jdf1',:] = [-124.673, -124.673,   48.371,   48.632]
+        sect_df.loc['jdf2',:] = [-124.276, -124.276,   48.213,   48.542]
+        sect_df.loc['jdf3',:] = [-123.865, -123.865,   48.110,   48.443]
+        sect_df.loc['jdf4',:] = [-123.363, -123.363,   48.069,   48.461]
 
-    # Strait of Georgia
-    sect_df.loc['sog1',:] = [-123.740, -122.663,   48.857,   48.857]
-    sect_df.loc['sog2',:] = [-124.065, -123.073,   49.184,   49.184]
-    sect_df.loc['sog3',:] = [-124.223, -124.223,   49.220,   49.946]
-    sect_df.loc['sog4',:] = [-125.356, -124.556,   50.002,   50.002]
-    sect_df.loc['sog5',:] = [-125.600, -124.400,   50.200,   50.200]
+        # Strait of Georgia
+        sect_df.loc['sog1',:] = [-123.740, -122.663,   48.857,   48.857]
+        sect_df.loc['sog2',:] = [-124.065, -123.073,   49.184,   49.184]
+        sect_df.loc['sog3',:] = [-124.223, -124.223,   49.220,   49.946]
+        sect_df.loc['sog4',:] = [-125.356, -124.556,   50.002,   50.002]
+        sect_df.loc['sog5',:] = [-125.600, -124.400,   50.200,   50.200]
     
-    # San Juans
-    sect_df.loc['sji1',:] = [-123.350, -122.65,   48.438,   48.438]
-    sect_df.loc['sji2',:] = [-123.449, -122.425,   48.681,   48.681]
+        # San Juans
+        sect_df.loc['sji1',:] = [-123.350, -122.65,   48.438,   48.438]
+        sect_df.loc['sji2',:] = [-123.449, -122.425,   48.681,   48.681]
 
-    # Deception Pass
-    sect_df.loc['dp',:]  = [-122.643, -122.643,   48.389,   48.425]
+        # Deception Pass
+        sect_df.loc['dp',:]  = [-122.643, -122.643,   48.389,   48.425]
 
-    # Admiralty Inlet
-    sect_df.loc['ai1',:] = [-122.762, -122.762,   48.141,   48.227]
-    sect_df.loc['ai2',:] = [-122.808, -122.584,   48.083,   48.083]
-    sect_df.loc['ai3',:] = [-122.755, -122.537,   48.002,   48.002]
-    sect_df.loc['ai4',:] = [-122.537, -122.537,   47.903,   47.979]
+        # Admiralty Inlet
+        sect_df.loc['ai1',:] = [-122.762, -122.762,   48.141,   48.227]
+        sect_df.loc['ai2',:] = [-122.808, -122.584,   48.083,   48.083]
+        sect_df.loc['ai3',:] = [-122.755, -122.537,   48.002,   48.002]
+        sect_df.loc['ai4',:] = [-122.537, -122.537,   47.903,   47.979]
 
-    # Whidbey Basin
-    sect_df.loc['wb1',:] = [-122.385, -122.286,   47.934,   47.934]
-    sect_df.loc['wb2',:] = [-122.504, -122.286,   48.087,   48.087]
-    sect_df.loc['wb3',:] = [-122.610, -122.498,   48.173,   48.173]
-    sect_df.loc['wb4',:] = [-122.524, -122.524,   48.245,   48.308]
+        # Whidbey Basin
+        sect_df.loc['wb1',:] = [-122.385, -122.286,   47.934,   47.934]
+        sect_df.loc['wb2',:] = [-122.504, -122.286,   48.087,   48.087]
+        sect_df.loc['wb3',:] = [-122.610, -122.498,   48.173,   48.173]
+        sect_df.loc['wb4',:] = [-122.524, -122.524,   48.245,   48.308]
 
-    # Hood Canal
-    sect_df.loc['hc1',:] = [-122.670, -122.564,   47.912,   47.912]
-    sect_df.loc['hc2',:] = [-122.769, -122.656,   47.795,   47.795]
-    sect_df.loc['hc3',:] = [-122.802, -122.802,   47.709,   47.624]
-    sect_df.loc['hc4',:] = [-123.013, -122.888,   47.610,   47.610]
-    sect_df.loc['hc5',:] = [-123.132, -123.000,   47.484,   47.484]
-    sect_df.loc['hc6',:] = [-123.178, -123.086,   47.390,   47.390]
-    sect_df.loc['hc7',:] = [-123.079, -123.079,   47.385,   47.331]
-    sect_df.loc['hc8',:] = [-122.960, -122.960,   47.358,   47.426]
+        # Hood Canal
+        sect_df.loc['hc1',:] = [-122.670, -122.564,   47.912,   47.912]
+        sect_df.loc['hc2',:] = [-122.769, -122.656,   47.795,   47.795]
+        sect_df.loc['hc3',:] = [-122.802, -122.802,   47.709,   47.624]
+        sect_df.loc['hc4',:] = [-123.013, -122.888,   47.610,   47.610]
+        sect_df.loc['hc5',:] = [-123.132, -123.000,   47.484,   47.484]
+        sect_df.loc['hc6',:] = [-123.178, -123.086,   47.390,   47.390]
+        sect_df.loc['hc7',:] = [-123.079, -123.079,   47.385,   47.331]
+        sect_df.loc['hc8',:] = [-122.960, -122.960,   47.358,   47.426]
 
-    # Main Basin
-    sect_df.loc['mb1',:] = [-122.544, -122.293,   47.862,   47.862]
-    sect_df.loc['mb2',:] = [-122.603, -122.333,   47.732,   47.732]
-    sect_df.loc['mb3',:] = [-122.570, -122.379,   47.561,   47.561]
-    sect_df.loc['mb4',:] = [-122.544, -122.339,   47.493,   47.493]
-    sect_df.loc['mb5',:] = [-122.610, -122.300,   47.349,   47.349]
+        # Main Basin
+        sect_df.loc['mb1',:] = [-122.544, -122.293,   47.862,   47.862]
+        sect_df.loc['mb2',:] = [-122.603, -122.333,   47.732,   47.732]
+        sect_df.loc['mb3',:] = [-122.570, -122.379,   47.561,   47.561]
+        sect_df.loc['mb4',:] = [-122.544, -122.339,   47.493,   47.493]
+        sect_df.loc['mb5',:] = [-122.610, -122.300,   47.349,   47.349]
 
-    # Tacoma Narrows
-    sect_df.loc['tn1',:] = [-122.584, -122.537,   47.313,   47.313]
-    sect_df.loc['tn2',:] = [-122.564, -122.518,   47.286,   47.286]
-    sect_df.loc['tn3',:] = [-122.584, -122.537,   47.259,   47.259]
+        # Tacoma Narrows
+        sect_df.loc['tn1',:] = [-122.584, -122.537,   47.313,   47.313]
+        sect_df.loc['tn2',:] = [-122.564, -122.518,   47.286,   47.286]
+        sect_df.loc['tn3',:] = [-122.584, -122.537,   47.259,   47.259]
 
-    # South Sound
-    sect_df.loc['ss1',:] = [-122.610, -122.610,   47.151,   47.309]
-    sect_df.loc['ss2',:] = [-122.769, -122.769,   47.106,   47.187]
-    sect_df.loc['ss3',:] = [-122.888, -122.888,   47.142,   47.313]
+        # South Sound
+        sect_df.loc['ss1',:] = [-122.610, -122.610,   47.151,   47.309]
+        sect_df.loc['ss2',:] = [-122.769, -122.769,   47.106,   47.187]
+        sect_df.loc['ss3',:] = [-122.888, -122.888,   47.142,   47.313]
+        
+    else:
+        print('** sect_df not supported for this gridname **')
+        sys.exit()
 
     return sect_df
     
 def get_inds(x0, x1, y0, y1, G, verbose=False):
+    # get grid indices and lon,lat for the TEF sections
     
     # determine the direction of the section
     # and make sure indices are *increasing*
@@ -174,6 +179,7 @@ def get_inds(x0, x1, y0, y1, G, verbose=False):
     return ii0, ii1, jj0, jj1, sdir, Lon, Lat, Mask
     
 def start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir, vn_list):
+    # initialize the NetCDF files the extract_sections.py creates
     out_fn.unlink(missing_ok=True)
     ds = nc.Dataset(out_fn, 'w')
     # and some dicts of long names and units
@@ -244,13 +250,11 @@ def start_netcdf(fn, out_fn, NT, NX, NZ, Lon, Lat, Ldir, vn_list):
     foo.close()
 
 def add_fields(out_fn, temp_dir, sect_name, vn_list, S, NT):
-        
+    # unpack the data made by extract_one_time.py and load into NetCDF
     foo = nc.Dataset(out_fn, 'a')
-    
     A_list = list(temp_dir.glob('A*.p'))
     A_list.sort()
     count = 0
-    
     for A_fn in A_list:
         A = pickle.load(open(A_fn, 'rb'))
         C = A[sect_name]
@@ -259,33 +263,24 @@ def add_fields(out_fn, temp_dir, sect_name, vn_list, S, NT):
             d = C['d']
             NX = len(d)
             NZ = S['N']
-            
             h = C['h']
             foo['h'][:] = h
-            
             z0 = zrfun.get_z(h, 0*h, S, only_rho=True)
             foo['z0'][:] = z0
-            
             zw0 = zrfun.get_z(h, 0*h, S, only_w=True)
             DZ0 = np.diff(zw0, axis=0)
             DA0 = d.reshape((1, NX)) * DZ0
             foo['DA0'][:] = DA0
-            
             zeta_arr = np.nan * np.ones((NT, NX))
             h_arr = np.nan * np.ones((NT, NX))
             vel_arr = np.nan * np.ones((NT, NZ, NX))
-            
         zeta_arr[count,:] = C['zeta']
         h_arr[count,:] = h
         vel_arr[count,:,:] = C['vel']
-        
         for vn in vn_list:
             foo[vn][count,:,:] = C[vn]
-            
         foo['ocean_time'][count] = C['ot']
-        
         count += 1
-    
     z = zrfun.get_z(h_arr, zeta_arr, S, only_w=True)
     # initially z is packed (z,t,x)
     z = np.transpose(z, (1,0,2))
@@ -293,11 +288,8 @@ def add_fields(out_fn, temp_dir, sect_name, vn_list, S, NT):
     DZ = np.diff(z, axis=1)
     DA = d.reshape((1, 1, NX)) * DZ
     q = vel_arr * DA
-    
     foo['zeta'][:] = zeta_arr
     foo['q'][:] = q
     foo['DA'][:] = DA
-    
-        
     foo.close()
     
