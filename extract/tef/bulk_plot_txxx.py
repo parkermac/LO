@@ -75,12 +75,6 @@ ax.grid(True)
 ax.set_ylabel('Transport $[m^{3}s^{-1}]$')
 ax.text(.03, .95, '(b)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
     bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
-
-if tef_df['salt_in'].mean() > tef_df['salt_out'].mean():
-    pass
-else:
-    print('Warning: sign logic breakdown! ' + sect_name)
-
 ax.text(.97, .95, 'Inflow', ha='right', va='top', weight='bold', color='r',
     transform=ax.transAxes, size=1.2*fs,
     bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
