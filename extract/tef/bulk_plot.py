@@ -1,9 +1,10 @@
 """
-Plot bulk fluxes as a time series, including all chamical tracers.
+Plot bulk fluxes as a time series, including all chemical tracers
+if present.
+
 """
 from pathlib import Path
 import sys
-from datetime import datetime, timedelta
 
 pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
@@ -13,7 +14,6 @@ if str(pth) not in sys.path:
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
-from time import time
 
 import Lfun
 import zfun
@@ -36,9 +36,11 @@ Lfun.make_dir(out_dir, clean=True)
 
 # =================================
 # get the DataFrame of all sections
-sect_df = tef_fun.get_sect_df()
+gridname=gtagex.split('_')[0]
+sect_df = tef_fun.get_sect_df(gridname)
 
 testing = True
+
 if testing:
     from importlib import reload
     reload(flux_fun)
@@ -56,7 +58,19 @@ for sect_name in sect_list:
 
     # ---------------------------------------------------------
 
-    tef_df, in_sign = flux_fun.get_two_layer_all(in_dir, sect_name)
+    tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, gridname)
+    cols = list(tef_df.columns)
+    
+    # Check if we have chemical variables, or just salt
+    vn_list = tef_fun.vn_list
+    do_chem = True
+    for vn in vn_list:
+        if vn+'_in' not in cols:
+            do_chem = False
+    if do_chem:
+        NR = 3; NC = 2 # rows and columns for subplots
+    else:
+        NR = 2; NC = 1
     
     # some information about direction
     x0, x1, y0, y1 = sect_df.loc[sect_name,:]
@@ -75,35 +89,20 @@ for sect_name in sect_list:
                 
     fig = plt.figure()
 
+    # transport axis limits
     qlim_p = np.around(1.2*tef_df['Qin'].max(), 0)
     qlim_m = np.around(-1.2*tef_df['Qout'].min(), 0)
     qlim = np.max([qlim_p, qlim_m])
     
-    ax = fig.add_subplot(321)
-    tef_df[['salt_in','salt_out']].plot(ax=ax, legend=False, color=['r','b'])
-    ax.set_title('Section = ' + sect_name + ': Positive is ' + dir_str)
-    ax.grid(True)
-    ax.set_xticklabels([])
-    ax.set_xlabel('')
-    ax.set_ylabel('Salinity')
-    ax.text(.03, .95, '(a)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
-        bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
-        
-    ax = fig.add_subplot(323)
-    tef_df[['temp_in','temp_out']].plot(ax=ax, legend=False, color=['r','b'])
-    ax.grid(True)
-    ax.set_xticklabels([])
-    ax.set_xlabel('')
-    ax.set_ylabel('Temperature')
-    ax.text(.03, .95, '(c)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
-        bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
-        
-    ax = fig.add_subplot(325)
-    tef_df[['Qin','Qout']].plot(ax=ax, legend=False, color=['r','b'])
+    # transport
+    ax = fig.add_subplot(NR, NC, 1)
+    tef_df[['Qin','Qout']].plot(ax=ax, legend=False, color=['r','b'], grid=True)
+    ax.set_title(gtagex + ' : ' + sect_name + ' : Positive is ' + dir_str)
     ax.set_ylim(-qlim, qlim)
-    ax.grid(True)
+    ax.set_xticklabels([])
+    ax.set_xlabel('')
     ax.set_ylabel('Transport $[m^{3}s^{-1}]$')
-    ax.text(.03, .95, '(e)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
+    ax.text(.03, .95, '(a)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
         bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
     if tef_df['salt_in'].mean() > tef_df['salt_out'].mean():
         pass
@@ -115,39 +114,50 @@ for sect_name in sect_list:
     ax.text(.97, .05, 'Outflow', ha='right', va='bottom', weight='bold', color='b',
         transform=ax.transAxes, size=1.2*fs,
         bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
+    
+    # all other variables
+    if do_chem:
+        vn_list = ['salt', 'temp', 'NO3', 'oxygen', 'TIC']
+        ylab_list = [r'Salinity', r'Pot. Temp. $[^{o}C]$', r'Nitrate $[\mu mol\ L^{-1}]$',
+            r'Oxygen $[\mu mol\ L^{-1}]$', 'TIC (solid), Alk. (dashed)']
+        ii_list = [3, 5, 2, 4, 6]
+        xax_list = [False, True, False, False, True]
+        abc_list = ['c', 'e', 'b', 'd', 'f']
+        ii_dict = dict(zip(vn_list, ii_list))
+        xax_dict = dict(zip(vn_list, xax_list))
+        abc_dict = dict(zip(vn_list, abc_list))
+        ylab_dict = dict(zip(vn_list, ylab_list))
+    else:
+        vn_list = ['salt']
+        ii_list = [2]
+        xax_list = [True]
+        abc_list = ['b']
+        ii_dict = dict(zip(vn_list, ii_list))
+        xax_dict = dict(zip(vn_list, xax_list))
+        abc_dict = dict(zip(vn_list, abc_list))
         
-    ax = fig.add_subplot(322)
-    tef_df[['NO3_in','NO3_out']].plot(ax=ax, legend=False, color=['r','b'])
-    ax.grid(True)
-    ax.set_xticklabels([])
-    ax.set_xlabel('')
-    ax.set_ylabel('NO3')
-    ax.text(.03, .95, '(b)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
-        bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
-        
-    ax = fig.add_subplot(324)
-    tef_df[['oxygen_in','oxygen_out']].plot(ax=ax, legend=False, color=['r','b'])
-    ax.grid(True)
-    ax.set_xticklabels([])
-    ax.set_xlabel('')
-    ax.set_ylabel('Oxygen')
-    ax.text(.03, .95, '(d)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
-        bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
-        
-    ax = fig.add_subplot(326)
-    tef_df[['TIC_in','TIC_out']].plot(ax=ax, legend=False, color=['r','b'])
-    tef_df[['alkalinity_in','alkalinity_out']].plot(ax=ax, legend=False, color=['r','b'], linestyle='--')
-    ax.grid(True)
-    ax.set_ylabel('TIC (solid), Alk. (dashed)')
-    ax.text(.03, .95, '(f)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
-        bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
-        
+    for vn in vn_list:
+        ax = fig.add_subplot(NR, NC, ii_dict[vn])
+        tef_df[[vn+'_in',vn+'_out']].plot(ax=ax, legend=False, color=['r','b'], grid=True)
+        if vn == 'TIC':
+            tef_df[['alkalinity_in','alkalinity_out']].plot(ax=ax, legend=False,
+                color=['r','b'], linestyle='--', grid=True)
+        ax.set_ylabel(ylab_dict[vn])
+        if xax_dict[vn]:
+            pass
+        else:
+            ax.set_xticklabels([])
+            ax.set_xlabel('')
+        ax.text(.03, .95, '(' + abc_dict[vn] + ')', va='top', weight='bold',
+            transform=ax.transAxes, size=1.2*fs,
+            bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
+                
     fig.tight_layout()
     
     if testing:
         plt.show()
     else:
-        plt.savefig(out_dir + sect_name + '.png')
+        plt.savefig(out_dir / (sect_name + '.png'))
         plt.close()
 
 pfun.end_plot()

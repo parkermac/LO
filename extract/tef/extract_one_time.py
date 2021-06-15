@@ -51,7 +51,8 @@ if args.testing == True:
     # Make the sect_info dict if we ask it to (otherwise made by calling function)
     tt0 = time()
     # - get the DataFrame of all sections
-    sect_df = tef_fun.get_sect_df()
+    gridname=args.gtagex.split('_')[0]
+    sect_df = tef_fun.get_sect_df(gridname)
     sect_list = [item for item in sect_df.index]
     # - get grid info
     # - make a dictionary of info for each section

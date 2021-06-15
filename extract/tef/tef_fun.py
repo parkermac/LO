@@ -14,7 +14,7 @@ import zrfun
 # long list of variables to extract
 vn_list = ['salt', 'temp', 'oxygen', 'NO3', 'TIC', 'alkalinity']
 
-def get_sect_df(gridname='cas6'):
+def get_sect_df(gridname):
     # section definitions
     # * x and y are latitude and longitude and we require sections to be NS or EW so
     # either x0=x1 or y0=y1

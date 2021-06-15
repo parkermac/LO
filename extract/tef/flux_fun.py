@@ -16,7 +16,7 @@ from warnings import filterwarnings
 filterwarnings('ignore') # skip some warning messages
 # associated with lines like QQp[QQ<=0] = np.nan
 
-def get_two_layer(in_dir, sect_name, old_style=False):
+def get_two_layer(in_dir, sect_name, gridname, old_style=False):
     """
     Form time series of 2-layer TEF quantities, from the multi-layer bulk values.
     - works on all tracers
@@ -44,7 +44,7 @@ def get_two_layer(in_dir, sect_name, old_style=False):
     QQm = QQ.copy()
     QQm[QQ>=0] = np.nan
     
-    # form two-layer versions
+    # form two-layer versions of volume and tracer transports
     Qp = np.nansum(QQp, axis=1)
     Qm = np.nansum(QQm, axis=1)
     QCp = dict()
@@ -52,9 +52,8 @@ def get_two_layer(in_dir, sect_name, old_style=False):
     for vn in vn_list:
         QCp[vn] = np.nansum(QQp*bulk[vn], axis=1)
         QCm[vn] = np.nansum(QQm*bulk[vn], axis=1)
-        
     
-    # TEF versions
+    # form flux-weighted tracer concentrations
     Cp = dict()
     Cm = dict()
     for vn in vn_list:
@@ -71,7 +70,6 @@ def get_two_layer(in_dir, sect_name, old_style=False):
         Qin = Qp
         Qout = Qm
         in_sign = 1
-        
     elif SM > SP:
         # postive was outflow
         Cin = Cm.copy()
@@ -82,21 +80,30 @@ def get_two_layer(in_dir, sect_name, old_style=False):
     else:
         print('ambiguous sign!!')
     
-    if False:
-        print('%s SP=%0.1f SM = %0.1f' % (sect_name, SP, SM))
-        import sys
-        sys.stdout.flush()
-        
-    # fnet = in_sign * bulk['fnet']/1e6 # net tidal energy flux [MW]
-    # qabs = bulk['qabs'] # low pass of absolute value of net transport [m3/s]
-    
     tef_df = pd.DataFrame(index=dt)
     tef_df['Qin']=Qin
     tef_df['Qout']=Qout
     for vn in vn_list:
         tef_df[vn+'_in'] = Cin[vn]
         tef_df[vn+'_out'] = Cout[vn]
-    return tef_df, in_sign
+    
+    # get a sring for the direction of Qin
+    sect_df = tef_fun.get_sect_df(gridname)
+    x0, x1, y0, y1 = sect_df.loc[sect_name,:]
+    if (x0==x1) and (y0!=y1):
+        sdir = 'NS'
+        if in_sign == 1:
+            dir_str = 'Eastward'
+        elif in_sign == -1:
+            dir_str = 'Westward'
+    elif (x0!=x1) and (y0==y1):
+        sdir = 'EW'
+        if in_sign == 1:
+            dir_str = 'Northward'
+        elif in_sign == -1:
+            dir_str = 'Southward'
+            
+    return tef_df, in_sign, dir_str
 
 # desired time ranges, the "seasons"
 def get_dtr(year):
@@ -129,7 +136,6 @@ ic_seg2_dict = {'IC_HoodCanalInner': ['H'+str(n)+'_s' for n in range(3,9)],
                     + get_seg_list('H',8) + get_seg_list('W',4)
                     + get_seg_list('G',6),
             }
-                            
 
 # create Series of two-layer volumes
 # this is the one place to specify the ratio volume in the "salty" and "fresh" layers

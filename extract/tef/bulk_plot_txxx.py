@@ -1,7 +1,5 @@
 """
-Compare results of LO/extract/tef with those from LiveOcean/x_tef2.
-
-RESULT: they are exactly the same.  Hooray!
+Compare experiments - in this case for runs that had different tidal forcing
 
 """
 from pathlib import Path
@@ -29,44 +27,31 @@ reload(flux_fun)
 Ldir = Lfun.Lstart()
 
 sect_name = 'ai1'
-in_dir_old = Path('/Users/pm8/Documents/LiveOcean_output/tef2/cas6_v3_lo8b_2018.01.01_2018.12.31/bulk')
-in_dir = Path('/Users/pm8/Documents/LO_output/extract/cas6_v3_lo8b/tef/bulk_2018.01.01_2018.12.31')
+in_dir_old = Path('/Users/pm8/Documents/LO_output/extract/cas6_v3_lo8b/tef/bulk_2018.01.01_2018.12.31')
+in_dir = Path('/Users/pm8/Documents/LO_output/extract/cas6_v3t075_lo8/tef/bulk_2018.01.01_2018.12.31')
 
-# =================================
-# get the DataFrame of all sections
-gridname='cas6'
+gridname = 'cas6'
 sect_df = tef_fun.get_sect_df(gridname)
 
 # PLOTTING
 fs = 14
 pfun.start_plot(fs=fs, figsize=(14,10))
 
-tef_df_old, in_sign_old, dir_str = flux_fun.get_two_layer(in_dir_old, sect_name, gridname, old_style=True)
+tef_df_old, in_sign_old, dir_str = flux_fun.get_two_layer(in_dir_old, sect_name, gridname)
 tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, gridname)
+
+tef_df_old['Qe'] = (tef_df_old['Qin'] - tef_df_old['Qout'])/2
+tef_df['Qe'] = (tef_df['Qin'] - tef_df['Qout'])/2
+print('Ratio Qe new/old = %0.3f' % (tef_df['Qe'].mean()/tef_df_old['Qe'].mean()))
 
 if in_sign_old != in_sign:
     print('** in_sign error **')
     sys.exit()
-
-# some information about direction
-x0, x1, y0, y1 = sect_df.loc[sect_name,:]
-if (x0==x1) and (y0!=y1):
-    sdir = 'NS'
-    if in_sign == 1:
-        dir_str = 'Eastward'
-    elif in_sign == -1:
-        dir_str = 'Westward'
-elif (x0!=x1) and (y0==y1):
-    sdir = 'EW'
-    if in_sign == 1:
-        dir_str = 'Northward'
-    elif in_sign == -1:
-        dir_str = 'Southward'
             
 fig = plt.figure()
 
-qlim_p = np.around(1.2*tef_df['Qin'].max(), 0)
-qlim_m = np.around(-1.2*tef_df['Qout'].min(), 0)
+qlim_p = np.around(1.5*tef_df['Qin'].max(), 0)
+qlim_m = np.around(-1.5*tef_df['Qout'].min(), 0)
 qlim = np.max([qlim_p, qlim_m])
 
 # Salinity vs. Time (color by Transport)

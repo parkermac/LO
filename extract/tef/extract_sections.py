@@ -66,7 +66,9 @@ temp_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / ('tef_temp_' + ds0 + '_' +
 Lfun.make_dir(temp_dir, clean=True)
 
 # get the DataFrame of all sections
-sect_df = tef_fun.get_sect_df()
+gridname=Ldir['gtagex'].split('_')[0]
+sect_df = tef_fun.get_sect_df(gridname)
+
 # initialize a dictionary of info for each section
 sect_info = dict()
 # select which sections to extract
