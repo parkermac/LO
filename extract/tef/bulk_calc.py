@@ -5,7 +5,7 @@ Based on his code, and modified by PM.
 PERFORMANCE: Takes about 5-27 minutes per year for 39 cas6 sections.
 
 To test on mac:
-run process_sections -gtagex cas6_v3_lo8b -0 2019.07.04 -1 2019.07.06
+run bulk_calc -gtagex cas6_v3_lo8b -0 2019.07.04 -1 2019.07.06
 
 """
 
@@ -62,6 +62,12 @@ Lfun.make_dir(out_dir, clean=True)
 tt00 = time()
 
 testing = False
+# setting testing = True runs a deep debugging step, in which you only process
+# the first day, and look at the details of the multi-layer bulk calculation,
+# both graphically and as screen output.
+
+# debugging
+#sect_list = ['ai1.p', 'ss3.p']
 
 for snp in sect_list:
     print('Working on ' + snp)
@@ -71,8 +77,14 @@ for snp in sect_list:
     # load the data file
     TEF = pickle.load(open(in_dir / snp, 'rb'))
     
-    vn_list = [item for item in TEF.keys() if item not in ['sbins', 'ot', 'qnet', 'fnet', 'ssh']]
-    vec_list = ['qnet', 'fnet', 'ssh']
+    # add the absolute value of the net transport (to make Qprism)
+    TEF['qabs'] = np.abs(TEF['qnet'].copy())
+    
+    # vn_list is variables that are arrays [ot, sbins]
+    vn_list = [item for item in TEF.keys() if item not in ['sbins', 'ot', 'qnet', 'qabs', 'fnet', 'ssh']]
+    
+    # vec_list is time series [ot]
+    vec_list = ['qnet', 'qabs', 'fnet', 'ssh']
     sbins = TEF['sbins']
     ot = TEF['ot']
 
@@ -172,7 +184,12 @@ for snp in sect_list:
                 
     MLO['ot'] = ot
     for vn in vec_list:
-        MLO[vn] = TEF_lp[vn]
+        MLO[vn] = TEF_lp[vn].copy()
+        
+    # debugging
+    # print(MLO['ssh'].shape)
+    # print(MLO['ssh'])
+    
     pickle.dump(MLO, open(out_fn, 'wb'))
     
     if testing:

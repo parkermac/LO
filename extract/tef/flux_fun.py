@@ -83,6 +83,11 @@ def get_two_layer(in_dir, sect_name, gridname, old_style=False):
     tef_df = pd.DataFrame(index=dt)
     tef_df['Qin']=Qin
     tef_df['Qout']=Qout
+    tef_df['qabs'] = bulk['qabs']
+    tef_df['qnet'] = in_sign * bulk['qnet']
+    tef_df['fnet'] = in_sign * bulk['fnet']
+    tef_df['ssh'] = bulk['ssh']
+    
     for vn in vn_list:
         tef_df[vn+'_in'] = Cin[vn]
         tef_df[vn+'_out'] = Cout[vn]

@@ -118,10 +118,7 @@ for ext_fn in sect_list:
     for tt in range(NT):
             
         si = V['salt'][tt,:,:].squeeze()
-        if isinstance(si, np.ma.MaskedArray):
-            sf = si[si.mask==False].data.flatten()
-        else:
-            sf = si.flatten()
+        sf = zfun.fillit(si).flatten()
         sf = sf[~np.isnan(sf)]
         # sort into salinity bins
         inds = np.digitize(sf, sedges, right=True)
@@ -129,18 +126,15 @@ for ext_fn in sect_list:
             
         for vn in QV.keys():
             XI = QV[vn][tt,:,:].squeeze()
-            if isinstance(XI, np.ma.MaskedArray):
-                XF = XI[XI.mask==False].data.flatten()
-            else:
-                XF = XI.flatten()
+            XF = zfun.fillit(XI).flatten()
             XF = XF[~np.isnan(XF)]
             if vn == 'q':
                 # also keep track of volume transport
                 qnet[tt] = XF.sum()
                 # and tidal energy flux
                 zi = zeta[tt,:].squeeze()
-                ff = zi.reshape((1,NX)) * XI
-                fnet[tt] = g * rho * ff.sum()
+                ssh[tt] = np.nanmean(zfun.fillit(zi))
+                fnet[tt] = g * rho * ssh[tt] * qnet[tt]
             counter = 0
             for ii in indsf:
                 TEF[vn][tt, ii-1] += XF[counter]
@@ -150,7 +144,7 @@ for ext_fn in sect_list:
     TEF['sbins'] = sbins
     TEF['qnet'] = qnet
     TEF['fnet'] = fnet
-    TEF['ssh'] = np.mean(zeta, axis=1)
+    TEF['ssh'] = ssh
     pickle.dump(TEF, open(out_dir / out_fn, 'wb'))
     print('  elapsed time for section = %d seconds' % (time()-tt0))
     sys.stdout.flush()
