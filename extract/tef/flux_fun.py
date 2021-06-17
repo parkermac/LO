@@ -92,7 +92,7 @@ def get_two_layer(in_dir, sect_name, gridname, old_style=False):
         tef_df[vn+'_in'] = Cin[vn]
         tef_df[vn+'_out'] = Cout[vn]
     
-    # get a sring for the direction of Qin
+    # get a string for the direction of Qin
     sect_df = tef_fun.get_sect_df(gridname)
     x0, x1, y0, y1 = sect_df.loc[sect_name,:]
     if (x0==x1) and (y0!=y1):

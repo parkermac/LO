@@ -91,7 +91,7 @@ Output: LO_output/extract/[gtagex]/tef/bulk_[\*]/[sect name].p
 
 These are pickled dicts with keys: ['salt', 'q', etc., 'ot', 'qnet', 'qabs' 'fnet', 'ssh'] and other variables, where 'salt', 'q', and etc. are matrices of shape (363, 30) meaning that it is one per day, at Noon UTC, after tidal-averaging, with nan-days on the ends cut off.  The 30 is the number of "bulk" bins, so many are be filled with nan's.
 
-Since we have done the tidal averaging **qnet** is now the mean total transport through the section, mostly representing river flow in simple cases, whereas the qnet from `process_section.py` retains tidal variability. We also introduce a new time series, **qabs**, which is the tidal average of the absolute value of qnet.  One can show that the amplitude of the tidal flow is pi/2 times qabs, and that Qprism, from Chen et al. (2012 JPO) is qabs/2.
+Since we have done the tidal averaging **qnet** is now the mean total transport through the section, mostly representing river flow in simple cases, whereas the qnet from `process_section.py` retains tidal variability. We also introduce a new time series, **qabs**, which is the tidal average of the absolute value of qnet.  The amplitude of the tidal flow is Qt = (pi/2)*qabs, and that Qprism = qabs/2 (from Chen et al. 2012 JPO).
 
 ---
 #### TEF plotting
@@ -101,8 +101,16 @@ Since we have done the tidal averaging **qnet** is now the mean total transport 
 
 `check_results.py` is code with hard-wired file-paths to check that all out calculations above give exactly the same results as the original LiveOcean version. RESULT: the results are identical.
 
+`exchange_dyn_plot.py` plots time series of the results of bulk_calc.py, focusing on dynamical response to Qprism for a single section.
+
+`exchange_dyn_all_plot.py` plots time mean Qe vs. Qprism for all the sections, for two experiments.
+
+`test_freshwater.py` is a simple test of the sensitivity of freshwater transport to the value of Socn.
+
+**NOTE**: these make use of flux_fun.get_two_layer() which sums the multi-layer output of `bulk_calc.py` into two layer TEF format and adjusts the signs to be positive in the direction of mean transport of the saltier layer.
+
 ---
 #### FLUX CODE
 ---
 
-Under construction
+`flux_fun.py` is a module of functions associated with the complexity of hooking up sections, segments and rivers for the salt budget and box model codes.

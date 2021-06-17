@@ -54,20 +54,26 @@ for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8']:
     ii += 1
 
 # PLOTTING
+c0 = 'darkred'
+c1 = 'dodgerblue'
+alpha = 0.5
+loglog = True
 
 plt.close('all')
-pfun.start_plot()
+fs = 14
+pfun.start_plot(fs=fs, figsize=(12,12))
 
-# dfx = pd.DataFrame(index=sect_list)
-# dfx['DQe'] = df1['Qe'] - df0['Qe']
-# dfx['DQprism'] = df1['Qprism'] - df0['Qprism']
-# ax = dfx.plot(x='DQprism', y='DQe', grid=True, style='ob', alpha=.5)
-# for sect_name in sect_list:
-#     ax.text(dfx.loc[sect_name,'DQprism'], dfx.loc[sect_name,'DQe'], sect_name)
-# ax.plot([-100,0],[-25,0],'-k')
+ax = df0.plot(x='Qprism', y='Qe', linestyle='None', marker='o',
+    color=c0, label='Original', alpha=alpha, loglog=loglog)
+df1.plot(x='Qprism', y='Qe', linestyle='None', marker='o',
+    color=c1, ax=ax, label='75% tide', alpha=alpha, loglog=loglog)
+ax.set_xlabel(r'$Q_{prism}\ [10^{3}\ m^{3}s^{-1}]$')
+ax.set_ylabel(r'$Q_{E}\ [10^{3}\ m^{3}s^{-1}]$')
 
-ax = df0.plot(x='Qprism', y='Qe', style='*b')
-df1.plot(x='Qprism', y='Qe', style='*r', ax=ax)
+for sect_name in sect_list:
+    ax.text(df0.loc[sect_name,'Qprism'], df0.loc[sect_name,'Qe'], sect_name, fontsize=.7*(fs), color=c0)
+    ax.plot([df0.loc[sect_name,'Qprism'], df1.loc[sect_name,'Qprism']],
+            [df0.loc[sect_name,'Qe'], df1.loc[sect_name,'Qe']], '-', c='gray')
 
 plt.show()
 pfun.end_plot()
