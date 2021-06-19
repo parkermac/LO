@@ -37,16 +37,22 @@ print('start ' + str(tind[0]))
 print('end   ' + str(tind[-1]))
 
 print('info'.center(60,'-'))
+VN_list = []
 for vn in ds.variables:
     print('%s %s' % (vn, ds[vn].shape))
+    VN_list.append(vn)
+    
+# populate list of variables to plot
+vn_list = []
+if 'salt' in VN_list:
+    vn_list += ['salt', 'temp']
+if 'NO3' in VN_list:
+    vn_list += ['NO3', 'oxygen', 'phytoplankton']
 
 df = pd.DataFrame(index=tind)
 df['zeta'] = ds['zeta'][:,0,0]
-df['salt'] = ds['salt'][:,-1,0,0]
-df['temp'] = ds['temp'][:,-1,0,0]
-df['u'] = ds['u'][:,-1,0,0]
-df['v'] = ds['v'][:,-1,0,0]
-df['w'] = ds['w'][:,15,0,0]
+for vn in vn_list:
+    df[vn] = ds[vn][:, -1, 0, 0]
 
 pfun.start_plot()
 

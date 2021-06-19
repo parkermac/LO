@@ -38,6 +38,7 @@ for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8']:
     for sect_name in sect_list:
         gridname = 'cas6'
         tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, gridname)
+        tef_df = tef_df.loc[datetime(2018,5,1):,:] # limit time range
         # make derived variables
         df.loc[sect_name, 'Qe'] = ((tef_df['Qin'] - tef_df['Qout']).mean()/2)/1000
         df.loc[sect_name, 'DS'] = (tef_df['salt_in'] - tef_df['salt_out']).mean()
