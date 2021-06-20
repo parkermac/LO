@@ -147,7 +147,7 @@ while dt <= dt1:
         
     # Loop over blow ups.
     blow_ups = 0
-    blow_ups_max = 0 #5
+    blow_ups_max = 5
     roms_worked = False
     while blow_ups <= blow_ups_max:
         print((' - Blow-ups = ' + str(blow_ups)))
