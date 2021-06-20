@@ -1,22 +1,16 @@
 """
 This runs ROMS for one or more days, allowing for either a forecast or backfill.
 
-Designed to be run from mox, and depends on other drivers having been run first on boiler.
+Designed to be run from klone, and depends on other drivers having been run first on boiler.
 
 The -np and -N flags specify the total number of cores, and the
 cores per node.  For the current mox environment, acceptable choices are
--np 64 -N 32 or -np 196 -N 28
+-np 200 or 400 -N 40
 NOTE: np has to be an even multiple of N, and N has to be <= the number
 of nodes of that size that I own.
 
 - To test on mac in ipython:
-run driver_roms_mox -g cas6 -t v3t075 -x lo8 -r backfill -s continuation -0 2019.07.04 -np 196 -N 28 -v True --get_forcing False --run_roms False --move_his False
-- To test on mox:
-python3 driver_roms_mox.py -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2021.05.29 -np 196 -N 28 -v True --short_roms True > driver_log.txt &
-- or, after you have copied the forcing files once...
-python3 driver_roms_mox.py -g cas6 -t v3 -x lo8 -r backfill -s continuation -0 2021.05.29 -np 196 -N 28 -v True --get_forcing False --short_roms True > driver_log.txt &
-- this one would run a day with tag=v3t075, but getting forcing from from cas6_v3 on boiler in LiveOcean:
-python3 driver_roms_mox.py -g cas6 -t v3t075 -ta v3 -x lo8 -r backfill -s continuation -0 2018.01.01 -np 196 -N 28 -v True --short_roms True > driver_log.txt &
+run driver_roms_mox -g cas6 -t v3t075 -x lo8 -r backfill -s continuation -0 2019.07.04 -np 200 -N 40 -v True --get_forcing False --run_roms False --move_his False
 
 DEVELOPMENT NOTES: see the "various flags to facilitate testing" part of the arguments for other testing flags
 
