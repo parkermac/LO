@@ -1,0 +1,291 @@
+!  parameters for the Banas NPZD2O model.
+!  not part of the ROMS distribution.
+!
+!==============================================================================
+!                                                                             !
+! Input parameters can be entered in ANY order, provided that the parameter   !
+! KEYWORD (usually, upper case) is typed correctly followed by "="  or "=="   !
+! symbols. Any comment lines are allowed and must begin with an exclamation   !
+! mark (!) in column one.  Comments may  appear to the right of a parameter   !
+! specification to improve documentation.  Comments will be ignored  during   !
+! reading.  Blank lines are also allowed and ignored. Continuation lines in   !
+! a parameter specification are allowed and must be preceded by a backslash   !
+! (\).  In some instances, more than one value is required for a parameter.   !
+! If fewer values are provided, the  last value  is assigned for the entire   !
+! parameter array.  The multiplication symbol (*),  without blank spaces in   !
+! between, is allowed for a parameter specification.  For example, in a two   !
+! grids nested application:                                                   !
+!                                                                             !
+!    AKT_BAK == 2*1.0d-6  2*5.0d-6              ! m2/s                        !
+!                                                                             !
+! indicates that the first two entries of array AKT_BAK,  in fortran column-  !
+! major order, will have the same value of "1.0d-6" for grid 1,  whereas the  !
+! next two entries will have the same value of "5.0d-6" for grid 2.           !
+!                                                                             !
+! In multiple levels of nesting and/or multiple connected domains  step-ups,  !
+! "Ngrids" entries are expected for some of these parameters.  In such case,  !
+! the order of the entries for a parameter is extremely important.  It  must  !
+! follow the same order (1:Ngrids) as in the state variable declaration. The  !
+! USER may follow the above guidelines for specifying his/her values.  These  !
+! parameters are marked by "==" plural symbol after the KEYWORD.              !
+!                                                                             !
+!==============================================================================
+!
+! "uM" = micromolar N = mmol N / m3
+!
+!
+! Switch to control the computation of biology within nested and/or multiple
+! connected grids.
+
+      Lbiology == T
+
+! Maximum number of iterations to achieve convergence of the nonlinear
+! solution.
+
+      BioIter == 1
+
+! Fraction of shortwave radiation that is photosynthetically active
+
+      PARfrac == 0.43d0
+
+! Light attenuation due to seawater [1/m]
+! If AttSW is nonzero, then this is AttSW at a reference salinity of 32
+
+      AttSW == 0.0654d0
+
+! Light attenuation by phytoplankton [1/uM/m]
+
+      AttP == 0.04d0
+
+! Light attenuation by salinity [1/psu/m]
+
+      AttS == 0.0d0
+
+! phytoplankton initial slope of P-I curve [(uM/d) / (Watts/m2)]
+
+      phyAlpha == 0.07d0
+
+! phytoplankton max growth/uptake rate [1/d]
+
+      phyMu0 == 1.7d0
+
+! half-saturation for phytoplankton NO3 uptake [uM]
+
+      phyKs == 0.1d0
+
+! Phytoplankton minimum threshold value [uM]
+
+      phyMin == 0.001d0
+
+! Phytoplankton mortality rate [1/day]
+
+      phyM == 0.1d0
+       
+! zooplankton max grazing rate [1/day]
+
+      zooI0 == 4.8d0
+
+! zooplankton grazing half-saturation [uM]
+
+      zooKs == 3.0d0
+       
+! zooplankton gross growth efficiency (assimilation = this * grazing)
+
+      zooEps = 0.3d0
+
+! fraction of grazing losses egested (to D) instead of excreted (to N)
+
+      zooFegest = 0.5d0
+
+! zooplankton minimum threshold value [uM]
+
+      zooMin == 0.001d0
+
+! zooplankton quadratic mortality rate [1/uM/day]
+
+      zooZeta == 2.0d0
+
+! detritus remineralization rate [1/d]
+
+      detRemin = 0.1d0
+
+! Coagulation rate: aggregation rate of SDeN + Phy ==> LDeN [1/day]
+
+       CoagR == 0.05d0
+
+! sinking velocity for detritus [m/day]
+
+      detWsink == 8.0d0
+
+! sinking velocity for large detritus [m/day]
+
+      LdetWsink == 80.0d0
+
+! CO2 partial pressure in the air (parts per million by volume),
+! {377.0d0}.
+
+     pCO2air == 377.0d0
+
+! Lateral, constant, harmonic/biharmonic horizontal diffusion of biological
+! tracer: [1:NBT,Ngrids].
+
+      TNU2 == 9*0.0d0                        ! m2/s
+      TNU4 == 9*0.0d0                        ! m4/s
+
+     ad_TNU2 == 12*0.0d0                        ! m2/s
+     ad_TNU4 == 12*0.0d0                        ! m4/s
+
+! Logical switches (TRUE/FALSE) to increase/decrease horizontal diffusivity
+! in specific areas of the application domain (like sponge areas) for the
+! desired grid: [Ngrids]
+
+LtracerSponge == 9*F
+
+! Vertical mixing coefficients for biological tracers: [1:NBT,Ngrids].
+
+      AKT_BAK == 9*1.0d-6                    ! m2/s
+
+       ad_AKT_fac == 9*1.0d0                        ! nondimensional
+
+! Nudging/relaxation time scales, inverse scales will be computed
+! internally: [1:NBT,Ngrids].
+
+      TNUDG == 9*3.0d0                       ! days
+
+
+! Set lateral boundary conditions keyword. Notice that a value is expected
+! for each boundary segment per nested grid for each state variable.
+!
+! The biological tracer variables require [1:4,1:NBT,Ngrids] values. The
+! boundary order is: 1=west, 2=south, 3=east, and 4=north. That is,
+! anticlockwise starting at the western boundary.
+!
+! The keyword is case insensitive and usually has three characters. However,
+! it is possible to have compound keywords, if applicable. For example, the
+! keyword "RadNud" implies radiation boundary condition with nudging. This
+! combination is usually used in active/passive radiation conditions.
+!
+! NOTICE: It is possible to specify the lateral boundary conditions for
+! ======  all biological tracers in a compact form with a single entry.
+! If so, all the biological tracers are assumed to have the same boundary
+! condition as in the single entry.
+!
+!   Keyword    Lateral Boundary Condition Type
+!
+!   Cla        Clamped                                _____N_____     j=Mm
+!   Clo        Closed                                |     4     |
+!   Gra        Gradient                              |           |
+!   Nes        Nested                              1 W           E 3
+!   Nud        Nudging                               |           |
+!   Per        Periodic                              |_____S_____|
+!   Rad        Radiation                                   2          j=1
+!                                                   i=1         i=Lm
+!                   W       S       E       N
+!                   e       o       a       o
+!                   s       u       s       r
+!                   t       t       t       t
+!                           h               h
+!
+!                   1       2       3       4
+
+
+!   LBC(isTvar) ==   Per     Per     Per     Per \    ! idbio(1), NO3
+!                    Per     Per     Per     Per \ ! idbio(2), phytoplankton
+!                    Per     Per     Per     Per \ ! idbio(3), zooplankton
+!                    Per     Per     Per     Per \  ! idbio(4), detritus
+!                    Per     Per     Per     Per \  ! idbio(5), large detritus
+!                    Per     Per     Per     Per \  ! idbio(6), oxygen
+!                    Per     Per     Per     Per \ ! idbio(7), tic
+!                     Per     Per     Per     Per \  ! idbio(8), alkalinity
+!                     Per     Per     Per     Per   ! idbio(9), Caco3
+
+   LBC(isTvar) ==   RadNud     RadNud     Clo     RadNud \    ! idbio(1), NO3
+                    RadNud     RadNud     Clo     RadNud \    ! idbio(2), phytoplankton
+                    RadNud     RadNud     Clo     RadNud \    ! idbio(3), zooplankton
+                    RadNud     RadNud     Clo     RadNud \    ! idbio(4), detritus
+                    RadNud     RadNud     Clo     RadNud \    ! idbio(5), large detritus
+                    RadNud     RadNud     Clo     RadNud \    ! idbio(6), oxygen
+                    RadNud     RadNud     Clo     RadNud \    ! idbio(7), tic
+                    RadNud     RadNud     Clo     RadNud \     ! idbio(8), alkalinity
+                    Gra     Gra     Clo     Clo      ! idbio(9), Caco3
+
+! Adjoint-based algorithms can have different lateral boundary
+! conditions keywords.
+
+ad_LBC(isTvar) ==   RadNud     RadNud     Clo     Clo \    ! idbio(1), NO3
+                    RadNud     RadNud     Clo     Clo \    ! idbio(2), phytoplankton
+                    RadNud     RadNud     Clo     Clo \    ! idbio(3), zooplankton
+                    RadNud     RadNud     Clo     Clo \    ! idbio(4), detritus
+                    RadNud     RadNud     Clo     Clo \    ! idbio(5), large detritus
+                    RadNud     RadNud     Clo     Clo \    ! idbio(6), oxygen
+                    RadNud     RadNud     Clo     Clo \    ! idbio(7), tic
+                    RadNud     RadNud     Clo     Clo \     ! idbio(8), alkalinity
+                    Gra     Gra     Clo     Clo      ! idbio(9), Caco3
+
+! Logical switches (TRUE/FALSE) to activate biological tracers point
+! Sources/Sinks (like river runoff) and to specify which tracer variables
+! to consider: [NBT,Ngrids] values are expected. See glossary below for
+! details.
+
+  LtracerSrc == 9*T
+
+! Logical switches (TRUE/FALSE) to read and process biological tracer
+! climatology fields: [NBT,Ngrids] values are expected. See glossary below
+! for details.
+
+  LtracerCLM == 9*T
+
+! Logical switches (TRUE/FALSE) to nudge the desired biological tracer
+! climatology field. If not analytical climatology fields, users need to
+! turn on the logical switches above to process the fields from the
+! climatology NetCDF file that are needed for nudging; [NBT,Ngrids]
+! values are expected. See glossary below for details.
+
+  LnudgeTCLM == 9*T
+
+  SSFNAME == $force_dir$/$riv$/rivers.nc
+
+
+! Logical switches (TRUE/FALSE) to activate writing of biological tracers
+! into HISTORY output file: [1:NBT,Ngrids].
+
+      Hout(idTvar) == 9*T                  ! biological tracer
+      Hout(idTsur) == 9*F                  ! surface tracer flux
+
+! Logical switches (TRUE/FALSE) to activate writing of biological fields
+! into QUICKSAVE output file: [1:NBT,Ngrids].
+
+Qout(idTvar) == 12*F    ! ..., NO3, ...           biological tracer
+Qout(idsurT) == 12*F    ! ..., NO3_sur, ...       surface biological tracer
+Qout(idTsur) == 12*F    ! ..., NO3_sflux, ...     surface tracer flux
+
+! Logical switches (TRUE/FALSE) to activate writing of time-averaged fields
+! into AVERAGE output file: [1:NBT,Ngrids].
+
+      Aout(idTvar) == 9*F                             ! biological tracer
+
+! Logical switches (TRUE/FALSE) to activate writing of time-averaged,
+! biological tracer diagnostic terms into DIAGNOSTIC output file:
+! [1:NBT,Ngrids].
+
+      Dout(iTrate) == 9*F                             ! time rate of change
+      Dout(iThadv) == 9*F                             ! horizontal total advection
+      Dout(iTxadv) == 9*F                             ! horizontal XI-advection
+      Dout(iTyadv) == 9*F                             ! horizontal ETA-advection
+      Dout(iTvadv) == 9*F                             ! vertical advection
+      Dout(iThdif) == 9*F                             ! horizontal total diffusion
+      Dout(iTxdif) == 9*F                             ! horizontal XI-diffusion
+      Dout(iTydif) == 9*F                             ! horizontal ETA-diffusion
+      Dout(iTsdif) == 9*F                             ! horizontal S-diffusion
+      Dout(iTvdif) == 9*F                             ! vertical diffusion
+
+     Dout(iO2fx) == F        ! O2_airsea          air-sea O2 flux
+     Dout(ipCO2) == F        ! pCO2 surf
+     Dout(iCOfx) == F        ! CO2_airsea          air-sea CO2 flux
+     Dout(iDsed) == F        ! O2_sedflux         O2 sed flux
+     Dout(iPPro) == F        ! P_Production       primary production
+     Dout(iRem) == F        ! NO3_uptake         NO3 uptake
+     Dout(iGraz) == F        ! total grazing
+     Dout(iDNIT) == F        ! total denit
+
+
