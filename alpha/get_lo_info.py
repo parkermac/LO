@@ -61,6 +61,9 @@ elif (str(HOME) == '/home/parker') & ('perigee' in HOSTNAME):
     
 elif (str(HOME) == '/usr/lusers/pmacc'):
     lo_env = 'pm_mox'
+
+elif (str(HOME) == '/mmfs1/home/pmacc'):
+    lo_env = 'pm_klone'
   
 Ldir0 = dict()
 Ldir0['lo_env'] = lo_env
