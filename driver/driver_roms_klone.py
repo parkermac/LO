@@ -40,8 +40,8 @@ parser.add_argument('-r', '--run_type', type=str)   # forecast or backfill
 parser.add_argument('-s', '--start_type', type=str) # new or continuation
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
-parser.add_argument('-np', '--np_num', type=int) # e.g. 196, number of cores
-parser.add_argument('-N', '--cores_per_node', type=int) # 28 or 32 on mox, number of cores per node
+parser.add_argument('-np', '--np_num', type=int) # e.g. 200, number of cores
+parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone
 # various flags to facilitate testing
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
@@ -55,7 +55,7 @@ args = parser.parse_args()
 argsd = args.__dict__
 for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'ds0', 'np_num', 'cores_per_node']:
     if argsd[a] == None:
-        print('*** Missing required argument for driver_roms_mox.py: ' + a)
+        print('*** Missing required argument for driver_roms_klone.py: ' + a)
         sys.exit()
         
 # set tag_alt to tag if it is not provided
@@ -166,7 +166,7 @@ while dt <= dt1:
             messages(stdout, stderr, 'Make dot in', args.verbose)
             
             # Create batch script
-            cmd_list = ['python3', str(dot_in_shared_dir / 'make_mox_batch.py'),
+            cmd_list = ['python3', str(dot_in_shared_dir / 'make_klone_batch.py'),
                 '-xd', str(roms_ex_dir),
                 '-rod', str(roms_out_dir),
                 '-np', str(args.np_num),
@@ -183,8 +183,8 @@ while dt <= dt1:
         
         if args.run_roms:
             # Run ROMS using the batch script.
-            cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
-                str(roms_out_dir / 'mox_batch.sh')]
+            cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc','--wait',
+                str(roms_out_dir / 'klone_batch.sh')]
             # The --wait flag will cause the subprocess to not return until the job has terminated.
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
