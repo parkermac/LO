@@ -15,8 +15,8 @@
 ## Memory per node
 #SBATCH --mem=128G
 
-module load icc_17-impi_2017
-module load netcdf_fortran+c_4.4.1.1-icc_17
+## module load icc_17-impi_2017
+## module load netcdf_fortran+c_4.4.1.1-icc_17
 
 mpirun $roms_ex_dir$/oceanM $roms_out_dir$/liveocean.in > $roms_out_dir$/log.txt
 
