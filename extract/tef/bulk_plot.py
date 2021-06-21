@@ -39,7 +39,7 @@ Lfun.make_dir(out_dir, clean=True)
 gridname=gtagex.split('_')[0]
 sect_df = tef_fun.get_sect_df(gridname)
 
-testing = True
+testing = False
 
 if testing:
     from importlib import reload
@@ -125,12 +125,14 @@ for sect_name in sect_list:
         ylab_dict = dict(zip(vn_list, ylab_list))
     else:
         vn_list = ['salt']
+        ylab_list = [r'Salinity']
         ii_list = [2]
         xax_list = [True]
         abc_list = ['b']
         ii_dict = dict(zip(vn_list, ii_list))
         xax_dict = dict(zip(vn_list, xax_list))
         abc_dict = dict(zip(vn_list, abc_list))
+        ylab_dict = dict(zip(vn_list, ylab_list))
         
     for vn in vn_list:
         ax = fig.add_subplot(NR, NC, ii_dict[vn])

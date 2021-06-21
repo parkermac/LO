@@ -2,7 +2,7 @@
 Code to create the mean over a specified time period of the two-layer
 TEF properties, and some derived quantities, for several runs.
 
-It only takes 5 sec or so for each gtagex.
+It takes 9 sec or so for each gtagex.
 
 The names and time periods are hard-coded, so you have to edit it for
 different purposes.
@@ -37,7 +37,7 @@ sect_list = list(sect_df.index)
 
 ds0 = '2018.01.01'
 ds1 = '2018.12.31'
-dt00 = datetime(2018,5,1)
+dt00 = datetime(2018,8,1)
 ds00 = dt00.strftime(Lfun.ds_fmt)
 ii = 0
 for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8', 'cas6_v3t110_lo8']:
@@ -55,6 +55,8 @@ for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8', 'cas6_v3t110_lo8']:
                 df.loc[sect_name, vn+'_in'] = (tef_df['Qin']*tef_df[vn+'_in']).mean()/tef_df['Qin'].mean()
                 df.loc[sect_name, vn+'_out'] = (tef_df['Qout']*tef_df[vn+'_out']).mean()/tef_df['Qout'].mean()
         # make derived variables
+        Socn = 34
+        df.loc[sect_name, 'Qfw'] = (tef_df['Qin']*(Socn-tef_df['salt_in']) + tef_df['Qout']*(Socn-tef_df['salt_out'])).mean()/Socn
         df.loc[sect_name, 'Qe'] = ((df.loc[sect_name, 'Qin'] - df.loc[sect_name, 'Qout'])/2)/1000
         df.loc[sect_name, 'DS'] = df.loc[sect_name, 'salt_in'] - df.loc[sect_name, 'salt_out']
         df.loc[sect_name, 'Sbar'] = (df.loc[sect_name, 'salt_in'] + df.loc[sect_name, 'salt_out'])/2
