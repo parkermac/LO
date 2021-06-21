@@ -13,10 +13,12 @@
 #SBATCH --time=05:00:00
 
 ## Memory per node
-#SBATCH --mem=128G
+#SBATCH --mem=100G
 
-## module load icc_17-impi_2017
-## module load netcdf_fortran+c_4.4.1.1-icc_17
+module purge
+module load intel/oneAPI
+NFDIR=/gscratch/macc/local/netcdf-ifort/
+export LD_LIBRARY_PATH=${NFDIR}/lib:${LD_LIBRARY_PATH}
 
 mpirun $roms_ex_dir$/oceanM $roms_out_dir$/liveocean.in > $roms_out_dir$/log.txt
 
