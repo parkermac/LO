@@ -31,50 +31,46 @@ sect_df = tef_fun.get_sect_df(gridname)
 sect_list = list(sect_df.index)
 
 ii = 0
-for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8']:
-    in_dir = Path('/Users/pm8/Documents/LO_output/extract/'+gtagex+'/tef/bulk_2018.01.01_2018.12.31')
-    tt0 = time()
-    df = pd.DataFrame(index=sect_list)
-    for sect_name in sect_list:
-        gridname = 'cas6'
-        tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, gridname)
-        tef_df = tef_df.loc[datetime(2018,5,1):,:] # limit time range
-        # make derived variables
-        df.loc[sect_name, 'Qe'] = ((tef_df['Qin'] - tef_df['Qout']).mean()/2)/1000
-        df.loc[sect_name, 'DS'] = (tef_df['salt_in'] - tef_df['salt_out']).mean()
-        df.loc[sect_name, 'Sbar'] = (tef_df['salt_in'] + tef_df['salt_out']).mean()/2
-        df.loc[sect_name, 'Qprism'] =( tef_df['qabs'].mean()/2)/1000
-        df.loc[sect_name, 'SSH'] = tef_df['ssh'].mean()
-        df.loc[sect_name, 'Fnet'] = tef_df['fnet'].mean()
-        df.loc[sect_name, 'Qnet'] = tef_df['qnet'].mean()
+for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8', 'cas6_v3t110_lo8']:
+    in_fn = Path('/Users/pm8/Documents/LO_output/extract/'+gtagex+'/tef/two_layer_mean_2018.05.01_2018.12.31.p')
+    df = pd.read_pickle(in_fn)
     if ii == 0:
         df0 = df.copy()
     elif ii == 1:
         df1 = df.copy()
-    print('Total time to fill DataFrame = %0.1f sec' % (time()-tt0))
+    elif ii == 2:
+        df2 = df.copy()
     ii += 1
 
 # PLOTTING
-c0 = 'darkred'
+c0 = 'g'
 c1 = 'dodgerblue'
-alpha = 0.5
+c2 = 'darkred'
+alpha = 0.3
 loglog = True
+ms = 8
 
 plt.close('all')
 fs = 14
 pfun.start_plot(fs=fs, figsize=(12,12))
 
 ax = df0.plot(x='Qprism', y='Qe', linestyle='None', marker='o',
-    color=c0, label='Original', alpha=alpha, loglog=loglog)
+    color=c0, label='Original', alpha=alpha, loglog=loglog, markersize=ms)
 df1.plot(x='Qprism', y='Qe', linestyle='None', marker='o',
-    color=c1, ax=ax, label='75% tide', alpha=alpha, loglog=loglog)
+    color=c1, ax=ax, label='75% tide', alpha=alpha, loglog=loglog, markersize=ms)
+df2.plot(x='Qprism', y='Qe', linestyle='None', marker='o',
+    color=c2, ax=ax, label='110% tide', alpha=alpha, loglog=loglog, markersize=ms)
 ax.set_xlabel(r'$Q_{prism}\ [10^{3}\ m^{3}s^{-1}]$')
 ax.set_ylabel(r'$Q_{E}\ [10^{3}\ m^{3}s^{-1}]$')
 
 for sect_name in sect_list:
-    ax.text(df0.loc[sect_name,'Qprism'], df0.loc[sect_name,'Qe'], sect_name, fontsize=.7*(fs), color=c0)
+    # add section names
+    ax.text(df0.loc[sect_name,'Qprism'], df0.loc[sect_name,'Qe'], sect_name, fontsize=.7*(fs), color='k', ha='center', va='center')
+    # add lines connecting the experiments for each section
     ax.plot([df0.loc[sect_name,'Qprism'], df1.loc[sect_name,'Qprism']],
             [df0.loc[sect_name,'Qe'], df1.loc[sect_name,'Qe']], '-', c='gray')
+    ax.plot([df0.loc[sect_name,'Qprism'], df2.loc[sect_name,'Qprism']],
+            [df0.loc[sect_name,'Qe'], df2.loc[sect_name,'Qe']], '-', c='gray')
 
 plt.show()
 pfun.end_plot()

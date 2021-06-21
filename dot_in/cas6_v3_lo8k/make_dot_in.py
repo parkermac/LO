@@ -120,6 +120,9 @@ if multi_core:
     elif Ldir['np_num'] == 200: # klone
         ntilei = '10' # number of tiles in I-direction
         ntilej = '20' # number of tiles in J-direction
+    elif Ldir['np_num'] == 40: # klone
+        ntilei = '5' # number of tiles in I-direction
+        ntilej = '8' # number of tiles in J-direction
     else:
         print('Unsupported number of processors: %d' % (Ldir['np_num']))
 else:
