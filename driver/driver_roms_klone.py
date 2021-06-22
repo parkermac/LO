@@ -22,7 +22,7 @@ import argparse
 from datetime import datetime, timedelta
 from pathlib import Path
 import subprocess
-import time
+from time import time, sleep
 
 pth = Path(__file__).absolute().parent.parent / 'alpha'
 if str(pth) not in sys.path:
@@ -43,7 +43,7 @@ parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omit
 parser.add_argument('-np', '--np_num', type=int) # e.g. 200, number of cores
 parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone
 # various flags to facilitate testing
-parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
+parser.add_argument('-v', '--verbose', default=True, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
 parser.add_argument('--short_roms', default=False, type=Lfun.boolean_string)
 parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
@@ -130,6 +130,7 @@ while dt <= dt1:
             force_dict[which_force] = force_choice
     
     if args.get_forcing:
+        tt0 = time()
         # Name the place where the forcing files will be copied from
         remote_dir='parker@boiler.ocean.washington.edu:/data1/parker'
         Lfun.make_dir(force_dir, clean=True)
@@ -142,6 +143,7 @@ while dt <= dt1:
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
+        print(' - time to get forcing = %d sec' % (time()-tt0))
     else:
         print(' ** skipped getting forcing')
         
@@ -182,6 +184,7 @@ while dt <= dt1:
     
         
         if args.run_roms:
+            tt0 = time()
             # Run ROMS using the batch script.
             cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc','--wait',
                 str(roms_out_dir / 'klone_batch.sh')]
@@ -189,11 +192,12 @@ while dt <= dt1:
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Run ROMS', args.verbose)
+            print(' - time to run ROMS = %d sec' % (time()-tt0))
     
             # A bit of checking to make sure that the log file exists...
             lcount = 0
             while not log_file.is_file():
-                time.sleep(10)
+                sleep(10)
                 print(' - lcount = %d' % (lcount))
                 sys.stdout.flush()
                 lcount += 1
@@ -201,7 +205,7 @@ while dt <= dt1:
             llcount = 0
             log_done = False
             while log_done == False:
-                time.sleep(3)
+                sleep(3)
                 cmd_list = ['lsof', '-u', 'pmacc','|','grep',str(log_file)]
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
@@ -240,6 +244,7 @@ while dt <= dt1:
 
     if roms_worked:
         if args.move_his:
+            tt0 = time()
             # Copy history files to boiler and clean up
             # (i) make sure the output directory exists
             cmd_list = ['ssh', 'parker@boiler.ocean.washington.edu', 'mkdir -p /data1/parker/LO_roms/'+Ldir['gtagex']]
@@ -258,6 +263,7 @@ while dt <= dt1:
             force_dir_prev = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string_prev
             shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(force_dir_prev), ignore_errors=True)
+            print(' - time to move history files and clean up = %d sec' % (time()-tt0))
         else:
             print(' ** skipped moving history files')
         dt += timedelta(days=1)
