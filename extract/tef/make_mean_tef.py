@@ -45,9 +45,12 @@ for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8', 'cas6_v3t110_lo8']:
     tt0 = time()
     df = pd.DataFrame(index=sect_list)
     for sect_name in sect_list:
-        tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, gridname)
-        tef_df = tef_df.loc[dt00:,:] # limit time range
-        # copy over two-layer versions
+        x0, x1, y0, y1 = sect_df.loc[sect_name,:]
+        lon = (x0 + x1)/2
+        lat = (y0 + y1)/2
+        # get two-layer versions
+        tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, gridname, dt00=dt00)
+        # and save their flux-weighted means
         df.loc[sect_name, 'Qin'] = tef_df['Qin'].mean()
         df.loc[sect_name, 'Qout'] = tef_df['Qout'].mean()
         for vn in tef_fun.vn_list:
@@ -64,6 +67,10 @@ for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8', 'cas6_v3t110_lo8']:
         df.loc[sect_name, 'SSH'] = tef_df['ssh'].mean()
         df.loc[sect_name, 'Fnet'] = tef_df['fnet'].mean()
         df.loc[sect_name, 'Qnet'] = tef_df['qnet'].mean()
+        df.loc[sect_name, 'in_sign'] = in_sign
+        df.loc[sect_name, 'dir_str'] = dir_str
+        df.loc[sect_name, 'lon'] = lon
+        df.loc[sect_name, 'lat'] = lat
     print('Total time to fill DataFrame = %0.1f sec' % (time()-tt0))
     ii += 1
     df.to_pickle(in_dir.parent / ('two_layer_mean_' + ds00 + '_' + ds1 + '.p'))

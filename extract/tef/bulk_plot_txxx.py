@@ -1,5 +1,5 @@
 """
-Compare experiments - in this case for runs that had different tidal forcing
+Compare experiments - in this case for runs that had different tidal forcing.
 
 """
 from pathlib import Path
@@ -27,8 +27,14 @@ reload(flux_fun)
 Ldir = Lfun.Lstart()
 
 sect_name = 'ai1'
-in_dir_old = Path('/Users/pm8/Documents/LO_output/extract/cas6_v3_lo8b/tef/bulk_2018.01.01_2018.12.31')
-in_dir = Path('/Users/pm8/Documents/LO_output/extract/cas6_v3t075_lo8/tef/bulk_2018.01.01_2018.12.31')
+gtagex_list = ['cas6_v3t075_lo8', 'cas6_v3_lo8b', 'cas6_v3t110_lo8']
+alpha_dict = dict(zip(gtagex_list, [.3, .7, 1]))
+label_dict = dict(zip(gtagex_list, ['75% tide', '100% tide', '110% tide']))
+
+in_dir_dict = dict()
+for gtagex in gtagex_list:
+    in_dir_dict[gtagex] = Path('/Users/pm8/Documents/LO_output/extract/' + gtagex +
+        '/tef/bulk_2018.01.01_2018.12.31')
 
 gridname = 'cas6'
 sect_df = tef_fun.get_sect_df(gridname)
@@ -37,28 +43,24 @@ sect_df = tef_fun.get_sect_df(gridname)
 fs = 14
 pfun.start_plot(fs=fs, figsize=(14,10))
 
-tef_df_old, in_sign_old, dir_str = flux_fun.get_two_layer(in_dir_old, sect_name, gridname)
-tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, gridname)
-
-tef_df_old['Qe'] = (tef_df_old['Qin'] - tef_df_old['Qout'])/2
-tef_df['Qe'] = (tef_df['Qin'] - tef_df['Qout'])/2
-print('Ratio Qe new/old = %0.3f' % (tef_df['Qe'].mean()/tef_df_old['Qe'].mean()))
-
-if in_sign_old != in_sign:
-    print('** in_sign error **')
-    sys.exit()
+tef_df_dict = dict()
+in_sign_dict = dict()
+dir_str_dict = dict()
+for gtagex in gtagex_list:
+    tef_df_dict[gtagex], in_sign_dict[gtagex], dir_str_dict[gtagex] = flux_fun.get_two_layer(in_dir_dict[gtagex], sect_name, gridname)
             
 fig = plt.figure()
 
-qlim_p = np.around(1.5*tef_df['Qin'].max(), 0)
-qlim_m = np.around(-1.5*tef_df['Qout'].min(), 0)
-qlim = np.max([qlim_p, qlim_m])
-
 # Salinity vs. Time (color by Transport)
 ax = fig.add_subplot(211)
-tef_df[['salt_in','salt_out']].plot(ax=ax, legend=False, color=['r','b'], alpha=.5)
-tef_df_old[['salt_in','salt_out']].plot(ax=ax, legend=False, color=['r','b'], linestyle='--')
-ax.set_title('Section = ' + sect_name + ': Positive is ' + dir_str)
+ii = 0
+for gtagex in gtagex_list:
+    tef_df_dict[gtagex][['salt_in', 'salt_out']].plot(ax=ax, color=['r', 'b'], alpha=alpha_dict[gtagex], legend=False)
+    ax.text(.97, .07*(1 + ii), label_dict[gtagex], ha='right', weight='bold', color='k',
+        transform=ax.transAxes, size=1.2*fs, alpha = alpha_dict[gtagex])
+    ii += 1
+    
+ax.set_title('Section = ' + sect_name)
 ax.grid(True)
 ax.set_xticklabels([])
 ax.set_xlabel('')
@@ -68,9 +70,8 @@ ax.text(.03, .95, '(a)', va='top', weight='bold', transform=ax.transAxes, size=1
     
 # Tranport vs. Time
 ax = fig.add_subplot(212)
-tef_df[['Qin','Qout']].plot(ax=ax, legend=False, color=['r','b'], alpha=.5)
-tef_df_old[['Qin','Qout']].plot(ax=ax, legend=False, color=['r','b'], linestyle='--')
-ax.set_ylim(-qlim, qlim)
+for gtagex in gtagex_list:
+    tef_df_dict[gtagex][['Qin','Qout']].plot(ax=ax, legend=False, color=['r','b'], alpha=alpha_dict[gtagex])
 ax.grid(True)
 ax.set_ylabel('Transport $[m^{3}s^{-1}]$')
 ax.text(.03, .95, '(b)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,

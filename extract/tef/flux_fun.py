@@ -16,11 +16,13 @@ from warnings import filterwarnings
 filterwarnings('ignore') # skip some warning messages
 # associated with lines like QQp[QQ<=0] = np.nan
 
-def get_two_layer(in_dir, sect_name, gridname, old_style=False):
+def get_two_layer(in_dir, sect_name, gridname, old_style=False, dt00='', dt11=''):
     """
     Form time series of 2-layer TEF quantities, from the multi-layer bulk values.
     - works on all tracers
     - adjust sign convention so that transport is positive for the saltier layer and call it Qin
+    
+    dt00 and dt11 are datetimes that provide alternate averaging limits
     """
     
     bulk = pickle.load(open(in_dir / (sect_name + '.p'), 'rb'))
@@ -34,6 +36,17 @@ def get_two_layer(in_dir, sect_name, gridname, old_style=False):
     dt = []
     for tt in ot:
         dt.append(Lfun.modtime_to_datetime(tt))
+    
+    if not isinstance(dt00, datetime):
+        dt00 = dt[0]
+    if not isinstance(dt11, datetime):
+        dt11 = dt[-1]
+    dt0 = max(dt[0], dt00)
+    dt1 = min(dt[-1], dt11)
+
+    dti = pd.Index(dt)
+    mask = (dti >= dt0) & (dti <= dt1)
+    dti = dti[mask]
 
     vn_list = tef_fun.vn_list + ['salt2']
     vn_list = [item for item in vn_list if item in bulk.keys()]
@@ -45,13 +58,13 @@ def get_two_layer(in_dir, sect_name, gridname, old_style=False):
     QQm[QQ>=0] = np.nan
     
     # form two-layer versions of volume and tracer transports
-    Qp = np.nansum(QQp, axis=1)
-    Qm = np.nansum(QQm, axis=1)
+    Qp = np.nansum(QQp[mask,:], axis=1)
+    Qm = np.nansum(QQm[mask,:], axis=1)
     QCp = dict()
     QCm = dict()
     for vn in vn_list:
-        QCp[vn] = np.nansum(QQp*bulk[vn], axis=1)
-        QCm[vn] = np.nansum(QQm*bulk[vn], axis=1)
+        QCp[vn] = np.nansum(QQp[mask,:]*(bulk[vn][mask,:]), axis=1)
+        QCm[vn] = np.nansum(QQm[mask,:]*(bulk[vn][mask,:]), axis=1)
     
     # form flux-weighted tracer concentrations
     Cp = dict()
@@ -61,9 +74,12 @@ def get_two_layer(in_dir, sect_name, gridname, old_style=False):
         Cm[vn] = QCm[vn]/Qm
         
     # adjust sign convention so that positive flow is salty
-    SP = np.nanmean(Cp['salt'])
-    SM = np.nanmean(Cm['salt'])
-    if SP > SM:
+    SP = np.nanmean(Qp*Cp['salt'])/np.nanmean(Qp)
+    SM = np.nanmean(Qm*Cm['salt'])/np.nanmean(Qm)
+    # print('SP = ' + str(SP))
+    # print('SM = ' + str(SM))
+    if SP >= SM:
+        # print(' -- regular')
         # positive was inflow
         Cin = Cp.copy()
         Cout = Cm.copy()
@@ -71,6 +87,7 @@ def get_two_layer(in_dir, sect_name, gridname, old_style=False):
         Qout = Qm
         in_sign = 1
     elif SM > SP:
+        # print(' -- reversed')
         # postive was outflow
         Cin = Cm.copy()
         Cout = Cp.copy()
@@ -80,13 +97,13 @@ def get_two_layer(in_dir, sect_name, gridname, old_style=False):
     else:
         print('ambiguous sign!!')
     
-    tef_df = pd.DataFrame(index=dt)
+    tef_df = pd.DataFrame(index=dti)
     tef_df['Qin']=Qin
     tef_df['Qout']=Qout
-    tef_df['qabs'] = bulk['qabs']
-    tef_df['qnet'] = in_sign * bulk['qnet']
-    tef_df['fnet'] = in_sign * bulk['fnet']
-    tef_df['ssh'] = bulk['ssh']
+    tef_df['qabs'] = bulk['qabs'][mask]
+    tef_df['qnet'] = in_sign * bulk['qnet'][mask]
+    tef_df['fnet'] = in_sign * bulk['fnet'][mask]
+    tef_df['ssh'] = bulk['ssh'][mask]
     
     for vn in vn_list:
         tef_df[vn+'_in'] = Cin[vn]
