@@ -144,6 +144,7 @@ while dt <= dt1:
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
         print(' - time to get forcing = %d sec' % (time()-tt0))
+        sys.stdout.flush()
     else:
         print(' ** skipped getting forcing')
         
@@ -193,6 +194,7 @@ while dt <= dt1:
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Run ROMS', args.verbose)
             print(' - time to run ROMS = %d sec' % (time()-tt0))
+            sys.stdout.flush()
     
             # A bit of checking to make sure that the log file exists...
             lcount = 0
@@ -219,19 +221,26 @@ while dt <= dt1:
             # Look in the log file to see what happened, and decide what to do.
             roms_worked = False
             with open(log_file, 'r') as ff:
+                found_line = False
                 for line in ff:
                     if ('Blowing-up' in line) or ('BLOWUP' in line):
                         print(' - Run blew up, blow ups = ' + str(blow_ups))
+                        found_line = True
                         roms_worked = False
                         break
                     elif 'ERROR' in line:
                         print(' - Run had an error. Check the log file.')
+                        found_line = True
                         roms_worked = False
                         sys.exit()
                     elif 'ROMS/TOMS: DONE' in line:
+                        found_line = True
                         print(' - ROMS SUCCESS')
                         roms_worked = True
                         break
+            if not found_line:
+                print(' - Problem finding line in log file.')
+                sys.exit()
             sys.stdout.flush()
             if roms_worked:
                 break # escape from blow_ups loop
@@ -264,6 +273,7 @@ while dt <= dt1:
             shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(force_dir_prev), ignore_errors=True)
             print(' - time to move history files and clean up = %d sec' % (time()-tt0))
+            sys.stdout.flush()
         else:
             print(' ** skipped moving history files')
         dt += timedelta(days=1)
