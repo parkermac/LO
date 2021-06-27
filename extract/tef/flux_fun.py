@@ -60,6 +60,9 @@ def get_two_layer(in_dir, sect_name, gridname, old_style=False, dt00='', dt11=''
     # form two-layer versions of volume and tracer transports
     Qp = np.nansum(QQp[mask,:], axis=1)
     Qm = np.nansum(QQm[mask,:], axis=1)
+    # mask out times when the transport is too small to use for tracer averaging
+    Qp[Qp<np.nanmean(Qp)/10] = np.nan
+    Qm[Qm>np.nanmean(Qm)/10] = np.nan
     QCp = dict()
     QCm = dict()
     for vn in vn_list:

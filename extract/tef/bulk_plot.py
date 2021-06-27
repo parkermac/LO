@@ -39,14 +39,14 @@ Lfun.make_dir(out_dir, clean=True)
 gridname=gtagex.split('_')[0]
 sect_df = tef_fun.get_sect_df(gridname)
 
-testing = False
+testing = True
 
 if testing:
     from importlib import reload
     reload(flux_fun)
 
 if testing:
-    sect_list = ['ai1']
+    sect_list = ['ss2']
 else:
     sect_list = list(sect_df.index)
 
