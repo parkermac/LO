@@ -20,8 +20,8 @@ import pandas as pd
 import numpy as np
 
 import Lfun
-#gridname = 'cas6'; tag = 'v3'; ex_name = 'lo8b'
-gridname = 'cas6'; tag = 'v3t075'; ex_name = 'lo8'
+gridname = 'cas6'; tag = 'v3'; ex_name = 'lo8b'
+#gridname = 'cas6'; tag = 'v3t075'; ex_name = 'lo8'
 #gridname = 'cas6'; tag = 'v3t110'; ex_name = 'lo8'
 Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
 
@@ -227,7 +227,6 @@ ax4.grid(True)
 
 ax5.axis(aa5)
 ax5.grid(True)
-
 
 pfun.add_coast(ax3, color='gray')
 pfun.dar(ax3)

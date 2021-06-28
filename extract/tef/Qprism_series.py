@@ -35,7 +35,7 @@ tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, 'cas6')
 tef_df['Qe'] = ((tef_df['Qin'] - tef_df['Qout'])/2)/1000
 tef_df['DS'] = tef_df['salt_in'] - tef_df['salt_out']
 tef_df['Sbar'] = (tef_df['salt_in'] + tef_df['salt_out'])/2
-tef_df['Qprism'] = tef_df['qabs']/2
+tef_df['Qprism'] = (tef_df['qabs']/2)/1000
 # use Freshwater Flux as an alternate way to calculate Qr
 Socn = 34
 tef_df['Qfw'] = (tef_df['Qin']*(Socn-tef_df['salt_in']) + tef_df['Qout']*(Socn-tef_df['salt_out']))/Socn

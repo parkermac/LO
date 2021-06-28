@@ -48,7 +48,8 @@ in_sign_dict = dict()
 dir_str_dict = dict()
 for gtagex in gtagex_list:
     tef_df_dict[gtagex], in_sign_dict[gtagex], dir_str_dict[gtagex] = flux_fun.get_two_layer(in_dir_dict[gtagex], sect_name, gridname)
-            
+    tef_df_dict[gtagex]['Qin1000'] = tef_df_dict[gtagex]['Qin']/1000
+    tef_df_dict[gtagex]['Qout1000'] = tef_df_dict[gtagex]['Qout']/1000
 fig = plt.figure()
 
 # Salinity vs. Time (color by Transport)
@@ -71,9 +72,9 @@ ax.text(.03, .95, '(a)', va='top', weight='bold', transform=ax.transAxes, size=1
 # Tranport vs. Time
 ax = fig.add_subplot(212)
 for gtagex in gtagex_list:
-    tef_df_dict[gtagex][['Qin','Qout']].plot(ax=ax, legend=False, color=['r','b'], alpha=alpha_dict[gtagex])
+    tef_df_dict[gtagex][['Qin1000','Qout1000']].plot(ax=ax, legend=False, color=['r','b'], alpha=alpha_dict[gtagex])
 ax.grid(True)
-ax.set_ylabel('Transport $[m^{3}s^{-1}]$')
+ax.set_ylabel('Transport $[1000\ m^{3}s^{-1}]$')
 ax.text(.03, .95, '(b)', va='top', weight='bold', transform=ax.transAxes, size=1.2*fs,
     bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
 ax.text(.97, .95, 'Inflow', ha='right', va='top', weight='bold', color='r',
