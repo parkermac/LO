@@ -139,6 +139,26 @@ elif Ldir['cruise'] == 'woac':
             else:
                 get_cast(out_fn, fn, lon, lat)
                 
+elif Ldir['cruise'] == 'wcoa':
+    sta_fn = Ldir['parent'] / 'ptools_output' / 'wcoa' / 'sta_df.p'
+    if sta_fn.is_file():
+        sta_df = pd.read_pickle(sta_fn)
+    cruises = sta_df['Cruise'].unique()
+    for cruise in cruises:
+        c_df = sta_df[sta_df['Cruise']==cruise]
+        for sn in c_df.index:
+            lon = c_df.loc[sn,'Longitude']
+            lat = c_df.loc[sn,'Latitude']
+            dt = c_df.loc[sn,'Datetime']
+            out_fn = out_dir / (cruise + '_' + str(int(sn)) + '.nc')
+            fn = get_his_fn_from_dt(Ldir, dt)
+            if Ldir['testing']:
+                print('\ncruise=%s sn=%d lon=%0.2f lat=%0.2f' % (cruise, sn, lon, lat))
+                print(str(out_fn))
+                print(fn)
+            else:
+                get_cast(out_fn, fn, lon, lat)
+                
 # -------------------------------------------------------
 
 # test for success 
