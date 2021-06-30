@@ -119,7 +119,7 @@ if Ldir['cruises'] == 'test_cruises':
     lat = 48.240300
     get_cast(out_fn, fn, lon, lat)
     
-elif Ldir['cruise'] == 'woac':
+elif Ldir['cruises'] == 'woac':
     sta_fn = Ldir['parent'] / 'ptools_output' / 'woac2' / 'sta_df.p'
     if sta_fn.is_file():
         sta_df = pd.read_pickle(sta_fn)
@@ -139,7 +139,7 @@ elif Ldir['cruise'] == 'woac':
             else:
                 get_cast(out_fn, fn, lon, lat)
                 
-elif Ldir['cruise'] == 'wcoa':
+elif Ldir['cruises'] == 'wcoa':
     sta_fn = Ldir['parent'] / 'ptools_output' / 'wcoa' / 'sta_df.p'
     if sta_fn.is_file():
         sta_df = pd.read_pickle(sta_fn)
