@@ -42,18 +42,18 @@ qscl = 50
 plt.rc('font', size=fs)
 plt.close('all')
 
-channel_list = flux_fun.channel_list
+#channel_list = flux_fun.channel_list
+channel_list = ['Whidbey Basin',
+ 'Hood Canal',
+ 'Admiralty Inlet to South Sound',
+ 'Juan de Fuca to Strait of Georgia']
 channel_dict = flux_fun.long_channel_dict
 
 lcol_dict = flux_fun.c_dict
 
 ch_idict = dict(zip(channel_list, [1,2,3,4])) # subplot number
 
-# channel_list =
-# ['Whidbey Basin',
-#  'Hood Canal',
-#  'Admiralty Inlet to South Sound',
-#  'Juan de Fuca to Strait of Georgia']
+
 aad = dict()
 aad[1] = [190, 260, 23, 32]
 aad[2] = [170, 270, 28.5, 32]
