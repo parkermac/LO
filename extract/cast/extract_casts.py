@@ -149,7 +149,7 @@ elif Ldir['cruises'] == 'wcoa':
         for sn in c_df.index:
             lon = c_df.loc[sn,'Longitude']
             lat = c_df.loc[sn,'Latitude']
-            dt = c_df.loc[sn,'Datetime']
+            dt = datetime.strptime(c_df.loc[sn,'Datetime'],'%m/%d/%Y %H:%M:%S')
             out_fn = out_dir / (cruise + '_' + str(sn) + '.nc')
             fn = get_his_fn_from_dt(Ldir, dt)
             if Ldir['testing']:
