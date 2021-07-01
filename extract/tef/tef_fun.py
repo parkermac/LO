@@ -12,7 +12,9 @@ import zfun
 import zrfun
 
 # long list of variables to extract
-vn_list = ['salt', 'temp', 'oxygen', 'NO3', 'TIC', 'alkalinity']
+vn_list = ['salt', 'temp', 'oxygen',
+    'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
+    'TIC', 'alkalinity']
 
 def get_sect_df(gridname):
     # section definitions
