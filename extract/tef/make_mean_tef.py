@@ -37,7 +37,7 @@ sect_list = list(sect_df.index)
 
 ds0 = '2018.01.01'
 ds1 = '2018.12.31'
-dt00 = datetime(2018,8,1)
+dt00 = datetime(2018,1,1)
 ds00 = dt00.strftime(Lfun.ds_fmt)
 ii = 0
 for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8', 'cas6_v3t110_lo8']:
@@ -49,7 +49,7 @@ for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8', 'cas6_v3t110_lo8']:
         lon = (x0 + x1)/2
         lat = (y0 + y1)/2
         # get two-layer versions
-        tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, gridname, dt00=dt00)
+        tef_df, in_sign, dir_str, sdir = flux_fun.get_two_layer(in_dir, sect_name, gridname, dt00=dt00)
         # and save their flux-weighted means
         df.loc[sect_name, 'Qin'] = tef_df['Qin'].mean()
         df.loc[sect_name, 'Qout'] = tef_df['Qout'].mean()
@@ -69,6 +69,7 @@ for gtagex in ['cas6_v3_lo8b', 'cas6_v3t075_lo8', 'cas6_v3t110_lo8']:
         df.loc[sect_name, 'Qnet'] = tef_df['qnet'].mean()
         df.loc[sect_name, 'in_sign'] = in_sign
         df.loc[sect_name, 'dir_str'] = dir_str
+        df.loc[sect_name, 'sdir'] = sdir
         df.loc[sect_name, 'lon'] = lon
         df.loc[sect_name, 'lat'] = lat
     print('Total time to fill DataFrame = %0.1f sec' % (time()-tt0))

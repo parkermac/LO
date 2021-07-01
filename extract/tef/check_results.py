@@ -41,8 +41,8 @@ sect_df = tef_fun.get_sect_df(gridname)
 fs = 14
 pfun.start_plot(fs=fs, figsize=(14,10))
 
-tef_df_old, in_sign_old, dir_str = flux_fun.get_two_layer(in_dir_old, sect_name, gridname, old_style=True)
-tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, gridname)
+tef_df_old, in_sign_old, dir_str, sdir = flux_fun.get_two_layer(in_dir_old, sect_name, gridname, old_style=True)
+tef_df, in_sign, dir_str, sdir = flux_fun.get_two_layer(in_dir, sect_name, gridname)
 
 if in_sign_old != in_sign:
     print('** in_sign error **')

@@ -47,7 +47,7 @@ tef_df_dict = dict()
 in_sign_dict = dict()
 dir_str_dict = dict()
 for gtagex in gtagex_list:
-    tef_df_dict[gtagex], in_sign_dict[gtagex], dir_str_dict[gtagex] = flux_fun.get_two_layer(in_dir_dict[gtagex], sect_name, gridname)
+    tef_df_dict[gtagex], in_sign_dict[gtagex], dir_str_dict[gtagex], sdir = flux_fun.get_two_layer(in_dir_dict[gtagex], sect_name, gridname)
     tef_df_dict[gtagex]['Qin1000'] = tef_df_dict[gtagex]['Qin']/1000
     tef_df_dict[gtagex]['Qout1000'] = tef_df_dict[gtagex]['Qout']/1000
 fig = plt.figure()

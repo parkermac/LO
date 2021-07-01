@@ -31,7 +31,7 @@ in_dir = Path('/Users/pm8/Documents/LO_output/extract/cas6_v3_lo8b/tef/bulk_2018
 # get Qfw vs. Socn over a range of Socn at ai1
 sect_name = 'ai1'
 gridname = 'cas6'
-tef_df, _, _ = flux_fun.get_two_layer(in_dir, sect_name, gridname)
+tef_df, _, _, _ = flux_fun.get_two_layer(in_dir, sect_name, gridname)
 # get Qfw over a reange of Socn at this section
 Qfw_ser = pd.Series(index = np.arange(15, 41))
 for Socn in np.arange(15, 41):
@@ -40,7 +40,7 @@ for Socn in np.arange(15, 41):
 # Get Socn at the mouth of the system, jdf1
 sect_name = 'jdf1'
 gridname = 'cas6'
-tef_df1, _, _ = flux_fun.get_two_layer(in_dir, sect_name, gridname)
+tef_df1, _, _, _ = flux_fun.get_two_layer(in_dir, sect_name, gridname)
 Socn = tef_df1['salt_in'].max()
 Qfw = get_Qfw(tef_df, Socn)
 

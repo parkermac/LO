@@ -39,14 +39,14 @@ Lfun.make_dir(out_dir, clean=True)
 gridname=gtagex.split('_')[0]
 sect_df = tef_fun.get_sect_df(gridname)
 
-testing = True
+testing = False
 
 if testing:
     from importlib import reload
     reload(flux_fun)
 
 if testing:
-    sect_list = ['ss2']
+    sect_list = ['jdf1']
 else:
     sect_list = list(sect_df.index)
 
@@ -58,7 +58,7 @@ for sect_name in sect_list:
 
     # ---------------------------------------------------------
 
-    tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, gridname)
+    tef_df, in_sign, dir_str, sdir = flux_fun.get_two_layer(in_dir, sect_name, gridname)
     cols = list(tef_df.columns)
     
     # Check if we have chemical variables, or just salt

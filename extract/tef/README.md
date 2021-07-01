@@ -41,9 +41,9 @@ The **command line arguments** are set in `alpha/extract_argfun.py`, with the us
 - -get_bio is a Boolean.  If True then you get the list in tef_fun.vn_list.  If False (the default) then vn_list = ['salt'].
 - -sect_name is a string to specify the sections to get, either a single one such as ai1, or all of them using "-sect_name all" in the command line.  The full list is in tef_fun.get_sect_df().
 
-Input: ROMS history files over some date range, e.g. [\*] = 2017.01.01_2017.12.31
+Input: ROMS history files over some date range, e.g. [*] = 2017.01.01_2017.12.31
 
-Output: LO_output/extract/[gtagex]/tef/extractions_[\*]/[sect name].nc where:
+Output: LO_output/extract/[gtagex]/tef/extractions_[*]/[sect name].nc where:
 
 Variables in the NetCDF files:
 - salt is hourly salinity in each cell (t, z, x-or-y) [same for all other variables]
@@ -62,7 +62,7 @@ Variables in the NetCDF files:
 
 Input: the output NetCDF files from `extract_sections.py`
 
-Output: LO_output/extract/[gtagex]/tef/processed_[\*]/[sect name].p
+Output: LO_output/extract/[gtagex]/tef/processed_[*]/[sect name].p
 
 - a pickled dict with keys: ['q', 'salt', 'salt2', 'sbins', 'ot', 'qnet', 'fnet', 'ssh'] and other variables specified in tef_fun.vn_list
 
@@ -87,7 +87,7 @@ These remaining fields are just functions of time:
 
 Input: output of `process_sections.py`
 
-Output: LO_output/extract/[gtagex]/tef/bulk_[\*]/[sect name].p
+Output: LO_output/extract/[gtagex]/tef/bulk_[*]/[sect name].p
 
 These are pickled dicts with keys: ['salt', 'q', etc., 'ot', 'qnet', 'qabs' 'fnet', 'ssh'] and other variables, where 'salt', 'q', and etc. are matrices of shape (363, 30) meaning that it is one per day, at Noon UTC, after tidal-averaging, with nan-days on the ends cut off.  The 30 is the number of "bulk" bins, so many are be filled with nan's.
 
@@ -97,17 +97,19 @@ Since we have done the tidal averaging **qnet** is now the mean total transport 
 #### TEF plotting
 ---
 
-`bulk_plot.py` plots the results of bulk_calc.py, either as a single plot to the screen, or multiple plots to png's.  You need to edit the code to run for other years.  It uses flux_fun.get_two_layer() to sum the multi-layers into two, and decide on the in and out directions for naming.
+**NOTE**: these make use of flux_fun.get_two_layer() which sums the multi-layer output of `bulk_calc.py` into two layer TEF format and adjusts the signs to be positive in the direction of mean transport of the saltier layer.
+
+`bulk_plot.py` plots the results of bulk_calc.py, either as a single plot to the screen, or multiple plots to png's.  You need to edit the code to run for other years.
 
 `check_results.py` is code with hard-wired file-paths to check that all out calculations above give exactly the same results as the original LiveOcean version. RESULT: the results are identical.
 
-`exchange_dyn_plot.py` plots time series of the results of bulk_calc.py, focusing on dynamical response to Qprism for a single section.
-
-`exchange_dyn_all_plot.py` plots time mean Qe vs. Qprism for all the sections, for two experiments.
-
 `test_freshwater.py` is a simple test of the sensitivity of freshwater transport to the value of Socn.
 
-**NOTE**: these make use of flux_fun.get_two_layer() which sums the multi-layer output of `bulk_calc.py` into two layer TEF format and adjusts the signs to be positive in the direction of mean transport of the saltier layer.
+`allSect_[*].py` are several plotting codes use the two-layer properties averaged over some time period, and plotted for all sections on one plot.
+
+`threeTide_[*].py` are several plotting codes that are customized to plot the results of three tidal manipulation experiments at once,
+
+`Qprism_series.py` plots time series of the results of bulk_calc.py, focusing on dynamical response to Qprism for a single section.
 
 ---
 #### FLUX CODE

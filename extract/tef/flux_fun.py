@@ -128,7 +128,7 @@ def get_two_layer(in_dir, sect_name, gridname, old_style=False, dt00='', dt11=''
         elif in_sign == -1:
             dir_str = 'Southward'
             
-    return tef_df, in_sign, dir_str
+    return tef_df, in_sign, dir_str, sdir
 
 # desired time ranges, the "seasons"
 def get_dtr(year):

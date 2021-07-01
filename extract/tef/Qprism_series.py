@@ -29,7 +29,7 @@ sect_name = 'ai1'
 in_dir = Path('/Users/pm8/Documents/LO_output/extract/cas6_v3_lo8b/tef/bulk_2018.01.01_2018.12.31')
 
 # get two-layer time series
-tef_df, in_sign, dir_str = flux_fun.get_two_layer(in_dir, sect_name, 'cas6')
+tef_df, in_sign, dir_str, sdir = flux_fun.get_two_layer(in_dir, sect_name, 'cas6')
 
 # make derived variables
 tef_df['Qe'] = ((tef_df['Qin'] - tef_df['Qout'])/2)/1000
