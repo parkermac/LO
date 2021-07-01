@@ -10,11 +10,16 @@ Socn = 33.75 in this example.
 from pathlib import Path
 import sys
 
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
+pth = Path(__file__).absolute().parent.parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
     
+
+pth = Path(__file__).absolute().parent.parent
+if str(pth) not in sys.path:
+    sys.path.append(str(pth))
 import flux_fun
+
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt

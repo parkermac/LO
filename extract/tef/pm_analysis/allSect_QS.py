@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
+pth = Path(__file__).absolute().parent.parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
     
@@ -27,6 +27,9 @@ Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
 
 import plotting_functions as pfun
 
+pth = Path(__file__).absolute().parent.parent
+if str(pth) not in sys.path:
+    sys.path.append(str(pth))
 import tef_fun
 import flux_fun
 

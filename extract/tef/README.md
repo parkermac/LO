@@ -103,6 +103,12 @@ Since we have done the tidal averaging **qnet** is now the mean total transport 
 
 `check_results.py` is code with hard-wired file-paths to check that all out calculations above give exactly the same results as the original LiveOcean version. RESULT: the results are identical.
 
+---
+#### pm_analysis
+---
+
+This is a folder of plotting and other code that is Parker MacCready's personal analysis code. It builds on the results of the TEF extractions.
+
 `test_freshwater.py` is a simple test of the sensitivity of freshwater transport to the value of Socn.
 
 `allSect_[*].py` are several plotting codes use the two-layer properties averaged over some time period, and plotted for all sections on one plot.
