@@ -26,7 +26,7 @@ def get_two_layer(in_dir, sect_name, gridname, old_style=False, dt00='', dt11=''
     """
     
     bulk = pickle.load(open(in_dir / (sect_name + '.p'), 'rb'))
-    
+        
     if old_style:
         bulk['q'] = bulk['QQ']
         bulk['salt'] = bulk['SS']

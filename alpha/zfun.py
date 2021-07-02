@@ -215,20 +215,24 @@ def filt_hanning(data, n=40, nanpad=True):
             
     return smooth
     
-def filt_hanning_mat(data, n=40):
+def filt_hanning_mat(data, n=40, nanpad=True):
     """
     Input: ND numpy array, with time on axis 0.
     Output: Array of the same size, filtered with Hanning window of length n,
         padded with nan's
     """
     filt = hanning_shape(n=n)
-    n = np.floor(len(filt)/2).astype(int)
+    npad = np.floor(len(filt)/2).astype(int)
     sh = data.shape
     df = data.flatten('F')
     dfs = np.convolve(df, filt, mode = 'same')
     smooth = dfs.reshape(sh, order='F')
-    smooth[:n,:] = np.nan
-    smooth[-n:,:] = np.nan
+    if nanpad:
+        smooth[:npad,:] = np.nan
+        smooth[-npad:,:] = np.nan
+    else:
+        smooth[:npad,:] = data[:npad]
+        smooth[-npad:,:] = data[-npad:]
     return smooth
 
 def filt_godin(data):

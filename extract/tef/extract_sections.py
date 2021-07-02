@@ -8,7 +8,7 @@ results at the end, because of the tidal averaging.
 All input parameters are specified at the command line, so this can be run in the background.
 This is essential for year-long extractions.
 
-PERFORMANCE: 4 hours per year, perigee, cas6_v3_lo8b, 39 sections, all variables.  About 5 hours
+PERFORMANCE: 5 hours per year, perigee, cas6_v3_lo8b, 39 sections, all variables.  About 6.5 hours
 including the processing and bulk_calc steps.  2.25 hours when just extracting salt.
 
 To test on mac (default is to just get salt on section ai1):
@@ -154,7 +154,7 @@ for sect_name in sect_list:
     out_fn = out_dir / (sect_name + '.nc')
     tef_fun.add_fields(out_fn, temp_dir, sect_name, vn_list, S, NT)
     
-# Elean up
+# Clean up
 Lfun.make_dir(temp_dir, clean=True)
 temp_dir.rmdir()
 

@@ -36,6 +36,8 @@ Then you can run `flux_salt_budget.py`
 
 **NOTE**: this code also automatically runs the two subsequent steps, `process_sections.py` and `bulk_calc.py`.  These can also be run as stand-alone (use -test True when running `extract_sections.py`) to facilitate debugging.
 
+**PERFORMANCE**: For a full year of cas6, with -get_bio True and all NPZDOC variables this takes 5 hours on perigee (6.5 hours when including all steps).
+
 The **command line arguments** are set in `alpha/extract_argfun.py`, with the usual requirements for gridname, tag, ex_name, and beginning and end dates.  You also specify:
 - -ro, --roms_out_num, is a integer specifying where to look for the ROMS history profiles
 - -get_bio is a Boolean.  If True then you get the list in tef_fun.vn_list.  If False (the default) then vn_list = ['salt'].
