@@ -56,8 +56,6 @@ pfun.start_plot(fs=fs, figsize=(21,10))
 
 for sect_name in sect_list:
 
-    # ---------------------------------------------------------
-
     tef_df, in_sign, dir_str, sdir = flux_fun.get_two_layer(in_dir, sect_name, gridname)
     cols = list(tef_df.columns)
     
@@ -77,8 +75,8 @@ for sect_name in sect_list:
         vn_list_long = vn_list
         NR = 2; NC = 1
         
-    # filter more in time (requires that Q be first item in vn_list)
-    nhan = 20 # length of Hanning window in days
+    # filter more in time (requires that Q be the first item in vn_list)
+    nhan = 20 # length of Hanning window in days (use 1 for no filtering)
     for vn in vn_list_long:
         if vn == 'Q':
             tef_df['Q_in'] = zfun.filt_hanning(tef_df['Qin'],nhan)
@@ -86,6 +84,10 @@ for sect_name in sect_list:
         else:
             tef_df[vn+'_in'] = zfun.filt_hanning(tef_df[vn+'_in']*tef_df['Qin'],nhan)/tef_df['Q_in']
             tef_df[vn+'_out'] = zfun.filt_hanning(tef_df[vn+'_out']*tef_df['Qout'],nhan)/tef_df['Q_out']
+            
+    # adjust units
+    tef_df['Q_in'] = tef_df['Q_in']/1000
+    tef_df['Q_out'] = tef_df['Q_out']/1000
     
                     
     # labels and colors
@@ -130,7 +132,6 @@ for sect_name in sect_list:
             ax.text(.97, .95, 'Transparent = zooplankton', ha='right', va='top', weight='bold', c='k',
                 transform=ax.transAxes, size=fs, alpha=.5,
                 bbox=dict(facecolor='w', edgecolor='None', alpha=0.5))
-        
         if vn == 'detritus':
             tef_df[['Ldetritus_in','Ldetritus_out']].plot(ax=ax, legend=False, color=[incolor, outcolor],
                 grid=True, alpha=.5, lw=lw)

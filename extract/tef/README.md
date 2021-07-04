@@ -20,7 +20,6 @@ Then you can run `flux_salt_budget.py`
 
 ---
 #### PREAMBLE
----
 
 `ptools/pgrid/tef_section_maker.py` is a tool to define sections, if needed.  This is a GUI where you define section endpoints (forced to be either perfectly E-W or N-S), name the section, and define which direction is "landward" (i.e. which way is positive transport).  You can define one or more sections in a session.  At the end, when you push DONE it produces screen output suitable for pasting into new or existing lists in `tef_fun.get_sect_df()`.
 
@@ -28,7 +27,6 @@ Then you can run `flux_salt_budget.py`
 
 ---
 #### EXTRACTION CODE
----
 
 `extract_sections.py` creates a NetCDF file for each section with arrays of hourly transport and tracer values on the section, arranged as (t, z, x-or-y). Using command line arguments you can change the run, the day range, the sections to extract, and the variables extracted. Typically this will be done on a remote machine, like perigee, although the defaults are designed to work with model output I have saved on my mac.
 
@@ -97,9 +95,6 @@ Since we have done the tidal averaging **qnet** is now the mean total transport 
 
 ---
 #### TEF plotting
----
-
-**NOTE**: these make use of flux_fun.get_two_layer() which sums the multi-layer output of `bulk_calc.py` into two layer TEF format and adjusts the signs to be positive in the direction of mean transport of the saltier layer.
 
 `bulk_plot.py` plots the results of bulk_calc.py, either as a single plot to the screen, or multiple plots to png's.  You need to edit the code to run for other years.
 
@@ -107,7 +102,6 @@ Since we have done the tidal averaging **qnet** is now the mean total transport 
 
 ---
 #### pm_analysis
----
 
 This is a folder of plotting and other code that is Parker MacCready's personal analysis code. It builds on the results of the TEF extractions.
 
@@ -120,7 +114,48 @@ This is a folder of plotting and other code that is Parker MacCready's personal 
 `Qprism_series.py` plots time series of the results of bulk_calc.py, focusing on dynamical response to Qprism for a single section.
 
 ---
-#### FLUX CODE
+#### Code for the segments between TEF sections
+
+`flux_fun.py` is a module of functions associated with the complexity of hooking up sections, segments and rivers for the salt budget and box model codes. Important functions are:
+- flux_fun.get_two_layer() which sums the multi-layer output of `bulk_calc.py` into two layer TEF format and adjusts the signs to be positive in the direction of mean transport of the saltier layer. It is used in many of the plotting and analysis programs above.
+
 ---
 
-`flux_fun.py` is a module of functions associated with the complexity of hooking up sections, segments and rivers for the salt budget and box model codes.
+`make_segment_volumes.py` gets the volume (with SSH = 0) of each segment.  Uses a cute mine-sweeper-like algorithm to find all the unmasked rho-grid cells on the grid between the sections that define a segment.
+
+Input: flux_fun.segs, the model grid (hard wired in the code to be cas6), and sect_df = tef_fun.get_sect_df().
+
+Output: LO_output/extract/tef/volumes_[gridname]/ containing:
+- volumes.p a pickled DataFrame with segment names for the index and columns: ['volume m3', 'area m2', 'lon', 'lat']
+- bathy_dict.p pickled dict of the grid bathy, for plotting (h, lon_psi, lat_psi)
+- ji_dict.p pickled dict (keys = segment names) of the ji indices of each segment area
+
+---
+
+`extract_segment_tracers.py` creates time series of hourly salinity and volume in segments, over a user specified (like a year) period.  Now includes files for the salinity-squared and the net "mixing" (variance destruction due to vertical and horizontal mixing).
+
+Input: ROMS history files
+
+Output: LO_output/extract/[gtagex]/tef/segment_[*]/hourly_[volume,salinity,mix,salinity2].p, pickled DataFrames where the index is hourly datetime and the columns are the segments.
+
+---
+
+`lowpass_segment_tracers.py` creates time series of daily salinity, volume, and net salt in segments.
+
+Input: results of `extract_segment_tracers.py`
+
+Output: LO_output/extract/[gtagex]/tef/segment_[*]/lowpass_[tracer].p
+
+---
+#### BUDGET code
+
+`salt_budget.py` makes complete volume, salt, salinty-squared, and S'^2 budgets for a user-specified set of segments.
+These budgets are of the form:
+	dSnet/dt = QSin + QSout, and
+	dV/dt = Qin + Qout + Qr
+    and so on...
+They are useful for knowing that the budgets add up in each of the basins and years to reasonable accuracy.  The values plotted are DAILY (tidally averaged).
+
+Input: TEF and lowpass tracer extractions, also some river extractions in [].
+
+Output: []
