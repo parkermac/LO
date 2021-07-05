@@ -3,7 +3,11 @@ A tool to extract hourly time series of volume and selected tracers and derived 
 for budgets in the segments.
 
 To test on mac:
-run extract_segments -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -test True
+run extract_segments -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -test True
+
+And on perigee:
+python extract_segments.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -Nproc 20
+
 
 """
 
@@ -29,15 +33,6 @@ import xarray as xr
 
 import zrfun
 import tef_fun
-# if Ldir['testing']:
-#     from importlib import reload
-#     reload(tef_fun)
-    
-# # set list of variables to extract
-# if Ldir['get_bio']:
-#     vn_list = tef_fun.vn_list
-# else:
-#     vn_list = ['salt']
 
 ds0 = Ldir['ds0']
 ds1 = Ldir['ds1']
@@ -91,7 +86,7 @@ for ii in range(N):
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
     
-    Nproc = 20
+    Nproc = Ldir['Nproc']
     if (np.mod(ii,Nproc) == 0) or (ii == N-1):
         tt0 = time()
         for proc in proc_list:
@@ -125,7 +120,7 @@ d.to_netcdf(out_fn)
 Lfun.make_dir(temp_dir, clean=True)
 temp_dir.rmdir()
 
-if True:#Ldir['testing']:
+if Ldir['testing']:
     # check results
     dd = xr.open_dataarray(out_fn)
     ddd = dd.sel(vn='salt', seg='J1')

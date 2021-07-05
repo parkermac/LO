@@ -33,7 +33,8 @@ def intro():
     # NOTE: the tef code shares the -get_bio argument and uses it to set a
     # longer list of variables for extraction
     parser.add_argument('-sect_name', type=str, default='ai1')
-    
+    parser.add_argument('-Nproc', type=int, default=10) # number of subprocesses to use
+    # 10 works best on mac, but 20 is much faster on perigee
     
     # get the args
     args = parser.parse_args()
