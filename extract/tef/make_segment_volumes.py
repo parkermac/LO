@@ -218,11 +218,26 @@ for seg_name in seg_name_list:
     vol_df.loc[seg_name,'area m2'] = area
     vol_df.loc[seg_name,'lon'] = lon
     vol_df.loc[seg_name,'lat'] = lat
-
+    
+# repack the ji info into separate dicts: keys are segment names, and values are
+# 1-D arrays of the indices, ready to use for fancy indexing.
+j_dict = {}; i_dict = {}
+for seg_name in seg_name_list:
+    jj = []; ii = []
+    ji_list_full = ji_dict[seg_name]
+    for ji in ji_list_full:
+        jj.append(ji[0])
+        ii.append(ji[1])
+    jjj = np.array(jj)
+    iii = np.array(ii)
+    j_dict[seg_name] = jjj
+    i_dict[seg_name] = iii
+    
 if not testing:
     vol_df.to_pickle(outdir / 'volumes.p')
     pickle.dump(bathy_dict, open(outdir / 'bathy_dict.p', 'wb'))
-    pickle.dump(ji_dict, open(outdir / 'ji_dict.p', 'wb'))
+    pickle.dump(i_dict, open(outdir / 'i_dict.p', 'wb'))
+    pickle.dump(j_dict, open(outdir / 'j_dict.p', 'wb'))
 #
 if testing:
     plt.show()

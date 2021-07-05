@@ -26,8 +26,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-pth', type=str)
 parser.add_argument('-out_dir', type=str)
 parser.add_argument('-gtagex', type=str)
-parser.add_argument('-d', type=str)
-parser.add_argument('-nhis', type=int, default=1)
+parser.add_argument('-d', type=str) # date string like 2019.07.04
+parser.add_argument('-nhis', type=int, default=1) # history file number, 1-25
 parser.add_argument('-get_bio', type=Lfun.boolean_string, default=True)
 parser.add_argument('-testing', type=Lfun.boolean_string, default=False)
 args = parser.parse_args()

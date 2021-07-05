@@ -30,7 +30,7 @@ Then you can run `flux_salt_budget.py`
 
 `extract_sections.py` creates a NetCDF file for each section with arrays of hourly transport and tracer values on the section, arranged as (t, z, x-or-y). Using command line arguments you can change the run, the day range, the sections to extract, and the variables extracted. Typically this will be done on a remote machine, like perigee, although the defaults are designed to work with model output I have saved on my mac.
 
-**NOTE**: this code runs mulitple subprocess instances of `extract_one_time.py`, currently 20 at once (set by Nproc in `extract_sections.py`). This significantly speeds things up, but it tends to completely occupy the machine, _**so you only want to run one of these at a time**_.
+**NOTE**: this code runs mulitple subprocess instances of `extract_section_one_time.py`, currently 20 at once (set by Nproc in `extract_sections.py`). This significantly speeds things up, but it tends to completely occupy the machine, _**so you only want to run one of these at a time**_.
 
 **NOTE**: this code also automatically runs the two subsequent steps, `process_sections.py` and `bulk_calc.py`.  These can also be run as stand-alone (use -test True when running `extract_sections.py`) to facilitate debugging.
 
@@ -132,7 +132,7 @@ Output: LO_output/extract/tef/volumes_[gridname]/ containing:
 
 ---
 
-`extract_segment_tracers.py` creates time series of hourly salinity and volume in segments, over a user specified (like a year) period.  Now includes files for the salinity-squared and the net "mixing" (variance destruction due to vertical and horizontal mixing).
+`extract_segments.py` creates time series of hourly salinity and volume in segments, over a user specified (like a year) period.  Now includes files for the salinity-squared and the net "mixing" (variance destruction due to vertical and horizontal mixing).
 
 Input: ROMS history files
 
@@ -140,9 +140,9 @@ Output: LO_output/extract/[gtagex]/tef/segment_[*]/hourly_[volume,salinity,mix,s
 
 ---
 
-`lowpass_segment_tracers.py` creates time series of daily salinity, volume, and net salt in segments.
+`lowpass_segments.py` creates time series of daily salinity, volume, and net salt in segments.
 
-Input: results of `extract_segment_tracers.py`
+Input: results of `extract_segments.py`
 
 Output: LO_output/extract/[gtagex]/tef/segment_[*]/lowpass_[tracer].p
 

@@ -130,7 +130,7 @@ for ii in range(N):
     fn = fn_list[ii]
     d = fn.parent.name.replace('f','')
     nhis = int(fn.name.split('.')[0].split('_')[-1])
-    cmd_list = ['python3', 'extract_one_time.py',
+    cmd_list = ['python3', 'extract_section_one_time.py',
             '-pth', str(Ldir['roms_out']),
             '-out_dir',str(temp_dir),
             '-gtagex', Ldir['gtagex'],
