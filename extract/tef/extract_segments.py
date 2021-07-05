@@ -91,7 +91,7 @@ for ii in range(N):
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
     
-    Nproc = 10
+    Nproc = 20
     if (np.mod(ii,Nproc) == 0) or (ii == N-1):
         tt0 = time()
         for proc in proc_list:
