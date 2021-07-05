@@ -81,11 +81,9 @@ for seg_name in seg_list:
     
     jjj = j_dict[seg_name]
     iii = i_dict[seg_name]
-    z_r, z_w = zrfun.get_z(h[jjj,iii], zeta[jjj,iii], S)
+    z_w = zrfun.get_z(h[jjj,iii], zeta[jjj,iii], S, only_w=True)
     dz = np.diff(z_w, axis=0)
-    dzr = np.diff(z_r, axis=0)
     DV = dz * DA3[0,jjj,iii]
-    DVR = dzr * DA3[0,jjj,iii]
     volume = DV.sum()
     AA['volume'] = volume
     
