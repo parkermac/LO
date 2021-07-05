@@ -29,15 +29,15 @@ import xarray as xr
 
 import zrfun
 import tef_fun
-if Ldir['testing']:
-    from importlib import reload
-    reload(tef_fun)
+# if Ldir['testing']:
+#     from importlib import reload
+#     reload(tef_fun)
     
-# set list of variables to extract
-if Ldir['get_bio']:
-    vn_list = tef_fun.vn_list
-else:
-    vn_list = ['salt']
+# # set list of variables to extract
+# if Ldir['get_bio']:
+#     vn_list = tef_fun.vn_list
+# else:
+#     vn_list = ['salt']
 
 ds0 = Ldir['ds0']
 ds1 = Ldir['ds1']
@@ -124,5 +124,12 @@ d.to_netcdf(out_fn)
 # Clean up
 Lfun.make_dir(temp_dir, clean=True)
 temp_dir.rmdir()
+
+if True:#Ldir['testing']:
+    # check results
+    dd = xr.open_dataarray(out_fn)
+    ddd = dd.sel(vn='salt', seg='J1')
+    D = ddd.values # an ndarray
+    print(D)
 
 

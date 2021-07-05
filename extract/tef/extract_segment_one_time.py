@@ -49,10 +49,6 @@ S = zrfun.get_basic_info(fn, only_S=True)
 h = G['h']
 DA = G['DX'] * G['DY']
 DA3 = DA.reshape((1,G['M'],G['L']))
-DXu = (G['DX'][:,1:]+G['DX'][:,:-1])/2
-DX3u = DXu.reshape((1,G['M'],G['L']-1))
-DYv = (G['DY'][1:,:]+G['DY'][:-1,:])/2
-DY3v = DYv.reshape((1,G['M']-1,G['L']))
 
 # get segment info
 vol_dir = Ldir['LOo'] / 'extract' / 'tef' / ('volumes_' + Ldir['gridname'])
@@ -71,23 +67,12 @@ tt0 = time()
 print(fn)
     
 ds = nc.Dataset(fn)
-salt = ds['salt'][0,:,:,:]
-AKs = ds['AKs'][0,:,:,:]
-KH = float(ds['nl_tnu2'][0].data)
-zeta = ds['zeta'][0,:,:]
-ot = ds['ocean_time'][:]
-ds.close()
 
-# calculate horizontal salinity gradient for hmix
-# Erin's results say that centered differencing is fine, and this is used here.
-sx2 = np.square(np.diff(salt,axis=2)/DX3u)
-SX2 = 0*salt
-SX2[:,:,1:-1] = (sx2[:,:,1:]+sx2[:,:,:-1])/2
-sy2 = np.square(np.diff(salt,axis=1)/DY3v)
-SY2 = 0*salt
-SY2[:,1:-1,:] = (sy2[:,1:,:]+sy2[:,:-1,:])/2
-    
-dt = Lfun.modtime_to_datetime(ot.data[0])
+vn_dict = {}
+for vn in vn_list:
+    vn_dict[vn] = ds[vn][0,:,:,:]
+zeta = ds['zeta'][0,:,:]
+ds.close()
 
 # find the volume and other variables for each segment, at this time
 A = pd.DataFrame(index=seg_list)
@@ -103,25 +88,12 @@ for seg_name in seg_list:
     DVR = dzr * DA3[0,jjj,iii]
     volume = DV.sum()
     AA['volume'] = volume
-    net_salt = (salt[:,jjj,iii] * DV).sum()
-    AA['mean_salt'] = net_salt/volume
-    net_salt2 = (salt[:,jjj,iii] * salt[:,jjj,iii] * DV).sum()
-    AA['mean_salt2'] = net_salt2/volume
     
-    dsdz = (salt[1:,jjj,iii] - salt[:-1,jjj,iii])/dzr
-    AA['mix'] = -2*(AKs[1:-1,jjj,iii] * dsdz * dsdz * DVR).sum()
-    
-    AA['hmix'] = -2 * KH * ((SX2[:,jjj,iii] + SY2[:,jjj,iii]) * DV).sum()
-    
+    for vn in vn_list:
+        AA[vn] = (vn_dict[vn][:,jjj,iii] * DV).sum()/volume
     # store results
-    for vn in ['mean_salt', 'mean_salt2', 'mix', 'hmix', 'volume']:
+    for vn in vn_list + ['volume']:
         A.loc[seg_name, vn] = AA[vn]
-    
-    if args.testing:
-        print('%3s: Mean Salinity = %0.4f, Volume  = %0.4f km3' %
-            (seg_name, AA['mean_salt'], AA['volume']/1e9))
-        print('%3s: Mean Salinity Squared = %0.4f, Volume  = %0.4f km3' %
-            (seg_name, AA['mean_salt2'], AA['volume']/1e9))
             
 print('  ** took %0.1f sec' % (time()-tt0))
 sys.stdout.flush()
