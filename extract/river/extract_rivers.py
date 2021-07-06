@@ -3,7 +3,8 @@
 Extract as-run river time series.
 
 To run on boiler:
-run extract_sections -g cas6 -t v3 -x junk -0 2018.01.01 -1 2018.12.31
+run extract_rivers -g cas6 -t v3 -x junk -0 2018.01.01 -1 2018.01.10
+run extract_rivers -g cas6 -t v3 -x junk -0 2018.01.01 -1 2018.12.31
 
 Performance:
 
@@ -25,12 +26,12 @@ import numpy as np
 import netCDF4 as nc
 import pickle
 import zrfun
-import tef_fun
     
 ds0 = Ldir['ds0']
 ds1 = Ldir['ds1']
 
-tt00 = time()
+tt0 = time()
+
 print(' Doing river extraction for '.center(60,'='))
 print(' gtag = ' + Ldir['gtag'])
 outname = 'extraction_' + ds0 + '_' + ds1 + '.p'
@@ -104,4 +105,6 @@ Qr = Qr[:-1,:] + np.diff(Qr, axis=0)/2
 df = pd.DataFrame(index=Qind, columns=riv_name_list, data=Qr)
 
 df.to_pickle(out_fn)
+
+print('Total time for extraction = %d seconds' % (time() - tt0))
     
