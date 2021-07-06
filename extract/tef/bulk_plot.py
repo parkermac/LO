@@ -76,14 +76,14 @@ for sect_name in sect_list:
         NR = 2; NC = 1
         
     # filter more in time (requires that Q be the first item in vn_list)
-    nhan = 20 # length of Hanning window in days (use 1 for no filtering)
+    nhan = 1 # length of Hanning window in days (use 1 for no filtering)
     for vn in vn_list_long:
         if vn == 'Q':
-            tef_df['Q_in'] = zfun.filt_hanning(tef_df['Qin'],nhan)
-            tef_df['Q_out'] = zfun.filt_hanning(tef_df['Qout'],nhan)
+            tef_df['Q_in'] = zfun.lowpass(tef_df['Qin'].to_numpy(), n=nhan)
+            tef_df['Q_out'] = zfun.lowpass(tef_df['Qout'].to_numpy(), n=nhan)
         else:
-            tef_df[vn+'_in'] = zfun.filt_hanning(tef_df[vn+'_in']*tef_df['Qin'],nhan)/tef_df['Q_in']
-            tef_df[vn+'_out'] = zfun.filt_hanning(tef_df[vn+'_out']*tef_df['Qout'],nhan)/tef_df['Q_out']
+            tef_df[vn+'_in'] = zfun.lowpass((tef_df[vn+'_in']*tef_df['Qin']).to_numpy(), n=nhan)/tef_df['Q_in']
+            tef_df[vn+'_out'] = zfun.lowpass((tef_df[vn+'_out']*tef_df['Qout']).to_numpy(), n=nhan)/tef_df['Q_out']
             
     # adjust units
     tef_df['Q_in'] = tef_df['Q_in']/1000

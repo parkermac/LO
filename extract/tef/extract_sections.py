@@ -17,6 +17,8 @@ run extract_sections -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06
 To get all sections and all variables use these flags:
 -get_bio True -sect_name all
 
+On perigee use -Nproc 20
+
 """
 
 from pathlib import Path
@@ -139,7 +141,7 @@ for ii in range(N):
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
     
-    Nproc = 20
+    Nproc = Ldir['Nproc']
     if (np.mod(ii,Nproc) == 0) or (ii == N-1):
         tt0 = time()
         for proc in proc_list:

@@ -95,9 +95,11 @@ for snp in sect_list:
     # each day (excluding the first and last days of the record)
     TEF_lp = dict()
     for vn in vn_list:
-        TEF_lp[vn] = zfun.filt_godin_mat(TEF[vn])[pad:-pad+1:24, :]
+        #TEF_lp[vn] = zfun.filt_godin_mat(TEF[vn])[pad:-pad+1:24, :]
+        TEF_lp[vn] = zfun.lowpass(TEF[vn], f='godin')[pad:-pad+1:24, :]
     for vn in vec_list:
-        TEF_lp[vn] = zfun.filt_godin(TEF[vn])[pad:-pad+1:24]
+        #TEF_lp[vn] = zfun.filt_godin(TEF[vn])[pad:-pad+1:24]
+        TEF_lp[vn] = zfun.lowpass(TEF[vn], f='godin')[pad:-pad+1:24]
     ot = ot[pad:-pad+1:24]
     
     if testing:

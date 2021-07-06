@@ -42,21 +42,16 @@ print(' Doing segment extraction for '.center(60,'='))
 print(' gtagex = ' + Ldir['gtagex'])
 outname = 'segments_' + ds0 + '_' + ds1 + '.nc'
 print(' outname = ' + outname)
-
 # make sure the output directory exists
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef'
 Lfun.make_dir(out_dir)
-
+# name the output file and make sure it does not exist
 out_fn = out_dir / outname
 out_fn.unlink(missing_ok=True)
 
 # make the scratch directory for holding temporary files
 temp_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / ('segment_temp_' + ds0 + '_' + ds1)
 Lfun.make_dir(temp_dir, clean=True)
-
-# get the DataFrame of all sections
-gridname=Ldir['gtagex'].split('_')[0]
-sect_df = tef_fun.get_sect_df(gridname)
 
 # get list of history files to process
 fn_list = Lfun.get_fn_list('hourly', Ldir, ds0, ds1)
@@ -67,7 +62,6 @@ else:
     
 print('Doing initial data extraction:')
 # We do extractions one hour at a time, as separate subprocess jobs.
-# Running Nproc (e.g. 20) of these in parallel makes the code much faster.
 # Files are saved to temp_dir.
 tt000 = time()
 proc_list = []
@@ -90,7 +84,6 @@ for ii in range(N):
     if (np.mod(ii,Nproc) == 0) or (ii == N-1):
         tt0 = time()
         for proc in proc_list:
-            # stdout, stderr = proc.communicate()
             proc.communicate()
         print(' - %d out of %d: %d took %0.2f sec' % (ii, N, Nproc, time()-tt0))
         sys.stdout.flush()
@@ -101,19 +94,21 @@ print('Total elapsed time = %0.2f sec' % (time()-tt000))
 A_list = list(temp_dir.glob('A*.p'))
 A_list.sort()
 
+# make a list of the datetimes (really should to this in extract_segment_one_time)
 dt_list = []
 for fn in fn_list:
     ds = nc.Dataset(fn)
     ot = ds['ocean_time'][:]
     dt_list.append(Lfun.modtime_to_datetime(ot.data[0]))
 
+# make a list of the output as DataArrays
 x_list = []
 for A_fn in A_list:
     A = pickle.load(open(A_fn, 'rb'))
     x_list.append(xr.DataArray(A, dims=('seg','vn')))
-
+# and concatenate into a single DataArray, with time as the concatenating dimension
 d = xr.concat(x_list, pd.Index(dt_list, name='time'))
-
+# save it to NetCDF
 d.to_netcdf(out_fn)
 
 # Clean up

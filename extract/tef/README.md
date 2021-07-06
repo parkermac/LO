@@ -128,15 +128,15 @@ Input: flux_fun.segs, the model grid (hard wired in the code to be cas6), and se
 Output: LO_output/extract/tef/volumes_[gridname]/ containing:
 - volumes.p a pickled DataFrame with segment names for the index and columns: ['volume m3', 'area m2', 'lon', 'lat']
 - bathy_dict.p pickled dict of the grid bathy, for plotting (h, lon_psi, lat_psi)
-- ji_dict.p pickled dict (keys = segment names) of the ji indices of each segment area
+- j_dict.p and i_dict.p pickled dict (keys = segment names) of the j and i indices of each segment area, stored as arrays ready for fancy indexing
 
 ---
 
-`extract_segments.py` creates time series of hourly salinity and volume in segments, over a user specified (like a year) period.  Now includes files for the salinity-squared and the net "mixing" (variance destruction due to vertical and horizontal mixing).
+`extract_segments.py` creates time series of hourly volume, salinity and other tracers averaged in segments, over a user specified (like a year) period.  Takes about 4 hours for a year on perigee.
 
 Input: ROMS history files
 
-Output: LO_output/extract/[gtagex]/tef/segment_[*]/hourly_[volume,salinity,mix,salinity2].p, pickled DataFrames where the index is hourly datetime and the columns are the segments.
+Output: LO_output/extract/[gtagex]/tef/segments_[*].nc, an xarray DataArray with dimensions: seg, vn, and time. Load using xr.open_dataarray(path to file).
 
 ---
 

@@ -264,6 +264,39 @@ def filt_godin_mat(data):
     smooth[-n:,:] = np.nan
     return smooth
     
+def lowpass(data, f='hanning', n=40, nanpad=True):
+    """
+    A replacement for almost all previous filter code.
+    
+    Input: ND numpy array, any number of dimensions, with time on axis 0.
+    Output: Array of the same size, filtered with Hanning window of length n,
+        or the Goding filter (hourly data only) padded with nan's.
+    """
+    if n == 1:
+        return data
+    else:
+        if f == 'hanning':
+            filt = hanning_shape(n=n)
+        elif f == 'godin':
+            filt = godin_shape()
+        else:
+            print('ERROR in filt_general(): unsupported filter ' + f)
+            filt = np.nan
+        npad = np.floor(len(filt)/2).astype(int)
+        sh = data.shape
+        df = data.flatten('F')
+        dfs = np.convolve(df, filt, mode = 'same')
+        smooth = dfs.reshape(sh, order='F')
+        # note that the indexing below defaults to being on axis 0,
+        # and correctly broadcasts without having to mention the other axes
+        if nanpad:
+            smooth[:npad] = np.nan
+            smooth[-npad:] = np.nan
+        else:
+            smooth[:npad] = data[:npad]
+            smooth[-npad:] = data[-npad:]
+        return smooth
+    
 def godin_shape():
     """
     Based on matlab code of 4/8/2013  Parker MacCready
