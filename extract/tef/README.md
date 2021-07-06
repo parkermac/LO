@@ -149,11 +149,10 @@ Output: LO_output/extract/[gtagex]/tef/segment_[*]/lowpass_[tracer].p
 ---
 #### BUDGET code
 
-`salt_budget.py` makes complete volume, salt, salinty-squared, and S'^2 budgets for a user-specified set of segments.
+`salt_budget.py` makes complete volume, and salt budgets for a user-specified set of segments.
 These budgets are of the form:
 	dSnet/dt = QSin + QSout, and
 	dV/dt = Qin + Qout + Qr
-    and so on...
 They are useful for knowing that the budgets add up in each of the basins and years to reasonable accuracy.  The values plotted are DAILY (tidally averaged).
 
 Input: TEF and lowpass tracer extractions, also some river extractions in [].
