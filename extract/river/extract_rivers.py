@@ -6,7 +6,7 @@ To run on boiler:
 run extract_rivers -g cas6 -t v3 -x junk -0 2018.01.01 -1 2018.01.10
 run extract_rivers -g cas6 -t v3 -x junk -0 2018.01.01 -1 2018.12.31
 
-Performance:
+Performance: takes 3 seconds per year on boiler
 
 """
 
