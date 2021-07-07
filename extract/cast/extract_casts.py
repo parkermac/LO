@@ -5,6 +5,8 @@ Test on mac in ipython:
 
 run extract_casts.py -g cas6 -t v3 -x lo8b -ro 2 -test True
 
+run extract_casts.py -g cas6 -t v3 -x lo8b -ro 2 -test True -cruises newport_line
+
 """
 
 from pathlib import Path
@@ -158,6 +160,28 @@ elif Ldir['cruises'] == 'wcoa':
                 print(fn)
             else:
                 get_cast(out_fn, fn, lon, lat)
+                
+elif Ldir['cruises'] == 'newport_line':
+    sta_fn = Ldir['LOo'] / 'obs' / 'newport_line' / 'sta_df.p'
+    if sta_fn.is_file():
+        sta_df = pd.read_pickle(sta_fn)
+    cruises = sta_df['Cruise'].unique()
+    for cruise in cruises:
+        c_df = sta_df[sta_df['Cruise']==cruise]
+        for index, row in sta_df.iterrows():
+            sn = index
+            lon = row['Longitude']
+            lat = row['Latitude']
+            dt = row['Datetime']
+            out_fn = out_dir / (cruise + '_' + str(sn) + '.nc')
+            fn = get_his_fn_from_dt(Ldir, dt)
+            if Ldir['testing']:
+                print('\ncruise=%s sn=%s lon=%0.2f lat=%0.2f' % (cruise, sn, lon, lat))
+                print(str(out_fn))
+                print(fn)
+            else:
+                get_cast(out_fn, fn, lon, lat)
+
                 
 # -------------------------------------------------------
 
