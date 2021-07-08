@@ -1,19 +1,16 @@
 """
 Do volume and salt budgets for user-specified volumes.
-This is a fairly complicated task because it involves coordinating
-the net salt and volume time series from flux_[get,lowpass]_s.py,
-the TEF transports through any open sections of the volume,
-and all the rivers flowing into the volume.
 
 Run with a command like:
 run salt_budget -test True
-and then it runs for all volumes in vol_list
 
 """
 
-import os; import sys
-sys.path.append(os.path.abspath('../alpha'))
-
+import sys
+from pathlib import Path
+pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
+if str(pth) not in sys.path:
+    sys.path.append(str(pth))
 
 import Lfun
 import tef_fun
@@ -39,11 +36,8 @@ parser.add_argument('-test', '--testing', type=zfun.boolean_string, default=Fals
 args = parser.parse_args()
 testing = args.testing
 
-old_dt = False
-
 # Get Ldir
-Ldir = Lfun.Lstart(args.gridname, args.tag)
-gtagex = args.gridname + '_' + args.tag + '_' + args.ex_name
+Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
 
 if testing:
     year_list = [2018]
@@ -63,9 +57,15 @@ for which_vol in vol_list:
 
     for year in year_list:
         year_str = str(year)
+        date_str = '_' + year_str + '.01.01_' + year_str + '.12.31'
+        
+        riv_fn = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_roms' / ('extraction' + date_str + '.p')
+        tef_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef' / ('bulk' + date_str)
+        seg_fn = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef' / ('segments' + date_str + '.nc')
+        vol
     
         # select input/output location
-        run_name = gtagex+'_'+year_str+'.01.01_'+year_str+'.12.31'
+        run_name = Ldir['gtagex'] + 
         indir00 = Ldir['LOo'] + 'tef2/'
         indir0 = indir00 + run_name + '/'
 

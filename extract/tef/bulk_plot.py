@@ -46,7 +46,7 @@ if testing:
     reload(flux_fun)
 
 if testing:
-    sect_list = ['jdf1']
+    sect_list = ['ai1']
 else:
     sect_list = list(sect_df.index)
 
@@ -76,7 +76,7 @@ for sect_name in sect_list:
         NR = 2; NC = 1
         
     # filter more in time (requires that Q be the first item in vn_list)
-    nhan = 1 # length of Hanning window in days (use 1 for no filtering)
+    nhan = 20 # length of Hanning window in days (use 1 for no filtering)
     for vn in vn_list_long:
         if vn == 'Q':
             tef_df['Q_in'] = zfun.lowpass(tef_df['Qin'].to_numpy(), n=nhan)
