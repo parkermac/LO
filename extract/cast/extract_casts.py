@@ -197,7 +197,7 @@ elif Ldir['cruises'] == 'newport_line':
             lon = row['Longitude']
             lat = row['Latitude']
             dt = row['Datetime']
-            out_fn = out_dir / (cruise + '_' + str(sn) + '.nc')
+            out_fn = out_dir / (cruise + '_' + str(sn) + '_' + dt.strftime(Lfun.ds_fmt) + '.nc')
             fn = get_his_fn_from_dt(Ldir, dt)
             get_cast(out_fn, fn, lon, lat)
 
