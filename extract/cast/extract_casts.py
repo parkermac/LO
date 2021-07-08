@@ -133,7 +133,7 @@ def get_his_fn_from_dt(Ldir, dt):
     return fn
 
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'cast' / Ldir['cruises']
-Lfun.make_dir(out_dir)
+Lfun.make_dir(out_dir, clean=True)
 
 if Ldir['cruises'] == 'test_cruises':
     cruise = 'MyCruise'
