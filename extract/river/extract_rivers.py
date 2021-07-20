@@ -8,6 +8,9 @@ run extract_rivers -g cas6 -t v3 -x junk -0 2018.01.01 -1 2018.12.31
 
 Performance: takes 3 seconds per year on boiler
 
+Modified to include all NPZD tracers, and package the results as
+an xarray Dataset.
+
 """
 
 from pathlib import Path
@@ -26,15 +29,21 @@ import numpy as np
 import netCDF4 as nc
 import pandas as pd
 import zrfun
+import xarray as xr
     
 ds0 = Ldir['ds0']
 ds1 = Ldir['ds1']
 
 tt0 = time()
 
+# long list of variables to extract
+vn_list = ['salt', 'temp', 'oxygen',
+    'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
+    'TIC', 'alkalinity']
+
 print(' Doing river extraction for '.center(60,'='))
 print(' gtag = ' + Ldir['gtag'])
-outname = 'extraction_' + ds0 + '_' + ds1 + '.p'
+outname = 'extraction_' + ds0 + '_' + ds1 + '.nc'
 
 # make sure the output directory exists
 out_dir = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_roms'
@@ -42,8 +51,6 @@ Lfun.make_dir(out_dir)
 
 out_fn = out_dir / outname
 out_fn.unlink(missing_ok=True)
-
-# ------ OLD --------------
 
 dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
 dt1 = datetime.strptime(ds1, Lfun.ds_fmt)
@@ -89,7 +96,6 @@ for mds in mds_list:
         rdt = Lfun.modtime_to_datetime(rt)
         rds = datetime.strftime(rdt, Lfun.ds_fmt)
         if rds == mds:
-            #print('Match at ii=%d, %s' % (ii, rds))
             Qr[tt,:] = ds['river_transport'][ii,:]
         ii += 1
     ds.close()
