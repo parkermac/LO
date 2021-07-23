@@ -15,6 +15,7 @@ import netCDF4 as nc
 import pandas as pd
 import numpy as np
 import utide
+import zfun
 
 import Lfun
 gridname = 'cas6'; tag = 'v3'; ex_name = 'lo8b'
@@ -28,7 +29,7 @@ import tef_fun
 def get_hm(t_days, v, lat, epoch=Lfun.modtime0):
     # function to get harmonics for variable v
     hm = utide.solve(t_days, v, lat=lat, epoch=epoch,
-        nodal=False, trend=False, method='ols', Rayleigh_min=0.95)
+        nodal=True, trend=False)
     return hm
     # hm.aux.freq has units cyles/hour
     # so for f = hm.aux.frq[hm.name == 'M2'][0] we get
@@ -48,7 +49,7 @@ sect_list = list(sect_df.index)
 
 testing = False
 if testing:
-    sect_list = ['ai1']
+    sect_list = ['wb2'] # wb2 has an island in the middle - good mask test
     
 hm_e_dict = dict()
 hm_u_dict = dict()
@@ -58,6 +59,7 @@ for sect_name in sect_list:
     
     # get section info
     x0, x1, y0, y1 = sect_df.loc[sect_name,:]
+    lat = (y0 + y1)/2
         
     # load extracted fields
     ds = nc.Dataset(in_fn)
@@ -71,17 +73,22 @@ for sect_name in sect_list:
     NT, NZ, NX = q.shape
 
     # mask: True for water points on section
-    mask = ~np.isnan(DA[0,0,:]).data
+    mask = ~np.isnan(q[0,0,:]).data # use q to find the correct mask
     H = h[mask].mean()
     A0 = (DA0.data[:,mask]).sum()
 
     # velocity
-    Q = np.nansum(q.data[:,:,mask], axis=2).sum(axis=1)
+    #Q = np.nansum(q.data[:,:,mask], axis=2).sum(axis=1)
+    Q = q.data[:,:,mask].sum(axis=2).sum(axis=1)
     A = DA.data[:,:,mask].sum(axis=2).sum(axis=1)
     u = Q/A
 
     # surface height
     eta = zeta[:,mask].mean(axis=1).data
+    
+    # remove low-passed signal
+    eta = eta - zfun.lowpass(eta, f='godin', nanpad=False)
+    u = u - zfun.lowpass(u, f='godin', nanpad=False)
     
     # calculate harmonics
     hm_e = get_hm(ot_days, eta, lat)
@@ -98,27 +105,9 @@ for sect_name in sect_list:
     hm_e['F'] = F
     hm_u['F'] = F
     
-    if testing:
-        cons = 'M2'
-        f = hm_e.aux.frq[hm_e.name == cons][0]
-        E = hm_e.A[hm_e.name == cons][0]
-        U = hm_u.A[hm_u.name == cons][0]
-        print((' %s: %s ' % (sect_name, cons)).center(60,'-'))
-        # try two levels of friction
-        # no friction
-        a = np.sqrt(g/H) / np.sqrt(1 + 0j)
-        Ep = abs(E + U/a)/2
-        Em = abs(E - U/a)/2
-        print('  No Friction: Ep = %0.2f, Em = %0.2f, Em/Ep = %0.2f' % (Ep, Em, Em/Ep))
-        # high friction
-        a = np.sqrt(g/H) / np.sqrt(1 + 1j)
-        Ep = abs(E + U/a)/2
-        Em = abs(E - U/a)/2
-        print('High Friction: Ep = %0.2f, Em = %0.2f, Em/Ep = %0.2f' % (Ep, Em, Em/Ep))
-    else:
-        # gather results
-        hm_e_dict[sect_name] = hm_e
-        hm_u_dict[sect_name] = hm_u
+    # gather results
+    hm_e_dict[sect_name] = hm_e
+    hm_u_dict[sect_name] = hm_u
         
 if not testing:
     out_dir = in_dir0 / ('harmonics_' + dates)
