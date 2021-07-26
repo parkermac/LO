@@ -49,9 +49,29 @@ in_dir0 = Ldir['roms_out'] / Ldir['gtagex']
 lon = Ldir['lon']
 lat = Ldir['lat']
 G, S, T = zrfun.get_basic_info(in_dir0 / ('f' + Ldir['ds0']) / 'ocean_his_0001.nc')
-ilon = zfun.find_nearest_ind(G['lon_rho'][0,:], lon)
-ilat = zfun.find_nearest_ind(G['lat_rho'][:,0], lat)
-# NOTE: we should also check that this is not masked on any grid
+Lon = G['lon_rho'][0,:]
+Lat = G['lat_rho'][:,0]    
+# error checking
+if (lon < Lon[0]) or (lon > Lon[-1]):
+    print('ERROR: lon out of bounds ' + out_fn.name)
+    sys.exit()
+if (lat < Lat[0]) or (lat > Lat[-1]):
+    print('ERROR: lat out of bounds ' + out_fn.name)
+    sys.exit()
+# get indices
+ix = zfun.find_nearest_ind(Lon, lon)
+iy = zfun.find_nearest_ind(Lat, lat)
+# more error checking
+if G['mask_rho'][iy,ix] == False:
+    print('ERROR: rho point on land mask ' + out_fn.name)
+    sys.exit()
+if Ldir['get_vel']:
+    if G['mask_u'][iy,ix] == False:
+        print('ERROR: u point on land mask ' + out_fn.name)
+        sys.exit()
+    if G['mask_v'][iy,ix] == False:
+        print('ERROR: v point on land mask ' + out_fn.name)
+        sys.exit()
 
 fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
 
@@ -117,11 +137,11 @@ foo['salt'].units = 'g kg-1'
 foo.close()
     
 # clean up
-Lfun.make_dir(temp_dir, clean=True)
-temp_dir.rmdir()
+if False:
+    Lfun.make_dir(temp_dir, clean=True)
+    temp_dir.rmdir()
 
 print('\nTotal Elapsed time was %0.2f sec' % (time()-tt00))
-
 
 # test for success 
 if moor_fn.is_file():
