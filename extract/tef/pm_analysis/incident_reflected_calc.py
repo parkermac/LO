@@ -1,6 +1,20 @@
 """
 Calculate incident and reflected wave amplitudes on all sections.
 
+RESULT: this appears to give unrelaible results, although I don't know why.
+The way I test if a results is "correct" is to compare the net tidal energy
+flux due to the incident and reflected waves (FF_alt) to the original flux (F)
+and the constituent-reconstructed flux (FF).  In general F and FF compare
+well regardless of the sign I use for Eg and Ug.  The FF_alt is also good
+(and identical to FF) but ONLY if I use a real value of a.  For any complex
+a FF_alt != FF.
+
+Curious: If I use real a, the net is always good, but the incident
+and reflected parts vary with a (but not their sum).  Is a = np.sqrt(g/H)
+more "correct?"
+
+This also makes a nice map, if I ever get the answer to be satisfactory.
+
 """
 
 from pathlib import Path
@@ -70,37 +84,47 @@ for sect_name in sect_list:
     FFp = 0
     FFm = 0
     FF = 0
-    clist = hm_e.name
-    if testing:
-        clist = ['M2']
+    FF_alt = 0
+    clist = ['Q1', 'O1', 'P1', 'K1', 'N2', 'M2', 'S2', 'K2']
+    #clist = ['M2']
+
     # Use the pytide module to get the same information.
     # The tutorial is helpful:
     # https://pangeo-pytide.readthedocs.io/en/latest/tutorial.html
     wt = pytide.WaveTable(clist)
-    f_alt, vu_alt = wt.compute_nodal_modulations([datetime(year,1,1)])
+    f, vu = wt.compute_nodal_modulations([datetime(year,1,1)])
     
     for cons in clist:
-        if cons in hm_u.name:
-            E = hm_e.A[hm_e.name == cons][0]
-            U = hm_u.A[hm_u.name == cons][0]
-            Eg = np.pi * hm_e.g[hm_e.name == cons][0] / 180
-            Ug = np.pi * hm_u.g[hm_u.name == cons][0] / 180
-            EE = cmath.rect(f_alt*E, vu_alt-Eg)
-            UU = cmath.rect(f_alt*U, vu_alt-Ug)
-            a = np.sqrt(g/H)#/np.sqrt(1 + 1j)
-            Ep = (EE + UU/a)/2
-            Em = (EE - UU/a)/2
-            Up =   Ep*a
-            Um =  Em*a
-            Fp = 0.5*rho*g*A0 * (Ep.real*Up.real + Ep.imag*Up.imag)
-            Fm = -0.5*rho*g*A0 * (Em.real*Um.real + Em.imag*Um.imag)
-            if testing and cons == 'M2':
-                print(EE*a)
-                print(UU)
-            Fc = Fp + Fm
-            FFp += Fp
-            FFm += Fm
-            FF += Fc
+        E = hm_e.A[hm_e.name == cons][0]
+        U = hm_u.A[hm_u.name == cons][0]
+        Eg = np.pi * hm_e.g[hm_e.name == cons][0] / 180
+        Ug = np.pi * hm_u.g[hm_u.name == cons][0] / 180
+        
+        this_f = f[clist.index(cons)]
+        this_vu = vu[clist.index(cons)]
+        
+        EE = cmath.rect(this_f*E, -Eg)
+        UU = cmath.rect(this_f*U, -Ug)
+        
+        Fc = 0.5*rho*g*A0 * (EE.real*UU.real + EE.imag*UU.imag)
+        
+        a = np.sqrt(g/H)/np.sqrt(1 + 1j) # use 1j for R/om = 1
+        
+        Ep = (EE + UU/a)/2
+        Em = (EE - UU/a)/2
+        Up =  Ep*a
+        Um =  Em*a
+        Fp = 0.5*rho*g*A0 * (Ep.real*Up.real + Ep.imag*Up.imag)
+        Fm = - 0.5*rho*g*A0 * (Em.real*Um.real + Em.imag*Um.imag)
+        if testing:
+            print('%s: Fp = %8.1f, Fm = %8.1f [MW]' % (cons, Fp/1e6, Fm/1e6))
+        
+        Fc_alt = Fp + Fm
+        FFp += Fp
+        FFm += Fm
+        FF += Fc
+        FF_alt += Fc_alt
+        # FF should match FF_alt
             
     F_df.loc[sect_name, 'FFp'] = FFp/1e6
     F_df.loc[sect_name, 'FFm'] = FFm/1e6
@@ -111,7 +135,8 @@ for sect_name in sect_list:
     F_df.loc[sect_name, 'sdir'] = sdir
     
     if testing:
-        print('%s: F = %0.2f, FF = %0.2f MW' % (sect_name, F/1e6, FF/1e6))
+        print('\n%s: F = %0.1f, FF = %0.1f, FF_alt = %0.1f [MW]' %
+            (sect_name, F/1e6, FF/1e6, FF_alt/1e6))
 
 if not testing:
     

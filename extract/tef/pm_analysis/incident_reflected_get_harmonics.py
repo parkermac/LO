@@ -1,6 +1,9 @@
 """
 Get and save all the tidal harmonics for a colleciton of TEF sections.
 
+One improvement might be to save Q instead of u because that is what
+is more exact for calculation of tidal energy flux.
+
 """
 
 from pathlib import Path
@@ -78,7 +81,6 @@ for sect_name in sect_list:
     A0 = (DA0.data[:,mask]).sum()
 
     # velocity
-    #Q = np.nansum(q.data[:,:,mask], axis=2).sum(axis=1)
     Q = q.data[:,:,mask].sum(axis=2).sum(axis=1)
     A = DA.data[:,:,mask].sum(axis=2).sum(axis=1)
     u = Q/A
@@ -89,6 +91,7 @@ for sect_name in sect_list:
     # remove low-passed signal
     eta = eta - zfun.lowpass(eta, f='godin', nanpad=False)
     u = u - zfun.lowpass(u, f='godin', nanpad=False)
+    # this leaves zeros as the padding on the ends
     
     # calculate harmonics
     hm_e = get_hm(ot_days, eta, lat)
