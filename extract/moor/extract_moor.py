@@ -59,20 +59,20 @@ if (lat < Lat[0]) or (lat > Lat[-1]):
     print('ERROR: lat out of bounds ' + out_fn.name)
     sys.exit()
 # get indices
-ix = zfun.find_nearest_ind(Lon, lon)
-iy = zfun.find_nearest_ind(Lat, lat)
+ilon = zfun.find_nearest_ind(Lon, lon)
+ilat = zfun.find_nearest_ind(Lat, lat)
 # more error checking
-if G['mask_rho'][iy,ix] == False:
+if G['mask_rho'][ilat,ilon] == False:
     print('ERROR: rho point on land mask ' + out_fn.name)
     sys.exit()
 if Ldir['get_vel']:
-    if G['mask_u'][iy,ix] == False:
+    if G['mask_u'][ilat,ilon] == False:
         print('ERROR: u point on land mask ' + out_fn.name)
         sys.exit()
-    if G['mask_v'][iy,ix] == False:
+    if G['mask_v'][ilat,ilon] == False:
         print('ERROR: v point on land mask ' + out_fn.name)
         sys.exit()
-
+        
 fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
 
 vn_list = 'h,zeta'
