@@ -91,7 +91,7 @@ N = len(fn_list)
 for ii in range(N):
     fn = fn_list[ii]
     # extract one day at a time using ncks
-    count_str = ('0000' + str(ii))[-4:]
+    count_str = ('000000' + str(ii))[-6:]
     out_fn = temp_dir / ('moor_temp_' + count_str + '.nc')
     cmd_list1 = ['ncks',
         '-v', vn_list,

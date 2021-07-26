@@ -94,7 +94,7 @@ print('Total elapsed time = %0.2f sec' % (time()-tt000))
 A_list = list(temp_dir.glob('A*.p'))
 A_list.sort()
 
-# make a list of the datetimes (really should to this in extract_segment_one_time)
+# make a list of the datetimes (really should do this in extract_segment_one_time)
 dt_list = []
 for fn in fn_list:
     ds = nc.Dataset(fn)
