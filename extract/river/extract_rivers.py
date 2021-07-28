@@ -37,7 +37,7 @@ ds1 = Ldir['ds1']
 tt0 = time()
 
 # long list of variables to extract
-vn_list = ['salt', 'temp', 'oxygen',
+vn_list = ['transport', 'salt', 'temp', 'oxygen',
     'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
     'TIC', 'alkalinity']
 
@@ -56,13 +56,16 @@ dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
 dt1 = datetime.strptime(ds1, Lfun.ds_fmt)
 ndays = (dt1-dt0).days + 1
 
+# make mds_list: list of datestrings (e.g. 2017.01.01) to loop over
 mds_list = []
 mdt = dt0
 while mdt <= dt1:
     mds_list.append(datetime.strftime(mdt, Lfun.ds_fmt))
     mdt = mdt + timedelta(days=1)
 
-# get some initial info
+# get list of river names
+# (this is a bit titchy because of NetCDF 3 limitations on strings, forcing them
+# to be arrays of characters)
 mds = mds_list[0]
 fn = Ldir['parent'] / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
 ds = nc.Dataset(fn)
@@ -77,40 +80,47 @@ for ii in range(NR):
     for l in a:
         r.append(l.decode())
     rr = ''.join(r)
-    #print('%d %s' % (ii, rr))
     riv_name_list.append(rr)
 ds.close()
 
 NT = len(mds_list)
 
-Qr = np.nan * np.ones((NT, NR))
+nanmat = np.nan * np.ones((NT, NR))
+v_dict = dict()
+for vn in vn_list:
+    v_dict[vn] = nanmat
 tt = 0
 for mds in mds_list:
     fn = Ldir['parent'] / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
     ds = nc.Dataset(fn)
-    # the river transport is given at noon of a number of days surrounding the forcing date
-    # here we find the index of the time for today
+    # The river transport is given at noon of a number of days surrounding the forcing date.
+    # Here we find the index of the time for the day "mds".
     RT = ds['river_time'][:]
     ii = 0
     for rt in RT:
         rdt = Lfun.modtime_to_datetime(rt)
         rds = datetime.strftime(rdt, Lfun.ds_fmt)
         if rds == mds:
-            Qr[tt,:] = ds['river_transport'][ii,:]
+            for vn in vn_list:
+            v_dict[vn][tt,:] = ds['river_' + vn][ii,:]
         ii += 1
     ds.close()
     tt += 1
+
+# make transport positive    
+v_dict['river_transport'] = np.abs(v_dict['river_transport'])
+
+# store output in an xarray Dataset
+mdt_list = [(datetime.strptime(item, Lfun.ds_fmt) + timedelta(days=0.5)) for item in mds_list]
+times = pd.Index(mdt_list)
+
+ds = xr.Dataset(coords={'time': times,'riv': river_name_list})
+
+for vn in vn_list:
+    v = v_dict[vn]
+    ds[vn] = (['time','riv'], v)
     
-Qr = np.abs(Qr)
-
-# now interpolate to make the time and Qr at midnight of each day
-Qind = pd.date_range(dt0, dt1+timedelta(days=1),freq='D')
-Qr = np.concatenate((np.reshape(Qr[0,:], (1,NR)),Qr,np.reshape(Qr[-1,:], (1,NR))), axis=0)
-Qr = Qr[:-1,:] + np.diff(Qr, axis=0)/2
-
-df = pd.DataFrame(index=Qind, columns=riv_name_list, data=Qr)
-
-df.to_pickle(out_fn)
+ds.to_netcdf(out_fn)
 
 print('Total time for extraction = %d seconds' % (time() - tt0))
     
