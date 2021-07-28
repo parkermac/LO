@@ -102,7 +102,12 @@ for mds in mds_list:
         rds = datetime.strftime(rdt, Lfun.ds_fmt)
         if rds == mds:
             for vn in vn_list:
-                v_dict[vn][tt,:] = ds['river_' + vn][ii,:]
+                if vn == 'transport':
+                    v_dict[vn][tt,:] = ds['river_' + vn][ii,:]
+                else:
+                    # the rest of the variables allow for depth variation, but we
+                    # don't use this, so, just use the bottom value
+                    v_dict[vn][tt,:] = ds['river_' + vn][ii,0,:]
         ii += 1
     ds.close()
     tt += 1
