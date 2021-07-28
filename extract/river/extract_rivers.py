@@ -119,7 +119,7 @@ v_dict['transport'] = np.abs(v_dict['transport'])
 mdt_list = [(datetime.strptime(item, Lfun.ds_fmt) + timedelta(days=0.5)) for item in mds_list]
 times = pd.Index(mdt_list)
 
-ds = xr.Dataset(coords={'time': times,'riv': river_name_list})
+ds = xr.Dataset(coords={'time': times,'riv': riv_name_list})
 
 for vn in vn_list:
     v = v_dict[vn]
