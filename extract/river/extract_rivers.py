@@ -102,7 +102,7 @@ for mds in mds_list:
         rds = datetime.strftime(rdt, Lfun.ds_fmt)
         if rds == mds:
             for vn in vn_list:
-            v_dict[vn][tt,:] = ds['river_' + vn][ii,:]
+                v_dict[vn][tt,:] = ds['river_' + vn][ii,:]
         ii += 1
     ds.close()
     tt += 1
