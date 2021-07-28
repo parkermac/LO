@@ -113,7 +113,7 @@ for mds in mds_list:
     tt += 1
 
 # make transport positive    
-v_dict['river_transport'] = np.abs(v_dict['river_transport'])
+v_dict['transport'] = np.abs(v_dict['transport'])
 
 # store output in an xarray Dataset
 mdt_list = [(datetime.strptime(item, Lfun.ds_fmt) + timedelta(days=0.5)) for item in mds_list]
