@@ -119,13 +119,13 @@ v_dict['transport'] = np.abs(v_dict['transport'])
 mdt_list = [(datetime.strptime(item, Lfun.ds_fmt) + timedelta(days=0.5)) for item in mds_list]
 times = pd.Index(mdt_list)
 
-ds = xr.Dataset(coords={'time': times,'riv': riv_name_list})
+x = xr.Dataset(coords={'time': times,'riv': riv_name_list})
 
 for vn in vn_list:
     v = v_dict[vn]
-    ds[vn] = (['time','riv'], v)
+    x[vn] = (['time','riv'], v)
     
-ds.to_netcdf(out_fn)
+x.to_netcdf(out_fn)
 
 print('Total time for extraction = %d seconds' % (time() - tt0))
     
