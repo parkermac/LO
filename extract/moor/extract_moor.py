@@ -5,7 +5,9 @@ Test on mac in ipython:
 
 run extract_moor.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_tsa True -get_vel True -get_bio True
 
-The performance on this is reasonable, taking about 24 minutes for a year of hourly records
+Use -test True to keep the folder full of temporary files.
+
+The performance on this is excellent, taking about 24 minutes for a year of hourly records
 on perigee with cas6_v3_lo8b and all flags True.
 
 """
@@ -137,7 +139,7 @@ foo['salt'].units = 'g kg-1'
 foo.close()
     
 # clean up
-if False:
+if not Ldir['testing']:
     Lfun.make_dir(temp_dir, clean=True)
     temp_dir.rmdir()
 
