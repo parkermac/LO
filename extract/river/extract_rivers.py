@@ -88,7 +88,7 @@ NT = len(mds_list)
 nanmat = np.nan * np.ones((NT, NR))
 v_dict = dict()
 for vn in vn_list:
-    v_dict[vn] = nanmat
+    v_dict[vn] = nanmat.copy()
 tt = 0
 for mds in mds_list:
     fn = Ldir['parent'] / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
@@ -108,6 +108,7 @@ for mds in mds_list:
                     # the rest of the variables allow for depth variation, but we
                     # don't use this, so, just use the bottom value
                     v_dict[vn][tt,:] = ds['river_' + vn][ii,0,:]
+            break
         ii += 1
     ds.close()
     tt += 1
