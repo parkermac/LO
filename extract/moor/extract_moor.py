@@ -90,6 +90,7 @@ if Ldir['get_surfbot']:
     
 proc_list = []
 N = len(fn_list)
+print('\nTimes to extract =  %d' % (N))
 for ii in range(N):
     fn = fn_list[ii]
     # extract one day at a time using ncks
@@ -105,9 +106,18 @@ for ii in range(N):
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
     
-    if (np.mod(ii,100) == 0) or (ii == N-1):
-        print(' - %d out of %d' % (ii, N))
+    if (np.mod(ii,100) == 0): # 100
+        print(str(ii), end=', ')
         sys.stdout.flush()
+        if (np.mod(ii,1000) == 0) and (ii > 0): # 1000
+            print(str(ii))
+            sys.stdout.flush()
+    elif (ii == N-1):
+        print(str(ii))
+        sys.stdout.flush()
+    
+    
+    if (np.mod(ii,100) == 0) or (ii == N-1):
         for proc in proc_list:
             proc.communicate()
         # make sure everyone is finished before continuing

@@ -22,6 +22,7 @@ def intro():
     parser.add_argument('-lon', type=float, default=-125)   # longitude
     parser.add_argument('-lat', type=float, default=47)     # latitude
     parser.add_argument('-sn', type=str, default='gh_test') # station name
+    parser.add_argument('-job', type=str) # job name for multi_mooring_driver.py
     parser.add_argument('-lt', '--list_type', type=str, default='hourly') # list type
     parser.add_argument('-get_tsa', type=zfun.boolean_string, default=False)
     parser.add_argument('-get_vel', type=zfun.boolean_string, default=False)
@@ -30,8 +31,8 @@ def intro():
     # generic arguments used by extract/cast
     parser.add_argument('-cruises', type=str, default='test_cruises')
     # generic arguments used by extract/tef
-    # NOTE: the tef code shares the -get_bio argument and uses it to set a
-    # longer list of variables for extraction
+    #   NOTE: the tef code shares the -get_bio argument and uses it to set a
+    #   longer list of variables for extraction
     parser.add_argument('-sect_name', type=str, default='ai1')
     parser.add_argument('-Nproc', type=int, default=10) # number of subprocesses to use
     # 10 works best on mac, but 20 is much faster on perigee
