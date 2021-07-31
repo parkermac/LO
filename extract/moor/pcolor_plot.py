@@ -1,5 +1,5 @@
 """
-Generic code to plot any mooring extraction
+Generic code to plot any mooring extraction, using pcolor.
 """
 from pathlib import Path
 import sys
@@ -15,6 +15,8 @@ import netCDF4 as nc
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import cmocean
+
 
 Ldir = Lfun.Lstart()
 
@@ -42,20 +44,36 @@ for vn in ds.variables:
     print('%s %s' % (vn, ds[vn].shape))
     VN_list.append(vn)
     
-# populate list of variables to plot
-vn_list = []
-if 'salt' in VN_list:
-    vn_list += ['salt', 'temp']
-if 'NO3' in VN_list:
-    vn_list += ['NO3', 'oxygen', 'phytoplankton']
+t = (ot - ot[0])/86400 # time in days
+s = ds['salt'][:].data
+th = ds['temp'][:].data
+z = ds['z_w'][:].data
+NT, NZ = z.shape
 
-df = pd.DataFrame(index=tind)
-df['zeta'] = ds['zeta'][:].data
-for vn in vn_list:
-    df[vn] = ds[vn][:, -1].data
+# make variables at midddle times, fo pcolormesh
+S = (s[1:,:] + s[:-1,:])/2
+TH = (th[1:,:] + th[:-1,:])/2
 
+plt.close('all')
 pfun.start_plot()
+fig = plt.figure()
 
-df.plot(subplots=True, figsize=(16,10))
+ax = fig.add_subplot(211)
+cs = ax.pcolormesh(t.reshape((NT,1))*np.ones((1,NZ)), z, S, cmap=cmocean.cm.haline)
+fig.colorbar(cs)
+ax.set_ylim(top=5)
+ax.set_ylabel('Z [m]')
+ax.set_title(moor_name)
+ax.text(.05, .1, 'Salinity [g/kg]', c='k', weight='bold', transform=ax.transAxes)
+
+ax = fig.add_subplot(212)
+cs = ax.pcolormesh(t.reshape((NT,1))*np.ones((1,NZ)), z, TH, cmap=cmocean.cm.balance)
+fig.colorbar(cs)
+ax.set_ylim(top=5)
+ax.set_xlabel('Time [days from start of record]')
+ax.set_ylabel('Z [m]')
+ax.text(.05, .1, 'Potential Temperature [deg C]', c='w', weight='bold', transform=ax.transAxes)
+
+plt.show()
 
 pfun.end_plot()

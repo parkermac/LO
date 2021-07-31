@@ -34,6 +34,7 @@ from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import numpy as np
 import netCDF4 as nc
+import xarray as xr
 
 tt00 = time()
 
@@ -133,20 +134,29 @@ proc.communicate()
 
 # Add z-coordinates to the file
 foo = nc.Dataset(moor_fn, 'a')
-z_rho, z_w = zrfun.get_z(foo['h'][:], np.array([0.]), S)
-vv = foo.createVariable('z_rho', float, ('s_rho',))
+zeta = foo['zeta'][:].squeeze().data
+NT = len(zeta)
+hh = foo['h'][0].data * np.ones(NT)
+z_rho, z_w = zrfun.get_z(hh, zeta, S)
+vv = foo.createVariable('z_rho', float, ('ocean_time', 's_rho'))
 vv.long_name = 'vertical position on s_rho grid, positive up, zero at surface'
 vv.units = 'm'
-vv[:] = z_rho
-vv = foo.createVariable('z_w', float, ('s_w',))
+vv[:] = np.transpose(z_rho.data)
+vv = foo.createVariable('z_w', float, ('ocean_time', 's_w'))
 vv.long_name = 'vertical position on s_w grid, positive up, zero at surface'
 vv.units = 'm'
-vv[:] = z_w
+vv[:] = np.transpose(z_w.data)
 # Note that z_rho and z_w do not have singleton dimensions
 
 # Also add units to salt
 foo['salt'].units = 'g kg-1'
 foo.close()
+
+# remove singleton dimensions
+fx = xr.load_dataset(moor_fn)
+fx = fx.squeeze()
+moor_fn.unlink()
+fx.to_netcdf(moor_fn)
     
 # clean up
 if not Ldir['testing']:

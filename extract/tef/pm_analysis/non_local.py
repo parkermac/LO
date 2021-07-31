@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 from time import time
+import pandas as pd
 
 import Lfun
 import zfun
@@ -31,9 +32,10 @@ Ldir = Lfun.Lstart()
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('-gtagex', type=str, default='cas6_v3_lo8b')   # e.g. cas6_v3_lo8b
+parser.add_argument('-gtagex', type=str, default='cas6_v3_lo8b')          # e.g. cas6_v3_lo8b
 parser.add_argument('-0', '--ds0', type=str, default='2018.01.01')        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='2018.12.31')        # e.g. 2019.07.04
+parser.add_argument('-sn', '--sect_name', type=str, default='ai1')        # e.g. ai1
 args = parser.parse_args()
 
 in_dir00 = Ldir['LOo'] / 'extract'
@@ -47,15 +49,15 @@ if (len(args.ds0)==0) or (len(args.ds1)==0):
 else:
     ext_name = 'extractions_' + args.ds0 + '_' + args.ds1
 in_dir = in_dir0 / ext_name
-sect_list = [item.name.replace('.nc','') for item in in_dir.glob('*.nc')]
+#sect_list = [item.name.replace('.nc','') for item in in_dir.glob('*.nc')]
 
-for sect_name in ['hc2']:
+for sect_name in [args.sect_name]:
 
     # load extracted fields
     ds = nc.Dataset(in_dir / (sect_name + '.nc'))
     q = ds['q'][:]
     s = ds['salt'][:]
-    DA = ds['DA'][:]
+    a = ds['DA'][:]
     ot = ds['ocean_time'][:].data
     td = ot/86400 # time in days
     T = td - td[0] # for plotting
@@ -65,36 +67,76 @@ for sect_name in ['hc2']:
     mask = ~np.isnan(q[0,0,:]).data
     q = q[:,:,mask].data
     s = s[:,:,mask].data
-    da = DA[:,:,mask].data
+    a = a[:,:,mask].data
+    sa = s*a
+    NT, NZ, NX = q.shape
+    NC = NZ*NX # number of cells on section
     
     # net salt flux
-    QS = (q*s).sum(axis=2).sum(axis=1)
-    QS_lp = zfun.lowpass(QS, f='godin')
+    F = (q*s).sum(axis=2).sum(axis=1)
+    F_lp = zfun.lowpass(F, f='godin')
+    
+    # standard decomposition
+    q_lp = zfun.lowpass(q, f='godin')
+    s_lp = zfun.lowpass(s, f='godin')
+    sa_lp = zfun.lowpass(sa, f='godin')
+    a_lp = zfun.lowpass(a, f='godin')
+    Q_lp = q_lp.sum(axis=2).sum(axis=1)
+    A_lp = a_lp.sum(axis=2).sum(axis=1)
+    S_lp_bar = (sa_lp.sum(axis=2).sum(axis=1)) / A_lp
+    
+    F0 = Q_lp * S_lp_bar
+    
+    q_lp_p = q_lp - Q_lp.reshape((NT,1,1))
+    s_lp_p = s_lp - S_lp_bar.reshape((NT,1,1))
+    
+    F1 = ((q_lp_p * s_lp_p).sum(axis=2).sum(axis=1))
+    
+    F2 = F_lp - F0 - F1
+    
+    stn_df = pd.DataFrame(index=T)
+    stn_df['F_lp'] = F_lp
+    stn_df['F0'] = F0
+    stn_df['F1'] = F1
+    stn_df['F2'] = F2
+    stn_df = stn_df/1e3
     
     # "tidal" salt flux
     Q = q.sum(axis=2).sum(axis=1)
-    Qlp = zfun.lowpass(Q, f='godin')
-    Qp = Q - Qlp
+    Q_lp = zfun.lowpass(Q, f='godin')
+    Q_p = Q - Q_lp
     
-    sda = s * da
-    S = sda.sum(axis=2).sum(axis=1) / da.sum(axis=2).sum(axis=1)
-    Slp = zfun.lowpass(S, f='godin')
-    Sp = S - Slp
+    S = sa.sum(axis=2).sum(axis=1) / a.sum(axis=2).sum(axis=1)
+    S_lp = zfun.lowpass(S, f='godin')
+    S_p = S - S_lp
+        
+    Qlp_Slp = Q_lp * S_lp
     
-    QS_tidal_lp = zfun.lowpass(Qp*Sp, f='godin')
+    QS_tidal_lp = zfun.lowpass(Q_p*S_p, f='godin')
     
-    Qlp_Slp = Qlp * Slp
+    Q_rest = F_lp - Qlp_Slp - QS_tidal_lp
+    
+    nolo_df = pd.DataFrame(index=T)
+    nolo_df['F_lp'] = F_lp
+    nolo_df['Mean'] = Qlp_Slp
+    nolo_df['Tidal'] = QS_tidal_lp
+    nolo_df['Rest'] = Q_rest
+    nolo_df = nolo_df/1e3
+    
     
     
 plt.close('all')
 pfun.start_plot(fs=14, figsize=(14,8))
-
 fig = plt.figure()
-ax = fig.add_subplot(111)
-ax.plot(T, QS_lp/1e3, '-r', T, QS_tidal_lp/1e3, '-b', T, Qlp_Slp/1e3, '-g')
-ax.grid(True)
+
+ax = fig.add_subplot(211)
+stn_df.plot(ax=ax, grid=True)
 ax.axhline()
 ax.set_title(sect_name)
+
+ax = fig.add_subplot(212)
+nolo_df.plot(ax=ax, grid=True)
+ax.axhline()
 
 plt.show()
 pfun.end_plot()
