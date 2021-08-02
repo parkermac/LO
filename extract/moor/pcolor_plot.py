@@ -11,12 +11,12 @@ if str(pth) not in sys.path:
 import Lfun
 import plotting_functions as pfun
 
-import netCDF4 as nc
+#import netCDF4 as nc
+import xarray as xr
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import cmocean
-
 
 Ldir = Lfun.Lstart()
 
@@ -27,30 +27,29 @@ in_dir = in_dir0 / gtagex / 'moor'
 moor_name = Lfun.choose_item(in_dir, tag='.nc', exclude_tag='', itext='** Choose mooring extraction from list **')
 moor_fn = in_dir / moor_name
 
-ds = nc.Dataset(moor_fn)
-
-ot = ds['ocean_time'][:]
+# load everything using xarray
+xs = xr.load_dataset(moor_fn)
+ot = xs.ocean_time.values
+ot_dt = pd.to_datetime(ot)
+t = (ot_dt - ot_dt[0]).total_seconds().to_numpy()
+T = t/86400 # time in days from start
 print('time step of mooring'.center(60,'-'))
-print(np.diff(ot))
-
-tind = [Lfun.modtime_to_datetime(tt) for tt in ot]
+print(t[1])
 print('time limits'.center(60,'-'))
-print('start ' + str(tind[0]))
-print('end   ' + str(tind[-1]))
-
+print('start ' + str(ot_dt[0]))
+print('end   ' + str(ot_dt[-1]))
 print('info'.center(60,'-'))
 VN_list = []
-for vn in ds.variables:
-    print('%s %s' % (vn, ds[vn].shape))
+for vn in xs.data_vars:
+    print('%s %s' % (vn, xs[vn].shape))
     VN_list.append(vn)
     
-t = (ot - ot[0])/86400 # time in days
-s = ds['salt'][:].data
-th = ds['temp'][:].data
-z = ds['z_w'][:].data
+s = xs['salt'].values
+th = xs['temp'].values
+z = xs['z_w'].values
 NT, NZ = z.shape
 
-# make variables at midddle times, fo pcolormesh
+# make variables at midddle times, for pcolormesh
 S = (s[1:,:] + s[:-1,:])/2
 TH = (th[1:,:] + th[:-1,:])/2
 
@@ -59,7 +58,7 @@ pfun.start_plot()
 fig = plt.figure()
 
 ax = fig.add_subplot(211)
-cs = ax.pcolormesh(t.reshape((NT,1))*np.ones((1,NZ)), z, S, cmap=cmocean.cm.haline)
+cs = ax.pcolormesh(T.reshape((NT,1))*np.ones((1,NZ)), z, S, cmap=cmocean.cm.haline)
 fig.colorbar(cs)
 ax.set_ylim(top=5)
 ax.set_ylabel('Z [m]')
@@ -67,7 +66,7 @@ ax.set_title(moor_name)
 ax.text(.05, .1, 'Salinity [g/kg]', c='k', weight='bold', transform=ax.transAxes)
 
 ax = fig.add_subplot(212)
-cs = ax.pcolormesh(t.reshape((NT,1))*np.ones((1,NZ)), z, TH, cmap=cmocean.cm.balance)
+cs = ax.pcolormesh(T.reshape((NT,1))*np.ones((1,NZ)), z, TH, cmap=cmocean.cm.balance)
 fig.colorbar(cs)
 ax.set_ylim(top=5)
 ax.set_xlabel('Time [days from start of record]')

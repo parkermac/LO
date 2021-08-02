@@ -11,7 +11,7 @@ if str(pth) not in sys.path:
 import Lfun
 import plotting_functions as pfun
 
-import netCDF4 as nc
+import xarray as xr
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
@@ -25,34 +25,39 @@ in_dir = in_dir0 / gtagex / 'moor'
 moor_name = Lfun.choose_item(in_dir, tag='.nc', exclude_tag='', itext='** Choose mooring extraction from list **')
 moor_fn = in_dir / moor_name
 
-ds = nc.Dataset(moor_fn)
-
-ot = ds['ocean_time'][:]
+# load everything using xarray
+xs = xr.load_dataset(moor_fn)
+ot = xs.ocean_time.values
+ot_dt = pd.to_datetime(ot)
+t = (ot_dt - ot_dt[0]).total_seconds().to_numpy()
+T = t/86400 # time in days from start
 print('time step of mooring'.center(60,'-'))
-print(np.diff(ot))
-
-tind = [Lfun.modtime_to_datetime(tt) for tt in ot]
+print(t[1])
 print('time limits'.center(60,'-'))
-print('start ' + str(tind[0]))
-print('end   ' + str(tind[-1]))
-
+print('start ' + str(ot_dt[0]))
+print('end   ' + str(ot_dt[-1]))
 print('info'.center(60,'-'))
 VN_list = []
-for vn in ds.variables:
-    print('%s %s' % (vn, ds[vn].shape))
+for vn in xs.data_vars:
+    print('%s %s' % (vn, xs[vn].shape))
     VN_list.append(vn)
     
-# populate list of variables to plot
-vn_list = []
+# populate lists of variables to plot
+vn2_list = ['zeta']
+if 'Pair' in VN_list:
+    vn2_list += ['shflux', 'swrad']
+vn3_list = []
 if 'salt' in VN_list:
-    vn_list += ['salt', 'temp']
+    vn3_list += ['salt', 'temp']
 if 'NO3' in VN_list:
-    vn_list += ['NO3', 'oxygen', 'phytoplankton']
+    vn3_list += ['oxygen']
 
-df = pd.DataFrame(index=tind)
-df['zeta'] = ds['zeta'][:].data
-for vn in vn_list:
-    df[vn] = ds[vn][:, -1].data
+# plot time series using a pandas DataFrame
+df = pd.DataFrame(index=ot)
+for vn in vn2_list:
+    df[vn] = xs[vn].values
+for vn in vn3_list:
+    df[vn] = xs[vn][:, -1].values
 
 pfun.start_plot()
 

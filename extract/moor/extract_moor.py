@@ -33,7 +33,6 @@ from time import time
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import numpy as np
-import netCDF4 as nc
 import xarray as xr
 
 tt00 = time()
@@ -68,7 +67,7 @@ ilat = zfun.find_nearest_ind(Lat, lat)
 if G['mask_rho'][ilat,ilon] == False:
     print('ERROR: rho point on land mask ' + out_fn.name)
     sys.exit()
-if Ldir['get_vel']:
+if Ldir['get_vel'] or Ldir['get_surfbot']:
     if G['mask_u'][ilat,ilon] == False:
         print('ERROR: u point on land mask ' + out_fn.name)
         sys.exit()
@@ -86,8 +85,7 @@ if Ldir['get_vel']:
 if Ldir['get_bio']:
     vn_list += ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC'
 if Ldir['get_surfbot']:
-    pass
-    # need to populate surface fields to get
+    vn_list += ',Pair,Uwind,Vwind,shflux,ssflux,latent,sensible,lwrad,swrad,sustr,svstr,bustr,bvstr'
     
 proc_list = []
 N = len(fn_list)
@@ -100,7 +98,7 @@ for ii in range(N):
     cmd_list1 = ['ncks',
         '-v', vn_list,
         '-d', 'xi_rho,'+str(ilon), '-d', 'eta_rho,'+str(ilat)]
-    if Ldir['get_vel']:
+    if Ldir['get_vel'] or Ldir['get_surfbot']:
         cmd_list1 += ['-d', 'xi_u,'+str(ilon), '-d', 'eta_u,'+str(ilat),
             '-d', 'xi_v,'+str(ilon), '-d', 'eta_v,'+str(ilat)]
     cmd_list1 += ['-O', str(fn), str(out_fn)]
@@ -118,7 +116,11 @@ for ii in range(N):
         sys.stdout.flush()
     
     
-    if (np.mod(ii,100) == 0) or (ii == N-1):
+    # Nproc controls how many ncks subprocesses we allow to stack up
+    # before we require them all to finish.  It appears to work even
+    # with Nproc = 100, although this may slow other jobs.
+    Nproc = 100
+    if (np.mod(ii,Nproc) == 0) or (ii == N-1):
         for proc in proc_list:
             proc.communicate()
         # make sure everyone is finished before continuing
@@ -132,31 +134,30 @@ cmd_list = ['ncrcat','-p', str(temp_dir), '-O',str(moor_fn)]
 proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi)
 proc.communicate()
 
-# Add z-coordinates to the file
-foo = nc.Dataset(moor_fn, 'a')
-zeta = foo['zeta'][:].squeeze().data
+# add z_coordinates to the file using xarray
+xs = xr.load_dataset(moor_fn)
+xs = xs.squeeze() # remove singleton dimensions
+zeta = xs.zeta.values
 NT = len(zeta)
-hh = foo['h'][0].data * np.ones(NT)
+hh = xs.h.values * np.ones(NT)
 z_rho, z_w = zrfun.get_z(hh, zeta, S)
-vv = foo.createVariable('z_rho', float, ('ocean_time', 's_rho'))
-vv.long_name = 'vertical position on s_rho grid, positive up, zero at surface'
-vv.units = 'm'
-vv[:] = np.transpose(z_rho.data)
-vv = foo.createVariable('z_w', float, ('ocean_time', 's_w'))
-vv.long_name = 'vertical position on s_w grid, positive up, zero at surface'
-vv.units = 'm'
-vv[:] = np.transpose(z_w.data)
-# Note that z_rho and z_w do not have singleton dimensions
-
-# Also add units to salt
-foo['salt'].units = 'g kg-1'
-foo.close()
-
-# remove singleton dimensions
-fx = xr.load_dataset(moor_fn)
-fx = fx.squeeze()
-moor_fn.unlink()
-fx.to_netcdf(moor_fn)
+# the returned z arrays have vertical position first, so we 
+# transporse to put time first for the mooring, to be consistent with
+# all other variables
+xs['z_rho'] = (('ocean_time', 's_rho'), np.transpose(z_rho.data))
+xs['z_w'] = (('ocean_time', 's_w'), np.transpose(z_w.data))
+xs.z_rho.attrs['units'] = 'm'
+xs.z_w.attrs['units'] = 'm'
+xs.z_rho.attrs['long name'] = 'vertical position on s_rho grid, positive up'
+xs.z_w.attrs['long name'] = 'vertical position on s_w grid, positive up'
+# add units to salt
+xs.salt.attrs['units'] = 'g kg-1'
+# update the time long name
+xs.ocean_time.attrs['long_name'] = 'Time [UTC]'
+# update format attribute
+xs.attrs['format'] = 'netCDF-4'
+# and save to NetCDF (default is netCDF-4, and to overwrite any existing file)
+xs.to_netcdf(moor_fn)
     
 # clean up
 if not Ldir['testing']:
