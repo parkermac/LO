@@ -28,6 +28,7 @@ def intro():
     parser.add_argument('-get_vel', type=zfun.boolean_string, default=False)
     parser.add_argument('-get_bio', type=zfun.boolean_string, default=False)
     parser.add_argument('-get_surfbot', type=zfun.boolean_string, default=False)
+    parser.add_argument('-get_all', type=zfun.boolean_string, default=False)
     # generic arguments used by extract/cast
     parser.add_argument('-cruises', type=str, default='test_cruises')
     # generic arguments used by extract/tef
@@ -64,6 +65,13 @@ def intro():
         pass
     elif args.roms_out_num > 0:
         Ldir['roms_out'] = Ldir['roms_out' + str(args.roms_out_num)]
+        
+    # set mooring flags if needed
+    if Ldir['get_all']:
+        Ldir['get_tsa'] = True
+        Ldir['get_vel'] = True
+        Ldir['get_bio'] = True
+        Ldir['get_surfbot'] = True
         
     return Ldir.copy()
     
