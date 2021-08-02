@@ -11,7 +11,6 @@ if str(pth) not in sys.path:
 import Lfun
 import plotting_functions as pfun
 
-#import netCDF4 as nc
 import xarray as xr
 import matplotlib.pyplot as plt
 import pandas as pd
