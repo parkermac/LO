@@ -115,10 +115,10 @@ for ii in range(N):
         print(str(ii))
         sys.stdout.flush()
     
-    
     # Nproc controls how many ncks subprocesses we allow to stack up
     # before we require them all to finish.  It appears to work even
-    # with Nproc = 100, although this may slow other jobs.
+    # with Nproc = 100 on perigee, although this may slow other jobs.
+    # boiler seemed to prefer a lower number, like 10.
     Nproc = Ldir['Nproc']
     if (np.mod(ii,Nproc) == 0) or (ii == N-1):
         for proc in proc_list:
