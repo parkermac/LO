@@ -119,7 +119,7 @@ for ii in range(N):
     # Nproc controls how many ncks subprocesses we allow to stack up
     # before we require them all to finish.  It appears to work even
     # with Nproc = 100, although this may slow other jobs.
-    Nproc = 100
+    Nproc = Ldir['Nproc']
     if (np.mod(ii,Nproc) == 0) or (ii == N-1):
         for proc in proc_list:
             proc.communicate()
