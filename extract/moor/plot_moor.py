@@ -15,6 +15,7 @@ import xarray as xr
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import zfun
 
 Ldir = Lfun.Lstart()
 
@@ -51,16 +52,19 @@ if 'salt' in VN_list:
     vn3_list += ['salt', 'temp']
 if 'NO3' in VN_list:
     vn3_list += ['oxygen']
+# if 'u' in VN_list:
+#     vn3_list += ['u', 'v']
 
 # plot time series using a pandas DataFrame
 df = pd.DataFrame(index=ot)
 for vn in vn2_list:
     df[vn] = xs[vn].values
 for vn in vn3_list:
-    df[vn] = xs[vn][:, -1].values
+    df[vn] = xs[vn][:, -1]
+    #df[vn] = zfun.lowpass(xs[vn][:, -1].values, f='godin')
 
+plt.close('all')
 pfun.start_plot()
-
-df.plot(subplots=True, figsize=(16,10))
-
+df.plot(subplots=True, figsize=(16,12), grid=True)
+plt.show()
 pfun.end_plot()

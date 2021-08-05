@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """
-Created on Sun Aug 21 10:18:52 2016
-@author: PM5
 Module of functions specific to ROMS.
+
+2021.08.05 Recoded using xarray instead of netCDF4.
 """
-import netCDF4 as nc
+import xarray as xr
 import numpy as np
+import pandas as pd
 
 def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
     """
@@ -17,14 +18,14 @@ def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
     G, S, T = zfun.get_basic_info(fn)
     T = zfun.get_basic_info(fn, only_T=True)
     """
-    ds = nc.Dataset(fn,'r')
-    def make_G(ds):
+    xs = xr.open_dataset(fn)
+    def make_G(xs):
         # get grid and bathymetry info
         g_varlist = ['h', 'lon_rho', 'lat_rho', 'lon_u', 'lat_u', 'lon_v', 'lat_v',
         'lon_psi', 'lat_psi', 'mask_rho', 'mask_u', 'mask_v', 'pm', 'pn',]
         G = dict()
         for vv in g_varlist:
-            G[vv] = ds.variables[vv][:]
+            G[vv] = xs[vv].values
         G['DX'] = 1/G['pm']
         G['DY'] = 1/G['pn']
         G['M'], G['L'] = np.shape(G['lon_rho']) # M = rows, L = columns
@@ -33,47 +34,32 @@ def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
         G['mask_u'] = G['mask_u'] == 1
         G['mask_v'] = G['mask_v'] == 1
         return G
-    def make_S(ds):
+    def make_S(xs):
         # get vertical sigma-coordinate info (vectors are bottom to top)
         s_varlist = ['s_rho', 's_w', 'hc', 'Cs_r', 'Cs_w', 'Vtransform']
         S = dict()
         for vv in s_varlist:
-            S[vv] = ds.variables[vv][:]
+            S[vv] = xs[vv].values
         S['N'] = len(S['s_rho']) # number of vertical levels
         return S
-    def make_T(ds):
-        # get time info
-        t_varlist = ['ocean_time', 'dstart']
+    def make_T(xs):
+        ot = xs.ocean_time.values # an array with dtype='datetime64[ns]'
+        dti = pd.to_datetime(ot) # a pandas DatetimeIndex with dtype='datetime64[ns]'
+        dt = dti.to_pydatetime() # an array of datetimes
         T = dict()
-        for vv in t_varlist:
-            T[vv] = ds.variables[vv][:]
-        # find  time reference
-        dstart = ds.variables['dstart']
-        tu = dstart.units
-        import re
-        isdash = [m.start() for m in re.finditer('-', tu)]
-        iscolon = [m.start() for m in re.finditer(':', tu)]
-        year = int(tu[isdash[0]-4:isdash[0]])
-        month = int(tu[isdash[1]-2:isdash[1]])
-        day = int(tu[isdash[1]+1:isdash[1]+3])
-        hour = int(tu[iscolon[0]-2:iscolon[0]])
-        minute = int(tu[iscolon[1]-2:iscolon[1]])
-        second = int(tu[iscolon[1]+1:iscolon[1]+3])
-        import datetime
-        tt = datetime.datetime(year, month, day, hour, minute, second)
-        delta = datetime.timedelta(0, int(T['ocean_time']))
-        T['tm0'] = tt
-        T['tm'] = tt + delta
+        T['ot'] = ot
+        T['dti'] = dti
+        T['dt'] = dt
         return T
     # return results
     if only_G:
-        return make_G(ds)
+        return make_G(xs)
     elif only_S:
-        return make_S(ds)
+        return make_S(xs)
     elif only_T:
-        return make_T(ds)
+        return make_T(xs)
     else:
-        return make_G(ds), make_S(ds), make_T(ds)
+        return make_G(xs), make_S(xs), make_T(xs)
 
 def get_z(h, zeta, S, only_rho=False, only_w=False):
     """
@@ -161,52 +147,6 @@ def get_z(h, zeta, S, only_rho=False, only_w=False):
         return make_z_w(h, zeta, S, N, M, L)
     else :
         return make_z_rho(h, zeta, S, N, M, L), make_z_w(h, zeta, S, N, M, L)
-
-def roms_low_pass(flist, outfile, filt0, exclude=[]):
-    """
-    Creates a low-passed version of ROMS history files, that are identical
-    in structure to history files except that they have an ocean_time dimension
-    and are filtered.
-    INPUT:
-    * flist is a list of paths to history files
-    * outfile is the path of the output file to create
-    * filt is a vector of weights for the low-pass.  It must be a numpy
-      array whose sum is one, and whose length is equal to len(flist)
-    * exclude is a list of variable names not to filter.
-    OUTPUT:
-    * creates a single file (outfile)
-    """
-    import shutil
-    import netCDF4 as nc4
-    nf = len(flist)
-    if len(filt0) != nf:
-        print('ERROR roms_low_pass: inconsistent lengths!')
-    # create the output file
-    shutil.copyfile(flist[0],outfile)
-    # create the Datasets
-    ds = nc4.MFDataset(flist, exclude=exclude)
-    dsout = nc4.Dataset(outfile,'a')
-    # zero out variables we want to exclude
-    for vn in exclude:
-        try:
-            dsout[vn][:] = 0.
-        except IndexError:
-            pass
-    # loop over all variables that have time axes
-    for vn in ds.variables:
-        if vn not in exclude:
-            if 'ocean_time' in ds.variables[vn].dimensions:
-                print(vn + ' ' + str(ds.variables[vn].shape)) # debugging
-                ndim = len(ds.variables[vn].shape)
-                filt_shape = (nf,)
-                for ii in range(ndim-1):
-                    filt_shape = filt_shape + (1,)
-                v = ds.variables[vn][:]
-                filt = filt0.reshape(filt_shape)
-                vf = (filt*v).sum(axis=0)
-                dsout.variables[vn][:] = vf.reshape(dsout.variables[vn].shape)
-    ds.close()
-    dsout.close()
     
 def get_S(S_info_dict):
     """
