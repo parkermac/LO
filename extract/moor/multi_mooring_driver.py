@@ -3,11 +3,11 @@ This is a driver for doing multiple mooring extractions.  It reads in
 a file from Ldir['data'] and uses this to run extract_moor.py as a
 series of subprocesses
 
-Run from the command like:
-python multi_mooring_driver.py -gtx cas6_v3_lo8b -test True > log &
+Run from the command line like:
+python multi_mooring_driver.py -gtx cas6_v3_lo8b -test True > mmd.log &
 
 The same job would be run with flags as:
-python multi_mooring_driver.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt hourly -job mickett_2 -get_all True > log &
+python multi_mooring_driver.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt hourly -job mickett_2 -get_all True > mmd.log &
 
 """
 

@@ -2,10 +2,10 @@
 This is code for doing mooring extractions.
 
 Test on mac in ipython:
+run extract_moor -gtx cas6_v3_lo8b -test True
 
-run extract_moor.py -gtx cas6_v3_lo8b -test True
-
-
+The same job would be run with flags as:
+python extract_moor.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt hourly -sn TEST_0 -lon ' -125' -lat 47 -get_all True > em.log &
 
 The performance on this is excellent, taking about 24 minutes for a year of hourly records
 on perigee with cas6_v3_lo8b and all flags True (IF we use Nproc = 100).
@@ -143,7 +143,7 @@ if Ldir['get_surfbot']:
     
 proc_list = []
 N = len(fn_list)
-print('\nTimes to extract =  %d' % (N))
+print('Times to extract =  %d' % (N))
 for ii in range(N):
     fn = fn_list[ii]
     # extract one day at a time using ncks
@@ -217,4 +217,4 @@ xs.to_netcdf(moor_fn)
 Lfun.make_dir(temp_dir, clean=True)
 temp_dir.rmdir()
 
-print('\nTotal Elapsed time was %0.2f sec' % (time()-tt00))
+print('Total Elapsed time was %0.2f sec' % (time()-tt00))
