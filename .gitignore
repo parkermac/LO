@@ -116,3 +116,4 @@ dmypy.json
 # Pyre type checker
 .pyre/
 forcing/.DS_Store
+extract/moor/log

@@ -4,10 +4,10 @@ a file from Ldir['data'] and uses this to run extract_moor.py as a
 series of subprocesses
 
 Run from the command like:
-python multi_mooring_driver.py -gtx cas6_v3_lo8b -test True > mlog &
+python multi_mooring_driver.py -gtx cas6_v3_lo8b -test True > log &
 
-The same job would be run with flags as
-python multi_mooring_driver.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt hourly -job mickett_2 -get_all True > mlog &
+The same job would be run with flags as:
+python multi_mooring_driver.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt hourly -job mickett_2 -get_all True > log &
 
 """
 
