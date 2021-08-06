@@ -3,30 +3,22 @@ This is code for doing mooring extractions.
 
 Test on mac in ipython:
 
-run extract_moor.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -get_all True
+run extract_moor.py -gtx cas6_v3_lo8b -test True
 
-Use -test True to keep the folder full of temporary files.
+
 
 The performance on this is excellent, taking about 24 minutes for a year of hourly records
-on perigee with cas6_v3_lo8b and all flags True.
+on perigee with cas6_v3_lo8b and all flags True (IF we use Nproc = 100).
 
 """
 
+# imports
 from pathlib import Path
 import sys
-from datetime import datetime, timedelta
-
 pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
-import extract_argfun as exfun
-
-Ldir = exfun.intro() # this handles the argument passing
-result_dict = dict()
-result_dict['start_dt'] = datetime.now()
-
-# ****************** CASE-SPECIFIC CODE *****************
-
+import argparse
 import Lfun
 import zrfun, zfun
 from time import time
@@ -35,6 +27,68 @@ from subprocess import PIPE as Pi
 import numpy as np
 import xarray as xr
 
+# commandd line arugments
+parser = argparse.ArgumentParser()
+# which run to use
+parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas6_v3_l08b
+parser.add_argument('-ro', '--roms_out_num', type=int) # 1 = Ldir['roms_out1'], etc.
+# select time period and frequency
+parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
+parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
+parser.add_argument('-lt', '--list_type', type=str) # list type: hourly or daily
+# select mooring location and name
+parser.add_argument('-lon', type=float) # longitude
+parser.add_argument('-lat', type=float) # latitude
+parser.add_argument('-sn', type=str)    # station name
+# select categories of variables to extract (defined in extract_moor.py)
+parser.add_argument('-get_tsa', type=zfun.boolean_string, default=False)
+parser.add_argument('-get_vel', type=zfun.boolean_string, default=False)
+parser.add_argument('-get_bio', type=zfun.boolean_string, default=False)
+parser.add_argument('-get_surfbot', type=zfun.boolean_string, default=False)
+# OR select all of them
+parser.add_argument('-get_all', type=zfun.boolean_string, default=False)
+# Optional: set max number of subprocesses to run at any time
+parser.add_argument('-Nproc', type=int, default=10)
+# Optional: for testing
+parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_string)    
+# get the args and put into Ldir
+args = parser.parse_args()
+# test that main required arguments were provided (other)
+argsd = args.__dict__
+for a in ['gtagex']:
+    if argsd[a] == None:
+        print('*** Missing required argument to forcing_argfun.intro(): ' + a)
+        sys.exit()
+gridname, tag, ex_name = args.gtagex.split('_')
+# get the dict Ldir
+Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
+# add more entries to Ldir
+for a in argsd.keys():
+    if a not in Ldir.keys():
+        Ldir[a] = argsd[a]
+# testing
+if Ldir['testing']:
+    Ldir['roms_out_num'] = 2
+    Ldir['ds0'] = '2019.07.04'
+    Ldir['ds1'] = '2019.07.06'
+    Ldir['list_type'] = 'hourly'
+    Ldir['lon'] = -125
+    Ldir['lat'] = 47
+    Ldir['sn'] = 'TEST_0'
+    Ldir['get_all'] = True
+# set where to look for model output
+if Ldir['roms_out_num'] == 0:
+    pass
+elif Ldir['roms_out_num'] > 0:
+    Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
+# set variable list flags
+if Ldir['get_all']:
+    Ldir['get_tsa'] = True
+    Ldir['get_vel'] = True
+    Ldir['get_bio'] = True
+    Ldir['get_surfbot'] = True
+
+# do the extraction
 tt00 = time()
 
 # set output location
@@ -160,18 +214,7 @@ xs.attrs['format'] = 'netCDF-4'
 xs.to_netcdf(moor_fn)
     
 # clean up
-if not Ldir['testing']:
-    Lfun.make_dir(temp_dir, clean=True)
-    temp_dir.rmdir()
+Lfun.make_dir(temp_dir, clean=True)
+temp_dir.rmdir()
 
 print('\nTotal Elapsed time was %0.2f sec' % (time()-tt00))
-
-# test for success 
-if moor_fn.is_file():
-    result_dict['result'] = 'success' # success or fail
-else:
-    result_dict['result'] = 'fail'
-
-# *******************************************************
-
-result_dict['end_dt'] = datetime.now()
