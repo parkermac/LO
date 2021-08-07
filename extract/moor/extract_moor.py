@@ -6,6 +6,7 @@ run extract_moor -gtx cas6_v3_lo8b -test True
 
 The same job would be run with flags as:
 python extract_moor.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt hourly -sn TEST_0 -lon ' -125' -lat 47 -get_all True > em.log &
+NOTE: the quotes and space are required to feed it a negative longitude.
 
 The performance on this is excellent, taking about 24 minutes for a year of hourly records
 on perigee with cas6_v3_lo8b and all flags True (IF we use Nproc = 100).

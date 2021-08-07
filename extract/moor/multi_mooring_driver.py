@@ -102,6 +102,7 @@ njobs = len(sta_dict.keys())
 for sn in sta_dict.keys():
     tt0 = time()
     print('Working on %s (%d of %d)' % (sn, ii, njobs), end='')
+    sys.stdout.flush()
     x = ' ' + str(sta_dict[sn][0])
     y = ' ' + str(sta_dict[sn][1])
     cmd_list = ['python','extract_moor.py',
@@ -125,5 +126,6 @@ for sn in sta_dict.keys():
         with open(serr_fn, 'w') as ffout:
             ffout.write(stderr.decode())
     print(': completed in %d sec' % (time()-tt0))
+    sys.stdout.flush()
     ii += 1
 print('DONE')
