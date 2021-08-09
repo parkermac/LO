@@ -5,7 +5,6 @@ and inspection.
 Parker MacCready
 """
 
-import netCDF4 as nc
 import numpy as np
 
 def interp2(x, y, X, Y, U):
@@ -250,35 +249,6 @@ def hanning_shape(n=40):
     filt = (1 + ff)/2
     filt = filt / filt.sum()
     return filt
-
-def ncd(fn_ds, pat=''):
-    """
-    Prints info on varibles in a NetCDF file or NetCDF dataset.
-    Accepts a string 'pat' that
-    can be used to filter the output.
-
-    Example: zfun.ncd(fn_ds, pat='time')
-    """
-    # determine input type
-    if isinstance(fn_ds, nc.Dataset):
-        ds = fn_ds
-    elif isinstance(fn_ds, str):
-        try:
-            ds = nc.Dataset(fn_ds)
-        except:
-            print('Input was not a NetCDF file')
-            return
-    else:
-        print('Bad input type')
-        return # exit the function
-
-    # print information
-    for vn in ds.variables:
-        if len(pat) > 0:
-            if pat in vn:
-                print(ds.variables[vn])
-        else:
-            print(ds.variables[vn])
 
 def earth_rad(lat_deg):
     """

@@ -25,8 +25,7 @@ clm_fn = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_historical' / 'CLI
 dfc = pd.read_pickle(clm_fn)
 
 # add the climatology, for practice
-x = x.assign(transport_clim = 0*x.transport)
-
+x['transport_clim'] = 0*x.transport
 
 # add the climatology to the xarray dataset
 NT = len(x.time) # needed because the climatology has 366 days

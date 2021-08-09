@@ -190,29 +190,29 @@ proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi)
 proc.communicate()
 
 # add z_coordinates to the file using xarray
-xs = xr.load_dataset(moor_fn)
-xs = xs.squeeze() # remove singleton dimensions
-zeta = xs.zeta.values
+ds = xr.load_dataset(moor_fn)
+ds = ds.squeeze() # remove singleton dimensions
+zeta = ds.zeta.values
 NT = len(zeta)
-hh = xs.h.values * np.ones(NT)
+hh = ds.h.values * np.ones(NT)
 z_rho, z_w = zrfun.get_z(hh, zeta, S)
 # the returned z arrays have vertical position first, so we 
 # transporse to put time first for the mooring, to be consistent with
 # all other variables
-xs['z_rho'] = (('ocean_time', 's_rho'), np.transpose(z_rho.data))
-xs['z_w'] = (('ocean_time', 's_w'), np.transpose(z_w.data))
-xs.z_rho.attrs['units'] = 'm'
-xs.z_w.attrs['units'] = 'm'
-xs.z_rho.attrs['long name'] = 'vertical position on s_rho grid, positive up'
-xs.z_w.attrs['long name'] = 'vertical position on s_w grid, positive up'
+ds['z_rho'] = (('ocean_time', 's_rho'), np.transpose(z_rho.data))
+ds['z_w'] = (('ocean_time', 's_w'), np.transpose(z_w.data))
+ds.z_rho.attrs['units'] = 'm'
+ds.z_w.attrs['units'] = 'm'
+ds.z_rho.attrs['long name'] = 'vertical position on s_rho grid, positive up'
+ds.z_w.attrs['long name'] = 'vertical position on s_w grid, positive up'
 # add units to salt
-xs.salt.attrs['units'] = 'g kg-1'
+ds.salt.attrs['units'] = 'g kg-1'
 # update the time long name
-xs.ocean_time.attrs['long_name'] = 'Time [UTC]'
+ds.ocean_time.attrs['long_name'] = 'Time [UTC]'
 # update format attribute
-xs.attrs['format'] = 'netCDF-4'
+ds.attrs['format'] = 'netCDF-4'
 # and save to NetCDF (default is netCDF-4, and to overwrite any existing file)
-xs.to_netcdf(moor_fn)
+ds.to_netcdf(moor_fn)
     
 # clean up
 Lfun.make_dir(temp_dir, clean=True)

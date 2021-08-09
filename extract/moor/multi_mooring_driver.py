@@ -8,7 +8,7 @@ python multi_mooring_driver.py -gtx cas6_v3_lo8b -test True > mmd.log &
 
 The same job would be run with flags as:
 python multi_mooring_driver.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt hourly -job mickett_2 -get_all True > mmd.log &
-
+NOTE: naming the log as "*.log" means that is it automatically ignored by git (as specifed in LO/.gitignore)
 """
 
 # imports

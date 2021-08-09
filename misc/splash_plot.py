@@ -22,19 +22,19 @@ Ldir = Lfun.Lstart()
 # model output
 fn = (Ldir['parent'] / 'LiveOcean_roms' / 'output' /
     'cas6_v3_lo8b' / 'f2019.07.04' / 'ocean_his_0001.nc')
-xs = xr.open_dataset(fn)
-x = xs.lon_psi.values
-y = xs.lat_psi.values
-th = xs['temp'][0,-1,1:-1,1:-1].values
+ds = xr.open_dataset(fn)
+x = ds.lon_psi.values
+y = ds.lat_psi.values
+th = ds['temp'][0,-1,1:-1,1:-1].values
 
 # topography
 tfn = (Ldir['parent'] / 'ptools_data' / 'topo' /
     'srtm15' / 'topo15.nc')
-txs = xr.open_dataset(tfn)
+tds = xr.open_dataset(tfn)
 step = 3
-tx = txs['lon'][::step].values
-ty = txs['lat'][::step].values
-tz = txs['z'][::step,::step].values
+tx = tds['lon'][::step].values
+ty = tds['lat'][::step].values
+tz = tds['z'][::step,::step].values
 tz[tz<0] = np.nan
 
 # PLOTTING

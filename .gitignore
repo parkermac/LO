@@ -1,5 +1,5 @@
 # PM Additions
-.DS_Store
+*.DS_Store
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -117,3 +117,4 @@ dmypy.json
 .pyre/
 forcing/.DS_Store
 extract/moor/log
+.DS_Store

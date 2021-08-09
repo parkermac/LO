@@ -18,14 +18,14 @@ def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
     G, S, T = zfun.get_basic_info(fn)
     T = zfun.get_basic_info(fn, only_T=True)
     """
-    xs = xr.open_dataset(fn)
-    def make_G(xs):
+    ds = xr.open_dataset(fn)
+    def make_G(ds):
         # get grid and bathymetry info
         g_varlist = ['h', 'lon_rho', 'lat_rho', 'lon_u', 'lat_u', 'lon_v', 'lat_v',
         'lon_psi', 'lat_psi', 'mask_rho', 'mask_u', 'mask_v', 'pm', 'pn',]
         G = dict()
         for vv in g_varlist:
-            G[vv] = xs[vv].values
+            G[vv] = ds[vv].values
         G['DX'] = 1/G['pm']
         G['DY'] = 1/G['pn']
         G['M'], G['L'] = np.shape(G['lon_rho']) # M = rows, L = columns
@@ -34,16 +34,16 @@ def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
         G['mask_u'] = G['mask_u'] == 1
         G['mask_v'] = G['mask_v'] == 1
         return G
-    def make_S(xs):
+    def make_S(ds):
         # get vertical sigma-coordinate info (vectors are bottom to top)
         s_varlist = ['s_rho', 's_w', 'hc', 'Cs_r', 'Cs_w', 'Vtransform']
         S = dict()
         for vv in s_varlist:
-            S[vv] = xs[vv].values
+            S[vv] = ds[vv].values
         S['N'] = len(S['s_rho']) # number of vertical levels
         return S
-    def make_T(xs):
-        ot = xs.ocean_time.values # an array with dtype='datetime64[ns]'
+    def make_T(ds):
+        ot = ds.ocean_time.values # an array with dtype='datetime64[ns]'
         dti = pd.to_datetime(ot) # a pandas DatetimeIndex with dtype='datetime64[ns]'
         dt = dti.to_pydatetime() # an array of datetimes
         T = dict()
@@ -53,13 +53,13 @@ def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
         return T
     # return results
     if only_G:
-        return make_G(xs)
+        return make_G(ds)
     elif only_S:
-        return make_S(xs)
+        return make_S(ds)
     elif only_T:
-        return make_T(xs)
+        return make_T(ds)
     else:
-        return make_G(xs), make_S(xs), make_T(xs)
+        return make_G(ds), make_S(ds), make_T(ds)
 
 def get_z(h, zeta, S, only_rho=False, only_w=False):
     """

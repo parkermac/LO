@@ -27,8 +27,8 @@ moor_name = Lfun.choose_item(in_dir, tag='.nc', exclude_tag='', itext='** Choose
 moor_fn = in_dir / moor_name
 
 # load everything using xarray
-xs = xr.load_dataset(moor_fn)
-ot = xs.ocean_time.values
+ds = xr.load_dataset(moor_fn)
+ot = ds.ocean_time.values
 ot_dt = pd.to_datetime(ot)
 t = (ot_dt - ot_dt[0]).total_seconds().to_numpy()
 T = t/86400 # time in days from start
@@ -39,8 +39,8 @@ print('start ' + str(ot_dt[0]))
 print('end   ' + str(ot_dt[-1]))
 print('info'.center(60,'-'))
 VN_list = []
-for vn in xs.data_vars:
-    print('%s %s' % (vn, xs[vn].shape))
+for vn in ds.data_vars:
+    print('%s %s' % (vn, ds[vn].shape))
     VN_list.append(vn)
     
 # populate lists of variables to plot
@@ -58,10 +58,10 @@ if 'NO3' in VN_list:
 # plot time series using a pandas DataFrame
 df = pd.DataFrame(index=ot)
 for vn in vn2_list:
-    df[vn] = xs[vn].values
+    df[vn] = ds[vn].values
 for vn in vn3_list:
-    df[vn] = xs[vn][:, -1]
-    #df[vn] = zfun.lowpass(xs[vn][:, -1].values, f='godin')
+    df[vn] = ds[vn][:, -1]
+    #df[vn] = zfun.lowpass(ds[vn][:, -1].values, f='godin')
 
 plt.close('all')
 pfun.start_plot()

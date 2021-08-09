@@ -20,26 +20,46 @@ fn = (Ldir['parent'] / 'LiveOcean_roms' / 'output' /
     'cas6_v3_lo8b' / 'f2019.07.04' / 'ocean_his_0001.nc')
 G,S,T = zrfun.get_basic_info(fn)
 
-xs = xr.open_dataset(fn)
+ds = xr.open_dataset(fn)
 """
-An xarray Dataset with attibutes like:
-- attrs
-- data_vars (like salt)
+An xarray Dataset with properties like:
 - dims (like xi_rho)
 - coords (lke lon_rho)
-- values (typically an ndarray)
+- attrs
+- data_vars (dict-like of all the variables, e.g. salt)
 
 xr.open_dataset() = lazy loading
 xr.load_dataset() = load everything
+
+For a typical LiveOcean history file from cas6_v3_lo8b the original file is
+2 GB, and loading it using load_dataset() appears to use about 700 MB of memory,
+whereas open_dataset() only appears to use 1 MB!
 """
 
-s = xs.salt
-# an xarray DataArray of shape (1, 30, 1302, 663)
+s = ds.salt
+"""
+An xarray DataArray of shape (1, 30, 1302, 663)
+with properties like:
+- values (typically an ndarray)
+- dims (like xi_rho)
+- coords (lke lon_rho)
+- attrs
+
+NOTE: the coords are shared across all variables in the Dataset
+"""
 
 # NOTE: hereafter we refer to a DataArray as simply an array
 
-# make a DataArray from scratch (could also just pass a pandas Series for a 1D array)
-a = xr.DataArray(np.arange(12).reshape((3,4)), dims=('x','y'), coords={'x':[1,2,3], 'y':list('abcd')})
+# make a DataArray from scratch:
+a = xr.DataArray(np.arange(12).reshape((3,4)), dims=['x','y'], coords={'x':[1,2,3], 'y':list('abcd')})
+# There are many ways to make a DataArray.  In the version above we passed it data (required),
+# coordinates as a dict, and dims.  Passing dims is required when specifying the coordinates
+# as a dict.
+# The version below is a different way of making the same array using a list of tuples for the
+# coordinates
+a_alt = xr.DataArray(np.arange(12).reshape((3,4)), [('x',[1,2,3]), ('y',list('abcd'))])
+# One could also just pass a pandas Series for a 1D array.
+
 # ways to work with it (these generally return another DataArray)
 a = a * 2 # math
 am = a.mean(dim='y')
@@ -66,3 +86,8 @@ B = xr.DataArray([1,2,3], dims=('q'), coords={'q':list('LMN')})
 # then these operations make 2D arrays from 1D:
 C = A + B # the order of the dimensions appears to be set by the order of A and B
 CC = B + A
+
+# xarray Datasets are dict-like collections of DataArrays
+# * dot indexing:  ds.salt
+# * dict indexing: ds['salt'] - need to do this way for assignment, i.e. adding the variable,
+# like when we added the z variables in extract_moor.py

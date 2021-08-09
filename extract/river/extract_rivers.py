@@ -2,6 +2,9 @@
 
 Extract as-run river time series.
 
+To test on mac:
+run extract_rivers -g cas6 -t v3 -x junk -0 2019.07.04 -1 2019.07.04
+
 To run on boiler:
 run extract_rivers -g cas6 -t v3 -x junk -0 2018.01.01 -1 2018.01.10
 run extract_rivers -g cas6 -t v3 -x junk -0 2018.01.01 -1 2018.12.31
@@ -26,7 +29,6 @@ Ldir = exfun.intro() # this handles the argument passing
 from time import time
 import Lfun
 import numpy as np
-import netCDF4 as nc
 import pandas as pd
 import zrfun
 import xarray as xr
@@ -68,14 +70,12 @@ while mdt <= dt1:
 # to be arrays of characters)
 mds = mds_list[0]
 fn = Ldir['parent'] / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
-ds = nc.Dataset(fn)
-rn = ds['river_name'][:]
+ds = xr.open_dataset(fn)
+rn = ds['river_name'].values
 NR = rn.shape[1]
 riv_name_list = []
 for ii in range(NR):
     a = rn[:,ii]
-    if isinstance(a, np.ma.MaskedArray):
-        a = a.data
     r = []
     for l in a:
         r.append(l.decode())
@@ -92,32 +92,27 @@ for vn in vn_list:
 tt = 0
 for mds in mds_list:
     fn = Ldir['parent'] / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
-    ds = nc.Dataset(fn)
+    ds = xr.open_dataset(fn)
     # The river transport is given at noon of a number of days surrounding the forcing date.
     # Here we find the index of the time for the day "mds".
-    RT = ds['river_time'][:]
-    ii = 0
-    for rt in RT:
-        rdt = Lfun.modtime_to_datetime(rt)
-        rds = datetime.strftime(rdt, Lfun.ds_fmt)
-        if rds == mds:
-            for vn in vn_list:
-                if vn == 'transport':
-                    v_dict[vn][tt,:] = ds['river_' + vn][ii,:]
-                else:
-                    # the rest of the variables allow for depth variation, but we
-                    # don't use this, so, just use the bottom value
-                    v_dict[vn][tt,:] = ds['river_' + vn][ii,0,:]
-            break
-        ii += 1
+    RT = pd.to_datetime(ds['river_time'].values)
+    mdt = datetime.strptime(mds, Lfun.ds_fmt) + timedelta(hours=12)
+    mask = RT == mdt
+    for vn in vn_list:
+        if vn == 'transport':
+            v_dict[vn][tt,:] = ds['river_' + vn][mask,:]
+        else:
+            # the rest of the variables allow for depth variation, but we
+            # don't use this, so, just use the bottom value
+            v_dict[vn][tt,:] = ds['river_' + vn][mask,0,:]
     ds.close()
     tt += 1
 
-# make transport positive    
+# make transport positive
 v_dict['transport'] = np.abs(v_dict['transport'])
 
 # store output in an xarray Dataset
-mdt_list = [(datetime.strptime(item, Lfun.ds_fmt) + timedelta(days=0.5)) for item in mds_list]
+mdt_list = [(datetime.strptime(item, Lfun.ds_fmt) + timedelta(hours=12)) for item in mds_list]
 times = pd.Index(mdt_list)
 
 x = xr.Dataset(coords={'time': times,'riv': riv_name_list})

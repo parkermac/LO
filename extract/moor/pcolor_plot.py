@@ -27,8 +27,8 @@ moor_name = Lfun.choose_item(in_dir, tag='.nc', exclude_tag='', itext='** Choose
 moor_fn = in_dir / moor_name
 
 # load everything using xarray
-xs = xr.load_dataset(moor_fn)
-ot = xs.ocean_time.values
+ds = xr.load_dataset(moor_fn)
+ot = ds.ocean_time.values
 ot_dt = pd.to_datetime(ot)
 t = (ot_dt - ot_dt[0]).total_seconds().to_numpy()
 T = t/86400 # time in days from start
@@ -39,14 +39,19 @@ print('start ' + str(ot_dt[0]))
 print('end   ' + str(ot_dt[-1]))
 print('info'.center(60,'-'))
 VN_list = []
-for vn in xs.data_vars:
-    print('%s %s' % (vn, xs[vn].shape))
+for vn in ds.data_vars:
+    print('%s %s' % (vn, ds[vn].shape))
     VN_list.append(vn)
     
-s = xs['salt'].values
-th = xs['temp'].values
-z = xs['z_w'].values
+s = ds['salt'].values
+th = ds['temp'].values
+z = ds['z_w'].values
 NT, NZ = z.shape
+Z = z.mean(axis=0)
+
+# coordinate arrays ro plotting
+TT = T.reshape((NT,1))*np.ones((1,NZ))
+ZZ = Z.reshape((1,NZ))*np.ones((NT,1))
 
 # make variables at midddle times, for pcolormesh
 S = (s[1:,:] + s[:-1,:])/2
@@ -57,7 +62,7 @@ pfun.start_plot()
 fig = plt.figure()
 
 ax = fig.add_subplot(211)
-cs = ax.pcolormesh(T.reshape((NT,1))*np.ones((1,NZ)), z, S, cmap=cmocean.cm.haline)
+cs = ax.pcolormesh(TT, ZZ, S, cmap=cmocean.cm.haline)
 fig.colorbar(cs)
 ax.set_ylim(top=5)
 ax.set_ylabel('Z [m]')
@@ -65,7 +70,7 @@ ax.set_title(moor_name)
 ax.text(.05, .1, 'Salinity [g/kg]', c='k', weight='bold', transform=ax.transAxes)
 
 ax = fig.add_subplot(212)
-cs = ax.pcolormesh(T.reshape((NT,1))*np.ones((1,NZ)), z, TH, cmap=cmocean.cm.balance)
+cs = ax.pcolormesh(TT, ZZ, TH, cmap=cmocean.cm.balance)
 fig.colorbar(cs)
 ax.set_ylim(top=5)
 ax.set_xlabel('Time [days from start of record]')
