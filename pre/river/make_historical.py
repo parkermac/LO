@@ -23,6 +23,9 @@ ri_fn = Ldir['LOo'] / 'pre' / 'river' / gtag / 'river_info.csv'
 ri_df = pd.read_csv(ri_fn, index_col='rname')
 
 if False:
+    # 2021.08.09 This is OBSOLETE.  The pickled DataFrame has been replaced by an
+    # xarray Dataset, so the file referred to below no longer exists.
+    
     # Load the as-run rivers from forcing files to fill in gaps in ec records
     roms_fn = 'cas6_v3_2017.01.01_2020.12.31.p' # copied from LiveOcean_output/river
     roms_qt = pd.read_pickle(Ldir['LOo'] / 'pre' / 'river' / gtag / 'Data_roms' / roms_fn)

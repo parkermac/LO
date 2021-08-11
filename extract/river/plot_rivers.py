@@ -17,7 +17,8 @@ import matplotlib.pyplot as plt
 Ldir = Lfun.Lstart(gridname='cas6', tag='v3')
 
 # load extraction (an xarray Dataset)
-fn = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_roms' / 'extraction_2018.01.01_2018.12.31.nc'
+#fn = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_roms' / 'extraction_2018.01.01_2018.12.31.nc'
+fn = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_roms' / 'extraction_2017.01.01_2020.12.31.nc'
 x = xr.load_dataset(fn)
 
 # get climatology
@@ -26,12 +27,17 @@ dfc = pd.read_pickle(clm_fn)
 
 # add the climatology, for practice
 x['transport_clim'] = 0*x.transport
+x['yearday'] = (('time'), x.time.to_index().dayofyear.to_numpy())
+ydvec = x.yearday.values
 
-# add the climatology to the xarray dataset
-NT = len(x.time) # needed because the climatology has 366 days
+# add the climatology to the xarray dataset (maybe use groupby instead?)
 for rn in list(x.riv.values):
     if rn in dfc.columns:
-        x.transport_clim.loc[dict(riv=rn)] = dfc[rn][:NT].to_numpy()
+        this_riv = dfc[rn] # a Series
+        this_riv_clim = 0 * ydvec
+        for ii in range(1,367):
+            this_riv_clim[ydvec==ii] = this_riv[ii]
+        x.transport_clim.loc[:,rn] = this_riv_clim
     else:
         print('Missing ' + rn)
         
@@ -40,7 +46,7 @@ plt.close('all')
 pfun.start_plot()
 fig = plt.figure()
 
-# for time series we are better off using pandas
+# for plotting time series we are better off using pandas
 df = pd.DataFrame(index=x.time.values)
 ii = 1
 for rn in ['fraser', 'columbia', 'skagit', 'deschutes']:

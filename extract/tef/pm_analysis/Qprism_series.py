@@ -38,6 +38,7 @@ tef_df, in_sign, dir_str, sdir = flux_fun.get_two_layer(in_dir, sect_name, 'cas6
 # make derived variables
 tef_df['Qe'] = ((tef_df['Qin'] - tef_df['Qout'])/2)/1000
 tef_df['DS'] = tef_df['salt_in'] - tef_df['salt_out']
+tef_df['QeDS'] = tef_df['Qe'] * tef_df['DS']
 tef_df['Sbar'] = (tef_df['salt_in'] + tef_df['salt_out'])/2
 tef_df['Qprism'] = (tef_df['qabs']/2)/1000
 # use Freshwater Flux as an alternate way to calculate Qr
@@ -55,10 +56,14 @@ fs = 14
 pfun.start_plot(fs=fs, figsize=(14,12))
 fig = plt.figure()
 
-vn_list = ['Qe', 'DS', 'Qfw', 'Qsw']
-label_list = [r'$Q_{E}\ [10^{3}\ m^{3}s^{-1}]$', r'$\Delta S$',
+vn_list = ['Qe', 'DS', 'QeDS', 'Qfw', 'Qsw']
+label_list = [r'$Q_{E}\ [10^{3}\ m^{3}s^{-1}]$', r'$\Delta S$', r'$Q_{E}\Delta S\ [10^{3}\ m^{3}s^{-1}]$',
     r'$Q_{FW}\ [m^{3}s^{-1}]$', r'$Q_{SW}\ [m^{3}s^{-1}]$']
 label_dict = dict(zip(vn_list, label_list))
+
+# limit list
+vn_list = vn_list[:3]
+
 nvn = len(vn_list)
 ii = 1
 for vn in vn_list:
