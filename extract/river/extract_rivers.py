@@ -9,7 +9,7 @@ To run on boiler:
 run extract_rivers -gtx cas6_v3_lo8b -0 2018.01.01 -1 2018.01.10
 run extract_rivers -gtx cas6_v3_lo8b -0 2018.01.01 -1 2018.12.31
 
-Performance: takes ~30? sec per year on boiler
+Performance: takes 23 sec per year on boiler
 
 Modified to include all NPZD tracers, and package the results as
 an xarray Dataset.
