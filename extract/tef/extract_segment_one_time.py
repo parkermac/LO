@@ -2,14 +2,15 @@
 This code extracts all needed segment data for one history file,
 looping over all variables and all segments.
 
-Performance: []
+To test on mac:
+run extract_segment_one_time.py -pth /Users/pm8/Documents/LiveOcean_roms/output -out_dir /Users/pm8/Documents/LO_output/extract/cas6_v3_lo8b/segment_temp_2019.07.04_2019.07.04 -gtagex cas6_v3_lo8b -d 2019.07.04 -nhis 3 -get_bio True -test True
 """
 from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 import argparse
 import numpy as np
-import netCDF4 as nc
+import xarray as xr
 from time import time
 import pickle
 import pandas as pd
@@ -44,8 +45,7 @@ out_fn.unlink(missing_ok=True)
 
 # ---
 # get grid info
-G = zrfun.get_basic_info(fn, only_G=True)
-S = zrfun.get_basic_info(fn, only_S=True)
+G, S, T = zrfun.get_basic_info(fn)
 h = G['h']
 DA = G['DX'] * G['DY']
 DA3 = DA.reshape((1,G['M'],G['L']))
@@ -66,12 +66,12 @@ else:
 tt0 = time()
 print(fn)
     
-ds = nc.Dataset(fn)
+ds = xr.open_dataset(fn)
 
 vn_dict = {}
 for vn in vn_list:
-    vn_dict[vn] = ds[vn][0,:,:,:]
-zeta = ds['zeta'][0,:,:]
+    vn_dict[vn] = ds[vn][0,:,:,:].values
+zeta = ds['zeta'][0,:,:].values
 ds.close()
 
 # find the volume and other variables for each segment, at this time
@@ -96,7 +96,7 @@ for seg_name in seg_list:
 print('  ** took %0.1f sec' % (time()-tt0))
 sys.stdout.flush()
 
-pickle.dump(A, open(out_fn, 'wb'))
+A.to_pickle(out_fn)
 print('Time to extract all segment data = %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
 

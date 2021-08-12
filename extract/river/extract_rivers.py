@@ -3,16 +3,22 @@
 Extract as-run river time series.
 
 To test on mac:
-run extract_rivers -g cas6 -t v3 -x junk -0 2019.07.04 -1 2019.07.04
+run extract_rivers -gtx cas6_v3_lo8b -0 2019.07.04 -1 2019.07.04
 
 To run on boiler:
-run extract_rivers -g cas6 -t v3 -x junk -0 2018.01.01 -1 2018.01.10
-run extract_rivers -g cas6 -t v3 -x junk -0 2018.01.01 -1 2018.12.31
+run extract_rivers -gtx cas6_v3_lo8b -0 2018.01.01 -1 2018.01.10
+run extract_rivers -gtx cas6_v3_lo8b -0 2018.01.01 -1 2018.12.31
 
-Performance: takes 3 seconds per year on boiler
+Performance: takes ~30? sec per year on boiler
 
 Modified to include all NPZD tracers, and package the results as
 an xarray Dataset.
+
+***
+NOTE: this is hard-coded to LiveOcean_output / [gtag] / riv2 so it
+pretty specific to the cas6_v3_lo8b run.  Also, it expects to find all
+the NPZDOC variables.
+***
 
 """
 
@@ -119,7 +125,7 @@ x = xr.Dataset(coords={'time': times,'riv': riv_name_list})
 
 for vn in vn_list:
     v = v_dict[vn]
-    x[vn] = (['time','riv'], v)
+    x[vn] = (('time','riv'), v)
     
 x.to_netcdf(out_fn)
 

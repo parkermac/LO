@@ -3,11 +3,10 @@ A tool to extract hourly time series of volume and selected tracers and derived 
 for budgets in the segments.
 
 To test on mac:
-run extract_segments -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -test True
+run extract_segments -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -test True
 
 And on perigee:
-python extract_segments.py -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -Nproc 20
-
+python extract_segments.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -Nproc 20
 
 """
 
@@ -90,36 +89,56 @@ for ii in range(N):
         proc_list = []
 print('Total elapsed time = %0.2f sec' % (time()-tt000))
 
-# now load all the results into a single xarray object
+"""
+Now we repackage all these single-time extractions into an xarray Dataset.  This is
+a little tricky because for the Dataset we want to have it composed of DataArrays that
+are variable(time, segment), but what we are starting from is a collection of
+time(segment, variable) pandas DataFrames.
+
+We will proceed by using a two step process, first concatenating all the pandas DataFrames
+into an xarray DataArray with dimensions(time, segment, variable).  Then we will
+convert this to an xarray Dataset with a collection of variable(time,segment) DataArrays.
+
+I'm sure there is a more clever way to do this in xarray, but I am not yet proficient
+enough with that module.
+"""
+
+# get a list of all our pandas DataFrames
 A_list = list(temp_dir.glob('A*.p'))
 A_list.sort()
-
-# make a list of the datetimes (really should do this in extract_segment_one_time)
-dt_list = []
+# make a list of the datetimes and form a time index
+ot_list = []
 for fn in fn_list:
-    ds = nc.Dataset(fn)
-    ot = ds['ocean_time'][:]
-    dt_list.append(Lfun.modtime_to_datetime(ot.data[0]))
-
+    ds = xr.open_dataset(fn)
+    ot = ds['ocean_time'].values[0]
+    ot_list.append(ot)
+ot_ind = pd.Index(ot_list)
 # make a list of the output as DataArrays
 x_list = []
 for A_fn in A_list:
-    A = pickle.load(open(A_fn, 'rb'))
+    A = pd.read_pickle(A_fn)
     x_list.append(xr.DataArray(A, dims=('seg','vn')))
-# and concatenate into a single DataArray, with time as the concatenating dimension
-d = xr.concat(x_list, pd.Index(dt_list, name='time'))
+# and concatenate that list into a single DataArray, with time as the concatenating dimension
+da = xr.concat(x_list, pd.Index(ot_ind, name='time'))
+# repackage the DataArray as a Dataset
+vns = da.coords['vn'].values
+segs = da.coords['seg'].values
+times = da.coords['time'].values
+ds = xr.Dataset(coords={'time': times,'seg': segs})
+for vn in vns:
+    v = da.sel(vn=vn).values
+    ds[vn] = (('time','seg'), v)
 # save it to NetCDF
-d.to_netcdf(out_fn)
+ds.to_netcdf(out_fn)
 
 # Clean up
-Lfun.make_dir(temp_dir, clean=True)
-temp_dir.rmdir()
+if not Ldir['testing']:
+    Lfun.make_dir(temp_dir, clean=True)
+    temp_dir.rmdir()
 
 if Ldir['testing']:
     # check results
-    dd = xr.open_dataarray(out_fn)
-    ddd = dd.sel(vn='salt', seg='J1')
-    D = ddd.values # an ndarray
-    print(D)
+    dd = xr.open_dataset(out_fn)
+    print(dd.salt.sel(seg='J1').values)
 
 

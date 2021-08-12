@@ -34,6 +34,12 @@ xr.load_dataset() = load everything
 For a typical LiveOcean history file from cas6_v3_lo8b the original file is
 2 GB, and loading it using load_dataset() appears to use about 700 MB of memory,
 whereas open_dataset() only appears to use 1 MB!
+
+Here are typical lines for making a Dataset from scratch and filling it:
+ds = xr.Dataset(coords={'time': times,'seg': segs})
+for vn in vn_list:
+    v = some appropriate ndarray
+    ds[vn] = (('time','seg'), v)
 """
 
 s = ds.salt
