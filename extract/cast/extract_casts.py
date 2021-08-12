@@ -2,35 +2,29 @@
 This is code for doing cast extractions.
 
 Test on mac in ipython:
+run extract_casts.py -gtx cas6_v3_lo8b -ro 2 -test True
+run extract_casts.py -gtx cas6_v3_lo8b -ro 2 -test True -cruises newport_line
 
-run extract_casts.py -g cas6 -t v3 -x lo8b -ro 2 -test True
-
-run extract_casts.py -g cas6 -t v3 -x lo8b -ro 2 -test True -cruises newport_line
-
+Run for real on perigee (after transferring the required sta_df.p)
+python extract_casts.py -gtx cas6_v3_lo8b -ro 2 -cruises newport_line > np.log &
 """
 
 from pathlib import Path
 import sys
-from datetime import datetime, timedelta
-
 pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import extract_argfun as exfun
-
 Ldir = exfun.intro() # this handles the argument passing
-result_dict = dict()
-result_dict['start_dt'] = datetime.now()
-
-# ****************** CASE-SPECIFIC CODE *****************
 
 import pandas as pd
 import zfun
 import zrfun
 import subprocess
-import netCDF4 as nc
+import xarray as xr
 import Lfun
 import numpy as np
+from datetime import datetime
 
 def get_cast(out_fn, fn, lon, lat):
     
@@ -54,7 +48,7 @@ def get_cast(out_fn, fn, lon, lat):
     if (lat < Lat[0]) or (lat > Lat[-1]):
         print('ERROR: lat out of bounds ' + out_fn.name)
         return
-        
+
     ix = zfun.find_nearest_ind(Lon, lon)
     iy = zfun.find_nearest_ind(Lat, lat)
     
@@ -80,34 +74,28 @@ def get_cast(out_fn, fn, lon, lat):
         if len(stderr) > 0:
             print('\n' + ' stderr '.center(60,'-'))
             print(stderr.decode())
-    
-        # Add z-coordinates to the file
-        foo = nc.Dataset(out_fn, 'a')
-        z_rho, z_w = zrfun.get_z(foo['h'][:], np.array([0.]), S)
-        vv = foo.createVariable('z_rho', float, ('s_rho',))
-        vv.long_name = 'vertical position on s_rho grid, positive up, zero at surface'
-        vv.units = 'm'
-        vv[:] = z_rho
-        vv = foo.createVariable('z_w', float, ('s_w',))
-        vv.long_name = 'vertical position on s_w grid, positive up, zero at surface'
-        vv.units = 'm'
-        vv[:] = z_w
-        # Note that z_rho and z_w do not have singleton dimensions
-    
-        # Also add units to salt
-        foo['salt'].units = 'g kg-1'
-        foo.close()
-    
+            
+        # Add z-coordinates to the file using xarray
+        foo = xr.load_dataset(out_fn)
+        foo = foo.squeeze()
+        z_rho, z_w = zrfun.get_z(foo['h'].values, np.array([0.]), S)
+        foo['z_rho'] = (('s_rho'), z_rho)
+        foo['z_w'] = (('s_w'), z_w)
+        foo.s_rho.attrs['long_name'] = 'vertical position on s_rho grid, positive up, zero at surface'
+        foo.s_rho.attrs['units'] = 'm'
+        foo.s_w.attrs['long_name'] = 'vertical position on s_w grid, positive up, zero at surface'
+        foo.s_w.attrs['units'] = 'm'
+        foo.salt.attrs['units'] = 'g kg-1'
+        foo.to_netcdf(out_fn)
         # and check on the results
         if Ldir['testing']:
-            foo = nc.Dataset(out_fn)
-            for vn in foo.variables:
+            foo = xr.open_dataset(out_fn)
+            for vn in foo.data_vars:
                 print('%14s: %s' % (vn, str(foo[vn].shape)))
-            foo.close()
     
     # plot for reality check
     if (Ldir['lo_env'] == 'pm_mac') and (Ldir['cruises'] == 'test_cruises'):
-        a = nc. Dataset(out_fn)
+        a = xr.open_dataset(out_fn)
         import matplotlib.pyplot as plt
         plt.close('all')
         fig = plt.figure(figsize=(14,8))
@@ -117,7 +105,7 @@ def get_cast(out_fn, fn, lon, lat):
         ii = 1
         for vn in v_list:
             ax = fig.add_subplot(1,NV,ii)
-            ax.plot(a[vn][:].squeeze(), a['z_rho'][:], '-o')
+            ax.plot(a[vn].values, a['z_rho'].values, '-o')
             if ii == 1:
                 ax.set_ylabel('Z [m]')
             ax.set_title('%s [%s]' % (vn, a[vn].units))
@@ -135,6 +123,7 @@ def get_his_fn_from_dt(Ldir, dt):
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'cast' / Ldir['cruises']
 Lfun.make_dir(out_dir, clean=True)
 
+# Here is where we do the function call to actually make the cast extractions(s)
 if Ldir['cruises'] == 'test_cruises':
     cruise = 'MyCruise'
     sn = 0
@@ -201,15 +190,3 @@ elif Ldir['cruises'] == 'newport_line':
             fn = get_his_fn_from_dt(Ldir, dt)
             get_cast(out_fn, fn, lon, lat)
 
-                
-# -------------------------------------------------------
-
-# test for success 
-if True:
-    result_dict['result'] = 'success' # success or fail
-else:
-    result_dict['result'] = 'fail'
-
-# *******************************************************
-
-result_dict['end_dt'] = datetime.now()

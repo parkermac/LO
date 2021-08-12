@@ -6,7 +6,7 @@ To test on mac:
 run extract_segments -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -test True
 
 And on perigee:
-python extract_segments.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -Nproc 20
+python extract_segments.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -Nproc 20 > test2019.log &
 
 """
 
