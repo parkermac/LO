@@ -213,6 +213,7 @@ ds.ocean_time.attrs['long_name'] = 'Time [UTC]'
 ds.attrs['format'] = 'netCDF-4'
 # and save to NetCDF (default is netCDF-4, and to overwrite any existing file)
 ds.to_netcdf(moor_fn)
+ds.close()
     
 # clean up
 Lfun.make_dir(temp_dir, clean=True)

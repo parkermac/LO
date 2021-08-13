@@ -130,6 +130,7 @@ for vn in vns:
     ds[vn] = (('time','seg'), v)
 # save it to NetCDF
 ds.to_netcdf(out_fn)
+ds.close()
 
 # Clean up
 if not Ldir['testing']:
@@ -140,5 +141,6 @@ if Ldir['testing']:
     # check results
     dd = xr.open_dataset(out_fn)
     print(dd.salt.sel(seg='J1').values)
+    dd.close()
 
 

@@ -92,6 +92,7 @@ def get_cast(out_fn, fn, lon, lat):
             foo = xr.open_dataset(out_fn)
             for vn in foo.data_vars:
                 print('%14s: %s' % (vn, str(foo[vn].shape)))
+        foo.close()
     
     # plot for reality check
     if (Ldir['lo_env'] == 'pm_mac') and (Ldir['cruises'] == 'test_cruises'):

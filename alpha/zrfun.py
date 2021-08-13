@@ -60,6 +60,7 @@ def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
         return make_T(ds)
     else:
         return make_G(ds), make_S(ds), make_T(ds)
+    ds.close()
 
 def get_z(h, zeta, S, only_rho=False, only_w=False):
     """

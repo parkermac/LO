@@ -136,15 +136,7 @@ Output: LO_output/extract/tef/volumes_[gridname]/ containing:
 
 Input: ROMS history files
 
-Output: LO_output/extract/[gtagex]/tef/segments_[*].nc, an xarray DataArray with dimensions: seg, vn, and time. Load using xr.open_dataarray(path to file).
-
----
-
-`lowpass_segments.py` creates time series of daily salinity, volume, and net salt in segments.
-
-Input: results of `extract_segments.py`
-
-Output: LO_output/extract/[gtagex]/tef/segment_[*]/lowpass_[tracer].p
+Output: LO_output/extract/[gtagex]/tef/segments_[*].nc, an xarray Dataset whose variables have dimensions (time, segment).  Time is hourly.
 
 ---
 #### BUDGET code
@@ -153,4 +145,4 @@ Output: LO_output/extract/[gtagex]/tef/segment_[*]/lowpass_[tracer].p
 
 Input: TEF and segment-averaged tracer extractions, also some river extractions.
 
-Output: []
+Output: Budget time series plots (one for each tracer) and some screen output of annual averages.

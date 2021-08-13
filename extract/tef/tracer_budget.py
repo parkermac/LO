@@ -2,7 +2,7 @@
 Do volume and tracer budgets for user-specified volumes.
 
 Run with a command like:
-run salt_budget -test True
+run tracer_budget -test True
 
 """
 

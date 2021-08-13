@@ -128,6 +128,7 @@ for vn in vn_list:
     x[vn] = (('time','riv'), v)
     
 x.to_netcdf(out_fn)
+x.close()
 
 print('Total time for extraction = %d seconds' % (time() - tt0))
     
