@@ -1,6 +1,6 @@
 """
 This is a driver for doing multiple mooring extractions.  It reads in
-a file from Ldir['data'] and uses this to run extract_moor.py as a
+a dict from job_lists.py and uses this to run extract_moor.py as a
 series of subprocesses
 
 Run from the command line like:
@@ -23,6 +23,9 @@ from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import os
 from time import time
+import job_lists
+from importlib import reload
+reload(job_lists)
 
 pid = os.getpid()
 print(' multi_mooring_driver '.center(60,'='))
@@ -88,7 +91,6 @@ if Ldir['get_all']:
 job_dir = Ldir['data'] / 'moor'
 if str(job_dir) not in sys.path:
     sys.path.append(str(job_dir))
-import job_lists
 
 # Get job dict:
 sta_dict = job_lists.get_sta_dict(Ldir['job'])

@@ -63,7 +63,6 @@ def get_cast(out_fn, fn, lon, lat):
         cmd_list = ['ncks', '-d', 'xi_rho,'+str(ix), '-d', 'eta_rho,'+str(iy),
             '-v', 'AKs,salt,temp,NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,h',
             '-O', str(fn), str(out_fn)]
-        # Note: 3-D variables will retain singleton dimensions
         # Note: We get AKs so that the s_w dimension is retained
         proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         # and check on the results

@@ -43,17 +43,25 @@ in_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef' / 'bulk_2018.01.01_201
 
 # PLOTTING
 plt.close('all')
-pfun.start_plot(figsize=(16,8))
+pfun.start_plot(figsize=(24,8))
 
 fig = plt.figure()
-ax1 = fig.add_subplot(121)
+
+ax1 = fig.add_subplot(131)
 ax1.grid(True)
 ax1.set_xlabel(r'$Q_{prism}\ [10^{3}\ m^{3}s^{-1}]$')
 ax1.set_ylabel(r'$\Delta S$')
-ax2 = fig.add_subplot(122)
+
+ax2 = fig.add_subplot(132)
 ax2.grid(True)
 ax2.set_xlabel(r'$Q_{prism}\ [10^{3}\ m^{3}s^{-1}]$')
 ax2.set_ylabel(r'$Q_{E}\ [10^{3}\ m^{3}s^{-1}]$')
+
+ax3 = fig.add_subplot(133)
+ax3.grid(True)
+ax3.set_xlabel(r'$Q_{prism}\ [10^{3}\ m^{3}s^{-1}]$')
+ax3.set_ylabel(r'$Q_{E} \Delta S\ [10^{3}\ m^{3}s^{-1}]$')
+
 for sect_name in sect_list:
     # get two-layer time series
     tef_df, in_sign, dir_str, sdir = flux_fun.get_two_layer(in_dir, sect_name, 'cas6')
@@ -73,10 +81,10 @@ for sect_name in sect_list:
     # and plot this section
     ax1.plot(tef_df['Qprism'].to_numpy(),tef_df['DS'].to_numpy(),'-', label=sect_name, alpha=.8)
     ax2.plot(tef_df['Qprism'].to_numpy(),tef_df['Qe'].to_numpy(),'-', label=sect_name, alpha=.8)
+    ax3.plot(tef_df['Qprism'].to_numpy(),(tef_df['Qe']*tef_df['DS']).to_numpy(),'-', label=sect_name, alpha=.8)
 
     
 ax1.legend()
-ax2.legend()
 fig.tight_layout()
 plt.show()
 pfun.end_plot()

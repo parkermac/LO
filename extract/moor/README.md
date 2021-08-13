@@ -10,7 +10,7 @@
 
 `extract_moor.py` does the extractions. It uses `ncks` to get an extraction as a NetCDF file for each hour (or day), keeping them in a temporary folder and then concatenates them using `ncrcat`.  It is fast because it runs many ncks subprocesses at once (use the optional -Nproc flag to control this).  My mac and perigee can handle 100 fine although it may slow other operations.  Boiler seemed to choke on 100 but ran fine with 10.
 
-`multi_mooring_driver.py` is a driver to run extract_moor.py for multiple moorings. It looks in Ldir['data']/moor at `job_lists.py` for a dict of station names and lon,lat tuples.  The idea of putting this in Ldir['data'] is that, while it is not in the LO repo, it is under the complete control of any user, meaning that the driver can be used by anyone directly, without the need for a user instance of anything. The downside is that you have to scp your own job_lists.py.
+`multi_mooring_driver.py` is a driver to run extract_moor.py for multiple moorings. It looks in `job_lists.py` for a dict of station names and lon,lat tuples. In the future I should make it also look for a version of this in LO_user.
 
 See the codes for details on the required command line arguments. Basically you need to tell it which run to use, and the time limits and frequency. For `extract_moor.py` you also pass a station name, longitude, and latitude, whereas for `multi_mooring_driver.py` you instead pass a job name.
 
