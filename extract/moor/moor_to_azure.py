@@ -19,7 +19,7 @@ moor_name = Lfun.choose_item(in_dir, tag='.nc', exclude_tag='', itext='** Choose
 moor_fn = in_dir / moor_name
 
 # this will give screen output of the URL for sharing
-az_dict = Lfun.copy_to_azure(moor_fn, moor_name, 'pm_share', Ldir)
+az_dict = Lfun.copy_to_azure(moor_fn, moor_name, 'pm-share', Ldir)
 if az_dict['result'] =='success':
     print('USE THIS URL TO ACCESS THE FILE')
     print(az_dict['az_url'])
