@@ -5,6 +5,8 @@ as a boundary contition.
 Testing:
 run extract_box -gtx cas6_v3_lo8b -test True
 
+same but with all flags:
+run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -lt hourly -job yang_sequim -test True
 """
 
 # imports
@@ -82,8 +84,8 @@ Lfun.make_dir(temp_dir, clean=True)
 
 # get list of files to work on
 fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
-# if Ldir['testing']:
-#     fn_list = fn_list[:5]
+if Ldir['testing']:
+    fn_list = fn_list[:5]
 
 def get_box(job):
     if job == 'yang_sequim':
@@ -132,8 +134,8 @@ for ii in range(N):
     cmd_list1 = ['ncks',
         '-v', vn_list,
         '-d', 'xi_rho,'+str(ilon0)+','+str(ilon1), '-d', 'eta_rho,'+str(ilat0)+','+str(ilat1),
-        '-d', 'xi_u,'+str(ilon0)+','+str(ilon1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
-        '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0)+','+str(ilat1)]
+        '-d', 'xi_u,'+str(ilon0-1)+','+str(ilon1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
+        '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0-1)+','+str(ilat1)]
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
@@ -193,3 +195,58 @@ ds = xr.open_dataset(box_fn)
 for vn in ds.data_vars:
     print('%s (%s) max/min = %0.2f/%0.2f' % (vn, str(ds[vn].shape), ds[vn].max(), ds[vn].min()))
 ds.close()
+
+if Ldir['testing']:
+    # make a plot to look at things
+    import matplotlib.pyplot as plt
+    import plotting_functions as pfun
+    ds = xr.open_dataset(box_fn)
+    s0 = ds.salt[0,-1,:,:].values
+    u0 = ds.u[0,-1,:,:].values
+    v0 = ds.v[0,-1,:,:].values
+    rmask = ~np.isnan(s0) # True on water
+    umask = ~np.isnan(u0)
+    vmask = ~np.isnan(v0)
+    
+    plt.close('all')
+    pfun.start_plot(figsize=(22,9))
+    fig = plt.figure()
+    
+    ax = fig.add_subplot(121)
+    alpha=.2
+    ms = 3
+    ax.plot(ds.lon_rho.values, ds.lat_rho.values,'ok',alpha=alpha, ms=ms)
+    ax.plot(ds.lon_u.values, ds.lat_u.values,'>g',alpha=alpha, ms=ms)
+    ax.plot(ds.lon_v.values, ds.lat_v.values,'^r',alpha=alpha, ms=ms)
+    ax.plot(ds.lon_rho.values[rmask], ds.lat_rho.values[rmask],'ok', ms=ms)
+    ax.plot(ds.lon_u.values[umask], ds.lat_u.values[umask],'>g', ms=ms)
+    ax.plot(ds.lon_v.values[vmask], ds.lat_v.values[vmask],'^r', ms=ms)
+    pfun.add_coast(ax, color='b', linewidth=2)
+    pfun.dar(ax)
+    pad = .02
+    ax.axis([lon0-pad, lon1+pad, lat0-pad, lat1+pad])
+    
+    # make psi_grid coordinates
+    lon_psi, lat_psi = np.meshgrid(ds.lon_u.values[0,:], ds.lat_v.values[:,0])
+    # make interpolated u and v
+    uu = u0.copy(); vv = v0.copy()
+    uu[np.isnan(uu)] = 0
+    vv[np.isnan(vv)] = 0
+    UU = (uu[:,1:]+uu[:,:-1])/2
+    VV = (vv[:1,:] + vv[:-1,:])/2
+    UU[np.isnan(s0)] = np.nan
+    VV[np.isnan(s0)] = np.nan
+    
+    ax = fig.add_subplot(122)
+    alpha=.2
+    ax.pcolormesh(lon_psi, lat_psi, s0, vmin=30, vmax=32, cmap='Spectral_r')
+    ax.quiver(ds.lon_rho.values, ds.lat_rho.values, UU, VV)
+    pfun.add_coast(ax, color='b', linewidth=2)
+    pfun.dar(ax)
+    pad = .02
+    ax.axis([lon0-pad, lon1+pad, lat0-pad, lat1+pad])
+    
+    plt.show()
+    pfun.end_plot()
+    
+    ds.close()
