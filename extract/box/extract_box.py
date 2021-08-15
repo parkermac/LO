@@ -136,8 +136,6 @@ tt0 = time()
 print('Working on ' + box_fn.name + ' (' + str(N) + ' times)')
 for ii in range(N):
     fn = fn_list[ii]
-    tt0 = time()
-    #print(str(ii)+', ', end='')
     sys.stdout.flush()
     # extract one day at a time using ncks
     count_str = ('000000' + str(ii))[-6:]
