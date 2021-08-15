@@ -3,10 +3,12 @@ Code to extract a box-like region, typically for another modeler to use
 as a boundary contition.
 
 Testing:
-run extract_box -gtx cas6_v3_lo8b -test True
+run extract_box -gtx cas6_v3_lo8b -job yang_sequim -test True
 
 same but with all flags:
 run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -lt hourly -job yang_sequim -test True
+
+Performance: this is very fast, takes just a few seconds for three days on boiler (for yang_sequim).
 """
 
 # imports
@@ -39,7 +41,9 @@ parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
 parser.add_argument('-lt', '--list_type', type=str) # list type: hourly or daily
 # select job name
-parser.add_argument('-job', type=str) # job name 
+parser.add_argument('-job', type=str) # job name
+# this flag just gets surface fields if True
+parser.add_argument('-surf', default=False, type=Lfun.boolean_string)
 # Optional: set max number of subprocesses to run at any time
 parser.add_argument('-Nproc', type=int, default=10)
 # Optional: for testing
@@ -63,9 +67,8 @@ for a in argsd.keys():
 if Ldir['testing']:
     Ldir['roms_out_num'] = 2
     Ldir['ds0'] = '2019.07.04'
-    Ldir['ds1'] = '2019.07.06'
+    Ldir['ds1'] = '2019.07.04'
     Ldir['list_type'] = 'hourly'
-    Ldir['job'] = 'yang_sequim'
 # set where to look for model output
 if Ldir['roms_out_num'] == 0:
     pass
@@ -75,7 +78,10 @@ elif Ldir['roms_out_num'] > 0:
 # output location
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box'
 Lfun.make_dir(out_dir)
-box_fn = out_dir / (Ldir['job'] + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
+if Ldir['surf']:
+    box_fn = out_dir / (Ldir['job'] + '_surf_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
+else:
+    box_fn = out_dir / (Ldir['job'] + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
 box_fn.unlink(missing_ok=True)
 
 # name the temp dir to accumulate individual extractions
@@ -87,10 +93,19 @@ fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
 if Ldir['testing']:
     fn_list = fn_list[:5]
 
+# specify variables to get
+vn_list = 'salt,temp,zeta,h,u,v'
+
 def get_box(job):
+    # could override the variable list here
     if job == 'yang_sequim':
         lon0 = -123.15120787; lon1 = -122.89090010
         lat0 = 48.07302111; lat1 = 48.19978336
+    elif job == 'PS':
+        # 3 MB per save (26 GB/year for hourly)
+        lon0 = -123.5; lon1 = -122.05
+        lat0 = 47; lat1 = 49
+        Ldir['surf'] = True # override to be sure
     return lon0, lon1, lat0, lat1
     
 G, S, T = zrfun.get_basic_info(fn_list[0])
@@ -114,11 +129,7 @@ lon0, lon1, lat0, lat1 = get_box(Ldir['job'])
 ilon0, ilat0 = check_bounds(lon0, lat0)
 ilon1, ilat1 = check_bounds(lon1, lat1)
 
-# specify variables to get
-vn_list = 'salt,temp,zeta,h,u,v'
-
 # do the extractions
-ii = 1
 N = len(fn_list)
 proc_list = []
 tt0 = time()
@@ -126,7 +137,7 @@ print('Working on ' + box_fn.name + ' (' + str(N) + ' times)')
 for ii in range(N):
     fn = fn_list[ii]
     tt0 = time()
-    print(str(ii)+', ', end='')
+    #print(str(ii)+', ', end='')
     sys.stdout.flush()
     # extract one day at a time using ncks
     count_str = ('000000' + str(ii))[-6:]
@@ -136,19 +147,23 @@ for ii in range(N):
         '-d', 'xi_rho,'+str(ilon0)+','+str(ilon1), '-d', 'eta_rho,'+str(ilat0)+','+str(ilat1),
         '-d', 'xi_u,'+str(ilon0-1)+','+str(ilon1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
         '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0-1)+','+str(ilat1)]
+    if Ldir['surf']:
+        cmd_list1 += ['-d','s_rho,'+str(S['N']-1)]
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
 
+    # screen output about progress
     if (np.mod(ii,10) == 0) and ii>0:
         print(str(ii), end=', ')
         sys.stdout.flush()
-        if (np.mod(ii,20) == 0) and (ii > 0):
-            print(str(ii))
-            sys.stdout.flush()
-    elif (ii == N-1):
+    if (np.mod(ii,50) == 0) and (ii > 0):
+        print('') # line feed
+        sys.stdout.flush()
+    if (ii == N-1):
         print(str(ii))
         sys.stdout.flush()
+        
     # Nproc controls how many ncks subprocesses we allow to stack up
     # before we require them all to finish.
     if (np.mod(ii,Ldir['Nproc']) == 0) or (ii == N-1):
@@ -165,39 +180,45 @@ pp2 = Po(['grep','box'], stdin=pp1.stdout, stdout=Pi)
 cmd_list = ['ncrcat','-p', str(temp_dir), '-O', str(box_fn)]
 proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
-# print('\n'+stdout.decode())
-# print('\n'+stderr.decode())
+if Ldir['testing']:
+    if len(stdout) > 0:
+        print('\n'+stdout.decode())
+    if len(stderr) > 0:
+        print('\n'+stderr.decode())
 print('Total time = %0.2f sec' % (time()- tt0))
 
 # add z variables
-tt0 = time()
-ds = xr.load_dataset(box_fn) # have to load in order to add new variables
-ds['z_rho'] = 0*ds.temp
-ds.z_rho.attrs['units'] = 'm'
-ds.z_rho.attrs['long name'] = 'vertical position on s_rho grid, positive up'
-NT = len(ds.ocean_time.values)
-for ii in range(NT):
-    h = ds.h.values
-    zeta = ds.zeta[ii,:,:].values
-    z_rho = zrfun.get_z(h, zeta, S, only_rho=True)
-    ds['z_rho'][ii,:,:,:] = z_rho
-ds.to_netcdf(box_fn)
-ds.close()
-print('time to add z variables = %0.2f sec' % (time()- tt0))
+if Ldir['surf'] == False:
+    tt0 = time()
+    ds = xr.load_dataset(box_fn) # have to load in order to add new variables
+    ds['z_rho'] = 0*ds.temp
+    ds.z_rho.attrs['units'] = 'm'
+    ds.z_rho.attrs['long name'] = 'vertical position on s_rho grid, positive up'
+    NT = len(ds.ocean_time.values)
+    for ii in range(NT):
+        h = ds.h.values
+        zeta = ds.zeta[ii,:,:].values
+        z_rho = zrfun.get_z(h, zeta, S, only_rho=True)
+        ds['z_rho'][ii,:,:,:] = z_rho
+    ds.to_netcdf(box_fn)
+    ds.close()
+    print('time to add z variables = %0.2f sec' % (time()- tt0))
 
 # clean up
-Lfun.make_dir(temp_dir, clean=True)
-temp_dir.rmdir()
+if True: #Ldir['testing'] == False:
+    Lfun.make_dir(temp_dir, clean=True)
+    temp_dir.rmdir()
 
 print('\nContents of extracted box file:')
 # check on the results
 ds = xr.open_dataset(box_fn)
 for vn in ds.data_vars:
-    print('%s (%s) max/min = %0.2f/%0.2f' % (vn, str(ds[vn].shape), ds[vn].max(), ds[vn].min()))
+    print('%s (%s) max/min = %0.4f/%0.4f' % (vn, str(ds[vn].shape), ds[vn].max(), ds[vn].min()))
 ds.close()
 
-if Ldir['testing']:
+if Ldir['testing'] and Ldir['lo_env'] == 'pm_mac':
     # make a plot to look at things
+    # (currently optimized for yang_sequim)
     import matplotlib.pyplot as plt
     import plotting_functions as pfun
     ds = xr.open_dataset(box_fn)
