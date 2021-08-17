@@ -15,7 +15,7 @@ import os
 from pathlib import Path
 
 # defaults that should work on all machines
-parent = Path(__file__).absolute().parent.parent.parent
+parent = Path(__file__).absolute().parent.parent.parent.parent
 LO = parent / 'LO'
 LOo = parent / 'LO_output'
 LOu = parent / 'LO_user'

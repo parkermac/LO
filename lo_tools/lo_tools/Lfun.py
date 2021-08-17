@@ -14,7 +14,7 @@ if (alp_user / 'user_get_lo_info.py').is_file():
         sys.path.append(str(alp_user))
     import user_get_lo_info as glo
 else:
-    import get_lo_info as glo
+    from lo_tools import get_lo_info as glo
     
 if False:
     from importlib import reload
