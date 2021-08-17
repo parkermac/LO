@@ -31,8 +31,10 @@ dependencies:
   - lxml
   - xlrd
   - openpyxl
+  - pytide
   - pip
   - pip:
+    - -e lo_tools # package of local modules
     - azure-storage-blob
     - PyCO2SYS
   # and some non-python tools

@@ -1,5 +1,5 @@
 """
-These are snippets of python code that I oten use in the LO system.
+These are snippets of python code that I often use in the LO system.
 They are here for easy cut-and-paste.
 """
 
