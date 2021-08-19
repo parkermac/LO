@@ -6,29 +6,21 @@ run tracer_budget -test True
 
 """
 
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-
-import Lfun
+from lo_tools import Lfun, zfun
+from lo_tools import plotting_functions as pfun
 import tef_fun
 import flux_fun
-import plotting_functions as pfun
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import pandas as pd
-from datetime import datetime, timedelta
 import argparse
 import xarray as xr
 
 # debugging imports
 import netCDF4 as nc
 from time import time
-import zfun
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--gridname', type=str, default='cas6')

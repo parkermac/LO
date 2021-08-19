@@ -6,19 +6,13 @@ Performance: 2-3 sec on perigee.
 """
 from pathlib import Path
 import sys
-from datetime import datetime, timedelta
 import argparse
 import numpy as np
 import netCDF4 as nc
 from time import time
 import pickle
 
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-import zfun, zrfun
-
+from lo_tools import Lfun, zfun, zrfun
 import tef_fun
 
 # command line arguments

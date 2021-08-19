@@ -21,28 +21,21 @@ On perigee use -Nproc 20
 
 """
 
-from pathlib import Path
-import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import extract_argfun as exfun
+from lo_tools import Lfun, zrfun
+from lo_tools import extract_argfun as exfun
 Ldir = exfun.intro() # this handles the argument passing
+import tef_fun
+if Ldir['testing']:
+    from importlib import reload
+    reload(tef_fun)
 
+import sys
 from time import time
-import Lfun
 import numpy as np
 import netCDF4 as nc
 import pickle
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
-import zrfun
-import tef_fun
-if Ldir['testing']:
-    from importlib import reload
-    reload(tef_fun)
     
 # set list of variables to extract
 if Ldir['get_bio']:

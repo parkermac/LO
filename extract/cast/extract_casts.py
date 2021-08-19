@@ -9,20 +9,13 @@ Run for real on perigee (after transferring the required sta_df.p)
 python extract_casts.py -gtx cas6_v3_lo8b -ro 2 -cruises newport_line > np.log &
 """
 
-from pathlib import Path
-import sys
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import extract_argfun as exfun
+from lo_tools import Lfun, zfun, zrfun
+from lo_tools import extract_argfun as exfun
 Ldir = exfun.intro() # this handles the argument passing
 
 import pandas as pd
-import zfun
-import zrfun
 import subprocess
 import xarray as xr
-import Lfun
 import numpy as np
 from datetime import datetime
 

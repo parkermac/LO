@@ -18,7 +18,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import subprocess
 
-pth = Path(__file__).absolute().parent.parent / 'alpha'
+pth = Path(__file__).absolute().parent.parent / 'lo_tools' / 'lo_tools'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import Lfun, zfun

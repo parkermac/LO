@@ -7,9 +7,7 @@ import numpy as np
 import pickle
 import sys
 
-# path to alpha provided by driver
-import zfun
-import zrfun
+from lo_tools import zfun, zrfun
 
 # long list of variables to extract
 vn_list = ['salt', 'temp', 'oxygen',

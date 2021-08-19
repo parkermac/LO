@@ -4,19 +4,12 @@ Code to plot the results of a cast extraction.
 run plot_casts -gtx cas6_v3_lo8b -cruises newport_line
 """
 
-from pathlib import Path
-import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import extract_argfun as exfun
+from lo_tools import Lfun
+from lo_tools import plotting_functions as pfun
+from lo_tools import extract_argfun as exfun
 Ldir = exfun.intro() # this handles the argument passing
 
 import xarray as xr
-import Lfun
-import plotting_functions as pfun
 import matplotlib.pyplot as plt
 from time import time
 

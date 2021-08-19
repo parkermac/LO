@@ -7,26 +7,19 @@ except that it plots freshwater flux instead of volume flux.
 
 from pathlib import Path
 import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
-# imports
 import matplotlib.pyplot as plt
 import pickle
 import netCDF4 as nc
 import pandas as pd
 import numpy as np
 
-import Lfun
+from lo_tools import Lfun
+from lo_tools import plotting_functions as pfun
+
 gridname = 'cas6'; tag = 'v3'; ex_name = 'lo8b'
 #gridname = 'cas6'; tag = 'v3t075'; ex_name = 'lo8'
 #gridname = 'cas6'; tag = 'v3t110'; ex_name = 'lo8'
 Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
-
-import plotting_functions as pfun
 
 pth = Path(__file__).absolute().parent.parent
 if str(pth) not in sys.path:

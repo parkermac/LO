@@ -15,7 +15,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
+pth = Path(__file__).absolute().parent.parent.parent / 'lo_tools' / 'lo_tools'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import dot_in_argfun as dfun

@@ -8,8 +8,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import pickle
 
-import zfun # path provided by calling code
-import Lfun
+from lo_tools import Lfun, zfun
 import tef_fun
 
 from warnings import filterwarnings

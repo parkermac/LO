@@ -8,7 +8,7 @@ This program is meant to be loaded as a module by Lfun which then adds more
 entries to the Ldir dict based on which model run you are working on.
 
 Users should not edit this directly but instead should copy it to
-LO_user/alpha/user_get_lo_info.py where LO_user is at the same level as LO.
+LO_user/lo_tools/lo_tools/user_get_lo_info.py where LO_user is at the same level as LO.
 Then they can edit that version, and put LO_user in their own GitHub repo.
 """
 import os

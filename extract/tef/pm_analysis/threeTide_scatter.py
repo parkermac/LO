@@ -5,22 +5,14 @@ of all sections
 """
 from pathlib import Path
 import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
-# setup
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import pandas as pd
 from time import time
 
-import Lfun
-import zfun
-import plotting_functions as pfun
+from lo_tools import Lfun, zfun
+from lo_tools import plotting_functions as pfun
 
 pth = Path(__file__).absolute().parent.parent
 if str(pth) not in sys.path:

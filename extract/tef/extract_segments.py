@@ -9,19 +9,13 @@ And on perigee:
 python extract_segments.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -get_bio True -Nproc 20 > test2019.log &
 
 """
-
-from pathlib import Path
-import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import extract_argfun as exfun
+from lo_tools import Lfun, zrfun
+from lo_tools import extract_argfun as exfun
 Ldir = exfun.intro() # this handles the argument passing
+import tef_fun
 
+import sys
 from time import time
-import Lfun
 import numpy as np
 import netCDF4 as nc
 import pickle
@@ -29,9 +23,6 @@ import pandas as pd
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import xarray as xr
-
-import zrfun
-import tef_fun
 
 ds0 = Ldir['ds0']
 ds1 = Ldir['ds1']

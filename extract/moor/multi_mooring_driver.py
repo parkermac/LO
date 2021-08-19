@@ -12,20 +12,17 @@ NOTE: naming the log as "*.log" means that is it automatically ignored by git (a
 """
 
 # imports
-from pathlib import Path
+from lo_tools import Lfun
+import job_lists
+from importlib import reload
+reload(job_lists)
+
 import sys
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
 import argparse
-import Lfun
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import os
 from time import time
-import job_lists
-from importlib import reload
-reload(job_lists)
 
 pid = os.getpid()
 print(' multi_mooring_driver '.center(60,'='))

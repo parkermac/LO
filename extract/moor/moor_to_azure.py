@@ -1,14 +1,7 @@
 """
 Code to simplify pushing a mooring extraction to azure.
 """
-from pathlib import Path
-import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
+from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 
 # choose the file

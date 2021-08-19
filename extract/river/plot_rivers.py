@@ -2,13 +2,8 @@
 Plot as-run river time series.
 
 """
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-import plotting_functions as pfun
+from lo_tools import Lfun
+from lo_tools import plotting_functions as pfun
 
 import xarray as xr
 import pandas as pd

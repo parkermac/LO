@@ -8,19 +8,14 @@ is more exact for calculation of tidal energy flux.
 
 from pathlib import Path
 import sys
-pth = Path(__file__).absolute().parent.parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
-# imports
 import pickle
 import netCDF4 as nc
 import pandas as pd
 import numpy as np
 import utide
-import zfun
 
-import Lfun
+from lo_tools import Lfun, zfun
+
 gridname = 'cas6'; tag = 'v3'; ex_name = 'lo8b'
 Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
 

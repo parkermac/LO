@@ -4,8 +4,7 @@ Shared helper functions for the forcing code, especially for argument passing.
 """
 import argparse
 import sys
-from pathlib import Path
-import Lfun, zfun # path to alpha set by calling function
+from lo_tools import Lfun
 
 def intro():
     parser = argparse.ArgumentParser()
@@ -17,7 +16,7 @@ def intro():
     parser.add_argument('-s', '--start_type', type=str) # new or continuation
     parser.add_argument('-d', '--date_string', type=str) # e.g. 2019.07.04
     # optional arguments
-    parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_string)
+    parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
     
     # get the args
     args = parser.parse_args()

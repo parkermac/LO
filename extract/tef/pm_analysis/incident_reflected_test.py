@@ -22,22 +22,16 @@ but that link appears to be defunct.
 
 from pathlib import Path
 import sys
-pth = Path(__file__).absolute().parent.parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
-# imports
 import netCDF4 as nc
 import pandas as pd
 import numpy as np
 import utide
 import matplotlib.pyplot as plt
 import zfun
-
-# NEW
 import pytide
 
-import Lfun
+from lo_tools import Lfun
+
 gridname = 'cas6'; tag = 'v3'; ex_name = 'lo8b'
 Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
 

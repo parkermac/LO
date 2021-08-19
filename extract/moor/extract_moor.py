@@ -14,14 +14,9 @@ on perigee with cas6_v3_lo8b and all flags True (IF we use Nproc = 100).
 """
 
 # imports
-from pathlib import Path
 import sys
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
+from lo_tools import Lfun, zrfun, zfun
 import argparse
-import Lfun
-import zrfun, zfun
 from time import time
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi

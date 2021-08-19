@@ -4,8 +4,7 @@ Shared helper functions for the dot_in code, especially for argument passing.
 """
 import argparse
 import sys
-from pathlib import Path
-import Lfun # path to alpha set by calling function
+from lo_tools import Lfun
 
 def intro():
     parser = argparse.ArgumentParser()

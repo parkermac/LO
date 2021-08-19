@@ -12,14 +12,9 @@ Performance: this is very fast, takes just a few seconds for three days on boile
 """
 
 # imports
-from pathlib import Path
 import sys
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
 import argparse
-import Lfun
-import zfun, zrfun
+from lo_tools import Lfun, zfun, zrfun
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import os

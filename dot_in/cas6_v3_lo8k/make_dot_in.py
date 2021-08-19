@@ -4,7 +4,7 @@ designed to work with the "BLANK" version of the .in file,
 replacing things like $whatever$ with meaningful values.
 
 To test from ipython on mac:
-run make_dot_in -g cas6 -t v3 -x lo8 -r backfill -s continuation -d 2019.07.04 -bu 0 -np 196
+run make_dot_in -g cas6 -t v3 -x lo8k -r backfill -s continuation -d 2019.07.04 -bu 0 -np 196
 
 If you call with -short_roms True it will create dot_in that only runs ROMS for 1 hour.
 
@@ -15,7 +15,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
+pth = Path(__file__).absolute().parent.parent.parent / 'lo_tools' / 'lo_tools'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import dot_in_argfun as dfun

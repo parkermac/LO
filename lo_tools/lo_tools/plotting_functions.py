@@ -7,13 +7,8 @@ from pathlib import Path
 import pandas as pd
 
 # get initial version of Ldir when this module is loaded
-pth = Path(__file__).absolute().parent # path to where this file lives
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
+from lo_tools import Lfun, zrfun, zfun
 Ldir = Lfun.Lstart()
-import zrfun
-import zfun
 
 import numpy as np
 from datetime import datetime, timedelta

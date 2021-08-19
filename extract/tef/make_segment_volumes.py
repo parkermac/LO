@@ -2,24 +2,14 @@
 Find the volume of each segment
 """
 
-from pathlib import Path
-import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
-# imports
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import pandas as pd
 import netCDF4 as nc
 
-import Lfun
-import zrfun
-import plotting_functions as pfun
+from lo_tools import Lfun, zrfun
+from lo_tools import plotting_functions as pfun
 import tef_fun
 import flux_fun
 

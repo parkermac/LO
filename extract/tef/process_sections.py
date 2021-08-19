@@ -12,28 +12,18 @@ run process_sections -gtagex cas6_v3_lo8b -0 2019.07.04 -1 2019.07.06
 
 """
 
-from pathlib import Path
 import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
-# setup
 import netCDF4 as nc
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 from time import time
+import argparse
 
-import Lfun
-import zfun
+from lo_tools import Lfun, zfun
 import tef_fun
-
 Ldir = Lfun.Lstart()
 
-import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-gtagex', type=str, default='')   # e.g. cas6_v3_lo8b
 parser.add_argument('-0', '--ds0', type=str, default='')        # e.g. 2019.07.04

@@ -9,12 +9,6 @@ Socn = 33.75 in this example.
 """
 from pathlib import Path
 import sys
-
-pth = Path(__file__).absolute().parent.parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
-
 pth = Path(__file__).absolute().parent.parent
 if str(pth) not in sys.path:
     sys.path.append(str(pth))

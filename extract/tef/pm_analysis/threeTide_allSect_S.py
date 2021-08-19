@@ -6,23 +6,15 @@ Compares three different runs with varying tidal strength.
 """
 from pathlib import Path
 import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
-# imports
 import matplotlib.pyplot as plt
 import pickle
 import netCDF4 as nc
 import pandas as pd
 import numpy as np
 
-import Lfun
+from lo_tools import Lfun
+from lo_tools import plotting_functions as pfun
 Ldir = Lfun.Lstart()
-
-import plotting_functions as pfun
 
 pth = Path(__file__).absolute().parent.parent
 if str(pth) not in sys.path:

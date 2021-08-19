@@ -22,21 +22,14 @@ the NPZDOC variables.
 
 """
 
-from pathlib import Path
-import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import extract_argfun as exfun
+from lo_tools import Lfun, zrfun
+from lo_tools import extract_argfun as exfun
 Ldir = exfun.intro() # this handles the argument passing
 
+from datetime import datetime, timedelta
 from time import time
-import Lfun
 import numpy as np
 import pandas as pd
-import zrfun
 import xarray as xr
     
 ds0 = Ldir['ds0']

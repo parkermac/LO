@@ -7,7 +7,6 @@ run extract_segment_one_time.py -pth /Users/pm8/Documents/LiveOcean_roms/output 
 """
 from pathlib import Path
 import sys
-from datetime import datetime, timedelta
 import argparse
 import numpy as np
 import xarray as xr
@@ -15,12 +14,7 @@ from time import time
 import pickle
 import pandas as pd
 
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-import zfun, zrfun
-
+from lo_tools import Lfun, zfun, zrfun
 import tef_fun
 
 # command line arguments

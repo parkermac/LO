@@ -9,23 +9,13 @@ run bulk_calc -gtagex cas6_v3_lo8b -0 2019.07.04 -1 2019.07.06
 
 """
 
-from pathlib import Path
 import sys
-from datetime import datetime, timedelta
-
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
-# setup
 import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 from time import time
 
-import Lfun
-import zfun
-
+from lo_tools import Lfun, zfun
 import tef_fun_lorenz as tfl
 from importlib import reload
 reload(tfl)

@@ -4,8 +4,7 @@ Shared helper functions for the extraction code, especially for argument passing
 """
 import argparse
 import sys
-from pathlib import Path
-import Lfun, zfun # path to alpha set by calling function
+from lo_tools import Lfun
 
 def intro():
     parser = argparse.ArgumentParser()
@@ -15,13 +14,13 @@ def intro():
     # select time period and frequency
     parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
     parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
-    parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_string)
+    parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
     parser.add_argument('-Nproc', type=int, default=10) # number of subprocesses to use
     # arguments used by extract/cast
     parser.add_argument('-cruises', type=str, default='test_cruises')
     # arguments used by extract/tef
     parser.add_argument('-sect_name', type=str, default='ai1')
-    parser.add_argument('-get_bio', type=zfun.boolean_string, default=False)
+    parser.add_argument('-get_bio', type=Lfun.boolean_string, default=False)
     
     # get the args and put into Ldir
     args = parser.parse_args()

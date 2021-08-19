@@ -1,15 +1,9 @@
 """
 Generic code to plot any mooring extraction, using pcolor.
 """
-from pathlib import Path
-import sys
-from datetime import datetime, timedelta
 
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-import plotting_functions as pfun
+from lo_tools import Lfun
+from lo_tools import plotting_functions as pfun
 
 import xarray as xr
 import matplotlib.pyplot as plt
