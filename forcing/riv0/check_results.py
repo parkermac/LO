@@ -10,16 +10,11 @@ more rivers this time.
 
 """
 
-from pathlib import Path
-import sys
 import netCDF4 as nc
 import numpy as np
 import matplotlib.pyplot as plt
 
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
+from lo_tools import Lfun
 Ldir = Lfun.Lstart(gridname='cas6',tag='v3')
 Ldir['date_string'] = '2021.04.20'
 

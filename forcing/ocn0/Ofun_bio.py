@@ -5,7 +5,7 @@ Functions to add biogeochemical fields to a clm file.
 import netCDF4 as nc
 import numpy as np
 import matplotlib.path as mpath
-import zfun
+from lo_tools import zfun
 
 verbose = False
 

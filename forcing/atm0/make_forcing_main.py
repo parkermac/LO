@@ -12,10 +12,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import forcing_argfun as ffun
+from lo_tools import forcing_argfun as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing
 result_dict = dict()
@@ -32,9 +29,7 @@ import seawater as sw
 from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
 
-import Lfun
-import zfun
-import zrfun
+from lo_tools import Lfun, zfun, zrfun
 
 import atm_fun as afun
 from importlib import reload

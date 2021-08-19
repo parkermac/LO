@@ -5,11 +5,14 @@ in forcing.
 
 Test on mac in ipython:
 
-run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2019.07.04 -test True -f ztest0
+run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2019.07.04 -f ztest0 -test True
 
 """
 
+from pathlib import Path
+import sys
 from datetime import datetime, timedelta
+
 from lo_tools import forcing_argfun as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing

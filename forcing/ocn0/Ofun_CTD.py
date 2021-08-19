@@ -12,7 +12,7 @@ from scipy.spatial import cKDTree
 from datetime import datetime, timedelta
 
 import Ofun
-import zfun # alpha is already on path
+from lo_tools import zfun
 
 def get_casts(Ldir):
         

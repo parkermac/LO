@@ -8,8 +8,8 @@ import netCDF4 as nc
 import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
-import Lfun # in alpha, assume path is provided by calling function
-import river_functions as rivf # in alpha
+from lo_tools import Lfun
+from lo_tools import river_functions as rivf
 
 def get_tc_rn(ri_df):
     """

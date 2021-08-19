@@ -15,10 +15,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import forcing_argfun as ffun
+from lo_tools import forcing_argfun as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing
 result_dict = dict()
@@ -28,7 +25,7 @@ result_dict['start_dt'] = datetime.now()
 import os
 import pandas as pd
 
-import zrfun
+from lo_tools import zrfun
 import rivfun
 from importlib import reload
 reload(rivfun)

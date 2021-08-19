@@ -5,19 +5,12 @@ it is all working in LO.
 RESULT: The new version results exactly match the old ones.
 """
 
-from pathlib import Path
-import sys
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-import plotting_functions as pfun
+from lo_tools import Lfun, zfun, zrfun
+from lo_tools import plotting_functions as pfun
 
-date_string = '2017.04.20'
+date_string = '2019.07.04'
 
 Ldir = Lfun.Lstart(gridname='cas6', tag='v3')
-import zfun
-import zrfun
 
 import netCDF4 as nc
 import matplotlib.pyplot as plt

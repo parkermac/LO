@@ -4,14 +4,9 @@ Code to plot the various WRF grids, with a selected ROMS grid.
 Assumes we are running on my mac.
 """
 
-from pathlib import Path
-import sys
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
+from lo_tools import Lfun
+from lo_tools import plotting_functions as pfun
 Ldir = Lfun.Lstart(gridname='cas6')
-import plotting_functions as pfun
 
 import netCDF4 as nc
 import matplotlib.pyplot as plt
@@ -19,7 +14,7 @@ import seawater as sw
 
 # where are files located, and other situational choices
 wrf_dir = str(Ldir['data']) + '/wrf/'
-Ldir['date_string'] = '2017.04.20'
+Ldir['date_string'] = '2019.07.04'
 
 # create list of input files
 d_str = Ldir['date_string'].replace('.','')

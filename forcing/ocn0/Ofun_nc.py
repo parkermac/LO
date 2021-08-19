@@ -5,7 +5,7 @@ Functions for writing saved fields to ROMS NetCDF.
 import os
 import netCDF4 as nc
 import numpy as np
-import Lfun
+from lo_tools import Lfun
 
 def make_clm_file(Ldir, nc_dir, fh_dir, c_dict, dt_list, S, G):
     # name output file

@@ -14,11 +14,8 @@ import subprocess
 import requests
 
 import Ofun_CTD
-
-import zfun
-import zrfun
-import Lfun
-import hycom_functions as hfun
+from lo_tools import Lfun, zfun, zrfun
+from lo_tools import hycom_functions as hfun
 
 verbose = False
 
