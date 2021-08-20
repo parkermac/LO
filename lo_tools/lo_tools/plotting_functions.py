@@ -73,9 +73,9 @@ def get_units(ds, vn):
 
 def add_bathy_contours(ax, ds, depth_levs = [], txt=False):
     # This should work with ds being a history file Dataset, or the G dict.
-    h = ds['h'][:]
-    lon = ds['lon_rho'][:]
-    lat = ds['lat_rho'][:]
+    h = ds['h'].values
+    lon = ds['lon_rho'].values
+    lat = ds['lat_rho'].values
     c1 = 'k'
     c2 = 'k'
     if len(depth_levs) == 0:
@@ -98,32 +98,33 @@ def add_bathy_contours(ax, ds, depth_levs = [], txt=False):
                         transform=ax.transAxes)
                 ii += 1
         
-def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1, alpha=1, do_mask_salish=False, aa=[], vlims_fac=3, do_mask_edges=False):
+def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1,
+    alpha=1, aa=[], vlims_fac=3, do_mask_edges=False):
     cmap = plt.get_cmap(name=cmap)
-    if 'lon_rho' in ds[vn].coordinates:
-        x = ds['lon_psi'][:]
-        y = ds['lat_psi'][:]
-        m = ds['mask_psi'][:]
+    if 'lon_rho' in ds[vn].coords:
+        x = ds['lon_psi'].values
+        y = ds['lat_psi'].values
+        m = ds['mask_psi'].values
         if vn == 'zeta':
-            v = ds[vn][0, 1:-1, 1:-1].squeeze()
+            v = ds[vn][0, 1:-1, 1:-1].values
         else:
-            v = ds[vn][0, slev, 1:-1, 1:-1].squeeze()
-    elif 'lon_v' in ds[vn].coordinates:
-        x = ds['lon_u'][:]
-        y = ds['lat_u'][:]
-        m = ds['mask_u'][:]
+            v = ds[vn][0, slev, 1:-1, 1:-1].values
+    elif 'lon_u' in ds[vn].coords:
+        x = ds['lon_u'].values
+        y = ds['lat_u'].values
+        m = ds['mask_u'].values
         if vn == 'vbar':
-            v = ds[vn][0, :, 1:-1].squeeze()
+            v = ds[vn][0, :, 1:-1].values
         else:
-            v = ds[vn][0, slev, :, 1:-1].squeeze()
-    elif 'lon_u' in ds[vn].coordinates:
-        x = ds['lon_v'][:]
-        y = ds['lat_v'][:]
-        m = ds['mask_v'][:]
+            v = ds[vn][0, slev, :, 1:-1].values
+    elif 'lon_v' in ds[vn].coords:
+        x = ds['lon_v'].values
+        y = ds['lat_v'].values
+        m = ds['mask_v'].values
         if vn == 'ubar':
-            v = ds[vn][0, 1:-1, :].squeeze()
+            v = ds[vn][0, 1:-1, :].values
         else:
-            v = ds[vn][0, slev, 1:-1, :].squeeze()
+            v = ds[vn][0, slev, 1:-1, :].values
         
     v_scaled = fac*v
     
@@ -145,10 +146,7 @@ def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1, alpha=
             vlims = auto_lims(v_scaled, vlims_fac=vlims_fac)
         vlims_dict[vn] = vlims
         # dicts have essentially global scope, so setting it here sets it everywhere
-        
-    if do_mask_salish:
-        v_scaled = mask_salish(v_scaled, ds['lon_rho'][1:-1, 1:-1], ds['lat_rho'][1:-1, 1:-1])  
-        
+                
     if do_mask_edges:
         v_scaled = mask_edges(v_scaled, ds['lon_rho'][1:-1, 1:-1], ds['lat_rho'][1:-1, 1:-1])  
     
@@ -163,24 +161,24 @@ def add_velocity_vectors(ax, ds, fn, v_scl=3, v_leglen=0.5, nngrid=80, zlev='top
     # GET DATA
     G = zrfun.get_basic_info(fn, only_G=True)
     if zlev == 'top':
-        u = ds['u'][0, -1, :, :].squeeze()
-        v = ds['v'][0, -1, :, :].squeeze()
+        u = ds['u'][0, -1, :, :].values
+        v = ds['v'][0, -1, :, :].values
     elif zlev == 'bot':
-        u = ds['u'][0, 0, :, :].squeeze()
-        v = ds['v'][0, 0, :, :].squeeze()
+        u = ds['u'][0, 0, :, :].values
+        v = ds['v'][0, 0, :, :].values
     else:
         zfull_u = get_zfull(ds, fn, 'u')
         zfull_v = get_zfull(ds, fn, 'v')
-        u = get_laym(ds, zfull_u, ds['mask_u'][:], 'u', zlev).squeeze()
-        v = get_laym(ds, zfull_v, ds['mask_v'][:], 'v', zlev).squeeze()
+        u = get_laym(ds, zfull_u, ds['mask_u'][:], 'u', zlev).values
+        v = get_laym(ds, zfull_v, ds['mask_v'][:], 'v', zlev).values
     # ADD VELOCITY VECTORS
     # set masked values to 0
-    ud = u.data; ud[u.mask]=0
-    vd = v.data; vd[v.mask]=0
+    u[np.isnan(u)] = 0
+    v[np.isnan(v)] = 0
     # create interpolant
     import scipy.interpolate as intp
-    ui = intp.interp2d(G['lon_u'][0, :], G['lat_u'][:, 0], ud)
-    vi = intp.interp2d(G['lon_v'][0, :], G['lat_v'][:, 0], vd)
+    ui = intp.interp2d(G['lon_u'][0, :], G['lat_u'][:, 0], u)
+    vi = intp.interp2d(G['lon_v'][0, :], G['lat_v'][:, 0], v)
     # create regular grid
     aaa = ax.axis()
     daax = aaa[1] - aaa[0]
@@ -194,22 +192,16 @@ def add_velocity_vectors(ax, ds, fn, v_scl=3, v_leglen=0.5, nngrid=80, zlev='top
     vv = vi(x, y)
     mask = uu != 0
     # plot velocity vectors
-    ax.quiver(xx[mask], yy[mask], uu[mask], vv[mask],
+    Q = ax.quiver(xx[mask], yy[mask], uu[mask], vv[mask],
         units='y', scale=v_scl, scale_units='y', color='k')
-    ax.quiver([xc, xc] , [yc, yc], [v_leglen, v_leglen],
-              [v_leglen, v_leglen],
-        units='y', scale=v_scl, scale_units='y', color='k',
-        transform=ax.transAxes)
-    ax.text(xc+.05, yc, str(v_leglen) + ' m/s',
-        horizontalalignment='left', transform=ax.transAxes)
-    # note: I could also use plt.quiverkey() 
+    plt.quiverkey(Q, .9, .1, v_leglen, str(v_leglen)+' m/s', angle=45)
 
 def add_windstress_flower(ax, ds, t_scl=0.2, t_leglen=0.1, center=(.85,.25), fs=12):
     # ADD MEAN WINDSTRESS VECTOR
     # t_scl: scale windstress vector (smaller to get longer arrows)
     # t_leglen: # Pa for wind stress vector legend
-    taux = ds['sustr'][:].squeeze()
-    tauy = ds['svstr'][:].squeeze()
+    taux = ds['sustr'].values.squeeze()
+    tauy = ds['svstr'].values.squeeze()
     tauxm = taux.mean()
     tauym = tauy.mean()
     x = center[0]
@@ -232,7 +224,7 @@ def add_windstress_flower(ax, ds, t_scl=0.2, t_leglen=0.1, center=(.85,.25), fs=
 def add_info(ax, fn, fs=12, loc='lower_right'):
     # put info on plot
     T = zrfun.get_basic_info(fn, only_T=True)
-    dt_local = get_dt_local(T['tm'])
+    dt_local = get_dt_local(T['dt'][0])
     if loc == 'lower_right':
         ax.text(.95, .075, dt_local.strftime('%Y-%m-%d'),
             horizontalalignment='right' , verticalalignment='bottom',
@@ -247,7 +239,7 @@ def add_info(ax, fn, fs=12, loc='lower_right'):
         ax.text(.95, .925, dt_local.strftime('%H:%M') + ' ' + dt_local.tzname(),
             horizontalalignment='right', verticalalignment='top',
             transform=ax.transAxes, fontsize=fs)
-    ax.text(.06, .04, fn.split('/')[-3],
+    ax.text(.06, .04, str(fn).split('/')[-3],
         verticalalignment='bottom', transform=ax.transAxes,
         rotation='vertical', fontsize=fs)
 
@@ -259,21 +251,21 @@ def get_dt_local(dt, tzl='US/Pacific'):
     return dt_local
 
 def get_aa(ds):
-    x = ds['lon_psi'][0,:]
-    y = ds['lat_psi'][:,0]
+    x = ds['lon_psi'][0,:].values
+    y = ds['lat_psi'][:,0].values
     aa = [x[0], x[-1], y[0], y[-1]]
     return aa
     
 def get_aa_ex(ds):
-    x = ds['lon_psi_ex'][0,:]
-    y = ds['lat_psi_ex'][:,0]
+    x = ds['lon_psi_ex'][0,:].values
+    y = ds['lat_psi_ex'][:,0].values
     aa = [x[0], x[-1], y[0], y[-1]]
     return aa
 
 def get_zfull(ds, fn, which_grid):
     # get zfull field on "which_grid" ('rho', 'u', or 'v')
     G, S, T = zrfun.get_basic_info(fn)
-    zeta = 0 * ds.variables['zeta'][:].squeeze()
+    zeta = 0 * ds.variables['zeta'].values.squeeze()
     zr_mid = zrfun.get_z(G['h'], zeta, S, only_rho=True)
     zr_bot = -G['h'].reshape(1, G['M'], G['L']).copy()
     zr_top = zeta.reshape(1, G['M'], G['L']).copy()
@@ -288,7 +280,7 @@ def get_zfull(ds, fn, which_grid):
 
 def get_laym(ds, zfull, mask, vn, zlev):
     # make the layer
-    fld_mid = ds[vn][:].squeeze()
+    fld_mid = ds[vn].values.squeeze()
     fld = make_full((fld_mid,))
     zlev_a = zlev * np.ones(1)
     lay = get_layer(fld, zfull, zlev_a)
@@ -409,7 +401,7 @@ def mask_edges(fld, lon, lat):
     """
     mm = 6
     mask = (lon < lon[0,mm]) | (lat < lat[mm,0]) | (lat > lat[-mm,0])
-    fld = np.ma.masked_where(mask, fld)
+    fld[mask] = np.nan
     return fld
     
 def get_section(ds, vn, x, y, in_dict):

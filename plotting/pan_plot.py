@@ -3,69 +3,84 @@ Plot fields in one or more history files.
 
 Examples:
 
-Plot a single figure to the screen with the default arguments
-run pan_plot.py
+Plot a single figure to the screen with default arguments
+run pan_plot -gtx cas6_v3_lo8b -test True
+
+Here is an example with explicit flags
+run pan_plot -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -lt snapshot -pt P_Chl_DO -avl False
 
 Save multiple plots with color limits all set to match those set by
-auto_lims() from the first plot:
-run pan_plot.py -0 2017.09.01 -1 2017.09.03 -lt hourly -mov True
+auto_lims() from the first plot
 
 Use -avl False to have color limits all set to match those set by
-pinfo.vlims_dict:
-
-Example of an analytical run:
-run pan_plot.py -g aestus1 -t A1 -x ae1 -0 2013.03.01
+pinfo.vlims_dict.
 
 """
-
-#%% setup
-import os
-import sys
+import os, sys
 import argparse
 from datetime import datetime, timedelta
-sys.path.append(os.path.abspath('../alpha'))
-from importlib import reload
-import Lfun
-import roms_plots; reload(roms_plots)
-
 import matplotlib.pyplot as plt
-plt.close('all')
 
-def boolean_string(s):
-    if s not in ['False', 'True']:
-        raise ValueError('Not a valid boolean string')
-    return s == 'True' # note use of ==
+from lo_tools import Lfun
+import roms_plots
+from importlib import reload
+reload(roms_plots)
 
 parser = argparse.ArgumentParser()
-# standard arguments
-parser.add_argument('-g', '--gridname', nargs='?', type=str, default='cas6')
-parser.add_argument('-t', '--tag', nargs='?', type=str, default='v3')
-parser.add_argument('-x', '--ex_name', nargs='?', type=str, default='lo8b')
-parser.add_argument('-0', '--date_string0', nargs='?', type=str, default='2019.07.04')
-parser.add_argument('-1', '--date_string1', nargs='?', type=str, default='')
+
+# which run to use
+parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas6_v3_l08b
+parser.add_argument('-ro', '--roms_out_num', type=int) # 2 = Ldir['roms_out2'], etc.
+
+# select time period and frequency
+parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
+parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
+parser.add_argument('-lt', '--list_type', type=str) # list type: snapshot, hourly, or daily
+
 # arguments that allow you to bypass the interactive choices
-parser.add_argument('-hn', '--his_num', nargs='?', type=int, default=1)
-parser.add_argument('-lt', '--list_type', nargs='?', type=str, default='')
-parser.add_argument('-pt', '--plot_type', nargs='?', type=str, default='')
+parser.add_argument('-hn', '--his_num', type=int, default=1)
+parser.add_argument('-pt', '--plot_type', type=str)
+
 # arguments that influence other behavior
 #  e.g. make a movie, override auto color limits
-parser.add_argument('-mov', '--make_movie', default=False, type=boolean_string)
-parser.add_argument('-avl', '--auto_vlims', default=True, type=boolean_string)
-parser.add_argument('-test', '--testing', default=False, type=boolean_string)
+parser.add_argument('-mov', '--make_movie', default=False, type=Lfun.boolean_string)
+parser.add_argument('-avl', '--auto_vlims', default=True, type=Lfun.boolean_string)
+parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 
+# do things with the arguments
 args = parser.parse_args()
-if len(args.date_string1) == 0:
-    args.date_string1 = args.date_string0
-    
-if args.testing:
-    reload(Lfun)
-
-Ldir = Lfun.Lstart(args.gridname, args.tag)
-Ldir['gtagex'] = Ldir['gtag'] + '_' + args.ex_name
+argsd = args.__dict__
+for a in ['gtagex']:
+    if argsd[a] == None:
+        print('*** Missing required argument: ' + a)
+        sys.exit()
+gridname, tag, ex_name = args.gtagex.split('_')
+# get the dict Ldir
+Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
+# add more entries to Ldir
+for a in argsd.keys():
+    if a not in Ldir.keys():
+        Ldir[a] = argsd[a]
+# testing
+if Ldir['testing']:
+    Ldir['roms_out_num'] = 2
+    Ldir['ds0'] = '2019.07.04'
+    Ldir['ds1'] = '2019.07.04'
+    Ldir['list_type'] = 'snapshot'
+    Ldir['plot_type'] = 'P_basic'
+# set second date string if omitted (need to have Ldir['ds0'])
+if Ldir['ds1'] == None:
+    print('hi')
+    Ldir['ds1'] = Ldir['ds0']
+# set where to look for model output
+if Ldir['roms_out_num'] == 0:
+    pass
+elif Ldir['roms_out_num'] > 0:
+    Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
 
 # choose the type of list to make
-if len(args.list_type) == 0:
-    print(30*'*' + ' pan_plot ' + 30*'*')
+if Ldir['list_type'] == None:
+    print(' pan_plot '.center(60,'='))
     print('\n%s\n' % '** Choose List type (return for snapshot) **')
     lt_list = ['snapshot', 'daily', 'hourly ', 'allhours']
     Nlt = len(lt_list)
@@ -74,14 +89,14 @@ if len(args.list_type) == 0:
         print(str(nlt) + ': ' + lt_list[nlt])
     my_nlt = input('-- Input number -- ')
     if len(my_nlt)==0:
-        list_type = 'snapshot'
+        Ldir['list_type'] = 'snapshot'
     else:
-        list_type = lt_dict[int(my_nlt)]
+        Ldir['list_type'] = lt_dict[int(my_nlt)]
 else:
-    list_type = args.list_type
+    pass
 
 # choose the type of plot to make
-if len(args.plot_type) == 0:
+if Ldir['plot_type'] == None:
     print('\n%s\n' % '** Choose Plot type (return for P_basic) **')
     pt_list_raw = dir(roms_plots)
     pt_list = []
@@ -94,25 +109,27 @@ if len(args.plot_type) == 0:
         print(str(npt) + ': ' + pt_list[npt])
     my_npt = input('-- Input number -- ')
     if len(my_npt)==0:
-        plot_type = 'P_basic'
+        Ldir['plot_type'] = 'P_basic'
     else:
-        plot_type = pt_dict[int(my_npt)]
+        Ldir['plot_type'] = pt_dict[int(my_npt)]
 else:
-    plot_type = args.plot_type
-whichplot = getattr(roms_plots, plot_type)
+    pass
+    
+whichplot = getattr(roms_plots, Ldir['plot_type'])
 
 in_dict = dict()
-in_dict['auto_vlims'] = args.auto_vlims
-in_dict['testing'] = args.testing
+in_dict['auto_vlims'] = Ldir['auto_vlims']
+in_dict['testing'] = Ldir['testing']
 
 # get list of history files to plot
-fn_list = Lfun.get_fn_list(list_type, Ldir,
-    args.date_string0, args.date_string1, his_num=args.his_num)    
+fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir,
+    Ldir['ds0'], Ldir['ds1'], his_num=Ldir['his_num'])
     
-if (list_type == 'allhours') and (args.testing == True):
+if (Ldir['list_type'] == 'allhours') and Ldir['testing']:
     fn_list = fn_list[:4]
-            
+
 # PLOTTING
+plt.close('all')
 
 if len(fn_list) == 1:
     # plot a single image to screen
@@ -120,19 +137,20 @@ if len(fn_list) == 1:
     in_dict['fn'] = fn
     in_dict['fn_out'] = ''
     whichplot(in_dict)
+    
 elif len(fn_list) > 1:
     # prepare a directory for results
-    outdir0 = Ldir['LOo'] + 'plots/'
+    outdir0 = Ldir['LOo'] / 'plots'
     Lfun.make_dir(outdir0, clean=False)
-    outdir = outdir0 + list_type + '_' + plot_type + '_' + Ldir['gtagex'] + '/'
+    outdir = outdir0 / (Ldir['list_type'] + '_' + Ldir['plot_type'] + '_' + Ldir['gtagex'])
     Lfun.make_dir(outdir, clean=True)
     # plot to a folder of files
     jj = 0
     for fn in fn_list:
         nouts = ('0000' + str(jj))[-4:]
         outname = 'plot_' + nouts + '.png'
-        outfile = outdir + outname
-        print('Plotting ' + fn)
+        outfile = outdir / outname
+        print('Plotting ' + str(fn))
         in_dict['fn'] = fn
         in_dict['fn_out'] = outfile
         whichplot(in_dict)
@@ -140,8 +158,8 @@ elif len(fn_list) > 1:
         in_dict['auto_vlims'] = False
         jj += 1
     # and make a movie
-    if args.make_movie:
+    if Ldir['make_movie']:
         ff_str = ("ffmpeg -r 8 -i " + 
-        outdir+"plot_%04d.png -vcodec libx264 -pix_fmt yuv420p -crf 25 "
-        +outdir+"movie.mp4")
+        str(outdir)+"/plot_%04d.png -vcodec libx264 -pix_fmt yuv420p -crf 25 "
+        +str(outdir)+"/movie.mp4")
         os.system(ff_str)

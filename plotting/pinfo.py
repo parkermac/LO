@@ -3,6 +3,8 @@ Dictionaries of defaults to be used for plotting.
 
 """
 
+from cmocean import cm
+
 # default figure size
 figsize = (13,8) # laptop
 
@@ -15,7 +17,7 @@ vlims_dict = {'salt': (14, 35),
         'NO3': (0, 44),
         'phytoplankton': (0,30),
         'zooplankton': (0, 4),
-        'oxygen': (0, 8),
+        'oxygen': (0, 10),
         'TIC': (2000, 2400),
         'alkalinity': (2000,2400),
         'PH': (7, 8.5),
@@ -23,12 +25,12 @@ vlims_dict = {'salt': (14, 35),
         'Ldetritus': ()}
 
 # Colormaps (use _r for reverse)
-cmap_dict = {'salt': 'Spectral_r',#'rainbow',
-             'temp': 'bwr',#run 'jet',
+cmap_dict = {'salt': cm.haline,#'Spectral_r',
+             'temp': 'RdYlBu_r',#'bwr',
              'NO3': 'jet',
              'phytoplankton': 'ocean_r',
              'zooplankton': 'jet',
-             'oxygen': 'rainbow_r',#'jet_r',
+             'oxygen': cm.oxy,
              'TIC': 'rainbow',
              'alkalinity': 'rainbow',
              'PH': 'jet',
@@ -38,21 +40,21 @@ cmap_dict = {'salt': 'Spectral_r',#'rainbow',
 
 # Units (after multiplying by scaling factor)
 units_dict = {'salt': '',
-             'temp': 'degC',#' $(^{\circ}C)$',
+             'temp': ' $(^{\circ}C)$',
              'NO3': ' $(\mu mol\ L^{-1})$',
              'phytoplankton': ' $(mg\ Chl\ m^{-3})$',
              'zooplankton': ' $(\mu mol\ N\ L^{-1})$',
-             'oxygen': ' $(ml\ L^{-1})$',
+             'oxygen': ' $(mg\ L^{-1})$',
              'TIC': ' $(\mu mol\ L^{-1})$',
              'alkalinity': ' $(\mu\ equivalents\ L^{-1})$',
              'PH': '',
              'ARAG': '',
              'Ldetritus': '',
-             'w': ' m/s',#' $(m s^{-1})$',
-             'u': ' m/s',#' $(m s^{-1})$',
-             'v': ' m/s',#' $(m s^{-1})$',
-             'ubar': ' m/s',#' $(m s^{-1})$',
-             'vbar': ' m/s',#' $(m s^{-1})$',
+             'w': ' $(m s^{-1})$',
+             'u': ' $(m s^{-1})$',
+             'v': ' $(m s^{-1})$',
+             'ubar': ' $(m s^{-1})$',
+             'vbar': ' $(m s^{-1})$',
              'zeta': ' (m)'}
 
 # Scaling factors
@@ -61,7 +63,7 @@ fac_dict =  {'salt': 1,
              'NO3': 1,
              'phytoplankton': 2.5,
              'zooplankton': 1,
-             'oxygen': 0.032/1.42903, # convert mmol m-3 to ml L-1
+             'oxygen': 32/1000, # convert mmol m-3 to mg L-1
              'TIC': 1,
              'alkalinity': 1,
              'PH': 1,
@@ -93,3 +95,22 @@ tstr_dict = {'salt': 'Salinity',
              'vbar': 'Vbar',
              'zeta': 'Zeta'}
              
+# this is used by plotting_functions.auto_lims to decide how many
+# standard deviations +/- to set the color limits relative to the mean
+range_dict =  {'salt': 1,
+             'temp': 2.5,
+             'NO3': 3,
+             'phytoplankton': 3,
+             'zooplankton': 3,
+             'oxygen': 3,
+             'TIC': 3,
+             'alkalinity': 3,
+             'PH': 3,
+             'ARAG': 3,
+             'Ldetritus': 3,
+             'w': 3,
+             'u': 3,
+             'v': 3,
+             'ubar': 3,
+             'vbar': 3,
+             'zeta': 3}
