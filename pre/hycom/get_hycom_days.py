@@ -3,21 +3,14 @@ Extract and save extracted fields from a sequence of hycom past days.
 
 """
 
-# setup
-import os
-import sys
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if pth not in sys.path:
-    sys.path.append(pth)
-import Lfun
-Ldir = Lfun.Lstart()
-import zfun
-import hycom_functions as hfun
+from lo_tools import Lfun, zfun
+from lo_tools import hycom_functions as hfun
 
 import pickle
 import netCDF4 as nc
 from datetime import datetime, timedelta
 
+Ldir = Lfun.Lstart()
 
 # optional command line input
 import argparse

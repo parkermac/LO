@@ -1,18 +1,15 @@
 """
 Program to plot historical records for rivers.
 """
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-Ldir = Lfun.Lstart()
 
 import pandas as pd
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
+
+from lo_tools import Lfun
+
+Ldir = Lfun.Lstart()
 
 gtag = 'cas6_v3'
 year0 = 1980

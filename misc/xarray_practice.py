@@ -1,14 +1,8 @@
 """
 Code to practice and test the use of xarray in the LO system.
 """
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
     
-import Lfun
-import zrfun
+from lo_tools import Lfun, zrfun
 
 import numpy as np
 import pandas as pd

@@ -5,12 +5,7 @@ This code shows how powerful pandas is for this kind of task.
 Really just one line to make a climatology (the groupby call)
 """
 
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
+from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 
 import pandas as pd

@@ -13,25 +13,19 @@ calling it ALL_flow_1980_2020_ORIG.py.
 2021.04.16 Using this it was easy for me to fill in all the gaps in the
 Fraser River record.
 """
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-import zfun
-Ldir = Lfun.Lstart()
-
-import river_functions as rivf
-from importlib import reload
-reload(rivf)
-
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
-
 import argparse
+
+from lo_tools import Lfun, zfun
+from lo_tools import river_functions as rivf
+from importlib import reload
+reload(rivf)
+
+Ldir = Lfun.Lstart()
+
 parser = argparse.ArgumentParser()
 # required arguments
 parser.add_argument('-rn', type=str)   # e.g. fraser

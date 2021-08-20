@@ -6,12 +6,7 @@ This makes a DataFrame with integer Index and columns:
 
 """
 
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
+from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 
 import pandas as pd

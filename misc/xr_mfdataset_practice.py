@@ -7,16 +7,9 @@ but fails for the 73 files in a three-day sequence, even when I specify smaller 
 So at this point it is sort of useful, but not for proper tidal averaging.
 """
 
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
-import Lfun
-import zrfun
-import zfun
+from lo_tools import Lfun, zrfun, zfun
 
+import sys
 import numpy as np
 import pandas as pd
 import xarray as xr

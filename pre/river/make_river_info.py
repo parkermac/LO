@@ -6,18 +6,13 @@ output directory accordingly.
 
 """
 
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-
-Ldir = Lfun.Lstart()
-
 import scipy.io as sio
 import numpy as np
 import pandas as pd
+
+from lo_tools import Lfun
+
+Ldir = Lfun.Lstart()
 
 # make places for output
 ri_dir = Ldir['LOo'] / 'pre' / 'river' / 'cas6_v3'

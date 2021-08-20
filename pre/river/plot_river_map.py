@@ -2,17 +2,14 @@
 Program to plot a map of river tracks used in a specific ROMS grid.
 
 """
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-Ldir = Lfun.Lstart(gridname='cas6', tag='v3')
-import plotting_functions as pfun
 
 import pandas as pd
 import matplotlib.pyplot as plt
+
+from lo_tools import Lfun
+from lo_tools import plotting_functions as pfun
+
+Ldir = Lfun.Lstart(gridname='cas6', tag='v3')
 
 # get the list of rivers for this grid
 gri_fn = Ldir['grid'] / 'river_info.csv'
@@ -28,10 +25,10 @@ Ctemp_df = pd.read_pickle(ri_dir / 'Data_historical' /
 # PLOTTING
 
 plt.close('all')
-fs=14
-plt.rc('font', size=fs)
+fs = 14
+pfun.start_plot(fs=fs, figsize=(10,13))
+fig = plt.figure()
 
-fig = plt.figure(figsize=(10,13))
 ax = fig.add_subplot(111)
 pfun.add_coast(ax, color='gray')
 pfun.dar(ax)
@@ -71,4 +68,4 @@ ax.text(.03,.25,'RED have Temperature Data', color='r', weight='bold', transform
 fig.tight_layout()
 fig.savefig(ri_dir / 'river_map.png')
 plt.show()
-plt.rcdefaults()
+pfun.end_plot()

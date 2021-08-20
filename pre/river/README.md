@@ -2,7 +2,7 @@
 
 ### This code is for gathering and processing river data, and one of the uses for the data is forcing ROMS hindccasts.
 
-### It relies on functions in the module `LO/alpha/river_functions.py`, which go out and get data from external sources: USGS, NWS Forecasts, and Environment Canada websites.  The reason for putting these in alpha is that they are also used by the forecast system.
+### It relies on functions in the module `LO/lo_tools/lo_tools/river_functions.py`, which go out and get data from external sources: USGS, NWS Forecasts, and Environment Canada websites.  The reason for putting these in lo_tools is that they are also used by the forecast system.
 
 The output goes into:
 
@@ -29,7 +29,7 @@ OUTPUT:
 
 INPUT:
 
-Raw data from XML (USGS), or scraped from html (EC), using the functions in river_functions.py.  For the USGS data you can simply had it a date range and it will quickly return 40 years of daily flow data.  For EC data it is more complicated.  I think that it works like this: over a range in the last 18 months you can get data using a date range, just like for USGS.  Earlier than this you need to scrape the "historical" date from a table on a web page, a year at a time.  When I did this in April 2021, I was able to get historical data through 2019, and current data for 2020.  In previous work on this archive I sometimes encountered times (maybe later in the year) when there was a gap between the two data sources.  A workaround (currently commented out in the code) is to use as-run river extractions from LiveOcean forcing files.
+Raw data from XML (USGS), or scraped from html (EC), using the functions in river_functions.py.  For the USGS data you can simply hand it a date range and it will quickly return 40 years of daily flow data.  For EC data it is more complicated.  I think that it works like this: over a range in the last 18 months you can get data using a date range, just like for USGS.  Earlier than this you need to scrape the "historical" date from a table on a web page, a year at a time.  When I did this in April 2021, I was able to get historical data through 2019, and current data for 2020.  In previous work on this archive I sometimes encountered times (maybe later in the year) when there was a gap between the two data sources.  A workaround (currently commented out in the code) is to use as-run river extractions from LiveOcean forcing files.
 
 OUTPUT:
 

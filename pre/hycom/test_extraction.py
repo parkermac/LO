@@ -1,28 +1,23 @@
 """
-Functions to use with the new HYCOM code.  Works for both backfill and forecast files.
+This appears to be code I used to test various details about
+getting HYCOM files.  I believe it is valuable only as background info
+for lo_tools/hycom_functions.py, and is probably largely obsolete.
 
 """
 
-# setup
 import os
-import sys
-pth = os.path.abspath('../../alpha')
-if pth not in sys.path:
-    sys.path.append(pth)
-import Lfun
-import hycom_functions as hfun
-
-Ldir = Lfun.Lstart()
-fn_out = Ldir['LOo'] + 'misc/hycom_test.nc'
-
 import time
 from datetime import datetime, timedelta
-
 import netCDF4 as nc
-
 from urllib.request import urlretrieve
 from urllib.error import URLError
 from socket import timeout
+
+from lo_tools import Lfun
+from lo_tools import hycom_functions as hfun
+
+Ldir = Lfun.Lstart()
+fn_out = Ldir['LOo'] + 'misc/hycom_test.nc'
 
 # ** USER **********************************
 

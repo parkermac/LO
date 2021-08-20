@@ -2,23 +2,18 @@
 Plot a map of Froude Number.  Potentially this is a piece of evidence to use for
 understanding Salish Sea exchange flow.
 
+NOT FINISHED as of 2021.08.19
+
 """
 
-from pathlib import Path
-import sys
-
-pth = Path(__file__).absolute().parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-    
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
 import xarray as xr
 
-import plotting_functions as pfun
-import zfun
-import Lfun
+from lo_tools import Lfun, zfun
+from lo_tools import plotting_functions as pfun
+
 gridname = 'cas6'; tag = 'v3'; ex_name = 'lo8b'
 Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
 Ldir['roms_out'] = Ldir['roms_out2']

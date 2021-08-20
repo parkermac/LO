@@ -1,20 +1,15 @@
 """
 Program to gather historical records for rivers.
 """
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-import zfun
-Ldir = Lfun.Lstart()
 
-import river_functions as rivf
+from lo_tools import Lfun, zfun
+from lo_tools import river_functions as rivf
 
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
+
+Ldir = Lfun.Lstart()
 
 # set the gtag for this case (could make it a command line argument)
 gtag = 'cas6_v3'

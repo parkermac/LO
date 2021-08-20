@@ -6,20 +6,15 @@ Run with the -a True flag to get all lists, otherwise the default is
 to only update the last one in hfun.hy_dict.
 
 """
-
 import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-import zfun
-import hycom_functions as hfun
-Ldir = Lfun.Lstart()
-
 import pickle
 import netCDF4 as nc
 from datetime import datetime, timedelta
+
+from lo_tools import Lfun, zfun
+from lo_tools import hycom_functions as hfun
+
+Ldir = Lfun.Lstart()
 
 # optional command line input
 import argparse

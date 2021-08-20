@@ -3,18 +3,10 @@ Code to print all dt_info files.
 
 """
 
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'alpha'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun
-import zfun
-import hycom_functions as hfun
+from lo_tools import Lfun, zfun
+from lo_tools import hycom_functions as hfun
+
 Ldir = Lfun.Lstart()
-
-import pickle
-
 
 # initial experiment list
 h_list = list(hfun.hy_dict.keys())
@@ -27,6 +19,6 @@ for hy in h_list:
     print('Experiment = ' + hy)
     f = open(out_dir / ('dt_info_' + hy + '.txt'), 'r')
     for line in f:
-        sys.stdout.write(' - ' + line)
+        print(' - ' + line, end='')
     f.close()
     print('\n')
