@@ -70,7 +70,6 @@ if Ldir['testing']:
     Ldir['plot_type'] = 'P_basic'
 # set second date string if omitted (need to have Ldir['ds0'])
 if Ldir['ds1'] == None:
-    print('hi')
     Ldir['ds1'] = Ldir['ds0']
 # set where to look for model output
 if Ldir['roms_out_num'] == 0:
@@ -151,6 +150,7 @@ elif len(fn_list) > 1:
         outname = 'plot_' + nouts + '.png'
         outfile = outdir / outname
         print('Plotting ' + str(fn))
+        sys.stdout.flush()
         in_dict['fn'] = fn
         in_dict['fn_out'] = outfile
         whichplot(in_dict)

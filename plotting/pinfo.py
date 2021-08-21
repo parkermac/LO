@@ -39,7 +39,7 @@ cmap_dict = {'salt': cm.haline,#'Spectral_r',
              'w': 'rainbow'}
 
 # Units (after multiplying by scaling factor)
-units_dict = {'salt': '',
+units_dict = {'salt': '$(g\ kg^{-1})$',
              'temp': ' $(^{\circ}C)$',
              'NO3': ' $(\mu mol\ L^{-1})$',
              'phytoplankton': ' $(mg\ Chl\ m^{-3})$',
@@ -50,11 +50,11 @@ units_dict = {'salt': '',
              'PH': '',
              'ARAG': '',
              'Ldetritus': '',
-             'w': ' $(m s^{-1})$',
-             'u': ' $(m s^{-1})$',
-             'v': ' $(m s^{-1})$',
-             'ubar': ' $(m s^{-1})$',
-             'vbar': ' $(m s^{-1})$',
+             'w': ' $(m\ s^{-1})$',
+             'u': ' $(m\ s^{-1})$',
+             'v': ' $(m\ s^{-1})$',
+             'ubar': ' $(m\ s^{-1})$',
+             'vbar': ' $(m\ s^{-1})$',
              'zeta': ' (m)'}
 
 # Scaling factors

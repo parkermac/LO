@@ -121,62 +121,54 @@ def P_Chl_DO(in_dict):
 
 def P_ths(in_dict):
     # Plot property-property plots, like theta vs. s
-
     # START
-    fig = plt.figure(figsize=(12,8)) # (16,12) or pinfo.figsize for default
-    ds = nc.Dataset(in_dict['fn'])
-
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(10,10))
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
     # PLOT CODE
-
     # make a potential density field
     import seawater as sw
-    s0 = 27; s1 = 35
-    th0 = 4; th1 = 20
+    s0 = 25; s1 = 35
+    th0 = 0; th1 = 20
     SS, TH = np.meshgrid(np.linspace(s0, s1, 50), np.linspace(th0, th1, 50))
     SIG = sw.dens0(SS, TH) - 1000
-
     S = zrfun.get_basic_info(in_dict['fn'], only_S=True)
-    h = ds['h'][:]
+    h = ds['h'].values
     z = zrfun.get_z(h, 0*h, S, only_rho=True)
-
-    s = ds['salt'][:].squeeze()
-    th = ds['temp'][:].squeeze()
-
+    s = ds['salt'].values.squeeze()
+    th = ds['temp'].values.squeeze()
     ax = fig.add_subplot(111)
     ax.set_xlabel('Salinity')
     ax.set_ylabel('Theta (deg C)')
     ax.contour(SS, TH, SIG, 20)
-
     nsub = 500
     alpha = .1
-
     mask = z > -10
     ax.plot(s[mask][::nsub], th[mask][::nsub], '.r', alpha=alpha)
-
     mask = (z < -10) & (z > -200)
     ax.plot(s[mask][::nsub], th[mask][::nsub], '.g', alpha=alpha)
-
     mask = z < -200
     ax.plot(s[mask][::nsub], th[mask][::nsub], '.b', alpha=alpha)
-
     ax.set_xlim(s0, s1)
     ax.set_ylim(th0, th1)
-
-
     # FINISH
     ds.close()
-    if len(in_dict['fn_out']) > 0:
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
         plt.savefig(in_dict['fn_out'])
         plt.close()
     else:
         plt.show()
-        
+
 def P_debug(in_dict):
     # Focused on debugging
 
     # START
-    fig = plt.figure(figsize=pinfo.figsize)
-    ds = nc.Dataset(in_dict['fn'])
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=pinfo.figsize)
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
 
     # PLOT CODE
     vn_list = ['salt', 'temp']
@@ -202,11 +194,11 @@ def P_debug(in_dict):
             #pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
             # add debugging information to the plot
             # gathering info
-            u = ds['u'][0,-1,:,:].squeeze()
+            u = ds['u'][0,-1,:,:].values
             umax, ujmax, uimax, umin, ujmin, uimin = pfun.maxmin(u)
-            v = ds['v'][0,-1,:,:].squeeze()
+            v = ds['v'][0,-1,:,:].values
             vmax, vjmax, vimax, vmin, vjmin, vimin = pfun.maxmin(v)
-            eta = ds['zeta'][0,:,:].squeeze()
+            eta = ds['zeta'][0,:,:].values
             emax, ejmax, eimax, emin, ejmin, eimin = pfun.maxmin(eta)
             #
             G = zrfun.get_basic_info(in_dict['fn'], only_G=True)
@@ -225,21 +217,22 @@ def P_debug(in_dict):
 
     # FINISH
     ds.close()
-    if len(in_dict['fn_out']) > 0:
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
         plt.savefig(in_dict['fn_out'])
         plt.close()
     else:
         plt.show()
 
 def P_layer(in_dict):
-
     # START
-    fig = plt.figure(figsize=pinfo.figsize)
-    ds = nc.Dataset(in_dict['fn'])
-
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(14,10))
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
     # PLOT CODE
-    vn_list = ['salt', 'temp']
-    z_level = -30
+    vn_list = ['oxygen', 'temp']
+    z_level = -250
     zfull = pfun.get_zfull(ds, in_dict['fn'], 'rho')
     ii = 1
     for vn in vn_list:
@@ -255,8 +248,6 @@ def P_layer(in_dict):
         cs = ax.pcolormesh(ds['lon_psi'][:], ds['lat_psi'][:], v_scaled[1:-1,1:-1],
                            vmin=vlims[0], vmax=vlims[1], cmap=pinfo.cmap_dict[vn])
         cb = fig.colorbar(cs)
-        # cb.formatter.set_useOffset(False)
-        # cb.update_ticks()
         pfun.add_bathy_contours(ax, ds, txt=True)
         pfun.add_coast(ax)
         ax.axis(pfun.get_aa(ds))
@@ -268,67 +259,13 @@ def P_layer(in_dict):
             ax.set_ylabel('Latitude')
             pfun.add_windstress_flower(ax, ds)
         if ii == 2:
-            pfun.add_velocity_vectors(ax, ds, in_dict['fn'], v_scl=1, v_leglen=0.5,
-                                      nngrid=80, zlev=z_level)
+            pfun.add_velocity_vectors(ax, ds, in_dict['fn'], zlev=z_level)
         ii += 1
-
+    fig.tight_layout()
     # FINISH
     ds.close()
-    if len(in_dict['fn_out']) > 0:
-        plt.savefig(in_dict['fn_out'])
-        plt.close()
-    else:
-        plt.show()
-
-def P_layer_JdF_Eddy(in_dict):
-
-    # START
-    fig = plt.figure(figsize=(24,8))
-    ds = nc.Dataset(in_dict['fn'])
-
-    # PLOT CODE
-    aa = [-125.8, -124.2, 48, 49]
-    pinfo.vlims_dict['salt'] = (32,34)
-    pinfo.vlims_dict['temp'] = (6,10)
-
-    vn_list = ['salt', 'temp']
-    z_level = -50
-    zfull = pfun.get_zfull(ds, in_dict['fn'], 'rho')
-    ii = 1
-    for vn in vn_list:
-        # if in_dict['auto_vlims']:
-        #     pinfo.vlims_dict[vn] = ()
-        ax = fig.add_subplot(1, len(vn_list), ii)
-        laym = pfun.get_laym(ds, zfull, ds['mask_rho'][:], vn, z_level)
-        v_scaled = pinfo.fac_dict[vn]*laym
-        vlims = pinfo.vlims_dict[vn]
-        if len(vlims) == 0:
-            vlims = pfun.auto_lims(v_scaled)
-            pinfo.vlims_dict[vn] = vlims
-        cs = ax.pcolormesh(ds['lon_psi'][:], ds['lat_psi'][:], v_scaled[1:-1,1:-1],
-                           vmin=vlims[0], vmax=vlims[1], cmap=pinfo.cmap_dict[vn])
-        cb = fig.colorbar(cs)
-        # cb.formatter.set_useOffset(False)
-        # cb.update_ticks()
-        pfun.add_coast(ax)
-        ax.axis(aa)
-        pfun.dar(ax)
-        ax.set_xlabel('Longitude')
-        ax.set_title('%s %s on Z = %d (m)' % (pinfo.tstr_dict[vn], pinfo.units_dict[vn], z_level))
-        if ii == 1:
-            pfun.add_bathy_contours(ax, ds, depth_levs = [50, 100, 200], txt=True)
-            pfun.add_info(ax, in_dict['fn'])
-            ax.set_ylabel('Latitude')
-            pfun.add_windstress_flower(ax, ds, t_scl=0.6, t_leglen=0.1, center=(.15,.75))
-        if ii == 2:
-            # pfun.add_velocity_vectors(ax, ds, in_dict['fn'], v_scl=5, v_leglen=0.2,
-            #                           nngrid=30, zlev=z_level)
-            pass
-        ii += 1
-
-    # FINISH
-    ds.close()
-    if len(in_dict['fn_out']) > 0:
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
         plt.savefig(in_dict['fn_out'])
         plt.close()
     else:

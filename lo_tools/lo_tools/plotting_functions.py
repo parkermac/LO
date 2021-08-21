@@ -169,8 +169,8 @@ def add_velocity_vectors(ax, ds, fn, v_scl=3, v_leglen=0.5, nngrid=80, zlev='top
     else:
         zfull_u = get_zfull(ds, fn, 'u')
         zfull_v = get_zfull(ds, fn, 'v')
-        u = get_laym(ds, zfull_u, ds['mask_u'][:], 'u', zlev).values
-        v = get_laym(ds, zfull_v, ds['mask_v'][:], 'v', zlev).values
+        u = get_laym(ds, zfull_u, ds['mask_u'].values, 'u', zlev)
+        v = get_laym(ds, zfull_v, ds['mask_v'].values, 'v', zlev)
     # ADD VELOCITY VECTORS
     # set masked values to 0
     u[np.isnan(u)] = 0
@@ -265,7 +265,7 @@ def get_aa_ex(ds):
 def get_zfull(ds, fn, which_grid):
     # get zfull field on "which_grid" ('rho', 'u', or 'v')
     G, S, T = zrfun.get_basic_info(fn)
-    zeta = 0 * ds.variables['zeta'].values.squeeze()
+    zeta = 0 * G['h']
     zr_mid = zrfun.get_z(G['h'], zeta, S, only_rho=True)
     zr_bot = -G['h'].reshape(1, G['M'], G['L']).copy()
     zr_top = zeta.reshape(1, G['M'], G['L']).copy()
@@ -288,8 +288,8 @@ def get_laym(ds, zfull, mask, vn, zlev):
     # Note: if mask came directly from the mask_rho field of a history file it is
     # 1 = water, and 0 = land, so it would be better to add nan's using this as a
     # test, but using mask == False works.
-    laym = np.ma.masked_where(np.isnan(lay), lay)
-    return laym
+    #laym = np.ma.masked_where(np.isnan(lay), lay)
+    return lay #laym
 
 def get_layer(fld, zfull, which_z):
     """
@@ -527,9 +527,9 @@ def get_section(ds, vn, x, y, in_dict):
 def maxmin(a):
     # find the value and location of the max and min of a 2D
     # masked array
-    jmax,imax = np.unravel_index(a.argmax(),a.shape)
+    jmax,imax = np.unravel_index(np.nanargmax(a),a.shape)
     amax = a[jmax,imax]
-    jmin,imin = np.unravel_index(a.argmin(),a.shape)
+    jmin,imin = np.unravel_index(np.nanargmin(a),a.shape)
     amin = a[jmin,imin]
     return amax, jmax, imax, amin, jmin, imin
 
