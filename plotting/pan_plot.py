@@ -3,17 +3,19 @@ Plot fields in one or more history files.
 
 Examples:
 
-Plot a single figure to the screen with default arguments
+Plot a single figure to the screen with testing-default arguments:
 run pan_plot -gtx cas6_v3_lo8b -test True
 
-Here is an example with explicit flags
+Here is an example with explicit flags:
 run pan_plot -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -lt snapshot -pt P_Chl_DO -avl False
 
-Save multiple plots with color limits all set to match those set by
-auto_lims() from the first plot
+And this is good for testing: it will prompt for plot type:
+run pan_plot -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -lt snapshot
 
-Use -avl False to have color limits all set to match those set by
-pinfo.vlims_dict.
+When using the default -avl True for multimple plots (e.g. when making a movie)
+the color limits will all be set to match those set by auto_lims() from the first plot.
+
+Use -avl False to have color limits all set to match those set by pinfo.vlims_dict.
 
 """
 import os, sys

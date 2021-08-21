@@ -405,18 +405,14 @@ def mask_edges(fld, lon, lat):
     return fld
     
 def get_section(ds, vn, x, y, in_dict):
-    
-    # PLOT CODE
-    from warnings import filterwarnings
-    filterwarnings('ignore') # skip a warning message
 
     # GET DATA
     G, S, T = zrfun.get_basic_info(in_dict['fn'])
     h = G['h']
-    zeta = ds['zeta'][:].squeeze()
+    zeta = ds['zeta'].values.squeeze()
     zr = zrfun.get_z(h, zeta, S, only_rho=True)
 
-    sectvar = ds[vn][:].squeeze()
+    sectvar = ds[vn].values.squeeze()
 
     L = G['L']
     M = G['M']
@@ -472,18 +468,13 @@ def get_section(ds, vn, x, y, in_dict):
         fld = d2[fname]
         fldi = (rowff*(colff*fld[row0, col0] + colf*fld[row0, col1])
         + rowf*(colff*fld[row1, col0] + colf*fld[row1, col1]))
-        if type(fldi) == np.ma.core.MaskedArray:
-            fldi = fldi.data # just the data, not the mask
         v2[fname] = fldi
     # 3-D fields
     v3 = dict()
     for fname in d3.keys():
         fld = d3[fname]
-        fldi = (rowff*(colff*fld[:, row0, col0] + colf*fld[:, row0, col1])
+        fldid = (rowff*(colff*fld[:, row0, col0] + colf*fld[:, row0, col1])
         + rowf*(colff*fld[:, row1, col0] + colf*fld[:, row1, col1]))
-        if type(fldi) == np.ma.core.MaskedArray:
-            fldid = fldi.data # just the data, not the mask
-            fldid[fldi.mask == True] = np.nan
         v3[fname] = fldid
     v3['dist'] = dista # distance in km
     # make "full" fields by padding top and bottom

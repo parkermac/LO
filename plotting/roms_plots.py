@@ -272,32 +272,21 @@ def P_layer(in_dict):
         plt.show()
 
 def P_sect(in_dict):
-    # plots a map and a section (distance, z)
-
-    fs=12
-    plt.rc('font', size=fs)
-
+    """
+    This plots a map and a section (distance, z), and makes sure
+    that the color limits are identical.  If the color limits are
+    set automatically then the section is the preferred field for
+    setting the limits.
+    
+    I think this works best with -avl False (the default).
+    """
     # START
-    fig = plt.figure(figsize=(15,6))
-    ds = nc.Dataset(in_dict['fn'])
-
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(20,9))
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
     # PLOT CODE
-    #vn = 'NO3'
     vn = 'phytoplankton'
-    # we allow for the possibility of using different color scales
-    # on the map and section for the same varible, and these follow
-    # the general scheme that the default is for them to be chosen
-    # automatically based on the first plot in a series.
-    if in_dict['auto_vlims']:
-        pinfo.vlims_dict[vn] = ()
-        pinfo.vlims_dict['sect_'+vn] = ()
-    # override
-    if vn == 'phytoplankton':
-        pinfo.vlims_dict[vn] = (0,25)
-        pinfo.vlims_dict['sect_'+vn] = (0,25)
-        pinfo.cmap_dict[vn] = 'Spectral_r'
-
-    #
     # GET DATA
     G, S, T = zrfun.get_basic_info(in_dict['fn'])
     # CREATE THE SECTION
@@ -306,22 +295,17 @@ def P_sect(in_dict):
         lon = G['lon_rho']
         lat = G['lat_rho']
         zdeep = -3500
-        #x = np.linspace(lon.min(), -124, 500)
-        if True:
-            x = np.linspace(lon.min(), lon.max(), 500)
-            y = 47 * np.ones(x.shape)
-        else:
-            y = np.linspace(lat.min(), lat.max(), 500)
-            x = -126 * np.ones(y.shape)
+        x = np.linspace(lon.min(), lon.max(), 500)
+        y = 47 * np.ones(x.shape)
     # or read in a section (or list of sections)
     else:
-        tracks_path = Ldir['data'] + 'tracks_new/'
+        tracks_path = Ldir['data'] / 'section_lines'
         tracks = ['Line_jdf_v0.p', 'Line_ps_main_v0.p']
         zdeep = -300
         xx = np.array([])
         yy = np.array([])
         for track in tracks:
-            track_fn = tracks_path + track
+            track_fn = tracks_path / track
             # get the track to interpolate onto
             pdict = pickle.load(open(track_fn, 'rb'))
             xx = np.concatenate((xx,pdict['lon_poly']))
@@ -339,64 +323,58 @@ def P_sect(in_dict):
                 x = np.concatenate((x, np.linspace(x0, x1, nn)[1:]))
                 y = np.concatenate((y, np.linspace(y0, y1, nn)[1:]))
     v2, v3, dist, idist0 = pfun.get_section(ds, vn, x, y, in_dict)
-
+    
+    # COLOR
+    # scaled section data
+    sf = pinfo.fac_dict[vn] * v3['sectvarf']
+    # now we use the scaled section as the preferred field for setting the
+    # color limits of both figures in the case -avl True
+    if in_dict['auto_vlims']:
+        pinfo.vlims_dict[vn] = pfun.auto_lims(sf)
+    
     # PLOTTING
     # map with section line
     ax = fig.add_subplot(1, 3, 1)
     cs = pfun.add_map_field(ax, ds, vn, pinfo.vlims_dict,
             cmap=pinfo.cmap_dict[vn], fac=pinfo.fac_dict[vn], do_mask_edges=True)
-    #fig.colorbar(cs)
-    #pfun.add_bathy_contours(ax, ds, txt=True)
+    # fig.colorbar(cs, ax=ax) # It is identical to that of the section
     pfun.add_coast(ax)
     aaf = [-125.5, -122.1, 46.8, 50.3] # focus domain
-    #ax.axis(pfun.get_aa(ds))
     ax.axis(aaf)
     pfun.dar(ax)
+    pfun.add_info(ax, in_dict['fn'], loc='upper_right')
     ax.set_title('Surface %s %s' % (pinfo.tstr_dict[vn],pinfo.units_dict[vn]))
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
-    #pfun.add_info(ax, in_dict['fn'])
-    #pfun.add_windstress_flower(ax, ds)
     # add section track
     ax.plot(x, y, '-r', linewidth=2)
     ax.plot(x[idist0], y[idist0], 'or', markersize=5, markerfacecolor='w',
         markeredgecolor='r', markeredgewidth=2)
     ax.set_xticks([-125, -124, -123])
     ax.set_yticks([47, 48, 49, 50])
-    #
     # section
     ax = fig.add_subplot(1, 3, (2, 3))
     ax.plot(dist, v2['zbot'], '-k', linewidth=2)
     ax.plot(dist, v2['zeta'], '-b', linewidth=1)
     ax.set_xlim(dist.min(), dist.max())
     ax.set_ylim(zdeep, 5)
-    sf = pinfo.fac_dict[vn] * v3['sectvarf']
-    # set section color limits
-    svlims = pinfo.vlims_dict['sect_'+vn]
-    if len(svlims) == 0:
-        svlims = pfun.auto_lims(sf)
-        pinfo.vlims_dict['sect_'+vn] = svlims
     # plot section
+    svlims = pinfo.vlims_dict[vn]
     cs = ax.pcolormesh(v3['distf'], v3['zrf'], sf,
                        vmin=svlims[0], vmax=svlims[1], cmap=pinfo.cmap_dict[vn])
-    fig.colorbar(cs)
-    # cs = ax.contour(v3['distf'], v3['zrf'], sf,
-    #     np.linspace(np.floor(svlims[0]), np.ceil(svlims[1]), 20),
-    #     colors='k', linewidths=0.5)
+    fig.colorbar(cs, ax=ax)
     ax.set_xlabel('Distance (km)')
     ax.set_ylabel('Z (m)')
     ax.set_title('Section %s %s' % (pinfo.tstr_dict[vn],pinfo.units_dict[vn]))
     fig.tight_layout()
-
     # FINISH
     ds.close()
-    if len(in_dict['fn_out']) > 0:
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
         plt.savefig(in_dict['fn_out'])
         plt.close()
     else:
         plt.show()
-
-    plt.rcdefaults()
 
 def P_superplot_salt(in_dict):
     # Plot salinity maps and section, with forcing time-series.
