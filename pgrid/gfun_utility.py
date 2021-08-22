@@ -1,26 +1,11 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Wed Mar 29 15:55:45 2017
-
-@author: PM5
-
 Utility functions for pgrid.
 """
 import numpy as np
-import zfun
-import h5py
-import matfun
-import netCDF4 as nc
+import xarray as xr
 import seawater as sw
 
-import os
-import sys
-pth = os.path.abspath('../../LiveOcean/alpha')
-if pth not in sys.path:
-    sys.path.append(pth)
-import zrfun
-import Lfun
+from lo_tools import Lfun, zfun, zrfun
 
 def simple_grid(aa, res):
     dlat = aa[3] - aa[2]
@@ -74,46 +59,18 @@ def stretched_grid(lon_list, x_res_list, lat_list, y_res_list):
     return np.array(plon_list), np.array(plat_list)
 
 def load_bathy_nc(t_fn):
-    ds = nc.Dataset(t_fn)
-    tlon_vec = ds['lon'][:]
-    tlat_vec = ds['lat'][:]
-    tz = ds['z'][:]
+    ds = xr.open_dataset(t_fn)
+    tlon_vec = ds['lon'].values
+    tlat_vec = ds['lat'].values
+    tz = ds['z'].values
     ds.close()
-    return tlon_vec, tlat_vec, tz
-
-def load_bathy(t_fn):
-    try:
-        a = h5py.File(t_fn)
-        aa = dict()
-        print(' using h5py')
-        for item in a.keys():
-            aa[item] = a[item][:]
-            #print('    ' + item + ' ' + str(aa[item].shape))
-        # reshaping because of how things are packed
-        tlon_vec = a['lon'][:].flatten()
-        tlat_vec = a['lat'][:].flatten()
-        tz = a['z'][:].T
-        #tmask = a['mask'][:].T
-        # The field "mask" was created in the topo processing
-        # as a matrix of ints with 1=ocean, 0=land.
-        # We will supersede it here with our own masking.
-        a.close()
-    except:
-        # for some reason h5py does not work with, for example,
-        # psdem/PS_183m.mat
-        tmat = matfun.loadmat(t_fn)
-        print(' using matfun')
-        # reshaping because of how things are packed
-        tlon_vec = tmat['lon'][:].flatten()
-        tlat_vec = tmat['lat'][:].flatten()
-        tz = tmat['z'][:]
     return tlon_vec, tlat_vec, tz
     
 def load_bathy2(t_fn, lon_vec, lat_vec):
     # load a section of the new NetCDF Smith-Sandwell bathy
-    ds = nc.Dataset(t_fn)
-    Lon = ds['lon'][:]
-    Lat = ds['lat'][:]
+    ds = xr.open_dataset(t_fn)
+    tlon_vec = ds['lon'].values
+    tlat_vec = ds['lat'].values
     i0 = zfun.find_nearest_ind(Lon, lon_vec[0])
     i1 = zfun.find_nearest_ind(Lon, lon_vec[-1])
     j0 = zfun.find_nearest_ind(Lat, lat_vec[0])
@@ -125,14 +82,10 @@ def load_bathy2(t_fn, lon_vec, lat_vec):
     return tlon_vec, tlat_vec, tz
 
 def make_nc(out_fn, plon, plat, lon, lat, z, m, dch):
-    # get rid of old version
-    try:
-        os.remove(out_fn)
-    except OSError:
-        pass # assume error was because the file did not exist
     
+    out_fn.unlink(missing_ok=True)
     # create new NetCDF file
-    foo = nc.Dataset(out_fn, 'w', format='NETCDF3_CLASSIC')
+    foo = xr.Dataset(out_fn)
     
     # create dimensions
     M, L = lon.shape # use ROMS teminology

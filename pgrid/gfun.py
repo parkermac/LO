@@ -1,22 +1,26 @@
-# -*- coding: utf-8 -*-
 """
 Organizational functions for pgrid.
 """
 
 # **** USER EDIT ********
-#gridname = 'aestus3'
-gridname = 'cas6'
+gridname = 'sal0'; base_gridname = 'cas6'; base_tag = 'v3'
 # **** END USER EDIT ****
 
-import os; import sys
-sys.path.append(os.path.abspath('../../LiveOcean/alpha'))
-import Lfun
-Ldir = Lfun.Lstart()
+from pathlib import Path
+from lo_tools import Lfun
 
-sys.path.append(os.path.abspath('../../LiveOcean/plotting'))
+Ldir = Lfun.Lstart(gridname=base_gridname, tag=base_tag)
 
-dir0 = Ldir['parent']
-pgdir = dir0 + 'ptools_output/pgrid/'
+def gstart():
+    """
+    This returns a dict of Path objects that tell where various things are,
+    or where they should go.
+    """
+    pgdir = Ldir['LOo'] / 'pgrid'
+    gdir = pgdir / gridname # where grid.nc will end up
+    ri_dir = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'tracks'
+    Gr ={'gridname': gridname,'pgdir': pgdir, 'gdir': gdir,'ri_dir': ri_dir}
+    return Gr
 
 def default_choices(Gr, wet_dry=False):
     # Default choices (can override in each case)    
@@ -34,12 +38,13 @@ def default_choices(Gr, wet_dry=False):
     dch['use_z_offset'] = True
     dch['z_offset'] = -1.06
     # specify topography files to use
-    dch['t_dir'] = Gr['dir0'] + 'ptools_data/topo/'    
+    t_dir = Ldir['data'] / 'topo'
+    dch['t_dir'] = Ldir['data'] / 'topo'
     # list of topo files: coarsest to finest
-    dch['t_list'] = ['srtm15/topo15.nc',
-              'cascadia/cascadia_gridded.nc',
-             'psdem/PS_183m.nc',
-             'ttp_patch/TTP_Regional_27m_patch.nc']
+    dch['t_list'] = [t_dir / 'srtm15' / 'topo15.nc',
+              t_dir / 'cascadia' / 'cascadia_gridded.nc',
+             t_dir / 'psdem' / 'PS_183m.nc',
+             t_dir / 'ttp_patch' / 'TTP_Regional_27m_patch.nc']
  
     # MASKING
     # list of existing masks to work from
@@ -67,46 +72,16 @@ def default_choices(Gr, wet_dry=False):
         
     return dch
 
-def gstart(gridname=gridname):
-    
-    if gridname in ['aestus1', 'aestus2']:
-        ri_dir = dir0 + 'ptools_output/river/analytical/'
-    else:
-        ri_dir = dir0 + 'ptools_output/river/pnw_all_2016_07/'
-    
-    gdir = pgdir + gridname + '/'
-    Gr ={'gridname': gridname, 'dir0': dir0, 'pgdir': pgdir, 'gdir': gdir,
-         'ri_dir': ri_dir}
-    return Gr
-
-def select_file(Gr, using_old_grid=False):
+def select_file(Gr):
     # interactive selection
-    if using_old_grid==True:
-        fn_list = []
-        dir0 = Ldir['parent'] + 'LiveOcean_data/grids/'
-        gn_list = ['cascadia1', 'cascadia2']
-        for gn in gn_list:
-            fn_list.append(dir0 + gn + '/grid.nc')
-    elif using_old_grid==False:
-        print('\n** %s in <<%s>> **\n' % ('Choose file to edit', Gr['gridname']))
-        fn_list_raw = os.listdir(Gr['gdir'])
-        fn_list = []
-        for item in fn_list_raw:
-            if item[-3:] == '.nc':
-                fn_list.append(item)
-        fn_list.sort()
-    Nfn = len(fn_list)
-    fn_dict = dict(zip(range(Nfn), fn_list))
-    for nfn in range(Nfn):
-        print(str(nfn) + ': ' + fn_list[nfn])
-    my_nfn = int(input('-- Input number -- '))
-    fn = fn_dict[my_nfn]
+    fn = choose_item(Gr['gdir'], tag='.nc', itext='** Choose grid from list **')
     return fn
 
 def increment_filename(fn, tag='_m'):
+    fns = str(fn)
     # create the new file name
-    gni = fn.find(tag)
-    new_num = ('00' + str(int(fn[gni+2: gni+4]) + 1))[-2:]
-    fn_new = fn.replace(fn[gni:gni+4], tag + new_num)
-
+    gni = fns.find(tag)
+    new_num = ('00' + str(int(fns[gni+2: gni+4]) + 1))[-2:]
+    fns_new = fns.replace(fns[gni:gni+4], tag + new_num)
+    fn_new = Path(fns_new)
     return fn_new
