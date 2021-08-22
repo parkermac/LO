@@ -70,7 +70,7 @@ while mdt <= dt1:
 # (this is a bit titchy because of NetCDF 3 limitations on strings, forcing them
 # to be arrays of characters)
 mds = mds_list[0]
-fn = Path('/boildat1').absolute() / 'parker' / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
+fn = Path('/boildat1') / 'parker' / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
 ds = xr.open_dataset(fn)
 rn = ds['river_name'].values
 NR = rn.shape[1]
