@@ -22,8 +22,19 @@ the NPZDOC variables.
 
 """
 
-from lo_tools import Lfun, zrfun
-from lo_tools import extract_argfun as exfun
+if True:
+    # do this to run on boiler since it does not have a proper loenv environment
+    import sys
+    from pathlib import Path
+    pth = Path(__file__).absolute().parent.parent / 'lo_tools' / 'lo_tools'
+    if str(pth) not in sys.path:
+        sys.path.append(str(pth))
+    import Lfun, zrfun
+    import extract_argfun as exfun
+else:
+    from lo_tools import Lfun, zrfun
+    from lo_tools import extract_argfun as exfun
+    
 Ldir = exfun.intro() # this handles the argument passing
 
 from datetime import datetime, timedelta
