@@ -22,18 +22,8 @@ the NPZDOC variables.
 
 """
 
-if True:
-    # do this to run on boiler since it does not have a proper loenv environment
-    import sys
-    from pathlib import Path
-    pth = Path(__file__).absolute().parent.parent.parent / 'lo_tools' / 'lo_tools'
-    if str(pth) not in sys.path:
-        sys.path.append(str(pth))
-    import Lfun, zrfun
-    import extract_argfun as exfun
-else:
-    from lo_tools import Lfun, zrfun
-    from lo_tools import extract_argfun as exfun
+from lo_tools import Lfun, zrfun
+from lo_tools import extract_argfun as exfun
     
 Ldir = exfun.intro() # this handles the argument passing
 
@@ -42,6 +32,7 @@ from time import time
 import numpy as np
 import pandas as pd
 import xarray as xr
+from pathlib import Path
     
 ds0 = Ldir['ds0']
 ds1 = Ldir['ds1']
@@ -79,7 +70,7 @@ while mdt <= dt1:
 # (this is a bit titchy because of NetCDF 3 limitations on strings, forcing them
 # to be arrays of characters)
 mds = mds_list[0]
-fn = Ldir['parent'] / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
+fn = Path('/boildat1').absolute() / 'parker' / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
 ds = xr.open_dataset(fn)
 rn = ds['river_name'].values
 NR = rn.shape[1]
