@@ -604,7 +604,7 @@ def P_superplot_salt(in_dict):
 
     # FINISH
     ds.close()
-    if len(in_dict['fn_out']) > 0:
+    if len(str(in_dict['fn_out'])) > 0:
         plt.savefig(in_dict['fn_out'])
         plt.close()
     else:
@@ -843,7 +843,7 @@ def P_superplot_oxygen(in_dict):
 
     # FINISH
     ds.close()
-    if len(in_dict['fn_out']) > 0:
+    if len(str(in_dict['fn_out'])) > 0:
         plt.savefig(in_dict['fn_out'])
         plt.close()
     else:
@@ -1076,7 +1076,7 @@ def P_superplot_chl(in_dict):
 
     # FINISH
     ds.close()
-    if len(in_dict['fn_out']) > 0:
+    if len(str(in_dict['fn_out'])) > 0:
         plt.savefig(in_dict['fn_out'])
         plt.close()
     else:
