@@ -9,7 +9,9 @@ python extract_moor.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt h
 NOTE: the quotes and space are required to feed it a negative longitude.
 
 The performance on this is excellent, taking about 24 minutes for a year of hourly records
-on perigee with cas6_v3_lo8b and all flags True (IF we use Nproc = 100).
+on perigee with cas6_v3_lo8b and all flags True, IF we use Nproc = 100.
+
+Using the more standard Nproc = 10, it takes 1.2 hours for a year on perigee.
 
 """
 

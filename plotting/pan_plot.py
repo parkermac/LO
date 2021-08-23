@@ -47,6 +47,7 @@ parser.add_argument('-pt', '--plot_type', type=str)
 #  e.g. make a movie, override auto color limits
 parser.add_argument('-mov', '--make_movie', default=False, type=Lfun.boolean_string)
 parser.add_argument('-avl', '--auto_vlims', default=True, type=Lfun.boolean_string)
+parser.add_argument('-save', '--save_plot', default=False, type=Lfun.boolean_string)
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 
 # do things with the arguments
@@ -130,19 +131,23 @@ if (Ldir['list_type'] == 'allhours') and Ldir['testing']:
     fn_list = fn_list[:4]
 
 # PLOTTING
+outdir0 = Ldir['LOo'] / 'plots'
+Lfun.make_dir(outdir0)
 plt.close('all')
 
 if len(fn_list) == 1:
     # plot a single image to screen
     fn = fn_list[0]
     in_dict['fn'] = fn
-    in_dict['fn_out'] = ''
+    if Ldir['save_plot'] == True:
+        in_dict['fn_out'] = outdir0 / (Ldir['list_type'] + '_'
+            + Ldir['plot_type'] + '_' + Ldir['gtagex'] + '.png')
+    else:
+        in_dict['fn_out'] = ''
     whichplot(in_dict)
     
 elif len(fn_list) > 1:
     # prepare a directory for results
-    outdir0 = Ldir['LOo'] / 'plots'
-    Lfun.make_dir(outdir0, clean=False)
     outdir = outdir0 / (Ldir['list_type'] + '_' + Ldir['plot_type'] + '_' + Ldir['gtagex'])
     Lfun.make_dir(outdir, clean=True)
     # plot to a folder of files

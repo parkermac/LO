@@ -195,10 +195,12 @@ def filt_AB8d(data):
 def lowpass(data, f='hanning', n=40, nanpad=True):
     """
     A replacement for almost all previous filter code.
+    f = 'hanning' (default) or 'godin'
     
     Input: ND numpy array, any number of dimensions, with time on axis 0.
+    
     Output: Array of the same size, filtered with Hanning window of length n,
-        or the Goding filter (hourly data only) padded with nan's.
+        or the Godin filter (hourly data only) padded with nan's.
     """
     if n == 1:
         return data

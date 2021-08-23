@@ -1,5 +1,5 @@
 """
-Module of basic utilities for plotting.  Used heavily in plotting/roms_plot.py
+Module of basic utilities for plotting.  Used heavily in plotting/roms_plots.py
 """
 
 import sys
@@ -14,9 +14,9 @@ import numpy as np
 from datetime import datetime, timedelta
 import pytz
 
-if Ldir['lo_env'] == 'pm_mac': # mac version
+if '_mac' in Ldir['lo_env']: # mac version
     pass
-else: # regular (remote, linux) version
+else: # remote/linux version
     import matplotlib as mpl
     mpl.use('Agg')
 # do these after the mpl.use() call to get remote plotting to work
@@ -244,6 +244,7 @@ def add_info(ax, fn, fs=12, loc='lower_right'):
         rotation='vertical', fontsize=fs)
 
 def get_dt_local(dt, tzl='US/Pacific'):
+    # take a model datetime (assumed to be UTC) and return local datetime
     tz_utc = pytz.timezone('UTC')
     tz_local = pytz.timezone(tzl)
     dt_utc = dt.replace(tzinfo=tz_utc)
@@ -288,8 +289,7 @@ def get_laym(ds, zfull, mask, vn, zlev):
     # Note: if mask came directly from the mask_rho field of a history file it is
     # 1 = water, and 0 = land, so it would be better to add nan's using this as a
     # test, but using mask == False works.
-    #laym = np.ma.masked_where(np.isnan(lay), lay)
-    return lay #laym
+    return lay
 
 def get_layer(fld, zfull, which_z):
     """
