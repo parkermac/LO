@@ -70,7 +70,7 @@ a[0, :] = 77 # positional and by integer label, like numpy
 a.loc[2,'b'] = 88 # loc or "location": positional and coordinate label, like pandas
 # - whereas these two ways can only return a new array, not change values in the array
 aa = a.isel(x=0) # isel or "integer select":  by dimension name and integer label
-bb = a.sel(y='b') # sel or "select": by dimension name and coordinate label
+bb = a.sel(y='b') # sel or "select": by dimension name and coordinate label, or a list of labels
 
 # plotting
 t = pd.date_range('1/1/2021','1/10/2021', freq='H') # xarray loves pandas time Index objects

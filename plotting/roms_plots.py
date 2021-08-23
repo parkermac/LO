@@ -388,27 +388,26 @@ def P_superplot_salt(in_dict):
     cmap = 'Spectral_r'
 
     # get model fields
-    fn = in_dict['fn']
-    ds = nc.Dataset(fn)
+    ds = xr.open_dataset(in_dict['fn'])
     
-    gtagex = in_dict['fn'].split('/')[-3]
-    year_str = in_dict['fn'].split('/')[-2].split('.')[0][1:]
+    gtagex = str(in_dict['fn']).split('/')[-3]
+    year_str = str(in_dict['fn']).split('/')[-2].split('.')[0][1:]
 
     # get forcing fields
-    ffn = Ldir['LOo'] + 'superplot/forcing_'+gtagex+'_'+year_str+'.p'
+    ffn = Ldir['LOo'] / 'extract' / gtagex / 'superplot' / ('forcing_' + gtagex + '_' + year_str + '.p')
     fdf = pd.read_pickle(ffn)
     fdf['yearday'] = fdf.index.dayofyear - 0.5 # .5 to 364.5
 
     # get section
     G, S, T = zrfun.get_basic_info(in_dict['fn'])
     # read in a section (or list of sections)
-    tracks_path = Ldir['data'] + 'tracks_new/'
+    tracks_path = Ldir['data'] / 'section_lines'
     tracks = ['Line_ps_main_v0.p']
     zdeep = -300
     xx = np.array([])
     yy = np.array([])
     for track in tracks:
-        track_fn = tracks_path + track
+        track_fn = tracks_path / track
         # get the track to interpolate onto
         pdict = pickle.load(open(track_fn, 'rb'))
         xx = np.concatenate((xx,pdict['lon_poly']))
@@ -433,9 +432,9 @@ def P_superplot_salt(in_dict):
 
     # Full map
     ax = fig.add_subplot(131)
-    lon = ds['lon_psi'][:]
-    lat = ds['lat_psi'][:]
-    v =ds[vn][0, -1, 1:-1, 1:-1]
+    lon = ds['lon_psi'].values
+    lat = ds['lat_psi'].values
+    v =ds[vn][0, -1, 1:-1, 1:-1].values
     fac=pinfo.fac_dict[vn]
     vv = fac * v
     vv[:, :6] = np.nan
@@ -450,9 +449,12 @@ def P_superplot_salt(in_dict):
     pfun.draw_box(ax, aa, color='c', alpha=.5, linewidth=5, inset=.01)
     # labels
     ax.text(.95, .07, 'LiveOcean\nSalinity\n'
-        + datetime.strftime(T['tm'], '%Y'), fontsize=fs, color='k',
+        + datetime.strftime(T['dt'][0], '%Y'), fontsize=fs, color='k',
         transform=ax.transAxes, horizontalalignment='center',
         fontweight='bold')
+    ax.text(.95, .03, datetime.strftime(T['dt'][0], '%Y.%m.%d'), fontsize=fs*.7, color='k',
+        transform=ax.transAxes, horizontalalignment='center')
+    
     ax.text(.99,.97,'S range\n'+ str(vlims), transform=ax.transAxes,
         va='top', ha='right', c='orange', size=.6*fs, weight='bold')
 
@@ -502,7 +504,7 @@ def P_superplot_salt(in_dict):
     ax.set_axis_off()
 
     # get the day
-    tm = T['tm'] # datetime
+    tm = T['dt'][0] # datetime
     TM = datetime(tm.year, tm.month, tm.day)
     # get yearday
     yearday = fdf['yearday'].values
@@ -607,41 +609,40 @@ def P_superplot_salt(in_dict):
         plt.close()
     else:
         plt.show()
-
+        
 def P_superplot_oxygen(in_dict):
     # Plot bottom oxygen maps and section, with forcing time-series.
     # Super clean design.  Updated to avoid need for tide data, which it
     # now just gets from the same mooring extraction it uses for wind.
 
     vn = 'oxygen'
-    vlims = (0, 8) # full map
-    vlims2 = (0, 8) # PS map
-    vlims3 = (0, 8) # PS section
+    vlims = (0, 10) # full map
+    vlims2 = (0, 10) # PS map
+    vlims3 = (0, 10) # PS section
     from cmocean import cm
     cmap = cm.oxy
 
     # get model fields
-    fn = in_dict['fn']
-    ds = nc.Dataset(fn)
+    ds = xr.open_dataset(in_dict['fn'])
     
-    gtagex = in_dict['fn'].split('/')[-3]
-    year_str = in_dict['fn'].split('/')[-2].split('.')[0][1:]
+    gtagex = str(in_dict['fn']).split('/')[-3]
+    year_str = str(in_dict['fn']).split('/')[-2].split('.')[0][1:]
 
     # get forcing fields
-    ffn = Ldir['LOo'] + 'superplot/forcing_'+gtagex+'_'+year_str+'.p'
+    ffn = Ldir['LOo'] / 'extract' / gtagex / 'superplot' / ('forcing_' + gtagex + '_' + year_str + '.p')
     fdf = pd.read_pickle(ffn)
     fdf['yearday'] = fdf.index.dayofyear - 0.5 # .5 to 364.5
 
     # get section
     G, S, T = zrfun.get_basic_info(in_dict['fn'])
     # read in a section (or list of sections)
-    tracks_path = Ldir['data'] + 'tracks_new/'
+    tracks_path = Ldir['data'] / 'section_lines'
     tracks = ['Line_HC_thalweg_long.p']
     zdeep = -300
     xx = np.array([])
     yy = np.array([])
     for track in tracks:
-        track_fn = tracks_path + track
+        track_fn = tracks_path / track
         # get the track to interpolate onto
         pdict = pickle.load(open(track_fn, 'rb'))
         xx = np.concatenate((xx,pdict['lon_poly']))
@@ -666,9 +667,9 @@ def P_superplot_oxygen(in_dict):
 
     # Full map
     ax = fig.add_subplot(131)
-    lon = ds['lon_psi'][:]
-    lat = ds['lat_psi'][:]
-    v =ds[vn][0, 0, 1:-1, 1:-1]
+    lon = ds['lon_psi'].values
+    lat = ds['lat_psi'].values
+    v =ds[vn][0, 0, 1:-1, 1:-1].values
     fac=pinfo.fac_dict[vn]
     vv = fac * v
     vv[:, :6] = np.nan
@@ -682,17 +683,19 @@ def P_superplot_oxygen(in_dict):
     aa = [-123.5, -122.1, 47.03, 48.8]
     pfun.draw_box(ax, aa, color='c', alpha=.5, linewidth=5, inset=.01)
     # labels
-    ax.text(.95, .03, 'LiveOcean\nBottom Oxygen\n'
-        + datetime.strftime(T['tm'], '%Y'), fontsize=fs, color='k',
+    ax.text(.95, .07, 'LiveOcean\nBottom Oxygen\n'
+        + datetime.strftime(T['dt'][0], '%Y'), fontsize=fs, color='k',
         transform=ax.transAxes, horizontalalignment='center',
         fontweight='bold')
-    # ax.text(.99,.97,'DO range\n'+ str(vlims), transform=ax.transAxes,
-    #     va='top', ha='right', c='orange', size=.6*fs, weight='bold')
+    ax.text(.95, .03, datetime.strftime(T['dt'][0], '%Y.%m.%d'), fontsize=fs*.7, color='k',
+        transform=ax.transAxes, horizontalalignment='center')
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
     cbaxes = inset_axes(ax, width="40%", height="4%", loc='upper right', borderpad=2) 
     cb = fig.colorbar(cs, cax=cbaxes, orientation='horizontal')
     cb.ax.tick_params(labelsize=.85*fs)
     ax.text(1, .85, r'$[mg\ L^{-1}]$', transform=ax.transAxes, fontsize=fs, ha='right')
+    # ax.text(.99,.97,'S range\n'+ str(vlims), transform=ax.transAxes,
+    #     va='top', ha='right', c='orange', size=.6*fs, weight='bold')
 
     # PS map
     ax = fig.add_subplot(132)
@@ -740,7 +743,7 @@ def P_superplot_oxygen(in_dict):
     ax.set_axis_off()
 
     # get the day
-    tm = T['tm'] # datetime
+    tm = T['dt'][0] # datetime
     TM = datetime(tm.year, tm.month, tm.day)
     # get yearday
     yearday = fdf['yearday'].values
@@ -845,7 +848,7 @@ def P_superplot_oxygen(in_dict):
         plt.close()
     else:
         plt.show()
-
+        
 def P_superplot_chl(in_dict):
     # Plot phytoplankton maps and section, with forcing time-series.
     # Super clean design.  Updated to avoid need for tide data, which it
@@ -856,29 +859,28 @@ def P_superplot_chl(in_dict):
     vlims2 = (0, 25) # PS map
     vlims3 = (0, 25) # PS section
     cmap = 'Spectral_r'
-
-    # get model fields
-    fn = in_dict['fn']
-    ds = nc.Dataset(fn)
     
-    gtagex = in_dict['fn'].split('/')[-3]
-    year_str = in_dict['fn'].split('/')[-2].split('.')[0][1:]
+    # get model fields
+    ds = xr.open_dataset(in_dict['fn'])
+    
+    gtagex = str(in_dict['fn']).split('/')[-3]
+    year_str = str(in_dict['fn']).split('/')[-2].split('.')[0][1:]
 
     # get forcing fields
-    ffn = Ldir['LOo'] + 'superplot/forcing_'+gtagex+'_'+year_str+'.p'
+    ffn = Ldir['LOo'] / 'extract' / gtagex / 'superplot' / ('forcing_' + gtagex + '_' + year_str + '.p')
     fdf = pd.read_pickle(ffn)
     fdf['yearday'] = fdf.index.dayofyear - 0.5 # .5 to 364.5
 
     # get section
     G, S, T = zrfun.get_basic_info(in_dict['fn'])
     # read in a section (or list of sections)
-    tracks_path = Ldir['data'] + 'tracks_new/'
+    tracks_path = Ldir['data'] / 'section_lines'
     tracks = ['Line_ps_main_v0.p']
     zdeep = -300
     xx = np.array([])
     yy = np.array([])
     for track in tracks:
-        track_fn = tracks_path + track
+        track_fn = tracks_path / track
         # get the track to interpolate onto
         pdict = pickle.load(open(track_fn, 'rb'))
         xx = np.concatenate((xx,pdict['lon_poly']))
@@ -903,13 +905,13 @@ def P_superplot_chl(in_dict):
 
     # Full map
     ax = fig.add_subplot(131)
-    lon = ds['lon_psi'][:]
-    lat = ds['lat_psi'][:]
-    v =ds[vn][0, -1, 1:-1, 1:-1]
+    lon = ds['lon_psi'].values
+    lat = ds['lat_psi'].values
+    v =ds[vn][0, -1, 1:-1, 1:-1].values
     fac=pinfo.fac_dict[vn]
     vv = fac * v
     vv[:, :6] = np.nan
-    vv[:6, -6:] = np.nan
+    vv[:6, :] = np.nan
     cs = ax.pcolormesh(lon, lat, vv, vmin=vlims[0], vmax=vlims[1], cmap=cmap)
     pfun.add_coast(ax)
     ax.axis(pfun.get_aa(ds))
@@ -920,11 +922,13 @@ def P_superplot_chl(in_dict):
     pfun.draw_box(ax, aa, color='c', alpha=.5, linewidth=5, inset=.01)
     # labels
     ax.text(.95, .07, 'LiveOcean\nPhytoplankton\n'+pinfo.units_dict[vn]+'\n'
-        + datetime.strftime(T['tm'], '%Y'), fontsize=fs, color='k',
+        + datetime.strftime(T['dt'][0], '%Y'), fontsize=fs, color='k',
         transform=ax.transAxes, horizontalalignment='center',
         fontweight='bold')
     ax.text(.99,.97,'range\n'+ str(vlims), transform=ax.transAxes,
         va='top', ha='right', c='orange', size=.6*fs, weight='bold')
+    ax.text(.95, .03, datetime.strftime(T['dt'][0], '%Y.%m.%d'), fontsize=fs*.7, color='k',
+        transform=ax.transAxes, horizontalalignment='center')
 
     # PS map
     ax = fig.add_subplot(132)
@@ -945,9 +949,10 @@ def P_superplot_chl(in_dict):
         markeredgecolor='k')
     ax.plot(x[n_tn], y[n_tn], marker='o', color=sect_color, markersize=10,
         markeredgecolor='k')
-    # ax.text(.93,.97,'range\n'+ str(vlims2), transform=ax.transAxes,
+    # ax.text(.93,.97,'S range\n'+ str(vlims2), transform=ax.transAxes,
     #     va='top', ha='right', c='orange', size=.6*fs, weight='bold')
     
+
     # Section
     ax =  fig.add_subplot(433)
     ax.plot(dist, v2['zeta']+5, linestyle='--', color='k', linewidth=2)
@@ -961,17 +966,17 @@ def P_superplot_chl(in_dict):
     # plot section
     cs = ax.pcolormesh(v3['distf'], v3['zrf'], sf,
                        vmin=vlims3[0], vmax=vlims3[1], cmap=cmap)
-    # ax.text(.99,.4,'range\n'+ str(vlims3), transform=ax.transAxes,
+    # ax.text(.99,.4,'S range\n'+ str(vlims3), transform=ax.transAxes,
     #     va='bottom', ha='right', c='orange', size=.6*fs, weight='bold')
                        
     #fig.colorbar(cs)
     # labels
-    ax.text(0, 0, 'SECTION\nPuget Sound', fontsize=fs, color='b',
+    ax.text(0, 0, 'SECTION\nHood Canal', fontsize=fs, color='b',
         transform=ax.transAxes)
     ax.set_axis_off()
 
     # get the day
-    tm = T['tm'] # datetime
+    tm = T['dt'][0] # datetime
     TM = datetime(tm.year, tm.month, tm.day)
     # get yearday
     yearday = fdf['yearday'].values
