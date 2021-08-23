@@ -638,7 +638,7 @@ def P_superplot_oxygen(in_dict):
     # read in a section (or list of sections)
     tracks_path = Ldir['data'] / 'section_lines'
     tracks = ['Line_HC_thalweg_long.p']
-    zdeep = -300
+    zdeep = -250
     xx = np.array([])
     yy = np.array([])
     for track in tracks:
@@ -971,7 +971,7 @@ def P_superplot_chl(in_dict):
                        
     #fig.colorbar(cs)
     # labels
-    ax.text(0, 0, 'SECTION\nHood Canal', fontsize=fs, color='b',
+    ax.text(0, 0, 'SECTION\nPuget Sound', fontsize=fs, color='b',
         transform=ax.transAxes)
     ax.set_axis_off()
 
