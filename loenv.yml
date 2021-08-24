@@ -33,6 +33,7 @@ dependencies:
   - openpyxl
   - pytide
   - sqlalchemy
+  - git
   - pip
   - pip:
     - -e lo_tools # package of local modules
