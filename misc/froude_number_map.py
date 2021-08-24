@@ -43,14 +43,14 @@ u[np.isnan(u)] = 0
 v[np.isnan(v)] = 0
 uu = (u[:, 1:] + u[:, :-1])/2
 vv = (v[1:, :] + v[:-1, :])/2
-spd = np.sqrt(uu**2 + vv**2)
-spd[np.isnan(drho)] = np.nan
-spd[spd < .001] = .001 # avoid divide by zero errors
+spd2 = uu**2 + vv**2
+spd2[np.isnan(drho)] = np.nan
+spd2[spd2 < .001] = .001 # avoid divide by zero errors
 
 # approximate Richardson number
 rho0 = ds.rho0.values
 g = 9.8
-Ri = g * drho * h / (rho0 * spd)
+Ri = g * drho * h / (rho0 * spd2)
 
 # psi_grid coordinates
 x, y = np.meshgrid(ds.lon_u.values[0,ix0-1:ix1], ds.lat_v.values[iy0-1:iy1,0])
@@ -74,7 +74,7 @@ ax.set_xticks(xt)
 ax.set_yticks(yt)
 
 ax = fig.add_subplot(132)
-cs = ax.pcolormesh(x, y, spd, vmin=0, vmax=2, cmap=cm.speed)
+cs = ax.pcolormesh(x, y, np.sqrt(spd2), vmin=0, vmax=2, cmap=cm.speed)
 fig.colorbar(cs, ax=ax)
 pfun.dar(ax)
 pfun.add_coast(ax)
