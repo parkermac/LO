@@ -74,6 +74,100 @@ def P_basic(in_dict):
     else:
         plt.show()
         
+def P_ri(in_dict):
+    """
+    Simplified Richardson number
+    """
+    # START
+    fs = 10
+    pfun.start_plot(fs=fs, figsize=(20,10))
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
+    
+    # PLOT CODE
+    xrho = ds['lon_rho'][0,:].values
+    yrho = ds['lat_rho'][:,0].values
+
+    # define box
+    aa = [-123.25, -122.1, 47, 48.75]
+    ix0 = zfun.find_nearest_ind(xrho, aa[0])
+    ix1 = zfun.find_nearest_ind(xrho, aa[1])
+    iy0 = zfun.find_nearest_ind(yrho, aa[2])
+    iy1 = zfun.find_nearest_ind(yrho, aa[3])
+
+    h = ds.h[iy0:iy1, ix0:ix1].values
+    rho_bot = ds.rho[0, 0, iy0:iy1, ix0:ix1].values
+    rho_top = ds.rho[0, -1, iy0:iy1, ix0:ix1].values
+    drho = rho_bot - rho_top
+    u = ds.ubar[0, iy0:iy1, ix0-1:ix1].values
+    v = ds.vbar[0, iy0-1:iy1, ix0:ix1].values
+    u[np.isnan(u)] = 0
+    v[np.isnan(v)] = 0
+    uu = (u[:, 1:] + u[:, :-1])/2
+    vv = (v[1:, :] + v[:-1, :])/2
+    spd = np.sqrt(uu**2 + vv**2)
+    spd[np.isnan(drho)] = np.nan
+    spd[spd < .001] = .001 # avoid divide by zero errors
+
+    # approximate Richardson number
+    rho0 = ds.rho0.values
+    g = 9.8
+    Ri = g * drho * h / (rho0 * spd)
+
+    # psi_grid coordinates
+    x, y = np.meshgrid(ds.lon_u.values[0,ix0-1:ix1], ds.lat_v.values[iy0-1:iy1,0])
+
+    # PLOTTING
+    plt.close('all')
+    pfun.start_plot(fs=10, figsize=(18,10))
+    fig = plt.figure()
+
+    xt = [-123.2, -122.2]
+    yt = [47, 47.5, 48, 48.5]
+
+    ax = fig.add_subplot(131)
+    cs = ax.pcolormesh(x, y, drho, vmin=0, vmax=5, cmap=cm.dense)
+    fig.colorbar(cs, ax=ax)
+    pfun.dar(ax)
+    pfun.add_coast(ax)
+    ax.axis(aa)
+    ax.set_title(r'$\Delta\rho\ [kg\ m^{-3}]$')
+    ax.set_xticks(xt)
+    ax.set_yticks(yt)
+
+    ax = fig.add_subplot(132)
+    cs = ax.pcolormesh(x, y, spd, vmin=0, vmax=2, cmap=cm.speed)
+    fig.colorbar(cs, ax=ax)
+    pfun.dar(ax)
+    pfun.add_coast(ax)
+    ax.axis(aa)
+    ax.set_title(r'Speed $[m\ s^{-1}]$')
+    ax.set_xticks(xt)
+    ax.set_yticks(yt)
+    ax.set_yticklabels([])
+
+    ax = fig.add_subplot(133)
+    cs = ax.pcolormesh(x, y, 4*Ri, vmin=0, vmax = 2, cmap='bwr_r')
+    fig.colorbar(cs, ax=ax)
+    pfun.dar(ax)
+    pfun.add_coast(ax)
+    ax.axis(aa)
+    ax.set_title(r'$4 x Ri$')
+    ax.set_xticks(xt)
+    ax.set_yticks(yt)
+    ax.set_yticklabels([])
+        
+    fig.tight_layout()
+    
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+        
 def P_Chl_DO(in_dict):
     # START
     fs = 14
@@ -508,8 +602,6 @@ def P_splash(in_dict):
     else:
         plt.show()
 
-    
-    
 def P_superplot_salt(in_dict):
     # Plot salinity maps and section, with forcing time-series.
     # Super clean design.  Updated to avoid need for tide data, which it
@@ -743,7 +835,7 @@ def P_superplot_salt(in_dict):
         plt.close()
     else:
         plt.show()
-        
+
 def P_superplot_oxygen(in_dict):
     # Plot bottom oxygen maps and section, with forcing time-series.
     # Super clean design.  Updated to avoid need for tide data, which it
@@ -982,7 +1074,7 @@ def P_superplot_oxygen(in_dict):
         plt.close()
     else:
         plt.show()
-        
+
 def P_superplot_chl(in_dict):
     # Plot phytoplankton maps and section, with forcing time-series.
     # Super clean design.  Updated to avoid need for tide data, which it
