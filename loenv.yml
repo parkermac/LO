@@ -32,6 +32,7 @@ dependencies:
   - xlrd
   - openpyxl
   - pytide
+  - sqlalchemy
   - pip
   - pip:
     - -e lo_tools # package of local modules
