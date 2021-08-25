@@ -43,9 +43,9 @@ if Ldir['lo_env'] == 'pm_mac':
     Ldir['run_type'] == 'backfill'
 elif 'boiler' in Ldir['lo_env']:
     wrf_dir = Path('/data1/darr/wrf_crons/wrfout')
-else:
-    print('WRF file location not yet supported on this machine.')
-    sys.exit()
+# else:
+#     print('WRF file location not yet supported on this machine.')
+#     sys.exit()
     
 # Create list of hours
 if Ldir['run_type'] == 'backfill':
