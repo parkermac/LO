@@ -256,12 +256,12 @@ while dt <= dt1:
             tt0 = time()
             # Copy history files to boiler and clean up
             # (i) make sure the output directory exists
-            cmd_list = ['ssh', 'parker@boiler.ocean.washington.edu', 'mkdir -p /data1/parker/LO_roms/'+Ldir['gtagex']]
+            cmd_list = ['ssh', 'parker@apogee.ocean.washington.edu', 'mkdir -p /dat1/parker/LO_roms/'+Ldir['gtagex']]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Make output directory on boiler', args.verbose)
             # (ii) move the contents of roms_out_dir
-            cmd_list = ['scp','-r',str(roms_out_dir), 'parker@boiler.ocean.washington.edu:/data1/parker/LO_roms/'+Ldir['gtagex']]
+            cmd_list = ['scp','-r',str(roms_out_dir), 'parker@apogee.ocean.washington.edu:/dat1/parker/LO_roms/'+Ldir['gtagex']]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Copy ROMS output to boiler', args.verbose)
