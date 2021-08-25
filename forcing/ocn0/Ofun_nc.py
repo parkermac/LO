@@ -24,48 +24,48 @@ def make_clm_file(Ldir, nc_dir, fh_dir, c_dict, dt_list, S, G):
     for dt in dt_list:
         dtm_list.append(Lfun.datetime_to_modtime(dt))        
     for vn in ['salt', 'temp', 'v3d', 'v2d', 'zeta', 'ocean']:
-        vv = foo.createVariable(vn+'_time', float, (vn+'_time',))
+        vv = foo.createVariable(vn+'_time', float, (vn+'_time',), zlib=True)
         vv.units = 'seconds since 1970.01.01 UTC'
         vv[:] = np.array(dtm_list)
     # add 2d field data
-    vv = foo.createVariable('zeta', float, ('zeta_time', 'eta_rho', 'xi_rho'))
+    vv = foo.createVariable('zeta', float, ('zeta_time', 'eta_rho', 'xi_rho'), zlib=True)
     vv.long_name = 'sea surface height climatology'
     vv.units = 'meter'
     for t in c_dict.keys():
         c = c_dict[t]
         vv[t,:,:] = c['ssh']
-    vv = foo.createVariable('ubar', float, ('v2d_time', 'eta_u', 'xi_u'))
+    vv = foo.createVariable('ubar', float, ('v2d_time', 'eta_u', 'xi_u'), zlib=True)
     vv.long_name = 'vertically averaged u-momentum climatology'
     vv.units = 'meter second-1'
     for t in c_dict.keys():
         c = c_dict[t]
         vv[t,:,:] = c['ubar']
-    vv = foo.createVariable('vbar', float, ('v2d_time', 'eta_v', 'xi_v'))
+    vv = foo.createVariable('vbar', float, ('v2d_time', 'eta_v', 'xi_v'), zlib=True)
     vv.long_name = 'vertically averaged v-momentum climatology'
     vv.units = 'meter second-1'
     for t in c_dict.keys():
         c = c_dict[t]
         vv[t,:,:] = c['vbar']
     # add 3d field data
-    vv = foo.createVariable('u', float, ('v3d_time', 's_rho', 'eta_u', 'xi_u'))
+    vv = foo.createVariable('u', float, ('v3d_time', 's_rho', 'eta_u', 'xi_u'), zlib=True)
     vv.long_name = 'u-momentum component climatology'
     vv.units = 'meter second-1'
     for t in c_dict.keys():
         c = c_dict[t]
         vv[t,:,:,:] = c['u3d']
-    vv = foo.createVariable('v', float, ('v3d_time', 's_rho', 'eta_v', 'xi_v'))
+    vv = foo.createVariable('v', float, ('v3d_time', 's_rho', 'eta_v', 'xi_v'), zlib=True)
     vv.long_name = 'v-momentum component climatology'
     vv.units = 'meter second-1'
     for t in c_dict.keys():
         c = c_dict[t]
         vv[t,:,:,:] = c['v3d']
-    vv = foo.createVariable('salt', float, ('salt_time', 's_rho', 'eta_rho', 'xi_rho'))
+    vv = foo.createVariable('salt', float, ('salt_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=True)
     vv.long_name = 'salinity climatology'
     vv.units = 'PSU'
     for t in c_dict.keys():
         c = c_dict[t]
         vv[t,:,:,:] = c['s3d']
-    vv = foo.createVariable('temp', float, ('temp_time', 's_rho', 'eta_rho', 'xi_rho'))
+    vv = foo.createVariable('temp', float, ('temp_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=True)
     vv.long_name = 'potential temperature climatology'
     vv.units = 'Celsius'
     for t in c_dict.keys():

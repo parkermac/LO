@@ -28,7 +28,7 @@ def add_bio(nc_dir, G, add_CTD=False):
     foo.close()
     for vn in vn_dict.keys():
         foo = nc.Dataset(clm_fn, 'a')
-        vv = foo.createVariable(vn, float, ('salt_time', 's_rho', 'eta_rho', 'xi_rho'))
+        vv = foo.createVariable(vn, float, ('salt_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=True)
         vv.long_name = vn + ' climatology'
         vv.units = vn_dict[vn]
         vv.time = 'salt_time'
