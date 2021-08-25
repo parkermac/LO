@@ -138,7 +138,7 @@ while dt <= dt1:
         for force in force_dict.keys():
             force_choice = force_dict[force]
             cmd_list = ['scp','-r',
-                remote_dir + '/' + str(Ldir['LOo'].name) + '/' + Ldir['gtag_alt'] + '/' + f_string + '/' + force_choice,
+                remote_dir + '/LO_output/forcing/' + Ldir['gtag_alt'] + '/' + f_string + '/' + force_choice,
                 str(force_dir)]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
