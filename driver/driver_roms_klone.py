@@ -259,12 +259,12 @@ while dt <= dt1:
             cmd_list = ['ssh', 'parker@apogee.ocean.washington.edu', 'mkdir -p /dat1/parker/LO_roms/'+Ldir['gtagex']]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Make output directory on boiler', args.verbose)
+            messages(stdout, stderr, 'Make output directory on apogee', args.verbose)
             # (ii) move the contents of roms_out_dir
             cmd_list = ['scp','-r',str(roms_out_dir), 'parker@apogee.ocean.washington.edu:/dat1/parker/LO_roms/'+Ldir['gtagex']]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Copy ROMS output to boiler', args.verbose)
+            messages(stdout, stderr, 'Copy ROMS output to apogee', args.verbose)
             # (iii) delete roms_out_dir and forcing files from the day before yesterday
             dt_prev = dt - timedelta(days=2)
             f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
