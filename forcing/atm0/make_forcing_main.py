@@ -38,8 +38,8 @@ reload(afun)
 # Set where are files located, and other situational choices.
 do_d3 = True
 do_d4 = True
+wrf_dir = Ldir['data'] / 'wrf' # the default
 if Ldir['lo_env'] == 'pm_mac':
-    wrf_dir = Ldir['data'] / 'wrf'
     Ldir['run_type'] == 'backfill'
 elif 'boiler' in Ldir['lo_env']:
     wrf_dir = Path('/data1/darr/wrf_crons/wrfout')
