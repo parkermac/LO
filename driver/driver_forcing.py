@@ -15,13 +15,9 @@ python ./driver_forcing.py -g cas6 -t v3 -r backfill -s continuation -0 2019.07.
 import sys
 import argparse
 from datetime import datetime, timedelta
-from pathlib import Path
 import subprocess
 
-pth = Path(__file__).absolute().parent.parent / 'lo_tools' / 'lo_tools'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import Lfun, zfun
+from lo_tools import Lfun, zfun
 
 parser = argparse.ArgumentParser()
 # arguments without defaults are required
