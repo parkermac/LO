@@ -4,7 +4,12 @@ Shared helper functions for the dot_in code, especially for argument passing.
 """
 import argparse
 import sys
-from lo_tools import Lfun
+from pathlib import Path
+
+pth = Path(__file__).absolute().parent
+if str(pth) not in sys.path:
+    sys.path.append(str(pth))
+import Lfun
 
 def intro():
     parser = argparse.ArgumentParser()
