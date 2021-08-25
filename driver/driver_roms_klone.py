@@ -132,13 +132,13 @@ while dt <= dt1:
     if args.get_forcing:
         tt0 = time()
         # Name the place where the forcing files will be copied from
-        remote_dir='parker@boiler.ocean.washington.edu:/data1/parker'
+        remote_dir='parker@apogee.ocean.washington.edu:/dat1/parker'
         Lfun.make_dir(force_dir, clean=True)
         # Copy the forcing files, one folder at a time.
         for force in force_dict.keys():
             force_choice = force_dict[force]
             cmd_list = ['scp','-r',
-                remote_dir + '/LiveOcean_output/' + Ldir['gtag_alt'] + '/' + f_string + '/' + force_choice,
+                remote_dir + '/' + str(Ldir['LOo'].name) + '/' + Ldir['gtag_alt'] + '/' + f_string + '/' + force_choice,
                 str(force_dir)]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
