@@ -89,7 +89,7 @@ def make_ini_file(nc_dir):
             ds2.createDimension(dname, len(the_dim) if not the_dim.isunlimited() else None)
     # Copy variables
     for v_name, varin in ds1.variables.items():
-        outVar = ds2.createVariable(v_name, varin.datatype, varin.dimensions)
+        outVar = ds2.createVariable(v_name, varin.datatype, varin.dimensions, zlib=True)
         # Copy variable attributes, {} is a dict comprehension, cool!
         outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip()
                 for k in varin.ncattrs()})
