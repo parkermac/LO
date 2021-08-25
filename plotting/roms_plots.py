@@ -14,7 +14,6 @@ OUTPUT: either a screen image or a graphics file
 """
 import numpy as np
 import xarray as xr
-import matplotlib.pyplot as plt
 import pickle
 from datetime import datetime, timedelta
 import pandas as pd
@@ -28,11 +27,12 @@ reload(pfun)
 reload(pinfo)
 
 Ldir = Lfun.Lstart()
-if Ldir['lo_env'] == 'pm_mac': # mac version [not helpful for other users!]
+if '_mac' in Ldir['lo_env']: # mac version
     pass
 else: # remote linux version
     import matplotlib as mpl
     mpl.use('Agg')
+import matplotlib.pyplot as plt
     
 def P_basic(in_dict):
     # START

@@ -15,8 +15,10 @@ from datetime import datetime, timedelta
 import pytz
 
 if '_mac' in Ldir['lo_env']: # mac version
+    #print('mac version') # debugging
     pass
 else: # remote/linux version
+    #print('linux version')
     import matplotlib as mpl
     mpl.use('Agg')
 # do these after the mpl.use() call to get remote plotting to work
@@ -29,7 +31,7 @@ def start_plot(fs=14, figsize=(14,10)):
     plt.rc('figure', figsize=figsize)
     
 def end_plot():
-    plt.show()
+    #plt.show()
     plt.rcdefaults()
 
 def dar(ax):
