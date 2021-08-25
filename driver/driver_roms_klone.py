@@ -1,7 +1,7 @@
 """
 This runs ROMS for one or more days, allowing for either a forecast or backfill.
 
-Designed to be run from klone, and depends on other drivers having been run first on boiler.
+Designed to be run from klone, and depends on other drivers having been run first on apogee.
 
 The -np and -N flags specify the total number of cores, and the
 cores per node.  For the current mox environment, acceptable choices are

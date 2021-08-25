@@ -4,7 +4,7 @@
 
 ---
 
-### driver_roms_mox.py
+### `driver_roms_mox.py`
 
 This runs ROMS for a single forecast or for many days. It is organized to use the LO run naming system: [gtagex] = [gridname]\_[tag]\_[ex_name].
 
@@ -19,6 +19,6 @@ NOTE: This code hardwires the fact that it is being run on mox and getting its f
 
 ---
 
-### driver_forcing.py
+### `driver_forcing.py`
 
 This runs any of the forcing jobs, for one or more days, for any [gtag].
