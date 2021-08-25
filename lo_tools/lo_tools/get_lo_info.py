@@ -59,6 +59,13 @@ elif (str(HOME) == '/home/parker') & ('perigee' in HOSTNAME):
     roms_out3 = Path('/data2/parker/LiveOcean_roms/output')     # LiveOcean past II
     roms_out4 = Path('/boildat1/parker/LO_roms')                # LO boiler
     
+elif (str(HOME) == '/home/parker') & ('apogee' in HOSTNAME):
+    lo_env = 'pm_apogee'
+    roms_out1 = Path('/boildat/parker/LiveOcean_roms/output')  # LiveOcean current
+    roms_out2 = Path('/pgdat1/parker/LiveOcean_roms/output')     # LiveOcean past I
+    roms_out3 = Path('/pgdat2/parker/LiveOcean_roms/output')     # LiveOcean past II
+    roms_out4 = Path('/boildat/parker/LO_roms')                # LO boiler
+    
 elif (str(HOME) == '/usr/lusers/pmacc'):
     lo_env = 'pm_mox'
 
