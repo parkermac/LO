@@ -107,24 +107,24 @@ Lon = G['lon_rho'][0,:]
 Lat = G['lat_rho'][:,0]    
 # error checking
 if (lon < Lon[0]) or (lon > Lon[-1]):
-    print('ERROR: lon out of bounds ' + out_fn.name)
+    print('ERROR: lon out of bounds ' + moor_fn.name)
     sys.exit()
 if (lat < Lat[0]) or (lat > Lat[-1]):
-    print('ERROR: lat out of bounds ' + out_fn.name)
+    print('ERROR: lat out of bounds ' + moor_fn.name)
     sys.exit()
 # get indices
 ilon = zfun.find_nearest_ind(Lon, lon)
 ilat = zfun.find_nearest_ind(Lat, lat)
 # more error checking
 if G['mask_rho'][ilat,ilon] == False:
-    print('ERROR: rho point on land mask ' + out_fn.name)
+    print('ERROR: rho point on land mask ' + moor_fn.name)
     sys.exit()
 if Ldir['get_vel'] or Ldir['get_surfbot']:
     if G['mask_u'][ilat,ilon] == False:
-        print('ERROR: u point on land mask ' + out_fn.name)
+        print('ERROR: u point on land mask ' + moor_fn.name)
         sys.exit()
     if G['mask_v'][ilat,ilon] == False:
-        print('ERROR: v point on land mask ' + out_fn.name)
+        print('ERROR: v point on land mask ' + moor_fn.name)
         sys.exit()
         
 fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
