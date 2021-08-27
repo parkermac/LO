@@ -4,15 +4,16 @@ This runs ROMS for one or more days, allowing for either a forecast or backfill.
 Designed to be run from klone, and depends on other drivers having been run first on apogee.
 
 The -np and -N flags specify the total number of cores, and the
-cores per node.  For the current mox environment, acceptable choices are
--np 200 or 400 -N 40
+cores per node.  For the current klone environment, acceptable choices are
+-np any multiple of 40 up to 400, and -N 40
 NOTE: np has to be an even multiple of N, and N has to be <= the number
 of nodes of that size that I own.
 
 - To test on mac in ipython:
 run driver_roms_mox -g cas6 -t v3t075 -x lo8 -r backfill -s continuation -0 2019.07.04 -np 200 -N 40 -v True --get_forcing False --run_roms False --move_his False
 
-DEVELOPMENT NOTES: see the "various flags to facilitate testing" part of the arguments for other testing flags
+DEVELOPMENT NOTES: see the "various flags to facilitate testing" part of the arguments for other testing flags.
+The -v (verbose) flag gives really useful screen output.
 
 """
 
@@ -24,6 +25,7 @@ from pathlib import Path
 import subprocess
 from time import time, sleep
 
+# add the path by hand so that it will urun on klone (outside of loenv)
 pth = Path(__file__).absolute().parent.parent / 'lo_tools' / 'lo_tools'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
@@ -35,7 +37,6 @@ parser.add_argument('-g', '--gridname', type=str)   # e.g. cas2
 parser.add_argument('-t', '--tag', type=str)        # e.g. v3
 parser.add_argument('-ta', '--tag_alt', type=str, default='') # used to make gtag in "remote_dir"
 parser.add_argument('-x', '--ex_name', type=str)    # e.g. lo8b
-parser.add_argument('-f', '--frc', type=str)        # e.g. tide
 parser.add_argument('-r', '--run_type', type=str)   # forecast or backfill
 parser.add_argument('-s', '--start_type', type=str) # new or continuation
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
@@ -53,7 +54,7 @@ args = parser.parse_args()
 
 # check for required arguments
 argsd = args.__dict__
-for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'ds0', 'np_num', 'cores_per_node']:
+for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'np_num', 'cores_per_node']:
     if argsd[a] == None:
         print('*** Missing required argument for driver_roms_klone.py: ' + a)
         sys.exit()
@@ -66,13 +67,24 @@ if len(args.tag_alt) == 0:
 Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
 Ldir['gtag_alt'] = Ldir['gridname'] + '_' + argsd['tag_alt']
 
+# Assign some variables related to the remote machine.  These are user specific
+# so eventually we may want them to the in lo_tools/get_lo_info.py.
+if Ldir['lo_env'] == 'pm_klone':
+    remote_user = 'parker'
+    remote_machine = 'apogee.ocean.washington.edu'
+    remote_dir0 = '/dat1/parker'
+    local_user = 'pmacc'
+else:
+    print('*** Unsupported lo_env: ' + Ldir['lo_env'])
+    sys.exit()
+
 # set time range to process
 if args.run_type == 'forecast':
     ds0 = datetime.now().strftime(Lfun.ds_fmt)
     dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
     dt1 = dt0 + timedelta(days=Ldir['forecast_days'])
     ds1 = dt1.strftime(Lfun.ds_fmt)
-elif args.run_type == 'backfill':
+elif args.run_type == 'backfill': # you have to provide at least ds0 for backfill
     ds0 = args.ds0
     if len(args.ds1) == 0:
         ds1 = ds0
@@ -132,7 +144,8 @@ while dt <= dt1:
     if args.get_forcing:
         tt0 = time()
         # Name the place where the forcing files will be copied from
-        remote_dir='parker@apogee.ocean.washington.edu:/dat1/parker'
+        # remote_dir='parker@apogee.ocean.washington.edu:/dat1/parker'
+        remote_dir = remote_user + '@' + remote_machine + ':' + remote_dir0
         Lfun.make_dir(force_dir, clean=True)
         # Copy the forcing files, one folder at a time.
         for force in force_dict.keys():
@@ -208,7 +221,7 @@ while dt <= dt1:
             log_done = False
             while log_done == False:
                 sleep(3)
-                cmd_list = ['lsof', '-u', 'pmacc','|','grep',str(log_file)]
+                cmd_list = ['lsof', '-u', local_user,'|','grep',str(log_file)]
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 print(' - llcount = %d' % (lcount))
@@ -256,15 +269,19 @@ while dt <= dt1:
             tt0 = time()
             # Copy history files to boiler and clean up
             # (i) make sure the output directory exists
-            cmd_list = ['ssh', 'parker@apogee.ocean.washington.edu', 'mkdir -p /dat1/parker/LO_roms/'+Ldir['gtagex']]
+            # cmd_list = ['ssh', 'parker@apogee.ocean.washington.edu', 'mkdir -p /dat1/parker/LO_roms/'+Ldir['gtagex']]
+            cmd_list = ['ssh', remote_user + '@' + remote_machine,
+                'mkdir -p ' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Make output directory on apogee', args.verbose)
+            messages(stdout, stderr, 'Make output directory on ' + remote_machine, args.verbose)
             # (ii) move the contents of roms_out_dir
-            cmd_list = ['scp','-r',str(roms_out_dir), 'parker@apogee.ocean.washington.edu:/dat1/parker/LO_roms/'+Ldir['gtagex']]
+            # cmd_list = ['scp','-r',str(roms_out_dir), 'parker@apogee.ocean.washington.edu:/dat1/parker/LO_roms/'+Ldir['gtagex']]
+            cmd_list = ['scp','-r',str(roms_out_dir),
+                remote_user + '@' + remote_machine + ':' remote_dir0 + '/LO_roms/'+Ldir['gtagex']]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Copy ROMS output to apogee', args.verbose)
+            messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
             # (iii) delete roms_out_dir and forcing files from the day before yesterday
             dt_prev = dt - timedelta(days=2)
             f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
