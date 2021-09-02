@@ -42,7 +42,7 @@ sect_df = tef_fun.get_sect_df(gridname)
 # loop over all sections
 sect_list = list(sect_df.index)
 
-testing = True
+testing = False
 if testing:
     sect_list = ['wb2'] # wb2 has an island in the middle - good mask test
     
@@ -67,43 +67,22 @@ for sect_name in sect_list:
     zeta = ds['zeta'][:]
     # mask: True for water points on section
     mask = ~np.isnan(q[0,0,:])
-    # surface height
-    eta = zeta[:,mask].mean(axis=1).data
-    # remove low-passed SSH
-    eta = eta - zfun.lowpass(eta, f='godin', nanpad=True)
-        
-    # load extracted fields
-    ds = nc.Dataset(in_fn)
-    h = ds['h'].values
-    q = ds['q'].values
-    DA = ds['DA'].values
-    DA0 = ds['DA0'][:]
-    ot = ds['ocean_time'][:].data
-    ot_days = ot/86400
-    zeta = ds['zeta'][:]
-    NT, NZ, NX = q.shape
-
-    # mask: True for water points on section
-    mask = ~np.isnan(q[0,0,:]).data # use q to find the correct mask
     H = h[mask].mean()
-    A0 = (DA0.data[:,mask]).sum()
-
-    # velocity
-    Q = q.data[:,:,mask].sum(axis=2).sum(axis=1)
-    A = DA.data[:,:,mask].sum(axis=2).sum(axis=1)
-    u = Q/A
-
+    A0 = DA0[:,mask].sum()
     # surface height
     eta = zeta[:,mask].mean(axis=1).data
-    
+    # velocity
+    Q = q[:,:,mask].sum(axis=2).sum(axis=1)
+    A = DA[:,:,mask].sum(axis=2).sum(axis=1)
+    u = Q/A
     # remove low-passed signal
     eta = eta - zfun.lowpass(eta, f='godin', nanpad=False)
     u = u - zfun.lowpass(u, f='godin', nanpad=False)
     # this leaves zeros as the padding on the ends
     
     # calculate harmonics
-    hm_e = get_hm(ot_days, eta, lat)
-    hm_u = get_hm(ot_days, u, lat)
+    hm_e = get_hm(td, eta, lat)
+    hm_u = get_hm(td, u, lat)
     
     # and add H, A0, and F for later use
     hm_e['H'] = H

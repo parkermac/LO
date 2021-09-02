@@ -10,7 +10,7 @@ General formula from Hal Mofjeld:
 h(t) = f*H*cos[ om(t-t0) + vu - G ]
 
 f is the node factor (nodal correction)
-vu = V+U is the astronomical argument
+vu = V+U is the astronomical argument (Greenwich phase)
 t0 is the start of the chosen year.
 
 H and G are the amplitude and phase returned by utide,

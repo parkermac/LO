@@ -1,19 +1,14 @@
 """
 Calculate incident and reflected wave amplitudes on all sections.
 
-RESULT: this appears to give unreliable results, although I don't know why.
+RESULT: This only gives "correct" results for zero friction.
 The way I test if a results is "correct" is to compare the net tidal energy
-flux due to the incident and reflected waves (FF_alt) to the original flux (F)
+flux due to the incident plus reflected waves (FF_alt) to the original flux (F)
 and the constituent-reconstructed flux (FF).  In general F and FF compare
-well regardless of the sign I use for Eg and Ug.  The FF_alt is also good
-(and identical to FF) but ONLY if I use a real value of a.  For any complex
-a FF_alt != FF.
+well.  The FF_alt is also good (and identical to FF) but ONLY if I use a real
+value of alpha.
 
-Curious: If I use real a, the net is always good, but the incident
-and reflected parts vary with a (but not their sum).  Is a = np.sqrt(g/H)
-more "correct?"
-
-This also makes a nice map, if I ever get the answer to be satisfactory.
+This also makes a nice map, assuming I am ok with the frictionless result.
 
 """
 
