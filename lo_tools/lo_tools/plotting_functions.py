@@ -201,10 +201,8 @@ def add_windstress_flower(ax, ds, t_scl=0.2, t_leglen=0.1, center=(.85,.25), fs=
     # ADD MEAN WINDSTRESS VECTOR
     # t_scl: scale windstress vector (smaller to get longer arrows)
     # t_leglen: # Pa for wind stress vector legend
-    taux = ds['sustr'].values.squeeze()
-    tauy = ds['svstr'].values.squeeze()
-    tauxm = taux.mean()
-    tauym = tauy.mean()
+    tauxm = ds.sustr.mean()
+    tauym = ds.svstr.mean()
     x = center[0]
     y = center[1]
     ax.quiver([x, x] , [y, y], [tauxm, tauxm], [tauym, tauym],
