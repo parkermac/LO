@@ -67,10 +67,8 @@ ot = ds['ocean_time'].values # time in seconds since Lfun.modtime0 (1/1/1970)
 td = ot/86400 # time in days
 T = td - td[0] # for plotting
 zeta = ds['zeta'][:]
-
 # mask: True for water points on section
 mask = ~np.isnan(q[0,0,:])
-
 # surface height
 eta = zeta[:,mask].mean(axis=1).data
 # remove low-passed SSH

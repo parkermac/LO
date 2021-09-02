@@ -1,15 +1,12 @@
 """
 Get and save all the tidal harmonics for a colleciton of TEF sections.
 
-One improvement might be to save Q instead of u because that is what
-is more exact for calculation of tidal energy flux.
-
 """
 
 from pathlib import Path
 import sys
 import pickle
-import netCDF4 as nc
+import xarray as xr
 import pandas as pd
 import numpy as np
 import utide
@@ -45,7 +42,7 @@ sect_df = tef_fun.get_sect_df(gridname)
 # loop over all sections
 sect_list = list(sect_df.index)
 
-testing = False
+testing = True
 if testing:
     sect_list = ['wb2'] # wb2 has an island in the middle - good mask test
     
@@ -58,12 +55,28 @@ for sect_name in sect_list:
     # get section info
     x0, x1, y0, y1 = sect_df.loc[sect_name,:]
     lat = (y0 + y1)/2
+    
+    # load extracted fields
+    ds = xr.open_dataset(in_fn, decode_times=False)
+    h = ds['h'].values
+    q = ds['q'].values
+    DA = ds['DA'].values
+    DA0 = ds['DA0'].values
+    ot = ds['ocean_time'].values # time in seconds since Lfun.modtime0 (1/1/1970)
+    td = ot/86400 # time in days
+    zeta = ds['zeta'][:]
+    # mask: True for water points on section
+    mask = ~np.isnan(q[0,0,:])
+    # surface height
+    eta = zeta[:,mask].mean(axis=1).data
+    # remove low-passed SSH
+    eta = eta - zfun.lowpass(eta, f='godin', nanpad=True)
         
     # load extracted fields
     ds = nc.Dataset(in_fn)
-    h = ds['h'][:]
-    q = ds['q'][:]
-    DA = ds['DA'][:]
+    h = ds['h'].values
+    q = ds['q'].values
+    DA = ds['DA'].values
     DA0 = ds['DA0'][:]
     ot = ds['ocean_time'][:].data
     ot_days = ot/86400
