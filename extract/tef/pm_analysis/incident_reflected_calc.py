@@ -1,7 +1,7 @@
 """
 Calculate incident and reflected wave amplitudes on all sections.
 
-RESULT: this appears to give unrelaible results, although I don't know why.
+RESULT: this appears to give unreliable results, although I don't know why.
 The way I test if a results is "correct" is to compare the net tidal energy
 flux due to the incident and reflected waves (FF_alt) to the original flux (F)
 and the constituent-reconstructed flux (FF).  In general F and FF compare
@@ -20,7 +20,7 @@ This also makes a nice map, if I ever get the answer to be satisfactory.
 from pathlib import Path
 import sys
 import pickle
-import netCDF4 as nc
+import xarray as xr
 import pandas as pd
 import numpy as np
 import cmath
@@ -51,7 +51,7 @@ sect_df = tef_fun.get_sect_df(gridname)
 # loop over all sections
 sect_list = list(sect_df.index)
 
-testing = True
+testing = False
 if testing:
     sect_list = ['ai1']
 
@@ -80,7 +80,7 @@ for sect_name in sect_list:
     FFp = 0
     FFm = 0
     FF = 0
-    FF_alt = 0
+    FFpm = 0
     clist = ['Q1', 'O1', 'P1', 'K1', 'N2', 'M2', 'S2', 'K2']
     #clist = ['M2']
 
@@ -99,27 +99,27 @@ for sect_name in sect_list:
         this_f = f[clist.index(cons)]
         this_vu = vu[clist.index(cons)]
         
-        EE = cmath.rect(this_f*E, -Eg)
-        UU = cmath.rect(this_f*U, -Ug)
+        EE = cmath.rect(this_f*E, Eg)
+        UU = cmath.rect(this_f*U, Ug)
         
         Fc = 0.5*rho*g*A0 * (EE.real*UU.real + EE.imag*UU.imag)
         
-        a = np.sqrt(g/H)/np.sqrt(1 + 1j) # use 1j for R/om = 1
+        alpha = np.sqrt(g/H)/np.sqrt(1 + 0j) # use 1j for R/om = 1
         
-        Ep = (EE + UU/a)/2
-        Em = (EE - UU/a)/2
-        Up =  Ep*a
-        Um =  Em*a
+        Ep = (EE + UU/alpha)/2
+        Em = (EE - UU/alpha)/2
+        Up =  Ep*alpha
+        Um =  Em*alpha
         Fp = 0.5*rho*g*A0 * (Ep.real*Up.real + Ep.imag*Up.imag)
         Fm = - 0.5*rho*g*A0 * (Em.real*Um.real + Em.imag*Um.imag)
         if testing:
             print('%s: Fp = %8.1f, Fm = %8.1f [MW]' % (cons, Fp/1e6, Fm/1e6))
         
-        Fc_alt = Fp + Fm
+        Fc_pm = Fp + Fm
         FFp += Fp
         FFm += Fm
         FF += Fc
-        FF_alt += Fc_alt
+        FFpm += Fc_pm
         # FF should match FF_alt
             
     F_df.loc[sect_name, 'FFp'] = FFp/1e6
@@ -131,14 +131,14 @@ for sect_name in sect_list:
     F_df.loc[sect_name, 'sdir'] = sdir
     
     if testing:
-        print('\n%s: F = %0.1f, FF = %0.1f, FF_alt = %0.1f [MW]' %
-            (sect_name, F/1e6, FF/1e6, FF_alt/1e6))
+        print('\n%s: F = %0.1f, FF = %0.1f, FFpm = %0.1f [MW]' %
+            (sect_name, F/1e6, FF/1e6, FFpm/1e6))
 
 if not testing:
     
     # PLOTTING
     plt.close('all')
-    fs = 16 # fontsize
+    fs = 18 # fontsize
     ffs = .7*fs # flux text fontsize
     alpha = .5 # transparency for arrows
     cf = 'purple' # color for incident tidal energy flux
@@ -202,7 +202,7 @@ if not testing:
         vFFm1 = sth*FFm
 
         scl1 = 50000 # a vector of length 1 will be 1/scl of the length of the y-axis
-        ax1.quiver(sx,sy, vFF0, vFF1, scale=scl1, scale_units='height', linewidths=1, color='k', alpha=1)
+        ax1.quiver(sx,sy, vFF0, vFF1, scale=scl1, scale_units='height', linewidths=1.5, color='k', alpha=1)
         ax1.quiver(sx,sy, vFFp0, vFFp1, scale=scl1, scale_units='height', linewidths=1, color=cf, alpha=alpha)
         ax1.quiver(sx,sy, vFFm0, vFFm1, scale=scl1, scale_units='height', linewidths=1, color=cq, alpha=alpha)
         ax1.plot(sx,sy,'ok')
@@ -212,7 +212,7 @@ if not testing:
 
         if sx > x00 and sy < y11:
             scl2 = 10000 # a vector of length 1 will be 1/scl of the length of the y-axis
-            ax2.quiver(sx,sy, vFF0, vFF1, scale=scl2, scale_units='height', linewidths=1, color='k', alpha=1)
+            ax2.quiver(sx,sy, vFF0, vFF1, scale=scl2, scale_units='height', linewidths=1.5, color='k', alpha=1)
             ax2.quiver(sx,sy, vFFp0, vFFp1, scale=scl2, scale_units='height', linewidths=1, color=cf, alpha=alpha)
             ax2.quiver(sx,sy, vFFm0, vFFm1, scale=scl2, scale_units='height', linewidths=1, color=cq, alpha=alpha)
             ax2.plot(sx,sy,'ok')
@@ -234,7 +234,7 @@ if not testing:
     vFF0 = 2000; vFF1 = 0
     vFFp0 = 7000; vFFp1 = 0
     vFFm0 = -5000; vFFm1 = 0
-    ax1.quiver(sx,sy, vFF0, vFF1, scale=scl1, scale_units='height', linewidths=1, color='k', alpha=1)
+    ax1.quiver(sx,sy, vFF0, vFF1, scale=scl1, scale_units='height', linewidths=1.5, color='k', alpha=1)
     ax1.quiver(sx,sy, vFFp0, vFFp1, scale=scl1, scale_units='height', linewidths=1, color=cf, alpha=alpha)
     ax1.quiver(sx,sy, vFFm0, vFFm1, scale=scl1, scale_units='height', linewidths=1, color=cq, alpha=alpha)
     ax1.plot(sx,sy,'ok')
@@ -257,7 +257,7 @@ if not testing:
     vFF0 = 400; vFF1 = 0
     vFFp0 = 1200; vFFp1 = 0
     vFFm0 = -800; vFFm1 = 0
-    ax2.quiver(sx,sy, vFF0, vFF1, scale=scl2, scale_units='height', linewidths=1, color='k', alpha=1)
+    ax2.quiver(sx,sy, vFF0, vFF1, scale=scl2, scale_units='height', linewidths=1.5, color='k', alpha=1)
     ax2.quiver(sx,sy, vFFp0, vFFp1, scale=scl2, scale_units='height', linewidths=1, color=cf, alpha=alpha)
     ax2.quiver(sx,sy, vFFm0, vFFm1, scale=scl2, scale_units='height', linewidths=1, color=cq, alpha=alpha)
     ax2.plot(sx,sy,'ok')

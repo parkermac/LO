@@ -212,6 +212,55 @@ def P_Chl_DO(in_dict):
         plt.close()
     else:
         plt.show()
+        
+
+def P_DO_WA_shelf(in_dict):
+    # Focus on bottom DO on the WA shelf
+    aa = [-126.1, -123.7, 45.8, 48.8]
+    xtl = [-126, -125, -124]
+    ytl = [46, 47, 48]
+    
+    # START
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(7,10))
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
+    # PLOT CODE
+    vn = 'oxygen'
+    slev = 0
+    stext = 'Bottom'
+    if in_dict['auto_vlims']:
+        pinfo.vlims_dict[vn] = ()
+    ax = fig.add_subplot(111)
+    cs = pfun.add_map_field(ax, ds, vn, pinfo.vlims_dict, slev=slev,
+            cmap=pinfo.cmap_dict[vn], fac=pinfo.fac_dict[vn],
+            vlims_fac=pinfo.range_dict[vn], do_mask_edges=True)
+    fig.colorbar(cs)
+    pfun.add_coast(ax)
+    ax.axis(aa)
+    pfun.dar(ax)
+    ax.set_title('%s %s %s' % (stext, pinfo.tstr_dict[vn],pinfo.units_dict[vn]), fontsize=1.2*fs)
+    ax.set_xlabel('Longitude')
+    pfun.add_bathy_contours(ax, ds, txt=False)
+    ax.set_ylabel('Latitude')
+    ax.set_xticks(xtl)
+    ax.set_yticks(ytl)
+    pfun.add_info(ax, in_dict['fn'], loc='upper_right')
+    
+    pfun.add_windstress_flower(ax, ds, t_scl=0.5, t_leglen=0.1, center=(.85,.65), fs=12)
+    # ADD MEAN WINDSTRESS VECTOR
+    # t_scl: scale windstress vector (smaller to get longer arrows)
+    # t_leglen: # Pa for wind stress vector legend
+        
+    fig.tight_layout()
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
 
 def P_ths(in_dict):
     # Plot property-property plots, like theta vs. s

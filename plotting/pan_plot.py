@@ -21,7 +21,6 @@ Use -avl False to have color limits all set to match those set by pinfo.vlims_di
 import os, sys
 import argparse
 from datetime import datetime, timedelta
-#import matplotlib.pyplot as plt
 
 from lo_tools import Lfun
 import roms_plots
@@ -133,7 +132,13 @@ if (Ldir['list_type'] == 'allhours') and Ldir['testing']:
 # PLOTTING
 outdir0 = Ldir['LOo'] / 'plots'
 Lfun.make_dir(outdir0)
-#plt.close('all')
+if '_mac' in Ldir['lo_env']: # mac version
+    pass
+else: # remote linux version
+    import matplotlib as mpl
+    mpl.use('Agg')
+import matplotlib.pyplot as plt
+plt.close('all')
 
 if len(fn_list) == 1:
     # plot a single image to screen

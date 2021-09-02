@@ -44,16 +44,16 @@ z = ds['z_w'].values
 NT, NZ = z.shape
 Z = z.mean(axis=0)
 
-# coordinate arrays ro plotting
+# coordinate arrays for plotting
 TT = T.reshape((NT,1))*np.ones((1,NZ))
 ZZ = Z.reshape((1,NZ))*np.ones((NT,1))
 
-# make variables at midddle times, for pcolormesh
+# make variables at middle times, for pcolormesh
 S = (s[1:,:] + s[:-1,:])/2
 TH = (th[1:,:] + th[:-1,:])/2
 OX = (ox[1:,:] + ox[:-1,:])/2
 
-OX = OX*32/1000 # conver uM to mg/L
+OX = OX*32/1000 # convert uM to mg/L
 
 plt.close('all')
 pfun.start_plot()

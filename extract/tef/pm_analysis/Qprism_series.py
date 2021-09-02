@@ -56,6 +56,10 @@ label_dict = dict(zip(vn_list, label_list))
 # limit list
 vn_list = vn_list[:3]
 
+# time limits
+t0 = tef_df.index[0]
+t1 = tef_df.index[-1]
+
 nvn = len(vn_list)
 ii = 1
 for vn in vn_list:
@@ -72,6 +76,8 @@ for vn in vn_list:
     ax2.set_ylim(bottom = 0)
     ax.set_ylabel(label_dict[vn], color=c2)
     ax2.set_ylabel(r'$Q_{prism}\ [10^{3}\ m^{3}s^{-1}]$', c=c1)
+    ax.set_xlim(t0, t1)
+    ax2.set_xlim(t0, t1)
     ii += 1
         
 #fig.tight_layout()

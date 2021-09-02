@@ -31,7 +31,6 @@ def start_plot(fs=14, figsize=(14,10)):
     plt.rc('figure', figsize=figsize)
     
 def end_plot():
-    #plt.show()
     plt.rcdefaults()
 
 def dar(ax):
