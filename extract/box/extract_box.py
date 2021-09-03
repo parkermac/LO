@@ -34,11 +34,13 @@ parser.add_argument('-ro', '--roms_out_num', type=int) # 2 = Ldir['roms_out2'], 
 # select time period and frequency
 parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
-parser.add_argument('-lt', '--list_type', type=str) # list type: hourly or daily
+parser.add_argument('-lt', '--list_type', type=str) # list type: hourly, daily, weekly
 # select job name
 parser.add_argument('-job', type=str) # job name
-# this flag just gets surface fields if True
+# these flags get only surface or bottom fields if True
+# - cannot have both True -
 parser.add_argument('-surf', default=False, type=Lfun.boolean_string)
+parser.add_argument('-bot', default=False, type=Lfun.boolean_string)
 # Optional: set max number of subprocesses to run at any time
 parser.add_argument('-Nproc', type=int, default=10)
 # Optional: for testing
@@ -69,12 +71,18 @@ if Ldir['roms_out_num'] == 0:
     pass
 elif Ldir['roms_out_num'] > 0:
     Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
+# check for input conflicts:
+if Ldir['surf'] and Ldir['bot']:
+    print('Error: cannot have surf and bot both True.')
+    sys.exit()
     
 # output location
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box'
 Lfun.make_dir(out_dir)
 if Ldir['surf']:
     box_fn = out_dir / (Ldir['job'] + '_surf_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
+elif Ldir['bot']:
+    box_fn = out_dir / (Ldir['job'] + '_bot_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
 else:
     box_fn = out_dir / (Ldir['job'] + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
 box_fn.unlink(missing_ok=True)
@@ -88,20 +96,20 @@ fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
 if Ldir['testing']:
     fn_list = fn_list[:5]
 
-# specify variables to get
-vn_list = 'salt,temp,zeta,h,u,v'
-
 def get_box(job):
-    # could override the variable list here
+    vn_list = 'salt,temp,zeta,h,u,v' # default list
+    # specific jobs
     if job == 'yang_sequim':
-        lon0 = -123.15120787; lon1 = -122.89090010
-        lat0 = 48.07302111; lat1 = 48.19978336
+        aa = [-123.15120787, -122.89090010, 48.07302111, 48.19978336]
     elif job == 'PS':
         # 3 MB per save (26 GB/year for hourly)
-        lon0 = -123.5; lon1 = -122.05
-        lat0 = 47; lat1 = 49
+        aa = [-123.5, -122.05, 47, 49]
         Ldir['surf'] = True # override to be sure
-    return lon0, lon1, lat0, lat1
+    elif job == 'garrison':
+        aa = [-129.9, -122.05, 42.1, 51.9]
+        Ldir['bot'] = True # override to be sure
+        vn_list = 'salt,temp,oxygen,h'
+    return aa[0], aa[1], aa[2], aa[3], vn_list
     
 G, S, T = zrfun.get_basic_info(fn_list[0])
 Lon = G['lon_rho'][0,:]
@@ -120,7 +128,7 @@ def check_bounds(lon, lat):
     return ilon, ilat
 
 # get the indices and check that they are in the grid
-lon0, lon1, lat0, lat1 = get_box(Ldir['job'])
+lon0, lon1, lat0, lat1, vn_list = get_box(Ldir['job'])
 ilon0, ilat0 = check_bounds(lon0, lat0)
 ilon1, ilat1 = check_bounds(lon1, lat1)
 
@@ -142,6 +150,8 @@ for ii in range(N):
         '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0-1)+','+str(ilat1)]
     if Ldir['surf']:
         cmd_list1 += ['-d','s_rho,'+str(S['N']-1)]
+    elif Ldir['bot']:
+        cmd_list1 += ['-d','s_rho,0']
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
@@ -181,7 +191,7 @@ if Ldir['testing']:
 print('Total time = %0.2f sec' % (time()- tt0))
 
 # add z variables
-if Ldir['surf'] == False:
+if (Ldir['surf']==False) and (Ldir['bot']==False):
     tt0 = time()
     ds = xr.load_dataset(box_fn) # have to load in order to add new variables
     ds['z_rho'] = 0*ds.temp
@@ -209,6 +219,7 @@ for vn in ds.data_vars:
     print('%s (%s) max/min = %0.4f/%0.4f' % (vn, str(ds[vn].shape), ds[vn].max(), ds[vn].min()))
 ds.close()
 
+# ** this should be moved to a separate plotting program **
 if Ldir['testing'] and Ldir['lo_env'] == 'pm_mac':
     # make a plot to look at things
     # (currently optimized for yang_sequim)
