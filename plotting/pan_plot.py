@@ -21,6 +21,8 @@ Use -avl False to have color limits all set to match those set by pinfo.vlims_di
 import os, sys
 import argparse
 from datetime import datetime, timedelta
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
 
 from lo_tools import Lfun
 import roms_plots
@@ -171,7 +173,11 @@ elif len(fn_list) > 1:
         jj += 1
     # and make a movie
     if Ldir['make_movie']:
-        ff_str = ("ffmpeg -r 8 -i " + 
-        str(outdir)+"/plot_%04d.png -vcodec libx264 -pix_fmt yuv420p -crf 25 "
-        +str(outdir)+"/movie.mp4")
-        os.system(ff_str)
+        cmd_list = ['ffmpeg','-r','8','-i', str(outdir)+'/plot_%04d.png', '-vcodec', 'libx264',
+            '-pix_fmt', 'yuv420p', '-crf', '25', str(outdir)+'/movie.mp4']
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        if len(stdout) > 0:
+            print('\n'+stdout.decode())
+        if len(stderr) > 0:
+            print('\n'+stderr.decode())
