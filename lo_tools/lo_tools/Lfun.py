@@ -114,7 +114,7 @@ def boolean_string(s):
 
 # Functions used by postprocessing code like pan_plot or the various extractors
 
-def date_list_utility(dt0, dt1):
+def date_list_utility(dt0, dt1, daystep=1):
     """
     INPUT: start and end datetimes
     OUTPUT: list of LiveOcean formatted dates
@@ -123,7 +123,7 @@ def date_list_utility(dt0, dt1):
     dt = dt0
     while dt <= dt1:
         date_list.append(dt.strftime(ds_fmt))
-        dt = dt + timedelta(days=1)
+        dt = dt + timedelta(days=daystep)
     return date_list
 
 def fn_list_utility(dt0, dt1, Ldir, hourmax=24):
@@ -165,10 +165,17 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=1):
         # list of hourly files over a date range
         fn_list = fn_list_utility(dt0,dt1,Ldir)
     elif list_type == 'daily':
-        # list of history file 21 over a date range
-        # which is Noon Pacific Standard Time
+        # list of history file 21 (Noon PST) over a date range
         fn_list = []
         date_list = date_list_utility(dt0, dt1)
+        for dl in date_list:
+            f_string = 'f' + dl
+            fn = dir0 / f_string / 'ocean_his_0021.nc'
+            fn_list.append(fn)
+    elif list_type == 'weekly':
+        # like "daily" but at 7-day intervals
+        fn_list = []
+        date_list = date_list_utility(dt0, dt1, daystep=7)
         for dl in date_list:
             f_string = 'f' + dl
             fn = dir0 / f_string / 'ocean_his_0021.nc'
