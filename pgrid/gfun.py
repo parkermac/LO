@@ -3,7 +3,16 @@ Organizational functions for pgrid.
 """
 
 # **** USER EDIT ********
-gridname = 'sal0'; base_gridname = 'cas6'; base_tag = 'v3'
+
+# This is the name of the grid that you are working on.
+gridname = 'sal0'
+
+# These are the gridname and tag to feed to use when creating the Ldir paths.
+# They are used for accessing the river tracks, which may be developed for one
+# grid but reused in others.
+base_gridname = 'cas6'
+base_tag = 'v3'
+
 # **** END USER EDIT ****
 
 from pathlib import Path
@@ -74,7 +83,7 @@ def default_choices(Gr, wet_dry=False):
 
 def select_file(Gr):
     # interactive selection
-    fn = choose_item(Gr['gdir'], tag='.nc', itext='** Choose grid from list **')
+    fn = Lfun.choose_item(Gr['gdir'], tag='.nc', itext='** Choose grid from list **')
     return fn
 
 def increment_filename(fn, tag='_m'):

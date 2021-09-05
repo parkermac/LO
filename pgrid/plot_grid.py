@@ -6,7 +6,7 @@ to look at a grid other than the one set in gfun.pu
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('-g', '--gridname', nargs='?', default='',
+parser.add_argument('-g', '--gridname', default='',
         type=str)
 args = parser.parse_args()
 
@@ -17,12 +17,11 @@ if len(args.gridname) > 0:
     Gr = gfun.gstart(gridname=args.gridname)
 else:
     Gr = gfun.gstart()
-import pfun
-reload(pfun)
+from lo_tools import plotting_functions as pfun
 import gfun_plotting as gfp
 
 import matplotlib.pyplot as plt
-import netCDF4 as nc
+import xarray as xr
 import numpy as np
 
 # **** USER CHOICES ********
@@ -50,16 +49,16 @@ if using_old_grid==True:
     in_fn = fn
 elif using_old_grid==False:
     fn = gfun.select_file(Gr)
-    in_fn = Gr['gdir'] + fn
-    in_fn0 = Gr['gdir'] + 'grid_m00_r00_s00_x00.nc'
+    in_fn = Gr['gdir'] / fn
+    in_fn0 = Gr['gdir'] / 'grid_m00_r00_s00_x00.nc'
 
 # load the data
-ds = nc.Dataset(in_fn)
-z = -ds.variables['h'][:]
+ds = xr.open_dataset(in_fn)
+z = -ds.h.values
 if using_old_grid==False:
-    ds0 = nc.Dataset(in_fn0)
-    z0 = -ds0.variables['h'][:]
-mask_rho = ds.variables['mask_rho'][:]
+    ds0 = xr.open_dataset(in_fn0)
+    z0 = -ds0.h.values
+mask_rho = ds.mask_rho.values
 
 plon, plat = gfp.get_plon_plat(using_old_grid, ds)
 buff = 0.05*(plat[-1,0]-plat[0,0])

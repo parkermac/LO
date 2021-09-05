@@ -82,81 +82,62 @@ def load_bathy2(t_fn, lon_vec, lat_vec):
     return tlon_vec, tlat_vec, tz
 
 def make_nc(out_fn, plon, plat, lon, lat, z, m, dch):
+    """
+    Initial creation of the NetCDF grid file.
+    """
     
-    out_fn.unlink(missing_ok=True)
-    # create new NetCDF file
-    foo = xr.Dataset(out_fn)
-    
-    # create dimensions
-    M, L = lon.shape # use ROMS teminology
-    size_dict = {'rho': (M, L),
-                 'u': (M, L-1),
-                 'v': (M-1, L),
-                 'psi': (M-1, L-1),
-                 'psi_ex': (M+1, L+1)}
-    tag_list = ['rho', 'u', 'v', 'psi', 'psi_ex']
-    for tag in tag_list:
-        foo.createDimension('eta_'+tag, size_dict[tag][0])
-        foo.createDimension('xi_'+tag, size_dict[tag][1])
-    
-    # create variables
-    lon_var = dict()
-    lat_var = dict()
-    mask_var = dict()
-    for tag in tag_list:
-        lat_var[tag] = foo.createVariable('lat_'+tag, float, ('eta_'+tag, 'xi_'+tag))
-        lon_var[tag] = foo.createVariable('lon_'+tag, float, ('eta_'+tag, 'xi_'+tag))
-        mask_var[tag] = foo.createVariable('mask_'+tag, float, ('eta_'+tag, 'xi_'+tag))
-    h_var = foo.createVariable('h', float, ('eta_rho', 'xi_rho'))
-    f_var = foo.createVariable('f', float, ('eta_rho', 'xi_rho'))
-    pm_var = foo.createVariable('pm', float, ('eta_rho', 'xi_rho'))
-    pn_var = foo.createVariable('pn', float, ('eta_rho', 'xi_rho'))
-    xl_var = foo.createVariable('xl', float)
-    el_var = foo.createVariable('el', float)
-    sph_var = foo.createVariable('spherical', 'c')
-    
-    # create other grids
-    lon_dict = dict()
-    lat_dict = dict()
-    
-    lon_dict['rho'] = lon
-    lat_dict['rho'] = lat
-    
-    lon_dict['psi_ex'] = plon
-    lat_dict['psi_ex'] = plat
-    
-    lon_dict['u'] = lon[:, :-1] + np.diff(lon, axis=1)/2
-    lat_dict['u'] = lat[:, :-1]
-    
-    lon_dict['v'] = lon[:-1, :]
-    lat_dict['v'] = lat[:-1, :] + np.diff(lat, axis=0)/2
-    
-    lon_dict['psi'] = plon[1:-1, 1:-1]
-    lat_dict['psi'] = plat[1:-1, 1:-1]
-    
-    # create dx, dy and pm, pn
+    # create dx, dy (used to make pm and pn)
     ulon = plon[:-1, :]
     vlat = plat[:, :-1]
     R = zfun.earth_rad(np.mean(plat[:,1]))
     dx = R * np.cos(np.pi*lat/180) * (np.pi*np.diff(ulon, axis=1)/180)
     dy = R * (np.pi*np.diff(vlat, axis=0)/180)
     
-    # add data to fields
+    # populate dicts of data fields, organized by their dimensions
+    #
+    # these are on the rho grid
+    rho_dict = {
+        'h': -z,
+        'pm': 1/dx,
+        'pn': 1/dy,
+        'f': sw.f(lat),
+        }
+    # these are scalars or characters
+    misc_dict = {
+        'xl': dx[0,:].sum(),
+        'el': dy[:,0].sum(),
+        'sph': 'T',
+        }
+    # these are on all the grids in tag_list below
+    lon_lat_dict = {
+        'lon_rho':lon,
+        'lat_rho': lat,
+        'lon_psi_ex': plon,
+        'lat_psi_ex': plat,
+        'lon_u': lon[:, :-1] + np.diff(lon, axis=1)/2,
+        'lat_u': lat[:, :-1],
+        'lon_v': lon[:-1, :],
+        'lat_v': lat[:-1, :] + np.diff(lat, axis=0)/2,
+        'lon_psi': plon[1:-1, 1:-1],
+        'lat_psi': plat[1:-1, 1:-1],
+        }
+    
+    # now populate a data dict with all of these, including dimensions,
+    # to feed to an xarray Dataset
+    data_dict = dict()
+    for vn in rho_dict.keys():
+        data_dict[vn] = (('eta_rho', 'xi_rho'), rho_dict[vn])
+    for vn in misc_dict.keys():
+        data_dict[vn] = (misc_dict[vn]) # no dimension needed?  Should these be attributes?
+    tag_list = ['rho', 'u', 'v', 'psi', 'psi_ex']
     for tag in tag_list:
-        lon_var[tag][:] = lon_dict[tag]
-        lat_var[tag][:] = lat_dict[tag]
-        # start with all ones (unmasked for ROMS)
-        mask_var[tag][:] = np.ones_like(lon_dict[tag], dtype=int)
+        data_dict['lon_'+tag] = (('eta_'+tag, 'xi_'+tag), lon_lat_dict['lon_'+tag])
+        data_dict['lat_'+tag] = (('eta_'+tag, 'xi_'+tag), lon_lat_dict['lat_'+tag])
+        data_dict['mask_'+tag] = (('eta_'+tag, 'xi_'+tag), np.ones_like(lon_lat_dict['lon_'+tag]))
     
-    h_var[:] = -z
-    pm_var[:] = 1/dx
-    pn_var[:] = 1/dy
-    f_var[:] = sw.f(lat_dict['rho'])
-    xl_var[:] = dx[0,:].sum()
-    el_var[:] = dy[:,0].sum()
-    sph_var[:] = 'T'
-    
-    foo.close()
+    # create the Dataset and write to NetCDF (overwrites existing file)
+    ds = xr.Dataset(data_dict)
+    ds.to_netcdf(out_fn)
     
 def make_nudgcoef(dch, out_dir):
     # Using info from From https://www.myroms.org/projects/src/ticket/627

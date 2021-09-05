@@ -4,8 +4,11 @@ Code to initialize the creation of a ROMS grid file.
 NOTE: the gridname is set in gfun.gstart().
 
 Throughout this code I try to use ROMS naming conventions, except that
-when manipulating or plotting I refer to [lon,lat]_rho as [lon,lat],
-and [lon,lat]_psi_ex as [plon,plat].
+when manipulating or plotting I refer to: [lon_rho,lat_rho] as [lon,lat].
+
+Also [plon,plat] is just like [lon_psi, lat_psi] but extended by one on all
+directions so that it is box corners around all rho-grid points.
+
 """
 import numpy as np
 import pickle
@@ -34,7 +37,7 @@ dch = gfun.default_choices(Gr)
 # start with cell corners (like an extended psi grid)
     
 if Gr['gridname'] == 'sal0':
-    # start of a salish nest grid
+    # A Salish Sea grid, used as an example.
     aa = [-124, -122, 47, 49]
     res = 600 # target resolution (m)
     plon_vec, plat_vec = gfu.simple_grid(aa, res)
