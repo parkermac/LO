@@ -25,7 +25,7 @@ from pathlib import Path
 import subprocess
 from time import time, sleep
 
-# add the path by hand so that it will urun on klone (outside of loenv)
+# add the path by hand so that it will run on klone (outside of loenv)
 pth = Path(__file__).absolute().parent.parent / 'lo_tools' / 'lo_tools'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
@@ -144,7 +144,6 @@ while dt <= dt1:
     if args.get_forcing:
         tt0 = time()
         # Name the place where the forcing files will be copied from
-        # remote_dir='parker@apogee.ocean.washington.edu:/dat1/parker'
         remote_dir = remote_user + '@' + remote_machine + ':' + remote_dir0
         Lfun.make_dir(force_dir, clean=True)
         # Copy the forcing files, one folder at a time.
@@ -267,16 +266,14 @@ while dt <= dt1:
     if roms_worked:
         if args.move_his:
             tt0 = time()
-            # Copy history files to boiler and clean up
+            # Copy history files to the remote machine and clean up
             # (i) make sure the output directory exists
-            # cmd_list = ['ssh', 'parker@apogee.ocean.washington.edu', 'mkdir -p /dat1/parker/LO_roms/'+Ldir['gtagex']]
             cmd_list = ['ssh', remote_user + '@' + remote_machine,
                 'mkdir -p ' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Make output directory on ' + remote_machine, args.verbose)
             # (ii) move the contents of roms_out_dir
-            # cmd_list = ['scp','-r',str(roms_out_dir), 'parker@apogee.ocean.washington.edu:/dat1/parker/LO_roms/'+Ldir['gtagex']]
             cmd_list = ['scp','-r',str(roms_out_dir),
                 remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
