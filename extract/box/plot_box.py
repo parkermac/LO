@@ -42,25 +42,23 @@ if int(my_choice) not in range(NT):
 else:
     nt = int(my_choice)
 
-# make psi_grid coordinates [what a pain!]
-rlon = ds.lon_rho.values[0,:]
-rlat = ds.lat_rho.values[:,0]
-plon = np.ones(len(rlon) + 1)
-plat = np.ones(len(rlat) + 1)
-dx2 = np.diff(rlon)/2
-dy2 = np.diff(rlat)/2
-plon = np.concatenate(((rlon[0]-dx2[0]).reshape((1,)), rlon[:-1]+dx2, (rlon[-1]+dx2[-1]).reshape((1,))))
-plat = np.concatenate(((rlat[0]-dy2[0]).reshape((1,)), rlat[:-1]+dy2, (rlat[-1]+dy2[-1]).reshape((1,))))
-lon_psi, lat_psi = np.meshgrid(plon, plat)
+plon, plat = pfun.get_plon(ds.lon_rho.values, ds.lat_rho.values)
 
 s0 = ds.salt[nt,-1,:,:].values
 rmask = ~np.isnan(s0) # True on water
+plot_uv = False
+if 'u' in ds.data_vars and 'v' in ds.data_vars:
+    u0 = ds.u[nt,-1,:,:].values
+    v0 = ds.v[nt,-1,:,:].values
+    umask = ~np.isnan(u0)
+    vmask = ~np.isnan(v0)
+    plot_uv = True
 
 # PLOTTING
 
 plt.close('all')
 
-if False:
+if plot_uv:
     # show exact gridpoints and mask
     pfun.start_plot(figsize=(10,10))
     fig = plt.figure()
@@ -77,12 +75,12 @@ if False:
     pfun.add_coast(ax, color='b', linewidth=2)
     pfun.dar(ax)
     pad = .02
-    ax.axis([lon0-pad, lon1+pad, lat0-pad, lat1+pad])
+    ax.axis([plon[0,0]-pad, plon[-1,-1]+pad, plat[0,0]-pad, plat[-1,-1]+pad])
     
     plt.show
     pfun.end_plot()
 
-if False:
+if plot_uv:
     # quiver plot of velocity
     pfun.start_plot(figsize=(10,10))
     fig = plt.figure()
@@ -103,12 +101,12 @@ if False:
     VV[np.isnan(s0)] = np.nan
 
     alpha=.2
-    ax.pcolormesh(lon_psi, lat_psi, s0, vmin=30, vmax=32, cmap='Spectral_r')
+    ax.pcolormesh(plon, plat, s0, vmin=30, vmax=32, cmap='Spectral_r')
     ax.quiver(ds.lon_rho.values, ds.lat_rho.values, UU, VV)
     pfun.add_coast(ax, color='b', linewidth=2)
     pfun.dar(ax)
     pad = .02
-    ax.axis([lon0-pad, lon1+pad, lat0-pad, lat1+pad])
+    ax.axis([plon[0,0]-pad, plon[-1,-1]+pad, plat[0,0]-pad, plat[-1,-1]+pad])
     
     plt.show()
     pfun.end_plot()
@@ -134,14 +132,14 @@ if True:
     ax = fig.add_subplot(111)
     
     alpha=.2
-    cs = ax.pcolormesh(lon_psi, lat_psi, v0, vmin=vmin, vmax=vmax, cmap=cmap)
+    cs = ax.pcolormesh(plon, plat, v0, vmin=vmin, vmax=vmax, cmap=cmap)
     fig.colorbar(cs, ax=ax)
     pfun.add_coast(ax, color='k', linewidth=0.5)
     pfun.dar(ax)
     pfun.add_bathy_contours(ax, ds, depth_levs = [], txt=True)
     
     pad = .02
-    ax.axis([plon[0]-pad, plon[-1]+pad, plat[0]-pad, plat[-1]+pad])
+    ax.axis([plon[0,0]-pad, plon[-1,-1]+pad, plat[0,0]-pad, plat[-1,-1]+pad])
     
     ax.text(.05, .05, ot_dt[nt].strftime(tstr + '\n%Y.%m.%d\n%H:%M:%S' + ' UTC'), transform=ax.transAxes,
         bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
