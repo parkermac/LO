@@ -1,10 +1,4 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 """
-Created on Wed Mar 29 15:34:22 2017
-
-@author: PM5
-
 Module of functions for plotting grids in pgrid.
 """
 import numpy as np
@@ -49,7 +43,7 @@ def get_grids(ds):
     
 def add_river_tracks(Gr, ds, ax):
     # add river tracks and endpoints
-    in_rfn = Gr['gdir'] + 'river_info.csv'
+    in_rfn = Gr['gdir'] / 'river_info.csv'
     try:
         df = pd.read_csv(in_rfn, index_col='rname')
     except FileNotFoundError:

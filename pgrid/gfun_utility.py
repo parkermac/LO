@@ -6,6 +6,7 @@ import xarray as xr
 import seawater as sw
 
 from lo_tools import Lfun, zfun, zrfun
+from lo_tools import plotting_functions as pfun
 
 def simple_grid(aa, res):
     dlat = aa[3] - aa[2]
@@ -16,21 +17,25 @@ def simple_grid(aa, res):
     dlonm = earth_rad * np.cos(np.pi*mean_lat/180) * np.pi * dlon/180
     nx = int(np.ceil(dlonm/res))
     ny = int(np.ceil(dlatm/res))
-    plon_vec = np.linspace(aa[0], aa[1], nx)
-    plat_vec = np.linspace(aa[2], aa[3], ny)
-    return plon_vec, plat_vec
+    Lon_vec = np.linspace(aa[0], aa[1], nx)
+    Lat_vec = np.linspace(aa[2], aa[3], ny)
+    return Lon_vec, Lat_vec
 
 def stretched_grid(lon_list, x_res_list, lat_list, y_res_list):
     """
     Input:
     The four lists (units = degrees and meters) are points that define
     segmented vectors along which the resolution changes linearly.
+    
+    Output:
+    vectors of lon and lat suitable for using with meshgrid to make
+    lon_rho and lat_rho.
     """
-    plon_list = []
-    plat_list = []
+    Lon_list = []
+    Lat_list = []
     if (len(lon_list) != len(x_res_list)) or (len(lat_list) != len(y_res_list)):
         print('Lists must be the same length')
-        return np.array(plon_list), np.array(plat_list)
+        return np.array(Lon_list), np.array(Lat_list)
 
     lon_vec = np.array(lon_list)
     x_res_vec = np.array(x_res_list)
@@ -41,22 +46,22 @@ def stretched_grid(lon_list, x_res_list, lat_list, y_res_list):
     clat = np.cos(np.pi*np.mean(lat_vec)/180)
 
     lon = lon_list[0]
-    plon_list.append(lon)
+    Lon_list.append(lon)
     while lon <= lon_list[-1]:
         i0, i1, fr = zfun.get_interpolant(np.array([lon]), lon_vec)
         xres = (1-fr)*x_res_vec[i0] + fr*x_res_vec[i1]
         dlon = 180 * xres / (clat * R * np.pi)
         lon = lon + dlon
-        plon_list.append(lon[0])
+        Lon_list.append(lon[0])
     lat = lat_list[0]
-    plat_list.append(lat)
+    Lat_list.append(lat)
     while lat <= lat_list[-1]:
         i0, i1, fr = zfun.get_interpolant(np.array([lat]), lat_vec)
         yres = (1-fr)*y_res_vec[i0] + fr*y_res_vec[i1]
         dlat = 180 * yres / (R * np.pi)
         lat = lat + dlat
-        plat_list.append(lat[0])
-    return np.array(plon_list), np.array(plat_list)
+        Lat_list.append(lat[0])
+    return np.array(Lon_list), np.array(Lat_list)
 
 def load_bathy_nc(t_fn):
     ds = xr.open_dataset(t_fn)
@@ -69,8 +74,8 @@ def load_bathy_nc(t_fn):
 def load_bathy2(t_fn, lon_vec, lat_vec):
     # load a section of the new NetCDF Smith-Sandwell bathy
     ds = xr.open_dataset(t_fn)
-    tlon_vec = ds['lon'].values
-    tlat_vec = ds['lat'].values
+    Lon = ds['lon'].values
+    Lat = ds['lat'].values
     i0 = zfun.find_nearest_ind(Lon, lon_vec[0])
     i1 = zfun.find_nearest_ind(Lon, lon_vec[-1])
     j0 = zfun.find_nearest_ind(Lat, lat_vec[0])
@@ -81,12 +86,13 @@ def load_bathy2(t_fn, lon_vec, lat_vec):
     ds.close()
     return tlon_vec, tlat_vec, tz
 
-def make_nc(out_fn, plon, plat, lon, lat, z, m, dch):
+def make_nc(out_fn, lon, lat, z, m, dch):
     """
     Initial creation of the NetCDF grid file.
     """
     
     # create dx, dy (used to make pm and pn)
+    plon, plat = pfun.get_plon(lon, lat)
     ulon = plon[:-1, :]
     vlat = plat[:, :-1]
     R = zfun.earth_rad(np.mean(plat[:,1]))
@@ -112,8 +118,6 @@ def make_nc(out_fn, plon, plat, lon, lat, z, m, dch):
     lon_lat_dict = {
         'lon_rho':lon,
         'lat_rho': lat,
-        'lon_psi_ex': plon,
-        'lat_psi_ex': plat,
         'lon_u': lon[:, :-1] + np.diff(lon, axis=1)/2,
         'lat_u': lat[:, :-1],
         'lon_v': lon[:-1, :],
@@ -129,7 +133,7 @@ def make_nc(out_fn, plon, plat, lon, lat, z, m, dch):
         data_dict[vn] = (('eta_rho', 'xi_rho'), rho_dict[vn])
     for vn in misc_dict.keys():
         data_dict[vn] = (misc_dict[vn]) # no dimension needed?  Should these be attributes?
-    tag_list = ['rho', 'u', 'v', 'psi', 'psi_ex']
+    tag_list = ['rho', 'u', 'v', 'psi']
     for tag in tag_list:
         data_dict['lon_'+tag] = (('eta_'+tag, 'xi_'+tag), lon_lat_dict['lon_'+tag])
         data_dict['lat_'+tag] = (('eta_'+tag, 'xi_'+tag), lon_lat_dict['lat_'+tag])

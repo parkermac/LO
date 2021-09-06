@@ -35,38 +35,26 @@ flag_show_res = True
 # show bathymetry on some sections
 flag_show_sections = False
 
-# Set this to True to look at grids we have already created,
-# e.g. ones currently in use for LiveOcean.
-using_old_grid = False
-# Set it to False when interacting with grids from pgrid_output.
-
 # **** END USER CHOICES ****
 
 # select grid file
-
-if using_old_grid==True:
-    fn = gfun.select_file(Gr, using_old_grid=True)
-    in_fn = fn
-elif using_old_grid==False:
-    fn = gfun.select_file(Gr)
-    in_fn = Gr['gdir'] / fn
-    in_fn0 = Gr['gdir'] / 'grid_m00_r00_s00_x00.nc'
+fn = gfun.select_file(Gr)
+in_fn = Gr['gdir'] / fn
+in_fn0 = Gr['gdir'] / 'grid_m00_r00_s00_x00.nc'
 
 # load the data
 ds = xr.open_dataset(in_fn)
 z = -ds.h.values
-if using_old_grid==False:
-    ds0 = xr.open_dataset(in_fn0)
-    z0 = -ds0.h.values
+ds0 = xr.open_dataset(in_fn0)
+z0 = -ds0.h.values
 mask_rho = ds.mask_rho.values
 
-plon, plat = gfp.get_plon_plat(using_old_grid, ds)
+plon, plat = pfun.get_plon(ds.lon_rho.values, ds.lat_rho.values)
 buff = 0.05*(plat[-1,0]-plat[0,0])
 ax_lims = (plon[0,0]-buff, plon[0,-1]+buff, plat[0,0]-buff, plat[-1,0]+buff)
 
 zm = np.ma.masked_where(mask_rho == 0, z)
-if using_old_grid==False:
-    z0m = np.ma.masked_where(mask_rho == 0, z0)
+z0m = np.ma.masked_where(mask_rho == 0, z0)
 
 # plotting
 plt.close('all')
@@ -88,7 +76,7 @@ fig = plt.figure(figsize=(8*NC,8))
 ax1 = fig.add_subplot(1,NC,1)
 cmap1 = plt.get_cmap(name='gist_earth') # terrain, viridis
 cs = ax1.pcolormesh(plon, plat, zm,
-                   vmin=-3000, vmax=10, cmap = cmap1)
+                   vmin=-300, vmax=10, cmap = cmap1)
 fig.colorbar(cs, ax=ax1, extend='both')
 pfun.add_coast(ax1)
 pfun.dar(ax1)
@@ -96,7 +84,7 @@ ax1.axis(ax_lims)
 ax1.set_title(Gr['gridname'] + '/' + fn)
 ax1.text(.95, .05, str(mask_rho.shape), horizontalalignment='right',
          transform=ax1.transAxes)                   
-gfp.add_river_tracks(Gr, ds, ax1)
+#gfp.add_river_tracks(Gr, ds, ax1)
    
 if flag_show_sections:
     color_list = ['orange', 'gold', 'greenyellow', 'lightgreen',
@@ -111,8 +99,7 @@ if flag_show_sections:
         y = z[jj, :]/100
         y0 = z0[jj, :]/100
         ax.plot(x, y, '-r', linewidth=1)
-        if using_old_grid==False:
-            ax.plot(x, y0, '-c', linewidth=1)
+        ax.plot(x, y0, '-c', linewidth=1)
         ax.plot(x, 0*x, '-', color=color_list[ss], linewidth=1)
         ax.set_xlim(x[0], x[-1])
         ax.set_ylim(-5, 1)
