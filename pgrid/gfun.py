@@ -27,7 +27,7 @@ def gstart():
     """
     pgdir = Ldir['LOo'] / 'pgrid'
     gdir = pgdir / gridname # where grid.nc will end up
-    ri_dir = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'tracks'
+    ri_dir = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag']
     Gr ={'gridname': gridname,'pgdir': pgdir, 'gdir': gdir,'ri_dir': ri_dir}
     return Gr
 

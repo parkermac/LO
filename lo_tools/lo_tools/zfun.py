@@ -12,24 +12,19 @@ def interp2(x, y, X, Y, U):
     Interpolate field U(X,Y) to u(x,y).  All grids are required to be plaid and 2D
     """
     if is_plaid(x) and is_plaid(y) and is_plaid(Y) and is_plaid(Y):
-        if False:
-        # slow version
-            # slow version
-            uu = interp_scattered_on_plaid(x, y, X[0,:], Y[:,0], U)
-            u = np.reshape(uu, x.shape)
-        else:
-            # Much Faster
-            xi0, xi1, xf = get_interpolant(x[0,:], X[0,:], extrap_nan=True)
-            yi0, yi1, yf = get_interpolant(y[:,0], Y[:,0], extrap_nan=True)
-            NR, NC = x.shape
-            XF = xf.reshape((1,NC)) * np.ones((NR,1))
-            YF = yf.reshape((NR,1)) * np.ones((1,NC))
-            # bi linear interpolation
-            u00 = U[yi0,:][:,xi0]
-            u10 = U[yi1,:][:,xi0]
-            u01 = U[yi0,:][:,xi1]
-            u11 = U[yi1,:][:,xi1]
-            u = (1-YF)*((1-XF)*u00 + XF*u01) + YF*((1-XF)*u10 + XF*u11)
+        # Much Faster than interp_scatttered_on_plaid()
+        xi0, xi1, xf = get_interpolant(x[0,:], X[0,:], extrap_nan=True)
+        yi0, yi1, yf = get_interpolant(y[:,0], Y[:,0], extrap_nan=True)
+        NR, NC = x.shape
+        XF, YF = np.meshgrid(xf, yf)
+        # XF = xf.reshape((1,NC)) * np.ones((NR,1))
+        # YF = yf.reshape((NR,1)) * np.ones((1,NC))
+        # bi linear interpolation
+        u00 = U[yi0,:][:,xi0]
+        u10 = U[yi1,:][:,xi0]
+        u01 = U[yi0,:][:,xi1]
+        u11 = U[yi1,:][:,xi1]
+        u = (1-YF)*((1-XF)*u00 + XF*u01) + YF*((1-XF)*u10 + XF*u11)
         return u
     else:
         print('grids not plaid')

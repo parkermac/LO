@@ -1,10 +1,5 @@
-# -*- coding: utf-8 -*-
 """
-Created on Wed Jun 15 16:43:32 2016
-
-@author: PM5
-
-This plots river tacks.
+This carves the rivers and generates info for ROMS point sources.
 """
 
 from importlib import reload

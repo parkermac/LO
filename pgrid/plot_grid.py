@@ -19,6 +19,7 @@ else:
     Gr = gfun.gstart()
 from lo_tools import plotting_functions as pfun
 import gfun_plotting as gfp
+reload(gfp)
 
 import matplotlib.pyplot as plt
 import xarray as xr
@@ -76,7 +77,7 @@ fig = plt.figure(figsize=(8*NC,8))
 ax1 = fig.add_subplot(1,NC,1)
 cmap1 = plt.get_cmap(name='gist_earth') # terrain, viridis
 cs = ax1.pcolormesh(plon, plat, zm,
-                   vmin=-300, vmax=10, cmap = cmap1)
+                   vmin=-300, vmax=100, cmap = cmap1)
 fig.colorbar(cs, ax=ax1, extend='both')
 pfun.add_coast(ax1)
 pfun.dar(ax1)
@@ -84,7 +85,7 @@ ax1.axis(ax_lims)
 ax1.set_title(Gr['gridname'] + '/' + fn)
 ax1.text(.95, .05, str(mask_rho.shape), horizontalalignment='right',
          transform=ax1.transAxes)                   
-#gfp.add_river_tracks(Gr, ds, ax1)
+gfp.add_river_tracks(Gr, ds, ax1)
    
 if flag_show_sections:
     color_list = ['orange', 'gold', 'greenyellow', 'lightgreen',

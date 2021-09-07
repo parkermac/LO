@@ -69,10 +69,7 @@ else:
     m = np.ones_like(lon)
     for t_fn in dch['t_list']:
         print('\nOPENING BATHY FILE: ' + t_fn.name)
-        if t_fn.name == 'topo15.nc':
-            tlon_vec, tlat_vec, tz = gfu.load_bathy2(t_fn, Lon_vec, Lat_vec)
-        else:
-            tlon_vec, tlat_vec, tz = gfu.load_bathy_nc(t_fn)
+        tlon_vec, tlat_vec, tz = gfu.load_bathy_nc(t_fn)
         tlon, tlat = np.meshgrid(tlon_vec, tlat_vec)
         z_part = zfun.interp2(lon, lat, tlon, tlat, tz)
         # put good values of z_part in z

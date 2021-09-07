@@ -68,6 +68,9 @@ def load_bathy_nc(t_fn):
     tlon_vec = ds['lon'].values
     tlat_vec = ds['lat'].values
     tz = ds['z'].values
+    # There is a bug in xarray with these files: it does
+    # not set masked regions to nan.  So we do it by hand.
+    tz[tz>1e6] = np.nan
     ds.close()
     return tlon_vec, tlat_vec, tz
     
