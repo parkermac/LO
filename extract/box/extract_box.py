@@ -1,12 +1,14 @@
 """
 Code to extract a box-like region, typically for another modeler to use
-as a boundary contition.
+as a boundary contition.  In cases where it gets velocity in addition to
+the rho-grid variables the grid limits mimic the standard ROMS organization,
+with the outermost corners being on the rho-grid.
 
 Testing:
 run extract_box -gtx cas6_v3_lo8b -job yang_sequim -test True
 
 same but with all flags:
-run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -lt hourly -job yang_sequim -test True
+run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt daily -job yang_sequim -test True
 
 Performance: this is very fast, takes just a few seconds for three days on boiler (for yang_sequim).
 """
@@ -64,8 +66,8 @@ for a in argsd.keys():
 if Ldir['testing']:
     Ldir['roms_out_num'] = 2
     Ldir['ds0'] = '2019.07.04'
-    Ldir['ds1'] = '2019.07.04'
-    Ldir['list_type'] = 'hourly'
+    Ldir['ds1'] = '2019.07.06'
+    Ldir['list_type'] = 'daily'
 # set where to look for model output
 if Ldir['roms_out_num'] == 0:
     pass
@@ -95,6 +97,9 @@ Lfun.make_dir(temp_dir, clean=True)
 fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
 if Ldir['testing']:
     fn_list = fn_list[:5]
+G, S, T = zrfun.get_basic_info(fn_list[0])
+Lon = G['lon_rho'][0,:]
+Lat = G['lat_rho'][:,0]
 
 def get_box(job):
     vn_list = 'salt,temp,zeta,h,u,v' # default list
@@ -107,11 +112,11 @@ def get_box(job):
     elif job == 'garrison':
         aa = [-129.9, -122.05, 42.1, 51.9]
         vn_list = 'salt,temp,oxygen,h'
+    elif job == 'full':
+        aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
+        vn_list = 'salt,temp,oxygen,h'
     return aa[0], aa[1], aa[2], aa[3], vn_list
     
-G, S, T = zrfun.get_basic_info(fn_list[0])
-Lon = G['lon_rho'][0,:]
-Lat = G['lat_rho'][:,0]
 def check_bounds(lon, lat):
     # error checking
     if (lon < Lon[0]) or (lon > Lon[-1]):
@@ -129,6 +134,7 @@ def check_bounds(lon, lat):
 lon0, lon1, lat0, lat1, vn_list = get_box(Ldir['job'])
 ilon0, ilat0 = check_bounds(lon0, lat0)
 ilon1, ilat1 = check_bounds(lon1, lat1)
+# NOTE: ncks indexing is zero-based but is INCLUSIVE of the last point.
 
 # do the extractions
 N = len(fn_list)
@@ -144,8 +150,8 @@ for ii in range(N):
     cmd_list1 = ['ncks',
         '-v', vn_list,
         '-d', 'xi_rho,'+str(ilon0)+','+str(ilon1), '-d', 'eta_rho,'+str(ilat0)+','+str(ilat1),
-        '-d', 'xi_u,'+str(ilon0-1)+','+str(ilon1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
-        '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0-1)+','+str(ilat1)]
+        '-d', 'xi_u,'+str(ilon0)+','+str(ilon1-1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
+        '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0)+','+str(ilat1-1)]
     if Ldir['surf']:
         cmd_list1 += ['-d','s_rho,'+str(S['N']-1)]
     elif Ldir['bot']:
@@ -210,6 +216,7 @@ if True: #Ldir['testing'] == False:
     Lfun.make_dir(temp_dir, clean=True)
     temp_dir.rmdir()
 
+print('Size of full rho-grid = %s' % (str(G['lon_rho'].shape)))
 print('\nContents of extracted box file:')
 # check on the results
 ds = xr.open_dataset(box_fn)

@@ -77,7 +77,7 @@ if plot_uv:
     pad = .02
     ax.axis([plon[0,0]-pad, plon[-1,-1]+pad, plat[0,0]-pad, plat[-1,-1]+pad])
     
-    plt.show
+    plt.show()
     pfun.end_plot()
 
 if plot_uv:
@@ -95,14 +95,14 @@ if plot_uv:
     uu = u0.copy(); vv = v0.copy()
     uu[np.isnan(uu)] = 0
     vv[np.isnan(vv)] = 0
-    UU = (uu[:,1:]+uu[:,:-1])/2
-    VV = (vv[:1,:] + vv[:-1,:])/2
-    UU[np.isnan(s0)] = np.nan
-    VV[np.isnan(s0)] = np.nan
+    UU = (uu[1:-1,1:]+uu[1:-1,:-1])/2
+    VV = (vv[:1,1:-1] + vv[:-1,1:-1])/2
+    UU[np.isnan(s0[1:-1,1:-1])] = np.nan
+    VV[np.isnan(s0[1:-1,1:-1])] = np.nan
 
     alpha=.2
     ax.pcolormesh(plon, plat, s0, vmin=30, vmax=32, cmap='Spectral_r')
-    ax.quiver(ds.lon_rho.values, ds.lat_rho.values, UU, VV)
+    ax.quiver(ds.lon_rho.values[1:-1,1:-1], ds.lat_rho.values[1:-1,1:-1], UU, VV)
     pfun.add_coast(ax, color='b', linewidth=2)
     pfun.dar(ax)
     pad = .02
@@ -110,8 +110,9 @@ if plot_uv:
     
     plt.show()
     pfun.end_plot()
-    
-if True:
+
+vn = 'oxygen'
+if vn in ds.data_vars:
     # plot another variable
     vn = 'oxygen'
     if vn in ds.data_vars:
