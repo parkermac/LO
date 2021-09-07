@@ -127,6 +127,29 @@ for sect_name in sect_list:
             [df0.loc[sect_name,'DS'], df1.loc[sect_name,'DS']], '-', c='gray')
     ax.plot([df0.loc[sect_name,'Qprism'], df2.loc[sect_name,'Qprism']],
             [df0.loc[sect_name,'DS'], df2.loc[sect_name,'DS']], '-', c='gray')
+            
+# Qin*DS vs. Qprism
+df0['QinDS'] = df0['Qin'] * df0['DS']
+df1['QinDS'] = df1['Qin'] * df1['DS']
+df2['QinDS'] = df2['Qin'] * df2['DS']
+ax = df0.plot(x='Qprism', y='QinDS', linestyle='None', marker='o', loglog=loglog,
+    color=c0, label='Original', alpha=alpha, markersize=ms)
+df1.plot(x='Qprism', y='QinDS', linestyle='None', marker='o', loglog=loglog,
+    color=c1, ax=ax, label='75% tide', alpha=alpha, markersize=ms)
+df2.plot(x='Qprism', y='QinDS', linestyle='None', marker='o', loglog=loglog,
+    color=c2, ax=ax, label='110% tide', alpha=alpha, markersize=ms)
+ax.set_xlabel(r'$Q_{prism}\ [10^{3}\ m^{3}s^{-1}]$')
+ax.set_ylabel(r'$Qin\Delta S$')
+for sect_name in sect_list:
+    # add section names
+    ax.text(df0.loc[sect_name,'Qprism'], df0.loc[sect_name,'QinDS'], sect_name, fontsize=.7*(fs),
+        color='k', ha='center', va='center')
+    # add lines connecting the experiments for each section
+    ax.plot([df0.loc[sect_name,'Qprism'], df1.loc[sect_name,'Qprism']],
+            [df0.loc[sect_name,'QinDS'], df1.loc[sect_name,'QinDS']], '-', c='gray')
+    ax.plot([df0.loc[sect_name,'Qprism'], df2.loc[sect_name,'Qprism']],
+            [df0.loc[sect_name,'QinDS'], df2.loc[sect_name,'QinDS']], '-', c='gray')
+
 
 plt.show()
 pfun.end_plot()
