@@ -73,7 +73,7 @@ def interp_scattered_on_plaid(x, y, xvec, yvec, u, exnan=True):
 
     return ui
 
-def get_interpolant(x, xvec, extrap_nan=False):
+def get_interpolant(x, xvec, extrap_nan=True):
     """
     Returns info to allow fast interpolation.
 
@@ -83,11 +83,12 @@ def get_interpolant(x, xvec, extrap_nan=False):
         NOTE: xvec must be monotonically increasing
 
     *kwargs*
-    Set extrap_nan=True to return nan for the fraction
+    
+    Default: extrap_nan=True will return nan for the fraction
     whenever an x value is outside of the range of xvec.
-    The default, with extrap_nan=False, is that
-    if the x is out of the range of xvec, or if x=nan it returns
-    the interpolant for the first or last point.
+    
+    With extrap_nan=False, if the x is out of the range of xvec,
+    or if x=nan it returns the interpolant for the first or last point.
     E.g. [0, 1, 0.] for x < xvec.min()
     
     Output: three 1-D numpy arrays of the same size as x
