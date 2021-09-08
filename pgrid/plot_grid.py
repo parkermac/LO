@@ -50,12 +50,14 @@ ds0 = xr.open_dataset(in_fn0)
 z0 = -ds0.h.values
 mask_rho = ds.mask_rho.values
 
-plon, plat = pfun.get_plon(ds.lon_rho.values, ds.lat_rho.values)
+plon, plat = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
 buff = 0.05*(plat[-1,0]-plat[0,0])
 ax_lims = (plon[0,0]-buff, plon[0,-1]+buff, plat[0,0]-buff, plat[-1,0]+buff)
 
-zm = np.ma.masked_where(mask_rho == 0, z)
-z0m = np.ma.masked_where(mask_rho == 0, z0)
+zm = z.copy()
+zm[mask_rho == 0] = np.nan
+zm0 = z0.copy()
+zm0[mask_rho == 0] = np.nan
 
 # plotting
 plt.close('all')

@@ -18,7 +18,7 @@ aa = [-124, -122, 47, 49]
 res = 600 # target resolution (m)
 Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
 lon, lat = np.meshgrid(Lon_vec, Lat_vec)
-plon, plat = pfun.get_plon(lon, lat)
+plon, plat = pfun.get_plon_plat(lon, lat)
 
 t_dir = Ldir['data'] / 'topo'
 # list of topo files: coarsest to finest
@@ -49,8 +49,8 @@ for t in t_list:
     ds.close()
     
     if False:
-        xi0, xi1, xf = zfun.get_interpolant(Lon_vec, tlon_vec, extrap_nan=True)
-        yi0, yi1, yf = zfun.get_interpolant(Lat_vec, tlat_vec, extrap_nan=True)
+        xi0, xi1, xf = zfun.get_interpolant(Lon_vec, tlon_vec)
+        yi0, yi1, yf = zfun.get_interpolant(Lat_vec, tlat_vec)
         NR = len(Lat_vec)
         NC = len(Lon_vec)
         XF = xf.reshape((1,NC)) * np.ones((NR,1))

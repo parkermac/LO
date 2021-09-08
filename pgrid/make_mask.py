@@ -23,7 +23,7 @@ out_fn = Gr['gdir'] / fn_new
 
 #% get the grid from NetCDF
 ds = xr.open_dataset(in_fn)
-plon, plat = pfun.get_plon(ds.lon_rho.values, ds.lat_rho.values)
+plon, plat = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
 z = -ds.h.values
 mask_rho_orig = ds.mask_rho.values
 plon_vec = plon[0,:]
@@ -81,8 +81,8 @@ if dch['unmask_coast']:
     cmask = np.isnan(cx)
     cx = cx[~cmask]
     cy = cy[~cmask]
-    ii0, ii1, ifr = zfun.get_interpolant(cx, plon_vec, extrap_nan=True)
-    jj0, jj1, jfr = zfun.get_interpolant(cy, plat_vec, extrap_nan=True)
+    ii0, ii1, ifr = zfun.get_interpolant(cx, plon_vec)
+    jj0, jj1, jfr = zfun.get_interpolant(cy, plat_vec)
     # Don't unmask extrapolated points.
     ii0 = ii0[~np.isnan(ifr) & ~np.isnan(jfr)]
     jj0 = jj0[~np.isnan(ifr) & ~np.isnan(jfr)]

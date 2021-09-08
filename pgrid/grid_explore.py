@@ -103,8 +103,8 @@ fig.colorbar(cs, ax=ax1, extend='both')
 aa = ax1.axis()
 # add the coastline
 clon, clat = pfun.get_coast()
-cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:], extrap_nan=True)
-cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0], extrap_nan=True)
+cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:])
+cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0])
 ax1.plot(cx0 + cxf, NR - (cy0 + cyf) - 1, '-k')
 # add rivers
 gfp.edit_mask_river_tracks(Gr, NR, ax1)

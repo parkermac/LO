@@ -95,7 +95,7 @@ def make_nc(out_fn, lon, lat, z, m, dch):
     """
     
     # create dx, dy (used to make pm and pn)
-    plon, plat = pfun.get_plon(lon, lat)
+    plon, plat = pfun.get_plon_plat(lon, lat)
     ulon = plon[:-1, :]
     vlat = plat[:, :-1]
     R = zfun.earth_rad(np.mean(plat[:,1]))

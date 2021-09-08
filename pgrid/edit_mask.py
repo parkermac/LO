@@ -114,8 +114,8 @@ aa = ax1.axis()
 
 # add the coastline
 clon, clat = pfun.get_coast()
-cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:], extrap_nan=True)
-cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0], extrap_nan=True)
+cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:])
+cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0])
 ax1.plot(cx0 + cxf, NR - (cy0 + cyf) - 1, '-k')
 
 # add rivers
@@ -290,8 +290,8 @@ while flag_get_ginput:
                 for I in range(len(x)-1):
                     xx = np.linspace(x[I], x[I+1], 100)
                     yy = np.linspace(y[I], y[I+1], 100)
-                    ii0, ii1, ifr = zfun.get_interpolant(xx, np.arange(NC), extrap_nan=True)
-                    jj0, jj1, jfr = zfun.get_interpolant(yy, np.arange(NR), extrap_nan=True)
+                    ii0, ii1, ifr = zfun.get_interpolant(xx, np.arange(NC))
+                    jj0, jj1, jfr = zfun.get_interpolant(yy, np.arange(NR))
                     # drop extrapolated points
                     ii0 = ii0[~np.isnan(ifr) & ~np.isnan(jfr)]
                     jj0 = jj0[~np.isnan(ifr) & ~np.isnan(jfr)]
