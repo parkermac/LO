@@ -53,7 +53,7 @@ def get_coast(dir0=Ldir['data']):
     lat = C['lat'].values
     return lon, lat
     
-def get_plon(lon, lat):
+def get_plon_plat(lon, lat):
     """
     This takes the 2-D lon and lat grids (ndarrays) and returns extended
     "psi" grids that are suitable for plotting using pcolormesh
@@ -64,10 +64,10 @@ def get_plon(lon, lat):
     Lon = lon[0,:]
     Lat = lat[:,0]
     if (Lon - lon[-1,:]).sum() != 0:
-        print('Error from get_plon: lon grid not plaid')
+        print('Error from get_plon_plat: lon grid not plaid')
         sys.exit()
     if (Lat - lat[:,-1]).sum() != 0:
-        print('Error from get_plon: lat grid not plaid')
+        print('Error from get_plon_plat: lat grid not plaid')
         sys.exit()
     plon = np.ones(len(Lon) + 1)
     plat = np.ones(len(Lat) + 1)

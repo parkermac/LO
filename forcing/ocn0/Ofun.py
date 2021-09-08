@@ -591,14 +591,16 @@ def get_zr(G, S, vn):
         zr = zrfun.get_z(h, 0*h, S, only_rho=True)
     elif vn in ['u3d']:    
         xru, yru = get_xyr(G, 'ubar')
-        hu = zfun.interp_scattered_on_plaid(G['lon_u'], G['lat_u'],
-                    G['lon_rho'][0,:], G['lat_rho'][:,0], h, exnan=False)
-        hu = np.reshape(hu, G['lon_u'].shape)
+        # hu = zfun.interp_scattered_on_plaid(G['lon_u'], G['lat_u'],
+        #             G['lon_rho'][0,:], G['lat_rho'][:,0], h)
+        # hu = np.reshape(hu, G['lon_u'].shape)
+        hu = (h[:,1:] + h[:,:-1])/2
         zr = zrfun.get_z(hu, 0*hu, S, only_rho=True)    
     elif vn in ['v3d']:    
-        hv = zfun.interp_scattered_on_plaid(G['lon_v'], G['lat_v'],
-                    G['lon_rho'][0,:], G['lat_rho'][:,0], h, exnan=False)
-        hv = np.reshape(hv, G['lon_v'].shape)
+        # hv = zfun.interp_scattered_on_plaid(G['lon_v'], G['lat_v'],
+        #             G['lon_rho'][0,:], G['lat_rho'][:,0], h)
+        # hv = np.reshape(hv, G['lon_v'].shape)
+        hv = (h[1:, :] + h[:-1,:])/2
         zr = zrfun.get_z(hv, 0*hv, S, only_rho=True)
     else:
         print('Unknown variable name for get_zr: ' + vn)

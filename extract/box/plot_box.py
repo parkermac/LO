@@ -42,7 +42,7 @@ if int(my_choice) not in range(NT):
 else:
     nt = int(my_choice)
 
-plon, plat = pfun.get_plon(ds.lon_rho.values, ds.lat_rho.values)
+plon, plat = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
 
 s0 = ds.salt[nt,-1,:,:].values
 rmask = ~np.isnan(s0) # True on water

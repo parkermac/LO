@@ -113,25 +113,25 @@ def get_inds(x0, x1, y0, y1, G, verbose=False):
         lat = G['lat_v'][:,0].squeeze()
         
     # we get all 4 i's or j's but only 3 are used
-    i0, i1, fr = zfun.get_interpolant(np.array([x0]), lon, extrap_nan=True)
+    i0, i1, fr = zfun.get_interpolant(np.array([x0]), lon)
     if np.isnan(fr):
         print('Bad x point')
         sys.exit()
     else:
         ii0 = int(i0)
-    i0, i1, fr = zfun.get_interpolant(np.array([x1]), lon, extrap_nan=True)
+    i0, i1, fr = zfun.get_interpolant(np.array([x1]), lon)
     if np.isnan(fr):
         print('Bad x point')
         sys.exit()
     else:
         ii1 = int(i1)
-    j0, j1, fr = zfun.get_interpolant(np.array([y0]), lat, extrap_nan=True)
+    j0, j1, fr = zfun.get_interpolant(np.array([y0]), lat)
     if np.isnan(fr):
         print('Bad y0 point')
         sys.exit()
     else:
         jj0 = int(j0)
-    j0, j1, fr = zfun.get_interpolant(np.array([y1]), lat, extrap_nan=True)
+    j0, j1, fr = zfun.get_interpolant(np.array([y1]), lat)
     if np.isnan(fr):
         print('Bad y1 point')
         sys.exit()

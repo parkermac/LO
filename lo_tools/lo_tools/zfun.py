@@ -13,12 +13,10 @@ def interp2(x, y, X, Y, U):
     """
     if is_plaid(x) and is_plaid(y) and is_plaid(Y) and is_plaid(Y):
         # Much Faster than interp_scatttered_on_plaid()
-        xi0, xi1, xf = get_interpolant(x[0,:], X[0,:], extrap_nan=True)
-        yi0, yi1, yf = get_interpolant(y[:,0], Y[:,0], extrap_nan=True)
+        xi0, xi1, xf = get_interpolant(x[0,:], X[0,:])
+        yi0, yi1, yf = get_interpolant(y[:,0], Y[:,0])
         NR, NC = x.shape
         XF, YF = np.meshgrid(xf, yf)
-        # XF = xf.reshape((1,NC)) * np.ones((NR,1))
-        # YF = yf.reshape((NR,1)) * np.ones((1,NC))
         # bi linear interpolation
         u00 = U[yi0,:][:,xi0]
         u10 = U[yi1,:][:,xi0]
@@ -42,7 +40,7 @@ def is_plaid(x):
     else:
         return True
 
-def interp_scattered_on_plaid(x, y, xvec, yvec, u, exnan=True):
+def interp_scattered_on_plaid(x, y, xvec, yvec, u):
     """
     Gets values of the field u at locations (x,y).
 
@@ -56,13 +54,10 @@ def interp_scattered_on_plaid(x, y, xvec, yvec, u, exnan=True):
 
     Returns a vector ui the same length as x and y.
 
-    Note that because it relies on "get_interpolant" out-of-bounds
-    values default to nan, unless you pass it the optional argument
-    exnan=False)
     """
     # get interpolants
-    xi0, xi1, xf = get_interpolant(x,xvec, extrap_nan=exnan)
-    yi0, yi1, yf = get_interpolant(y,yvec, extrap_nan=exnan)
+    xi0, xi1, xf = get_interpolant(x,xvec)
+    yi0, yi1, yf = get_interpolant(y,yvec)
 
     # bi linear interpolation
     u00 = u[yi0,xi0]
@@ -73,7 +68,7 @@ def interp_scattered_on_plaid(x, y, xvec, yvec, u, exnan=True):
 
     return ui
 
-def get_interpolant(x, xvec, extrap_nan=True):
+def get_interpolant(x, xvec):
     """
     Returns info to allow fast interpolation.
 
@@ -81,15 +76,6 @@ def get_interpolant(x, xvec, extrap_nan=True):
     x = data position(s) [1-D numpy array]
     xvec = coordinate vector [1-D numpy array without nans]
         NOTE: xvec must be monotonically increasing
-
-    *kwargs*
-    
-    Default: extrap_nan=True will return nan for the fraction
-    whenever an x value is outside of the range of xvec.
-    
-    With extrap_nan=False, if the x is out of the range of xvec,
-    or if x=nan it returns the interpolant for the first or last point.
-    E.g. [0, 1, 0.] for x < xvec.min()
     
     Output: three 1-D numpy arrays of the same size as x
     i0 = index below [int]
@@ -119,7 +105,7 @@ def get_interpolant(x, xvec, extrap_nan=True):
     xvec = xvec.flatten()
 
     # more error checking
-    if np.isnan(x).any() and extrap_nan==False:
+    if np.isnan(x).any():
         itp_err('nan found in x')
     if np.isnan(xvec).any():
         itp_err('nan found in xvec')
@@ -157,14 +143,10 @@ def get_interpolant(x, xvec, extrap_nan=True):
     fr = (x - xvec0)/(xvec1 - xvec0)
 
     # fractions for out of range x
-    if extrap_nan == False:
-        fr[lomask] = 0.
-        fr[himask] = 1.
-    elif extrap_nan == True:
-        fr[lomask] = np.nan
-        fr[himask] = np.nan
-        # override for the case where x = the last point of xvec
-        fr[X[:,0]==XVEC[0,-1]] = 1.0
+    fr[lomask] = np.nan
+    fr[himask] = np.nan
+    # override for the case where x = the last point of xvec
+    fr[X[:,0]==XVEC[0,-1]] = 1.0
 
     return i0, i1, fr
 
@@ -176,7 +158,7 @@ def find_nearest(array, value):
 def find_nearest_ind(array, value):
     # gives the index of the item in array that is closest to value
     idx = (np.abs(array-value)).argmin()
-    return idx
+    return int(idx)
 
 def filt_AB8d(data):
     """
@@ -315,6 +297,134 @@ def boolean_string(s):
     if s not in ['False', 'True']:
         raise ValueError('Not a valid boolean string')
     return s == 'True' # note use of ==
+
+def dist(x, x1, y, y1):
+    """
+    Standard distance between two points, used by get_stairstep().
+    """
+    d = np.sqrt((x1-x)**2 + (y1-y)**2)
+    return d
+    
+def dist_normal(x0, x1, y0, y1, xp, yp):
+    """
+    This finds the shortest distance from xp, yp to the segment
+    defined by points (x0, y0) and (x1, y1).  Used by get_stairstep().
+    """
+    # make sure x is increasing (inside the function)
+    if x1 < x0:
+        (x0, x1) = (x1, x0)
+        (y0, y1) = (y1, y0)
+    dx = x1-x0
+    dy = y1-y0
+    # find xp2, yp2: the position of the point on the line
+    # that is closest to xp, yp
+    if dy == 0: # line is horizontal
+        xp2 = xp
+        yp2 = y0
+    elif dx == 0: # line is vertical
+        yp2 = yp
+        xp2 = x0
+    else: # The line is sloping: then we find the equation for
+        # a line through xp, yp that is normal to the original line,
+        # and then find the point xp2, yp2 where the two lines intersect.
+        m = dy/dx
+        b = y0 - m*x0
+        bp = yp + (1/m)*xp
+        xp2 = (bp - b)/(m + (1/m))
+        yp2 = m*xp2 + b
+    # and return the distance between the point xp, yp and the intersection point
+    dxp = xp2 - xp
+    dyp = yp2 - yp
+    dist_n = np.sqrt(dxp**2 + dyp**2)
+    return dist_n
+    
+def get_stairstep(x0, x1, y0, y1):
+    """
+    Brute force method of generating a "stairstep" path: always choosing
+    the point with the shortest distance to the end will generate
+    the straightest path.
+    
+    The inputs should be integers, representing indices into a grid.
+    
+    The outputs are arrays of indices that would be suitable for a river
+    channel if we were working on the rho-grid on ROMS.
+    """
+    # check input
+    if isinstance(x0,int) and isinstance(x1,int) and isinstance(y0,int) and isinstance(y1,int):
+        pass
+    else:
+        print('Error from zfun.get_stairstep(): must pass ints.')
+        return
+    d = dist(x0, x1, y0, y1)
+    xx = []
+    yy = []
+    xx.append(x0)
+    yy.append(y0)
+    x = x0
+    y = y0
+    while d > 0:
+                
+        # find distances of all 4 surrounding points that
+        # are allowed choices to the end of line
+        dn = dist(x, x1, y+1, y1)
+        ds = dist(x, x1, y-1, y1)
+        de = dist(x+1, x1, y, y1)
+        dw = dist(x-1, x1, y, y1)
+        # close_arr is an array that is positive for surrounding points
+        # that are closer to the endpoint than the current point
+        close_arr = np.array([d-dn, d-ds, d-de, d-dw])
+        
+        # find distances of all 4 surrounding points that
+        # are allowed choices to closest point on line
+        dn_n = dist_normal(x0, x1, y0, y1, x, y+1)
+        ds_n = dist_normal(x0, x1, y0, y1, x, y-1)
+        de_n = dist_normal(x0, x1, y0, y1, x+1, y)
+        dw_n = dist_normal(x0, x1, y0, y1, x-1, y)
+        # gather them in an array
+        norm_arr = np.array([dn_n, ds_n, de_n, dw_n])
+        
+        # step_array is an array of the steps we take to make each
+        # of the surrounding points
+        step_arr = np.array([[0,1],[0,-1],[1,0],[-1,0]])
+        
+        # closer is a Boolean array that is True for all step choices
+        # that got us closer to the target
+        closer = close_arr >= 0
+        
+        # make shorter versions of step_arr and norm_arr that only include
+        # choices that got us closer
+        step_arr = step_arr[closer]
+        norm_arr = norm_arr[closer]
+        
+        # then find the index of the remaining choice that was closest to the line
+        imin = np.argmin(norm_arr)
+        
+        # take the step in the chosen direction
+        step = step_arr[imin,:]
+        x += step[0]
+        y += step[1]
+        xx.append(x)
+        yy.append(y)
+        
+        # and update the distance so the loop knows when it is done
+        d = dist(x, x1, y, y1)
+        
+    # pack results as arrays
+    XX = np.array(xx)
+    YY = np.array(yy)
+    
+    # check that result never steps more or less than one
+    DD = np.abs(np.diff(XX)) + np.abs(np.diff(YY))
+    if (DD==1).all():
+        pass # the result passes this test
+    else:
+        print('Error in result stepsize')
+    
+    # check that endpoints are correct
+    if (XX[0] != x0) or (XX[-1] != x1) or (YY[0] != y0) or (YY[-1] != y1):
+        print('Error in result endpoints!')
+        
+    return XX, YY
 
 
 

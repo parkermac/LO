@@ -54,8 +54,10 @@ planB = False
 planC = False
 add_CTD = False
 do_bio = True
-
 verbose = False
+
+if Ldir['testing']:
+    verbose = True
 
 testing_ncks = False
 testing_fmrc = False
