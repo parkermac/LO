@@ -133,7 +133,7 @@ vn_list = 'h,zeta'
 if Ldir['get_tsa']:
     vn_list += ',salt,temp,AKs,AKv'
 if Ldir['get_vel']:
-    vn_list += ',u,v,w'
+    vn_list += ',u,v,w,ubar,vbar'
 if Ldir['get_bio']:
     vn_list += ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC'
 if Ldir['get_surfbot']:
