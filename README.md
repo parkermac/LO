@@ -4,7 +4,7 @@
 
 The code here handles all the non-research tasks of making model (e.g. ROMS) forcing files, running the model on a remote linux cluster, and post-processing of model output.  Many of the post-processing tasks, such as mooring- cast- and layer extractions, and particle tracking, are designed for other users to be able to run from the linux command line, or modify if needed.
 
-This version is the second major release of this project, the first was called LiveOcean. This version incorporates all the things I learned building the first one. A few specifics: it uses python Path objects everywhere possible. It defaults to using NetCDF4 for all the ROMS forcing. It uses python code instead of shell scripts wherever that makes things simpler - especially in the drivers. It also uses a much more rigorous and naming and organization system.
+This version is the second major release of this project, the first was called LiveOcean. This version incorporates all the things I learned building the first one. A few specifics: it uses python Path objects everywhere possible. It defaults to using NetCDF4 for all the ROMS forcing. It uses python code instead of shell scripts wherever that makes things simpler - especially in the drivers. It also uses a much more rigorous and naming and organization system. I transitions to using xarray instead of the netCDF4 module.
 
 All the instructions assume you are working from the linux (bash) command line.
 
@@ -47,7 +47,7 @@ These four directories are assumed to be somewhere, all at the same level in the
 - LO_data: contains large binaries that change infrequently, especially for making grids or forcing files.  I maintain these by hand on my laptop and on my remote linux machines.
 - **LO: is this repo.**
 - LO_output: is where most output from the LO code ends up, e.g. model forcing files, mooring extractions, plots, etc. It is expected that the contents will change frequently and that they are specific to a given user or machine.
-- LO_user: is a placeholder that a user should create to house modified version of the LO code.
+- LO_user: is a required separate folder for information and programs specific to a given user.
 
 LO_output is typically made, if needed, by the code that writes to it. LO_user has to be made by hand (more on that below).
 

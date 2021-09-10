@@ -6,18 +6,14 @@ from pathlib import Path
 from datetime import datetime, timedelta
 
 # get initial version of Ldir when this module is loaded
-pth = Path(__file__).absolute().parent # path to where this file lives
-pth_user = Path(str(pth).replace('LO','LO_user'))
-if (pth_user / 'user_get_lo_info.py').is_file():
-    print(' Using user_get_lo_info.py '.center(60,'>'))
-    if str(pth_user) not in sys.path:
-        sys.path.append(str(pth_user))
-    import user_get_lo_info as glo
-else:
-    # we have to add the path in order for this to run on klone (outside of loenv)
+pth = Path(__file__).absolute().parent.parent.parent.parent / 'LO_user'
+if (pth / 'get_lo_info.py').is_file():
     if str(pth) not in sys.path:
         sys.path.append(str(pth))
     import get_lo_info as glo
+else:
+    print('Error from Lfun: missing LO_user/get_lo_info.py')
+    sys.exit()
     
 if False:
     from importlib import reload

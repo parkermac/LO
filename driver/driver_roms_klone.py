@@ -13,7 +13,7 @@ of nodes of that size that I own.
 run driver_roms_mox -g cas6 -t v3t075 -x lo8 -r backfill -s continuation -0 2019.07.04 -np 200 -N 40 -v True --get_forcing False --run_roms False --move_his False
 
 DEVELOPMENT NOTES: see the "various flags to facilitate testing" part of the arguments for other testing flags.
-The -v (verbose) flag gives really useful screen output.
+The -v (verbose) flag gives really useful screen output, so I have set its default to True.
 
 """
 
