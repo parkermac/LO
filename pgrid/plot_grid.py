@@ -10,6 +10,8 @@ parser.add_argument('-g', '--gridname', default='',
         type=str)
 args = parser.parse_args()
 
+import pandas as pd
+
 from importlib import reload
 import gfun
 reload(gfun)
@@ -42,6 +44,13 @@ flag_show_sections = False
 fn = gfun.select_file(Gr)
 in_fn = Gr['gdir'] / fn
 in_fn0 = Gr['gdir'] / 'grid_m00_r00_s00_x00.nc'
+
+# get river info if it exists
+do_riv = False
+ri_fn = Gr['gdir'] / 'river_info.csv'
+if ri_fn.is_file():
+    rdf = pd.read_csv(ri_fn, index_col='rname')
+    do_riv = True
 
 # load the data
 ds = xr.open_dataset(in_fn)
@@ -88,6 +97,14 @@ ax1.set_title(Gr['gridname'] + '/' + fn)
 ax1.text(.95, .05, str(mask_rho.shape), horizontalalignment='right',
          transform=ax1.transAxes)                   
 gfp.add_river_tracks(Gr, ds, ax1)
+
+if do_riv:
+    lon = ds.lon_rho.values
+    lat = ds.lat_rho.values
+    for rn in rdf.index:
+        ii = int(rdf.loc[rn,'col_py'])
+        jj = int(rdf.loc[rn,'row_py'])
+        ax1.plot(lon[jj,ii], lat[jj,ii],'ok')
    
 if flag_show_sections:
     color_list = ['orange', 'gold', 'greenyellow', 'lightgreen',

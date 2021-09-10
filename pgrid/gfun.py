@@ -20,7 +20,7 @@ from lo_tools import Lfun
 
 Ldir = Lfun.Lstart(gridname=base_gridname, tag=base_tag)
 
-def gstart():
+def gstart(gridname=gridname):
     """
     This returns a dict of Path objects that tell where various things are,
     or where they should go.

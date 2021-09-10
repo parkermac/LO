@@ -52,6 +52,8 @@ dir_dict = dict()
 
 good_riv = []
 
+roms_info_df = pd.DataFrame()
+
 def in_domain(xx, yy, XX, YY):
     if xx>XX[0] and xx<XX[-1] and yy>YY[0] and yy<YY[-1]:
         return True
@@ -68,199 +70,103 @@ for rn in df.index:
         y = track_df['lat'].to_numpy()
         
         if in_domain(x[0], y[0], X, Y):
+            # we only consider rivers that END in the domain
             good_riv.append(rn)
             print('including ' + rn.title())
-            
-        for ii in range(len(x)-1):
-            x0 = x[ii]
-            x1 = x[ii+1]
-            y0 = y[ii]
-            y1 = y[ii+1]
+            II_list = []
+            JJ_list = []
+            for ii in range(len(x)-1):
+                x0 = x[ii]
+                x1 = x[ii+1]
+                y0 = y[ii]
+                y1 = y[ii+1]
+                
 
-            if in_domain(x0, y0, X, Y) and in_domain(x1, y1, X, Y):
-                ix0 = zfun.find_nearest_ind(X,x0)
-                ix1 = zfun.find_nearest_ind(X,x1)
-                iy0 = zfun.find_nearest_ind(Y,y0)
-                iy1 = zfun.find_nearest_ind(Y,y1)
-                if ix0==ix1 and iy0==iy1:
-                    II = ix0
-                    JJ = iy0
-                else:
-                    II, JJ = zfun.get_stairstep(ix0, ix1, iy0, iy1)
-                m[JJ, II] = False
-                #z[JJ, II] = np.min((z[JJ, II], -depth))
-
-            # # this creates information about the index and direction of the river
-            # ilon_dict[rn] = II
-            # ilat_dict[rn] = JJ
-            # # phaseangle is degrees -180:180 with 0 = East
-            # dist, phaseangle = sw.dist([y[I], y[I+1]], [x[I], x[I+1]])
-            # dir_dict[rn] = phaseangle
+                if in_domain(x0, y0, X, Y) and in_domain(x1, y1, X, Y):
+                    ix0 = zfun.find_nearest_ind(X,x0)
+                    ix1 = zfun.find_nearest_ind(X,x1)
+                    iy0 = zfun.find_nearest_ind(Y,y0)
+                    iy1 = zfun.find_nearest_ind(Y,y1)
+                    if ix0==ix1 and iy0==iy1:
+                        II = np.array(ix0)
+                        JJ = np.array(iy0)
+                        z[JJ, II] = np.min((z[JJ, II], -depth))
+                        II_list.append(ix0)
+                        JJ_list.append(iy0)
+                    else:
+                        II, JJ = zfun.get_stairstep(ix0, ix1, iy0, iy1)
+                        for pp in range(len(II)):
+                            z[JJ[pp], II[pp]] = np.min((z[JJ[pp], II[pp]], -depth))
+                        II_list += list(II)
+                        JJ_list += list(JJ)
+                    m[JJ, II] = False
+                    
+                    # form unique entries of lists
+                    JI_ulist = []
+                    for pp in range(len(II_list)):
+                        ji_tup = (JJ_list[pp], II_list[pp])
+                        if ji_tup not in JI_ulist:
+                            JI_ulist.append(ji_tup)
+                    
+                    # then use the last two point to decide on the river direction
+                    if len(JI_ulist) >1:
+                        dx = JI_ulist[-1][1] - JI_ulist[-2][1] 
+                        dy = JI_ulist[-1][0] - JI_ulist[-2][0]
+                    else:
+                        dist, ang = sw.dist([y[0],y[-1]], [x[0], x[-1]])
+                        if -45<ang and ang<=45:
+                            dx=1; dy = 0
+                        elif 45<ang and ang<=135:
+                            dx=0; dy = 1
+                        elif -135<ang and ang<=-45:
+                            dx=0; dy = -1
+                        elif ang<=-135 or ang>135:
+                            dx=-1; dy = 0
+                        else:
+                            print(' Inconsistent angle for %s '.center(60,'*') % (rn))
+                            
+                        if dx==1 and dy==0:
+                            idir = 0 # 0 = E/W, 1 = N/S
+                            isign = -1
+                            uv = 'u'
+                        elif dx==-1 and dy==0:
+                            idir = 0
+                            isign = 1
+                            uv = 'u'
+                        elif dx==0 and dy==1:
+                            idir = 1
+                            isign = -1
+                            uv = 'v'
+                        elif dx==0 and dy==-1:
+                            idir = 1
+                            isign = 1
+                            uv = 'v'
+                        else:
+                            print(' Inconsistent last points for %s '.center(60,'*') % (rn))
+                    roms_info_df.loc[rn, 'row_py'] = JI_ulist[-1][0]
+                    roms_info_df.loc[rn, 'col_py'] = JI_ulist[-1][1]
+                    roms_info_df.loc[rn, 'idir'] = idir
+                    roms_info_df.loc[rn, 'isign'] = isign
+                    roms_info_df.loc[rn, 'uv'] = uv
         else:
             print(' >> excluding ' + rn.title())
             
     except FileNotFoundError:
         pass
 
+# save the updated mask
 mask_rho_new = mask_rho.copy()
 mask_rho_new[m == False] = 1
 ds.update({'mask_rho': (('eta_rho', 'xi_rho'), mask_rho_new)})
 ds.to_netcdf(out_fn)
 ds.close()
 
-# #%% figure out river source locations
-# idir_dict = dict()
-# isign_dict = dict()
-# uv_dict = dict()
-# row_dict_py = dict()
-# col_dict_py = dict()
-#
-# ji_dict = dict()
-# for rn in good_riv:
-#     ii = ilon_dict[rn]
-#     jj = ilat_dict[rn]
-#     ji = np.array([jj,ii])
-#     ph = dir_dict[rn]
-#     JI_W = np.array([0,1])
-#     JI_S = np.array([1,0])
-#     JI_N = np.array([-1,0])
-#     JI_E = np.array([0,-1])
-#     if -45 <= ph and ph <= 45: # River flowing W
-#         JI = JI_W
-#     elif 135 <= ph and ph < 45: # S
-#         JI = JI_S
-#     elif -135 <= ph and ph < -45: # N
-#         JI = JI_N
-#     elif np.abs(ph) > 135: # E
-#         JI = JI_E
-#     is_in_grid = True
-#     while is_in_grid == True:
-#         # this while loop has the channel keep going until it
-#         # hits a mask or hits a wall.
-#         ji = ji + JI
-#         if (ji[0] == -1) or (ji[1] == -1):
-#             # we hit the edge of the grid and so move back a step
-#             ji = ji - JI
-#             m[ji[0],ji[1]] = True
-#             ji_dict[rn] = ji
-#             print(rn + ' (hit a -1 boundary) ' + str(ji))
-#             is_in_grid = False
-#         else:
-#             try:
-#                 # this ensures a minumum depth in the channel
-#                 z[ji[0], ji[1]] = np.min((z[ji[0], ji[1]], -depth))
-#             except IndexError:
-#                 pass
-#             try:
-#                 # we stepped into the masked region
-#                 if m[ji[0],ji[1]] == True:
-#                     ji_dict[rn] = ji
-#                     print(rn)
-#                     is_in_grid = False
-#             except IndexError:
-#                 # assume we hit the edge of the grid and so move back a step
-#                 ji = ji - JI
-#                 m[ji[0],ji[1]] = True
-#                 ji_dict[rn] = ji
-#                 print(rn + ' (hit boundary) ' + str(ji))
-#                 is_in_grid = False
-#     if (JI == JI_E).all():
-#         idir_dict[rn] = 0 # 0 = E/W, 1 = N/S
-#         isign_dict[rn] = 1
-#         uv_dict[rn] = 'u'
-#         row_dict_py[rn] = ji[0]
-#         col_dict_py[rn] = ji[1]
-#     elif (JI == JI_W).all():
-#         idir_dict[rn] = 0
-#         isign_dict[rn] = -1
-#         uv_dict[rn] = 'u'
-#         row_dict_py[rn] = ji[0]
-#         col_dict_py[rn] = ji[1] - 1
-#     elif (JI == JI_N).all():
-#         idir_dict[rn] = 1
-#         isign_dict[rn] = 1
-#         uv_dict[rn] = 'v'
-#         row_dict_py[rn] = ji[0]
-#         col_dict_py[rn] = ji[1]
-#     elif (JI == JI_S).all():
-#         idir_dict[rn] = 1
-#         isign_dict[rn] = -1
-#         uv_dict[rn] = 'v'
-#         row_dict_py[rn] = ji[0] - 1
-#         col_dict_py[rn] = ji[1]
-#
-# #%% save all the new info fields to the DataFrame
-# df = df.ix[good_riv]
-#
-# df['idir'] = pd.Series(idir_dict)
-# df['isign'] = pd.Series(isign_dict)
-# df['uv'] = pd.Series(uv_dict)
-# df['row_py'] = pd.Series(row_dict_py)
-# df['col_py'] = pd.Series(col_dict_py)
-#
-# #%% create the new mask
-# mask_rho[m == True] = 0
-# mask_rho[m == False] = 1
-#
-# #%% plotting
-#
-# zm = np.ma.masked_where(m, z)
-#
-# plt.close()
-#
-# fig = plt.figure(figsize=(10,10))
-# ax = fig.add_subplot(111)
-# cmap1 = plt.get_cmap(name='rainbow')
-# cs = ax.pcolormesh(plon, plat,zm,
-#                    vmin=-200, vmax=20, cmap = cmap1)
-# fig.colorbar(cs, ax=ax, extend='both')
-# pfun.add_coast(ax)
-# pfun.dar(ax)
-# ax.axis(ax_lims)
-# ax.set_title(Gr['gridname'])
-#
-# ds.close()
-#
-# for rn in good_riv:
-#     fn_tr = Gr['ri_dir'] + 'tracks/' + rn + '.csv'
-#     df_tr = pd.read_csv(fn_tr, index_col='ind')
-#     x = df_tr['lon'].values
-#     y = df_tr['lat'].values
-#     ax.plot(x, y, '-r', linewidth=2)
-#     ax.plot(x[-1], y[-1], '*r')
-#
-#     if uv_dict[rn] == 'u' and isign_dict[rn] == 1:
-#         ax.plot(lonu[row_dict_py[rn], col_dict_py[rn]],
-#                 latu[row_dict_py[rn], col_dict_py[rn]], '>r')
-#     elif uv_dict[rn] == 'u' and isign_dict[rn] == -1:
-#         ax.plot(lonu[row_dict_py[rn], col_dict_py[rn]],
-#                 latu[row_dict_py[rn], col_dict_py[rn]], '<r')
-#     elif uv_dict[rn] == 'v' and isign_dict[rn] == 1:
-#         ax.plot(lonv[row_dict_py[rn], col_dict_py[rn]],
-#                 latv[row_dict_py[rn], col_dict_py[rn]], '^b')
-#     elif uv_dict[rn] == 'v' and isign_dict[rn] == -1:
-#         ax.plot(lonv[row_dict_py[rn], col_dict_py[rn]],
-#                 latv[row_dict_py[rn], col_dict_py[rn]], 'vb')
-#
-# plt.show()
-#
-# #%% Save the output files
-#
-# print('\nCreating ' + out_fn)
-# try:
-#     os.remove(out_fn)
-# except OSError:
-#     pass # assume error was because the file did not exist
-# shutil.copyfile(in_fn, out_fn)
-# ds = nc.Dataset(out_fn, 'a')
-# ds['mask_rho.values = mask_rho
-# ds['h.values = -z
-# ds.close()
-#
-# out_rfn = Gr['gdir'] + 'river_info.csv'
-# print('\nCreating ' + out_rfn)
-# df.to_csv(out_rfn)
-#
-# # here is how you would read the DataFrame back in
-# # df1 = pd.read_csv(out_rfn, index_col='rname')
+# save the river info
+out_rfn = Gr['gdir'] / 'river_info.csv'
+print('\nCreating ' + str(out_rfn))
+roms_info_df.index.name = 'rname'
+roms_info_df.to_csv(out_rfn)
+
+# here is how you would read the DataFrame back in
+# df1 = pd.read_csv(out_rfn, index_col='rname')
 
