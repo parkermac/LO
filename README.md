@@ -24,7 +24,7 @@ The main users of this repo are people who are in some way collaborating with me
 
 *All the instructions assume you are working from the linux (bash) command line. When I say "go to" I mean navigate to that place, and "do" means enter that command from the linux command line and hit return.*
 
-#### First: install miniconda on your machine and then create the "loenv" environment.
+#### (1) install miniconda on your machine and then create the "loenv" environment.
 
 Anaconda is a great way to get python. We will use a minimal installation of python3 called "miniconda" and then create a conda "environment" and add required packages to it ourselves.  This keeps things lightweight and less likely to suffer from package conflicts.
 
@@ -62,7 +62,7 @@ You will also need git, which you may or may not have.  You can install it easil
 conda install -c anaconda git
 ```
 
-#### Second: Get the LO code
+#### (2) Get the LO code
 
 On your machine, go to wherever you want the LO repo to end up, and do:
 ```
@@ -73,7 +73,7 @@ and LO and all its sub-folders will appear. To get any changes I may make, go to
 git pull
 ```
 
-#### Third: create the (loenv) environment
+#### (3) create the (loenv) environment
 
 Create an environment that has all the modules required for this code by going to LO and executing:
 ```
@@ -89,7 +89,9 @@ conda activate loenv
 ```
 to your .bashrc or .bash_profile, and "source" it.  Now (loenv) will appear at the start of your bash prompt.
 
-#### Fourth: create LO_user
+#### (4) create LO_user
+
+_NOTE: I think I should rewrite this section to have the user fork my LO_user repo, but I need to learn more about forking first._
 
 Make a folder called LO_user at the same level as LO, and then put a file inside it called get_lo_info.py. You can copy this from my own LO_user repo: [FILE](https://github.com/parkermac/LO_user/blob/main/get_lo_info.py).
 
@@ -97,16 +99,18 @@ Here are some [INSTRUCTIONS](http://faculty.washington.edu/pmacc/Classes/EffCom_
 
 LO_user will also be a place where the LO code looks for user versions of things, like particle tracking experiment initial conditions.
 
+Check that things are working as you expect by going to LO/lo_tools/lo_tools and running Lfun.py.  Although this is a module that you would usually import, when you run it as a program it shows the contents of Ldir as screen output.
+
 ---
 
 ## Top-level organization
 
 These four directories are assumed to be somewhere, all at the same level in the file structure.
 
-- LO_data: contains large binaries that change infrequently, especially for making grids or forcing files.  I maintain these by hand on my laptop and on my remote linux machines.
-- **LO: is this repo.**
-- LO_output: is where most output from the LO code ends up, e.g. model forcing files, mooring extractions, plots, etc. It is expected that the contents will change frequently and that they are specific to a given user or machine.
+- LO: is this repo.
 - LO_user: is a required separate folder for information and programs specific to a given user.
+- LO_data: contains large binaries that change infrequently, especially for making grids or forcing files.  I maintain these by hand on my laptop and on my remote linux machines.
+- LO_output: is where most output from the LO code ends up, e.g. model forcing files, mooring extractions, plots, etc. It is expected that the contents will change frequently and that they are specific to a given user or machine.
 
 LO_output is typically made, if needed, by the code that writes to it. LO_user has to be made by hand (more on that below).
 
@@ -114,13 +118,27 @@ A lot of the code makes use of a dictionary "Ldir" that contains Path objects ab
 - It is initially specified in `LO_user/get_lo_info.py`
 - You don't run `get_lo_info.py` itself, but instead it is run every time you run the method `lo_tools/lo_tools/Lfun.Lstart()` which adds a few more application-specific entries to Ldir.
 
-#### `get_lo_info.py` is designed to be the one place where you set machine-dependent choices.  It looks to see what machine you are working on.  It allows you to set several paths to model output, for example: Ldir['roms_out'], Ldir['roms_out1'], and so on.
+`get_lo_info.py` is designed to be the one place where you set machine-dependent choices.  It looks to see what machine you are working on.  It allows you to set several paths to model output, for example: Ldir['roms_out'], Ldir['roms_out1'], and so on.
 
 ---
 
 ## Organization of LO and relation to LO_output
 
-To Do: need to explain what [gtag] etc. are.
+**Naming convention**: We follow a fairly strict system of naming things associated with a ROMS run in order to allow for modularity, e.g. running a given grid and forcing files with a new executable.
+
+Things that I type in [ ] below mean that they would be replaced by specific strings, for example when using them as command line arguments.
+
+- [gridname] is the name of the grid (e.g. cas6)
+- [tag] is a name to identify a collection of forcing files (e.g. v3)
+- [ex_name] is the name of the ROMS executable (e.g. lo8b)
+- [fstring] is a date string of the form fYYYY.MM.DD (e.g. f2021.07.04).
+- [frc] is the name of one of the forcings (e.g. ocn0).
+
+Grids are just identified by [gridname].
+
+Collections of forcing files are identified by [gridname]_[tag] which is also referred to as [gtag] or Ldir['gtag'].
+
+A specific run is identified by [gridname]_[tag]_[ex_name] which is also referred to as [gtagex] or Ldir['gtagex'].
 
 | LO | LO_output |
 | --- | --- |

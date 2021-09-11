@@ -1,72 +1,52 @@
-# -*- coding: utf-8 -*-
 """
 Tool for editing the mask, and the depth, of a grid file.  During
 depth editing it sets the depth to a constant "dval" set early
-in the code.
+in the code, which can also be set as a kwarg.
 
 By using imshow() this is MUCH faster than anything I achieved
 using pcolormesh().  E.g with an 800x500 grid it was still
 pleasant to use, whereas the old version was unworkable.
 
-Now accepts an optional command line argument to set the
-carving depth "dval." 2019.04.19
-
 """
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('-d', '--dval', nargs='?', default=5, type=float)
+parser.add_argument('-d', '--dval', default=5, type=float)
 args = parser.parse_args()
 
-import gfun
-from importlib import reload
-reload(gfun)
-Gr =gfun.gstart()
-# running gfun.gstart() sets the path to include pfun and zfun
-import gfun_utility as gfu
-reload(gfu)
-import gfun_plotting as gfp
-reload(gfp)
-import pfun
-import zfun
-reload(zfun)
-
 import numpy as np
-import netCDF4 as nc
+import xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 import os
 import shutil
-#import pickle
 
-import Lfun
+from lo_tools import Lfun, zfun
+from lo_tools import plotting_functions as pfun
+
+import gfun
+import gfun_utility as gfu
+import gfun_plotting as gfp
+
+Gr =gfun.gstart()
+
 Ldir = Lfun.Lstart()
 
 # set the depth to impose during Depth Editing
 dval = args.dval # m (positive down)
 
-flag_testing = False
-if not flag_testing:
-    # select grid file
-    fn = gfun.select_file(Gr)
-    in_fn = Gr['gdir'] + fn
-elif flag_testing:
-    fn = 'grid_m02_r01_s00_x00.nc'
-    in_fn = '/Users/PM5/Documents/ptools_output/pgrid/salish1/' + fn
-
-# create new file name
-fn_new = gfun.increment_filename(fn, tag='_m')
-out_fn = Gr['gdir'] + fn_new
+# select and increment grid file
+in_fn = gfun.select_file(Gr)
+out_fn = gfun.increment_filename(in_fn, '_m')
 
 # get fields
-ds = nc.Dataset(in_fn)
-H = ds.variables['h'][:]
-mask_rho = ds.variables['mask_rho'][:]
-plon = ds.variables['lon_psi_ex'][:]
-plat = ds.variables['lat_psi_ex'][:]
-lon = ds.variables['lon_rho'][:]
-lat = ds.variables['lat_rho'][:]
-DA = (1/ds['pm'][:]) * (1/ds['pn'][:])
+ds = xr.open_dataset(in_fn)
+H = ds.h.values
+lon = ds.lon_rho.values
+lat = ds.lat_rho.values
+mask_rho = ds.mask_rho.values
+plon, plat = pfun.get_plon_plat(lon,lat)
+DA = (1/ds.pm.values) * (1/ds.pn.values)
 DA[mask_rho==0] = np.nan
 ds.close()
 
@@ -86,41 +66,31 @@ NR, NC = hh.shape
 
 # set up the axes
 plt.close('all')
-fig = plt.figure(figsize=(13,8)) # (13,8) is good for my laptop
+fig = plt.figure(figsize=(16,13)) # (13,8) is good for my laptop
 ax1 = plt.subplot2grid((1,3), (0,0), colspan=2) # map
 ax2 = plt.subplot2grid((1,3), (0,2), colspan=1) # buttons
 
-#%% initialize the data plot
-
-if False:
-    cmap1 = plt.get_cmap(name='rainbow_r') # terrain
-    tvmin = -20
-    tvmax = 200
-    cs = ax1.imshow(h, interpolation='nearest', vmin=tvmin, vmax=tvmax, cmap = cmap1)
-    fig.colorbar(cs, ax=ax1, extend='both')
-else:
-    # try a segmented colormap
-    from matplotlib import colors
-    # make a color map of fixed colors
-    cmap = colors.ListedColormap(['red', 'orange', 'lightgreen', 'green',
-                                  'cyan', 'blue', 'violet', 'black'])
-    bounds=[-10, -5, 0, 5, 10, 20, 100, 200, 4000]
-    norm = colors.BoundaryNorm(bounds, cmap.N)
-    # tell imshow about color map so that only set colors are used
-    cs = ax1.imshow(h, interpolation='nearest',
-                        cmap=cmap, norm=norm)
-    fig.colorbar(cs, cmap=cmap, norm=norm, boundaries=bounds, ticks=bounds)
+# initialize the data plot
+# try a segmented colormap
+from matplotlib import colors
+# make a color map of fixed colors
+cmap = colors.ListedColormap(['red', 'orange', 'lightgreen', 'green',
+                              'cyan', 'blue', 'violet', 'black'])
+bounds=[-10, -5, 0, 5, 10, 20, 100, 200, 4000]
+norm = colors.BoundaryNorm(bounds, cmap.N)
+# tell imshow about color map so that only set colors are used
+cs = ax1.imshow(h, interpolation='nearest', cmap=cmap, norm=norm)
+fig.colorbar(cs, ax=ax1)
 aa = ax1.axis()
 
 # add the coastline
 clon, clat = pfun.get_coast()
-cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:])
-cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0])
+cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:], show_warnings=False)
+cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0], show_warnings=False)
 ax1.plot(cx0 + cxf, NR - (cy0 + cyf) - 1, '-k')
 
-# add rivers
+# add river info if rivers have been carved
 gfp.edit_mask_river_tracks(Gr, NR, ax1)
-
 ax1.axis(aa)
 
 # create control buttons
@@ -272,33 +242,28 @@ while flag_get_ginput:
             cs.set_data(hh)
             remove_poly()
         elif (bdict[nb]=='lineToWater') and not flag_start:
+            # This unmasks or carves depth in the places where the
+            # line crosses a grid cell - ensures continuous path.
             flag_continue = False
             x = np.array(plon_poly)
             y = np.array(plat_poly)
-            # This unmasks or carves depth in the places where the
-            # line crosses a tile
-            #
-            # and we jiggle a little to make sure paths are not blocked
-            # (note these are indices instead of lat,lon degrees)
-            nudge_list = [(1,0), (0,1), (0,0)]
-            #nudge_list = [(0,0)]
-            x_orig = x.copy()
-            y_orig = y.copy()
-            for nudge in nudge_list:
-                x = x_orig + nudge[0]
-                y = y_orig + nudge[1]
-                for I in range(len(x)-1):
-                    xx = np.linspace(x[I], x[I+1], 100)
-                    yy = np.linspace(y[I], y[I+1], 100)
-                    ii0, ii1, ifr = zfun.get_interpolant(xx, np.arange(NC))
-                    jj0, jj1, jfr = zfun.get_interpolant(yy, np.arange(NR))
-                    # drop extrapolated points
-                    ii0 = ii0[~np.isnan(ifr) & ~np.isnan(jfr)]
-                    jj0 = jj0[~np.isnan(ifr) & ~np.isnan(jfr)]
-                    # this sets the depth of points crossed by the line to dval
-                    ax1.set_title('PAUSED: Changed line to Water of depth '
-                                  + str(dval) + ' m')
-                    hh[jj0, ii0] = dval
+            for ii in range(len(x)-1):
+                ix0 = int(x[ii])
+                ix1 = int(x[ii+1])
+                iy0 = int(y[ii])
+                iy1 = int(y[ii+1])
+                if ix0==ix1 and iy0==iy1:
+                    II = np.array(ix0)
+                    JJ = np.array(iy0)
+                    hh[JJ, II] = np.max(([JJ, II], dval))
+                else:
+                    II, JJ = zfun.get_stairstep(ix0, ix1, iy0, iy1)
+                    for pp in range(len(II)):
+                        hh[JJ[pp], II[pp]] = np.max((h[JJ[pp], II[pp]], dval))
+                # this sets the depth of points crossed by the line to dval
+                # or the original bathymetry - whichever is deeper.
+                ax1.set_title('PAUSED: Changed line to Water of depth '
+                              + str(dval) + ' m')
             cs.set_data(hh)
             remove_poly()
         elif (bdict[nb]=='done') and not flag_start:
@@ -339,24 +304,25 @@ while flag_get_ginput:
         plt.draw()
 
 # Save the output file: executes when you push done button
-if True:
-    # update fields for output
-    h = np.flipud(h)
-    hh = np.flipud(hh)
-    newmask = np.ones((NR, NC), dtype=float)
-    newmask[np.isnan(hh)] = 0.
-    hh[np.isnan(hh)] = h[np.isnan(hh)]
-    # save new data and mask, if needed
-    if np.any(mask_rho != newmask) or np.any(h != hh):
-        print('Creating ' + out_fn)
-        try:
-            os.remove(out_fn)
-        except OSError:
-            pass # assume error was because the file did not exist
-        shutil.copyfile(in_fn, out_fn)
-        ds = nc.Dataset(out_fn, 'a')
-        ds['h'][:] = hh
-        ds['mask_rho'][:] = newmask
-        ds.close()
-    else:
-        print('No change to mask')
+# (I should make a discard changes button)
+
+# update fields for output
+h = np.flipud(h)
+hh = np.flipud(hh)
+newmask = np.ones((NR, NC), dtype=float)
+newmask[np.isnan(hh)] = 0.
+
+# I don't understand this step...
+hh[np.isnan(hh)] = h[np.isnan(hh)] # why do this? it undoes depth changes...
+# it seems to be required for having the carved rivers show up...
+
+# save new data and mask, if there are any changes
+if np.any(mask_rho != newmask) or np.any(h != hh):
+    print('Creating ' + str(out_fn))
+    # save the updated mask and z
+    ds.update({'mask_rho': (('eta_rho', 'xi_rho'), newmask)})
+    ds.update({'h': (('eta_rho', 'xi_rho'), hh)})
+    ds.to_netcdf(out_fn)
+    ds.close()
+else:
+    print('No change to mask')

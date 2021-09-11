@@ -3,10 +3,52 @@
 ### This collection of programs is designed to make gridfiles for ROMS.  It works for analytical and realistic cases, and handles complex tasks like mask editing and smoothing.  It also creates other files associated with rivers, nudging to climatology, and vertical grid parameters, all in the form expected by LO/forcing and ROMS.
 
 ---
+#### Suggested order to run the code
+
+(1) You have to edit the gridname and definition in `LO_user/gfun_user.py`.
+
+The rest of the steps are just running the programs in the right order, with `edit_mask.py` requiring user interaction while running.  I would be tempted to make this more automated, but making the grid is a critical part of the model, and many  things can go wrong, so I leave it in individual steps which you can check on along the way using `plot_grid.py`.
+
+Throughout this code I try to use ROMS naming conventions, except that when manipulating or plotting I refer to: [lon_rho, lat_rho] as [lon, lat].
+
+Also [plon, plat] is just like [lon_psi, lat_psi] but extended by one on all directions so that it is box corners around all rho-grid points.
+
+The bulleted lists below each step are the dch items used in that step.
+
+(2) `start_grid.py` initializes the grid, bathymetry, and mask. You edit this to define the lon, lat vectors for your grid. It can take a while for big grids, so be patient (e.g. 15 minutes for cas6).
+- nudging_edges
+- analytical
+- t_dir/t_list
+- use_z_offset/z_offset
+
+(3) `make_mask.py` makes a first pass at the mask.
+- z_land
+- unmask_coast
+- remove_islands
+
+(4) `edit_mask.py` allows you to fully experience the joy of hand editing a mask.  You run it the first time just to get rid of obvious issues like Lake Washington and river channels.
+
+(5) `carve_rivers.py` uses files of river tracks to make the river channels.
+
+(6) `edit_mask.py` now can be run again for real this time, perhaps running many times. NOTE: you can use an optional command line argument -d ## to change "dval" the carving depth used for lines or points from its default value of 5 m.
+
+(7) `smooth_grid.py` smooths the grid.  This is required for numerical stability.
+- use_min_depth/min_depth
+
+NOTE: you may want to run `carve_rivers.py` again at this point just to make just they are still there.
+
+(8) `make_extras.py` does some other stuff.
+- min_depth (enforced for whole grid)
+
+(9) `grid_to_LO.py` writes the grid.nc file that is used by ROMS, saving it in LO_data/grids. It also saves S-coordinate info.
+- nudging_edges
+- nudging_days
+
+---
 
 #### Background on how information about a grid is organized and created.
 
-First edit the gridname and (if needed) a few directory locations at the top of gfun.py.  This gridname will then be used by all subsequent code.  Then most of the programs begin by executing:
+Most of the programs begin by executing:
 ```
 Gr = gfun.gstart()
 ```
@@ -28,32 +70,3 @@ You can use `plot_grid.py` to look at any of the grids.  You can override the de
 ```
 run plot_grid.py -g sal0
 ```
----
-#### Suggested order to run the code, and bulleted lists of which dch items are used at each step. You have to (1) edit the gridname in `gfun.py`, and (2) edit the grid definition and initial choices in `start_grid.py`.  The rest of the steps are just running the programs in the right order, with `edit_mask.py` requiring user interaction while running.  I would be tempted to make this more automated, but making the grid is a critical part of the model, and many  things can go wrong, so I leave it in individual steps which you can check on along the way using `plot_grid.py`.
-
-`start_grid.py` initializes the grid, bathymetry, and mask. You edit this to define the lon, lat vectors for your grid. It can take a while for big grids, so be patient (e.g. 15 minutes for cas6).
-- nudging_edges
-- analytical
-- t_dir/t_list
-- use_z_offset/z_offset
-
-`make_mask.py` makes a first pass at the mask.
-- z_land
-- unmask_coast
-- remove_islands
-
-`edit_mask.py` allows you to fully experience the joy of hand editing a mask.  You run it the first time just to get rid of obvious issues like Lake Washington and river channels.
-
-`carve_rivers.py` uses files of river tracks to make the river channels.
-
-`edit_mask.py` now can be run again for real this time, perhaps running many times. NOTE: you can use an optional command line argument -d ## to change "dval" the carving depth used for lines or points from its default value of 5 m.
-
-`smooth_grid.py` smooths the grid.  This is required for numerical stability.
-- use_min_depth/min_depth
-
-`make_extras.py` does some other stuff.
-- min_depth (enforced for whole grid)
-
-`grid_to_LO.py` writes the grid.nc file that is used by ROMS, saving it in LO_data/grids. It also saves S-coordinate info.
-- nudging_edges
-- nudging_days

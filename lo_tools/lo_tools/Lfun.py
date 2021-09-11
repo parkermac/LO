@@ -185,13 +185,16 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=1):
 
     return fn_list
     
-def choose_item(in_dir, tag='', exclude_tag='', itext='** Choose item from list **'):
+def choose_item(in_dir, tag='', exclude_tag='',
+    itext='** Choose item from list **', last=False):
     """
     INPUT: in_dir = Path object of a directory
     OUTPUT: just the name you chose, a string, not the full path.
     
     You can set strings to search for (tag), strings to exclude (exclude_tag),
     and the prompt text (itext).
+    
+    Use last=True to have the "return" choice be the last one.
     """
     print('\n%s\n' % (itext))
     ilist_raw = [item.name for item in in_dir.glob('*')]
@@ -210,9 +213,15 @@ def choose_item(in_dir, tag='', exclude_tag='', itext='** Choose item from list 
     idict = dict(zip(range(Nitem), ilist))
     for ii in range(Nitem):
         print(str(ii) + ': ' + ilist[ii])
-    my_choice = input('-- Input number -- (return=0) ')
-    if len(my_choice)==0:
-        my_choice = 0
+    if last == False:
+        my_choice = input('-- Input number -- (return=0) ')
+        if len(my_choice)==0:
+            my_choice = 0
+    elif last == True:
+        my_choice = input('-- Input number -- (return=last) ')
+        if len(my_choice)==0:
+            my_choice = Nitem-1
+        
     my_item = idict[int(my_choice)]
     return my_item
     

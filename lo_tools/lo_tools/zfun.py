@@ -68,7 +68,7 @@ def interp_scattered_on_plaid(x, y, xvec, yvec, u):
 
     return ui
 
-def get_interpolant(x, xvec):
+def get_interpolant(x, xvec, show_warnings=True):
     """
     Returns info to allow fast interpolation.
 
@@ -94,23 +94,25 @@ def get_interpolant(x, xvec):
     def itp_err(message='hi'):
         print('WARNING from get_interpolant(): ' + message)
 
-    # input error checking
+    # input major error checking
     if isinstance(x, np.ndarray) and isinstance(xvec, np.ndarray):
         pass # input type is good
     else:
         itp_err('Inputs must be numpy arrays')
+        return
 
     # some preconditioning of the input
     x = x.flatten()
     xvec = xvec.flatten()
 
-    # more error checking
-    if np.isnan(x).any():
-        itp_err('nan found in x')
-    if np.isnan(xvec).any():
-        itp_err('nan found in xvec')
-    if not np.all(np.diff(xvec) > 0):
-        itp_err('xvec must be monotonic and increasing')
+    if show_warnings:
+        # minor error checking
+        if np.isnan(x).any():
+            itp_err('nan found in x')
+        if np.isnan(xvec).any():
+            itp_err('nan found in xvec')
+        if not np.all(np.diff(xvec) > 0):
+            itp_err('xvec must be monotonic and increasing')
 
     nx = len(x)
     nxvec = len(xvec)

@@ -89,7 +89,7 @@ def load_bathy2(t_fn, lon_vec, lat_vec):
     ds.close()
     return tlon_vec, tlat_vec, tz
 
-def make_nc(out_fn, lon, lat, z, m, dch):
+def make_nc(out_fn, lon, lat, z, dch):
     """
     Initial creation of the NetCDF grid file.
     """
@@ -140,6 +140,7 @@ def make_nc(out_fn, lon, lat, z, m, dch):
     for tag in tag_list:
         data_dict['lon_'+tag] = (('eta_'+tag, 'xi_'+tag), lon_lat_dict['lon_'+tag])
         data_dict['lat_'+tag] = (('eta_'+tag, 'xi_'+tag), lon_lat_dict['lat_'+tag])
+        # masks follow ROMS convention: 1 = water, 0 = land
         data_dict['mask_'+tag] = (('eta_'+tag, 'xi_'+tag), np.ones_like(lon_lat_dict['lon_'+tag]))
     
     # create the Dataset and write to NetCDF (overwrites existing file)

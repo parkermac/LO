@@ -1,11 +1,6 @@
-# -*- coding: utf-8 -*-
 """
 Code to create an initial mask for a grid.
 """
-
-from importlib import reload
-import gfun; reload(gfun)
-Gr =gfun.gstart()
 
 import numpy as np
 import pickle
@@ -14,14 +9,14 @@ import xarray as xr
 from lo_tools import zfun
 from lo_tools import plotting_functions as pfun
 
-#% select grid file
-fn = gfun.select_file(Gr)
-in_fn = Gr['gdir'] / fn
-# create new file name
-fn_new = gfun.increment_filename(fn, tag='_m')
-out_fn = Gr['gdir'] / fn_new
+import gfun
 
-#% get the grid from NetCDF
+Gr =gfun.gstart()
+# select and increment grid file
+in_fn = gfun.select_file(Gr)
+out_fn = gfun.increment_filename(in_fn, '_m')
+
+# get the grid from NetCDF
 ds = xr.open_dataset(in_fn)
 plon, plat = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
 z = -ds.h.values

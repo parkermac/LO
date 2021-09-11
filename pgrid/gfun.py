@@ -2,21 +2,19 @@
 Organizational functions for pgrid.
 """
 
-# **** USER EDIT ********
-
-# This is the name of the grid that you are working on.
-gridname = 'sal0'
-
-# These are the gridname and tag to feed to use when creating the Ldir paths.
-# They are used for accessing the river tracks, which may be developed for one
-# grid but reused in others.
-base_gridname = 'cas6'
-base_tag = 'v3'
-
-# **** END USER EDIT ****
-
-from pathlib import Path
 from lo_tools import Lfun
+
+import sys
+from pathlib import Path
+pth = Path(__file__).absolute().parent.parent.parent / 'LO_user' / 'pgrid'
+if str(pth) not in sys.path:
+    sys.path.append(str(pth))
+import gfun_user
+
+# get info from LO_user/pgrid/gfun_user.py
+gridname = gfun_user.gridname
+base_gridname = gfun_user.base_gridname
+base_tag = gfun_user.base_tag
 
 Ldir = Lfun.Lstart(gridname=base_gridname, tag=base_tag)
 
@@ -31,9 +29,9 @@ def gstart(gridname=gridname):
     Gr ={'gridname': gridname,'pgdir': pgdir, 'gdir': gdir,'ri_dir': ri_dir}
     return Gr
 
-def default_choices(Gr, wet_dry=False):
-    # Default choices (can override in each case)    
-    dch = dict()    
+def default_choices(wet_dry=False):
+    # Default choices (can override in each case)
+    dch = dict()
 
     # Decide if the grid will allow wetting and drying.
     # We do this first becasue it affects several subsequent choices
@@ -83,14 +81,22 @@ def default_choices(Gr, wet_dry=False):
 
 def select_file(Gr):
     # interactive selection
-    fn = Lfun.choose_item(Gr['gdir'], tag='.nc', itext='** Choose grid from list **')
-    return fn
+    fn = Lfun.choose_item(Gr['gdir'], tag='.nc',
+        itext='** Choose grid from list **', last=True)
+    return  Gr['gdir'] / fn
 
-def increment_filename(fn, tag='_m'):
-    fns = str(fn)
+def increment_filename(fn, tag):
+    """
+    Creates an updated filename (Path object), increasing the number
+    for the specified tag.
+    """
+    if tag not in ['_m', '_r', '_s', '_x']:
+        print('Error in increment_filename: unrecognized tag.')
+        return
+    fns = fn.name
     # create the new file name
     gni = fns.find(tag)
     new_num = ('00' + str(int(fns[gni+2: gni+4]) + 1))[-2:]
     fns_new = fns.replace(fns[gni:gni+4], tag + new_num)
-    fn_new = Path(fns_new)
+    fn_new = fn.parent / fns_new
     return fn_new

@@ -17,22 +17,34 @@ def get_grids(ds):
     return (lon_dict, lat_dict, mask_dict)
     
 def add_river_tracks(Gr, ds, ax):
-    # add river tracks
-    gri_fn = Gr['ri_dir'] / 'river_info.csv'
-    df = pd.read_csv(gri_fn, index_col='rname')
-    # uv_dict = df['uv']
-    # row_dict_py = df['row_py']
-    # col_dict_py = df['col_py']
-    # isign_dict = df['isign']
-    # idir_dict = df['idir']
-    # # get grids
-    # lon_dict, lat_dict, mask_dict = get_grids(ds)
-    # lonu = lon_dict['u']
-    # latu = lat_dict['u']
-    # lonv = lon_dict['v']
-    # latv = lat_dict['v']
-    # plot river tracks
-    for rn in df.index:
+    lon = ds.lon_rho.values
+    lat = ds.lat_rho.values
+    lon_u = ds.lon_u.values
+    lat_u = ds.lat_u.values
+    lon_v = ds.lon_v.values
+    lat_v = ds.lat_v.values
+    
+    rri_fn = Gr['gdir'] / 'roms_river_info.csv'
+    rri_df = pd.read_csv(rri_fn, index_col='rname')
+
+    for rn in rri_df.index:
+        ii = int(rri_df.loc[rn,'col_py'])
+        jj = int(rri_df.loc[rn,'row_py'])
+        ax.plot(lon[jj,ii], lat[jj,ii],'oc')
+        
+        uv = rri_df.loc[rn,'uv']
+        isign = rri_df.loc[rn,'isign']
+        idir = rri_df.loc[rn,'idir']
+        
+        if uv == 'u' and isign == 1:
+            ax.plot(lon_u[jj,ii-1], lat_u[jj,ii-1],'>r')
+        if uv == 'u' and isign == -1:
+            ax.plot(lon_u[jj,ii], lat_u[jj,ii],'<r')
+        if uv == 'v' and isign == 1:
+            ax.plot(lon_v[jj-1,ii], lat_v[jj-1,ii],'^b')
+        if uv == 'v' and isign == -1:
+            ax.plot(lon_v[jj,ii], lat_v[jj,ii],'vb')
+            
         fn_tr = Gr['ri_dir'] / 'tracks' / (rn + '.p')
         try:
             track_df = pd.read_pickle(fn_tr)
@@ -40,28 +52,19 @@ def add_river_tracks(Gr, ds, ax):
             return
         x = track_df['lon'].to_numpy()
         y = track_df['lat'].to_numpy()
-        ax.plot(x, y, '-r', linewidth=2)
-        ax.plot(x[-1], y[-1], '*r')    
-        # if uv_dict[rn] == 'u' and isign_dict[rn] == 1:
-        #     ax.plot(lonu[row_dict_py[rn], col_dict_py[rn]],
-        #             latu[row_dict_py[rn], col_dict_py[rn]], '>r')
-        # elif uv_dict[rn] == 'u' and isign_dict[rn] == -1:
-        #     ax.plot(lonu[row_dict_py[rn], col_dict_py[rn]],
-        #             latu[row_dict_py[rn], col_dict_py[rn]], '<r')
-        # elif uv_dict[rn] == 'v' and isign_dict[rn] == 1:
-        #     ax.plot(lonv[row_dict_py[rn], col_dict_py[rn]],
-        #             latv[row_dict_py[rn], col_dict_py[rn]], '^b')
-        # elif uv_dict[rn] == 'v' and isign_dict[rn] == -1:
-        #     ax.plot(lonv[row_dict_py[rn], col_dict_py[rn]],
-        #             latv[row_dict_py[rn], col_dict_py[rn]], 'vb')
+        ax.plot(x, y, '-r', linewidth=1, alpha=.3)
+        ax.plot(x[-1], y[-1], '*r', alpha=.3)
                     
 def edit_mask_river_tracks(Gr, NR, ax):
     # add river tracks and endpoints for edit_mask.py
-    in_rfn = Gr['gdir'] + 'river_info.csv'
-    try:
-        df = pd.read_csv(in_rfn, index_col='rname')
-    except FileNotFoundError:
+    
+    rri_fn = Gr['gdir'] / 'roms_river_info.csv'
+    if rri_fn.is_file():
+        df = pd.read_csv(rri_fn, index_col='rname')
+    else:
+        print('Note from edit_mask_river_tracks(): missing roms_river_info.csv')
         return
+        
     uv_dict = df['uv']
     row_dict_py = df['row_py']
     col_dict_py = df['col_py']
