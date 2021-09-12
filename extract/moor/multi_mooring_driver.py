@@ -1,6 +1,6 @@
 """
 This is a driver for doing multiple mooring extractions.  It reads in
-a dict from job_lists.py and uses this to run extract_moor.py as a
+a dict from LO_user/moor/job_lists.py and uses this to run extract_moor.py as a
 series of subprocesses
 
 Run from the command line like:
@@ -13,9 +13,6 @@ NOTE: naming the log as "*.log" means that is it automatically ignored by git (a
 
 # imports
 from lo_tools import Lfun
-import job_lists
-from importlib import reload
-reload(job_lists)
 
 import sys
 import argparse
@@ -85,9 +82,11 @@ if Ldir['get_all']:
     Ldir['get_bio'] = True
     Ldir['get_surfbot'] = True
 
-job_dir = Ldir['data'] / 'moor'
+# get the job list module
+job_dir = Ldir['LOu'] / 'moor'
 if str(job_dir) not in sys.path:
     sys.path.append(str(job_dir))
+import job_lists
 
 # Get job dict:
 sta_dict = job_lists.get_sta_dict(Ldir['job'])

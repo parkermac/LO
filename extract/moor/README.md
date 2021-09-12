@@ -1,8 +1,10 @@
 # README for the mooring extractor code
 
-## This code does mooring extractions and plotting. It makes use of **xarray** instead of netCDF4 for manipulating things. The mooring extractions are packed in NetCDF files, with all 3-D data variables having dimensions ('ocean_time', 's_rho') or ('ocean_time', 's_w'), or just 'ocean_time'.
+## This code does mooring extractions and plotting.
 
-## Note that because of how xarray handles the time axis, it converts **ocean_time** to dtype='datetime64[ns]'.  See `plot_moor.py` for how to convert this to other things.
+It makes use of xarray instead of netCDF4 for manipulating things. The mooring extractions are packed in NetCDF files, with all 3-D data variables having dimensions ('ocean_time', 's_rho') or ('ocean_time', 's_w'), or just 'ocean_time'.
+
+Note that because of how xarray handles the time axis, it converts **ocean_time** to dtype='datetime64[ns]'.  See `plot_moor.py` for how to convert this to other things.
 
 ---
 
@@ -10,9 +12,11 @@
 
 `extract_moor.py` does the extractions. It uses `ncks` to get an extraction as a NetCDF file for each hour (or day), keeping them in a temporary folder and then concatenates them using `ncrcat`.  It is fast because it runs many ncks subprocesses at once (use the optional -Nproc flag to control this).  My mac and perigee can handle 100 fine although it may slow other operations.  Boiler seemed to choke on 100 but ran fine with 10.
 
-`multi_mooring_driver.py` is a driver to run extract_moor.py for multiple moorings. It looks in `job_lists.py` for a dict of station names and lon,lat tuples. In the future I should make it also look for a version of this in LO_user.
+`multi_mooring_driver.py` is a driver to run extract_moor.py for multiple moorings. It looks in `LO_user/moor/job_lists.py` for a dict of station names and (lon,lat) tuples.
 
 See the codes for details on the required command line arguments. Basically you need to tell it which run to use, and the time limits and frequency. For `extract_moor.py` you also pass a station name, longitude, and latitude, whereas for `multi_mooring_driver.py` you instead pass a job name.
+
+---
 
 #### Plotting
 

@@ -24,7 +24,7 @@ The main users of this repo are people who are in some way collaborating with me
 
 *All the instructions assume you are working from the linux (bash) command line. When I say "go to" I mean navigate to that place, and "do" means enter that command from the linux command line and hit return.*
 
-#### (1) install miniconda on your machine and then create the "loenv" environment.
+#### (1) Install miniconda on your machine and then create the "loenv" environment.
 
 Anaconda is a great way to get python. We will use a minimal installation of python3 called "miniconda" and then create a conda "environment" and add required packages to it ourselves.  This keeps things lightweight and less likely to suffer from package conflicts.
 
@@ -73,7 +73,7 @@ and LO and all its sub-folders will appear. To get any changes I may make, go to
 git pull
 ```
 
-#### (3) create the (loenv) environment
+#### (3) Create the (loenv) environment
 
 Create an environment that has all the modules required for this code by going to LO and executing:
 ```
@@ -89,17 +89,18 @@ conda activate loenv
 ```
 to your .bashrc or .bash_profile, and "source" it.  Now (loenv) will appear at the start of your bash prompt.
 
-#### (4) create LO_user
+#### (4) Fork LO_user
 
-_NOTE: I think I should rewrite this section to have the user fork my LO_user repo, but I need to learn more about forking first._
+Go to parkermac in GitHub and fork the LO_user repo.  You now own this as your own repo and can edit and clone it as needed.  LO_user is a place where the LO code looks for user versions of things, like particle tracking experiment initial conditions.  Most importantly, it is where user- and machine-specific paths are defined in `get_lo_info.py`.
 
-Make a folder called LO_user at the same level as LO, and then put a file inside it called get_lo_info.py. You can copy this from my own LO_user repo: [FILE](https://github.com/parkermac/LO_user/blob/main/get_lo_info.py).
+Here is some great [INFO](https://docs.github.com/en/get-started/quickstart/fork-a-repo) from GitHub about forking.
 
-Here are some [INSTRUCTIONS](http://faculty.washington.edu/pmacc/Classes/EffCom_2020/lectures/GitHub%20Intro.pdf) for how to get started using Git and making your own repo. **I strongly encourage you to make LO_user your own repo in GitHub.**
+Background: Here are some [INSTRUCTIONS](http://faculty.washington.edu/pmacc/Classes/EffCom_2020/lectures/GitHub%20Intro.pdf) for how to get started using Git and making your own repo.
 
-LO_user will also be a place where the LO code looks for user versions of things, like particle tracking experiment initial conditions.
 
-Check that things are working as you expect by going to LO/lo_tools/lo_tools and running Lfun.py.  Although this is a module that you would usually import, when you run it as a program it shows the contents of Ldir as screen output.
+**Clone your LO_user to your own machine and then edit the paths in `LO_user/get_lo_info.py`.**
+
+Check that things are working as you expect by executing `LO/lo_tools/lo_tools/Lfun.py`.  Although this is a module that you usually import, when you run it as a program it shows the contents of Ldir as screen output.  Check out the end of that code to see how this works - it is a great way to add tests to a module.
 
 ---
 
@@ -124,7 +125,7 @@ A lot of the code makes use of a dictionary "Ldir" that contains Path objects ab
 
 ## Organization of LO and relation to LO_output
 
-**Naming convention**: We follow a fairly strict system of naming things associated with a ROMS run in order to allow for modularity, e.g. running a given grid and forcing files with a new executable.
+**Naming convention**: We follow a strict system of naming things associated with a ROMS run in order to allow for modularity, e.g. running a given grid and forcing files with a new executable.
 
 Things that I type in [ ] below mean that they would be replaced by specific strings, for example when using them as command line arguments.
 
