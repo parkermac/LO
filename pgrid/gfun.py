@@ -11,6 +11,10 @@ if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import gfun_user
 
+# assume the user will be editing things
+from importlib import reload
+reload(gfun_user)
+
 # get info from LO_user/pgrid/gfun_user.py
 gridname = gfun_user.gridname
 base_gridname = gfun_user.base_gridname

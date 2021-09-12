@@ -259,6 +259,8 @@ def GRID_PlusMinusScheme_rx0(MSK, Hobs, rx0max, AreaMatrix,
     while True and count < maxcount:
         IsFinished=1
         for ff in range(5):
+            # the "5" appears to refer to various left-right and up-down
+            # flipping permutations 
             if ff == 0:
                 do_smooth = True
             elif ff == 1:

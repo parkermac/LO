@@ -10,23 +10,21 @@ Also [plon,plat] is just like [lon_psi, lat_psi] but extended by one on all
 directions so that it is box corners around all rho-grid points.
 
 """
-import numpy as np
+import sys
 import pickle
-from lo_tools import Lfun, zfun
+from lo_tools import Lfun
 
 import gfun
 import gfun_utility as gfu
-import gfun_user
-
-testing = True
-if testing:
-    from importlib import reload
-    reload(gfun)
-    reload(gfu)
-    reload(gfun_user)
-    
 Gr =gfun.gstart()
-Lfun.make_dir(Gr['gdir'], clean=True)
+import gfun_user # path added by gfun.gstart()
+
+if Gr['gdir'].is_dir():
+    ans = input('Grid ' + Gr['gridname'] + ' exists.  Overwrite? (y/n)')
+    if ans == 'y':
+        Lfun.make_dir(Gr['gdir'], clean=True)
+    else:
+        sys.exit()
 
 fn = 'grid_m00_r00_s00_x00.nc'
 out_fn = Gr['gdir'] / fn

@@ -18,8 +18,7 @@ import numpy as np
 import xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
-import os
-import shutil
+import sys
 
 from lo_tools import Lfun, zfun
 from lo_tools import plotting_functions as pfun
@@ -74,8 +73,8 @@ ax2 = plt.subplot2grid((1,3), (0,2), colspan=1) # buttons
 # try a segmented colormap
 from matplotlib import colors
 # make a color map of fixed colors
-cmap = colors.ListedColormap(['red', 'orange', 'lightgreen', 'green',
-                              'cyan', 'blue', 'violet', 'black'])
+cmap = colors.ListedColormap(['coral', 'orange', 'lightgreen', 'seagreen',
+                              'lightblue', 'cornflowerblue', 'mediumslateblue', 'blueviolet'])
 bounds=[-10, -5, 0, 5, 10, 20, 100, 200, 4000]
 norm = colors.BoundaryNorm(bounds, cmap.N)
 # tell imshow about color map so that only set colors are used
@@ -93,19 +92,19 @@ ax1.plot(cx0 + cxf, NR - (cy0 + cyf) - 1, '-k')
 gfp.edit_mask_river_tracks(Gr, NR, ax1)
 ax1.axis(aa)
 
-# create control buttons
-# list is organized from bottom to top
+# Create control buttons
+# Note: list is organized from bottom to top
 blist = ['start', 'pause', 'continueM', 'continueZ',
          'polyToLand', 'polyToWater', 'lineToWater', 'startPoly',
-         'done']
+         'undo','discard','done']
 # nicer names
 Blist = ['Start', 'Pause', 'Edit Mask', 'Edit Depth (' + str(dval) + ' m)',
          'Polygon to Land', 'Polygon to Water',
          'Line to Water', 'Start Polygon/Line',
-         'Done']
+         'Undo', 'Discard', 'Done']
 NB = len(blist) # number of buttons
 ybc = np.arange(NB+1) - .5
-offset = 1e5 # kludgey way to distinguish buttons from topography
+offset = 1e5 # kludgey way to distinguish buttons from topography in the ginput
 xbc = np.arange(2) + offset
 XBC, YBC = np.meshgrid(xbc, ybc)
 ZB = np.arange(1,NB+1).reshape(NB,1)
@@ -195,10 +194,12 @@ while flag_get_ginput:
 
     # this code deals with button input
     if (ix >= offset):
+                
         # were are in the buttons
         nb = iy # button number
         if (bdict[nb]=='start') and flag_start:
             flag_start = False
+            hh_prev = hh.copy()
             flag_continue = False
             cs.set_data(hh)
             ax1.set_title('PAUSED: Initial Mask')
@@ -209,17 +210,23 @@ while flag_get_ginput:
                 else:
                     addButtonLabel(ax2, xbc, ybc, bnum, Bdict[bnum], tcol=active_color)
         elif (bdict[nb]=='pause') and not flag_start:
+            # Note the pushing Pause saves the most recent edits and they
+            # can't be undone by the Undo button.
+            hh_prev = hh.copy()
             flag_continue = False
             ax1.set_title('PAUSED')
         elif (bdict[nb]=='continueM') and not flag_start:
+            hh_prev = hh.copy()
             flag_continue = True
             flag_e = 'm'
             ax1.set_title('EDITING Mask')
         elif (bdict[nb]=='continueZ') and not flag_start:
+            hh_prev = hh.copy()
             flag_continue = True
             flag_e = 'z'
             ax1.set_title('EDITING Depth')
         elif (bdict[nb]=='startPoly') and not flag_start:
+            hh_prev = hh.copy()
             flag_continue = True
             flag_e = 'p'
             ax1.set_title('Click to Add Poly Points')
@@ -228,6 +235,7 @@ while flag_get_ginput:
             plon_poly = []
             plat_poly = []
         elif (bdict[nb]=='polyToLand') and not flag_start:
+            hh_prev = hh.copy()
             flag_continue = False
             ax1.set_title('PAUSED: Changed Poly to Land')
             ji_rho_in = get_indices_in_polygon(plon_poly, plat_poly, NR, NC)
@@ -235,6 +243,7 @@ while flag_get_ginput:
             cs.set_data(hh)
             remove_poly()
         elif (bdict[nb]=='polyToWater') and not flag_start:
+            hh_prev = hh.copy()
             flag_continue = False
             ax1.set_title('PAUSED: Changed Poly to Water')
             ji_rho_in = get_indices_in_polygon(plon_poly, plat_poly, NR, NC)
@@ -244,6 +253,7 @@ while flag_get_ginput:
         elif (bdict[nb]=='lineToWater') and not flag_start:
             # This unmasks or carves depth in the places where the
             # line crosses a grid cell - ensures continuous path.
+            hh_prev = hh.copy()
             flag_continue = False
             x = np.array(plon_poly)
             y = np.array(plat_poly)
@@ -269,6 +279,18 @@ while flag_get_ginput:
         elif (bdict[nb]=='done') and not flag_start:
             flag_get_ginput = False
             ax1.set_title('DONE')
+            
+        elif (bdict[nb]=='undo') and not flag_start:
+            flag_continue = False
+            hh = hh_prev.copy()
+            cs.set_data(hh)
+            ax1.set_title('Paused: Undid last edits')
+            
+        elif (bdict[nb]=='discard') and not flag_start:
+            flag_get_ginput = False
+            ax1.set_title('DONE - No changes saved')
+            print('No change to mask or bathy')
+            sys.exit()
         else:
             pass
         plt.draw()
@@ -312,9 +334,9 @@ hh = np.flipud(hh)
 newmask = np.ones((NR, NC), dtype=float)
 newmask[np.isnan(hh)] = 0.
 
-# I don't understand this step...
-hh[np.isnan(hh)] = h[np.isnan(hh)] # why do this? it undoes depth changes...
-# it seems to be required for having the carved rivers show up...
+# We do this to maintain the h field (which will be created from hh when
+# we write the output below) as a complete array with no nans.
+hh[np.isnan(hh)] = h[np.isnan(hh)]
 
 # save new data and mask, if there are any changes
 if np.any(mask_rho != newmask) or np.any(h != hh):
@@ -325,4 +347,4 @@ if np.any(mask_rho != newmask) or np.any(h != hh):
     ds.to_netcdf(out_fn)
     ds.close()
 else:
-    print('No change to mask')
+    print('No change to mask or bathy')
