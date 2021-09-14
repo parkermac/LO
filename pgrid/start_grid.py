@@ -31,7 +31,9 @@ out_fn = Gr['gdir'] / fn
 print(60*'*')
 print(str(out_fn).center(60,'-'))
 
-dch = gfun.default_choices(Gr)
+Lfun.make_dir(Gr['gdir'], clean=True)
+
+dch = gfun.default_choices()
 lon, lat, z, dch = gfun_user.make_initial_info(dch)
 
 # save the output to NetCDF

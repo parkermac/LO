@@ -38,7 +38,7 @@ def default_choices(wet_dry=False):
     dch = dict()
 
     # Decide if the grid will allow wetting and drying.
-    # We do this first becasue it affects several subsequent choices
+    # We do this first because it affects several subsequent choices
     dch['wet_dry'] = wet_dry
 
     # GRID CREATION     

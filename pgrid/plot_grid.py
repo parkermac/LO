@@ -59,7 +59,7 @@ pfun.start_plot(figsize=(12,12))
 fig = plt.figure()
 
 ax = fig.add_subplot(111)
-cs = ax.pcolormesh(plon, plat, zm, vmin=-10, vmax=10, cmap='Spectral_r')
+cs = ax.pcolormesh(plon, plat, zm, vmin=-150, vmax=10, cmap='Spectral_r')
 fig.colorbar(cs, ax=ax)
 pfun.add_coast(ax)
 pfun.dar(ax)

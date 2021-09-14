@@ -2,7 +2,7 @@
 
 ### This collection of programs is designed to make gridfiles for ROMS.  It works for analytical and realistic cases, and handles complex tasks like mask editing and smoothing.  It also creates other files associated with rivers, nudging to climatology, and vertical grid parameters, all in the form expected by LO/forcing and ROMS.
 
-Throughout the steps we maintain and modify the arrays "h" and "mask_rho" to be complete 2-D arrays with no nan's.  mask_rho follows the ROMS convention of having 1 == water, 0 = land.
+Throughout the steps we maintain and modify the arrays "h" and "mask_rho" to be complete 2-D arrays with no nan's.  mask_rho follows the ROMS convention of having 1 = water, 0 = land.
 
 ---
 #### Suggested order to run the code
@@ -40,7 +40,7 @@ The bulleted lists below each step are the dch items used in that step.
 NOTE: you may want to run `carve_rivers.py` again at this point just to make just they are still there.
 
 (8) `make_extras.py` makes the u, v, and psi masks (you have to be done with mask editing).
-- min_depth (enforced for whole grid)
+- use_min_depth/min_depth (enforced for whole grid)
 
 (9) `grid_to_LO.py` writes the grid.nc file that is used by ROMS, saving it in LO_data/grids. It also saves S-coordinate info.
 
@@ -60,7 +60,7 @@ which returns a dict, Gr, that has the gridname and a few useful Path objects.
 
 In order to keep track of several choices made about a grid, we use dch, a dict of default choices that are initialized using this method:
 ```
-dch =  gfun.default_choices(Gr)
+dch =  gfun.default_choices()
 ```
 You typically override some of the defaults in `start_grid.py` when doing the initial grid specification.  The choices are saved in a pickle file:
 ```
