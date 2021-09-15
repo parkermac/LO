@@ -46,7 +46,7 @@ def get_cast(out_fn, fn, lon, lat):
     iy = zfun.find_nearest_ind(Lat, lat)
     
     # error checking
-    if G['mask_rho'][iy,ix] == False:
+    if G['mask_rho'][iy,ix] == 0:
         print('ERROR: point on land mask ' + out_fn.name)
         return
     

@@ -116,14 +116,14 @@ if (lat < Lat[0]) or (lat > Lat[-1]):
 ilon = zfun.find_nearest_ind(Lon, lon)
 ilat = zfun.find_nearest_ind(Lat, lat)
 # more error checking
-if G['mask_rho'][ilat,ilon] == False:
+if G['mask_rho'][ilat,ilon] == 0:
     print('ERROR: rho point on land mask ' + moor_fn.name)
     sys.exit()
 if Ldir['get_vel'] or Ldir['get_surfbot']:
-    if G['mask_u'][ilat,ilon] == False:
+    if G['mask_u'][ilat,ilon] == 0:
         print('ERROR: u point on land mask ' + moor_fn.name)
         sys.exit()
-    if G['mask_v'][ilat,ilon] == False:
+    if G['mask_v'][ilat,ilon] == 0:
         print('ERROR: v point on land mask ' + moor_fn.name)
         sys.exit()
         

@@ -22,12 +22,12 @@ Lfun.make_dir(outdir, clean=True)
 
 fng = Ldir['grid'] / 'grid.nc'
 G = zrfun.get_basic_info(fng, only_G=True)
-h = np.ma.masked_where(G['mask_rho']==False, G['h'])
+h = np.ma.masked_where(G['mask_rho']==0, G['h'])
 x = G['lon_rho'].data
 y = G['lat_rho'].data
 xp = G['lon_psi'].data
 yp = G['lat_psi'].data
-m = G['mask_rho']
+m = G['mask_rho'] == 1 # Boolean, True = water
 DA = G['DX'] * G['DY']
 
 # get the DataFrame of all sections
@@ -100,7 +100,7 @@ for seg_name in seg_name_list:
             seg_df['Lat0'].min()-pad,seg_df['Lat1'].max()+pad])
 
     # initialize a mask
-    mm = m.copy().data # boolean array, True over water
+    mm = m.copy() # boolean array, True over water
 
     # initialize some lists
     full_ji_list = [] # full list of indices of good rho points inside the volume

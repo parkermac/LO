@@ -44,14 +44,21 @@ H = ds.h.values
 lon = ds.lon_rho.values
 lat = ds.lat_rho.values
 mask_rho = ds.mask_rho.values
-plon, plat = pfun.get_plon_plat(lon,lat)
-DA = (1/ds.pm.values) * (1/ds.pn.values)
-DA[mask_rho==0] = np.nan
 ds.close()
+
+"""
+The code works by changing values in an array "hh" which stores
+the modified depth with nan's for the modified mask.  When needed
+it uses the unmodified depth "h" (which has no nan's) to restore
+back to the original depth.
+
+At the end it uses hh to update the depth and mask for the next
+NetCDF save of the file.
+"""
 
 # flip to work with imshow
 h = np.flipud(H)
-da = np.flipud(DA)
+# da = np.flipud(DA)
 m = np.flipud(mask_rho)
 # mask_rho:
 # 1 = water

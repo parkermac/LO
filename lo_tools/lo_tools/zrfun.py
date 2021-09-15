@@ -29,10 +29,6 @@ def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
         G['DX'] = 1/G['pm']
         G['DY'] = 1/G['pn']
         G['M'], G['L'] = np.shape(G['lon_rho']) # M = rows, L = columns
-        # make the masks boolean (True = water, False = land, opposite of masked arrays!)
-        G['mask_rho'] = G['mask_rho'] == 1
-        G['mask_u'] = G['mask_u'] == 1
-        G['mask_v'] = G['mask_v'] == 1
         return G
     def make_S(ds):
         # get vertical sigma-coordinate info (vectors are bottom to top)

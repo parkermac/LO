@@ -450,9 +450,9 @@ def get_section(ds, vn, x, y, in_dict):
     zbot = -h # don't need .copy() because of the minus operation
 
     # make sure fields are masked
-    zeta[mask==False] = np.nan
-    zbot[mask==False] = np.nan
-    sectvar[mask3==False] = np.nan
+    zeta[mask==0] = np.nan
+    zbot[mask==0] = np.nan
+    sectvar[mask3==0] = np.nan
 
     # create dist
     earth_rad = zfun.earth_rad(np.mean(lat[:,0])) # m
