@@ -21,8 +21,6 @@ box_name = Lfun.choose_item(in_dir, tag='.nc', exclude_tag='', itext='** Choose 
 box_fn = in_dir / box_name
 
 # gather fields
-import matplotlib.pyplot as plt
-import plotting_functions as pfun
 ds = xr.open_dataset(box_fn)
 
 # get time

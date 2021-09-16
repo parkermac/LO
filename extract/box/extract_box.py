@@ -100,22 +100,6 @@ if Ldir['testing']:
 G, S, T = zrfun.get_basic_info(fn_list[0])
 Lon = G['lon_rho'][0,:]
 Lat = G['lat_rho'][:,0]
-
-def get_box(job):
-    vn_list = 'salt,temp,zeta,h,u,v' # default list
-    # specific jobs
-    if job == 'yang_sequim':
-        aa = [-123.15120787, -122.89090010, 48.07302111, 48.19978336]
-    elif job == 'PS':
-        # 3 MB per save (26 GB/year for hourly)
-        aa = [-123.5, -122.05, 47, 49]
-    elif job == 'garrison':
-        aa = [-129.9, -122.05, 42.1, 51.9]
-        vn_list = 'salt,temp,oxygen,h'
-    elif job == 'full':
-        aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
-        vn_list = 'salt,temp,oxygen,h'
-    return aa[0], aa[1], aa[2], aa[3], vn_list
     
 def check_bounds(lon, lat):
     # error checking
@@ -131,7 +115,14 @@ def check_bounds(lon, lat):
     return ilon, ilat
 
 # get the indices and check that they are in the grid
-lon0, lon1, lat0, lat1, vn_list = get_box(Ldir['job'])
+pth = Ldir['LOu'] / 'extract' / 'box'
+if str(pth) not in sys.path:
+    sys.path.append(str(pth))
+import job_definitions
+from importlib import reload
+reload(job_definitions)
+aa, vn_list = job_definitions.get_box(Ldir['job'])
+lon0, lon1, lat0, lat1 = aa
 ilon0, ilat0 = check_bounds(lon0, lat0)
 ilon1, ilat1 = check_bounds(lon1, lat1)
 # NOTE: ncks indexing is zero-based but is INCLUSIVE of the last point.
@@ -198,21 +189,23 @@ print('Total time = %0.2f sec' % (time()- tt0))
 if (Ldir['surf']==False) and (Ldir['bot']==False):
     tt0 = time()
     ds = xr.load_dataset(box_fn) # have to load in order to add new variables
-    ds['z_rho'] = 0*ds.temp
-    ds.z_rho.attrs['units'] = 'm'
-    ds.z_rho.attrs['long name'] = 'vertical position on s_rho grid, positive up'
-    NT = len(ds.ocean_time.values)
+    NT, N, NR, NC = ds.salt.shape
+    ds['z_rho'] = (('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), np.nan*np.ones((NT, N, NR, NC)))
+    ds['z_w'] = (('ocean_time', 's_w', 'eta_rho', 'xi_rho'), np.nan*np.ones((NT, N+1, NR, NC)))
+    ds.z_rho.attrs = {'units':'m', 'long_name': 'vertical position on s_rho grid, positive up'}
+    ds.z_rho.attrs = {'units':'m', 'long_name': 'vertical position on s_w grid, positive up'}
     for ii in range(NT):
         h = ds.h.values
         zeta = ds.zeta[ii,:,:].values
-        z_rho = zrfun.get_z(h, zeta, S, only_rho=True)
+        z_rho, z_w = zrfun.get_z(h, zeta, S)
         ds['z_rho'][ii,:,:,:] = z_rho
+        ds['z_w'][ii,:,:,:] = z_w
     ds.to_netcdf(box_fn)
     ds.close()
     print('time to add z variables = %0.2f sec' % (time()- tt0))
 
 # clean up
-if True: #Ldir['testing'] == False:
+if True:
     Lfun.make_dir(temp_dir, clean=True)
     temp_dir.rmdir()
 
@@ -221,7 +214,7 @@ print('\nContents of extracted box file:')
 # check on the results
 ds = xr.open_dataset(box_fn)
 for vn in ds.data_vars:
-    print('%s (%s) max/min = %0.4f/%0.4f' % (vn, str(ds[vn].shape), ds[vn].max(), ds[vn].min()))
+    print('%s %s max/min = %0.4f/%0.4f' % (vn, str(ds[vn].shape), ds[vn].max(), ds[vn].min()))
 ds.close()
 
 
