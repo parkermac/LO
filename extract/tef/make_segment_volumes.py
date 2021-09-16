@@ -23,10 +23,9 @@ Lfun.make_dir(outdir, clean=True)
 fng = Ldir['grid'] / 'grid.nc'
 G = zrfun.get_basic_info(fng, only_G=True)
 h = np.ma.masked_where(G['mask_rho']==0, G['h'])
-x = G['lon_rho'].data
-y = G['lat_rho'].data
-xp = G['lon_psi'].data
-yp = G['lat_psi'].data
+x = G['lon_rho']
+y = G['lat_rho']
+xp, yp = pfun.get_plon_plat(x,y)
 m = G['mask_rho'] == 1 # Boolean, True = water
 DA = G['DX'] * G['DY']
 
@@ -45,7 +44,7 @@ if testing == True:
     # start a useful plot
     fig = plt.figure(figsize=(10,10))
     ax = fig.add_subplot(111)
-    ax.pcolormesh(xp, yp, h[1:-1,1:-1], cmap='terrain_r', vmin=-100, vmax = 400, alpha=.1)
+    ax.pcolormesh(xp, yp, h, cmap='terrain_r', vmin=-100, vmax = 400, alpha=.1)
     pfun.dar(ax)
     pfun.add_coast(ax)
 else:
@@ -186,7 +185,7 @@ for seg_name in seg_name_list:
             hh[ji]=1
         H = hh==0
         hm = np.ma.masked_where(H,h)
-        ax.pcolormesh(xp, yp, hm[1:-1,1:-1], cmap='terrain_r', vmin=-100, vmax = 400)
+        ax.pcolormesh(xp, yp, hm, cmap='terrain_r', vmin=-100, vmax = 400)
         
 #
     # find the volume and surface area

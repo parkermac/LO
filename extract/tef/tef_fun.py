@@ -139,9 +139,9 @@ def get_inds(x0, x1, y0, y1, G, verbose=False):
         jj1 = int(j1)
 
     # get mask and trim indices
-    # Note: the mask in G is True on water points
+    # Note: the mask in G = 1 on water points
     if sdir == 'NS':
-        mask = G['mask_u'][jj0:jj1+1, ii0]
+        mask = G['mask_u'][jj0:jj1+1, ii0] == 1
         # Note: argmax finds the index of the first True in this case
         igood0 = np.argmax(mask)
         igood1 = np.argmax(mask[::-1])
@@ -159,7 +159,7 @@ def get_inds(x0, x1, y0, y1, G, verbose=False):
         Lat = lat[jj0:jj1+1]
         Lon = lon[ii0] * np.ones_like(Mask)
     elif sdir == 'EW':
-        mask = G['mask_v'][jj0, ii0:ii1+1]
+        mask = G['mask_v'][jj0, ii0:ii1+1] == 1
         igood0 = np.argmax(mask)
         igood1 = np.argmax(mask[::-1])
         # check to see if section is "closed"
