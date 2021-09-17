@@ -194,7 +194,7 @@ NT = len(zeta)
 hh = ds.h.values * np.ones(NT)
 z_rho, z_w = zrfun.get_z(hh, zeta, S)
 # the returned z arrays have vertical position first, so we 
-# transporse to put time first for the mooring, to be consistent with
+# transpose to put time first for the mooring, to be consistent with
 # all other variables
 ds['z_rho'] = (('ocean_time', 's_rho'), np.transpose(z_rho.data))
 ds['z_w'] = (('ocean_time', 's_w'), np.transpose(z_w.data))

@@ -4,6 +4,8 @@ as a boundary contition.  In cases where it gets velocity in addition to
 the rho-grid variables the grid limits mimic the standard ROMS organization,
 with the outermost corners being on the rho-grid.
 
+Job definitions are in LO_user/extract/box/job_definitions.py
+
 Testing:
 run extract_box -gtx cas6_v3_lo8b -job yang_sequim -test True
 

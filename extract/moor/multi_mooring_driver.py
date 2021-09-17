@@ -1,6 +1,6 @@
 """
 This is a driver for doing multiple mooring extractions.  It reads in
-a dict from LO_user/moor/job_lists.py and uses this to run extract_moor.py as a
+a dict from LO_user/extract/moor/job_lists.py and uses this to run extract_moor.py as a
 series of subprocesses
 
 Run from the command line like:
@@ -83,7 +83,7 @@ if Ldir['get_all']:
     Ldir['get_surfbot'] = True
 
 # get the job list module
-job_dir = Ldir['LOu'] / 'moor'
+job_dir = Ldir['LOu'] / 'extract' / 'moor'
 if str(job_dir) not in sys.path:
     sys.path.append(str(job_dir))
 import job_lists
