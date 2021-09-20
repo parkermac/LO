@@ -15,7 +15,7 @@ Throughout this code I try to use ROMS naming conventions, except that when mani
 
 Also [plon, plat] is just like [lon_psi, lat_psi] but extended by one on all directions so that it is box corners around all rho-grid points.
 
-The bulleted lists below each step are the dch items used in that step.
+- The bulleted lists below each step are the dch items used in that step.
 
 (2) `start_grid.py` initializes the grid, bathymetry, and mask. You edit this to define the lon, lat vectors for your grid. It can take a while for big grids, so be patient (e.g. 15 minutes for cas6).
 - nudging_edges

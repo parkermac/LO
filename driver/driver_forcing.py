@@ -89,11 +89,10 @@ while dt <= dt1:
         with open(out_dir / 'Info' / 'subprocess_error.txt', 'w') as ffout:
             ffout.write(stderr.decode())
             
-    if args.testing:
-        print('\n' + ' sdtout '.center(60,'-'))
-        print(stdout.decode())
-        print('\n' + ' stderr '.center(60,'-'))
-        print(stderr.decode())
+    print('\n' + ' sdtout '.center(60,'-'))
+    print(stdout.decode())
+    print('\n' + ' stderr '.center(60,'-'))
+    print(stderr.decode())
         
     dt += timedelta(days=1)
     print('')
