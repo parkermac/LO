@@ -32,9 +32,9 @@ from lo_tools import Lfun, zfun, zrfun
 import Ofun_nc
 
 # defaults
-verbose = False
+verbose = True
 if Ldir['testing']:
-    verbose = True
+    # verbose = True
     from importlib import reload
     reload(Ofun_nc)
 
