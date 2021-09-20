@@ -51,7 +51,7 @@ def make_clm_file(data_dict, out_fn):
     # and both are much smaller than no compression.
     enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in vn_dict.keys()}
     # and save to NetCDF
-    ds.to_netcdf(out_fn, encoding=enc_dict)
+    ds.to_netcdf(out_fn)#, encoding=enc_dict)
     ds.close()
         
 def make_ini_file(in_fn, out_fn):
@@ -75,7 +75,7 @@ def make_ini_file(in_fn, out_fn):
     ds0.close()
     enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in ds.data_vars}
     # and save to NetCDF
-    ds.to_netcdf(out_fn, encoding=enc_dict)
+    ds.to_netcdf(out_fn)#, encoding=enc_dict)
     ds.close()
     
 def make_bry_file(in_fn, out_fn):
@@ -123,6 +123,6 @@ def make_bry_file(in_fn, out_fn):
     ds0.close()
     enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in ds.data_vars}
     # and save to NetCDF
-    ds.to_netcdf(out_fn, encoding=enc_dict)
+    ds.to_netcdf(out_fn)#, encoding=enc_dict)
     ds.close()
 
