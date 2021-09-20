@@ -67,13 +67,11 @@ def make_ini_file(in_fn, out_fn):
             # Note: we use [0] instead of 0 to retain the singleton dimension
         elif ndims == 4:
             ds[vn] = (ds0[vn].dims, ds0[vn].values[[0],:,:,:])
-        elif ndims == 1:
-            ds[vn] = (ds0[vn].dims, ds0[vn].values[[0]])
         Attrs = ds0[vn].attrs
         Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
         ds[vn].attrs = Attrs
     for cn in ds0.coords:
-        ds[cn] = (ds0[cn].dims, ds0[cn].values[[0]])
+        ds.coords[cn] = ds0.coords[cn][[0]]
     ds0.close()
     enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in ds.data_vars}
     # and save to NetCDF
@@ -121,7 +119,7 @@ def make_bry_file(in_fn, out_fn):
             Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
             ds[Vn].attrs = Attrs
     for cn in ds0.coords:
-        ds[cn] = (ds0[cn].dims, ds0[cn].values)
+        ds.coords[cn] = ds0.coords[cn]
     ds0.close()
     enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in ds.data_vars}
     # and save to NetCDF

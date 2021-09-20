@@ -55,7 +55,7 @@ this_dt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
 # list of history files from the original grid to work from (all Path objects)
 h_list = sorted(in_dir.glob('ocean_his_*'))
 if Ldir['testing']:
-    h_list = h_list[:3]
+    h_list = h_list[:2]
 NT = len(h_list)
     
 def get_bounds(x_big, y_big, x_small, y_small, pad=3):
@@ -167,7 +167,7 @@ for fn in h_list:
 data_dict['ocean_time'] = np.array(modtime_list)
 
 def print_info(fn):
-    ds = xr.open_dataset(out_fn)
+    ds = xr.open_dataset(out_fn, decode_times=False)
     print(ds)
     ds.close()
     
