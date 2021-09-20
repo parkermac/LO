@@ -84,4 +84,4 @@ So, in summary: for going from klone1 to apogee it added to:
 - ~/.ssh/known_hosts on klone (boiler and mox1 are also there), and
 - ~/.ssh/authorized_keys on apogee
 
-Question: if I now want to also allow other things like klone->perigee or mox->apogee, can I avoid overwriting my id_rsa?  Currently I rely on mox->boiler for the daily forecast.
+Presumably now I could run `ssh-copy-id` again for other computers, without having to do the `ssh-keygen` step.

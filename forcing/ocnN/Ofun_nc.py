@@ -1,128 +1,155 @@
 """
 Functions for writing saved fields to ROMS NetCDF.
-
-Rewritten to use xarray instead of netCDF4
 """
 
 import os
-import xarray as xr
+import netCDF4 as nc
 import numpy as np
 from lo_tools import Lfun
 
-def make_clm_file(data_dict, out_fn):
-    """
-    Write fields to ocean_clm.nc.
-    """
-    # associate variables with dimenstions
-    vn_dict = {
-            'zeta': ('zeta_time', 'eta_rho', 'xi_rho'),
-            'ubar': ('v2d_time', 'eta_u', 'xi_u'),
-            'vbar': ('v2d_time', 'eta_v', 'xi_v'),
-            'salt': ('salt_time', 's_rho', 'eta_rho', 'xi_rho'),
-            'temp': ('temp_time', 's_rho', 'eta_rho', 'xi_rho'),
-            'u': ('v3d_time', 's_rho', 'eta_u', 'xi_u'),
-            'v': ('v3d_time', 's_rho', 'eta_v', 'xi_v')
-            }
-    # assign attributes to variables
-    attrs_dict = {
-            'zeta': {'long_name': 'sea surface height climatology', 'units':'meter'},
-            'ubar': {'long_name': 'vertically averaged u-momentum climatology', 'units':'meter second-1'},
-            'vbar': {'long_name': 'vertically averaged v-momentum climatology', 'units':'meter second-1'},
-            'salt': {'long_name': 'salinity climatology', 'units':'g kg-1'},
-            'temp': {'long_name': 'potential temperature climatology', 'units':'Celsius'},
-            'u': {'long_name': 'u-momentum component climatology', 'units':'meter second-1'},
-            'v': {'long_name': 'v-momentum component climatology', 'units':'meter second-1'}
-            }
-    # write fields to the Dataset
-    ds = xr.Dataset()
-    ds['ocean_time'] = (('ocean_time',), data_dict['ocean_time'])
-    ds['ocean_time'].attrs['units'] = Lfun.roms_time_units
-    ds['ocean_time'].attrs['long_name'] = 'ocean time'
-    for vn in vn_dict.keys():
-        # time coordinates
-        vnt = vn_dict[vn][0]
-        ds[vnt] = ((vnt,), data_dict['ocean_time'])
-        ds[vnt].attrs['units'] = Lfun.roms_time_units
-        # fields
-        ds[vn] = (vn_dict[vn], data_dict[vn])
-        ds[vn].attrs = attrs_dict[vn]
-    # set compression
-    # Note: complevel=1 is about twice as big as complevel=9, but 10x faster to write,
-    # and both are much smaller than no compression.
-    enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in vn_dict.keys()}
-    # and save to NetCDF
-    ds.to_netcdf(out_fn)#, encoding=enc_dict)
-    ds.close()
-        
-def make_ini_file(in_fn, out_fn):
-    """
-    Create the ini file from the first time of the clm file.
-    """
-    ds0 = xr.open_dataset(in_fn)
-    ds = xr.Dataset()
-    for vn in ds0.data_vars:
-        ndims = len(ds0[vn].dims)
-        if ndims == 3:
-            ds[vn] = (ds0[vn].dims, ds0[vn].values[[0],:,:])
-            # Note: we use [0] instead of 0 to retain the singleton dimension
-        elif ndims == 4:
-            ds[vn] = (ds0[vn].dims, ds0[vn].values[[0],:,:,:])
-        Attrs = ds0[vn].attrs
-        Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
-        ds[vn].attrs = Attrs
-    for cn in ds0.coords:
-        ds.coords[cn] = ds0.coords[cn][[0]]
-    ds0.close()
-    enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in ds.data_vars}
-    # and save to NetCDF
-    ds.to_netcdf(out_fn)#, encoding=enc_dict)
-    ds.close()
-    
-def make_bry_file(in_fn, out_fn):
-    """
-    Create the bry file from the edges of the clm file.
-    """
-    ds0 = xr.open_dataset(in_fn)
-    ds = xr.Dataset()
-    for vn in ds0.data_vars:
-        dm = ds0[vn].dims
-        ndims = len(dm)
-        for D in ['north', 'south', 'east', 'west']:
-            # rename variable
-            Vn = vn + '_' + D
-            # trim dimensions
-            if D in ['east','west']:
-                Dm = tuple(item for item in dm if 'xi_' not in item)
-            elif D in ['north','south']:
-                Dm = tuple(item for item in dm if (('eta_' not in item) or ('zeta' in item)))
-            # write boundary arrays
-            if ndims == 3:
-                if D == 'north':
-                    ds[Vn] = (Dm, ds0[vn].values[:,-1,:])
-                elif D == 'south':
-                    ds[Vn] = (Dm, ds0[vn].values[:,0,:])
-                elif D == 'east':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,-1])
-                elif D == 'west':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,0])
-            elif ndims == 4:
-                if D == 'north':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,-1,:])
-                elif D == 'south':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,0,:])
-                elif D == 'east':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,:,-1])
-                elif D == 'west':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,:,0])
-            # add attributes
-            Attrs = ds0[vn].attrs
-            Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
-            ds[Vn].attrs = Attrs
-    for cn in ds0.coords:
-        ds.coords[cn] = ds0.coords[cn]
-    ds0.close()
-    enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in ds.data_vars}
-    # and save to NetCDF
-    ds.to_netcdf(out_fn)#, encoding=enc_dict)
-    ds.close()
+def make_clm_file(nc_dir, data_dict, N, NR, NC):
+    # name output file
+    clm_fn = nc_dir / 'ocean_clm.nc'
+    clm_fn.unlink(missing_ok=True)
+    foo = nc.Dataset(clm_fn, 'w')
+    # create dimensions
+    for vn in ['salt', 'temp', 'v3d', 'v2d', 'zeta', 'ocean']:
+        foo.createDimension(vn+'_time', len(data_dict['ocean_time']))
+    foo.createDimension('s_rho', N)
+    foo.createDimension('eta_rho', NR)
+    foo.createDimension('xi_rho', NC)
+    foo.createDimension('eta_u', NR)
+    foo.createDimension('xi_u', NC-1)
+    foo.createDimension('eta_v', NR-1)
+    foo.createDimension('xi_v', NC)
+    # add time data
+    for vn in ['salt', 'temp', 'v3d', 'v2d', 'zeta', 'ocean']:
+        vv = foo.createVariable(vn+'_time', float, (vn+'_time',), zlib=True)
+        vv.units = Lfun.roms_time_units #'seconds since 1970.01.01 UTC'
+        vv[:] = data_dict['ocean_time']
 
+    # add 2d field data
+    vv = foo.createVariable('zeta', float, ('zeta_time', 'eta_rho', 'xi_rho'), zlib=True)
+    vv.long_name = 'sea surface height climatology'
+    vv.units = 'meter'
+    vv[:] = data_dict['zeta']
+    
+    vv = foo.createVariable('ubar', float, ('v2d_time', 'eta_u', 'xi_u'), zlib=True)
+    vv.long_name = 'vertically averaged u-momentum climatology'
+    vv.units = 'meter second-1'
+    vv[:] = data_dict['ubar']
+    
+    vv = foo.createVariable('vbar', float, ('v2d_time', 'eta_v', 'xi_v'), zlib=True)
+    vv.long_name = 'vertically averaged v-momentum climatology'
+    vv.units = 'meter second-1'
+    vv[:] = data_dict['vbar']
+    
+    # add 3d field data
+    vv = foo.createVariable('u', float, ('v3d_time', 's_rho', 'eta_u', 'xi_u'), zlib=True)
+    vv.long_name = 'u-momentum component climatology'
+    vv.units = 'meter second-1'
+    vv[:] = data_dict['u']
+    
+    vv = foo.createVariable('v', float, ('v3d_time', 's_rho', 'eta_v', 'xi_v'), zlib=True)
+    vv.long_name = 'v-momentum component climatology'
+    vv.units = 'meter second-1'
+    vv[:] = data_dict['v']
+    
+    vv = foo.createVariable('salt', float, ('salt_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=True)
+    vv.long_name = 'salinity climatology'
+    vv.units = 'PSU'
+    vv[:] = data_dict['salt']
+    
+    vv = foo.createVariable('temp', float, ('temp_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=True)
+    vv.long_name = 'potential temperature climatology'
+    vv.units = 'Celsius'
+    vv[:] = data_dict['temp']
+    
+    foo.close()
+    print('-Writing ocean_clm.nc')
+        
+def make_ini_file(nc_dir):
+    # Initial condition, copied from first time of ocean_clm.nc
+    ds1 = nc.Dataset(nc_dir / 'ocean_clm.nc', mode='r')
+    # name output file
+    ini_fn = nc_dir / 'ocean_ini.nc'
+    ini_fn.unlink(missing_ok=True)
+    ds2 = nc.Dataset(ini_fn, 'w')
+    # Copy dimensions
+    for dname, the_dim in ds1.dimensions.items():
+        if 'time' in dname:
+            ds2.createDimension(dname, 1)
+        else:
+            ds2.createDimension(dname, len(the_dim) if not the_dim.isunlimited() else None)
+    # Copy variables
+    for v_name, varin in ds1.variables.items():
+        outVar = ds2.createVariable(v_name, varin.datatype, varin.dimensions, zlib=True)
+        # Copy variable attributes, {} is a dict comprehension, cool!
+        outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip()
+                for k in varin.ncattrs()})
+        if varin.ndim > 1:
+            outVar[:] = varin[0,:]
+        else:
+            outVar[:] = varin[0]
+    ds1.close()
+    ds2.close()
+    print('-Writing ocean_ini.nc')
+
+def make_bry_file(nc_dir):
+    # Boundary conditions, copied from edges of ocean_clm.nc
+    ds1 = nc.Dataset(nc_dir / 'ocean_clm.nc', mode='r')
+    # name output file
+    bry_fn = nc_dir / 'ocean_bry.nc'
+    bry_fn.unlink(missing_ok=True)
+    ds2 = nc.Dataset(bry_fn, 'w')
+    # Copy dimensions
+    for dname, the_dim in ds1.dimensions.items():
+        ds2.createDimension(dname, len(the_dim) if not the_dim.isunlimited() else None)
+    # Copy parts of variables
+    for v_name, varin in ds1.variables.items():
+        if varin.ndim in [3,4]: 
+            for bname in ['north', 'south', 'east', 'west']:
+                # hacks to get the right boundary names for a few BGC variables
+                # (really this should be regularized in the ROMS NPZD code)
+                if v_name == 'phytoplankton':
+                    v_name = 'phyt'
+                if v_name == 'zooplankton':
+                    v_name = 'zoop'
+                if v_name == 'alkalinity':
+                    v_name = 'Talk'
+                outname = v_name + '_' + bname
+                if bname in ['north', 'south']:
+                    outdims = tuple([item for item in varin.dimensions if item[:3] != 'eta'])
+                elif bname in ['west', 'east']:
+                    outdims = tuple([item for item in varin.dimensions if item[:2] != 'xi'])
+                outVar = ds2.createVariable(outname, varin.datatype, outdims)    
+                outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip()
+                        for k in varin.ncattrs()})
+                if varin.ndim == 4:
+                    if bname == 'north':
+                        outVar[:] = varin[:,:,-1,:]
+                    elif bname == 'south':
+                        outVar[:] = varin[:,:,0,:]
+                    elif bname == 'east':
+                        outVar[:] = varin[:,:,:,-1]
+                    elif bname == 'west':
+                        outVar[:] = varin[:,:,:,0]
+                elif varin.ndim == 3:
+                    if bname == 'north':
+                        outVar[:] = varin[:,-1,:]
+                    elif bname == 'south':
+                        outVar[:] = varin[:,0,:]
+                    elif bname == 'east':
+                        outVar[:] = varin[:,:,-1]
+                    elif bname == 'west':
+                        outVar[:] = varin[:,:,0]
+        else:
+            outname = v_name
+            outdims = tuple([item for item in varin.dimensions])
+            outVar = ds2.createVariable(outname, varin.datatype, outdims)    
+            outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip()
+                    for k in varin.ncattrs()})
+            outVar[:] = varin[:]    
+    ds1.close()
+    ds2.close()
+    print('-Writing ocean_bry.nc')

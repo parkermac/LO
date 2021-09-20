@@ -29,13 +29,14 @@ import numpy as np
 
 from lo_tools import Lfun, zfun, zrfun
 
+import Ofun_nc_xarray
 import Ofun_nc
-
 # defaults
 verbose = True
 if Ldir['testing']:
     # verbose = True
     from importlib import reload
+    reload(Ofun_nc_xarray)
     reload(Ofun_nc)
 
 # this directory is created, along with Info and Data subdirectories, by ffun.intro()
@@ -167,35 +168,48 @@ for fn in h_list:
 data_dict['ocean_time'] = np.array(modtime_list)
 
 def print_info(fn):
-    ds = xr.open_dataset(out_fn, decode_times=False)
+    print('\n' + str(fn))
+    ds = xr.open_dataset(fn, decode_times=False)
     print(ds)
     ds.close()
-    
-tt0 = time()
-out_fn = out_dir / 'ocean_clm.nc'
-Ofun_nc.make_clm_file(data_dict, out_fn)
-print('\n- Write clm file: %0.2f sec' % (time()-tt0))
-sys.stdout.flush()
-if verbose:
-    print_info(out_fn)
-    
-tt0 = time()
-in_fn = out_dir / 'ocean_clm.nc'
-out_fn = out_dir / 'ocean_ini.nc'
-Ofun_nc.make_ini_file(in_fn, out_fn)
-print('\n- Write ini file: %0.2f sec' % (time()-tt0))
-sys.stdout.flush()
-if verbose:
-    print_info(out_fn)
 
-tt0 = time()
-in_fn = out_dir / 'ocean_clm.nc'
-out_fn = out_dir / 'ocean_bry.nc'
-Ofun_nc.make_bry_file(in_fn, out_fn)
-print('\n- Write bry file: %0.2f sec' % (time()-tt0))
-sys.stdout.flush()
-if verbose:
-    print_info(out_fn)
+if False:
+    # write using xarray
+    tt0 = time()
+    out_fn = out_dir / 'ocean_clm.nc'
+    Ofun_nc_xarray.make_clm_file(data_dict, out_fn)
+    print('\n- Write clm file: %0.2f sec' % (time()-tt0))
+    sys.stdout.flush()
+    if verbose:
+        print_info(out_fn)
+    
+    tt0 = time()
+    in_fn = out_dir / 'ocean_clm.nc'
+    out_fn = out_dir / 'ocean_ini.nc'
+    Ofun_nc_xarray.make_ini_file(in_fn, out_fn)
+    print('\n- Write ini file: %0.2f sec' % (time()-tt0))
+    sys.stdout.flush()
+    if verbose:
+        print_info(out_fn)
+
+    tt0 = time()
+    in_fn = out_dir / 'ocean_clm.nc'
+    out_fn = out_dir / 'ocean_bry.nc'
+    Ofun_nc_xarray.make_bry_file(in_fn, out_fn)
+    print('\n- Write bry file: %0.2f sec' % (time()-tt0))
+    sys.stdout.flush()
+    if verbose:
+        print_info(out_fn)
+        
+else:
+    NT, N, NR, NC = data_dict['salt'].shape
+    Ofun_nc.make_clm_file(out_dir, data_dict, N, NR, NC)
+    Ofun_nc.make_ini_file(out_dir)
+    Ofun_nc.make_bry_file(out_dir)
+    
+    nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
+    for fn in nc_list:
+        print_info(out_dir / fn)
 
 # check results
 nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
