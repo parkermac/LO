@@ -10,6 +10,10 @@ ssh to `klone.hyak.uw.edu` to get to it
 
 There appears to be a klone1 so I will use that to be explicit (klo alias on my mac) although this is probably not required.  There is no klone2.  In contrast, on mox there is a mox1 and mox2.
 
+When you have a job running you can check on it using
+```
+squeue -A macc
+```
 ---
 
 #### From David Darr: klone requires only modest changes to Linux-ifort_mox.mk, renamed Linux-ifort_klone.mk (in LiveOcean_roms/LO_ROMS/Compilers).  The only difference actually is that the two instances of:
