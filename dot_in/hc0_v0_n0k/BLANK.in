@@ -572,7 +572,7 @@ Dout(iTvdif) == T T     ! temp_vdiff, ...    vertical diffusion
 
      SSFNAME == $force_dir$/$riv$/rivers.nc
 
-     NFFILES == 9                          ! number of unique forcing files
+     NFFILES == 8                          ! number of unique forcing files
 
 !     FRCNAME == $force_dir$/$tide$/tides.nc \
   FRCNAME == $force_dir$/$atm$/lwrad_down.nc \
