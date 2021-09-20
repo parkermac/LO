@@ -46,6 +46,7 @@ ds.update({'h': (('eta_rho', 'xi_rho'), h)})
 ds['mask_u'] = (('eta_u', 'xi_u'), mask_u)
 ds['mask_v'] = (('eta_v', 'xi_v'), mask_v)
 ds['mask_psi'] = (('eta_psi', 'xi_psi'), mask_psi)
+ds['spherical'] = 'T'
 ds.to_netcdf(out_fn)
 ds.close()
 

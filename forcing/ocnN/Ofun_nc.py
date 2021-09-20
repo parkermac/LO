@@ -35,6 +35,9 @@ def make_clm_file(data_dict, out_fn):
             }
     # write fields to the Dataset
     ds = xr.Dataset()
+    ds['ocean_time'] = (('ocean_time',), data_dict['ocean_time'])
+    ds['ocean_time'].attrs['units'] = Lfun.roms_time_units
+    ds['ocean_time'].attrs['long_name'] = 'ocean time'
     for vn in vn_dict.keys():
         # time coordinates
         vnt = vn_dict[vn][0]
@@ -64,6 +67,8 @@ def make_ini_file(in_fn, out_fn):
             # Note: we use [0] instead of 0 to retain the singleton dimension
         elif ndims == 4:
             ds[vn] = (ds0[vn].dims, ds0[vn].values[[0],:,:,:])
+        elif ndims == 1:
+            ds[vn] = (ds0[vn].dims, ds0[vn].values[[0]])
         Attrs = ds0[vn].attrs
         Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
         ds[vn].attrs = Attrs
