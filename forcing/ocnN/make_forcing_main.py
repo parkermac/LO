@@ -44,7 +44,7 @@ out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) /
 # where to find the files to interpolate from
 # NOTE: this should be made more general - perhaps handled by the command line arguments.
 if 'apogee' in Ldir['lo_env']:
-    in_dir = Ldir['rom_out2'] / 'cas6_v3_lo8b' / ('f' + Ldir['date_string'])
+    in_dir = Ldir['roms_out2'] / 'cas6_v3_lo8b' / ('f' + Ldir['date_string'])
     
 else:
     in_dir = Ldir['parent'] / 'LiveOcean_roms' / 'output' / 'cas6_v3_lo8b' / ('f' + Ldir['date_string'])
