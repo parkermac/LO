@@ -42,7 +42,12 @@ if Ldir['testing']:
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
 
 # where to find the files to interpolate from
-in_dir = Ldir['parent'] / 'LiveOcean_roms' / 'output' / 'cas6_v3_lo8b' / ('f' + Ldir['date_string'])
+# NOTE: this should be made more general - perhaps handled by the command line arguments.
+if 'apogee' in Ldir['lo_env']:
+    in_dir = Ldir['rom_out2'] / 'cas6_v3_lo8b' / ('f' + Ldir['date_string'])
+    
+else:
+    in_dir = Ldir['parent'] / 'LiveOcean_roms' / 'output' / 'cas6_v3_lo8b' / ('f' + Ldir['date_string'])
 
 # datetime of the day we are working on
 this_dt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
