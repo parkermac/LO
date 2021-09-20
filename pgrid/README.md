@@ -39,7 +39,7 @@ The bulleted lists below each step are the dch items used in that step.
 
 NOTE: you may want to run `carve_rivers.py` again at this point just to make just they are still there.
 
-(8) `make_extras.py` makes the u, v, and psi masks (you have to be done with mask editing).
+(8) `make_extras.py` makes the u, v, and psi masks.  Note: you cannot do any mask editing after this step, because it creates the other masks based on mask_rho.  If you do edit the mask, run this again.
 - use_min_depth/min_depth (enforced for whole grid)
 
 (9) `grid_to_LO.py` writes the grid.nc file that is used by ROMS, saving it in LO_data/grids. It also saves S-coordinate info.

@@ -26,6 +26,7 @@ The main users of this repo are people who are in some way collaborating with me
 
 #### (1) Install miniconda on your machine and then create the "loenv" environment.
 
+
 Anaconda is a great way to get python. We will use a minimal installation of python3 called "miniconda" and then create a conda "environment" and add required packages to it ourselves.  This keeps things lightweight and less likely to suffer from package conflicts.
 
 Go to this miniconda webpage to find the link for the "latest" installer for your platform: [INSTALLERS](https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links).  The "latest" is the table at the top of the page.  For example, for linux it is currently: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh.
