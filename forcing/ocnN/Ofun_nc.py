@@ -28,42 +28,47 @@ def make_clm_file(nc_dir, data_dict, N, NR, NC):
         vv.units = Lfun.roms_time_units #'seconds since 1970.01.01 UTC'
         vv[:] = data_dict['ocean_time']
 
+    def make_ma(vn):
+        f = data_dict[vn]
+        ff = np.ma.masked_where(np.isnan(f), f)
+        return ff
+        
     # add 2d field data
     vv = foo.createVariable('zeta', float, ('zeta_time', 'eta_rho', 'xi_rho'), zlib=True)
     vv.long_name = 'sea surface height climatology'
     vv.units = 'meter'
-    vv[:] = data_dict['zeta']
+    vv[:] = make_ma('zeta')
     
     vv = foo.createVariable('ubar', float, ('v2d_time', 'eta_u', 'xi_u'), zlib=True)
     vv.long_name = 'vertically averaged u-momentum climatology'
     vv.units = 'meter second-1'
-    vv[:] = data_dict['ubar']
+    vv[:] = make_ma('ubar')
     
     vv = foo.createVariable('vbar', float, ('v2d_time', 'eta_v', 'xi_v'), zlib=True)
     vv.long_name = 'vertically averaged v-momentum climatology'
     vv.units = 'meter second-1'
-    vv[:] = data_dict['vbar']
+    vv[:] = make_ma('vbar')
     
     # add 3d field data
     vv = foo.createVariable('u', float, ('v3d_time', 's_rho', 'eta_u', 'xi_u'), zlib=True)
     vv.long_name = 'u-momentum component climatology'
     vv.units = 'meter second-1'
-    vv[:] = data_dict['u']
+    vv[:] = make_ma('u')
     
     vv = foo.createVariable('v', float, ('v3d_time', 's_rho', 'eta_v', 'xi_v'), zlib=True)
     vv.long_name = 'v-momentum component climatology'
     vv.units = 'meter second-1'
-    vv[:] = data_dict['v']
+    vv[:] = make_ma('v')
     
     vv = foo.createVariable('salt', float, ('salt_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=True)
     vv.long_name = 'salinity climatology'
     vv.units = 'PSU'
-    vv[:] = data_dict['salt']
+    vv[:] = make_ma('salt')
     
     vv = foo.createVariable('temp', float, ('temp_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=True)
     vv.long_name = 'potential temperature climatology'
     vv.units = 'Celsius'
-    vv[:] = data_dict['temp']
+    vv[:] = make_ma('temp')
     
     foo.close()
     print('-Writing ocean_clm.nc')
