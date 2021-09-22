@@ -29,16 +29,16 @@ if dch['use_min_depth']:
 # Make the masks.
 
 mask_u_bool = (mask_rho[:, 1:] == 0) | (mask_rho[:, :-1] == 0)
-mask_u = np.ones_like(mask_u_bool, dtype=int)
+mask_u = np.ones_like(mask_u_bool)
 mask_u[mask_u_bool] = 0
 
 mask_v_bool = (mask_rho[1:, :] == 0) | (mask_rho[:-1, :] == 0)
-mask_v = np.ones_like(mask_v_bool, dtype=int)
+mask_v = np.ones_like(mask_v_bool)
 mask_v[mask_v_bool] = 0
 
 mask_psi_bool = ( (mask_rho[1:, 1:] == 0) | (mask_rho[:-1, :-1] == 0) |
                 (mask_rho[1:, :-1] == 0) | (mask_rho[:-1, 1:] == 0) )
-mask_psi = np.ones_like(mask_psi_bool, dtype=int)
+mask_psi = np.ones_like(mask_psi_bool)
 mask_psi[mask_psi_bool] = 0
 
 # save the updated mask and h
@@ -47,7 +47,14 @@ ds['mask_u'] = (('eta_u', 'xi_u'), mask_u)
 ds['mask_v'] = (('eta_v', 'xi_v'), mask_v)
 ds['mask_psi'] = (('eta_psi', 'xi_psi'), mask_psi)
 ds['spherical'] = 'T'
-ds.to_netcdf(out_fn)
+
+enc_dict = dict()
+for vn in ds.data_vars:
+    if vn not in ['spherical', 'sph']:
+        enc_dict[vn] = {'_FillValue': 1e20}
+    else:
+        enc_dict[vn] = {'dtype': 'S1'}
+ds.to_netcdf(out_fn, encoding=enc_dict)
 ds.close()
 
 

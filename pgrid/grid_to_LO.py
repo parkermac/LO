@@ -61,7 +61,9 @@ with open(dch_out_fn, 'x') as f:
         f.write(k + ',' + str(dch[k]) + '\n')
 
 # copy files
+
 shutil.copyfile(in_fn, out_dir / 'grid.nc')
+
 try:
     shutil.copyfile(Gr['gdir'] / 'roms_river_info.csv', out_dir / 'river_info.csv')
 except:

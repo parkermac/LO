@@ -115,7 +115,7 @@ def make_nc(out_fn, lon, lat, z, dch):
     misc_dict = {
         'xl': dx[0,:].sum(),
         'el': dy[:,0].sum(),
-        'sph': 'T',
+        'spherical': 'T',
         }
     # these are on all the grids in tag_list below
     lon_lat_dict = {
@@ -135,7 +135,7 @@ def make_nc(out_fn, lon, lat, z, dch):
     for vn in rho_dict.keys():
         data_dict[vn] = (('eta_rho', 'xi_rho'), rho_dict[vn])
     for vn in misc_dict.keys():
-        data_dict[vn] = (misc_dict[vn]) # no dimension needed?  Should these be attributes?
+        data_dict[vn] = (misc_dict[vn])
     tag_list = ['rho', 'u', 'v', 'psi']
     for tag in tag_list:
         data_dict['lon_'+tag] = (('eta_'+tag, 'xi_'+tag), lon_lat_dict['lon_'+tag])
