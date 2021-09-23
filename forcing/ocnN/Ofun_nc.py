@@ -24,7 +24,7 @@ def make_clm_file(nc_dir, data_dict, N, NR, NC):
     foo.createDimension('xi_v', NC)
     # add time data
     for vn in ['salt', 'temp', 'v3d', 'v2d', 'zeta', 'ocean']:
-        vv = foo.createVariable(vn+'_time', float, (vn+'_time',), zlib=True)
+        vv = foo.createVariable(vn+'_time', float, (vn+'_time',), zlib=False)
         vv.units = Lfun.roms_time_units #'seconds since 1970.01.01 UTC'
         vv[:] = data_dict['ocean_time']
 
@@ -34,38 +34,38 @@ def make_clm_file(nc_dir, data_dict, N, NR, NC):
         return ff
         
     # add 2d field data
-    vv = foo.createVariable('zeta', float, ('zeta_time', 'eta_rho', 'xi_rho'), zlib=True)
+    vv = foo.createVariable('zeta', float, ('zeta_time', 'eta_rho', 'xi_rho'), zlib=False)
     vv.long_name = 'sea surface height climatology'
     vv.units = 'meter'
     vv[:] = make_ma('zeta')
     
-    vv = foo.createVariable('ubar', float, ('v2d_time', 'eta_u', 'xi_u'), zlib=True)
+    vv = foo.createVariable('ubar', float, ('v2d_time', 'eta_u', 'xi_u'), zlib=False)
     vv.long_name = 'vertically averaged u-momentum climatology'
     vv.units = 'meter second-1'
     vv[:] = make_ma('ubar')
     
-    vv = foo.createVariable('vbar', float, ('v2d_time', 'eta_v', 'xi_v'), zlib=True)
+    vv = foo.createVariable('vbar', float, ('v2d_time', 'eta_v', 'xi_v'), zlib=False)
     vv.long_name = 'vertically averaged v-momentum climatology'
     vv.units = 'meter second-1'
     vv[:] = make_ma('vbar')
     
     # add 3d field data
-    vv = foo.createVariable('u', float, ('v3d_time', 's_rho', 'eta_u', 'xi_u'), zlib=True)
+    vv = foo.createVariable('u', float, ('v3d_time', 's_rho', 'eta_u', 'xi_u'), zlib=False)
     vv.long_name = 'u-momentum component climatology'
     vv.units = 'meter second-1'
     vv[:] = make_ma('u')
     
-    vv = foo.createVariable('v', float, ('v3d_time', 's_rho', 'eta_v', 'xi_v'), zlib=True)
+    vv = foo.createVariable('v', float, ('v3d_time', 's_rho', 'eta_v', 'xi_v'), zlib=False)
     vv.long_name = 'v-momentum component climatology'
     vv.units = 'meter second-1'
     vv[:] = make_ma('v')
     
-    vv = foo.createVariable('salt', float, ('salt_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=True)
+    vv = foo.createVariable('salt', float, ('salt_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=False)
     vv.long_name = 'salinity climatology'
     vv.units = 'PSU'
     vv[:] = make_ma('salt')
     
-    vv = foo.createVariable('temp', float, ('temp_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=True)
+    vv = foo.createVariable('temp', float, ('temp_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=False)
     vv.long_name = 'potential temperature climatology'
     vv.units = 'Celsius'
     vv[:] = make_ma('temp')
@@ -88,7 +88,7 @@ def make_ini_file(nc_dir):
             ds2.createDimension(dname, len(the_dim) if not the_dim.isunlimited() else None)
     # Copy variables
     for v_name, varin in ds1.variables.items():
-        outVar = ds2.createVariable(v_name, varin.datatype, varin.dimensions, zlib=True)
+        outVar = ds2.createVariable(v_name, varin.datatype, varin.dimensions, zlib=False)
         # Copy variable attributes, {} is a dict comprehension, cool!
         outVar.setncatts({k: varin.getncattr(k).replace('climatology','').strip()
                 for k in varin.ncattrs()})
