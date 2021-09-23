@@ -542,10 +542,13 @@ def get_section(ds, vn, x, y, in_dict):
 def maxmin(a):
     # find the value and location of the max and min of a 2D
     # masked array
-    jmax,imax = np.unravel_index(np.nanargmax(a),a.shape)
-    amax = a[jmax,imax]
-    jmin,imin = np.unravel_index(np.nanargmin(a),a.shape)
-    amin = a[jmin,imin]
+    try:
+        jmax,imax = np.unravel_index(np.nanargmax(a),a.shape)
+        amax = a[jmax,imax]
+        jmin,imin = np.unravel_index(np.nanargmin(a),a.shape)
+        amin = a[jmin,imin]
+    except ValueError:
+        amax, jmax, imax, amin, jmin, imin = (0,0,0,0,0,0)
     return amax, jmax, imax, amin, jmin, imin
 
 def draw_box(ax, aa, linestyle='-', color='k', alpha=1, linewidth=.5, inset=0):
