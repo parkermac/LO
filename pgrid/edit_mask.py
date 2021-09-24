@@ -102,12 +102,12 @@ ax1.axis(aa)
 # Create control buttons
 # Note: list is organized from bottom to top
 blist = ['start', 'pause', 'continueM', 'continueZ',
-         'polyToLand', 'polyToWater', 'lineToWater', 'startPoly',
+         'polyToLand', 'polyToWater', 'lineToLand', 'lineToWater', 'startPoly',
          'undo','discard','done']
 # nicer names
 Blist = ['Start', 'Pause', 'Edit Mask', 'Edit Depth (' + str(dval) + ' m)',
          'Polygon to Land', 'Polygon to Water',
-         'Line to Water', 'Start Polygon/Line',
+         'Line to Land', 'Line to Water', 'Start Polygon/Line',
          'Undo', 'Discard', 'Done']
 NB = len(blist) # number of buttons
 ybc = np.arange(NB+1) - .5
@@ -283,6 +283,31 @@ while flag_get_ginput:
                               + str(dval) + ' m')
             cs.set_data(hh)
             remove_poly()
+        elif (bdict[nb]=='lineToLand') and not flag_start:
+            # This masks in the places where the
+            # line crosses a grid cell - ensures continuous path.
+            hh_prev = hh.copy()
+            flag_continue = False
+            x = np.array(plon_poly)
+            y = np.array(plat_poly)
+            for ii in range(len(x)-1):
+                ix0 = int(x[ii])
+                ix1 = int(x[ii+1])
+                iy0 = int(y[ii])
+                iy1 = int(y[ii+1])
+                if ix0==ix1 and iy0==iy1:
+                    II = np.array(ix0)
+                    JJ = np.array(iy0)
+                    hh[JJ, II] = np.nan
+                else:
+                    II, JJ = zfun.get_stairstep(ix0, ix1, iy0, iy1)
+                    for pp in range(len(II)):
+                        hh[JJ[pp], II[pp]] = np.nan
+                ax1.set_title('PAUSED: Changed line to Water of depth '
+                              + str(dval) + ' m')
+            cs.set_data(hh)
+            remove_poly()
+            
         elif (bdict[nb]=='done') and not flag_start:
             flag_get_ginput = False
             ax1.set_title('DONE')

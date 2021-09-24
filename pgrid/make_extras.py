@@ -43,10 +43,9 @@ mask_psi[mask_psi_bool] = 0
 
 # save the updated mask and h
 ds.update({'h': (('eta_rho', 'xi_rho'), h)})
-ds['mask_u'] = (('eta_u', 'xi_u'), mask_u)
-ds['mask_v'] = (('eta_v', 'xi_v'), mask_v)
-ds['mask_psi'] = (('eta_psi', 'xi_psi'), mask_psi)
-ds['spherical'] = 'T'
+ds.update({'mask_u': (('eta_u', 'xi_u'), mask_u)})
+ds.update({'mask_v': (('eta_v', 'xi_v'), mask_v)})
+ds.update({'mask_psi': (('eta_psi', 'xi_psi'), mask_psi)})
 
 enc_dict = dict()
 for vn in ds.data_vars:
