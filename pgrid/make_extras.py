@@ -29,16 +29,16 @@ if dch['use_min_depth']:
 # Make the masks.
 
 mask_u_bool = (mask_rho[:, 1:] == 0) | (mask_rho[:, :-1] == 0)
-mask_u = np.ones_like(mask_u_bool)
+mask_u = np.ones(mask_u_bool.shape)
 mask_u[mask_u_bool] = 0
 
 mask_v_bool = (mask_rho[1:, :] == 0) | (mask_rho[:-1, :] == 0)
-mask_v = np.ones_like(mask_v_bool)
+mask_v = np.ones(mask_v_bool.shape)
 mask_v[mask_v_bool] = 0
 
 mask_psi_bool = ( (mask_rho[1:, 1:] == 0) | (mask_rho[:-1, :-1] == 0) |
                 (mask_rho[1:, :-1] == 0) | (mask_rho[:-1, 1:] == 0) )
-mask_psi = np.ones_like(mask_psi_bool)
+mask_psi = np.ones(mask_psi_bool.shape)
 mask_psi[mask_psi_bool] = 0
 
 # save the updated mask and h

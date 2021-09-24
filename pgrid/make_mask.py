@@ -127,7 +127,7 @@ if dch['remove_islands']:
 # create the new mask_rho
 # 1 = water
 # 0 = land
-mask_rho = np.ones_like(mask_rho_orig)
+mask_rho = np.ones(mask_rho_orig.shape)
 mask_rho[m == True] = 0
 
 if not np.all(mask_rho == mask_rho_orig):

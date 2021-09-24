@@ -56,8 +56,9 @@ zm[mask_rho == 0] = np.nan
 # PLOTTING
 plt.close('all')
 pfun.start_plot(figsize=(12,12))
-fig = plt.figure()
 
+# bathymetry
+fig = plt.figure()
 ax = fig.add_subplot(111)
 cs = ax.pcolormesh(plon, plat, zm, vmin=-150, vmax=10, cmap='Spectral_r')
 fig.colorbar(cs, ax=ax)
@@ -67,9 +68,27 @@ ax.axis(ax_lims)
 ax.set_title(in_fn.name)
 ax.text(.05, .95, Gr['gridname'], transform=ax.transAxes)
 ax.text(.95, .05, str(mask_rho.shape), ha='right', transform=ax.transAxes)
-
 if do_riv:
     gfp.add_river_tracks(Gr, ds, ax)
+    
+# mask
+fig = plt.figure()
+ax = fig.add_subplot(111)
+tt = ['rho', 'u', 'v']
+sym = dict(zip(['rho', 'u', 'v'],['o','>','^']))
+c = dict(zip(['rho', 'u', 'v'],['b','orange','r']))
+for t in tt:
+    x = ds['lon_'+t].values
+    y = ds['lat_'+t].values
+    m = ds['mask_'+t].values
+    ax.plot(x, y, sym[t], c=c[t], alpha=.2, ms=3)
+    ax.plot(x[m==1], y[m==1], sym[t], c=c[t], ms=3)
+    
+pfun.add_coast(ax)
+pfun.dar(ax)
+ax.axis(ax_lims)
+ax.set_title(in_fn.name)
+ax.text(.05, .95, Gr['gridname'], transform=ax.transAxes)
         
 ds.close()
 
