@@ -92,6 +92,7 @@ for tag in tag_list:
     yy[tag] = ds['lat_' + tag].values
     mm[tag] = ds['mask_' + tag].values
 ds.close()
+
 if Ldir['start_type'] == 'continuation':
     pad = 20
 elif Ldir['start_type'] == 'new':
@@ -102,7 +103,9 @@ else:
 if pad > 0:
     # mask out the inside of the nest fields, since we only use
     # the edges (unless Ldir['start_type']=='new')
-    mm[tag][pad:-pad, pad:-pad] = 0 # this speeds things up
+    for tag in tag_list:
+        mm[tag][pad:-pad, pad:-pad] = 0 # this speeds things up
+    
 for tag in tag_list:
     xynew[tag] = np.array((xx[tag][mm[tag]==1],yy[tag][mm[tag]==1])).T
 
