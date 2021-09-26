@@ -38,7 +38,10 @@ cmap_dict = {'salt': cm.haline,#'Spectral_r',
              'ARAG': 'rainbow',
              'detritus': 'rainbow',
              'Ldetritus': 'rainbow',
-             'w': 'rainbow'}
+             'u': 'rainbow',
+             'v': 'rainbow',
+             'w': 'rainbow',
+             'zeta': 'rainbow'}
 
 # Units (after multiplying by scaling factor)
 units_dict = {'salt': '$(g\ kg^{-1})$',

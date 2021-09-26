@@ -121,6 +121,8 @@ for rn in ri_df.index:
                     print(' Inconsistent angle for %s '.center(60,'*') % (rn))
         
             # write info for ROMS based on dx and dy
+            xoff = 0
+            yoff = 0
             if dx==1 and dy==0:
                 idir = 0 # 0 = E/W, 1 = N/S (redundant with 'uv')
                 isign = -1
@@ -129,6 +131,7 @@ for rn in ri_df.index:
                 idir = 0
                 isign = 1
                 uv = 'u'
+                xoff = -1
             elif dx==0 and dy==1:
                 idir = 1
                 isign = -1
@@ -137,10 +140,11 @@ for rn in ri_df.index:
                 idir = 1
                 isign = 1
                 uv = 'v'
+                yoff = -1
             else:
                 print(' Inconsistent last points for %s '.center(60,'*') % (rn))
-            roms_info_df.loc[rn, 'row_py'] = JI_ulist[-1][0]
-            roms_info_df.loc[rn, 'col_py'] = JI_ulist[-1][1]
+            roms_info_df.loc[rn, 'row_py'] = JI_ulist[-1][0] + yoff
+            roms_info_df.loc[rn, 'col_py'] = JI_ulist[-1][1] + xoff
             roms_info_df.loc[rn, 'idir'] = idir
             roms_info_df.loc[rn, 'isign'] = isign
             roms_info_df.loc[rn, 'uv'] = uv

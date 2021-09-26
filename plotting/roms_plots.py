@@ -306,56 +306,40 @@ def P_ths(in_dict):
 
 def P_debug(in_dict):
     # Focused on debugging
-
+    vn_list = ['salt','zeta', 'u', 'v']
+    
     # START
-    fs = 14
-    pfun.start_plot(fs=fs, figsize=pinfo.figsize)
+    fs = 10
+    pfun.start_plot(fs=fs, figsize=(6*len(vn_list),8))
     fig = plt.figure()
     ds = xr.open_dataset(in_dict['fn'])
-
     # PLOT CODE
-    vn_list = ['salt', 'temp']
     ii = 1
     for vn in vn_list:
-        if in_dict['auto_vlims']:
-            pinfo.vlims_dict[vn] = ()
+        if 'lon_rho' in ds[vn].coords:
+            tag = 'rho'
+        if 'lon_u' in ds[vn].coords:
+            tag = 'u'
+        if 'lon_v' in ds[vn].coords:
+            tag = 'v'
+        x = ds['lon_'+tag].values
+        y = ds['lat_'+tag].values
+        px, py = pfun.get_plon_plat(x,y)
+        if vn in ['zeta', 'ubar', 'vbar']:
+            v = ds[vn][0,:,:].values
+        else:
+            v = ds[vn][0, -1,:,:].values
         ax = fig.add_subplot(1, len(vn_list), ii)
-        cs = pfun.add_map_field(ax, ds, vn, pinfo.vlims_dict,
-                cmap=pinfo.cmap_dict[vn], fac=pinfo.fac_dict[vn])
-        fig.colorbar(cs)
-        pfun.add_bathy_contours(ax, ds, txt=True)
+        ax.set_xticks([])
+        ax.set_yticks([])
+        cs = ax.pcolormesh(px, py, v, cmap='rainbow')
         pfun.add_coast(ax)
         ax.axis(pfun.get_aa(ds))
         pfun.dar(ax)
-        ax.set_title('Surface %s %s' % (pinfo.tstr_dict[vn],pinfo.units_dict[vn]))
-        ax.set_xlabel('Longitude')
-        if ii == 1:
-            ax.set_ylabel('Latitude')
-            pfun.add_info(ax, in_dict['fn'])
-            pfun.add_windstress_flower(ax, ds)
-        elif ii == 2:
-            #pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
-            # add debugging information to the plot
-            # gathering info
-            u = ds['u'][0,-1,:,:].values
-            umax, ujmax, uimax, umin, ujmin, uimin = pfun.maxmin(u)
-            v = ds['v'][0,-1,:,:].values
-            vmax, vjmax, vimax, vmin, vjmin, vimin = pfun.maxmin(v)
-            eta = ds['zeta'][0,:,:].values
-            emax, ejmax, eimax, emin, ejmin, eimin = pfun.maxmin(eta)
-            #
-            G = zrfun.get_basic_info(in_dict['fn'], only_G=True)
-            def add_info(G, ax, name, grd, vval, vj, vi, ypos, clr):
-                ax.text(.98, ypos,'%s = %5.1f' % (name, vval), fontweight='bold',
-                    horizontalalignment='right', transform=ax.transAxes, color=clr)
-                ax.plot(G['lon_'+grd][vj,vi],G['lat_'+grd][vj,vi],'*', color=clr,
-                    markeredgecolor='w',markersize=18,)
-            add_info(G, ax, 'umax', 'u', umax, ujmax, uimax, .36, 'r')
-            add_info(G, ax, 'umin', 'u', umin, ujmin, uimin, .33, 'orange')
-            add_info(G, ax, 'vmax', 'v', vmax, vjmax, vimax, .3, 'b')
-            add_info(G, ax, 'vmin', 'v', vmin, vjmin, vimin, .27, 'g')
-            add_info(G, ax, 'emax', 'rho', emax, ejmax, eimax, .24, 'k')
-            add_info(G, ax, 'emin', 'rho', emin, ejmin, eimin, .21, 'm')
+        vmax, vjmax, vimax, vmin, vjmin, vimin = pfun.maxmin(v)
+        ax.plot(x[vjmax,vimax], y[vjmax,vimax],'*k')
+        ax.plot(x[vjmin,vimin], y[vjmin,vimin],'ok')
+        ax.set_title(('%s ((*)max=%0.1f, (o)min=%0.1f)' % (vn, vmax, vmin)))
         ii += 1
 
     # FINISH

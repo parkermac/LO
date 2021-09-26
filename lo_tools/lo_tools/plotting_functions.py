@@ -97,61 +97,40 @@ def get_units(ds, vn):
         units = ''
     return units
 
-def add_bathy_contours(ax, ds, depth_levs = [], txt=False):
+def add_bathy_contours(ax, ds, depth_levs = [200, 2000], txt=False):
     # This should work with ds being a history file Dataset, or the G dict.
-    h = ds['h'].values
-    lon = ds['lon_rho'].values
-    lat = ds['lat_rho'].values
-    c1 = 'k'
-    c2 = 'k'
-    if len(depth_levs) == 0:
-        ax.contour(lon, lat, h, [200], colors=c1, linewidths=0.5)
-        ax.contour(lon, lat, h, [2000], colors=c2, linewidths=0.5)
-        if txt==True:
-            ax.text(.95, .95, '200 m', color=c1,
-                    horizontalalignment='right',
-                    transform=ax.transAxes)
-            ax.text(.95, .92, '2000 m', color=c2,
-                    horizontalalignment='right',transform=ax.transAxes)
-    else:
-        cs = ax.contour(lon, lat, h, depth_levs, colors='k',
-            linewidths=0.5) # could add linestyles='dashed' e.g.
-        if txt==True:
-            ii = 0
-            for lev in depth_levs:
-                ax.text(.95, .95 - ii*.03, str(lev)+' m', color=c1,
-                        horizontalalignment='right',
-                        transform=ax.transAxes)
-                ii += 1
+    h = ds.h.values
+    # trim depth_levs to be in range of h
+    hmax = h.max()
+    depth_levs = [item for item in depth_levs if item < hmax]
+    lon = ds.lon_rho.values
+    lat = ds.lat_rho.values
+    cs = ax.contour(lon, lat, h, depth_levs, colors='k',
+        linewidths=0.5) # could add linestyles='dashed' e.g.
+    if txt==True:
+        ii = 0
+        for lev in depth_levs:
+            ax.text(.95, .95 - ii*.03, str(lev)+' m', ha='right', transform=ax.transAxes)
+            ii += 1
         
 def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1,
     alpha=1, aa=[], vlims_fac=3, do_mask_edges=False):
     cmap = plt.get_cmap(name=cmap)
     if 'lon_rho' in ds[vn].coords:
-        x = ds['lon_psi'].values
-        y = ds['lat_psi'].values
-        m = ds['mask_psi'].values
-        if vn == 'zeta':
-            v = ds[vn][0, 1:-1, 1:-1].values
-        else:
-            v = ds[vn][0, slev, 1:-1, 1:-1].values
-    elif 'lon_u' in ds[vn].coords:
-        x = ds['lon_u'].values
-        y = ds['lat_u'].values
-        m = ds['mask_u'].values
-        if vn == 'vbar':
-            v = ds[vn][0, :, 1:-1].values
-        else:
-            v = ds[vn][0, slev, :, 1:-1].values
-    elif 'lon_v' in ds[vn].coords:
-        x = ds['lon_v'].values
-        y = ds['lat_v'].values
-        m = ds['mask_v'].values
-        if vn == 'ubar':
-            v = ds[vn][0, 1:-1, :].values
-        else:
-            v = ds[vn][0, slev, 1:-1, :].values
+        tag = 'rho'
+    if 'lon_u' in ds[vn].coords:
+        tag = 'u'
+    if 'lon_v' in ds[vn].coords:
+        tag = 'v'
         
+    x = ds['lon_'+tag].values
+    y = ds['lat_'+tag].values
+    px, py = get_plon_plat(x,y)
+    m = ds['mask_'+tag].values
+    if vn in ['zeta', 'ubar', 'vbar']:
+        v = ds[vn][0,:,:].values
+    else:
+        v = ds[vn][0, slev,:,:].values
     v_scaled = fac*v
     
     # SETTING COLOR LIMITS
@@ -174,9 +153,9 @@ def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1,
         # dicts have essentially global scope, so setting it here sets it everywhere
                 
     if do_mask_edges:
-        v_scaled = mask_edges(v_scaled, ds['lon_rho'][1:-1, 1:-1], ds['lat_rho'][1:-1, 1:-1])  
+        v_scaled = mask_edges(v_scaled, x, y)  
     
-    cs = ax.pcolormesh(x, y, v_scaled, vmin=vlims[0], vmax=vlims[1], cmap=cmap, alpha=alpha)
+    cs = ax.pcolormesh(px, py, v_scaled, vmin=vlims[0], vmax=vlims[1], cmap=cmap, alpha=alpha)
     return cs
 
 def add_velocity_vectors(ax, ds, fn, v_scl=3, v_leglen=0.5, nngrid=80, zlev='top', center=(.8,.05)):
