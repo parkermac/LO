@@ -105,13 +105,14 @@ def add_bathy_contours(ax, ds, depth_levs = [200, 2000], txt=False):
     depth_levs = [item for item in depth_levs if item < hmax]
     lon = ds.lon_rho.values
     lat = ds.lat_rho.values
-    cs = ax.contour(lon, lat, h, depth_levs, colors='k',
-        linewidths=0.5) # could add linestyles='dashed' e.g.
-    if txt==True:
-        ii = 0
-        for lev in depth_levs:
-            ax.text(.95, .95 - ii*.03, str(lev)+' m', ha='right', transform=ax.transAxes)
-            ii += 1
+    if len(depth_levs) > 0:
+        cs = ax.contour(lon, lat, h, depth_levs, colors='k',
+            linewidths=0.5) # could add linestyles='dashed' e.g.
+        if txt==True:
+            ii = 0
+            for lev in depth_levs:
+                ax.text(.95, .95 - ii*.03, str(lev)+' m', ha='right', transform=ax.transAxes)
+                ii += 1
         
 def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1,
     alpha=1, aa=[], vlims_fac=3, do_mask_edges=False):
@@ -158,7 +159,7 @@ def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1,
     cs = ax.pcolormesh(px, py, v_scaled, vmin=vlims[0], vmax=vlims[1], cmap=cmap, alpha=alpha)
     return cs
 
-def add_velocity_vectors(ax, ds, fn, v_scl=3, v_leglen=0.5, nngrid=80, zlev='top', center=(.8,.05)):
+def add_velocity_vectors(ax, ds, fn, v_scl=5, v_leglen=0.5, nngrid=80, zlev='top', center=(.8,.05)):
     # v_scl: scale velocity vector (smaller to get longer arrows)
     # v_leglen: m/s for velocity vector legend
     xc = center[0]
@@ -198,10 +199,10 @@ def add_velocity_vectors(ax, ds, fn, v_scl=3, v_leglen=0.5, nngrid=80, zlev='top
     mask = uu != 0
     # plot velocity vectors
     Q = ax.quiver(xx[mask], yy[mask], uu[mask], vv[mask],
-        units='y', scale=v_scl, scale_units='y', color='k')
+        units='width', scale=v_scl, scale_units='width', color='k')
     plt.quiverkey(Q, .9, .1, v_leglen, str(v_leglen)+' m/s', angle=45)
 
-def add_windstress_flower(ax, ds, t_scl=0.2, t_leglen=0.1, center=(.85,.25), fs=12):
+def add_windstress_flower(ax, ds, t_scl=1, t_leglen=0.1, center=(.85,.25), fs=12):
     # ADD MEAN WINDSTRESS VECTOR
     # t_scl: scale windstress vector (smaller to get longer arrows)
     # t_leglen: # Pa for wind stress vector legend
@@ -210,14 +211,14 @@ def add_windstress_flower(ax, ds, t_scl=0.2, t_leglen=0.1, center=(.85,.25), fs=
     x = center[0]
     y = center[1]
     ax.quiver([x, x] , [y, y], [tauxm, tauxm], [tauym, tauym],
-        units='y', scale=t_scl, scale_units='y', color='k',
+        units='width', scale=t_scl, scale_units='width', color='k',
         transform=ax.transAxes)
     tt = 1./np.sqrt(2)
     t_alpha = 0.4
     ax.quiver(x*np.ones(8) , y*np.ones(8),
         t_leglen*np.array([0,tt,1,tt,0,-tt,-1,-tt]),
         t_leglen*np.array([1,tt,0,-tt,-1,-tt,0,tt]),
-        units='y', scale=t_scl, scale_units='y', color='k', alpha=t_alpha,
+        units='width', scale=t_scl, scale_units='width', color='k', alpha=t_alpha,
         transform=ax.transAxes)
     ax.text(x, y-.13,'Windstress',
         horizontalalignment='center', alpha=t_alpha, transform=ax.transAxes, fontsize=fs)
