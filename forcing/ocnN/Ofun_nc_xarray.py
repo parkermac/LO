@@ -9,6 +9,15 @@ import xarray as xr
 import numpy as np
 from lo_tools import Lfun
 
+enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e21}
+# Using compression (zlib=True, complevel=1) results in files that are just 2% of the
+# uncompressed files (for hc0, which has a lot of nan's).
+# Using complevel=9 makes the files half as big as complevel=1, but takes much about 10x longer.
+
+def make_masked(f):
+    ff = np.ma.masked_where(np.isnan(f), f)
+    return ff
+
 def make_clm_file(data_dict, out_fn):
     """
     Write fields to ocean_clm.nc.
@@ -44,14 +53,11 @@ def make_clm_file(data_dict, out_fn):
         ds[vnt] = ((vnt,), data_dict['ocean_time'])
         ds[vnt].attrs['units'] = Lfun.roms_time_units
         # fields
-        ds[vn] = (vn_dict[vn], data_dict[vn])
+        ds[vn] = (vn_dict[vn], make_masked(data_dict[vn]))
         ds[vn].attrs = attrs_dict[vn]
-    # set compression
-    # Note: complevel=1 is about twice as big as complevel=9, but 10x faster to write,
-    # and both are much smaller than no compression.
-    enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in vn_dict.keys()}
+    Enc_dict = {vn:enc_dict for vn in vn_dict.keys()}
     # and save to NetCDF
-    ds.to_netcdf(out_fn)#, encoding=enc_dict)
+    ds.to_netcdf(out_fn, encoding=Enc_dict)
     ds.close()
         
 def make_ini_file(in_fn, out_fn):
@@ -63,19 +69,19 @@ def make_ini_file(in_fn, out_fn):
     for vn in ds0.data_vars:
         ndims = len(ds0[vn].dims)
         if ndims == 3:
-            ds[vn] = (ds0[vn].dims, ds0[vn].values[[0],:,:])
+            ds[vn] = (ds0[vn].dims, make_masked(ds0[vn].values[[0],:,:]))
             # Note: we use [0] instead of 0 to retain the singleton dimension
         elif ndims == 4:
-            ds[vn] = (ds0[vn].dims, ds0[vn].values[[0],:,:,:])
+            ds[vn] = (ds0[vn].dims, make_masked(ds0[vn].values[[0],:,:,:]))
         Attrs = ds0[vn].attrs
         Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
         ds[vn].attrs = Attrs
     for cn in ds0.coords:
         ds.coords[cn] = ds0.coords[cn][[0]]
     ds0.close()
-    enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in ds.data_vars}
+    Enc_dict = {vn:enc_dict for vn in ds.data_vars}
     # and save to NetCDF
-    ds.to_netcdf(out_fn)#, encoding=enc_dict)
+    ds.to_netcdf(out_fn, encoding=Enc_dict)
     ds.close()
     
 def make_bry_file(in_fn, out_fn):
@@ -98,22 +104,22 @@ def make_bry_file(in_fn, out_fn):
             # write boundary arrays
             if ndims == 3:
                 if D == 'north':
-                    ds[Vn] = (Dm, ds0[vn].values[:,-1,:])
+                    ds[Vn] = (Dm, make_masked(ds0[vn].values[:,-1,:]))
                 elif D == 'south':
-                    ds[Vn] = (Dm, ds0[vn].values[:,0,:])
+                    ds[Vn] = (Dm, make_masked(ds0[vn].values[:,0,:]))
                 elif D == 'east':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,-1])
+                    ds[Vn] = (Dm, make_masked(ds0[vn].values[:,:,-1]))
                 elif D == 'west':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,0])
+                    ds[Vn] = (Dm, make_masked(ds0[vn].values[:,:,0]))
             elif ndims == 4:
                 if D == 'north':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,-1,:])
+                    ds[Vn] = (Dm, make_masked(ds0[vn].values[:,:,-1,:]))
                 elif D == 'south':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,0,:])
+                    ds[Vn] = (Dm, make_masked(ds0[vn].values[:,:,0,:]))
                 elif D == 'east':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,:,-1])
+                    ds[Vn] = (Dm, make_masked(ds0[vn].values[:,:,:,-1]))
                 elif D == 'west':
-                    ds[Vn] = (Dm, ds0[vn].values[:,:,:,0])
+                    ds[Vn] = (Dm, make_masked(ds0[vn].values[:,:,:,0]))
             # add attributes
             Attrs = ds0[vn].attrs
             Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
@@ -121,8 +127,8 @@ def make_bry_file(in_fn, out_fn):
     for cn in ds0.coords:
         ds.coords[cn] = ds0.coords[cn]
     ds0.close()
-    enc_dict = {vn:{'zlib':True, 'complevel':1} for vn in ds.data_vars}
+    Enc_dict = {vn:enc_dict for vn in ds.data_vars}
     # and save to NetCDF
-    ds.to_netcdf(out_fn)#, encoding=enc_dict)
+    ds.to_netcdf(out_fn, encoding=Enc_dict)
     ds.close()
 

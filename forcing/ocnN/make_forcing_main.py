@@ -176,33 +176,30 @@ def print_info(fn):
     print(ds)
     ds.close()
 
-if False:
+if True:
     # write using xarray
     tt0 = time()
     out_fn = out_dir / 'ocean_clm.nc'
+    out_fn.unlink(missing_ok=True)
     Ofun_nc_xarray.make_clm_file(data_dict, out_fn)
     print('\n- Write clm file: %0.2f sec' % (time()-tt0))
     sys.stdout.flush()
-    if verbose:
-        print_info(out_fn)
     
     tt0 = time()
     in_fn = out_dir / 'ocean_clm.nc'
     out_fn = out_dir / 'ocean_ini.nc'
+    out_fn.unlink(missing_ok=True)
     Ofun_nc_xarray.make_ini_file(in_fn, out_fn)
     print('\n- Write ini file: %0.2f sec' % (time()-tt0))
     sys.stdout.flush()
-    if verbose:
-        print_info(out_fn)
 
     tt0 = time()
     in_fn = out_dir / 'ocean_clm.nc'
     out_fn = out_dir / 'ocean_bry.nc'
+    out_fn.unlink(missing_ok=True)
     Ofun_nc_xarray.make_bry_file(in_fn, out_fn)
     print('\n- Write bry file: %0.2f sec' % (time()-tt0))
     sys.stdout.flush()
-    if verbose:
-        print_info(out_fn)
         
 else:
     NT, N, NR, NC = data_dict['salt'].shape
@@ -210,9 +207,9 @@ else:
     Ofun_nc.make_ini_file(out_dir)
     Ofun_nc.make_bry_file(out_dir)
     
-    nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
-    for fn in nc_list:
-        print_info(out_dir / fn)
+nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
+for fn in nc_list:
+    print_info(out_dir / fn)
 
 # check results
 nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
