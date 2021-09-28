@@ -2,6 +2,11 @@
 Functions for writing saved fields to ROMS NetCDF.
 
 Rewritten to use xarray instead of netCDF4
+
+RESULT: this works great with ROMS as long as we:
+(i) transform the arrays that have nan's
+(ii) write them to NetCDF with a _FillValue
+(iii) and the compression makes them MUCH smaller!
 """
 
 import os

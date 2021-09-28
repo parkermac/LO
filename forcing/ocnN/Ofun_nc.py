@@ -1,5 +1,9 @@
 """
 Functions for writing saved fields to ROMS NetCDF.
+
+This version works, but is deprecated in LO because it relies
+on the netCDF4 module.
+
 """
 
 import os

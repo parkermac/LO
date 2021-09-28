@@ -170,44 +170,45 @@ for fn in h_list:
     ds.close()
 data_dict['ocean_time'] = np.array(modtime_list)
 
+# Write to NetCDF using xarray (this works, hooray!).
+
+tt0 = time()
+out_fn = out_dir / 'ocean_clm.nc'
+out_fn.unlink(missing_ok=True)
+Ofun_nc_xarray.make_clm_file(data_dict, out_fn)
+print('\n- Write clm file: %0.2f sec' % (time()-tt0))
+sys.stdout.flush()
+
+tt0 = time()
+in_fn = out_dir / 'ocean_clm.nc'
+out_fn = out_dir / 'ocean_ini.nc'
+out_fn.unlink(missing_ok=True)
+Ofun_nc_xarray.make_ini_file(in_fn, out_fn)
+print('\n- Write ini file: %0.2f sec' % (time()-tt0))
+sys.stdout.flush()
+
+tt0 = time()
+in_fn = out_dir / 'ocean_clm.nc'
+out_fn = out_dir / 'ocean_bry.nc'
+out_fn.unlink(missing_ok=True)
+Ofun_nc_xarray.make_bry_file(in_fn, out_fn)
+print('\n- Write bry file: %0.2f sec' % (time()-tt0))
+sys.stdout.flush()
+    
+# # use the old netCDF4 methods (deprecated)
+# NT, N, NR, NC = data_dict['salt'].shape
+# Ofun_nc.make_clm_file(out_dir, data_dict, N, NR, NC)
+# Ofun_nc.make_ini_file(out_dir)
+# Ofun_nc.make_bry_file(out_dir)
+    
 def print_info(fn):
     print('\n' + str(fn))
     ds = xr.open_dataset(fn, decode_times=False)
     print(ds)
     ds.close()
 
-if True:
-    # write using xarray
-    tt0 = time()
-    out_fn = out_dir / 'ocean_clm.nc'
-    out_fn.unlink(missing_ok=True)
-    Ofun_nc_xarray.make_clm_file(data_dict, out_fn)
-    print('\n- Write clm file: %0.2f sec' % (time()-tt0))
-    sys.stdout.flush()
-    
-    tt0 = time()
-    in_fn = out_dir / 'ocean_clm.nc'
-    out_fn = out_dir / 'ocean_ini.nc'
-    out_fn.unlink(missing_ok=True)
-    Ofun_nc_xarray.make_ini_file(in_fn, out_fn)
-    print('\n- Write ini file: %0.2f sec' % (time()-tt0))
-    sys.stdout.flush()
-
-    tt0 = time()
-    in_fn = out_dir / 'ocean_clm.nc'
-    out_fn = out_dir / 'ocean_bry.nc'
-    out_fn.unlink(missing_ok=True)
-    Ofun_nc_xarray.make_bry_file(in_fn, out_fn)
-    print('\n- Write bry file: %0.2f sec' % (time()-tt0))
-    sys.stdout.flush()
-        
-else:
-    NT, N, NR, NC = data_dict['salt'].shape
-    Ofun_nc.make_clm_file(out_dir, data_dict, N, NR, NC)
-    Ofun_nc.make_ini_file(out_dir)
-    Ofun_nc.make_bry_file(out_dir)
-    
 nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
+# print info about the files to the screen
 for fn in nc_list:
     print_info(out_dir / fn)
 

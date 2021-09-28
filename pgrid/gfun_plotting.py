@@ -28,22 +28,31 @@ def add_river_tracks(Gr, ds, ax):
     rri_df = pd.read_csv(rri_fn, index_col='rname')
 
     for rn in rri_df.index:
+        # these are indices (python, zero-based) into either the
+        # u or v grids.
         ii = int(rri_df.loc[rn,'col_py'])
         jj = int(rri_df.loc[rn,'row_py'])
-        ax.plot(lon[jj,ii], lat[jj,ii],'oc')
         
         uv = rri_df.loc[rn,'uv']
         isign = rri_df.loc[rn,'isign']
         idir = rri_df.loc[rn,'idir']
         
         if uv == 'u' and isign == 1:
-            ax.plot(lon_u[jj,ii-1], lat_u[jj,ii-1],'>r')
+            # River source on W side of rho cell
+            ax.plot(lon_u[jj,ii], lat_u[jj,ii],'>r')
+            ax.plot(lon[jj,ii+1], lat[jj,ii+1],'oc')
         if uv == 'u' and isign == -1:
+            # River source on E side of rho cell
             ax.plot(lon_u[jj,ii], lat_u[jj,ii],'<r')
+            ax.plot(lon[jj,ii], lat[jj,ii],'oc')
         if uv == 'v' and isign == 1:
+            # River source on S side of rho cell
             ax.plot(lon_v[jj-1,ii], lat_v[jj-1,ii],'^b')
+            ax.plot(lon[jj,ii], lat[jj,ii],'oc')
         if uv == 'v' and isign == -1:
-            ax.plot(lon_v[jj,ii], lat_v[jj,ii],'vb')
+            # River source on N side of rho cell
+            ax.plot(lon_u[jj,ii], lat_u[jj,ii],'vb')
+            ax.plot(lon[jj,ii], lat[jj,ii],'oc')
             
         fn_tr = Gr['ri_dir'] / 'tracks' / (rn + '.p')
         try:
@@ -70,17 +79,23 @@ def edit_mask_river_tracks(Gr, NR, ax):
     col_dict_py = df['col_py']
     isign_dict = df['isign']
     idir_dict = df['idir']
-    # plot river tracks
+    # Plot river endpoints, indicating source direction.  The indexing
+    # nudges seem a little non-intuitive, but I believe they are correct.
     for rn in df.index:
         yy = NR - row_dict_py[rn] - 1
         xx = col_dict_py[rn]
+        # River Source on W side of rho cell
         if uv_dict[rn] == 'u' and isign_dict[rn] == 1:
+            # River Source on W side of rho cell
             ax.plot(xx+.5, yy, '>r')
         elif uv_dict[rn] == 'u' and isign_dict[rn] == -1:
+            # River Source on E side of rho cell
             ax.plot(xx+.5, yy, '<r')
         elif uv_dict[rn] == 'v' and isign_dict[rn] == 1:
+            # River Source on S side of rho cell
             ax.plot(xx, yy-.5, '^b')
         elif uv_dict[rn] == 'v' and isign_dict[rn] == -1:
+            # River Source on N side of rho cell
             ax.plot(xx, yy-.5, 'vb')    
 
 def show_z_info(zm, ax):

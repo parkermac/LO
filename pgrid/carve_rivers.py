@@ -101,7 +101,10 @@ for rn in ri_df.index:
                 if ji_tup not in JI_ulist:
                     JI_ulist.append(ji_tup)
         
-            # then use the last two point to decide on the river direction
+            # Then use the last two point to decide on the river direction.
+            # dx and dy are in: [-1,0,1] and are interpreted as, e.g.
+            # dx = 1 means that the source is on the E side of the rho cell
+            # ( column +1 is the step we took to get to the last river channel rho cell).
             if len(JI_ulist) >1:
                 # simple if we have at least two points in JI_ulist
                 dx = JI_ulist[-1][1] - JI_ulist[-2][1] 
@@ -120,23 +123,38 @@ for rn in ri_df.index:
                 else:
                     print(' Inconsistent angle for %s '.center(60,'*') % (rn))
         
-            # write info for ROMS based on dx and dy
+            # Write info for ROMS based on dx and dy.
+            #
+            # NOTE: the row_py and col_py that we write to river_info.csv use
+            # python indexing conventions, meaning that the rho, u, and v grids
+            # start at [0,0].  Hence when we plot things, as in plot_grid.py, we
+            # should be able to use [row_py, col_py] directly with the u and v grids.
+            #
+            # However, when we later create the source positions for running ROMS,
+            # e.g. in forcing/riv0/make_forcing_main.py => rivers.nc, we convert these
+            # values to ROMS indexing conventions, meaning:
+            # - add 1 to row of N/S sources
+            # - add 1 to column of E/W sources.
             xoff = 0
             yoff = 0
             if dx==1 and dy==0:
+                # Source on E side of rho-cell
                 idir = 0 # 0 = E/W, 1 = N/S (redundant with 'uv')
                 isign = -1
                 uv = 'u'
             elif dx==-1 and dy==0:
+                # Source on W side of rho-cell
                 idir = 0
                 isign = 1
                 uv = 'u'
                 xoff = -1
             elif dx==0 and dy==1:
+                # Source on N side of rho-cell
                 idir = 1
                 isign = -1
                 uv = 'v'
             elif dx==0 and dy==-1:
+                # Source on S side of rho-cell
                 idir = 1
                 isign = 1
                 uv = 'v'
