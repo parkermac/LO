@@ -159,7 +159,7 @@ def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1,
     cs = ax.pcolormesh(px, py, v_scaled, vmin=vlims[0], vmax=vlims[1], cmap=cmap, alpha=alpha)
     return cs
 
-def add_velocity_vectors(ax, ds, fn, v_scl=5, v_leglen=0.5, nngrid=80, zlev='top', center=(.8,.05)):
+def add_velocity_vectors(ax, ds, fn, v_scl=10, v_leglen=0.5, nngrid=80, zlev='top', center=(.8,.05)):
     # v_scl: scale velocity vector (smaller to get longer arrows)
     # v_leglen: m/s for velocity vector legend
     xc = center[0]
@@ -199,8 +199,8 @@ def add_velocity_vectors(ax, ds, fn, v_scl=5, v_leglen=0.5, nngrid=80, zlev='top
     mask = uu != 0
     # plot velocity vectors
     Q = ax.quiver(xx[mask], yy[mask], uu[mask], vv[mask],
-        units='width', scale=v_scl, scale_units='width', color='k')
-    plt.quiverkey(Q, .9, .1, v_leglen, str(v_leglen)+' m/s', angle=45)
+        units='width', scale=v_scl, scale_units='width', color='m')
+    plt.quiverkey(Q, .9, .1, v_leglen, str(v_leglen)+' $ms^{-1}$', angle=20)
 
 def add_windstress_flower(ax, ds, t_scl=1, t_leglen=0.1, center=(.85,.25), fs=12):
     # ADD MEAN WINDSTRESS VECTOR

@@ -36,10 +36,15 @@ import matplotlib.pyplot as plt
     
 def P_basic(in_dict):
     # START
-    fs = 14
-    pfun.start_plot(fs=fs, figsize=(14,10))
-    fig = plt.figure()
     ds = xr.open_dataset(in_dict['fn'])
+    # find aspect ratio of the map
+    aa = pfun.get_aa(ds)
+    # AR is the aspect ratio of the map: Vertical/Horizontal
+    AR = (aa[3] - aa[2]) / (np.sin(np.pi*aa[2]/180)*(aa[1] - aa[0]))
+    fs = 14
+    hgt = 10
+    pfun.start_plot(fs=fs, figsize=(hgt*2.5/AR,hgt))
+    fig = plt.figure()
     # PLOT CODE
     vn_list = ['salt', 'temp']
     fs = 14
@@ -64,7 +69,7 @@ def P_basic(in_dict):
         elif ii == 2:
             pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
         ii += 1
-    fig.tight_layout()
+    #fig.tight_layout()
     # FINISH
     ds.close()
     pfun.end_plot()
