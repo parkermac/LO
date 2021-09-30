@@ -80,7 +80,7 @@ Create an environment that has all the modules required for this code by going t
 ```
 conda env create -f loenv.yml > env.log &
 ```
-This may take a half hour or so, which is why I added the `> env.log &` at the end of the command (I haven't actually tested that yet). You can look in the .yml file to see what is being installed.  It even adds the non-python nco toolbox and ffmpeg.  It also adds LO/lo_tools as a local "package" so that when you are in (loenv) you can access any of the modules in LO/lo_tools/lo_tools with a line in your python code like `from lo_tools import zfun`.  Instructions for a simple approach to making your own local packages can be found [HERE](https://pythonchb.github.io/PythonTopics/where_to_put_your_code.html).
+This may take a half hour or so, which is why I added the `> env.log &` at the end of the command. You can look in the .yml file to see what is being installed.  It even adds the non-python nco toolbox and ffmpeg.  It also adds LO/lo_tools as a local "package" so that when you are in (loenv) you can access any of the modules in LO/lo_tools/lo_tools with a line in your python code like `from lo_tools import zfun`.  Instructions for a simple approach to making your own local packages can be found [HERE](https://pythonchb.github.io/PythonTopics/where_to_put_your_code.html).
 
 If you like you can make your own .yml and make your own environment, especially if you wan to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package.
 
@@ -89,6 +89,12 @@ Then if you want to use this environment all the time add this line:
 conda activate loenv
 ```
 to your .bashrc or .bash_profile, and "source" it.  Now (loenv) will appear at the start of your bash prompt.
+
+Every now and then (monthly?) it is good to update all the packages, which you can do from the command line:
+```
+conda update --all
+```
+Note: when I did this update on 2021.09.30 while trying to fix a cartopy problem it broke my installation, leaving me with a non-functioning numpy.  I fixed it by deleting the loenv folder in /Applications/miniconda3/envs (on my mac) and recreating the environment from scratch (the "conda create" step above).  This only took 10 minutes this time and fixed both the numpy and cartopy problems.
 
 #### (4) Fork LO_user
 
