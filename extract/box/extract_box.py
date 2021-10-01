@@ -123,7 +123,7 @@ if str(pth) not in sys.path:
 import job_definitions
 from importlib import reload
 reload(job_definitions)
-aa, vn_list = job_definitions.get_box(Ldir['job'])
+aa, vn_list = job_definitions.get_box(Ldir['job'], Lon, Lat)
 lon0, lon1, lat0, lat1 = aa
 ilon0, ilat0 = check_bounds(lon0, lat0)
 ilon1, ilat1 = check_bounds(lon1, lat1)
