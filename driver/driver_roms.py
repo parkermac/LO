@@ -67,16 +67,12 @@ if len(args.tag_alt) == 0:
 Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
 Ldir['gtag_alt'] = Ldir['gridname'] + '_' + argsd['tag_alt']
 
-# Assign some variables related to the remote machine.  These are user specific
-# so eventually we may want them to the in lo_tools/get_lo_info.py.
-if Ldir['lo_env'] == 'pm_klone':
-    remote_user = 'parker'
-    remote_machine = 'apogee.ocean.washington.edu'
-    remote_dir0 = '/dat1/parker'
-    local_user = 'pmacc'
-else:
-    print('*** Unsupported lo_env: ' + Ldir['lo_env'])
-    sys.exit()
+# Assign some variables related to the remote machine.  These are user-specific
+# and are specified in lo_tools/get_lo_info.py.
+remote_user = Ldir['remote_user']
+remote_machine = Ldir['remote_machine']
+remote_dir0 = Ldir['remote_dir0']
+local_user = Ldir['local_user']
 
 # set time range to process
 if args.run_type == 'forecast':
@@ -184,7 +180,11 @@ while dt <= dt1:
             messages(stdout, stderr, 'Make dot in', args.verbose)
             
             # Create batch script
-            cmd_list = ['python3', str(dot_in_shared_dir / 'make_klone_batch.py'),
+            if 'klone' in Ldir['lo_env']:
+                batch_name = 'make_klone_batch.py'
+            elif 'mox' in Ldir['lo_env']:
+                batch_name = 'make_mox_batch.py'
+            cmd_list = ['python3', str(dot_in_shared_dir / batch_name),
                 '-xd', str(roms_ex_dir),
                 '-rod', str(roms_out_dir),
                 '-np', str(args.np_num),
@@ -197,13 +197,16 @@ while dt <= dt1:
         else:
             print(' ** skipped making dot_in and batch script')
             args.run_roms = False # never run ROMS if we skipped making the dot_in
-    
         
         if args.run_roms:
             tt0 = time()
             # Run ROMS using the batch script.
-            cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc','--wait',
-                str(roms_out_dir / 'klone_batch.sh')]
+            if 'klone' in Ldir['lo_env']:
+                cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc','--wait',
+                    str(roms_out_dir / 'klone_batch.sh')]
+            elif 'mox' in Ldir['lo_env']:
+                cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
+                    str(roms_out_dir / 'mox_batch.sh')]
             # The --wait flag will cause the subprocess to not return until the job has terminated.
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
