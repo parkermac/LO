@@ -150,7 +150,7 @@ for vn in outvar_list:
     vv.units = Lfun.roms_time_units
     vv[:] = mod_time_vec
     # add variable definition
-    vv = foo.createVariable(vn, float, (timename, 'eta_rho', 'xi_rho'))
+    vv = foo.createVariable(vn, float, (timename, 'eta_rho', 'xi_rho'), zlib=True)
     vv.long_name = afun.longname_dict[vn]
     vv.units = afun.units_dict[vn]
     foo.close()
