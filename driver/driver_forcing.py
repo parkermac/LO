@@ -49,7 +49,7 @@ Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag)
 if args.run_type == 'forecast':
     ds0 = datetime.now().strftime(Lfun.ds_fmt)
     dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
-    dt1 = dt0 + timedelta(days=Ldir['forecast_days'])
+    dt1 = dt0
     ds1 = dt1.strftime(Lfun.ds_fmt)
 elif args.run_type == 'backfill':
     ds0 = args.ds0
