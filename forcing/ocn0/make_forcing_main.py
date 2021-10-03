@@ -37,8 +37,8 @@ import time
 import pandas as pd
 
 from lo_tools import Lfun, zrfun
-from lo_tools import Ofun_nc
 import Ofun
+import Ofun_nc
 import Ofun_CTD
 import Ofun_bio
 
