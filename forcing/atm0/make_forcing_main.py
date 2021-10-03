@@ -225,10 +225,10 @@ for fn2, fn3, fn4 in dall_list:
     
     # if we are missing a d3 or d4 file then we don't work on it
     if not fn3.is_file():
-        print(' - missing ' + fn3)
+        print(' - missing ' + str(fn3))
         do_this_d3 = False
     if not fn4.is_file():
-        print(' - missing ' + fn4)
+        print(' - missing ' + str(fn4))
         do_this_d4 = False
     
     ov2_dict = afun.gather_and_process_fields(fn2, imax2, ca2, sa2, outvar_list)
@@ -239,7 +239,7 @@ for fn2, fn3, fn4 in dall_list:
             ov3_dict = afun.gather_and_process_fields(fn3, imax3, ca3, sa3, outvar_list)
             ovi3_dict = afun.interp_to_roms(ov3_dict, outvar_list, IM3, NR, NC)
         except:
-            print(' - could not process ' + fn3)
+            print(' - could not process ' + str(fn3))
             do_this_d3 = False
     
     if do_this_d4:
@@ -247,7 +247,7 @@ for fn2, fn3, fn4 in dall_list:
             ov4_dict = afun.gather_and_process_fields(fn4, imax4, ca4, sa4, outvar_list)
             ovi4_dict = afun.interp_to_roms(ov4_dict, outvar_list, IM4, NR, NC)
         except:
-            print(' - could not process ' + fn4)
+            print(' - could not process ' + str(fn4))
             do_this_d4 = False
     
     # combine the grids
