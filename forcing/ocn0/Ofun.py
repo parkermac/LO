@@ -91,7 +91,7 @@ def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
     for ii in range(NT):
         hdt = hdt_list[ii]
         iis = str(ii)
-        fn_out = str(h_out_dir) + 'h'+ hdt.strftime(Lfun.ds_fmt) + '.nc'
+        fn_out = str(h_out_dir) + '/h'+ hdt.strftime(Lfun.ds_fmt) + '.nc'
         cmd_list = ['ncks',
             '-d', 'time,'+iis+','+iis,
             '-O', full_fn_out, fn_out]
