@@ -33,7 +33,7 @@ args = parser.parse_args()
 
 # check for required arguments
 argsd = args.__dict__
-for a in ['gridname', 'tag', 'frc', 'run_type', 'start_type', 'ds0']:
+for a in ['gridname', 'tag', 'frc', 'run_type', 'start_type']:
     if argsd[a] == None:
         print('*** Missing required argument for driver_forcing.py: ' + a)
         sys.exit()

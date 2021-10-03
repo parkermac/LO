@@ -51,7 +51,7 @@ make -f /gscratch/macc/parker/LiveOcean_roms/makefiles/[ex_name]/makefile
 ```
 Then `logout` to get back to the usual shell.  You have to do this because the `srun` command logged you onto one of the compute nodes.
 
-Note: `compute` in the srun command was `macc` on mox
+Note: `compute` in the srun command was `macc` on **mox**.  Other than that the process on mox is identical.
 
 ---
 
@@ -72,7 +72,7 @@ Looking [HERE](https://www.hostdime.com/kb/hd/linux-server/the-guide-to-generati
 ssh parker@apogee.ocean.washington.edu -i /path/to/ssh/key
 ```
 
-So, since I want apogee to be the main user of klone I will chose to **overwrite** in the above.  This means that the old connection to boiler will no longer work.  When I did this it asked for a passphrase and I hit return.
+In the interests of tidying up I will chose to **overwrite** in the above.  This means that the old connection to boiler will no longer work.  When I did this it asked for a passphrase and I hit return.
 
 Then I did:
 ```
@@ -88,4 +88,4 @@ So, in summary: for going from klone1 to apogee it added to:
 - ~/.ssh/known_hosts on klone (boiler and mox1 are also there), and
 - ~/.ssh/authorized_keys on apogee
 
-Presumably now I could run `ssh-copy-id` again for other computers, without having to do the `ssh-keygen` step.
+Now I can run `ssh-copy-id` again for other computers, without having to do the `ssh-keygen` step.
