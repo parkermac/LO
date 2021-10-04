@@ -639,6 +639,131 @@ def P_splash(in_dict):
         plt.close()
     else:
         plt.show()
+        
+def P_splash2(in_dict):
+    """
+    This makes a fancy plot suitable for the landing page of the LiveOcean
+    website.  This one is focused on the Salish Sea.
+    """
+    # START
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(12,9))
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
+    
+    # PREPARING FIELDS
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+    Ldir = Lfun.Lstart()
+
+    do_topo = True
+
+    # model output
+    fn = in_dict['fn']
+    T = zrfun.get_basic_info(fn, only_T=True)
+    x = ds.lon_psi.values
+    y = ds.lat_psi.values
+    th = ds['temp'][0,-1,1:-1,1:-1].values
+    ox = pinfo.fac_dict['oxygen'] * ds['oxygen'][0,0,1:-1,1:-1].values
+
+    if do_topo:
+        # topography
+        tfn = (Ldir['data'] / 'topo' / 'srtm15' / 'topo15.nc')
+        tds = xr.open_dataset(tfn)
+        step = 3
+        tx = tds['lon'][::step].values
+        ty = tds['lat'][::step].values
+        tz = tds['z'][::step,::step].values
+        tz[tz<0] = np.nan
+
+    # LARGE MAP
+    ax = fig.add_subplot(121)
+    cmap = 'RdYlBu_r'
+    cs = ax.pcolormesh(x,y,th, cmap=cmap, vmin=11, vmax=20)
+    # Inset colorbar
+    cbaxes = inset_axes(ax, width="5%", height="40%", loc='lower left')
+    fig.colorbar(cs, cax=cbaxes, orientation='vertical')
+    if do_topo:
+        cmap = 'gist_earth'
+        cs = ax.pcolormesh(tx,ty,tz, cmap=cmap, shading='nearest', vmin=-1000, vmax=2000)
+    pfun.add_coast(ax)
+    pfun.dar(ax)
+    ax.axis([-130, -122, 42, 52])
+    ax.set_xticks([-129, -127, -125, -123])
+    ax.set_yticks([42, 44, 46, 48, 50, 52])
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    tstr = T['dt'][0].strftime(Lfun.ds_fmt)
+    ax.text(.98,.99,'LiveOcean', size=fs*1.5,
+         ha='right', va='top', weight='bold', transform=ax.transAxes)
+    ax.text(.03,.45,'Surface water\nTemperature $[^{\circ}C]$\n'+tstr,
+         ha='left', va='bottom', weight='bold', transform=ax.transAxes,
+         bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
+
+    # box for Salish Sea
+    aa = [-125.3, -122.1, 46.8, 50.3]
+    nlev = 0
+    # draw box on the large map
+    pfun.draw_box(ax, aa, linestyle='-', color='g', alpha=1, linewidth=2, inset=0)
+    
+    fs2 = fs*.9
+    fs3 = fs*.8
+    
+    ax.text(-123.072,46.7866,'Washington', size=fs2,
+        style='italic',ha='center',va='center',rotation=-45)
+    ax.text(-122.996,44.5788,'Oregon', size=fs2,
+        style='italic',ha='center',va='center',rotation=-45)
+    
+    ah = ax.text(-125.3,49.4768,'Vancouver\nIsland', size=fs2,
+        style='italic',ha='center',va='center',rotation=-45)
+    ax.text(-126.3,50.2,'Johnstone\nStrait', size=.7*fs2,
+        style='italic',ha='center',va='center',rotation=-10)
+    
+
+    # SMALL MAP
+    from cmocean import cm
+    
+    ax = fig.add_subplot(122)
+    cs = ax.pcolormesh(x,y,ox, cmap=cm.oxy, vmin=0, vmax=10)
+    # Inset colorbar
+    cbaxes = inset_axes(ax, width="5%", height="30%", loc='upper right', borderpad=2)
+    fig.colorbar(cs, cax=cbaxes, orientation='vertical')
+    pfun.add_coast(ax)
+    pfun.dar(ax)
+    ax.axis(aa)
+    ax.set_xticks([-125, -124, -123])
+    ax.set_yticks([47, 48, 49, 50])
+    ax.set_xlabel('Longitude')
+    ax.text(.84,.95,'Salish Sea\n\nBottom Oxygen\n$[mg\ L^{-1}]$',
+         ha='right', va='top', weight='bold', transform=ax.transAxes)
+         
+    # add labels
+    ax.text(-122.8,49.335,'Fraser\nRiver',size=fs2,
+        style='italic',ha='center',va='center',rotation=0)
+    ax.text(-123.7,49.2528,'Strait of Georgia',size=fs2,
+        style='italic',ha='center',va='center',rotation=-30)
+    ax.text(-123.5,48.28,'Strait of Juan de Fuca',size=fs2,
+        style='italic',ha='center',va='center',rotation=0,
+        color='w')
+    ax.text(-123.3,47.6143,'Puget\nSound',size=fs2,
+        style='italic',ha='center',va='center',rotation=+55)
+    ax.text(-122.3,48.48,'Skagit\nRiver',size=fs3,
+        style='italic',ha='center',va='center',
+        bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
+    ax.text(-123.173,48.44,'Haro\nStrait',size=fs3,
+        style='italic',ha='center',va='center',
+        color='w')
+
+    fig.tight_layout()
+    
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
 
 def P_superplot_salt(in_dict):
     # Plot salinity maps and section, with forcing time-series.
