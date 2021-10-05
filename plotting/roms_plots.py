@@ -43,7 +43,7 @@ def P_basic(in_dict):
     AR = (aa[3] - aa[2]) / (np.sin(np.pi*aa[2]/180)*(aa[1] - aa[0]))
     fs = 14
     hgt = 10
-    pfun.start_plot(fs=fs, figsize=(hgt*2.5/AR,hgt))
+    pfun.start_plot(fs=fs, figsize=(int(hgt*2.5)/AR,int(hgt)))
     fig = plt.figure()
     # PLOT CODE
     vn_list = ['salt', 'temp']
