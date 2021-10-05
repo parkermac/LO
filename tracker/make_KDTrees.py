@@ -8,41 +8,50 @@ Usage:
 
 python make_KDTrees.py (uses defaults)
 
-python make_KDTrees.py -gridname cas6 -gtagex cas6_v3_lo8b -ds 2019.07.04
+python make_KDTrees.py -g cas6 -gtx cas6_v3_lo8b -d 2019.07.04 -ro 2
 
 (** you have to be pointing it to a history file that exists **)
 
+PERFORMANCE: takes about 30 sec on my mac for the cas6 grid.
+
 """
 
-import os, sys
-sys.path.append(os.path.abspath('../../LiveOcean/alpha'))
-import Lfun
-import zrfun
+from lo_tools import Lfun, zrfun
 
+import sys
 from scipy.spatial import cKDTree
 from time import time
 import pickle
 import numpy as np
 import argparse
 
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 # optional command line arguments, can be input in any order
 parser = argparse.ArgumentParser()
-parser.add_argument('-gridname', default='cas6', type=str)
-parser.add_argument('-gtagex', default='cas6_v3_lo8b', type=str)
-parser.add_argument('-ds', default='2019.07.04', type=str)
-# set which roms output directory to look in (refers to Ldir['roms'] or Ldir['roms2'])
-parser.add_argument('-rd', '--roms_dir', default='roms', type=str)
-# valid arguments to pass are: roms, roms2 (see alpha/get_lo_info.sh)
-args = parser.parse_args()
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+parser.add_argument('-g','--gridname', default='cas6', type=str)
+parser.add_argument('-gtx','--gtagex', default='cas6_v3_lo8b', type=str)
+parser.add_argument('-d', '--date_string', default='2019.07.04', type=str)
+parser.add_argument('-ro', '--roms_out_num', type=int, default=2) # 1 = Ldir['roms_out1'], etc.
 
-Ldir = Lfun.Lstart()
-Ldir['roms'] = Ldir[args.roms_dir]
-fn = Ldir['roms'] + 'output/' + args.gtagex + '/f' + args.ds + '/ocean_his_0001.nc'
-outdir0 = Ldir['LOo'] + 'tracker_trees/'
+# get the args and put into Ldir
+args = parser.parse_args()
+argsd = args.__dict__
+gridname, tag, ex_name = args.gtagex.split('_')
+# get the dict Ldir
+Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
+# add more entries to Ldir
+for a in argsd.keys():
+    if a not in Ldir.keys():
+        Ldir[a] = argsd[a]
+# set where to look for model output
+if Ldir['roms_out_num'] == 0:
+    pass
+elif Ldir['roms_out_num'] > 0:
+    Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
+
+fn = Ldir['roms_out'] / args.gtagex / ('f' + args.date_string) / 'ocean_his_0001.nc'
+outdir0 = Ldir['LOo'] / 'tracker_trees'
 Lfun.make_dir(outdir0)
-outdir = outdir0 + args.gridname + '/'
+outdir = outdir0 / args.gridname
 Lfun.make_dir(outdir, clean=True)
 
 G, S, T = zrfun.get_basic_info(fn)
@@ -50,76 +59,75 @@ h = G['h']
 
 # 2D trees
 X = G['lon_rho']; Y = G['lat_rho']
-Maskr = G['mask_rho'] # True over water
+Maskr = G['mask_rho']==1 # True over water
 xy = np.array((X[Maskr],Y[Maskr])).T
 xyT_rho = cKDTree(xy)
 xy = np.array((X.flatten(),Y.flatten())).T
 xyT_rho_un = cKDTree(xy) # unmasked version
 X = G['lon_u']; Y = G['lat_u']
-Masku = G['mask_u'] # True over water
+Masku = G['mask_u']==1 # True over water
 xy = np.array((X[Masku],Y[Masku])).T
 xyT_u = cKDTree(xy)
 X = G['lon_v']; Y = G['lat_v']
-Maskv = G['mask_v'] # True over water
+Maskv = G['mask_v']==1 # True over water
 xy = np.array((X[Maskv],Y[Maskv])).T
 xyT_v = cKDTree(xy)
 
-pickle.dump(xyT_rho, open(outdir + 'xyT_rho.p', 'wb'))
-pickle.dump(xyT_rho_un, open(outdir + 'xyT_rho_un.p', 'wb'))
-pickle.dump(xyT_u, open(outdir + 'xyT_u.p', 'wb'))
-pickle.dump(xyT_v, open(outdir + 'xyT_v.p', 'wb'))
+pickle.dump(xyT_rho, open(outdir / 'xyT_rho.p', 'wb'))
+pickle.dump(xyT_rho_un, open(outdir / 'xyT_rho_un.p', 'wb'))
+pickle.dump(xyT_u, open(outdir / 'xyT_u.p', 'wb'))
+pickle.dump(xyT_v, open(outdir / 'xyT_v.p', 'wb'))
 
-if True:
-    # 3D trees
-    for tag in ['w', 'rho', 'u', 'v']:
-        # prepare fields to make the tree
-        tt0 = time()
+# 3D trees
+for tag in ['w', 'rho', 'u', 'v']:
+    # prepare fields to make the tree
+    tt0 = time()
 
-        if tag == 'u':
-            hh = (h[:,:-1] + h[:,1:])/2
-        elif tag == 'v':
-            hh = (h[:-1,:] + h[1:,:])/2
-        elif tag in ['rho', 'w']:
-            hh = h.copy()
+    if tag == 'u':
+        hh = (h[:,:-1] + h[:,1:])/2
+    elif tag == 'v':
+        hh = (h[:-1,:] + h[1:,:])/2
+    elif tag in ['rho', 'w']:
+        hh = h.copy()
 
-        if tag in ['rho', 'u', 'v']:
-            z = zrfun.get_z(hh, 0*hh, S, only_rho=True)
-            x = G['lon_' + tag]
-            y = G['lat_' + tag]
-            mask = G['mask_' + tag]
-        elif tag == 'w':
-            z = zrfun.get_z(hh, 0*hh, S, only_w=True)
-            x = G['lon_rho']
-            y = G['lat_rho']
-            mask = G['mask_rho']
-        
-        N,M,L = z.shape
-        X = np.tile(x.reshape(1,M,L),[N,1,1])
-        Y = np.tile(y.reshape(1,M,L),[N,1,1])
-        H = np.tile(hh.reshape(1,M,L),[N,1,1])
-        Z = z/H # fractional depth (-1 to 0)
+    if tag in ['rho', 'u', 'v']:
+        z = zrfun.get_z(hh, 0*hh, S, only_rho=True)
+        x = G['lon_' + tag]
+        y = G['lat_' + tag]
+        mask = G['mask_' + tag]==1
+    elif tag == 'w':
+        z = zrfun.get_z(hh, 0*hh, S, only_w=True)
+        x = G['lon_rho']
+        y = G['lat_rho']
+        mask = G['mask_rho']==1
     
-        Mask = np.tile(mask.reshape(1,M,L),[N,1,1])
-    
-        xyz = np.array((X[Mask],Y[Mask],Z[Mask])).T
-        
-        print('Prepare fields to make tree %0.2f sec' % (time()-tt0))
-        # create the nearest neighbor Tree objects
-        tt0 = time()
-    
-        if tag == 'rho':
-            xyzT_rho = cKDTree(xyz)
-            pickle.dump(xyzT_rho, open(outdir + 'xyzT_rho.p', 'wb'))
-        elif tag == 'u':
-            xyzT_u = cKDTree(xyz)
-            pickle.dump(xyzT_u, open(outdir + 'xyzT_u.p', 'wb'))
-        elif tag == 'v':
-            xyzT_v = cKDTree(xyz)
-            pickle.dump(xyzT_v, open(outdir + 'xyzT_v.p', 'wb'))
-        elif tag == 'w':
-            xyzT_w = cKDTree(xyz)
-            pickle.dump(xyzT_w, open(outdir + 'xyzT_w.p', 'wb'))
+    N,M,L = z.shape
+    X = np.tile(x.reshape(1,M,L),[N,1,1])
+    Y = np.tile(y.reshape(1,M,L),[N,1,1])
+    H = np.tile(hh.reshape(1,M,L),[N,1,1])
+    Z = z/H # fractional depth (-1 to 0)
 
-        print('Create 3D tree for %s: %0.2f sec' % (tag, time()-tt0))
-        sys.stdout.flush()
+    Mask = np.tile(mask.reshape(1,M,L),[N,1,1])
+
+    xyz = np.array((X[Mask],Y[Mask],Z[Mask])).T
+    
+    print('Prepare fields to make tree %0.2f sec' % (time()-tt0))
+    # create the nearest neighbor Tree objects
+    tt0 = time()
+
+    if tag == 'rho':
+        xyzT_rho = cKDTree(xyz)
+        pickle.dump(xyzT_rho, open(outdir / 'xyzT_rho.p', 'wb'))
+    elif tag == 'u':
+        xyzT_u = cKDTree(xyz)
+        pickle.dump(xyzT_u, open(outdir / 'xyzT_u.p', 'wb'))
+    elif tag == 'v':
+        xyzT_v = cKDTree(xyz)
+        pickle.dump(xyzT_v, open(outdir / 'xyzT_v.p', 'wb'))
+    elif tag == 'w':
+        xyzT_w = cKDTree(xyz)
+        pickle.dump(xyzT_w, open(outdir / 'xyzT_w.p', 'wb'))
+
+    print('Create 3D tree for %s: %0.2f sec' % (tag, time()-tt0))
+    sys.stdout.flush()
     

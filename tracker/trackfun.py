@@ -6,9 +6,7 @@ LiveOcean_output/tracks/exp_info.csv.
 
 """
 # setup (assume path to alpha set by calling code)
-import Lfun
-import zfun
-import zrfun
+from lo_tools import Lfun, zfun, zrfun
 
 import numpy as np
 import netCDF4 as nc4
@@ -24,27 +22,36 @@ maskr_crit = 0.5 # (maskr = 1 in water, 0 on land) [0.5 seems good]
 
 # NEW CODE for nearest neighbor interpolation
 Ldir = Lfun.Lstart()
-EI = Lfun.csv_to_dict(Ldir['LOo'] + 'tracks/exp_info.csv')
+
+ei_fn = Ldir['LOo'] / 'tracks' / 'exp_info.csv'
+EI = dict()
+with open(ei_fn, 'r') as f:
+    for line in f:
+        k,v = line.split(',')
+        EI[k] = str(v).replace('\n','')
+#print(EI)
+#EI = Lfun.csv_to_dict(Ldir['LOo'] + 'tracks/exp_info.csv')
+
 G, S, T = zrfun.get_basic_info(EI['fn00'])
-Maskr = G['mask_rho'] # True over water
-Masku = G['mask_u'] # True over water
-Maskv = G['mask_v'] # True over water
+Maskr = G['mask_rho']==1 # True over water
+Masku = G['mask_u']==1 # True over water
+Maskv = G['mask_v']==1 # True over water
 Maskr3 = np.tile(G['mask_rho'].reshape(1,G['M'],G['L']),[S['N'],1,1])
 Masku3 = np.tile(G['mask_u'].reshape(1,G['M'],G['L']-1),[S['N'],1,1])
 Maskv3 = np.tile(G['mask_v'].reshape(1,G['M']-1,G['L']),[S['N'],1,1])
 Maskw3 = np.tile(G['mask_rho'].reshape(1,G['M'],G['L']),[S['N']+1,1,1])
 # load pre-made trees
-tree_dir = Ldir['LOo'] + 'tracker_trees/' + EI['gridname'] + '/'
+tree_dir = Ldir['LOo'] / 'tracker_trees' / EI['gridname']
 # 2D
-xyT_rho = pickle.load(open(tree_dir + 'xyT_rho.p', 'rb'))
-xyT_u = pickle.load(open(tree_dir + 'xyT_u.p', 'rb'))
-xyT_v = pickle.load(open(tree_dir + 'xyT_v.p', 'rb'))
-xyT_rho_un = pickle.load(open(tree_dir + 'xyT_rho_un.p', 'rb'))
+xyT_rho = pickle.load(open(tree_dir / 'xyT_rho.p', 'rb'))
+xyT_u = pickle.load(open(tree_dir / 'xyT_u.p', 'rb'))
+xyT_v = pickle.load(open(tree_dir / 'xyT_v.p', 'rb'))
+xyT_rho_un = pickle.load(open(tree_dir / 'xyT_rho_un.p', 'rb'))
 # 3D
-xyzT_rho = pickle.load(open(tree_dir + 'xyzT_rho.p', 'rb'))
-xyzT_u = pickle.load(open(tree_dir + 'xyzT_u.p', 'rb'))
-xyzT_v = pickle.load(open(tree_dir + 'xyzT_v.p', 'rb'))
-xyzT_w = pickle.load(open(tree_dir + 'xyzT_w.p', 'rb'))
+xyzT_rho = pickle.load(open(tree_dir / 'xyzT_rho.p', 'rb'))
+xyzT_u = pickle.load(open(tree_dir / 'xyzT_u.p', 'rb'))
+xyzT_v = pickle.load(open(tree_dir / 'xyzT_v.p', 'rb'))
+xyzT_w = pickle.load(open(tree_dir / 'xyzT_w.p', 'rb'))
 # the "f" below refers to flattened, which is the result of passing
 # a Boolean array like Maskr to an array.
 lonrf = G['lon_rho'][Maskr]
@@ -67,7 +74,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
     # == couldn't we do these outside the function? ==
     # get basic info
     G = zrfun.get_basic_info(fn_list[0], only_G=True)
-    maskr = np.ones_like(G['mask_rho']) # G['mask_rho'] = True in water
+    maskr = np.ones(G['mask_rho'].shape) # G['mask_rho'] = True in water
     maskr[G['mask_rho']==False] = 0 # maskr = 1 in water
     maskr = maskr.flatten()
     S = zrfun.get_basic_info(fn_list[0], only_S=True)
@@ -122,7 +129,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
         tt0 = time()
         if counter_his == 0:
             h = G['h']
-            hf = h[Maskr].data
+            hf = h[Maskr]
             if surface == True:
                 u0 = ds0['u'][0,-1,:,:]
                 u1 = ds1['u'][0,-1,:,:]
@@ -258,7 +265,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 xy = np.array((plon0,plat0)).T
                 #print(' ++ making pmask')
                 #print(maskr.shape)
-                pmask = maskr[xyT_rho_un.query(xy, n_jobs=-1)[1]]
+                pmask = maskr[xyT_rho_un.query(xy, workers=-1)[1]]
                 #print(pmask)
                 # keep only points with pmask >= maskr_crit
                 pcond = pmask >= maskr_crit
@@ -403,7 +410,7 @@ def update_position(dxg, dyg, maskr, V, ZH, S, dt_sec, plon, plat, pcs, surface)
     # Experiments with "trap0" to explore trapping in the Skokomish
     # showed that ## = 0.5 is a reasonable choice.
     xy = np.array((Plon,Plat)).T
-    pmask = maskr[xyT_rho_un.query(xy, n_jobs=-1)[1]]
+    pmask = maskr[xyT_rho_un.query(xy, workers=-1)[1]]
     pcond = pmask < maskr_crit # a Boolean mask
     if len(pcond) > 0:
         # these randint calls give random vectors of -1,0,1 (note the 2!)
@@ -414,11 +421,11 @@ def update_position(dxg, dyg, maskr, V, ZH, S, dt_sec, plon, plat, pcs, surface)
         
     # move any particles on land to the middle of the nearest good rho point.
     xy = np.array((Plon,Plat)).T
-    pmask = maskr[xyT_rho_un.query(xy, n_jobs=-1)[1]]
+    pmask = maskr[xyT_rho_un.query(xy, workers=-1)[1]]
     pcond = pmask < maskr_crit # a Boolean mask
     if len(pcond) > 0:
-        Plon_NEW = lonrf[xyT_rho.query(xy, n_jobs=-1)[1]]
-        Plat_NEW = latrf[xyT_rho.query(xy, n_jobs=-1)[1]]
+        Plon_NEW = lonrf[xyT_rho.query(xy, workers=-1)[1]]
+        Plat_NEW = latrf[xyT_rho.query(xy, workers=-1)[1]]
         Plon[pcond] = Plon_NEW[pcond]
         Plat[pcond] = Plat_NEW[pcond]
         
@@ -463,23 +470,23 @@ def get_vel(uf0,uf1,vf0,vf1,wf0,wf1, plon, plat, pcs, frac, surface):
     V = np.zeros((NP,3))
     if surface == True:
         xy = np.array((plon,plat)).T
-        # use n_jobs=-1 to use all available cores
-        ui0 = uf0[xyT_u.query(xy, n_jobs=-1)[1]]
-        vi0 = vf0[xyT_v.query(xy, n_jobs=-1)[1]]
-        ui1 = uf1[xyT_u.query(xy, n_jobs=-1)[1]]
-        vi1 = vf1[xyT_v.query(xy, n_jobs=-1)[1]]
+        # use workers=-1 to use all available cores
+        ui0 = uf0[xyT_u.query(xy, workers=-1)[1]]
+        vi0 = vf0[xyT_v.query(xy, workers=-1)[1]]
+        ui1 = uf1[xyT_u.query(xy, workers=-1)[1]]
+        vi1 = vf1[xyT_v.query(xy, workers=-1)[1]]
         ui = (1 - frac)*ui0 + frac*ui1
         vi = (1 - frac)*vi0 + frac*vi1
         V[:,0] = ui
         V[:,1] = vi
     else:
         xys = np.array((plon,plat,pcs)).T
-        ui0 = uf0[xyzT_u.query(xys, n_jobs=-1)[1]]
-        vi0 = vf0[xyzT_v.query(xys, n_jobs=-1)[1]]
-        wi0 = wf0[xyzT_w.query(xys, n_jobs=-1)[1]]
-        ui1 = uf1[xyzT_u.query(xys, n_jobs=-1)[1]]
-        vi1 = vf1[xyzT_v.query(xys, n_jobs=-1)[1]]
-        wi1 = wf1[xyzT_w.query(xys, n_jobs=-1)[1]]
+        ui0 = uf0[xyzT_u.query(xys, workers=-1)[1]]
+        vi0 = vf0[xyzT_v.query(xys, workers=-1)[1]]
+        wi0 = wf0[xyzT_w.query(xys, workers=-1)[1]]
+        ui1 = uf1[xyzT_u.query(xys, workers=-1)[1]]
+        vi1 = vf1[xyzT_v.query(xys, workers=-1)[1]]
+        wi1 = wf1[xyzT_w.query(xys, workers=-1)[1]]
         ui = (1 - frac)*ui0 + frac*ui1
         vi = (1 - frac)*vi0 + frac*vi1
         wi = (1 - frac)*wi0 + frac*wi1
@@ -492,9 +499,9 @@ def get_zh(zf0,zf1,hf, plon, plat, frac):
     # Get zeta and h at all points, at an arbitrary time between two saves
     NP = len(plon)
     xy = np.array((plon,plat)).T
-    zi0 = zf0[xyT_rho.query(xy, n_jobs=-1)[1]]
-    zi1 = zf1[xyT_rho.query(xy, n_jobs=-1)[1]]
-    hi = hf[xyT_rho.query(xy, n_jobs=-1)[1]]
+    zi0 = zf0[xyT_rho.query(xy, workers=-1)[1]]
+    zi1 = zf1[xyT_rho.query(xy, workers=-1)[1]]
+    hi = hf[xyT_rho.query(xy, workers=-1)[1]]
     zi = (1 - frac)*zi0 + frac*zi1
     ZH = np.zeros((NP,2))
     ZH[:,0] = zi
@@ -505,12 +512,12 @@ def get_VR(tf0,tf1, plon, plat, pcs, frac, surface):
     # Get a variable on the z_rho grid at all points.
     if surface == True:
         xy = np.array((plon,plat)).T
-        ti0 = tf0[xyT_rho.query(xy, n_jobs=-1)[1]]
-        ti1 = tf1[xyT_rho.query(xy, n_jobs=-1)[1]]
+        ti0 = tf0[xyT_rho.query(xy, workers=-1)[1]]
+        ti1 = tf1[xyT_rho.query(xy, workers=-1)[1]]
     else:
         xys = np.array((plon,plat,pcs)).T
-        ti0 = tf0[xyzT_rho.query(xys, n_jobs=-1)[1]]
-        ti1 = tf1[xyzT_rho.query(xys, n_jobs=-1)[1]]
+        ti0 = tf0[xyzT_rho.query(xys, workers=-1)[1]]
+        ti1 = tf1[xyzT_rho.query(xys, workers=-1)[1]]
     ti = (1 - frac)*ti0 + frac*ti1
     return ti
     
@@ -519,11 +526,11 @@ def get_wind(Uwindf0, Uwindf1, Vwindf0, Vwindf1, plon, plat, frac, windage):
     NP = len(plon)
     Vwind3 = np.zeros((NP,3))
     xy = np.array((plon,plat)).T
-    Uwind00 = Uwindf0[xyT_rho.query(xy, n_jobs=-1)[1]]
-    Uwind11 = Uwindf1[xyT_rho.query(xy, n_jobs=-1)[1]]
+    Uwind00 = Uwindf0[xyT_rho.query(xy, workers=-1)[1]]
+    Uwind11 = Uwindf1[xyT_rho.query(xy, workers=-1)[1]]
     Uwind = (1 - frac)*Uwind00 + frac*Uwind11
-    Vwind00 = Vwindf0[xyT_rho.query(xy, n_jobs=-1)[1]]
-    Vwind11 = Vwindf1[xyT_rho.query(xy, n_jobs=-1)[1]]
+    Vwind00 = Vwindf0[xyT_rho.query(xy, workers=-1)[1]]
+    Vwind11 = Vwindf1[xyT_rho.query(xy, workers=-1)[1]]
     Vwind = (1 - frac)*Vwind00 + frac*Vwind11
     Vwind3[:,0] = windage*Uwind
     Vwind3[:,1] = windage*Vwind
@@ -532,13 +539,13 @@ def get_wind(Uwindf0, Uwindf1, Vwindf0, Vwindf1, plon, plat, frac, windage):
 def get_AKs(AKsf, plon, plat, pcs):
     # Get AKs at all points, at one time.
     xys = np.array((plon,plat,pcs)).T
-    AKsi = AKsf[xyzT_w.query(xys, n_jobs=-1)[1]]
+    AKsi = AKsf[xyzT_w.query(xys, workers=-1)[1]]
     return AKsi
     
 def get_dAKs_new(dKdzf0, dKdzf1, plon, plat, pcs, frac):
     xys = np.array((plon,plat,pcs)).T
-    dKdzi0 = dKdzf0[xyzT_rho.query(xys, n_jobs=-1)[1]]
-    dKdzi1 = dKdzf1[xyzT_rho.query(xys, n_jobs=-1)[1]]
+    dKdzi0 = dKdzf0[xyzT_rho.query(xys, workers=-1)[1]]
+    dKdzi1 = dKdzf1[xyzT_rho.query(xys, workers=-1)[1]]
     dKdzi = (1 - frac)*dKdzi0 + frac*dKdzi1
     return dKdzi
     
@@ -594,9 +601,8 @@ def get_fn_list(idt, Ldir):
     # Assumes we have history files 1-25, corresponding to hours 0-24.
     fn_list = []
     dd = idt.strftime('%Y.%m.%d')
-    indir = (Ldir['roms'] + 'output/' + Ldir['gtagex'] +
-            '/f' + dd + '/')
+    indir = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + dd)
     for hh in range(1,26):
         hhhh = ('0000' + str(hh))[-4:]
-        fn_list.append(indir + 'ocean_his_' + hhhh + '.nc')
+        fn_list.append(indir / ('ocean_his_' + hhhh + '.nc'))
     return fn_list

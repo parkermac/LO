@@ -2,11 +2,12 @@
 Functions associated with NetCDF for tracker.
 """
 
-import netCDF4 as nc4
+from lo_tools import Lfun
+import xarray as xr
 
-# info for NetCDF output
+# Info for NetCDF output, organized as {variable name: (long_name, units)}
 name_unit_dict = {'lon':('Longitude','degrees'), 'lat':('Latitude','degrees'),
-    'cs':('Fractional Z','Dimensionless'), 'ot':('Ocean Time','Seconds since 1/1/1970 UTC'),
+    'cs':('Fractional Z','Dimensionless'), 'ot':('Ocean Time',Lfun.roms_time_units),
     'z':('Z','m'), 'zeta':('Surface Z','m'), 'zbot':('Bottom Z','m'),
     'salt':('Salinity','Dimensionless'), 'temp':('Potential Temperature','Degrees C'),
     'u':('EW Velocity','meters s-1'), 'v':('NS Velocity','meters s-1'),
@@ -16,54 +17,46 @@ name_unit_dict = {'lon':('Longitude','degrees'), 'lat':('Latitude','degrees'),
     'hit_sidewall':('Hit Sidewall','1=hit'),
     'hit_bottom':('Hit Bottom','1=hit'),
     'hit_top':('Hit Top','1=hit'),
-    'bad_pcs':('Bad Pcs','1=bad'),
-}
+    'bad_pcs':('Bad Pcs','1=bad')}
     
 def write_grid(g_infile, g_outfile):
     # write a file of grid info
-    dsh = nc4.Dataset(g_infile)
-    dsg = nc4.Dataset(g_outfile, 'w')
+    dsh = xr.open_dataset(g_infile)
     # lists of variables to process
-    dlist = ['xi_rho', 'eta_rho', 'xi_psi', 'eta_psi']
-    vn_list2 = [ 'lon_rho', 'lat_rho', 'lon_psi', 'lat_psi', 'mask_rho', 'h']
-    # Copy dimensions
-    for dname, the_dim in dsh.dimensions.items():
-        if dname in dlist:
-            dsg.createDimension(dname, len(the_dim))
-    # Copy variables
-    for vn in vn_list2:
-        varin = dsh[vn]
-        vv = dsg.createVariable(vn, varin.dtype, varin.dimensions)
-        vv.setncatts({k: varin.getncattr(k) for k in varin.ncattrs()})
-        vv[:] = dsh[vn][:]
+    v_dict = dict()
+    for vn in ['lon_rho', 'lat_rho', 'mask_rho', 'h']:
+        v_dict[vn] = (('eta_rho', 'xi_rho'), dsh[vn].values)
+    dsg = xr.Dataset(v_dict)
+    dsg.to_netcdf(g_outfile)
     dsh.close()
     dsg.close()
     
-def start_outfile(out_fn, P, NT_full, it0, it1):
-    # This initializes for all anticipated time steps.
-    NT, NP = P['lon'].shape
-    ds = nc4.Dataset(out_fn, 'w')
-    ds.createDimension('Time', NT_full)
-    ds.createDimension('Particle', NP)
-    # Copy variables
+def start_outfile(out_fn, P):
+    v_dict = dict()
     for vn in P.keys():
         if vn == 'ot':
-            vv = ds.createVariable(vn, float, ('Time'))
-            vv[it0:it1] = P[vn][:]
+            v_dict[vn] = (('Time'), P[vn])
         else:
-            vv = ds.createVariable(vn, float, ('Time', 'Particle'))
-            vv[it0:it1, :] = P[vn][:]
-        vv.long_name = name_unit_dict[vn][0]
-        vv.units = name_unit_dict[vn][1]
+            v_dict[vn] = (('Time', 'Particle'), P[vn])
+    ds = xr.Dataset(v_dict)
+    for vn in P.keys():
+        ds[vn].attrs['long_name'] = name_unit_dict[vn][0]
+        ds[vn].attrs['units'] = name_unit_dict[vn][1]
+    ds.to_netcdf(out_fn)
     ds.close()
     
-def append_to_outfile(out_fn, P, it0, it1):
-    # This is designed to add one day of data.
-    ds = nc4.Dataset(out_fn, 'a')
-    NTx, NPx = ds['lon'][:].shape
+def append_to_outfile(out_fn, P):
+    v_dict = dict()
     for vn in P.keys():
         if vn == 'ot':
-            ds[vn][it0:it1] = P[vn][:]
+            v_dict[vn] = (('Time'), P[vn][1:])
         else:
-            ds[vn][it0:it1, :] = P[vn][:]
-    ds.close()
+            v_dict[vn] = (('Time', 'Particle'), P[vn][1:,:])
+    ds1 = xr.Dataset(v_dict)
+    ds0 = xr.open_dataset(out_fn, decode_times=False)
+    ds2 = xr.concat((ds0,ds1), 'Time')
+    ds0.close()
+    ds1.close()
+    out_fn.unlink(missing_ok=True)
+    ds2.to_netcdf(out_fn)
+    ds2.close()
