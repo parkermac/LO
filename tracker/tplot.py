@@ -35,33 +35,45 @@ lonp, latp = pfun.get_plon_plat(dsg.lon_rho.values, dsg.lat_rho.values)
 hh = dsg.h.values
 maskr = dsg.mask_rho.values
 #
-u = dsr.u.values
-v = dsr.v.values
-w = dsr.w.values
-salt = dsr.salt.values
-temp = dsr.temp.values
-lon = dsr.lon.values
-lat = dsr.lat.values
-z = dsr.z.values
-cs = dsr.cs.values
-zeta = dsr.zeta.values
-h = dsr.h.values
+
+# u = dsr.u.values
+# v = dsr.v.values
+# w = dsr.w.values
+# salt = dsr.salt.values
+# temp = dsr.temp.values
+# lon = dsr.lon.values
+# lat = dsr.lat.values
+# z = dsr.z.values
+# cs = dsr.cs.values
+# zeta = dsr.zeta.values
+# h = dsr.h.values
+
 
 # subsample output for plotting
 npmax = 300 # max number of points to plot
 step = max(1,int(np.floor(NP/npmax)))
-u = u[:,::step]
-v = v[:,::step]
-w = w[:,::step]
-salt = salt[:,::step]
-temp = temp[:,::step]
-lon = lon[:,::step]
-lat = lat[:,::step]
-z = z[:,::step]
-cs = cs[:,::step]
-zeta = zeta[:,::step]
-h = h[:,::step]
+
+lon = dsr.lon.values[:,::step]
+lat = dsr.lat.values[:,::step]
+
+# make a mask that is False from the time a particle first leaves the domain
+# and onwards
+AA = [dsg.lon_rho.values[0,0], dsg.lon_rho.values[0,-1],
+        dsg.lat_rho.values[0,0], dsg.lat_rho.values[-1,0]]
+ib_mask = np.ones(lon.shape, dtype=bool)
+ib_mask[lon < AA[0]] = False
+ib_mask[lon > AA[1]] = False
+ib_mask[lat < AA[2]] = False
+ib_mask[lat > AA[3]] = False
 NTS, NPS = lon.shape
+for pp in range(NPS):
+    tt = np.argwhere(ib_mask[:,pp]==False)
+    if len(tt) > 0:
+        ib_mask[tt[0][0]:, pp] = False
+
+# and apply the mask to lon and lat
+lon[~ib_mask] = np.nan
+lat[~ib_mask] = np.nan
 
 # PLOTTING
 plt.close('all')
@@ -76,8 +88,9 @@ if False:
 else:
     # automatically plot region of particles, with padding
     pad = .02
-    aa = [lon.min() - pad, lon.max() + pad,
-    lat.min() - pad, lat.max() + pad]
+    aa = [np.nanmin(lon) - pad, np.nanmax(lon) + pad,
+    np.nanmin(lat) - pad, np.nanmax(lat) + pad]
+    
 ax = fig.add_subplot(121)
 zm = -np.ma.masked_where(maskr==0, hh)
 plt.pcolormesh(lonp, latp, zm, vmin=-100, vmax=0,
@@ -103,7 +116,9 @@ for ii in range(ntv):
     tv = tv_list[ii]
     NC = 2
     ax = fig.add_subplot(ntv,NC, (ii+1)*NC)
-    ax.plot(td, dsr[tv].values[:,::step], lw=.5)
+    v = dsr[tv].values[:,::step]
+    v[~ib_mask] = np.nan
+    ax.plot(td, v, lw=.5)
     ax.text(.05, .05, tv, fontweight='bold', transform=ax.transAxes)
     if ii == ntv-1:
         ax.set_xlabel('Time (days)')

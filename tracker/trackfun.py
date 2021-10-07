@@ -9,7 +9,7 @@ LiveOcean_output/tracks/exp_info.csv.
 from lo_tools import Lfun, zfun, zrfun
 
 import numpy as np
-import netCDF4 as nc4
+import xarray as xr
 from scipy.spatial import cKDTree
 import pickle
 from time import time
@@ -29,10 +29,10 @@ G, S, T = zrfun.get_basic_info(EI['fn00'])
 Maskr = G['mask_rho']==1 # True over water
 Masku = G['mask_u']==1 # True over water
 Maskv = G['mask_v']==1 # True over water
-Maskr3 = np.tile(G['mask_rho'].reshape(1,G['M'],G['L']),[S['N'],1,1])
-Masku3 = np.tile(G['mask_u'].reshape(1,G['M'],G['L']-1),[S['N'],1,1])
-Maskv3 = np.tile(G['mask_v'].reshape(1,G['M']-1,G['L']),[S['N'],1,1])
-Maskw3 = np.tile(G['mask_rho'].reshape(1,G['M'],G['L']),[S['N']+1,1,1])
+Maskr3 = np.tile(Maskr.reshape(1,G['M'],G['L']),[S['N'],1,1])
+Masku3 = np.tile(Masku.reshape(1,G['M'],G['L']-1),[S['N'],1,1])
+Maskv3 = np.tile(Maskv.reshape(1,G['M']-1,G['L']),[S['N'],1,1])
+Maskw3 = np.tile(Maskr.reshape(1,G['M'],G['L']),[S['N']+1,1,1])
 # load pre-made trees
 tree_dir = Ldir['LOo'] / 'tracker_trees' / EI['gridname']
 # 2D
@@ -54,6 +54,21 @@ latrf = G['lat_rho'][Maskr]
 zw = zrfun.get_z(G['h'], 0*G['h'], S, only_w=True)
 dz = np.diff(zw, axis = 0)
 
+maskr = Maskr.flatten()
+# minimum grid sizes in degrees (assumes plaid lon,lat grid?)
+dxg = np.diff(G['lon_rho'][0,:]).min()
+dyg = np.diff(G['lat_rho'][:,0]).min()
+
+# aa = [G['lon_rho'][0,0], G['lon_rho'][0,-1], G['lat_rho'][0,0], G['lat_rho'][-1,0]]
+# def in_bounds(lons, lats):
+#     # makes a boolean array that is False where particles are out of bounds
+#     ib_mask = np.ones(len(lons), dtype=bool)
+#     ib_mask[lons < aa[0]] = False
+#     ib_mask[lons > aa[1]] = False
+#     ib_mask[lats < aa[2]] = False
+#     ib_mask[lats > aa[3]] = False
+#     return ib_mask
+
 def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
     """
     This is the main function doing the particle tracking.
@@ -64,28 +79,17 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
     ndiv = TR['ndiv']
     windage = TR['windage']
     
-    # == couldn't we do these outside the function? ==
-    # get basic info
-    G = zrfun.get_basic_info(fn_list[0], only_G=True)
-    maskr = np.ones(G['mask_rho'].shape) # G['mask_rho'] = True in water
-    maskr[G['mask_rho']==False] = 0 # maskr = 1 in water
-    maskr = maskr.flatten()
-    S = zrfun.get_basic_info(fn_list[0], only_S=True)
-    # minimum grid sizes in degrees (assumes plaid lon,lat grid?)
-    dxg = np.diff(G['lon_rho'][0,:]).min()
-    dyg = np.diff(G['lat_rho'][:,0]).min()
-    # ================================================
-
     # get time vector of history files
     NT = len(fn_list)
     NTS = TR['sph']*(NT-1) + 1
     rot = np.nan * np.ones(NT)
     counter = 0
     for fn in fn_list:
-        ds = nc4.Dataset(fn)
-        rot[counter] = ds.variables['ocean_time'][:].squeeze()
+        ds = xr.open_dataset(fn, decode_times=False)
+        rot[counter] = ds.ocean_time.values[0]
         counter += 1
         ds.close
+    sys.stdout.flush()
     delta_t_his = rot[1] - rot[0] # seconds between saves
     delt = delta_t_his/ndiv # time step in seconds
     delt_save = delta_t_his/TR['sph']
@@ -115,8 +119,9 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
         # get Datasets
         fn0 = fn_list[counter_his]
         fn1 = fn_list[counter_his+1]
-        ds0 = nc4.Dataset(fn0, mode='r')
-        ds1 = nc4.Dataset(fn1, mode='r')
+        
+        ds0 = xr.open_dataset(fn0)
+        ds1 = xr.open_dataset(fn1)
         
         # prepare the fields for nearest neighbor interpolation
         tt0 = time()
@@ -124,129 +129,129 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
             h = G['h']
             hf = h[Maskr]
             if surface == True:
-                u0 = ds0['u'][0,-1,:,:]
-                u1 = ds1['u'][0,-1,:,:]
-                uf0 = u0[Masku].data
-                uf1 = u1[Masku].data
-                v0 = ds0['v'][0,-1,:,:]
-                v1 = ds1['v'][0,-1,:,:]
-                vf0 = v0[Maskv].data
-                vf1 = v1[Maskv].data
+                u0 = ds0['u'].values[0,-1,:,:]
+                u1 = ds1['u'].values[0,-1,:,:]
+                uf0 = u0[Masku]
+                uf1 = u1[Masku]
+                v0 = ds0['v'].values[0,-1,:,:]
+                v1 = ds1['v'].values[0,-1,:,:]
+                vf0 = v0[Maskv]
+                vf1 = v1[Maskv]
                 wf0 = 0; wf1 = 0
-                s0 = ds0['salt'][0,-1,:,:]
-                s1 = ds1['salt'][0,-1,:,:]
-                sf0 = s0[Maskr].data
-                sf1 = s1[Maskr].data
-                t0 = ds0['temp'][0,-1,:,:]
-                t1 = ds1['temp'][0,-1,:,:]
-                tf0 = t0[Maskr].data
-                tf1 = t1[Maskr].data
+                s0 = ds0['salt'].values[0,-1,:,:]
+                s1 = ds1['salt'].values[0,-1,:,:]
+                sf0 = s0[Maskr]
+                sf1 = s1[Maskr]
+                t0 = ds0['temp'].values[0,-1,:,:]
+                t1 = ds1['temp'].values[0,-1,:,:]
+                tf0 = t0[Maskr]
+                tf1 = t1[Maskr]
                 if windage > 0:
-                    Uwind0 = ds0['Uwind'][0,:,:]
-                    Uwind1 = ds1['Uwind'][0,:,:]
-                    Uwindf0 = Uwind0[Maskr].data
-                    Uwindf1 = Uwind1[Maskr].data
-                    Vwind0 = ds0['Vwind'][0,:,:]
-                    Vwind1 = ds1['Vwind'][0,:,:]
-                    Vwindf0 = Vwind0[Maskr].data
-                    Vwindf1 = Vwind1[Maskr].data
+                    Uwind0 = ds0['Uwind'].values[0,:,:]
+                    Uwind1 = ds1['Uwind'].values[0,:,:]
+                    Uwindf0 = Uwind0[Maskr]
+                    Uwindf1 = Uwind1[Maskr]
+                    Vwind0 = ds0['Vwind'].values[0,:,:]
+                    Vwind1 = ds1['Vwind'].values[0,:,:]
+                    Vwindf0 = Vwind0[Maskr]
+                    Vwindf1 = Vwind1[Maskr]
             else:
-                u0 = ds0['u'][0,:,:,:]
-                u1 = ds1['u'][0,:,:,:]
-                uf0 = u0[Masku3].data
-                uf1 = u1[Masku3].data
-                v0 = ds0['v'][0,:,:,:]
-                v1 = ds1['v'][0,:,:,:]
-                vf0 = v0[Maskv3].data
-                vf1 = v1[Maskv3].data
-                w0 = ds0['w'][0,:,:,:]
-                w1 = ds1['w'][0,:,:,:]
-                wf0 = w0[Maskw3].data
-                wf1 = w1[Maskw3].data
-                s0 = ds0['salt'][0,:,:,:]
-                s1 = ds1['salt'][0,:,:,:]
-                sf0 = s0[Maskr3].data
-                sf1 = s1[Maskr3].data
-                t0 = ds0['temp'][0,:,:,:]
-                t1 = ds1['temp'][0,:,:,:]
-                tf0 = t0[Maskr3].data
-                tf1 = t1[Maskr3].data
+                u0 = ds0['u'].values[0,:,:,:]
+                u1 = ds1['u'].values[0,:,:,:]
+                uf0 = u0[Masku3]
+                uf1 = u1[Masku3]
+                v0 = ds0['v'].values[0,:,:,:]
+                v1 = ds1['v'].values[0,:,:,:]
+                vf0 = v0[Maskv3]
+                vf1 = v1[Maskv3]
+                w0 = ds0['w'].values[0,:,:,:]
+                w1 = ds1['w'].values[0,:,:,:]
+                wf0 = w0[Maskw3]
+                wf1 = w1[Maskw3]
+                s0 = ds0['salt'].values[0,:,:,:]
+                s1 = ds1['salt'].values[0,:,:,:]
+                sf0 = s0[Maskr3]
+                sf1 = s1[Maskr3]
+                t0 = ds0['temp'].values[0,:,:,:]
+                t1 = ds1['temp'].values[0,:,:,:]
+                tf0 = t0[Maskr3]
+                tf1 = t1[Maskr3]
                 if turb == True:
-                    AKs0_temp = ds0['AKs'][0,:,:,:]
+                    AKs0_temp = ds0['AKs'].values[0,:,:,:]
                     AKs0 = AKs0_temp.copy()
                     AKs0[1:-1,:,:] = 0.25*AKs0_temp[:-2,:,:] + 0.5*AKs0_temp[1:-1,:,:] + 0.25*AKs0_temp[2:,:,:]
-                    AKsf0 = AKs0[Maskw3].data
+                    AKsf0 = AKs0[Maskw3]
                     #
-                    AKs1_temp = ds1['AKs'][0,:,:,:]
+                    AKs1_temp = ds1['AKs'].values[0,:,:,:]
                     AKs1 = AKs1_temp.copy()
                     AKs1[1:-1,:,:] = 0.25*AKs1_temp[:-2,:,:] + 0.5*AKs1_temp[1:-1,:,:] + 0.25*AKs1_temp[2:,:,:]
-                    AKsf1 = AKs1[Maskw3].data
+                    AKsf1 = AKs1[Maskw3]
                     #
                     dKdz0 = np.diff(AKs0, axis=0)/dz
                     dKdz1 = np.diff(AKs1, axis=0)/dz
-                    dKdzf0 = dKdz0[Maskr3].data
-                    dKdzf1 = dKdz1[Maskr3].data
+                    dKdzf0 = dKdz0[Maskr3]
+                    dKdzf1 = dKdz1[Maskr3]
                     
-            z0 = ds0['zeta'][0,:,:]
-            z1 = ds1['zeta'][0,:,:]
-            zf0 = z0[Maskr].data
-            zf1 = z1[Maskr].data
+            z0 = ds0['zeta'].values[0,:,:]
+            z1 = ds1['zeta'].values[0,:,:]
+            zf0 = z0[Maskr]
+            zf1 = z1[Maskr]
             if verbose:
                 print('   > Prepare fields for tree %0.4f sec' % (time()-tt0))
         else:
             # subsequent time steps
             if surface == True:
-                u1 = ds1['u'][0,-1,:,:]
+                u1 = ds1['u'].values[0,-1,:,:]
                 uf0 = uf1.copy()
-                uf1 = u1[Masku].data
-                v1 = ds1['v'][0,-1,:,:]
+                uf1 = u1[Masku]
+                v1 = ds1['v'].values[0,-1,:,:]
                 vf0 = vf1.copy()
-                vf1 = v1[Maskv].data
+                vf1 = v1[Maskv]
                 wf0 = 0; wf1 = 0
-                s1 = ds1['salt'][0,-1,:,:]
+                s1 = ds1['salt'].values[0,-1,:,:]
                 sf0 = sf1.copy()
-                sf1 = s1[Maskr].data
-                t1 = ds1['temp'][0,-1,:,:]
+                sf1 = s1[Maskr]
+                t1 = ds1['temp'].values[0,-1,:,:]
                 tf0 = tf1.copy()
-                tf1 = t1[Maskr].data
+                tf1 = t1[Maskr]
                 if windage > 0:
-                    Uwind1 = ds1['Uwind'][0,:,:]
+                    Uwind1 = ds1['Uwind'].values[0,:,:]
                     Uwindf0 = Uwindf1
-                    Uwindf1 = Uwind1[Maskr].data
-                    Vwind1 = ds1['Vwind'][0,:,:]
+                    Uwindf1 = Uwind1[Maskr]
+                    Vwind1 = ds1['Vwind'].values[0,:,:]
                     Vwindf0 = Vwindf1
-                    Vwindf1 = Vwind1[Maskr].data
+                    Vwindf1 = Vwind1[Maskr]
             else:
                 if TR['no_advection'] == False:
-                    u1 = ds1['u'][0,:,:,:]
+                    u1 = ds1['u'].values[0,:,:,:]
                     uf0 = uf1.copy()
-                    uf1 = u1[Masku3].data
-                    v1 = ds1['v'][0,:,:,:]
+                    uf1 = u1[Masku3]
+                    v1 = ds1['v'].values[0,:,:,:]
                     vf0 = vf1.copy()
-                    vf1 = v1[Maskv3].data
-                    w1 = ds1['w'][0,:,:,:]
+                    vf1 = v1[Maskv3]
+                    w1 = ds1['w'].values[0,:,:,:]
                     wf0 = wf1.copy()
-                    wf1 = w1[Maskw3].data
-                    s1 = ds1['salt'][0,:,:,:]
+                    wf1 = w1[Maskw3]
+                    s1 = ds1['salt'].values[0,:,:,:]
                     sf0 = sf1.copy()
-                    sf1 = s1[Maskr3].data
-                    t1 = ds1['temp'][0,:,:,:]
+                    sf1 = s1[Maskr3]
+                    t1 = ds1['temp'].values[0,:,:,:]
                     tf0 = tf1.copy()
-                    tf1 = t1[Maskr3].data
+                    tf1 = t1[Maskr3]
                 if turb == True:
                     AKsf0 = AKsf1.copy()
                     #
-                    AKs1_temp = ds1['AKs'][0,:,:,:]
+                    AKs1_temp = ds1['AKs'].values[0,:,:,:]
                     AKs1 = AKs1_temp.copy()
                     AKs1[1:-1,:,:] = 0.25*AKs1_temp[:-2,:,:] + 0.5*AKs1_temp[1:-1,:,:] + 0.25*AKs1_temp[2:,:,:]
-                    AKsf1 = AKs1[Maskw3].data
+                    AKsf1 = AKs1[Maskw3]
                     #
                     dKdzf0 = dKdzf1.copy()
                     dKdz1 = np.diff(AKs1, axis=0)/dz
-                    dKdzf1 = dKdz1[Maskr3].data
-            z1 = ds1['zeta'][0,:,:]
+                    dKdzf1 = dKdz1[Maskr3]
+            z1 = ds1['zeta'].values[0,:,:]
             zf0 = zf1.copy()
-            zf1 = z1[Maskr].data
+            zf1 = z1[Maskr]
             if verbose:
                 print('   > Prepare subsequent fields for tree %0.4f sec' % (time()-tt0))
         ds0.close()
@@ -266,6 +271,11 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 plon = plon0[pcond]
                 plat = plat0[pcond]
                 pcs = pcs0[pcond]
+                # # also keep only points in the domain
+                # ib_mask = in_bounds(plon, plat)
+                # plon = plon[ib_mask]
+                # plat = plat[ib_mask]
+                # pcs = pcs[ib_mask]
             else:
                 plon = plon0.copy()
                 plat = plat0.copy()
@@ -331,6 +341,12 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 plon, plat, pcs = update_position(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3,
                                                   (ZH0 + 2*ZH1 + 2*ZH2 + ZH3)/6,
                                                   S, delt, plon, plat, pcs, surface)
+                # # freeze out-of-bounds particles
+                # ib_mask = in_bounds(plon, plat)
+                # plon[~ib_mask] = P['lon'][it1,~ib_mask]
+                # plat[~ib_mask] = P['lat'][it1,~ib_mask]
+                # pcs[~ib_mask] = P['cs'][it1,~ib_mask]
+                
             elif TR['no_advection'] == True:
                 V3 = np.zeros((NP,3))
                 ZH3 = get_zh(zf0,zf1,hf, plon, plat, frmid)
