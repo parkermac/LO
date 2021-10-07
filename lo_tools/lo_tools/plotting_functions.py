@@ -97,7 +97,7 @@ def get_units(ds, vn):
         units = ''
     return units
 
-def add_bathy_contours(ax, ds, depth_levs = [200, 2000], txt=False):
+def add_bathy_contours(ax, ds, depth_levs = [50, 200, 2000], txt=False):
     # This should work with ds being a history file Dataset, or the G dict.
     h = ds.h.values
     # trim depth_levs to be in range of h
@@ -232,20 +232,25 @@ def add_info(ax, fn, fs=12, loc='lower_right'):
     if loc == 'lower_right':
         ax.text(.95, .075, dt_local.strftime('%Y-%m-%d'),
             horizontalalignment='right' , verticalalignment='bottom',
-            transform=ax.transAxes, fontsize=fs)
+            transform=ax.transAxes, fontsize=fs,
+            bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
         ax.text(.95, .065, dt_local.strftime('%H:%M') + ' ' + dt_local.tzname(),
             horizontalalignment='right', verticalalignment='top',
-            transform=ax.transAxes, fontsize=fs)
+            transform=ax.transAxes, fontsize=fs,
+            bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
     elif loc == 'upper_right':
         ax.text(.95, .935, dt_local.strftime('%Y-%m-%d'),
             horizontalalignment='right' , verticalalignment='bottom',
-            transform=ax.transAxes, fontsize=fs)
+            transform=ax.transAxes, fontsize=fs,
+            bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
         ax.text(.95, .925, dt_local.strftime('%H:%M') + ' ' + dt_local.tzname(),
             horizontalalignment='right', verticalalignment='top',
-            transform=ax.transAxes, fontsize=fs)
+            transform=ax.transAxes, fontsize=fs,
+            bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
     ax.text(.06, .04, str(fn).split('/')[-3],
         verticalalignment='bottom', transform=ax.transAxes,
-        rotation='vertical', fontsize=fs)
+        rotation='vertical', fontsize=fs,
+        bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
 
 def get_dt_local(dt, tzl='US/Pacific'):
     # take a model datetime (assumed to be UTC) and return local datetime

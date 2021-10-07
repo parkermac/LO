@@ -1,5 +1,8 @@
 """
-module of functions for LO version of LiveOcean.
+Module of functions for LO version of LiveOcean.
+
+This is purposely kept to a minimum of imports so that it will run with
+whatever python3 exists on the large clusters we sue for ROMS, e.g. mox and klone.
 """
 import os, sys, shutil
 from pathlib import Path 
@@ -262,6 +265,31 @@ def copy_to_azure(input_filename, output_filename, container_name, Ldir):
         az_dict['exception'] = str(e)
     return az_dict
     
+def dict_to_csv(in_dict, out_fn):
+    """
+    Writes a dict to a csv file.
+    
+    out_fn should be a Path object.
+    """
+    out_fn.unlink(missing_ok=True)
+    with open(out_fn, 'w') as f:
+        for k in in_dict.keys():
+            f.write(k + ',' + str(in_dict[k]) + '\n')
+            
+def csv_to_dict(in_fn):
+    """
+    Reads a csv file into a dict and returns it.
+    
+    We should add some error checking to make sure the input is as expected.
+    """
+    out_dict = dict()
+    with open(in_fn, 'r') as f:
+        for line in f:
+            k,v = line.split(',')
+            out_dict[k] = str(v).replace('\n','')
+    return out_dict
+    
+
 if __name__ == '__main__':
     # TESTING: run Lfun will execute these
     

@@ -45,13 +45,13 @@ Then if you are being really careful about security do:
 ```
 sha256sum [installer.sh]
 ```
-and make sure that the number matches the one from the table of installers.
+and make sure that the number matches the one from the table of installers.  Note: this may only work on linux machines; I don't have sha256sum on my mac.
 
 Next run the installer:
 ```
 bash [installer.sh]
 ```
-and answer yes to everything, especially "initialization".  For one of my linux installations I chose to put it in /data1/parker/miniconda3, or on my Mac I put it in /Applications/miniconda3.  The initialization adds some lines to your ~/.bashrc or ~/.bash_profile (Mac). After you "source" this you should have (base) appended to your bash prompt, and this tells you that you are in the (base) conda environment so you can run python - but not much else, yet.
+and answer yes to everything, especially "initialization".  For one of my linux installations I chose to put it in /data1/parker/miniconda3, or on my Mac I put it in /Applications/miniconda3.  It doesn't matter what folder you put it in.  The initialization adds some lines to your ~/.bashrc or ~/.bash_profile (mac). After you "source" this you should have (base) appended to your bash prompt, and this tells you that you are in the (base) conda environment so you can run python - but not much else, yet.
 
 Then for good measure do:
 ```
@@ -90,11 +90,11 @@ conda activate loenv
 ```
 to your .bashrc or .bash_profile, and "source" it.  Now (loenv) will appear at the start of your bash prompt.
 
-Every now and then (monthly?) it is good to update all the packages, which you can do from the command line:
+In the past I recommended updating your modules every now and then using:
 ```
 conda update --all
 ```
-Note: when I did this update on 2021.09.30 while trying to fix a cartopy problem it broke my installation, leaving me with a non-functioning numpy.  I fixed it by deleting the loenv folder in /Applications/miniconda3/envs (on my mac) and recreating the environment from scratch (the "conda create" step above).  This only took 10 minutes this time and fixed both the numpy and cartopy problems.
+BUT a couple of times recently this broke my installation, leaving me with a non-functioning numpy (frowny face).  I fixed it by deleting the loenv folder in /Applications/miniconda3/envs (on my mac) and recreating the environment from scratch (the "conda create" step above).  This only took 10 minutes this time and fixed both the numpy and cartopy problems.
 
 #### (4) Fork LO_user
 
@@ -104,10 +104,11 @@ Here is some great [INFO](https://docs.github.com/en/get-started/quickstart/fork
 
 Background: Here are some [INSTRUCTIONS](http://faculty.washington.edu/pmacc/Classes/EffCom_2020/lectures/GitHub%20Intro.pdf) for how to get started using Git and making your own repo.
 
-
 **Clone your LO_user to your own machine and then edit the paths in `LO_user/get_lo_info.py`.**
 
 Check that things are working as you expect by executing `LO/lo_tools/lo_tools/Lfun.py`.  Although this is a module that you usually import, when you run it as a program it shows the contents of Ldir as screen output.  Check out the end of that code to see how this works - it is a great way to add tests to a module.
+
+NOTE: I am still uncertain about the best way to have this code work for other users who will want to do add their own analysis tools.  In principle this is supposed to be handled by the LO_user fork, but that (a) cluttered with my own analysis code, and (b) subject to constant "improvements" I may make.  Perhaps I could make LO_user more static, and then put my own analysis code in a separate directory.  A potential downside is more git pull, which is pretty minor...
 
 ---
 

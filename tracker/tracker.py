@@ -32,7 +32,9 @@ This allows you to create your own modifications to the tracking
 It can be run on its own, or with command line arguments to facilitate
 large, automated jobs, for example in python:
     
-[examples under construction]
+Examples:
+
+python tracker.py -clb True
 
 """
 
@@ -198,17 +200,10 @@ Lfun.make_dir(outdir, clean=True)
 print(50*'*' + '\nWriting to ' + str(outdir))
 sys.stdout.flush()
 
-# and write some info to outdir0 for use by trackfun.py
-ei_out_fn = outdir0 / 'exp_info.csv'
-ei_out_fn.unlink(missing_ok=True)
-with open(ei_out_fn, 'w') as f:
-    for k in TR.keys():
-        f.write(k + ',' + str(TR[k]) + '\n')
-ei_out_fn = outdir / 'exp_info.csv'
-ei_out_fn.unlink(missing_ok=True)
-with open(ei_out_fn, 'w') as f:
-    for k in TR.keys():
-        f.write(k + ',' + str(TR[k]) + '\n')
+# Write some info to outdir0 for use by trackfun.py
+Lfun.dict_to_csv(TR, outdir0 / 'exp_info.csv')
+# and write the same info to outdir (gack)
+Lfun.dict_to_csv(TR, outdir / 'exp_info.csv')
 
 # Load the trackfun module.
 # NOTE: we have to load this module AFTER we write [outdir0]/exp_info.csv

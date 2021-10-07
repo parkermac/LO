@@ -46,6 +46,12 @@ def start_outfile(out_fn, P):
     ds.close()
     
 def append_to_outfile(out_fn, P):
+    """
+    This works fine, but I worry about it when there are many days.  Will it slow down?
+    
+    It could be replaced by putting each daily output file in a temp dir, and then
+    using ncrcat at the end.
+    """
     v_dict = dict()
     for vn in P.keys():
         if vn == 'ot':

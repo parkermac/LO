@@ -23,14 +23,7 @@ maskr_crit = 0.5 # (maskr = 1 in water, 0 on land) [0.5 seems good]
 # NEW CODE for nearest neighbor interpolation
 Ldir = Lfun.Lstart()
 
-ei_fn = Ldir['LOo'] / 'tracks' / 'exp_info.csv'
-EI = dict()
-with open(ei_fn, 'r') as f:
-    for line in f:
-        k,v = line.split(',')
-        EI[k] = str(v).replace('\n','')
-#print(EI)
-#EI = Lfun.csv_to_dict(Ldir['LOo'] + 'tracks/exp_info.csv')
+EI = Lfun.csv_to_dict(Ldir['LOo'] / 'tracks' / 'exp_info.csv')
 
 G, S, T = zrfun.get_basic_info(EI['fn00'])
 Maskr = G['mask_rho']==1 # True over water

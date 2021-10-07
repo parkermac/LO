@@ -64,10 +64,11 @@ def P_basic(in_dict):
         if ii == 1:
             ax.set_ylabel('Latitude')
             pfun.add_info(ax, in_dict['fn'])
-            pfun.add_windstress_flower(ax, ds)
+            #pfun.add_windstress_flower(ax, ds)
             pfun.add_bathy_contours(ax, ds, txt=True)
         elif ii == 2:
-            pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
+            pass
+            #pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
         ii += 1
     #fig.tight_layout()
     # FINISH
