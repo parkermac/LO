@@ -59,16 +59,6 @@ maskr = Maskr.flatten()
 dxg = np.diff(G['lon_rho'][0,:]).min()
 dyg = np.diff(G['lat_rho'][:,0]).min()
 
-# aa = [G['lon_rho'][0,0], G['lon_rho'][0,-1], G['lat_rho'][0,0], G['lat_rho'][-1,0]]
-# def in_bounds(lons, lats):
-#     # makes a boolean array that is False where particles are out of bounds
-#     ib_mask = np.ones(len(lons), dtype=bool)
-#     ib_mask[lons < aa[0]] = False
-#     ib_mask[lons > aa[1]] = False
-#     ib_mask[lats < aa[2]] = False
-#     ib_mask[lats > aa[3]] = False
-#     return ib_mask
-
 def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
     """
     This is the main function doing the particle tracking.
@@ -129,60 +119,60 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
             h = G['h']
             hf = h[Maskr]
             if surface == True:
-                u0 = ds0['u'].values[0,-1,:,:]
-                u1 = ds1['u'].values[0,-1,:,:]
+                u0 = ds0['u'][0,-1,:,:].values
+                u1 = ds1['u'][0,-1,:,:].values
                 uf0 = u0[Masku]
                 uf1 = u1[Masku]
-                v0 = ds0['v'].values[0,-1,:,:]
-                v1 = ds1['v'].values[0,-1,:,:]
+                v0 = ds0['v'][0,-1,:,:].values
+                v1 = ds1['v'][0,-1,:,:].values
                 vf0 = v0[Maskv]
                 vf1 = v1[Maskv]
                 wf0 = 0; wf1 = 0
-                s0 = ds0['salt'].values[0,-1,:,:]
-                s1 = ds1['salt'].values[0,-1,:,:]
+                s0 = ds0['salt'][0,-1,:,:].values
+                s1 = ds1['salt'][0,-1,:,:].values
                 sf0 = s0[Maskr]
                 sf1 = s1[Maskr]
-                t0 = ds0['temp'].values[0,-1,:,:]
-                t1 = ds1['temp'].values[0,-1,:,:]
+                t0 = ds0['temp'][0,-1,:,:].values
+                t1 = ds1['temp'][0,-1,:,:].values
                 tf0 = t0[Maskr]
                 tf1 = t1[Maskr]
                 if windage > 0:
-                    Uwind0 = ds0['Uwind'].values[0,:,:]
-                    Uwind1 = ds1['Uwind'].values[0,:,:]
+                    Uwind0 = ds0['Uwind'][0,:,:].values
+                    Uwind1 = ds1['Uwind'][0,:,:].values
                     Uwindf0 = Uwind0[Maskr]
                     Uwindf1 = Uwind1[Maskr]
-                    Vwind0 = ds0['Vwind'].values[0,:,:]
-                    Vwind1 = ds1['Vwind'].values[0,:,:]
+                    Vwind0 = ds0['Vwind'][0,:,:].values
+                    Vwind1 = ds1['Vwind'][0,:,:].values
                     Vwindf0 = Vwind0[Maskr]
                     Vwindf1 = Vwind1[Maskr]
             else:
-                u0 = ds0['u'].values[0,:,:,:]
-                u1 = ds1['u'].values[0,:,:,:]
+                u0 = ds0['u'][0,:,:,:].values
+                u1 = ds1['u'][0,:,:,:].values
                 uf0 = u0[Masku3]
                 uf1 = u1[Masku3]
-                v0 = ds0['v'].values[0,:,:,:]
-                v1 = ds1['v'].values[0,:,:,:]
+                v0 = ds0['v'][0,:,:,:].values
+                v1 = ds1['v'][0,:,:,:].values
                 vf0 = v0[Maskv3]
                 vf1 = v1[Maskv3]
-                w0 = ds0['w'].values[0,:,:,:]
-                w1 = ds1['w'].values[0,:,:,:]
+                w0 = ds0['w'][0,:,:,:].values
+                w1 = ds1['w'][0,:,:,:].values
                 wf0 = w0[Maskw3]
                 wf1 = w1[Maskw3]
-                s0 = ds0['salt'].values[0,:,:,:]
-                s1 = ds1['salt'].values[0,:,:,:]
+                s0 = ds0['salt'][0,:,:,:].values
+                s1 = ds1['salt'][0,:,:,:].values
                 sf0 = s0[Maskr3]
                 sf1 = s1[Maskr3]
-                t0 = ds0['temp'].values[0,:,:,:]
-                t1 = ds1['temp'].values[0,:,:,:]
+                t0 = ds0['temp'][0,:,:,:].values
+                t1 = ds1['temp'][0,:,:,:].values
                 tf0 = t0[Maskr3]
                 tf1 = t1[Maskr3]
                 if turb == True:
-                    AKs0_temp = ds0['AKs'].values[0,:,:,:]
+                    AKs0_temp = ds0['AKs'][0,:,:,:].values
                     AKs0 = AKs0_temp.copy()
                     AKs0[1:-1,:,:] = 0.25*AKs0_temp[:-2,:,:] + 0.5*AKs0_temp[1:-1,:,:] + 0.25*AKs0_temp[2:,:,:]
                     AKsf0 = AKs0[Maskw3]
                     #
-                    AKs1_temp = ds1['AKs'].values[0,:,:,:]
+                    AKs1_temp = ds1['AKs'][0,:,:,:].values
                     AKs1 = AKs1_temp.copy()
                     AKs1[1:-1,:,:] = 0.25*AKs1_temp[:-2,:,:] + 0.5*AKs1_temp[1:-1,:,:] + 0.25*AKs1_temp[2:,:,:]
                     AKsf1 = AKs1[Maskw3]
@@ -192,8 +182,8 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     dKdzf0 = dKdz0[Maskr3]
                     dKdzf1 = dKdz1[Maskr3]
                     
-            z0 = ds0['zeta'].values[0,:,:]
-            z1 = ds1['zeta'].values[0,:,:]
+            z0 = ds0['zeta'][0,:,:].values
+            z1 = ds1['zeta'][0,:,:].values
             zf0 = z0[Maskr]
             zf1 = z1[Maskr]
             if verbose:
@@ -201,47 +191,47 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
         else:
             # subsequent time steps
             if surface == True:
-                u1 = ds1['u'].values[0,-1,:,:]
+                u1 = ds1['u'][0,-1,:,:].values
                 uf0 = uf1.copy()
                 uf1 = u1[Masku]
-                v1 = ds1['v'].values[0,-1,:,:]
+                v1 = ds1['v'][0,-1,:,:].values
                 vf0 = vf1.copy()
                 vf1 = v1[Maskv]
                 wf0 = 0; wf1 = 0
-                s1 = ds1['salt'].values[0,-1,:,:]
+                s1 = ds1['salt'][0,-1,:,:].values
                 sf0 = sf1.copy()
                 sf1 = s1[Maskr]
-                t1 = ds1['temp'].values[0,-1,:,:]
+                t1 = ds1['temp'][0,-1,:,:].values
                 tf0 = tf1.copy()
                 tf1 = t1[Maskr]
                 if windage > 0:
-                    Uwind1 = ds1['Uwind'].values[0,:,:]
+                    Uwind1 = ds1['Uwind'][0,:,:].values
                     Uwindf0 = Uwindf1
                     Uwindf1 = Uwind1[Maskr]
-                    Vwind1 = ds1['Vwind'].values[0,:,:]
+                    Vwind1 = ds1['Vwind'][0,:,:].values
                     Vwindf0 = Vwindf1
                     Vwindf1 = Vwind1[Maskr]
             else:
                 if TR['no_advection'] == False:
-                    u1 = ds1['u'].values[0,:,:,:]
+                    u1 = ds1['u'][0,:,:,:].values
                     uf0 = uf1.copy()
                     uf1 = u1[Masku3]
-                    v1 = ds1['v'].values[0,:,:,:]
+                    v1 = ds1['v'][0,:,:,:].values
                     vf0 = vf1.copy()
                     vf1 = v1[Maskv3]
-                    w1 = ds1['w'].values[0,:,:,:]
+                    w1 = ds1['w'][0,:,:,:].values
                     wf0 = wf1.copy()
                     wf1 = w1[Maskw3]
-                    s1 = ds1['salt'].values[0,:,:,:]
+                    s1 = ds1['salt'][0,:,:,:].values
                     sf0 = sf1.copy()
                     sf1 = s1[Maskr3]
-                    t1 = ds1['temp'].values[0,:,:,:]
+                    t1 = ds1['temp'][0,:,:,:].values
                     tf0 = tf1.copy()
                     tf1 = t1[Maskr3]
                 if turb == True:
                     AKsf0 = AKsf1.copy()
                     #
-                    AKs1_temp = ds1['AKs'].values[0,:,:,:]
+                    AKs1_temp = ds1['AKs'][0,:,:,:].values
                     AKs1 = AKs1_temp.copy()
                     AKs1[1:-1,:,:] = 0.25*AKs1_temp[:-2,:,:] + 0.5*AKs1_temp[1:-1,:,:] + 0.25*AKs1_temp[2:,:,:]
                     AKsf1 = AKs1[Maskw3]
@@ -249,7 +239,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     dKdzf0 = dKdzf1.copy()
                     dKdz1 = np.diff(AKs1, axis=0)/dz
                     dKdzf1 = dKdz1[Maskr3]
-            z1 = ds1['zeta'].values[0,:,:]
+            z1 = ds1['zeta'][0,:,:].values
             zf0 = zf1.copy()
             zf1 = z1[Maskr]
             if verbose:

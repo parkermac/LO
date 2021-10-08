@@ -36,19 +36,6 @@ hh = dsg.h.values
 maskr = dsg.mask_rho.values
 #
 
-# u = dsr.u.values
-# v = dsr.v.values
-# w = dsr.w.values
-# salt = dsr.salt.values
-# temp = dsr.temp.values
-# lon = dsr.lon.values
-# lat = dsr.lat.values
-# z = dsr.z.values
-# cs = dsr.cs.values
-# zeta = dsr.zeta.values
-# h = dsr.h.values
-
-
 # subsample output for plotting
 npmax = 300 # max number of points to plot
 step = max(1,int(np.floor(NP/npmax)))
