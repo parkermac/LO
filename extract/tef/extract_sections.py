@@ -12,7 +12,7 @@ PERFORMANCE: 5 hours per year, perigee, cas6_v3_lo8b, 39 sections, all variables
 including the processing and bulk_calc steps.  2.25 hours when just extracting salt.
 
 To test on mac (default is to just get salt on section ai1):
-run extract_sections -g cas6 -t v3 -x lo8b -ro 2 -0 2019.07.04 -1 2019.07.06
+run extract_sections -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06
 
 To get all sections and all variables use these flags:
 -get_bio True -sect_name all

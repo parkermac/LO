@@ -12,16 +12,15 @@ In order to get to where you can run `flux_salt_budget.py` you need to go throug
  - `bulk_calc.py`
 
 (2) Segments (the flux_ code):
- - `flux_get_vol.py`
- - `flux_get_s.py`
- - `flux_lowpass_s.py`
+ - `make_segment_volumes.py`
+ - `extract_segments.py`
 
 Then you can run `tracer_budget.py`
 
 ---
 #### PREAMBLE
 
-`ptools/pgrid/tef_section_maker.py` is a tool to define sections, if needed.  This is a GUI where you define section endpoints (forced to be either perfectly E-W or N-S), name the section, and define which direction is "landward" (i.e. which way is positive transport).  You can define one or more sections in a session.  At the end, when you push DONE it produces screen output suitable for pasting into new or existing lists in `tef_fun.get_sect_df()`.
+`LO/pgrid/tef_section_maker.py` is a tool to define sections, if needed.  This is a GUI where you define section endpoints (forced to be either perfectly E-W or N-S), name the section, and define which direction is "landward" (i.e. which way is positive transport).  You can define one or more sections in a session.  At the end, when you push DONE it produces screen output suitable for pasting into new or existing lists in `tef_fun.get_sect_df()`.
 
 `tef_fun.py` is an important module for this code. It includes `tef_fun.get_sect_df()` which returns a DataFrame of all the section names and their lon,lat endpoints.
 
@@ -30,13 +29,13 @@ Then you can run `tracer_budget.py`
 
 `extract_sections.py` creates a NetCDF file for each section with arrays of hourly transport and tracer values on the section, arranged as (t, z, x-or-y). Using command line arguments you can change the run, the day range, the sections to extract, and the variables extracted. Typically this will be done on a remote machine, like perigee, although the defaults are designed to work with model output I have saved on my mac.
 
-**NOTE**: this code runs mulitple subprocess instances of `extract_section_one_time.py`, currently 20 at once (set by Nproc in `extract_sections.py`). This significantly speeds things up, but it tends to completely occupy the machine, _**so you only want to run one of these at a time**_.
+**NOTE**: this code runs multiple subprocess instances of `extract_section_one_time.py`, (set by the Nproc command line argument which has a default value of 10). This significantly speeds things up, but it tends to occupy the machine, e.g. if you use -Nproc 20 on perigee you are using all the cores and may slow down other jobs.
 
 **NOTE**: this code also automatically runs the two subsequent steps, `process_sections.py` and `bulk_calc.py`.  These can also be run as stand-alone (use -test True when running `extract_sections.py`) to facilitate debugging.
 
 **PERFORMANCE**: For a full year of cas6, with -get_bio True and all NPZDOC variables this takes 5 hours on perigee (6.5 hours when including all steps).
 
-The **command line arguments** are set in `alpha/extract_argfun.py`, with the usual requirements for gridname, tag, ex_name, and beginning and end dates.  You also specify:
+The **command line arguments** are defined in `LO/lo_tools/lo_tools/extract_argfun.py`, with the usual requirements for gtagex, and beginning and end dates.  You also specify:
 - -ro, --roms_out_num, is a integer specifying where to look for the ROMS history profiles
 - -get_bio is a Boolean.  If True then you get the list in tef_fun.vn_list.  If False (the default) then vn_list = ['salt'].
 - -sect_name is a string to specify the sections to get, either a single one such as ai1, or all of them using "-sect_name all" in the command line.  The full list is in tef_fun.get_sect_df().
@@ -99,19 +98,6 @@ Since we have done the tidal averaging **qnet** is now the mean total transport 
 `bulk_plot.py` plots the results of bulk_calc.py, either as a single plot to the screen, or multiple plots to png's.  You need to edit the code to run for other years.
 
 `check_results.py` is code with hard-wired file-paths to check that all out calculations above give exactly the same results as the original LiveOcean version. RESULT: the results are identical.
-
----
-#### pm_analysis
-
-This is a folder of plotting and other code that is Parker MacCready's personal analysis code. It builds on the results of the TEF extractions.
-
-`test_freshwater.py` is a simple test of the sensitivity of freshwater transport to the value of Socn.
-
-`allSect_[*].py` are several plotting codes use the two-layer properties averaged over some time period, and plotted for all sections on one plot.
-
-`threeTide_[*].py` are several plotting codes that are customized to plot the results of three tidal manipulation experiments at once,
-
-`Qprism_series.py` plots time series of the results of bulk_calc.py, focusing on dynamical response to Qprism for a single section.
 
 ---
 #### Code for the segments between TEF sections
