@@ -10,11 +10,9 @@ This code is designed to be a flexible, and hopefully fast, tool for doing parti
 
 (1) Create the nearest neighbor search trees for your grid.  You only need to do this once for a grid, but likely will want to repeat on different machines or after updating python.  You can do this from the command line with something like:
 ```
-python make_KDTrees.py -g cas6 -gtx cas6_v3_lo8b -d 2019.07.04 -ro 2
+python make_KDTrees.py -gtx cas6_v3_lo8b -d 2019.07.04 -ro 2
 ```
 but providing the tags appropriate for your run.  This takes a few minutes and creates some pickled KDTrees in LO_output/tracker_trees/[gridname]/.
-
-You only need to do this once for a given gridname.
 
 ---
 

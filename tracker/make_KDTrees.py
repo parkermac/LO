@@ -8,7 +8,7 @@ Usage:
 
 python make_KDTrees.py (uses defaults)
 
-python make_KDTrees.py -g cas6 -gtx cas6_v3_lo8b -d 2019.07.04 -ro 2
+python make_KDTrees.py -gtx cas6_v3_lo8b -d 2019.07.04 -ro 2
 
 (** you have to be pointing it to a history file that exists **)
 
@@ -27,7 +27,6 @@ import argparse
 
 # optional command line arguments, can be input in any order
 parser = argparse.ArgumentParser()
-parser.add_argument('-g','--gridname', default='cas6', type=str)
 parser.add_argument('-gtx','--gtagex', default='cas6_v3_lo8b', type=str)
 parser.add_argument('-d', '--date_string', default='2019.07.04', type=str)
 parser.add_argument('-ro', '--roms_out_num', type=int, default=2) # 1 = Ldir['roms_out1'], etc.
@@ -48,10 +47,8 @@ if Ldir['roms_out_num'] == 0:
 elif Ldir['roms_out_num'] > 0:
     Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
 
-fn = Ldir['roms_out'] / args.gtagex / ('f' + args.date_string) / 'ocean_his_0001.nc'
-outdir0 = Ldir['LOo'] / 'tracker_trees'
-Lfun.make_dir(outdir0)
-outdir = outdir0 / args.gridname
+fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string']) / 'ocean_his_0001.nc'
+outdir = Ldir['LOo'] / 'tracker_trees' / Ldir['gridname']
 Lfun.make_dir(outdir, clean=True)
 
 G, S, T = zrfun.get_basic_info(fn)

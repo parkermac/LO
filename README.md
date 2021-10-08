@@ -108,7 +108,7 @@ Background: Here are some [INSTRUCTIONS](http://faculty.washington.edu/pmacc/Cla
 
 Check that things are working as you expect by executing `LO/lo_tools/lo_tools/Lfun.py`.  Although this is a module that you usually import, when you run it as a program it shows the contents of Ldir as screen output.  Check out the end of that code to see how this works - it is a great way to add tests to a module.
 
-NOTE: I am still uncertain about the best way to have this code work for other users who will want to do add their own analysis tools.  In principle this is supposed to be handled by the LO_user fork, but that (a) cluttered with my own analysis code, and (b) subject to constant "improvements" I may make.  Perhaps I could make LO_user more static, and then put my own analysis code in a separate directory.  A potential downside is more git pull, which is pretty minor...
+LO_user will change gradually, for example as I add my own job definitions to `LO_user/extract/box/job_definitions.py`.  But the intent of this code is that it is relatively static (my personal analysis code has all been moved to the LPM repo).
 
 ---
 
@@ -118,7 +118,7 @@ These four directories are assumed to be somewhere, all at the same level in the
 
 - LO: is this repo.
 - LO_user: is a required separate folder for information and programs specific to a given user.
-- LO_data: contains large binaries that change infrequently, especially for making grids or forcing files.  I maintain these by hand on my laptop and on my remote linux machines.
+- LO_data: contains large binaries that change infrequently, especially for making grids or forcing files.  I maintain these by hand on my laptop and on my remote linux machines. It may be advantageous for a user on those remote machines to just point to my LO_data (see `get_lo_info.py`) instead of copying to make their own.  Of course on their personal laptop they will need to make their own LO_data.
 - LO_output: is where most output from the LO code ends up, e.g. model forcing files, mooring extractions, plots, etc. It is expected that the contents will change frequently and that they are specific to a given user or machine.
 
 LO_output is typically made, if needed, by the code that writes to it. LO_user has to be made by hand (more on that below).
@@ -148,6 +148,8 @@ Grids are just identified by [gridname].
 Collections of forcing files are identified by [gridname]_[tag] which is also referred to as [gtag] or Ldir['gtag'].
 
 A specific run is identified by [gridname]_[tag]_[ex_name] which is also referred to as [gtagex] or Ldir['gtagex'].
+
+NOTE: some of the code will parse a gtagex into it constituent gridname, tag, and ex_name.  To do so it assumes these are separated by an underscore "_", so don't use underscores in any of your gridnames, tags, or ex_names.
 
 | LO | LO_output |
 | --- | --- |
