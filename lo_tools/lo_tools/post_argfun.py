@@ -54,8 +54,8 @@ def finale(Ldir, result_dict):
     else:
         result_dict['note'] = 'NONE'
         
-    s1 = ('* post=%s, day=%s, result=%s, note=%s\n' %
-        (Ldir['frc'], Ldir['date_string'], result_dict['result'], result_dict['note']))
+    s1 = ('* post_job=%s, day=%s, result=%s, note=%s\n' %
+        (Ldir['job'], Ldir['date_string'], result_dict['result'], result_dict['note']))
     
     s2 = ('  start=%s (took %d sec)\n' %
         (result_dict['start_dt'].strftime(time_format), int(total_sec)))

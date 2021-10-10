@@ -33,24 +33,25 @@ if str(pth) not in sys.path:
 import surf_fun
 
 import netCDF4 as nc
-import from lo_tools import zrfun
+from lo_tools import zrfun
 import numpy as np
 from time import time
+import os
 
 start_time = datetime.now()
 
 print(' - Creating surface file(s) for ' + Ldir['date_string'])
 f_string = 'f' + Ldir['date_string']
 
-in_dir = Ldir['roms'] / Ldir['gtagex'] / f_string
-out_dir = in_dir # output goes to same place as input
+in_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
+out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
 
 # ======== Create an output file for EDS ==================
 fn_list_raw = os.listdir(in_dir)
 fn_list = []
 for item in fn_list_raw:
     if 'ocean_his' in item and '.nc' in item:
-        fn_list.append(in_dir + item)
+        fn_list.append(in_dir / item)
 fn_list.sort()
 # shorten the list to be every 2 hours
 fn_list = fn_list[::2]
@@ -77,13 +78,13 @@ v = u.copy()
 u[:, :, 1:-1] = (u0[:, :, 1:] + u0[:, :, :-1])/2
 v[:, 1:-1, :] = (v0[:, 1:, :] + v0[:, :-1, :])/2
 #
-vv = out_ds.createVariable('u', float, ('ocean_time', 'eta_rho', 'xi_rho'))
+vv = out_ds.createVariable('u', float, ('ocean_time', 'eta_rho', 'xi_rho'), zlib=True)
 vv.long_name = 'eastward near-surface velocity'
 vv.units = 'meter second-1'
 vv.time = 'ocean_time'
 vv[:] = u
 #
-vv = out_ds.createVariable('v', float, ('ocean_time', 'eta_rho', 'xi_rho'))
+vv = out_ds.createVariable('v', float, ('ocean_time', 'eta_rho', 'xi_rho'), zlib=True)
 vv.long_name = 'northward near-surface velocity'
 vv.units = 'meter second-1'
 vv.time = 'ocean_time'
@@ -96,13 +97,10 @@ in_ds.close()
 # -------------------------------------------------------
 
 # test for success
-result_dict['result'] = 'success'
-for vn in outvar_list:
-    fn = nc_out_dict[vn]
-    if fn.is_file():
-        pass
-    else:
-       result_dict['result'] = 'fail'
+if out_fn.is_file():
+    result_dict['result'] = 'success'
+else:
+   result_dict['result'] = 'fail'
 
 # *******************************************************
 

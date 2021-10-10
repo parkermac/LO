@@ -5,7 +5,7 @@ Functions for the surface code.
 # imports
 import os
 import netCDF4 as nc
-import zfun
+from lo_tools import zfun
 
 def create_ds(out_fn):
     # get rid of the old version, if it exists
@@ -27,7 +27,7 @@ def add_dims(in_ds, out_ds):
     # Copy variables
     for vn in vn_list2:
         varin = in_ds[vn]
-        vv = out_ds.createVariable(vn, varin.dtype, varin.dimensions)
+        vv = out_ds.createVariable(vn, varin.dtype, varin.dimensions, zlib=True)
         vv.setncatts({k: varin.getncattr(k) for k in varin.ncattrs()})
         vv[:] = in_ds[vn][:]
         
@@ -35,7 +35,7 @@ def add_fields(in_ds, out_ds, vn_list2t, vn_list3t, slev=-1, suffix=''):
     # slev = 0 for bottom, -1 for top
     for vn in vn_list2t:
         varin = in_ds[vn]
-        vv = out_ds.createVariable(vn, varin.dtype, varin.dimensions)
+        vv = out_ds.createVariable(vn, varin.dtype, varin.dimensions, zlib=True)
         vv.long_name = varin.long_name
         vv.units = varin.units
         try:
@@ -56,7 +56,7 @@ def add_fields(in_ds, out_ds, vn_list2t, vn_list3t, slev=-1, suffix=''):
             print(' - Variable not found: ' + vn)
         if do_var==True:
             dd = tuple([d for d in varin.dimensions if d != 's_rho'])
-            vv = out_ds.createVariable(vn + suffix, varin.dtype, dd)
+            vv = out_ds.createVariable(vn + suffix, varin.dtype, dd, zlib=True)
             if vn == 'PH':
                 vv.long_name = 'pH'
             elif vn == 'ARAG':
