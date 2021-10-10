@@ -16,8 +16,6 @@ This is much improved from the LiveOcean version:
 - It should run on both **klone** and **mox** in the hyak system.  You need to set specifics about each machine for each user in `LO_user/get_lo_info.py`.
 - There is a new [tag_alt] logic which allows you to add new forcing variations to some existing [gtag], but do all the ROMS writing to a different [gtag]. The [tag_alt] flag refers to the existing one where the forcing is read from.
 
-NOTE: This code hardwires the fact that it is being run on mox and getting its forcing from boiler in /data1/parker/LiveOcean_output. I wonder if anyone else can run the scp steps that use "parker@boiler"?
-
 ---
 
 #### `driver_forcing.py`

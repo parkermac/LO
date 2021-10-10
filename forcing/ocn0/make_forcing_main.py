@@ -94,6 +94,7 @@ if Ldir['run_type'] == 'forecast':
     # Plan A: use ncks
     try:
         print('**** Using planA ****')
+        result_dict['note'] = 'planA'
         got_ncks = False
         got_ncks = Ofun.get_data_ncks(h_out_dir, dt0, dt1, testing_ncks)
     except Exception as e:
@@ -106,6 +107,7 @@ if Ldir['run_type'] == 'forecast':
     # Plan B: use fmrc one day at a time
     if planB == True:
         print('**** Using planB ****')
+        result_dict['note'] = 'planB'
         try:
             for dtff in dt_list_full:
                 got_fmrc = False
@@ -203,6 +205,7 @@ if planC == False:
     
 elif planC == True:
     print('**** Using planC ****')
+    result_dict['note'] = 'planC'
     ds_today = Ldir['date_string']
     dt_today = datetime.strptime(ds_today, Lfun.ds_fmt)
     dt_yesterday = dt_today - timedelta(days=1)

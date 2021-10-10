@@ -62,7 +62,11 @@ elif args.run_type == 'backfill':
 else:
     print('Error: Unknown run_type')
     sys.exit()
-print((' Running %s for %s to %s ' % (args.run_type, ds0, ds1)).center(60,'-'))
+    
+if args.run_type == 'backfill':
+    print(('Forcing: %s, %s, %s-%s ' % (args.frc, args.run_type, ds0, ds1)).center(60,'-'))
+else:
+    pass # don't clutter up the screen output for forecasts
 
 # loop over all days
 dt = dt0
@@ -70,7 +74,6 @@ while dt <= dt1:
     
     # make clean output directories
     out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + dt.strftime(Lfun.ds_fmt)) / args.frc
-    print(('Creating %s' % (str(out_dir))).center(60,'-'))
     Lfun.make_dir(out_dir, clean=True)
     Lfun.make_dir(out_dir / 'Data')
     Lfun.make_dir(out_dir / 'Info')
@@ -88,12 +91,16 @@ while dt <= dt1:
     if len(stderr) > 0:
         with open(out_dir / 'Info' / 'subprocess_error.txt', 'w') as ffout:
             ffout.write(stderr.decode())
+    
+    # this is intended to end up in the log that the cron job makes
+    res_fn = out_dir / 'Info' / 'results.txt'
+    if res_fn.is_file():
+        with open(res_fn, 'r') as fout:
+            for line in fout:
+                print(line.replace('\n',''))
+    else:
+        print('ERROR: missing results.txt file')
             
-    print('\n' + ' sdtout '.center(60,'-'))
-    print(stdout.decode())
-    print('\n' + ' stderr '.center(60,'-'))
-    print(stderr.decode())
-        
     dt += timedelta(days=1)
     print('')
     
