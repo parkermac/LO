@@ -6,11 +6,10 @@ from the history files in a given day.
 
 Testing on mac:
 
-run post_main.py -gtx cas6_v3_l08b -ro 2 -r backfill -d 2019.07.04 -job surface0
+run post_main.py -gtx cas6_v3_lo8b -ro 2 -r backfill -d 2019.07.04 -job surface0
 
-TO DO: I should really do this with a call to extract/box, e.g.
-run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt daily -job yang_sequim -test True
-
+This is fast but something is messed up with the interpolated velocity.  I don't
+trust it.
 
 """
 
@@ -54,7 +53,7 @@ for item in fn_list_raw:
         fn_list.append(in_dir / item)
 fn_list.sort()
 # shorten the list to be every 2 hours
-fn_list = fn_list[::2]
+#fn_list = fn_list[::2]
 
 # Initialize the multi-file input dataset
 in_ds = nc.MFDataset(fn_list)
@@ -73,26 +72,43 @@ surf_fun.add_fields(in_ds, out_ds, vn_list2t, vn_list3t, slev=slev)
 # - surface velocity on the rho grid
 u0 = in_ds['u'][:, slev, :, :].squeeze()
 v0 = in_ds['v'][:, slev, :, :].squeeze()
+u00 = u0.data
+u00[u0.mask] = 0
+v00 = v0.data
+v00[v0.mask] = 0
 u = np.nan * in_ds['salt'][:, slev, :, :].squeeze()
 v = u.copy()
-u[:, :, 1:-1] = (u0[:, :, 1:] + u0[:, :, :-1])/2
-v[:, 1:-1, :] = (v0[:, 1:, :] + v0[:, :-1, :])/2
+u[:, :, 1:-1] = (u00[:, :, 1:] + u00[:, :, :-1])/2
+v[:, 1:-1, :] = (v00[:, 1:, :] + v00[:, :-1, :])/2
+u[out_ds['salt'][:].mask] = np.nan
+v[out_ds['salt'][:].mask] = np.nan
+um = np.ma.masked_where(np.isnan(u), u)
+vm = np.ma.masked_where(np.isnan(v), v)
 #
 vv = out_ds.createVariable('u', float, ('ocean_time', 'eta_rho', 'xi_rho'), zlib=True)
 vv.long_name = 'eastward near-surface velocity'
 vv.units = 'meter second-1'
 vv.time = 'ocean_time'
-vv[:] = u
+vv[:] = um
 #
 vv = out_ds.createVariable('v', float, ('ocean_time', 'eta_rho', 'xi_rho'), zlib=True)
 vv.long_name = 'northward near-surface velocity'
 vv.units = 'meter second-1'
 vv.time = 'ocean_time'
-vv[:] = v
+vv[:] = vm
 # Close output Dataset
 out_ds.close()
 # Close multi-file input Dataset
 in_ds.close()
+
+print('\nContents of extracted box file:')
+# check on the results
+ds = nc.Dataset(out_fn)
+for vn in ds.variables:
+    print('%s %s max/min = %0.4f/%0.4f' % (vn, str(ds[vn][:].shape),
+        np.nanmax(ds[vn][:].data), np.nanmin(ds[vn][:].data)))
+ds.close()
+
 
 # -------------------------------------------------------
 

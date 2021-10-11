@@ -12,6 +12,11 @@ run extract_box -gtx cas6_v3_lo8b -job yang_sequim -test True
 same but with all flags:
 run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt daily -job yang_sequim -test True
 
+this command replicates what post/surface1 does
+run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -lt hourly -job surface1 -uv_to_rho True -surf True
+or
+python extract_box.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -lt hourly -job surface1 -uv_to_rho True -surf True
+
 Performance: this is very fast, takes just a few seconds for three days on boiler (for yang_sequim).
 """
 
@@ -45,6 +50,8 @@ parser.add_argument('-job', type=str) # job name
 # - cannot have both True -
 parser.add_argument('-surf', default=False, type=Lfun.boolean_string)
 parser.add_argument('-bot', default=False, type=Lfun.boolean_string)
+# set this to True to interpolate all u, and v fields to the rho-grid
+parser.add_argument('-uv_to_rho', default=False, type=Lfun.boolean_string)
 # Optional: set max number of subprocesses to run at any time
 parser.add_argument('-Nproc', type=int, default=10)
 # Optional: for testing
@@ -185,7 +192,7 @@ if Ldir['testing']:
         print('\n'+stdout.decode())
     if len(stderr) > 0:
         print('\n'+stderr.decode())
-print('Total time = %0.2f sec' % (time()- tt0))
+print('Time for initial extraction = %0.2f sec' % (time()- tt0))
 
 # add z variables
 if (Ldir['surf']==False) and (Ldir['bot']==False):
@@ -204,15 +211,78 @@ if (Ldir['surf']==False) and (Ldir['bot']==False):
         ds['z_w'][ii,:,:,:] = z_w
     ds.to_netcdf(box_fn)
     ds.close()
-    print('time to add z variables = %0.2f sec' % (time()- tt0))
+    print('Time to add z variables = %0.2f sec' % (time()- tt0))
+
+if Ldir['uv_to_rho']:
+    # interpolate anything on the u and v grids to the rho grid, assuming
+    # zero values where masked, and leaving a masked ring around the outermost edge
+    tt0 = time()
+    ds = xr.load_dataset(box_fn) # have to load in order to add new variables
+    Maskr = ds.mask_rho.values == 1 # True over water
+    NR, NC = Maskr.shape
+    for vn in ds.data_vars:
+        if ('xi_u' in ds[vn].dims) and ('ocean_time' in ds[vn].dims):
+            if len(ds[vn].dims) == 4:
+                uu = ds[vn].values
+                NT, N, NRu, NCu = uu.shape
+                uu[np.isnan(uu)] = 0
+                UU = (uu[:,:,1:-1,1:]+uu[:,:,1:-1,:-1])/2
+                uuu = np.nan * np.ones((NT, N, NR, NC))
+                uuu[:,:,1:-1,1:-1] = UU
+                Maskr3 = np.tile(Maskr.reshape(1,1,NR,NC),[NT,N,1,1])
+                uuu[~Maskr3] = np.nan
+                ds.update({vn:(('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), uuu)})
+            elif len(ds[vn].dims) == 3:
+                uu = ds[vn].values
+                NT, NRu, NCu = uu.shape
+                uu[np.isnan(uu)] = 0
+                UU = (uu[:,1:-1,1:]+uu[:,1:-1,:-1])/2
+                uuu = np.nan * np.ones((NT, NR, NC))
+                uuu[:,1:-1,1:-1] = UU
+                Maskr3 = np.tile(Maskr.reshape(1,NR,NC),[NT,1,1])
+                uuu[~Maskr3] = np.nan
+                ds.update({vn:(('ocean_time', 'eta_rho', 'xi_rho'), uuu)})
+        elif ('xi_v' in ds[vn].dims) and ('ocean_time' in ds[vn].dims):
+            if len(ds[vn].dims) == 4:
+                vv = ds[vn].values
+                NT, N, NRv, NCv = vv.shape
+                vv[np.isnan(vv)] = 0
+                VV = (vv[:,:,1:,1:-1]+vv[:,:,:-1,1:-1])/2
+                vvv = np.nan * np.ones((NT, N, NR, NC))
+                vvv[:,:,1:-1,1:-1] = VV
+                Maskr3 = np.tile(Maskr.reshape(1,1,NR,NC),[NT,N,1,1])
+                vvv[~Maskr3] = np.nan
+                ds.update({vn:(('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), vvv)})
+            elif len(ds[vn].dims) == 3:
+                vv = ds[vn].values
+                NT, NRv, NCv = vv.shape
+                vv[np.isnan(vv)] = 0
+                VV = (vv[:,1:,1:-1]+vv[:,:-1,1:-1])/2
+                vvv = np.nan * np.ones((NT, NR, NC))
+                vvv[:,1:-1,1:-1] = VV
+                Maskr3 = np.tile(Maskr.reshape(1,NR,NC),[NT,1,1])
+                vvv[~Maskr3] = np.nan
+                ds.update({vn:(('ocean_time', 'eta_rho', 'xi_rho'), vvv)})
+    ds.to_netcdf(box_fn)
+    ds.close()
+    print('Time to interpolate uv variables to rho grid = %0.2f sec' % (time()- tt0))
+
+# squeeze and compress the resulting file
+tt0 = time()
+ds = xr.load_dataset(box_fn)
+#ds = ds.squeeze() # I would do this, but it makes plotting difficult
+enc_dict = {'zlib':True, 'complevel':1}
+Enc_dict = {vn:enc_dict for vn in ds.data_vars if 'ocean_time' in ds[vn].dims}
+ds.to_netcdf(box_fn, encoding=Enc_dict)
+ds.close()
+print('Time to compress = %0.2f sec' % (time()- tt0))
 
 # clean up
-if True:
-    Lfun.make_dir(temp_dir, clean=True)
-    temp_dir.rmdir()
+Lfun.make_dir(temp_dir, clean=True)
+temp_dir.rmdir()
 
 print('Size of full rho-grid = %s' % (str(G['lon_rho'].shape)))
-print('\nContents of extracted box file:')
+print(' Contents of extracted box file: '.center(60,'-'))
 # check on the results
 ds = xr.open_dataset(box_fn)
 for vn in ds.data_vars:

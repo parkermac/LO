@@ -40,23 +40,21 @@ if int(my_choice) not in range(NT):
 else:
     nt = int(my_choice)
 
-plon, plat = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
+lon = ds.lon_rho.values
+lat = ds.lat_rho.values
+plon, plat = pfun.get_plon_plat(lon, lat)
 
 s0 = ds.salt[nt,-1,:,:].values
 rmask = ~np.isnan(s0) # True on water
 plot_uv = False
 if 'u' in ds.data_vars and 'v' in ds.data_vars:
-    u0 = ds.u[nt,-1,:,:].values
-    v0 = ds.v[nt,-1,:,:].values
-    umask = ~np.isnan(u0)
-    vmask = ~np.isnan(v0)
     plot_uv = True
 
 # PLOTTING
 
 plt.close('all')
 
-if plot_uv:
+if plot_uv and False:
     # show exact gridpoints and mask
     pfun.start_plot(figsize=(10,10))
     fig = plt.figure()
@@ -87,20 +85,10 @@ if plot_uv:
     # get velocity
     u0 = ds.u[nt,-1,:,:].values
     v0 = ds.v[nt,-1,:,:].values
-    umask = ~np.isnan(u0)
-    vmask = ~np.isnan(v0)
-    # make interpolated u and v
-    uu = u0.copy(); vv = v0.copy()
-    uu[np.isnan(uu)] = 0
-    vv[np.isnan(vv)] = 0
-    UU = (uu[1:-1,1:]+uu[1:-1,:-1])/2
-    VV = (vv[:1,1:-1] + vv[:-1,1:-1])/2
-    UU[np.isnan(s0[1:-1,1:-1])] = np.nan
-    VV[np.isnan(s0[1:-1,1:-1])] = np.nan
 
     alpha=.2
     ax.pcolormesh(plon, plat, s0, vmin=30, vmax=32, cmap='Spectral_r')
-    ax.quiver(ds.lon_rho.values[1:-1,1:-1], ds.lat_rho.values[1:-1,1:-1], UU, VV)
+    ax.quiver(lon,lat, u0, v0)
     pfun.add_coast(ax, color='b', linewidth=2)
     pfun.dar(ax)
     pad = .02

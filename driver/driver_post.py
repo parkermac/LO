@@ -120,7 +120,7 @@ for job in job_list:
     if len(stderr) > 0:
         with open(out_dir / 'Info' / 'subprocess_error.txt', 'w') as ffout:
             ffout.write(stderr.decode())
-    # this is intended to end up in the log that the cron job makes
+    # this screen output is intended to end up in the log that the cron job makes
     res_fn = out_dir / 'Info' / 'results.txt'
     if res_fn.is_file():
         with open(res_fn, 'r') as fout:
