@@ -58,7 +58,7 @@ NOTE: In the code I set a parameter npmax=300 which subsamples the full set of t
 
 `trackfun.py` is the real heart of the program.  It is a module of functions that does all steps of an experiment, typically in one-day chunks as orchestrated by the calling code `tracker.py`.
 
-**CHECK: NOTE: `tracker.py` will automatically look first for "LiveOcean_user/tracker/user_trackfun.py" which is a placeholder name in case you want to make your own edited version of the functions to do something exotic like adding diurnal cycling behavior to particles.**
+**NOTE: `tracker.py` will automatically look first for "LO_user/tracker/user_trackfun.py" which is a placeholder name in case you want to make your own edited version of the functions to do something exotic like adding diurnal cycling behavior to particles.**
 
 LIMITATIONS: Currently the code is hardwired to only save time series of particle positions, velocity, salinity and temperature.  I will need to do a bit more work to simplify adding more tracers.
 

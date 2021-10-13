@@ -31,32 +31,34 @@ import shutil
 
 start_time = datetime.now()
 
-print(' - Creating surface file(s) for ' + Ldir['date_string'])
+print(' - Creating surface file for ' + Ldir['date_string'])
 
 # this is the name of the file created by extract/box/extract_box.py
 out_dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box'
-out_fn0 = out_dir / (Ldir['job'] + '_surf_' + Ldir['date_string'] + '_' + Ldir['date_string'] + '.nc')
+out_fn0 = out_dir0 / (Ldir['job'] + '_surf_' + Ldir['date_string'] + '_' + Ldir['date_string'] + '.nc')
 
 # this it the name of the file we will copy the output to
 out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
 out_fn = out_dir / 'ocean_surface.nc'
 
+# run extract_box.py to do the actual job
 tt0 = time()
 cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'box' / 'extract_box.py'),
     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
     '-0', Ldir['date_string'], '-1', Ldir['date_string'],
-    '-lt', 'hourly', '-job', 'surface1', '-surf', 'True', '-uv_to_rho', 'True']
+    '-lt', 'allhours', '-job', 'surface1', '-surf', 'True', '-uv_to_rho', 'True']
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-
-
 stdout, stderr = proc.communicate()
 print(stdout.decode())
 if len(stderr) > 0:
     print(stderr.decode())
 print('Elapsed time = %0.2f sec' % (time()-tt0))
 
-# copy the file to the expected "post" place
-shutil.copyfile(out_fn0, out_fn)
+# move the extraction to the expected "post" place
+if Ldir['testing']:
+    shutil.copyfile(out_fn0, out_fn)
+else:
+    shutil.move(out_fn0, out_fn)
 
 # -------------------------------------------------------
 

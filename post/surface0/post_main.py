@@ -8,10 +8,14 @@ Testing on mac:
 
 run post_main.py -gtx cas6_v3_lo8b -ro 2 -r backfill -d 2019.07.04 -job surface0
 
-This is fast but something is messed up with the interpolated velocity.  I don't
-trust it.
+NOTE:This is fast but something is messed up with the interpolated velocity.
+The masking of all the variables seems bad as well.
 
+Overall I consider the results to be unreliable and so this code is deprecated.
 """
+print('Deprecated code - Exiting')
+sys.exit()
+
 
 from pathlib import Path
 import sys
@@ -76,7 +80,7 @@ u00 = u0.data
 u00[u0.mask] = 0
 v00 = v0.data
 v00[v0.mask] = 0
-u = np.nan * in_ds['salt'][:, slev, :, :].squeeze()
+u = np.nan * in_ds['salt'][:, slev, :, :].squeeze().data
 v = u.copy()
 u[:, :, 1:-1] = (u00[:, :, 1:] + u00[:, :, :-1])/2
 v[:, 1:-1, :] = (v00[:, 1:, :] + v00[:, :-1, :])/2
@@ -85,13 +89,13 @@ v[out_ds['salt'][:].mask] = np.nan
 um = np.ma.masked_where(np.isnan(u), u)
 vm = np.ma.masked_where(np.isnan(v), v)
 #
-vv = out_ds.createVariable('u', float, ('ocean_time', 'eta_rho', 'xi_rho'), zlib=True)
+vv = out_ds.createVariable('u', float, ('ocean_time', 'eta_rho', 'xi_rho'), zlib=True, fill_value=1e20)
 vv.long_name = 'eastward near-surface velocity'
 vv.units = 'meter second-1'
 vv.time = 'ocean_time'
 vv[:] = um
 #
-vv = out_ds.createVariable('v', float, ('ocean_time', 'eta_rho', 'xi_rho'), zlib=True)
+vv = out_ds.createVariable('v', float, ('ocean_time', 'eta_rho', 'xi_rho'), zlib=True, fill_value=1e20)
 vv.long_name = 'northward near-surface velocity'
 vv.units = 'meter second-1'
 vv.time = 'ocean_time'
@@ -106,7 +110,7 @@ print('\nContents of extracted box file:')
 ds = nc.Dataset(out_fn)
 for vn in ds.variables:
     print('%s %s max/min = %0.4f/%0.4f' % (vn, str(ds[vn][:].shape),
-        np.nanmax(ds[vn][:].data), np.nanmin(ds[vn][:].data)))
+        ds[vn][:].max(), ds[vn][:].min()))
 ds.close()
 
 

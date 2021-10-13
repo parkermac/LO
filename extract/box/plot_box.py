@@ -44,96 +44,75 @@ lon = ds.lon_rho.values
 lat = ds.lat_rho.values
 plon, plat = pfun.get_plon_plat(lon, lat)
 
-s0 = ds.salt[nt,-1,:,:].values
-rmask = ~np.isnan(s0) # True on water
 plot_uv = False
-if 'u' in ds.data_vars and 'v' in ds.data_vars:
+if 'u' in ds.data_vars: # assume that if we have u we have v
     plot_uv = True
+    if 'xi_u' in ds.u.dims:
+        uv_grid = 'uv'
+    elif 'xi_rho' in ds.u.dims:
+        uv_grid = 'rho'
+
+ndims = len(ds.salt.dims)
+if ndims == 3:
+    # like for a squeezed surface extraction
+    s0 = ds.salt[nt,:,:].values
+    if plot_uv:
+        u0 = ds.u[nt,:,:].values
+        v0 = ds.v[nt,:,:].values
+elif ndims == 4:
+    s0 = ds.salt[nt,-1,:,:].values
+    if plot_uv:
+        u0 = ds.u[nt,-1,:,:].values
+        v0 = ds.v[nt,-1,:,:].values
 
 # PLOTTING
 
 plt.close('all')
 
-if plot_uv and False:
-    # show exact gridpoints and mask
-    pfun.start_plot(figsize=(10,10))
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    
-    alpha=.2
-    ms = 3
-    ax.plot(ds.lon_rho.values, ds.lat_rho.values,'ok',alpha=alpha, ms=ms)
-    ax.plot(ds.lon_u.values, ds.lat_u.values,'>g',alpha=alpha, ms=ms)
-    ax.plot(ds.lon_v.values, ds.lat_v.values,'^r',alpha=alpha, ms=ms)
-    ax.plot(ds.lon_rho.values[rmask], ds.lat_rho.values[rmask],'ok', ms=ms)
-    ax.plot(ds.lon_u.values[umask], ds.lat_u.values[umask],'>g', ms=ms)
-    ax.plot(ds.lon_v.values[vmask], ds.lat_v.values[vmask],'^r', ms=ms)
-    pfun.add_coast(ax, color='b', linewidth=2)
-    pfun.dar(ax)
-    pad = .02
-    ax.axis([plon[0,0]-pad, plon[-1,-1]+pad, plat[0,0]-pad, plat[-1,-1]+pad])
-    
-    plt.show()
-    pfun.end_plot()
+pfun.start_plot(figsize=(10,10))
+fig = plt.figure()
+ax = fig.add_subplot(111)
+ax.pcolormesh(plon, plat, s0, cmap='Spectral_r')
+pfun.add_coast(ax)
+pfun.dar(ax)
+pad = .02
+ax.axis([plon[0,0]-pad, plon[-1,-1]+pad, plat[0,0]-pad, plat[-1,-1]+pad])
 
 if plot_uv:
-    # quiver plot of velocity
-    pfun.start_plot(figsize=(10,10))
+    pfun.start_plot(figsize=(20,10))
     fig = plt.figure()
-    ax = fig.add_subplot(111)
-    
-    # get velocity
-    u0 = ds.u[nt,-1,:,:].values
-    v0 = ds.v[nt,-1,:,:].values
 
-    alpha=.2
-    ax.pcolormesh(plon, plat, s0, vmin=30, vmax=32, cmap='Spectral_r')
-    ax.quiver(lon,lat, u0, v0)
-    pfun.add_coast(ax, color='b', linewidth=2)
+    ax = fig.add_subplot(121)
+    if uv_grid == 'rho':
+        ax.pcolormesh(plon, plat, u0, cmap='jet')
+        ax.set_title('u rho-grid')
+    elif uv_grid == 'uv':
+        lon = ds.lon_u.values
+        lat = ds.lat_u.values
+        plon, plat = pfun.get_plon_plat(lon, lat)
+        ax.pcolormesh(plon, plat, u0, cmap='jet')
+        ax.set_title('u u-grid')
+    pfun.add_coast(ax)
     pfun.dar(ax)
     pad = .02
     ax.axis([plon[0,0]-pad, plon[-1,-1]+pad, plat[0,0]-pad, plat[-1,-1]+pad])
-    
-    plt.show()
-    pfun.end_plot()
 
-vn = 'oxygen'
-if vn in ds.data_vars:
-    # plot another variable
-    vn = 'oxygen'
-    if vn in ds.data_vars:
-        v0 = ds[vn][nt,-1,:,:].values
-    else:
-        print('Variable %s not found' % (vn))
-        sys.exit()
-        
-    if vn == 'oxygen':
-        v0 = v0 * 32/1000
-        vmin = 0
-        vmax = 10
-        cmap = cm.oxy
-        tstr = 'Bottom DO (mg/L)'
-    
-    pfun.start_plot(figsize=(10,13))
-    fig = plt.figure()
-    ax = fig.add_subplot(111)
-    
-    alpha=.2
-    cs = ax.pcolormesh(plon, plat, v0, vmin=vmin, vmax=vmax, cmap=cmap)
-    fig.colorbar(cs, ax=ax)
-    pfun.add_coast(ax, color='k', linewidth=0.5)
+    ax = fig.add_subplot(122)
+    if uv_grid == 'rho':
+        ax.pcolormesh(plon, plat, v0, cmap='jet')
+        ax.set_title('v rho-grid')
+    elif uv_grid == 'uv':
+        lon = ds.lon_v.values
+        lat = ds.lat_v.values
+        plon, plat = pfun.get_plon_plat(lon, lat)
+        ax.pcolormesh(plon, plat, v0, cmap='jet')
+        ax.set_title('v v-grid')
+    pfun.add_coast(ax)
     pfun.dar(ax)
-    pfun.add_bathy_contours(ax, ds, depth_levs = [], txt=True)
-    
     pad = .02
     ax.axis([plon[0,0]-pad, plon[-1,-1]+pad, plat[0,0]-pad, plat[-1,-1]+pad])
-    
-    ax.text(.05, .05, ot_dt[nt].strftime(tstr + '\n%Y.%m.%d\n%H:%M:%S' + ' UTC'), transform=ax.transAxes,
-        bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
-        
-    ax.set_title(box_name)
-    
-    plt.show()
-    pfun.end_plot()
+
+plt.show()
+pfun.end_plot()
 
 ds.close()

@@ -134,7 +134,9 @@ aa, vn_list = job_definitions.get_box(Ldir['job'], Lon, Lat)
 lon0, lon1, lat0, lat1 = aa
 ilon0, ilat0 = check_bounds(lon0, lat0)
 ilon1, ilat1 = check_bounds(lon1, lat1)
+
 # NOTE: ncks indexing is zero-based but is INCLUSIVE of the last point.
+# NOTE: ncks extractions retain singleton dimensions
 
 # do the extractions
 N = len(fn_list)
@@ -270,8 +272,8 @@ if Ldir['uv_to_rho']:
 # squeeze and compress the resulting file
 tt0 = time()
 ds = xr.load_dataset(box_fn)
-#ds = ds.squeeze() # I would do this, but it makes plotting difficult
-enc_dict = {'zlib':True, 'complevel':1}
+ds = ds.squeeze() # remove singleton dimensions
+enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
 Enc_dict = {vn:enc_dict for vn in ds.data_vars if 'ocean_time' in ds[vn].dims}
 ds.to_netcdf(box_fn, encoding=Enc_dict)
 ds.close()

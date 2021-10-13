@@ -1,10 +1,10 @@
-# Notes on using klone
+# Notes on using klone and mox
 
-#### Overview: klone is one of the UW supercomputers in the hyak system.
+#### Overview: klone and mox are UW supercomputers in the hyak system.
 
-We own 400 cores (10 nodes with 40 cores each).  We are allocated 1 TB of storage for each node, so 10 TB total.
+klone: We own 400 cores (10 nodes with 40 cores each).  We are allocated 1 TB of storage for each node, so 10 TB total.  You can check to see how close we are to our quota on klone with the command `hyakalloc`.
 
-ssh to `klone.hyak.uw.edu` to get to it
+ssh to `klone.hyak.uw.edu` to get to it (similar for mox, but you can specify mox1 and mox2, or just mox).  They seem to be the same except that you might not see cron jobs on one that were set up on the other.
 
 `/gscratch/macc` is our working directory, and I have created my own directory inside that: parker.
 
@@ -14,6 +14,13 @@ When you have a job running you can check on it using
 ```
 squeue -A macc
 ```
+
+---
+
+These notes are generally specific to klone at this point, but here is a little mox-specific info:
+
+mox: we own 196 cores (7 nodes with 28 cores each) plus another 64 (2 nodes with 32 cores each).  To check on our disk allocation look in the file `/gscratch/macc/usage_report.txt`.
+
 ---
 
 #### From David Darr: klone requires only modest changes to Linux-ifort_mox.mk, renamed Linux-ifort_klone.mk (in LiveOcean_roms/LO_ROMS/Compilers).  The only difference actually is that the two instances of:

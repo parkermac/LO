@@ -5,7 +5,7 @@ It is designed only to run for a single day.
 
 Testing on mac:
 
-python driver_post.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2 -test True
+python driver_post.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2
 
 """
 
@@ -62,12 +62,8 @@ else:
 print((' Post-processing %s for %s' % (Ldir['run_type'], Ldir['date_string'])).center(60,'-'))
 
 # check that all history files are in place
-if Ldir['testing']:
-    maxcount=3
-    sleeptime=1
-else:
-    maxcount=480
-    sleeptime=60
+maxcount=480
+sleeptime=60
 his_dir = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string'])
 if Ldir['run_type'] == 'forecast':
     ndays = Ldir['forecast_days']
@@ -97,9 +93,8 @@ while all_found == False:
     else:
         sleep(sleeptime)
 
-
 # loop over all jobs
-job_list = ['surface0']
+job_list = ['surface1']
 for job in job_list:
     
     # make clean output directories (often just a place for Info)
