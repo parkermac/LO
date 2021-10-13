@@ -3,16 +3,14 @@ Plot fields in one or more history files.
 
 Examples:
 
-Plot a single figure to the screen with testing-default arguments:
-run pan_plot -gtx cas6_v3_lo8b -test True
+Plot a single figure to the screen with default arguments:
+run pan_plot
+(it will prompt for the plot type)
 
 Here is an example with explicit flags:
 run pan_plot -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -lt snapshot -pt P_Chl_DO -avl False
 
-And this is good for testing: it will prompt for plot type:
-run pan_plot -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -lt snapshot
-
-When using the default -avl True for multimple plots (e.g. when making a movie)
+When using the default -avl True for multiple plots (e.g. when making a movie)
 the color limits will all be set to match those set by auto_lims() from the first plot.
 
 Use -avl False to have color limits all set to match those set by pinfo.vlims_dict.
@@ -32,16 +30,18 @@ reload(roms_plots)
 parser = argparse.ArgumentParser()
 
 # which run to use
-parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas6_v3_l08b
-parser.add_argument('-ro', '--roms_out_num', type=int) # 2 = Ldir['roms_out2'], etc.
+parser.add_argument('-gtx', '--gtagex', default='cas6_v3_lo8b', type=str)
+parser.add_argument('-ro', '--roms_out_num', default=2, type=int)
+# 2 = Ldir['roms_out2'], etc.
 
 # select time period and frequency
-parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
-parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
-parser.add_argument('-lt', '--list_type', type=str) # list type: snapshot, hourly, or daily
+parser.add_argument('-0', '--ds0', default='2019.07.04', type=str)
+parser.add_argument('-1', '--ds1', type=str)
+parser.add_argument('-lt', '--list_type', default='snapshot', type=str)
+# snapshot, hourly, or daily
 
 # arguments that allow you to bypass the interactive choices
-parser.add_argument('-hn', '--his_num', type=int, default=1)
+parser.add_argument('-hn', '--his_num', default=1, type=int)
 parser.add_argument('-pt', '--plot_type', type=str)
 
 # arguments that influence other behavior
@@ -54,10 +54,6 @@ parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_strin
 # do things with the arguments
 args = parser.parse_args()
 argsd = args.__dict__
-for a in ['gtagex']:
-    if argsd[a] == None:
-        print('*** Missing required argument: ' + a)
-        sys.exit()
 gridname, tag, ex_name = args.gtagex.split('_')
 # get the dict Ldir
 Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
@@ -65,13 +61,6 @@ Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
 for a in argsd.keys():
     if a not in Ldir.keys():
         Ldir[a] = argsd[a]
-# testing
-if Ldir['testing']:
-    Ldir['roms_out_num'] = 2
-    Ldir['ds0'] = '2019.07.04'
-    Ldir['ds1'] = '2019.07.04'
-    Ldir['list_type'] = 'snapshot'
-    Ldir['plot_type'] = 'P_basic'
 # set second date string if omitted (need to have Ldir['ds0'])
 if Ldir['ds1'] == None:
     Ldir['ds1'] = Ldir['ds0']
