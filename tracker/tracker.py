@@ -68,10 +68,18 @@ parser = argparse.ArgumentParser()
 
 # Set the experiment name
 # (details set in experiments.py, or, if it exists, user_experiments.py)
+
+parser.add_argument('-gtx', '--gtagex', default='cas6_v3_lo8b', type=str)
+parser.add_argument('-ro', '--roms_out_num', default=2, type=int)
+# 1 = Ldir['roms_out1'], etc.
+
+# this is the first starting day
+parser.add_argument('-d', '--date_string', default='2019.07.04', type=str)
+
 parser.add_argument('-exp', '--exp_name', default='jdf0', type=str)
 parser.add_argument('-clb', '--clobber', default=False, type=zfun.boolean_string)
 # overwrite existing output folder if clobber == True
-parser.add_argument('-t', '--tag', default='', type=str)
+parser.add_argument('-sub_tag', default='', type=str)
 # append an optional tag to the end of the output folder name
 
 # These are False unless the flags are used with the argument True
@@ -87,9 +95,6 @@ parser.add_argument('-sink', default=0, type=float) # particle sinking speed (m 
 # fraction of windspeed added to advection, only for 3d=False
 parser.add_argument('-wnd', '--windage', default=0, type=float)
 
-# set the starting day
-parser.add_argument('-ds', '--ds_first_day', default='2019.07.04', type=str)
-
 # You can make multiple releases using:
 # number_of_start_days > 1 & days_between_starts, and which hour (UTC) to start on
 parser.add_argument('-nsd', '--number_of_start_days', default=1, type=int)
@@ -104,12 +109,6 @@ parser.add_argument('-sh', '--start_hour', default=0, type=int)
 parser.add_argument('-ndiv', default=12, type=int)
 parser.add_argument('-sph', default=1, type=int)
 # sph = saves per hour, a new argument to allow more frequent writing of output.
-
-# set which ROMS output directory to look in.  This allows you to choose
-# between Ldir['roms'] or Ldir['roms2'] by passing "roms" or "roms2", or any other
-# choice that eventually appears in Ldir.
-parser.add_argument('-ro', '--roms_out_num', type=int, default=2) # 1 = Ldir['roms_out1'], etc.
-# valid arguments to pass are: roms, roms2, roms3
 
 args = parser.parse_args()
 TR = args.__dict__ 
@@ -137,18 +136,16 @@ if TR['laminar']:
     TR['turb'] = False
 
 # get experiment info
-EI = exp.get_exp_info(TR['exp_name'])
-TR['gtagex'] = EI['gtagex']
-TR['gridname'] = EI['gridname']
+TR['gridname'], TR['tag'], TR['ex_name'] = TR['gtagex'].split('_')
+
 
 # pass some info to Ldir
 Ldir['gtagex'] = TR['gtagex']
 Ldir['roms_out'] = TR['roms_out']
 
 # get the full path to a valid history file
-fn00 = Ldir['roms_out'] / TR['gtagex'] / ('f' + TR['ds_first_day']) / 'ocean_his_0001.nc'
+fn00 = Ldir['roms_out'] / TR['gtagex'] / ('f' + TR['date_string']) / 'ocean_his_0001.nc'
 TR['fn00'] = fn00
-EI['fn00'] = str(fn00)
 
 # set the name of the output folder
 out_name = TR['exp_name']
@@ -170,12 +167,12 @@ if TR['no_advection'] == True:
     out_name += '_nadv'
 if TR['ndiv'] != 12: # only mention ndiv if it is NOT 12
     out_name += '_ndiv' + str(TR['ndiv'])
-if len(TR['tag']) > 0:
+if len(TR['sub_tag']) > 0:
     out_name += '_' + TR['tag']
 
 # make the list of start days (datetimes) for separate releases
 idt_list = []
-dt = datetime.strptime(TR['ds_first_day'], '%Y.%m.%d')
+dt = datetime.strptime(TR['date_string'], '%Y.%m.%d')
 for nic in range(TR['number_of_start_days']):
     idt_list.append(dt)
     dt = dt + timedelta(TR['days_between_starts'])
@@ -216,7 +213,7 @@ else:
 reload(tfun)
 
 # get the initial particle location vectors
-plon00, plat00, pcs00 = exp.get_ic(EI, fn00)
+plon00, plat00, pcs00 = exp.get_ic(TR)
 
 # step through the releases, one for each start day
 write_grid = True

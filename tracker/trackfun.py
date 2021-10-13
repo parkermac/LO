@@ -23,9 +23,13 @@ maskr_crit = 0.5 # (maskr = 1 in water, 0 on land) [0.5 seems good]
 # NEW CODE for nearest neighbor interpolation
 Ldir = Lfun.Lstart()
 
-EI = Lfun.csv_to_dict(Ldir['LOo'] / 'tracks' / 'exp_info.csv')
+TR0 = Lfun.csv_to_dict(Ldir['LOo'] / 'tracks' / 'exp_info.csv')
+# Read this in as TR0 instead of TR so as not to confuse it with the TR
+# that we pass to get_tracks() below.  The only difference is that in
+# TR0 everything has been turned into a string, whereas in get_tracks()
+# we assume everything in TR has its original dtype as set in tracker.py.
 
-G, S, T = zrfun.get_basic_info(EI['fn00'])
+G, S, T = zrfun.get_basic_info(TR0['fn00'])
 Maskr = G['mask_rho']==1 # True over water
 Masku = G['mask_u']==1 # True over water
 Maskv = G['mask_v']==1 # True over water
@@ -34,7 +38,7 @@ Masku3 = np.tile(Masku.reshape(1,G['M'],G['L']-1),[S['N'],1,1])
 Maskv3 = np.tile(Maskv.reshape(1,G['M']-1,G['L']),[S['N'],1,1])
 Maskw3 = np.tile(Maskr.reshape(1,G['M'],G['L']),[S['N']+1,1,1])
 # load pre-made trees
-tree_dir = Ldir['LOo'] / 'tracker_trees' / EI['gridname']
+tree_dir = Ldir['LOo'] / 'tracker_trees' / TR0['gridname']
 # 2D
 xyT_rho = pickle.load(open(tree_dir / 'xyT_rho.p', 'rb'))
 xyT_u = pickle.load(open(tree_dir / 'xyT_u.p', 'rb'))
@@ -370,6 +374,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 if surface == True:
                     pcs[:] = S['Cs_r'][-1]
                 P['cs'][it1,:] = pcs
+                # I could generalize this step to get an arbitrary list of tracers
                 P['salt'][it1,:] = get_VR(sf0, sf1, plon, plat, pcs, fr1, surface)
                 P['temp'][it1,:] = get_VR(tf0, tf1, plon, plat, pcs, fr1, surface)
                 P['u'][it1,:] = V3[:,0]
