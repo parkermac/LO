@@ -96,7 +96,7 @@ ax.plot(lon[-1,:], lat[-1,:], 'or', alpha=.3)
 
 # time series
 td = (ot_vec - ot_vec[0])/86400
-tv_list = ['z', 'salt', 'temp']
+tv_list = ['z', 'salt', 'temp', 'oxygen']
 #tv_list = ['u', 'v', 'lon', 'lat']
 ntv = len(tv_list)
 for ii in range(ntv):

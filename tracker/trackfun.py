@@ -17,6 +17,11 @@ import sys
 
 verbose = False
 
+# this is the full list of tracers we want to find on the track and write to output
+tracer_list_full = ['salt', 'temp', 'oxygen']
+# we trim the list below so that it only includes tracers that are present
+# in the history files
+
 # criterion for deciding if particles are on land
 maskr_crit = 0.5 # (maskr = 1 in water, 0 on land) [0.5 seems good]
 
@@ -28,6 +33,12 @@ TR0 = Lfun.csv_to_dict(Ldir['LOo'] / 'tracks' / 'exp_info.csv')
 # that we pass to get_tracks() below.  The only difference is that in
 # TR0 everything has been turned into a string, whereas in get_tracks()
 # we assume everything in TR has its original dtype as set in tracker.py.
+
+ds = xr.open_dataset(TR0['fn00'])
+tracer_list = [vn for vn in tracer_list_full if vn in ds.data_vars]
+ds.close()
+
+print(tracer_list)
 
 G, S, T = zrfun.get_basic_info(TR0['fn00'])
 Maskr = G['mask_rho']==1 # True over water
@@ -94,7 +105,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
     vn_list_vel = ['u','v','w']
     vn_list_zh = ['zeta','h']
     vn_list_wind = ['Uwind','Vwind']
-    vn_list_other = ['salt', 'temp'] + vn_list_zh + vn_list_vel
+    vn_list_other = tracer_list + vn_list_zh + vn_list_vel
     if windage > 0:
         vn_list_other = vn_list_other + vn_list_wind
     # plist_main is what ends up written to output
@@ -132,14 +143,15 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 vf0 = v0[Maskv]
                 vf1 = v1[Maskv]
                 wf0 = 0; wf1 = 0
-                s0 = ds0['salt'][0,-1,:,:].values
-                s1 = ds1['salt'][0,-1,:,:].values
-                sf0 = s0[Maskr]
-                sf1 = s1[Maskr]
-                t0 = ds0['temp'][0,-1,:,:].values
-                t1 = ds1['temp'][0,-1,:,:].values
-                tf0 = t0[Maskr]
-                tf1 = t1[Maskr]
+                
+                trf0_dict = dict()
+                trf1_dict = dict()
+                for vn in tracer_list:
+                    tr0 = ds0[vn][0,-1,:,:].values
+                    tr1 = ds1[vn][0,-1,:,:].values
+                    trf0_dict[vn] = tr0[Maskr]
+                    trf1_dict[vn] = tr1[Maskr]
+                
                 if windage > 0:
                     Uwind0 = ds0['Uwind'][0,:,:].values
                     Uwind1 = ds1['Uwind'][0,:,:].values
@@ -162,14 +174,15 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 w1 = ds1['w'][0,:,:,:].values
                 wf0 = w0[Maskw3]
                 wf1 = w1[Maskw3]
-                s0 = ds0['salt'][0,:,:,:].values
-                s1 = ds1['salt'][0,:,:,:].values
-                sf0 = s0[Maskr3]
-                sf1 = s1[Maskr3]
-                t0 = ds0['temp'][0,:,:,:].values
-                t1 = ds1['temp'][0,:,:,:].values
-                tf0 = t0[Maskr3]
-                tf1 = t1[Maskr3]
+                
+                trf0_dict = dict()
+                trf1_dict = dict()
+                for vn in tracer_list:
+                    tr0 = ds0[vn][0,:,:,:].values
+                    tr1 = ds1[vn][0,:,:,:].values
+                    trf0_dict[vn] = tr0[Maskr3]
+                    trf1_dict[vn] = tr1[Maskr3]
+                    
                 if turb == True:
                     AKs0_temp = ds0['AKs'][0,:,:,:].values
                     AKs0 = AKs0_temp.copy()
@@ -202,12 +215,12 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 vf0 = vf1.copy()
                 vf1 = v1[Maskv]
                 wf0 = 0; wf1 = 0
-                s1 = ds1['salt'][0,-1,:,:].values
-                sf0 = sf1.copy()
-                sf1 = s1[Maskr]
-                t1 = ds1['temp'][0,-1,:,:].values
-                tf0 = tf1.copy()
-                tf1 = t1[Maskr]
+                
+                for vn in tracer_list:
+                    tr1 = ds1[vn][0,-1,:,:].values
+                    trf0_dict[vn] = trf1_dict[vn].copy()
+                    trf1_dict[vn] = tr1[Maskr]
+                
                 if windage > 0:
                     Uwind1 = ds1['Uwind'][0,:,:].values
                     Uwindf0 = Uwindf1
@@ -226,12 +239,12 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     w1 = ds1['w'][0,:,:,:].values
                     wf0 = wf1.copy()
                     wf1 = w1[Maskw3]
-                    s1 = ds1['salt'][0,:,:,:].values
-                    sf0 = sf1.copy()
-                    sf1 = s1[Maskr3]
-                    t1 = ds1['temp'][0,:,:,:].values
-                    tf0 = tf1.copy()
-                    tf1 = t1[Maskr3]
+                    
+                    for vn in tracer_list:
+                        tr1 = ds1[vn][0,:,:,:].values
+                        trf0_dict[vn] = trf1_dict[vn].copy()
+                        trf1_dict[vn] = tr1[Maskr3]
+                    
                 if turb == True:
                     AKsf0 = AKsf1.copy()
                     #
@@ -265,11 +278,6 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 plon = plon0[pcond]
                 plat = plat0[pcond]
                 pcs = pcs0[pcond]
-                # # also keep only points in the domain
-                # ib_mask = in_bounds(plon, plat)
-                # plon = plon[ib_mask]
-                # plat = plat[ib_mask]
-                # pcs = pcs[ib_mask]
             else:
                 plon = plon0.copy()
                 plat = plat0.copy()
@@ -287,8 +295,10 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
             if surface == True:
                 pcs[:] = S['Cs_r'][-1]
             P['cs'][it0,:] = pcs
-            P['salt'][it0,:] = get_VR(sf0, sf1, plon, plat, pcs, 0, surface)
-            P['temp'][it0,:] = get_VR(tf0, tf1, plon, plat, pcs, 0, surface)
+            
+            for vn in tracer_list:
+                P[vn][it0,:] = get_VR(trf0_dict[vn], trf1_dict[vn], plon, plat, pcs, 0, surface)
+                
             V = get_vel(uf0,uf1,vf0,vf1,wf0,wf1, plon, plat, pcs, 0, surface)
             ZH = get_zh(zf0,zf1,hf, plon, plat, 0)
             P['u'][it0,:] = V[:,0]
@@ -335,11 +345,6 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 plon, plat, pcs = update_position(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3,
                                                   (ZH0 + 2*ZH1 + 2*ZH2 + ZH3)/6,
                                                   S, delt, plon, plat, pcs, surface)
-                # # freeze out-of-bounds particles
-                # ib_mask = in_bounds(plon, plat)
-                # plon[~ib_mask] = P['lon'][it1,~ib_mask]
-                # plat[~ib_mask] = P['lat'][it1,~ib_mask]
-                # pcs[~ib_mask] = P['cs'][it1,~ib_mask]
                 
             elif TR['no_advection'] == True:
                 V3 = np.zeros((NP,3))
@@ -348,7 +353,6 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
             # add turbulence to vertical position change (advection already added above)
             if turb == True:
                 # pull values of VdAKs and add up to 3-dimensions
-                # VdAKs = get_dAKs(AKsf0, AKsf1, zf0,zf1,hf, plon, plat, pcs, S, frmid) # OBSOLETE
                 VdAKs = get_dAKs_new(dKdzf0, dKdzf1, plon, plat, pcs, frmid)
                 VdAKs3 = np.zeros((NP,3))
                 VdAKs3[:,2] = VdAKs
@@ -374,9 +378,10 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 if surface == True:
                     pcs[:] = S['Cs_r'][-1]
                 P['cs'][it1,:] = pcs
-                # I could generalize this step to get an arbitrary list of tracers
-                P['salt'][it1,:] = get_VR(sf0, sf1, plon, plat, pcs, fr1, surface)
-                P['temp'][it1,:] = get_VR(tf0, tf1, plon, plat, pcs, fr1, surface)
+                
+                for vn in tracer_list:
+                    P[vn][it1,:] = get_VR(trf0_dict[vn], trf1_dict[vn], plon, plat, pcs, fr1, surface)
+
                 P['u'][it1,:] = V3[:,0]
                 P['v'][it1,:] = V3[:,1]
                 P['w'][it1,:] = V3[:,2]
@@ -552,40 +557,6 @@ def get_dAKs_new(dKdzf0, dKdzf1, plon, plat, pcs, frac):
     dKdzi1 = dKdzf1[xyzT_rho.query(xys, workers=-1)[1]]
     dKdzi = (1 - frac)*dKdzi0 + frac*dKdzi1
     return dKdzi
-    
-def get_dAKs(AKsf0, AKsf1, zf0,zf1,hf, plon, plat, pcs, S, frac):
-    # create diffusivity gradient for turbulence calculation
-    # OBSOLETE 2020.10.03 Replaced by get_dAKs_new()
-    DPCS = 0.03 # 0.03 (look over cs range of 2*DPCS for derivative)
-    # first time
-    ZH0 = get_zh(zf0,zf1,hf, plon, plat, 0)
-    dpcs0 = DPCS
-    pcs0u = pcs + dpcs0
-    pcs0u[pcs0u > 0] = 0
-    AKs0u = get_AKs(AKsf0, plon, plat, pcs0u)
-    z0u = pcs0u * ZH0.sum(axis=1)
-    #     lower variables
-    pcs0b = pcs - dpcs0
-    pcs0b[pcs0b < -1] = -1
-    AKs0b = get_AKs(AKsf0, plon, plat, pcs0b)
-    z0b = pcs0b * ZH0.sum(axis=1)
-    V0 = (AKs0u-AKs0b)/(z0u-z0b)
-    # second time
-    ZH1 = get_zh(zf0,zf1,hf, plon, plat, 1)
-    dpcs1 = DPCS
-    pcs1u = pcs + dpcs1
-    pcs1u[pcs1u > 0] = 0
-    AKs1u = get_AKs(AKsf1, plon, plat, pcs1u)
-    z1u = pcs1u * ZH1.sum(axis=1)
-    #     lower variables
-    pcs1b = pcs - dpcs1
-    pcs1b[pcs1b < -1] = -1
-    AKs1b = get_AKs(AKsf1, plon, plat, pcs1b)
-    z1b = pcs1b * ZH1.sum(axis=1)
-    V1 = (AKs1u-AKs1b)/(z1u-z1b)
-    # average of times
-    V = (1-frac)*V0 + frac*V1
-    return V
 
 def get_turb(dAKs, AKsf0, AKsf1, delta_t, plon, plat, pcs, frac):
     # get the vertical turbulence correction components

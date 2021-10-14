@@ -20,18 +20,17 @@ but providing the tags appropriate for your run.  This takes a few minutes and c
 
 To create the initial positions of your release you make new entries in:
 
-- get_exp_info() where you define an experiment name, associate it with the run info, and
-- get_ic() where you define the lon, lat, and fractional depth vectors for the initial conditions.  The examples like "jdf0" are the simplest ones to copy from as they just involve making a regular lon, lat grid of points near the surface (particles on land will be trimmed automatically later).  A more complex example like "HC3d" shows how to have particles evenly distributed in depth.
+- get_ic() where you define the lon, lat, and fractional depth vectors for the initial conditions associated with an experiemnt name.  The examples like "jdf0" are the simplest ones to copy from as they just involve making a regular lon, lat grid of points near the surface (particles on land will be trimmed automatically later).  A more complex example like "HC3d" shows how to have particles evenly distributed in depth.
 
 ---
 
 (3) Run `tracker.py` from the command line, with arguments that tell it which experiment to use, the start times, and some other choices like whether or not to track in 3-D.  It should be run from the linux command line because, for reasons I don't understand, the performance gets slower after repeated runs in ipython.  A typical run command might be like:
 ```
-python tracker.py -exp jdf0 -3d True -ds 2019.7.04 -dtt 2
+python tracker.py -exp jdf0 -3d True -d 2019.7.04 -dtt 2
 ```
 which would track in 3d (including turbulence by default) for two days, starting on 2019.07.04 at a bunch of locations near the surface in the Strait of Juan de Fuca.  Important choices are encoded in the name of the output directory.  If it finds an existing directory of the same name it will warn you and quit.  If you want to overwrite that directory, add "-clb True" (clobber).
 
-Look at the code near the top of `tracker.py` to see all possible arguments and their default values.  In a single experiment, for example, you can have many start days, separated by any number of days.  You can also add an optional "tag" to the end of the experiment folder name.
+Look at the code near the top of `tracker.py` to see all possible arguments and their default values.  In a single experiment, for example, you can have many start days, separated by any number of days.  You can also add an optional tag to the end of the experiment folder name.
 
 The output appears as NetCDF files in, for example:
 
@@ -65,6 +64,11 @@ LIMITATIONS: Currently the code is hardwired to only save time series of particl
 ---
 
 #### New Development Notes (most recent on top)
+
+2021.10.14:
+- added "tracer_list_full" near the top of `trackfun.py` to allow more tracers to be written to the output (and potentially used along the way).
+- entirely done in xarray
+- TO DO: `trackfun_nc.py` needs a way to automate adding tracer units and long names.  Or I could just add them all by hand.
 
 2021.10.05:
 - started refactoring for the LO code structure

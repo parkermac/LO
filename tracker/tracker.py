@@ -36,6 +36,10 @@ Examples:
 
 python tracker.py -clb True
 
+the same command, with all the argmuents typed, instead of getting the as defaults:
+
+python tracker.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -exp jdf0 -clb True
+
 """
 
 import sys
@@ -177,13 +181,8 @@ for nic in range(TR['number_of_start_days']):
     idt_list.append(dt)
     dt = dt + timedelta(TR['days_between_starts'])
 
-# make sure the output parent directory "tracks" exists
-outdir00 = Ldir['LOo']
-Lfun.make_dir(outdir00)
-outdir0 = Ldir['LOo'] / 'tracks'
-Lfun.make_dir(outdir0)
-
 # make the output directory (empty)
+outdir0 = Ldir['LOo'] / 'tracks'
 outdir1 = out_name
 outdir = outdir0 / outdir1
 if outdir.is_dir():
@@ -199,7 +198,7 @@ sys.stdout.flush()
 
 # Write some info to outdir0 for use by trackfun.py
 Lfun.dict_to_csv(TR, outdir0 / 'exp_info.csv')
-# and write the same info to outdir (gack)
+# and write the same info to outdir as part of the archived run output
 Lfun.dict_to_csv(TR, outdir / 'exp_info.csv')
 
 # Load the trackfun module.
