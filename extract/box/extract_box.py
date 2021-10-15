@@ -175,7 +175,7 @@ for ii in range(N):
         
     # Nproc controls how many ncks subprocesses we allow to stack up
     # before we require them all to finish.
-    if (np.mod(ii,Ldir['Nproc']) == 0) or (ii == N-1):
+    if ((np.mod(ii,Ldir['Nproc']) == 0) and (ii > 0)) or (ii == N-1):
         for proc in proc_list:
             proc.communicate()
         # make sure everyone is finished before continuing

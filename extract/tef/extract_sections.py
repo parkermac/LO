@@ -135,7 +135,7 @@ for ii in range(N):
     proc_list.append(proc)
     
     Nproc = Ldir['Nproc']
-    if (np.mod(ii,Nproc) == 0) or (ii == N-1):
+    if ((np.mod(ii,Nproc) == 0) and (ii > 0)) or (ii == N-1):
         tt0 = time()
         for proc in proc_list:
             proc.communicate()

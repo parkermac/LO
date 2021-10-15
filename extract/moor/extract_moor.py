@@ -172,7 +172,7 @@ for ii in range(N):
     # with Nproc = 100 on perigee, although this may slow other jobs.
     # boiler seemed to prefer a lower number, like 10.
     Nproc = Ldir['Nproc']
-    if (np.mod(ii,Nproc) == 0) or (ii == N-1):
+    if ((np.mod(ii,Nproc) == 0) and (ii > 0)) or (ii == N-1):
         for proc in proc_list:
             proc.communicate()
         # make sure everyone is finished before continuing

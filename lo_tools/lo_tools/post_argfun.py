@@ -16,6 +16,7 @@ def intro():
     parser.add_argument('-d', '--date_string', default='', type=str) # e.g. 2019.07.04
     parser.add_argument('-job', default='', type=str) # e.g. surface0
     parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+    parser.add_argument('-Nproc', type=int, default=10) # number of subprocesses to use
     # get the args and put into Ldir
     args = parser.parse_args()
     argsd = args.__dict__
