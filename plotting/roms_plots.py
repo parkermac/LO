@@ -47,7 +47,6 @@ def P_basic(in_dict):
     fig = plt.figure()
     # PLOT CODE
     vn_list = ['salt', 'temp']
-    fs = 14
     ii = 1
     for vn in vn_list:
         if in_dict['auto_vlims']:
@@ -60,6 +59,67 @@ def P_basic(in_dict):
         ax.axis(pfun.get_aa(ds))
         pfun.dar(ax)
         ax.set_title('Surface %s %s' % (pinfo.tstr_dict[vn],pinfo.units_dict[vn]), fontsize=1.2*fs)
+        ax.set_xlabel('Longitude')
+        if ii == 1:
+            ax.set_ylabel('Latitude')
+            pfun.add_info(ax, in_dict['fn'])
+            #pfun.add_windstress_flower(ax, ds)
+            pfun.add_bathy_contours(ax, ds, txt=True)
+        elif ii == 2:
+            pass
+            #pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
+        ii += 1
+    #fig.tight_layout()
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+        
+def P_dive_vort(in_dict):
+    # START
+    ds = xr.open_dataset(in_dict['fn'])
+    # find aspect ratio of the map
+    aa = pfun.get_aa(ds)
+    # AR is the aspect ratio of the map: Vertical/Horizontal
+    AR = (aa[3] - aa[2]) / (np.sin(np.pi*aa[2]/180)*(aa[1] - aa[0]))
+    fs = 14
+    hgt = 10
+    pfun.start_plot(fs=fs, figsize=(int(hgt*2.5/AR),int(hgt)))
+    fig = plt.figure()
+    
+    # create fields
+    u = ds.u[0,-1,:,:].values
+    v = ds.v[0,-1,:,:].values
+    dx = 1/ds.pm.values
+    dy = 1/ds.pn.values
+    # dive is on the trimmed rho grid
+    dive = np.diff(u[1:-1,:], axis=1)/dx[1:-1,1:-1] + np.diff(v[:,1:-1],axis=0)/dy[1:-1,1:-1]
+    # vort is on the psi grid (plot with lon_rho, lat_rho)
+    vort = np.diff(v,axis=1)/dx[1:,1:] - np.diff(u,axis=0)/dy[1:,1:]
+    
+    # I'm not sure how to propagate this to movies...
+    vv = .0015 # 2*np.nanstd(vort)
+    #pinfo.vlims_dict['vort'] = (-vv, vv)
+    
+    # PLOT CODE
+    for ii in [1,2]:
+        ax = fig.add_subplot(1, 2, ii)
+        cmap = 'RdYlBu_r'
+        if ii == 1:
+            plon, plat = pfun.get_plon_plat(ds.lon_rho[1:-1,1:-1].values, ds.lat_rho[1:-1,1:-1].values)
+            cs = plt.pcolormesh(plon, plat, dive, cmap=cmap, vmin = -vv, vmax = vv)
+            ax.set_title('Surface Divergence $[s^{-1}]$', fontsize=1.2*fs)
+        elif ii == 2:
+            cs = plt.pcolormesh(ds.lon_rho.values, ds.lat_rho.values, vort, cmap=cmap, vmin = -vv, vmax = vv)
+            ax.set_title('Surface Vorticity $[s^{-1}]$', fontsize=1.2*fs)
+        fig.colorbar(cs)
+        pfun.add_coast(ax)
+        ax.axis(aa)
+        pfun.dar(ax)
         ax.set_xlabel('Longitude')
         if ii == 1:
             ax.set_ylabel('Latitude')
