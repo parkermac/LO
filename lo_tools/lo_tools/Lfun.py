@@ -8,23 +8,26 @@ import os, sys, shutil
 from pathlib import Path 
 from datetime import datetime, timedelta
 
+# get initial version of Ldir when this module is loaded
+pth = Path(__file__).absolute().parent.parent.parent.parent / 'LO_user'
+
+print('** from Lfun.py **')
+print(str(pth))
+
+if (pth / 'get_lo_info.py').is_file():
+    if str(pth) not in sys.path:
+        sys.path.append(str(pth))
+    import get_lo_info as glo
+else:
+    print('Error from Lfun: missing LO_user/get_lo_info.py')
+    sys.exit()
+
 if False:
-    # get initial version of Ldir when this module is loaded
-    pth = Path(__file__).absolute().parent.parent.parent.parent / 'LO_user'
-    if (pth / 'get_lo_info.py').is_file():
-        if str(pth) not in sys.path:
-            sys.path.append(str(pth))
-        import get_lo_info as glo
-    else:
-        print('Error from Lfun: missing LO_user/get_lo_info.py')
-        sys.exit()
-    
-    if False:
-        from importlib import reload
-        reload(glo)
-    
-    # initialize Ldir for this module
-    Ldir = glo.Ldir0.copy()
+    from importlib import reload
+    reload(glo)
+
+# initialize Ldir for this module
+Ldir = glo.Ldir0.copy()
 
 # this it the one place where the model time reference is set
 modtime0 = datetime(1970,1,1,0,0)
