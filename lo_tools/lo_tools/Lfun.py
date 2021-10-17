@@ -11,10 +11,19 @@ from datetime import datetime, timedelta
 # get initial version of Ldir when this module is loaded
 pth = Path(__file__).absolute().parent.parent.parent.parent / 'LO_user'
 
+# debugging
 print('** from Lfun.py **')
+HOME = Path.home()
+try:
+    HOSTNAME = os.environ['HOSTNAME']
+except KeyError:
+    HOSTNAME = 'BLANK'
+# debugging
+print('HOME = ' + str(HOME))
+print('HOSTNAME = ' + HOSTNAME)
+
 
 if (pth / 'get_lo_info.py').is_file():
-    print(' getting get_lo_info.py')
     if str(pth) not in sys.path:
         sys.path.append(str(pth))
     try:
