@@ -4,7 +4,15 @@ making sure crontab works.
 
 """
 #print('hello')
-from lo_tools import Lfun
+
+from pathlib import Path
+import sys
+
+pth = Path(__file__).absolute().parent.parent / 'lo_tools' / 'lo_tools'
+if str(pth) not in sys.path:
+    sys.path.append(str(pth))
+    
+import Lfun
 Ldir = Lfun.Lstart()
 for k in Ldir.keys():
     print('%s: %s' % (k, Ldir[k]))
