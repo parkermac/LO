@@ -12,8 +12,9 @@ pth = Path(__file__).absolute().parent.parent / 'lo_tools' / 'lo_tools'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 
-print(str(pth))    
-# import Lfun
+#print(str(pth))    
+import Lfun
+print(dir(Lfun))
 # Ldir = Lfun.Lstart()
 # for k in Ldir.keys():
 #     print('%s: %s' % (k, Ldir[k]))
