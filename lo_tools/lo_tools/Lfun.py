@@ -12,12 +12,15 @@ from datetime import datetime, timedelta
 pth = Path(__file__).absolute().parent.parent.parent.parent / 'LO_user'
 
 print('** from Lfun.py **')
-print(str(pth))
 
 if (pth / 'get_lo_info.py').is_file():
+    print(' getting get_lo_info.py')
     if str(pth) not in sys.path:
         sys.path.append(str(pth))
-    import get_lo_info as glo
+    try:
+        import get_lo_info as glo
+    except Exception as e:
+        print(e)
 else:
     print('Error from Lfun: missing LO_user/get_lo_info.py')
     sys.exit()
