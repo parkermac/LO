@@ -1,3 +1,4 @@
+#!/dat1/parker/miniconda3/envs/loenv/bin/python
 """
 Code to test that we are getting the right environment, aimed at
 making sure crontab works.

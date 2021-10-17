@@ -2,7 +2,7 @@
 Module of functions for LO version of LiveOcean.
 
 This is purposely kept to a minimum of imports so that it will run with
-whatever python3 exists on the large clusters we sue for ROMS, e.g. mox and klone.
+whatever python3 exists on the large clusters we use for ROMS, e.g. mox and klone.
 """
 import os, sys, shutil
 from pathlib import Path 
