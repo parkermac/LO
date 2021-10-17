@@ -23,7 +23,7 @@ if False:
     reload(glo)
     
 # initialize Ldir for this module
-Ldir = glo.Ldir0.copy()
+#Ldir = glo.Ldir0.copy()
 
 # this it the one place where the model time reference is set
 modtime0 = datetime(1970,1,1,0,0)

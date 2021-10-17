@@ -13,8 +13,8 @@ if str(pth) not in sys.path:
     sys.path.append(str(pth))
 
 #print(str(sys.path))
-import zfun
-print(dir(zfun))
+import Lfun
+print(dir(Lfun))
 # Ldir = Lfun.Lstart()
 # for k in Ldir.keys():
 #     print('%s: %s' % (k, Ldir[k]))
