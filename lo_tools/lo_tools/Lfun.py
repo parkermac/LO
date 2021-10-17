@@ -18,10 +18,10 @@ try:
     HOSTNAME = os.environ['HOSTNAME']
 except KeyError:
     HOSTNAME = 'BLANK'
-# debugging
-print('HOME = ' + str(HOME))
-print('HOSTNAME = ' + HOSTNAME)
 
+# debugging
+# print('HOME = ' + str(HOME))
+# print('HOSTNAME = ' + HOSTNAME)
 
 if (pth / 'get_lo_info.py').is_file():
     if str(pth) not in sys.path:

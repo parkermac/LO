@@ -14,7 +14,7 @@ if str(pth) not in sys.path:
 
 #print(str(sys.path))
 import Lfun
-print(dir(Lfun))
-# Ldir = Lfun.Lstart()
-# for k in Ldir.keys():
-#     print('%s: %s' % (k, Ldir[k]))
+#print(dir(Lfun))
+Ldir = Lfun.Lstart()
+for k in Ldir.keys():
+    print('%s: %s' % (k, Ldir[k]))
