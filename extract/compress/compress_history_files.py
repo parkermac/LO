@@ -6,7 +6,8 @@ that is uncompressed, NetCDF 3.
 
 Test on mac:
 
-run compress_history_files -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -test True
+run compress_history_files -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04
+python compress_history_files.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04
 
 Performance: took 3 minutes sec to compress 1 day of cas6 on my laptop.  This is 18 hours per year.
 
@@ -21,6 +22,7 @@ from time import time
 import numpy as np
 import xarray as xr
 from time import time
+from datetime import datetime, timedelta
 
 print(' compress history files '.center(60,'='))
 
@@ -32,7 +34,6 @@ parser.add_argument('-ro', '--roms_out_num', type=int) # 2 = Ldir['roms_out2'], 
 # select time period and frequency
 parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
-parser.add_argument('-lt', '--list_type', default='hourly', type=str) # list type: hourly, daily, weekly
 # Optional: set max number of subprocesses to run at any time
 parser.add_argument('-Nproc', type=int, default=4)
 # Optional: for testing
@@ -53,9 +54,16 @@ if Ldir['roms_out_num'] == 0:
     pass
 elif Ldir['roms_out_num'] > 0:
     Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
-    
-# get list of files to work on
-fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
+
+# we build fn_list one day at a time to make sure we get all files
+dt0 = datetime.strptime(Ldir['ds0'], Lfun.ds_fmt)
+dt1 = datetime.strptime(Ldir['ds1'], Lfun.ds_fmt)
+ds_list = Lfun.date_list_utility(dt0, dt1)
+fn_list = []
+for this_ds in ds_list:
+    fn_list = fn_list + Lfun.get_fn_list('allhours', Ldir, this_ds, this_ds)
+
+# do the compression
 N = len(fn_list)
 proc_list = []
 tt0 = time()
@@ -69,11 +77,11 @@ for ii in range(N):
         for proc in proc_list:
             # make sure everyone is finished before continuing
             stdout, stderr = proc.communicate()
-            if Ldir['testing']:
-                if len(stdout) > 0:
-                    print(stdout.decode().replace('\n',''))
-                if len(stderr) > 0:
-                    print(stderr.decode())
+            if len(stdout) > 0:
+                print(stdout.decode().replace('\n',''))
+            if len(stderr) > 0:
+                print(stderr.decode())
+            sys.stdout.flush()
         proc_list = []
     ii += 1
 print('Total time to compress %d files = %0.1f sec' % (N, time()-tt0))

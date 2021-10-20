@@ -16,4 +16,4 @@ enc_dict = {'zlib':True, 'complevel':1}
 Enc_dict = {vn:enc_dict for vn in ds.data_vars if 'ocean_time' in ds[vn].dims}
 ds.to_netcdf(fn, encoding=Enc_dict)
 ds.close()
-print('- %0.1f sec to compress %s' % (time()-tt0, fn.split('/')[-1]))
+print('- %0.1f sec to compress %s/%s' % (time()-tt0, fn.split('/')[-2], fn.split('/')[-1]))
