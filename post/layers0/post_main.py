@@ -38,7 +38,7 @@ temp_dir = out_dir / 'tempfiles'
 Lfun.make_dir(temp_dir, clean=True)
 
 in_dir = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string'])
-fn_list = Lfun.get_fn_list('hourly', Ldir, Ldir['date_string'], Ldir['date_string'])
+fn_list = Lfun.get_fn_list('allhours', Ldir, Ldir['date_string'], Ldir['date_string'])
 if Ldir['testing']:
     fn_list = fn_list[:2]
 else:
