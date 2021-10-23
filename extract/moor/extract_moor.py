@@ -13,6 +13,9 @@ on perigee with cas6_v3_lo8b and all flags True, IF we use Nproc = 100.
 
 Using the more standard Nproc = 10, it takes 1.2 hours for a year on perigee.
 
+With all defaults the test cast took 30 sec on my mac, with the new compressed files.
+The same test took 55 sec on perigee with uncompressed files.
+
 """
 
 # imports
