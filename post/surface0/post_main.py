@@ -6,7 +6,7 @@ from the history files in a given day.
 
 Testing on mac:
 
-run post_main.py -gtx cas6_v3_lo8b -ro 2 -r backfill -d 2019.07.04 -job surface1
+run post_main.py -gtx cas6_v3_lo8b -ro 2 -r backfill -d 2019.07.04 -job surface0
 
 
 """
@@ -46,7 +46,7 @@ tt0 = time()
 cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'box' / 'extract_box.py'),
     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
     '-0', Ldir['date_string'], '-1', Ldir['date_string'],
-    '-lt', 'allhours', '-job', 'surface1', '-surf', 'True', '-uv_to_rho', 'True']
+    '-lt', 'allhours', '-job', 'surface0', '-surf', 'True', '-uv_to_rho', 'True']
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
 print(stdout.decode())
