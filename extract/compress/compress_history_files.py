@@ -9,7 +9,7 @@ Test on mac:
 run compress_history_files -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04
 python compress_history_files.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04
 
-Performance: took 3 minutes sec to compress 1 day of cas6 on my laptop.  This is 18 hours per year.
+Performance: took 3 minutes to compress 1 day of cas6 on my laptop.  This is 18 hours per year.
 
 """
 
