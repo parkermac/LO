@@ -26,9 +26,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--gridname', type=str, default='cas6')
 parser.add_argument('-t', '--tag', type=str, default='v3')
 parser.add_argument('-x', '--ex_name', type=str, default='lo8b')
+parser.add_argument('-yr', '--year', type=int, default=2018)
 parser.add_argument('-test', '--testing', type=zfun.boolean_string, default=False)
 args = parser.parse_args()
 testing = args.testing
+year = args.year
 
 units_dict = {'salt':'g/kg',
         'temp':'degC',
@@ -50,7 +52,6 @@ if testing:
 else:
     vol_list = ['Salish Sea', 'Puget Sound', 'Hood Canal']
 
-year = 2018
 for which_vol in vol_list:
 
     year_str = str(year)

@@ -9,7 +9,11 @@ Test on mac:
 run compress_history_files -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04
 python compress_history_files.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04
 
-Performance: took 3 minutes to compress 1 day of cas6 on my laptop.  This is 18 hours per year.
+Performance: took 3 minutes to compress 1 day of cas6 on my laptop.  This is 18 hours per year,
+however that was with Nproc = 4.  With Nproc = 10 on perigee it took 8 hours for a year of
+history files with no NPZD.  Using Nproc = 100 did not speed things up, but it did make
+perigee a bit sluggish on the command line.  Overall I think 5 sec per file might be typical
+(meaning that I am running 10 files at once and each takes 50 sec).
 
 """
 
@@ -35,7 +39,7 @@ parser.add_argument('-ro', '--roms_out_num', type=int) # 2 = Ldir['roms_out2'], 
 parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
 # Optional: set max number of subprocesses to run at any time
-parser.add_argument('-Nproc', type=int, default=4)
+parser.add_argument('-Nproc', type=int, default=10)
 # Optional: for testing
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 # get the args and put into Ldir

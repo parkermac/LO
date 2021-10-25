@@ -39,7 +39,7 @@ for vn in ds.data_vars:
     
 s = ds['salt'].values
 th = ds['temp'].values
-ox = ds['oxygen'].values
+# ox = ds['oxygen'].values
 z = ds['z_w'].values
 NT, NZ = z.shape
 Z = z.mean(axis=0)
@@ -51,15 +51,15 @@ ZZ = Z.reshape((1,NZ))*np.ones((NT,1))
 # make variables at middle times, for pcolormesh
 S = (s[1:,:] + s[:-1,:])/2
 TH = (th[1:,:] + th[:-1,:])/2
-OX = (ox[1:,:] + ox[:-1,:])/2
-
-OX = OX*32/1000 # convert uM to mg/L
+# OX = (ox[1:,:] + ox[:-1,:])/2
+#
+# OX = OX*32/1000 # convert uM to mg/L
 
 plt.close('all')
 pfun.start_plot()
 fig = plt.figure()
 
-ax = fig.add_subplot(311)
+ax = fig.add_subplot(211)
 cs = ax.pcolormesh(TT, ZZ, S, cmap=cm.haline)
 fig.colorbar(cs)
 ax.set_ylim(top=5)
@@ -67,20 +67,21 @@ ax.set_ylabel('Z [m]')
 ax.set_title(moor_name)
 ax.text(.05, .1, 'Salinity [g/kg]', c='k', weight='bold', transform=ax.transAxes)
 
-ax = fig.add_subplot(312)
+ax = fig.add_subplot(212)
 cs = ax.pcolormesh(TT, ZZ, TH, cmap=cm.balance)
 fig.colorbar(cs)
 ax.set_ylim(top=5)
 ax.set_ylabel('Z [m]')
 ax.text(.05, .1, 'Potential Temperature [deg C]', c='w', weight='bold', transform=ax.transAxes)
-
-ax = fig.add_subplot(313)
-cs = ax.pcolormesh(TT, ZZ, OX, cmap=cm.oxy, vmin=0, vmax=10)
-fig.colorbar(cs)
-ax.set_ylim(top=5)
 ax.set_xlabel('Time [days from start of record]')
-ax.set_ylabel('Z [m]')
-ax.text(.05, .1, 'Dissolved Oxygen [mg/L]', c='k', weight='bold', transform=ax.transAxes)
+
+# ax = fig.add_subplot(313)
+# cs = ax.pcolormesh(TT, ZZ, OX, cmap=cm.oxy, vmin=0, vmax=10)
+# fig.colorbar(cs)
+# ax.set_ylim(top=5)
+# ax.set_xlabel('Time [days from start of record]')
+# ax.set_ylabel('Z [m]')
+# ax.text(.05, .1, 'Dissolved Oxygen [mg/L]', c='k', weight='bold', transform=ax.transAxes)
 
 plt.show()
 
