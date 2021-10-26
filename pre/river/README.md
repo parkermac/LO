@@ -1,6 +1,6 @@
 # README for the pre/river code
 
-### This code is for gathering and processing river data, and one of the uses for the data is forcing ROMS hindccasts.
+### This code is for gathering and processing river data, and one of the uses for the data is forcing ROMS hindcasts.
 
 ### It relies on functions in the module `LO/lo_tools/lo_tools/river_functions.py`, which go out and get data from external sources: USGS, NWS Forecasts, and Environment Canada websites.  The reason for putting these in lo_tools is that they are also used by the forecast system.
 

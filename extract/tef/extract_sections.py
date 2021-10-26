@@ -8,7 +8,7 @@ results at the end, because of the tidal averaging.
 All input parameters are specified at the command line, so this can be run in the background.
 This is essential for year-long extractions.
 
-PERFORMANCE: 5 hours per year, perigee, cas6_v3_lo8b, 39 sections, all variables.  About 6.5 hours
+PERFORMANCE: 6 hours per year, perigee, cas6_v3_lo8b, 39 sections, all variables.  About 6.5 hours
 including the processing and bulk_calc steps.  2.25 hours when just extracting salt.
 
 To test on mac (default is to just get salt on section ai1):

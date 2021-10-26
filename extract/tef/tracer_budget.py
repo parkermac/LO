@@ -212,16 +212,18 @@ for which_vol in vol_list:
         tstr = which_vol + ' ' + vn + ' Budget [' + units_dict[vn] + ' m3/s]'
         C[vn][['dFnet_dt','Ftot','Fr','Source/Sink']].plot(ax=ax, grid=True, title=tstr)
         if testing:
-            plt.show()
+            pass
+            #plt.show()
         else:
             fig.savefig(out_dir / (vn + '.png'))
-            
-        # screen output
-        print('')
-        tstr = ' ' + which_vol + ' ' + vn + ' Annual Mean [' + units_dict[vn] + '] '
-        print(tstr.center(51,'='))
-        for k in Cnorm[vn].keys():
-            print('%25s %25.3f' % (k, Cnorm[vn][k]))
+
+    # text output
+    with open(out_dir / ('Annual_Mean_' + which_vol.replace(' ','_') + '_' + year_str + '.txt'), 'w') as fout:
+        for vn in C.keys():
+            tstr = ' ' + which_vol + ' ' + vn + ' Annual Mean [' + units_dict[vn] + '] '
+            fout.write(tstr.center(51,'=') + '\n')
+            for k in Cnorm[vn].keys():
+                fout.write('%25s %25.3f\n' % (k, Cnorm[vn][k]))
         
     pfun.end_plot()
 
