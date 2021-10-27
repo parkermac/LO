@@ -85,6 +85,16 @@ ds.to_netcdf(out_fn)
 dsr.close()
 ds.close()
 
+# squeeze and compress the resulting file
+tt0 = time()
+ds = xr.load_dataset(out_fn)
+ds = ds.squeeze() # remove singleton dimensions
+enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
+Enc_dict = {vn:enc_dict for vn in ds.data_vars if 's_rho' in ds[vn].dims}
+ds.to_netcdf(out_fn, encoding=Enc_dict)
+ds.close()
+print('Time to compress = %0.2f sec' % (time()- tt0))
+
 # clean up
 out_fn_raw.unlink(missing_ok=True)
 
