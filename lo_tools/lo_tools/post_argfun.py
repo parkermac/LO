@@ -38,7 +38,7 @@ def intro():
         Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
 
     # create the expected output directories if needed
-    # (a convenience when running make_forcing_main.py on its own while testing)
+    # (a convenience when running post_main.py on its own while testing)
     out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
     Lfun.make_dir(out_dir)
     Lfun.make_dir(out_dir / 'Info')
