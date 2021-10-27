@@ -204,7 +204,7 @@ if (Ldir['surf']==False) and (Ldir['bot']==False):
     ds['z_rho'] = (('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), np.nan*np.ones((NT, N, NR, NC)))
     ds['z_w'] = (('ocean_time', 's_w', 'eta_rho', 'xi_rho'), np.nan*np.ones((NT, N+1, NR, NC)))
     ds.z_rho.attrs = {'units':'m', 'long_name': 'vertical position on s_rho grid, positive up'}
-    ds.z_rho.attrs = {'units':'m', 'long_name': 'vertical position on s_w grid, positive up'}
+    ds.z_w.attrs = {'units':'m', 'long_name': 'vertical position on s_w grid, positive up'}
     for ii in range(NT):
         h = ds.h.values
         zeta = ds.zeta[ii,:,:].values

@@ -1,5 +1,6 @@
 """
-This is the main program for Susan Allen and Doug Latournell at UBC.
+This is the main program for making the extraction for for Susan Allen
+and Doug Latournell at UBC.
 
 Testing on mac:
 
@@ -19,79 +20,73 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
-# recoded for LO, 2021.10.27 PM.
-
-from lo_tools import Lfun, zfun, zrfun
-
-from importlib import reload
-import UBC_subdomain
-reload(UBC_subdomain)
-
-import os
-import numpy as np
+# imports
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
+from time import time
 import shutil
+import xarray as xr
+from lo_tools import zfun
+import numpy as np
 
-# generate a list of all the files
-in_dir = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string'])
-fn_list_raw = os.listdir(in_dir)
-fn_list = [(in_dir / ff) for ff in fn_list_raw if 'ocean_his' in ff]
-fn_list.sort()
-if len(fn_list) != 73:
-    print('Warning: We have %d history files' % (len(fn_list)))
-    
-G = zrfun.get_basic_info(fn_list[0], only_G=True)
+start_time = datetime.now()
 
-lon_vec = G['lon_rho'][0,:]
-lat_vec = G['lat_rho'][:,0]
+print(' - Creating ubc file for ' + Ldir['date_string'])
 
-# Bounds of subdomain (rho grid) from Susan Allen 2018_11
-lon0 = -125.016452048434
-lon1 = -124.494612925929
-lat0 = 48.3169463809796
-lat1 = 48.7515055163539
+# this is the name of the file created by extract/box/extract_box.py
+out_dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box'
+out_fn0 = out_dir0 / (Ldir['job'] + '_' + Ldir['date_string'] + '_' + Ldir['date_string'] + '.nc')
 
-# find indices containing these bonds
-i0, i1, ifr = zfun.get_interpolant(np.array([lon0,lon1]), lon_vec)
-j0, j1, jfr = zfun.get_interpolant(np.array([lat0,lat1]), lat_vec)
-if np.nan in ifr:
-    print('Warning: nan in ifr')
-if np.nan in jfr:
-    print('Warning: nan in jfr')
-XBS = [i0[0], i1[1]]
-YBS = [j0[0], j1[1]]
-print(XBS)
-print(YBS)
-
-# the output file name
+# this it the name of the file we will copy the output to
 out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
-out_fn = out_dir / 'ubc.nc'
+out_fn_raw = out_dir / 'UBC.nc'
+out_fn = out_dir / 'low_pass_UBC.nc'
+out_fn_raw.unlink(missing_ok=True)
 out_fn.unlink(missing_ok=True)
-    
-# make a temporary place for the output
-temp_dir = out_dir / 'ubc_temp'
-Lfun.make_dir(temp_dir, clean=True)
 
-# do the extraction for the whole list
-UBC_subdomain.get_UBC_subdomain(fn_list, temp_dir, XBS, YBS)
+# run extract_box.py to do the actual job
+tt0 = time()
+cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'box' / 'extract_box.py'),
+    '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
+    '-0', Ldir['date_string'], '-1', Ldir['date_string'],
+    '-lt', 'allhours', '-job', 'ubc0']
+proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+stdout, stderr = proc.communicate()
+print(stdout.decode())
+if len(stderr) > 0:
+    print(stderr.decode())
+print('Time for initial extraction = %0.2f sec' % (time()-tt0))
 
-# prepare for the low_pass
-out_fn_list_raw = os.listdir(temp_dir)
-out_fn_list = [(temp_dir / ff) for ff in out_fn_list_raw if 'ocean_his' in ff]
-out_fn_list.sort()
-# create the filter
-out_fn_list_short = out_fn_list[1:-1] # trim to get to 71 for a forecast
-nf = len(out_fn_list_short)
-if nf == 71:
-    print(' - Using Godin filter')
-    filt0 = zfun.godin_shape()
+# move the extraction to the expected "post" place
+if Ldir['testing']:
+    # if testing we keep the extraction around to look at
+    shutil.copyfile(out_fn0, out_fn_raw)
 else:
-    print(' - Using Hanning filter for list length = ' + str(nf))
-    filt0 = zfun.hanning_shape(nf)
-# and do the low pass
-zrfun.roms_low_pass(out_fn_list_short, out_fn, filt0, exclude=[])
+    shutil.move(out_fn0, out_fn_raw)
 
-# get rid of the temp directory
-shutil.rmtree(temp_dir, ignore_errors=True)
+# and do the low pass
+dsr = xr.load_dataset(out_fn_raw)
+ds = xr.Dataset()
+# first add a weighting filter to dsr
+NT = len(dsr.ocean_time)
+if NT == 73:
+    filt = zfun.godin_shape()
+else:
+    filt = zfun.hanning_shape(NT - 2)
+filt = np.concatenate((np.array([0]),filt,np.array([0])))
+dsr['filt'] = (('ocean_time'), filt)
+# then make weighted means and write to ds
+tt0 = time()
+for vn in dsr.data_vars:
+    ds[vn] = dsr[vn].weighted(dsr.filt).mean(dim='ocean_time', keep_attrs=True)
+print('Time to make weighted mean: %0.2f sec'% (time()- tt0))
+sys.stdout.flush()
+ds.to_netcdf(out_fn)
+dsr.close()
+ds.close()
+
+# clean up
+out_fn_raw.unlink(missing_ok=True)
 
 # -------------------------------------------------------
 

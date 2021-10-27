@@ -94,7 +94,7 @@ while all_found == False:
         sleep(sleeptime)
 
 # loop over all jobs
-job_list = ['surface1']
+job_list = ['ubc0']#['surface0']
 for job in job_list:
     
     # make clean output directories (often just a place for Info)
