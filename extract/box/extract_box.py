@@ -291,4 +291,6 @@ for vn in ds.data_vars:
     print('%s %s max/min = %0.4f/%0.4f' % (vn, str(ds[vn].shape), ds[vn].max(), ds[vn].min()))
 ds.close()
 
+print('\nPath to file:\n%s' % (str(box_fn)))
+
 

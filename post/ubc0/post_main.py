@@ -3,10 +3,10 @@ This is the main program for making the extraction for for Susan Allen
 and Doug Latournell at UBC.
 
 Testing on mac:
-run post_main.py -gtx cas6_v3_lo8b -ro 2 -r backfill -d 2019.07.04 -job ubc0
+run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -job ubc0
 
 Test on apogee
-run post_main.py -gtx cas6_v0_u0kb -ro 0 -r backfill -d 2021.10.28 -job ubc0
+run post_main.py -gtx cas6_v0_u0kb -ro 0 -d 2021.10.28 -job ubc0
 
 """
 
@@ -21,8 +21,6 @@ result_dict = dict()
 result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
-
-# Note: -r --run_type is a required argument, but is not used here
 
 # imports
 from subprocess import Popen as Po
