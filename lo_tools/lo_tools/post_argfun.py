@@ -12,15 +12,15 @@ def intro():
     parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas6_v3_l08b
     parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
     # select time period and frequency
-    parser.add_argument('-r', '--run_type', type=str)   # backfill or forecast
-    parser.add_argument('-d', '--date_string', default='', type=str) # e.g. 2019.07.04
+    parser.add_argument('-r', '--run_type', type=str, default='')   # backfill or forecast
+    parser.add_argument('-d', '--date_string', type=str) # e.g. 2019.07.04
     parser.add_argument('-job', default='', type=str) # e.g. surface0
     parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
     parser.add_argument('-Nproc', type=int, default=10) # number of subprocesses to use
     # get the args and put into Ldir
     args = parser.parse_args()
     argsd = args.__dict__
-    for a in ['gtagex', 'roms_out_num', 'run_type', 'date_string', 'testing', 'job']:
+    for a in ['gtagex', 'roms_out_num', 'date_string', 'testing', 'job']:
         if argsd[a] == None:
             print('*** Missing required argument to forcing_argfun.intro(): ' + a)
             sys.exit()
