@@ -220,3 +220,6 @@ Lfun.make_dir(temp_dir, clean=True)
 temp_dir.rmdir()
 
 print('Total Elapsed time was %0.2f sec' % (time()-tt00))
+
+print('\nPath to file:\n%s' % (str(moor_fn)))
+

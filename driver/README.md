@@ -1,6 +1,11 @@
 # README for driver
 
-### This code is the drivers for creating forcing, running ROMS, and other jobs that require us to control complex, repetitive tasks, either for a single forecast or for a long series of days.
+### This code is the drivers for creating forcing, running ROMS, post-processing, and other jobs that require us to control complex, repetitive tasks, either for a single forecast or for a long series of days.
+
+---
+#### `driver_forcing.py`
+
+This runs any of the forcing jobs, for one or more days, for any [gtag].
 
 ---
 
@@ -18,6 +23,12 @@ This is much improved from the LiveOcean version:
 
 ---
 
-#### `driver_forcing.py`
+#### `driver_post.py`
 
-This runs any of the forcing jobs, for one or more days, for any [gtag].
+This is for running all the post-processing jobs.  It is mainly aimed at the daily forecast.  It checks to see that all expected history files are in place before beginning.
+
+---
+
+`copy_to_azure.py` is a utility to copy a file like a box extraction to azure for sharing.
+
+`test_Ldir.py` is a tool to test what is in Ldir. It avoids the use of the lo_tools package so it can run on the hyak clusters (mox and klone), and cron.

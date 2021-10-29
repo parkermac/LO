@@ -60,6 +60,8 @@ if Ldir['testing']:
 else:
     shutil.move(out_fn0, out_fn)
 
+print('\nPath to file:\n%s' % (str(out_fn)))
+
 # -------------------------------------------------------
 
 # test for success

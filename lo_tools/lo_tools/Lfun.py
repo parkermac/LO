@@ -232,43 +232,6 @@ def choose_item(in_dir, tag='', exclude_tag='',
     my_item = idict[int(my_choice)]
     return my_item
     
-def copy_to_azure(input_filename, output_filename, container_name, Ldir):
-    """
-    Copy the file to azure, and return the URL to access the file.
-    """
-    # get the blob_service
-    from azure.storage.blob import BlobServiceClient
-    from azure.storage.blob import PublicAccess
-    account_fn = Ldir['data'] / 'accounts' / 'azure_pm_2015.05.25.txt'
-    with account_fn.open() as aa:
-        # make sure to strip newline characters
-        account = aa.readline().strip()
-        key = aa.readline().strip()
-    connection_string = ('DefaultEndpointsProtocol=https' +
-        ';AccountName=' + account +
-        ';AccountKey=' + key + 
-        ';EndpointSuffix=core.windows.net')
-    blob_service = BlobServiceClient.from_connection_string(conn_str=connection_string)
-    try: # create the container if needed
-        blob_service.create_container(container_name, public_access=PublicAccess.Container)
-    except:
-        pass # assume error is because container exists
-    az_dict = {}
-    try: # write it to Azure and return a dict of information
-        from azure.storage.blob import BlobClient
-        blob = BlobClient.from_connection_string(conn_str=connection_string,
-            container_name=container_name, blob_name=output_filename)
-        with input_filename.open('rb') as data:
-            blob.upload_blob(data, overwrite=True)
-        az_dict['result'] = 'success'
-        az_url = ('https://pm2.blob.core.windows.net/'
-            + container_name + '/' + output_filename)
-        az_dict['az_url'] = az_url # URL to get the file
-    except Exception as e:
-        az_dict['result'] = 'fail'
-        az_dict['exception'] = str(e)
-    return az_dict
-    
 def dict_to_csv(in_dict, out_fn):
     """
     Writes a dict to a csv file.

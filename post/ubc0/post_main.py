@@ -100,6 +100,8 @@ print('Time to compress = %0.2f sec' % (time()- tt0))
 # clean up
 out_fn_raw.unlink(missing_ok=True)
 
+print('\nPath to file:\n%s' % (str(out_fn)))
+
 # -------------------------------------------------------
 
 # test for success

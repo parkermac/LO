@@ -93,6 +93,8 @@ print('Time for full layers extraction = %0.2f sec' % (time()- tt0))
 if not Ldir['testing']:
     Lfun.make_dir(temp_dir, clean=True)
 
+print('\nPath to file:\n%s' % (str(out_fn)))
+
 # -------------------------------------------------------
 
 # test for success
