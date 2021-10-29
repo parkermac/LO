@@ -2,52 +2,54 @@
 Module of basic utilities for plotting.  The goal is to make the code in
 pfun less cumbersome to write and edit.
 
+I don't like that this duplicates many of the function in lo_tools/plotting_functions.
+However this is value for the daymovie job in having the movie generation not be affected
+by changes I make to plotting_functions.
+
 """
-
-# setup
-import os, sys
-sys.path.append(os.path.abspath('../alpha'))
-import Lfun
-Ldir = Lfun.Lstart()
-import zrfun
-import zfun
-import netCDF4 as nc
-
 import numpy as np
 from datetime import datetime, timedelta
 import pytz
+import pandas as pd
+
+from lo_tools import Lfun, zfun, zrfun
+import xarray as xr
 
 import ephem_functions as efun
+import pinfo
 
+Ldir = Lfun.Lstart()
 if Ldir['lo_env'] == 'pm_mac': # mac version
     pass
 else: # regular (remote, linux) version
     import matplotlib as mpl
     mpl.use('Agg')
-
 import matplotlib.pyplot as plt
-import pandas as pd
-import pinfo
 
 from warnings import filterwarnings
 filterwarnings('ignore') # skip some warning messages
 
 def get_tracks(Q, Ldir):
     if Q['test'] == False:
-        dt0 = datetime.strptime(Q['ds0'],'%Y.%m.%d')
-        dt1 = datetime.strptime(Q['ds1'],'%Y.%m.%d')
+        dt0 = datetime.strptime(Q['ds0'],Lfun.ds_fmt)
+        dt1 = datetime.strptime(Q['ds1'],Lfun.ds_fmt)
         dtt = (dt1-dt0).days + 1
         import subprocess
-        cmd = ['python', '../tracker/tracker.py', '-exp', Q['exp'],
-            '-ds', Q['ds0'], '-dtt', str(dtt), '-t', Q['ttag'], '-clb', 'True']
+        
+        # python tracker.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -exp jdf0 -clb True
+        cmd = ['python', str(Ldir['LO']) + '/tracker/tracker.py',
+            '-gtx', Ldir['gtagex'], '-ro', Ldir['roms_out_num'],
+            '-d', Q['ds0'], '-dtt', str(dtt),
+            '-exp', Q['exp'],
+            '-t', Q['ttag'], '-clb', 'True']
         #print(cmd)
         proc = subprocess.Popen(cmd)
         proc.communicate()
     else:
         # using test = True allows us to use pre-calculated tracks
         pass
-    tr_fn = Ldir['LOo'] + 'tracks/' + Q['exp'] + '_surf_' + Q['ttag'] + '/release_' + Q['ds0'] + '.nc'
-    #print(tr_fn)
+    tr_fn = Ldir['LOo'] / 'tracks' / (Q['exp'] + '_surf_' + Q['ttag']) / ('release_' + Q['ds0'] + '.nc')
+    #print(str(tr_fn))
     Q['tr_fn'] = tr_fn
     
 def get_speed(ds, nlev):

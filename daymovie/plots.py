@@ -4,25 +4,20 @@ Module of plotting functions.
 
 # imports
 
-# The calling function, p5.py, has already put alpha on the path.
-import Lfun
+from lo_tools import Lfun, zfun, zrfun
 Ldir = Lfun.Lstart()
 if Ldir['lo_env'] == 'pm_mac': # mac version
     pass
 else: # remote linux version
     import matplotlib as mpl
     mpl.use('Agg')
-import zfun
-import zrfun
 
 from importlib import reload
-import pfun
-reload(pfun)
-import pinfo
-reload(pinfo)
+import pfun; reload(pfun)
+import pinfo; reload(pinfo)
 
 import numpy as np
-import netCDF4 as nc
+import xarray as xr
 import matplotlib.pyplot as plt
 from datetime import datetime, timedelta
 import pandas as pd
@@ -33,7 +28,7 @@ def P1(Q, M):
     fs=18
     plt.rc('font', size=fs)
     
-    ds = nc.Dataset(Q['fn'])
+    ds = xr.open_dataset(Q['fn'])
     if Q['dom'] == 'full':
         Q['aa'] = pfun.get_aa(ds)
     aa = Q['aa']
@@ -46,8 +41,8 @@ def P1(Q, M):
         nlev = -1
         tstr = 'Surface'
         
-    px = ds['lon_psi'][:]
-    py = ds['lat_psi'][:]
+    px = ds['lon_psi'].values
+    py = ds['lat_psi'].values
     if vn == 'speed':
         fld = pfun.get_speed(ds, nlev)
     elif vn == 'ARAG':

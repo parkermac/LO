@@ -8,10 +8,11 @@ run p5 -tracks True -mov True -lt hourly
 
 """
 
-import os, sys
 import argparse
 import numpy as np
 from datetime import datetime, timedelta
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
 
 from lo_tools import Lfun
 
@@ -83,15 +84,14 @@ if len(fn_list) == 1:
     
 elif len(fn_list) > 1:
     # prepare a directory for results
-    outdir0 = Ldir['LOo'] / 'p5' / Ldir['gtagex']
-    Lfun.make_dir(outdir0, clean=False)
+    outdir0 = Ldir['LOo'] / 'daymovie' / Ldir['gtagex']
+    Lfun.make_dir(outdir0)
     if Q['bot'] == True:
         bot_tag = 'bot'
     else:
         bot_tag = 'top'
-        
     moviename = Q['pt'] + '_' + Q['dom'] + '_' + Q['vn'] + '_' + bot_tag
-    outdir = outdir0 + moviename + '/'
+    outdir = outdir0 / moviename
     Lfun.make_dir(outdir, clean=True)
     # plot to a folder of files
     jj = 0
@@ -109,7 +109,12 @@ elif len(fn_list) > 1:
         jj += 1
     # and make a movie
     if Q['mov']:
-        ff_str = ("ffmpeg -r 8 -i " + 
-            outdir + "plot_%04d.png -vcodec libx264 -pix_fmt yuv420p -crf 25 "
-            + outdir + moviename + ".mp4")
-        os.system(ff_str)
+        cmd_list = ['ffmpeg','-r','8','-i', str(outdir)+'/plot_%04d.png', '-vcodec', 'libx264',
+            '-pix_fmt', 'yuv420p', '-crf', '25', str(outdir)+'/movie.mp4']
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        if len(stdout) > 0:
+            print('\n'+stdout.decode())
+        if len(stderr) > 0:
+            print('\n'+stderr.decode())
+        
