@@ -352,7 +352,7 @@ def add_wind(ax, M, T):
     # scl is windspeed [knots] for a 1 inch circle or arrow
     # this makes a circle 1 inch (72 points) in radius
     # and a vector 1 inch long for a windspeed of "scl" knots
-    iot = zfun.find_nearest_ind(M['ot'], Lfun.datetime_to_modtime(T['dt'][0]))
+    iot = zfun.find_nearest_ind(M['ot'], T['ocean_time'])
     uwind = M['uwind'][iot]
     vwind = M['vwind'][iot]
     ax.plot(M['lon'],M['lat'],'o', ms=144, mfc='None', mec='k', mew=1.5, alpha=.6)
