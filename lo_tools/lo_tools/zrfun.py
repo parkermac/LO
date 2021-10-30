@@ -7,6 +7,7 @@ Module of functions specific to ROMS.
 import xarray as xr
 import numpy as np
 import pandas as pd
+from lo_tools import Lfun
 
 def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
     """
@@ -46,6 +47,7 @@ def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
         T['ot'] = ot
         T['dti'] = dti
         T['dt'] = dt
+        T['ocean_time'] = Lfun.datetime_to_modtime(dt[0]) # a single float, seconds since...
         return T
     # return results
     if only_G:

@@ -3,8 +3,8 @@ Plot fields in one or more history files.
 
 Testing calls from ipython on mac:
 
-run p5
-run p5 -tracks True -mov True -lt hourly
+run dm_plot
+run dm_plot -tracks True -mov True -lt hourly
 
 """
 
@@ -18,7 +18,7 @@ from lo_tools import Lfun
 
 from importlib import reload
 import plots; reload(plots)
-import pfun; reload(pfun)
+import dm_pfun; reload(dm_pfun)
 import pinfo; reload(pinfo)
 
 import matplotlib.pyplot as plt
@@ -26,9 +26,8 @@ plt.close('all')
 
 parser = argparse.ArgumentParser()
 # standard arguments
-parser.add_argument('-gridname', type=str, default='cas6')
-parser.add_argument('-tag', type=str, default='v3')
-parser.add_argument('-ex_name', type=str, default='lo8b')
+parser.add_argument('-gtx', '--gtagex', type=str, default='cas6_v3_lo8b')
+parser.add_argument('-ro', '--roms_out_num', type=int, default=2)
 parser.add_argument('-ds0', type=str, default='2019.07.04')
 parser.add_argument('-ds1', type=str, default='')
 # arguments that allow you to bypass the interactive choices
@@ -50,10 +49,20 @@ Q = args.__dict__
 
 if len(Q['ds1']) == 0:
     Q['ds1'] = Q['ds0']
-    
-Ldir = Lfun.Lstart(args.gridname, args.tag)
-Ldir['gtagex'] = Ldir['gtag'] + '_' + Q['ex_name']
 
+gridname, tag, ex_name = args.gtagex.split('_')
+# get the dict Ldir
+Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
+# add more entries to Ldir
+for a in Q.keys():
+    if a not in Ldir.keys():
+        Ldir[a] = Q[a]
+# set where to look for model output
+if Ldir['roms_out_num'] == 0:
+    pass
+elif Ldir['roms_out_num'] > 0:
+    Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
+    
 whichplot = getattr(plots, Q['pt'])
 
 # get list of history files to plot
@@ -61,17 +70,17 @@ ds0 = Q['ds0']
 ds1 = Q['ds1']
 fn_list = Lfun.get_fn_list(Q['lt'], Ldir, ds0, ds1, his_num=Q['hn'])
 
-pfun.get_ax_limits(Q)
+dm_pfun.get_ax_limits(Q)
 
 if Q['avl'] == False:
     Q['vmin'] = pinfo.vlims_dict[Q['vn']][0]
     Q['vmax'] = pinfo.vlims_dict[Q['vn']][1]
 
-M = pfun.get_moor_info(Q)
-pfun.get_moor(ds0, ds1, Ldir, Q, M)
+M = dm_pfun.get_moor_info(Q)
+dm_pfun.get_moor(ds0, ds1, Ldir, Q, M)
 
 if Q['tracks']:
-    pfun.get_tracks(Q, Ldir)
+    dm_pfun.get_tracks(Q, Ldir)
 
 # PLOTTING
 

@@ -53,15 +53,14 @@ def get_tracks(Q, Ldir):
     Q['tr_fn'] = tr_fn
     
 def get_speed(ds, nlev):
-    u = ds['u'][0,nlev,:,:]
-    v = ds['v'][0,nlev,:,:]
-    u[u.mask] = 0
-    v[v.mask] = 0
-    fld0 = 0 * ds['salt'][0,-1,1:-1,1:-1]
+    u = ds['u'][0,nlev,:,:].values
+    v = ds['v'][0,nlev,:,:].values
+    u[np.isnan(u)] = 0
+    v[np.isnan(v)] = 0
     uu = (u[1:-1,:-1] + u[1:-1,1:])/2
     vv = (v[:-1,1:-1] + v[1:,1:-1])/2
     fld = np.sqrt(uu*uu + vv*vv)
-    fld = np.ma.masked_where(fld0.mask, fld)
+    fld = np.ma.masked_where(ds.mask_rho[1:-1,1:-1].values == 0, fld)
     return fld
 
 def get_arag(ds, Q, aa, nlev):
@@ -73,14 +72,13 @@ def get_arag(ds, Q, aa, nlev):
     i1 = zfun.find_nearest_ind(G['lon_rho'][0,:], aa[1]) + 2
     j0 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[2]) - 1
     j1 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[3]) + 2
-    px = G['lon_psi'][j0:j1-1, i0:i1-1]
-    py = G['lat_psi'][j0:j1-1, i0:i1-1]
+    px, py = pfun.get_plon_plat(G['lon_rho'][j0:j1,i0:i1], G['lat_rho'][j0:j1,i0:i1])
     lat = G['lat_rho'][j0:j1,i0:i1] # used in sw.pres
     # first extract needed fields and save in v_dict
     v_dict = {}
     vn_in_list = ['temp', 'salt' , 'rho', 'alkalinity', 'TIC']
     for cvn in vn_in_list:
-        L = zfun.fillit(ds[cvn][0,nlev,j0:j1,i0:i1])
+        L = ds[cvn][0,nlev,j0:j1,i0:i1].values
         v_dict[cvn] = L
     # ------------- the CO2SYS steps -------------------------
     # create pressure
@@ -100,7 +98,7 @@ def get_arag(ds, Q, aa, nlev):
     # PH = CO2dict['pHout']
     # PH = zfun.fillit(PH.reshape((v_dict['salt'].shape)))
     ARAG = CO2dict['OmegaARout']
-    ARAG = zfun.fillit(ARAG.reshape((v_dict['salt'].shape)))
+    ARAG = ARAG.reshape((v_dict['salt'].shape))
     fld = ARAG[1:-1, 1:-1]
     return px, py, fld
 
@@ -181,7 +179,7 @@ def plot_time_series(ax, M, T):
         '-3', va='center', ha='center', c='gray', weight='bold')
     ax.set_yticks([])    
     ax.set_xticks([])
-    dt_local = get_dt_local(T['tm'])
+    dt_local = get_dt_local(T['dt'][0])
     ax.text(.05,.07, datetime.strftime(dt_local,'%m/%d/%Y - %I%p')+' '+dt_local.tzname(),
         transform=ax.transAxes)
     ax.text(.95,.97, 'Sea Surface Height [ft]', ha='right', va='top', style='italic', c='k',
@@ -218,19 +216,19 @@ def get_moor(ds0, ds1, Ldir, Q, M):
     mj = zfun.find_nearest_ind(G['lat_rho'][:,0], M['lat'])
     for fn in m_fn_list:
         T = zrfun.get_basic_info(fn, only_T=True)
-        dt_list.append(T['tm'])
-        ds = nc.Dataset(fn)
-        ot_list.append(ds['ocean_time'][0])
-        zeta_list.append(ds['zeta'][0,mj,mi])
-        uwind_list.append(ds['Uwind'][0,mj,mi])
-        vwind_list.append(ds['Vwind'][0,mj,mi])
+        dt_list.append(T['dt'][0])
+        ds = xr.open_dataset(fn, decode_times=False)
+        ot_list.append(ds['ocean_time'][0].values)
+        zeta_list.append(ds['zeta'][0,mj,mi].values)
+        uwind_list.append(ds['Uwind'][0,mj,mi].values)
+        vwind_list.append(ds['Vwind'][0,mj,mi].values)
         ds.close()
     ot = zfun.fillit(np.array(ot_list))
     zeta = zfun.fillit(np.array(zeta_list))
     uwind = zfun.fillit(np.array(uwind_list))
     vwind = zfun.fillit(np.array(vwind_list))
-    uwind = zfun.filt_hanning(uwind, n=5, nanpad=False)
-    vwind = zfun.filt_hanning(vwind, n=5, nanpad=False)
+    uwind = zfun.lowpass(uwind, n=5, nanpad=False)
+    vwind = zfun.lowpass(vwind, n=5, nanpad=False)
     M['ot'] = ot
     M['zeta'] = zeta
     M['uwind'] = uwind
@@ -244,18 +242,18 @@ def get_moor(ds0, ds1, Ldir, Q, M):
     M['Srise'] = Srise
     M['Sset'] = Sset
 
-def dar(ax):
-    """
-    Fixes the plot aspect ratio to be locally Cartesian.
-    """
-    yl = ax.get_ylim()
-    yav = (yl[0] + yl[1])/2
-    ax.set_aspect(1/np.cos(np.pi*yav/180))
+# def dar(ax):
+#     """
+#     Fixes the plot aspect ratio to be locally Cartesian.
+#     """
+#     yl = ax.get_ylim()
+#     yav = (yl[0] + yl[1])/2
+#     ax.set_aspect(1/np.cos(np.pi*yav/180))
 
-def add_coast(ax, dir0=Ldir['data'], color='k', lw=0.5):
-    fn = dir0 + 'coast/coast_pnw.p'
-    C = pd.read_pickle(fn)
-    ax.plot(C['lon'].values, C['lat'].values, '-', color=color, linewidth=lw)
+# def add_coast(ax, dir0=Ldir['data'], color='k', lw=0.5):
+#     fn = dir0 + 'coast/coast_pnw.p'
+#     C = pd.read_pickle(fn)
+#     ax.plot(C['lon'].values, C['lat'].values, '-', color=color, linewidth=lw)
 
 def mask_edges(ds, fld, Q):
     # mask off selected edges, e.g. for NPZD variables
@@ -272,8 +270,8 @@ def mask_edges(ds, fld, Q):
 
 def get_vlims(ds, fld, Q):
     # mask to help with choosing color limits
-    xr = ds['lon_rho'][1:-1,1:-1]
-    yr = ds['lat_rho'][1:-1,1:-1]
+    xr = ds['lon_rho'].values
+    yr = ds['lat_rho'].values
     aa = Q['aa']
     fld = np.ma.masked_where(xr<aa[0], fld)
     fld = np.ma.masked_where(xr>aa[1], fld)
@@ -304,9 +302,9 @@ def get_units(ds, vn):
 
 def add_bathy_contours(ax, ds, depth_levs = [200], txt=False, c='k', lw=0.5):
     # this should work with ds being a history file Dataset, or the G dict.
-    h = ds['h'][:]
-    lon = ds['lon_rho'][:]
-    lat = ds['lat_rho'][:]
+    h = ds['h'].values
+    lon = ds['lon_rho'].values
+    lat = ds['lat_rho'].values
     c = c
     ax.contour(lon, lat, h, depth_levs, colors=c, linewidths=lw)
     if txt==True:
@@ -321,19 +319,19 @@ def add_velocity_vectors(ax, aa, ds, fn, v_scl=3, nngrid=80, zlev='top'):
     # GET DATA
     G = zrfun.get_basic_info(fn, only_G=True)
     if zlev == 'top':
-        u = ds['u'][0, -1, :, :].squeeze()
-        v = ds['v'][0, -1, :, :].squeeze()
+        u = ds['u'][0, -1, :, :].values
+        v = ds['v'][0, -1, :, :].values
     elif zlev == 'bot':
-        u = ds['u'][0, 0, :, :].squeeze()
-        v = ds['v'][0, 0, :, :].squeeze()
+        u = ds['u'][0, 0, :, :].values
+        v = ds['v'][0, 0, :, :].values
     # ADD VELOCITY VECTORS
     # set masked values to 0
-    ud = u.data; ud[u.mask]=0
-    vd = v.data; vd[v.mask]=0
+    u[np.isnan(u)]=0
+    v[np.isnan(v)]=0
     # create interpolant
     import scipy.interpolate as intp
-    ui = intp.interp2d(G['lon_u'][0, :], G['lat_u'][:, 0], ud)
-    vi = intp.interp2d(G['lon_v'][0, :], G['lat_v'][:, 0], vd)
+    ui = intp.interp2d(G['lon_u'][0, :], G['lat_u'][:, 0], u)
+    vi = intp.interp2d(G['lon_v'][0, :], G['lat_v'][:, 0], v)
     # create regular grid
     daax = aa[1] - aa[0]
     daay = aa[3] - aa[2]
@@ -354,7 +352,7 @@ def add_wind(ax, M, T):
     # scl is windspeed [knots] for a 1 inch circle or arrow
     # this makes a circle 1 inch (72 points) in radius
     # and a vector 1 inch long for a windspeed of "scl" knots
-    iot = zfun.find_nearest_ind(M['ot'], T['ocean_time'])
+    iot = zfun.find_nearest_ind(M['ot'], Lfun.datetime_to_modtime(T['dt'][0]))
     uwind = M['uwind'][iot]
     vwind = M['vwind'][iot]
     ax.plot(M['lon'],M['lat'],'o', ms=144, mfc='None', mec='k', mew=1.5, alpha=.6)
@@ -375,7 +373,7 @@ def add_wind_text(ax, aa, M, fs):
 def add_info(ax, fn, fs=12, loc='lower_right'):
     # put info on plot
     T = zrfun.get_basic_info(fn, only_T=True)
-    dt_local = get_dt_local(T['tm'])
+    dt_local = get_dt_local(T['dt'][0])
     if loc == 'lower_right':
         ax.text(.95, .075, dt_local.strftime('%Y-%m-%d'),
             horizontalalignment='right' , verticalalignment='bottom',
@@ -401,11 +399,11 @@ def get_dt_local(dt, tzl='US/Pacific'):
     dt_local = dt_utc.astimezone(tz_local)
     return dt_local
 
-def get_aa(ds):
-    x = ds['lon_psi'][0,:]
-    y = ds['lat_psi'][:,0]
-    aa = [x[0], x[-1], y[0], y[-1]]
-    return aa
+# def get_aa(ds):
+#     x = ds['lon_psi'][0,:]
+#     y = ds['lat_psi'][:,0]
+#     aa = [x[0], x[-1], y[0], y[-1]]
+#     return aa
 
 def draw_box(ax, aa, linestyle='-', color='k', alpha=1, linewidth=.5, inset=0):
     aa = [aa[0]+inset, aa[1]-inset, aa[2]+inset, aa[3]-inset]
