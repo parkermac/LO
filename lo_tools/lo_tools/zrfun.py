@@ -40,14 +40,13 @@ def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
         S['N'] = len(S['s_rho']) # number of vertical levels
         return S
     def make_T(ds):
+        # returns two single values, one a datatime, and one a float
         ot = ds.ocean_time.values # an array with dtype='datetime64[ns]'
         dti = pd.to_datetime(ot) # a pandas DatetimeIndex with dtype='datetime64[ns]'
         dt = dti.to_pydatetime() # an array of datetimes
         T = dict()
-        T['ot'] = ot
-        T['dti'] = dti
-        T['dt'] = dt
-        T['ocean_time'] = Lfun.datetime_to_modtime(dt[0]) # a single float, seconds since...
+        T['dt'] = dt[0] # a datetime object
+        T['ocean_time'] = Lfun.datetime_to_modtime(dt[0]) # a float, "seconds since..."
         return T
     # return results
     if only_G:

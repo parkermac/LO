@@ -228,7 +228,7 @@ def add_windstress_flower(ax, ds, t_scl=1, t_leglen=0.1, center=(.85,.25), fs=12
 def add_info(ax, fn, fs=12, loc='lower_right'):
     # put info on plot
     T = zrfun.get_basic_info(fn, only_T=True)
-    dt_local = get_dt_local(T['dt'][0])
+    dt_local = get_dt_local(T['dt'])
     if loc == 'lower_right':
         ax.text(.95, .075, dt_local.strftime('%Y-%m-%d'),
             horizontalalignment='right' , verticalalignment='bottom',

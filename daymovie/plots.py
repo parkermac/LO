@@ -89,7 +89,7 @@ def P1(Q, M):
     dm_pfun.add_wind_text(ax, aa, M, fs)
     
     if Q['tracks']:
-        tr_ds = xr.open_dataset(Q['tr_fn'])
+        tr_ds = xr.open_dataset(Q['tr_fn'], decode_times=False)
         iot = zfun.find_nearest_ind(tr_ds['ot'].values, T['ocean_time'])
         if iot > 2:
             ax.plot(tr_ds['lon'][0,:].values, tr_ds['lat'][0,:].values,'og', ms=5)
@@ -111,7 +111,7 @@ def P1(Q, M):
     
     # FINISH
     ds.close()
-    if len(Q['fn_out']) > 0:
+    if len(str(Q['fn_out'])) > 0:
         plt.savefig(Q['fn_out'])
         plt.close()
     else:
@@ -206,7 +206,7 @@ def P2(Q, M):
     
     # FINISH
     ds.close()
-    if len(Q['fn_out']) > 0:
+    if len(str(Q['fn_out'])) > 0:
         plt.savefig(Q['fn_out'])
         plt.close()
     else:
@@ -356,7 +356,7 @@ def Phab(Q, M):
     
     # FINISH
     ds.close()
-    if len(Q['fn_out']) > 0:
+    if len(str(Q['fn_out'])) > 0:
         plt.savefig(Q['fn_out'])
         plt.close()
     else:

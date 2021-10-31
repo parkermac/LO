@@ -172,7 +172,7 @@ if TR['no_advection'] == True:
 if TR['ndiv'] != 12: # only mention ndiv if it is NOT 12
     out_name += '_ndiv' + str(TR['ndiv'])
 if len(TR['sub_tag']) > 0:
-    out_name += '_' + TR['tag']
+    out_name += '_' + TR['sub_tag']
 
 # make the list of start days (datetimes) for separate releases
 idt_list = []

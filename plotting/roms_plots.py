@@ -738,7 +738,7 @@ def P_splash(in_dict):
     ax.set_yticks([42, 44, 46, 48, 50, 52])
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
-    tstr = T['dt'][0].strftime(Lfun.ds_fmt)
+    tstr = T['dt'].strftime(Lfun.ds_fmt)
     ax.text(.98,.99,'LiveOcean', size=fs*1.2,
          ha='right', va='top', weight='bold', transform=ax.transAxes)
     ax.text(.98,.95,'Surface water\nTemperature $[^{\circ}C]$\n'+tstr,
@@ -831,7 +831,7 @@ def P_splash2(in_dict):
     ax.set_yticks([42, 44, 46, 48, 50, 52])
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
-    tstr = T['dt'][0].strftime(Lfun.ds_fmt)
+    tstr = T['dt'].strftime(Lfun.ds_fmt)
     ax.text(.98,.99,'LiveOcean', size=fs*1.5,
          ha='right', va='top', weight='bold', transform=ax.transAxes)
     ax.text(.03,.45,'Surface water\nTemperature $[^{\circ}C]$\n'+tstr,
@@ -953,7 +953,7 @@ def P_splash3(in_dict):
     ax.set_yticks([42, 44, 46, 48, 50, 52])
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
-    tstr = T['dt'][0].strftime(Lfun.ds_fmt)
+    tstr = T['dt'].strftime(Lfun.ds_fmt)
     ax.text(.98,.99,'LiveOcean', size=fs*1.5,
          ha='right', va='top', weight='bold', transform=ax.transAxes)
     ax.text(.03,.45,'Surface water\nTemperature $[^{\circ}C]$\n'+tstr,
@@ -1081,10 +1081,10 @@ def P_superplot_salt(in_dict):
     pfun.draw_box(ax, aa, color='c', alpha=.5, linewidth=5, inset=.01)
     # labels
     ax.text(.95, .07, 'LiveOcean\nSalinity\n'
-        + datetime.strftime(T['dt'][0], '%Y'), fontsize=fs, color='k',
+        + datetime.strftime(T['dt'], '%Y'), fontsize=fs, color='k',
         transform=ax.transAxes, horizontalalignment='center',
         fontweight='bold')
-    ax.text(.95, .03, datetime.strftime(T['dt'][0], '%Y.%m.%d'), fontsize=fs*.7, color='k',
+    ax.text(.95, .03, datetime.strftime(T['dt'], '%Y.%m.%d'), fontsize=fs*.7, color='k',
         transform=ax.transAxes, horizontalalignment='center')
     
     ax.text(.99,.97,'S range\n'+ str(vlims), transform=ax.transAxes,
@@ -1136,7 +1136,7 @@ def P_superplot_salt(in_dict):
     ax.set_axis_off()
 
     # get the day
-    tm = T['dt'][0] # datetime
+    tm = T['dt'] # datetime
     TM = datetime(tm.year, tm.month, tm.day)
     # get yearday
     yearday = fdf['yearday'].values
@@ -1316,10 +1316,10 @@ def P_superplot_oxygen(in_dict):
     pfun.draw_box(ax, aa, color='c', alpha=.5, linewidth=5, inset=.01)
     # labels
     ax.text(.95, .07, 'LiveOcean\nBottom Oxygen\n'
-        + datetime.strftime(T['dt'][0], '%Y'), fontsize=fs, color='k',
+        + datetime.strftime(T['dt'], '%Y'), fontsize=fs, color='k',
         transform=ax.transAxes, horizontalalignment='center',
         fontweight='bold')
-    ax.text(.95, .03, datetime.strftime(T['dt'][0], '%Y.%m.%d'), fontsize=fs*.7, color='k',
+    ax.text(.95, .03, datetime.strftime(T['dt'], '%Y.%m.%d'), fontsize=fs*.7, color='k',
         transform=ax.transAxes, horizontalalignment='center')
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
     cbaxes = inset_axes(ax, width="40%", height="4%", loc='upper right', borderpad=2) 
@@ -1375,7 +1375,7 @@ def P_superplot_oxygen(in_dict):
     ax.set_axis_off()
 
     # get the day
-    tm = T['dt'][0] # datetime
+    tm = T['dt'] # datetime
     TM = datetime(tm.year, tm.month, tm.day)
     # get yearday
     yearday = fdf['yearday'].values
@@ -1554,12 +1554,12 @@ def P_superplot_chl(in_dict):
     pfun.draw_box(ax, aa, color='c', alpha=.5, linewidth=5, inset=.01)
     # labels
     ax.text(.95, .07, 'LiveOcean\nPhytoplankton\n'+pinfo.units_dict[vn]+'\n'
-        + datetime.strftime(T['dt'][0], '%Y'), fontsize=fs, color='k',
+        + datetime.strftime(T['dt'], '%Y'), fontsize=fs, color='k',
         transform=ax.transAxes, horizontalalignment='center',
         fontweight='bold')
     ax.text(.99,.97,'range\n'+ str(vlims), transform=ax.transAxes,
         va='top', ha='right', c='orange', size=.6*fs, weight='bold')
-    ax.text(.95, .03, datetime.strftime(T['dt'][0], '%Y.%m.%d'), fontsize=fs*.7, color='k',
+    ax.text(.95, .03, datetime.strftime(T['dt'], '%Y.%m.%d'), fontsize=fs*.7, color='k',
         transform=ax.transAxes, horizontalalignment='center')
 
     # PS map
@@ -1608,7 +1608,7 @@ def P_superplot_chl(in_dict):
     ax.set_axis_off()
 
     # get the day
-    tm = T['dt'][0] # datetime
+    tm = T['dt'] # datetime
     TM = datetime(tm.year, tm.month, tm.day)
     # get yearday
     yearday = fdf['yearday'].values

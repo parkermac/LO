@@ -107,7 +107,7 @@ elif len(fn_list) > 1:
     for fn in fn_list:
         nouts = ('0000' + str(jj))[-4:]
         outname = 'plot_' + nouts + '.png'
-        outfile = outdir + outname
+        outfile = outdir / outname
         if np.mod(jj,10) == 0:
             print('Plot %d out %d' % (jj, len(fn_list)))
         Q['fn'] = fn

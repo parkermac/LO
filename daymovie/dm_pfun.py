@@ -36,13 +36,12 @@ def get_tracks(Q, Ldir):
         dtt = (dt1-dt0).days + 1
         import subprocess
         
-        # python tracker.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -exp jdf0 -clb True
         cmd = ['python', str(Ldir['LO']) + '/tracker/tracker.py',
-            '-gtx', Ldir['gtagex'], '-ro', Ldir['roms_out_num'],
+            '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
             '-d', Q['ds0'], '-dtt', str(dtt),
             '-exp', Q['exp'],
-            '-t', Q['ttag'], '-clb', 'True']
-        #print(cmd)
+            '-sub_tag', Q['ttag'], '-clb', 'True']
+        print(cmd)
         proc = subprocess.Popen(cmd)
         proc.communicate()
     else:
@@ -53,14 +52,16 @@ def get_tracks(Q, Ldir):
     Q['tr_fn'] = tr_fn
     
 def get_speed(ds, nlev):
+    fld00 = np.zeros(ds.mask_rho.shape)
     u = ds['u'][0,nlev,:,:].values
     v = ds['v'][0,nlev,:,:].values
     u[np.isnan(u)] = 0
     v[np.isnan(v)] = 0
     uu = (u[1:-1,:-1] + u[1:-1,1:])/2
     vv = (v[:-1,1:-1] + v[1:,1:-1])/2
-    fld = np.sqrt(uu*uu + vv*vv)
-    fld = np.ma.masked_where(ds.mask_rho[1:-1,1:-1].values == 0, fld)
+    fld0 = np.sqrt(uu*uu + vv*vv)
+    fld00[1:-1,1:-1] = fld0
+    fld = np.ma.masked_where(ds.mask_rho.values == 0, fld00)
     return fld
 
 def get_arag(ds, Q, aa, nlev):
@@ -110,16 +111,16 @@ def get_ax_limits(Q):
         Q['xtl'] = range(-129,-121,2)
         Q['ytl'] = range(44,52,2)
         Q['v_scl'] = 3 # used for velocity vectors
-        Q['exp'] = 'p5_merhab' # particle tracking
+        Q['exp'] = 'dmMerhab' # particle tracking
     elif Q['dom'] == 'PS':
         Q['aa'] = [-123.6, -122, 47, 49]
         Q['xtl'] = [-123, -122.5]
         Q['ytl'] = [47.5, 48, 48.5]
         Q['v_scl'] = 25
-        Q['exp'] = 'p5_PS'
+        Q['exp'] = 'dm_PS'
     elif Q['dom'] == 'Psouth':
         # South Sound
-        Q['aa'] = [-123.15, -122.5, 47, 47.5]#.8125]
+        Q['aa'] = [-123.15, -122.5, 47, 47.5]
         Q['xtl'] = [-123, -122.5]
         Q['ytl'] = [47, 47.5]
         Q['v_scl'] = 40
@@ -179,7 +180,7 @@ def plot_time_series(ax, M, T):
         '-3', va='center', ha='center', c='gray', weight='bold')
     ax.set_yticks([])    
     ax.set_xticks([])
-    dt_local = get_dt_local(T['dt'][0])
+    dt_local = get_dt_local(T['dt'])
     ax.text(.05,.07, datetime.strftime(dt_local,'%m/%d/%Y - %I%p')+' '+dt_local.tzname(),
         transform=ax.transAxes)
     ax.text(.95,.97, 'Sea Surface Height [ft]', ha='right', va='top', style='italic', c='k',
@@ -216,7 +217,7 @@ def get_moor(ds0, ds1, Ldir, Q, M):
     mj = zfun.find_nearest_ind(G['lat_rho'][:,0], M['lat'])
     for fn in m_fn_list:
         T = zrfun.get_basic_info(fn, only_T=True)
-        dt_list.append(T['dt'][0])
+        dt_list.append(T['dt'])
         ds = xr.open_dataset(fn, decode_times=False)
         ot_list.append(ds['ocean_time'][0].values)
         zeta_list.append(ds['zeta'][0,mj,mi].values)
@@ -373,7 +374,7 @@ def add_wind_text(ax, aa, M, fs):
 def add_info(ax, fn, fs=12, loc='lower_right'):
     # put info on plot
     T = zrfun.get_basic_info(fn, only_T=True)
-    dt_local = get_dt_local(T['dt'][0])
+    dt_local = get_dt_local(T['dt'])
     if loc == 'lower_right':
         ax.text(.95, .075, dt_local.strftime('%Y-%m-%d'),
             horizontalalignment='right' , verticalalignment='bottom',
