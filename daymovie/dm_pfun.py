@@ -13,6 +13,8 @@ import pytz
 import pandas as pd
 
 from lo_tools import Lfun, zfun, zrfun
+from lo_tools import plotting_functions as pfun
+
 import xarray as xr
 
 import ephem_functions as efun
@@ -100,7 +102,7 @@ def get_arag(ds, Q, aa, nlev):
     # PH = zfun.fillit(PH.reshape((v_dict['salt'].shape)))
     ARAG = CO2dict['OmegaARout']
     ARAG = ARAG.reshape((v_dict['salt'].shape))
-    fld = ARAG[1:-1, 1:-1]
+    fld = ARAG
     return px, py, fld
 
 def get_ax_limits(Q):
