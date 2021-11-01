@@ -30,6 +30,7 @@ import shutil
 import xarray as xr
 from lo_tools import zfun
 import numpy as np
+import pandas as pd
 
 start_time = datetime.now()
 
@@ -43,31 +44,32 @@ out_fn0 = out_dir0 / (Ldir['job'] + '_' + Ldir['date_string'] + '_' + Ldir['date
 out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
 out_fn_raw = out_dir / 'UBC.nc'
 out_fn = out_dir / 'low_pass_UBC.nc'
-out_fn_raw.unlink(missing_ok=True)
 out_fn.unlink(missing_ok=True)
 
-# run extract_box.py to do the actual job
-tt0 = time()
-cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'box' / 'extract_box.py'),
-    '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
-    '-0', Ldir['date_string'], '-1', Ldir['date_string'],
-    '-lt', 'allhours', '-job', 'ubc0']
-proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-stdout, stderr = proc.communicate()
-print(stdout.decode())
-if len(stderr) > 0:
-    print(stderr.decode())
-print('Time for initial extraction = %0.2f sec' % (time()-tt0))
+if not Ldir['testing']:
+    out_fn_raw.unlink(missing_ok=True)
+    # run extract_box.py to do the actual job
+    tt0 = time()
+    cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'box' / 'extract_box.py'),
+        '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
+        '-0', Ldir['date_string'], '-1', Ldir['date_string'],
+        '-lt', 'allhours', '-job', 'ubc0']
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+    stdout, stderr = proc.communicate()
+    print(stdout.decode())
+    if len(stderr) > 0:
+        print(stderr.decode())
+    print('Time for initial extraction = %0.2f sec' % (time()-tt0))
 
-# move the extraction to the expected "post" place
-if Ldir['testing']:
-    # if testing we keep the extraction around to look at
-    shutil.copyfile(out_fn0, out_fn_raw)
-else:
-    shutil.move(out_fn0, out_fn_raw)
+    # move the extraction to the expected "post" place
+    if Ldir['testing']:
+        # if testing we keep the extraction around to look at
+        shutil.copyfile(out_fn0, out_fn_raw)
+    else:
+        shutil.move(out_fn0, out_fn_raw)
 
 # and do the low pass
-dsr = xr.load_dataset(out_fn_raw)
+dsr = xr.open_dataset(out_fn_raw)
 ds = xr.Dataset()
 # first add a weighting filter to dsr
 NT = len(dsr.ocean_time)
@@ -81,36 +83,48 @@ dsr['filt'] = (('ocean_time'), filt)
 tt0 = time()
 for vn in dsr.data_vars:
     ds[vn] = dsr[vn].weighted(dsr.filt).mean(dim='ocean_time', keep_attrs=True)
-print('Time to make weighted mean: %0.2f sec'% (time()- tt0))
-sys.stdout.flush()
-ds.to_netcdf(out_fn)
-dsr.close()
-ds.close()
+# The mean operation above removes the ocean_time dimension, which Susan would like,
+# so we add it back in and then add the time as a coordinate.
+ds = ds.expand_dims('ocean_time')
+a = dsr.ocean_time.mean().values
+ds['ocean_time'] = (('ocean_time'), pd.DatetimeIndex([a]))
+# the coordinate step in the line above wasted about a day of my time until I finally tried
+# making if a pandas DatetimeIndex object!!
 
-# squeeze and compress the resulting file
-tt0 = time()
-ds = xr.load_dataset(out_fn)
-ds = ds.squeeze() # remove singleton dimensions
-enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
-Enc_dict = {vn:enc_dict for vn in ds.data_vars if 's_rho' in ds[vn].dims}
-ds.to_netcdf(out_fn, encoding=Enc_dict)
-ds.close()
-print('Time to compress = %0.2f sec' % (time()- tt0))
+if not Ldir['testing']:
 
-# clean up
-out_fn_raw.unlink(missing_ok=True)
+    print('Time to make weighted mean: %0.2f sec'% (time()- tt0))
+    sys.stdout.flush()
+    ds.to_netcdf(out_fn)
 
-print('\nPath to file:\n%s' % (str(out_fn)))
+    dsr.close()
+    ds.close()
 
-# -------------------------------------------------------
+    # compress the resulting file
+    tt0 = time()
+    ds = xr.load_dataset(out_fn)
+    # need to load in order to do the compression
+    enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
+    Enc_dict = {vn:enc_dict for vn in ds.data_vars if 's_rho' in ds[vn].dims}
+    ds.to_netcdf(out_fn, encoding=Enc_dict)
+    ds.close()
+    print('Time to compress = %0.2f sec' % (time()- tt0))
 
-# test for success
-if out_fn.is_file():
-    result_dict['result'] = 'success'
-else:
-   result_dict['result'] = 'fail'
+    if not Ldir['testing']:
+        # clean up
+        out_fn_raw.unlink(missing_ok=True)
 
-# *******************************************************
+    print('\nPath to file:\n%s' % (str(out_fn)))
 
-result_dict['end_dt'] = datetime.now()
-post_argfun.finale(Ldir, result_dict)
+    # -------------------------------------------------------
+
+    # test for success
+    if out_fn.is_file():
+        result_dict['result'] = 'success'
+    else:
+       result_dict['result'] = 'fail'
+
+    # *******************************************************
+
+    result_dict['end_dt'] = datetime.now()
+    post_argfun.finale(Ldir, result_dict)
