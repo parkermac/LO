@@ -93,13 +93,13 @@ for moviename in moviename_list:
 
 for proc in procs:
     stdout, stderr = proc.communicate()
-    # if Ldir['testing']:
-    #     if len(stdout) > 0:
-    #         print(' sdtout '.center(60,'-'))
-    #         print(stdout.decode())
-    #     if len(stderr) > 0:
-    #         print(' stderr '.center(60,'-'))
-    #         print(stderr.decode())
+    if Ldir['testing']:
+        if len(stdout) > 0:
+            print(' sdtout '.center(60,'-'))
+            print(stdout.decode())
+        if len(stderr) > 0:
+            print(' stderr '.center(60,'-'))
+            print(stderr.decode())
     
 print('Time to run all jobs = %0.1f sec' % (time() - tt0))
 sys.stdout.flush()
