@@ -8,9 +8,12 @@ with copies of the history files:
 day 2: 25-49 become 1-25
 day3: 49-73 become 1-25
 
-Run on apogee:
-python post_main.py -gtx cas6_v0_u08k -ro 0 -d [today's datestring] -test True > split.log &
+Test on apogee:
+python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -test True > split.log &
+Testing just prints what it would do, but does not actually copy the files.
 
+Ru for real on apogee:
+python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] > split.log &
 """
 
 from pathlib import Path
