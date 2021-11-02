@@ -83,6 +83,7 @@ for moviename in moviename_list:
     #     mov = 'False'
         
     cmd = ['python', str(Ldir['LO'] / 'daymovie' / 'dm_plot.py'),
+        '-gtx', str(Ldir['gtagex']), '-ro', str(Ldir['roms_out_num']),
         '-ds0', ds0, '-ds1', ds1, '-lt', lt, '-mov', mov, '-pt', pt,
         '-dom', dom, '-vn', vn, '-tracks', tracks, '-emask', emask, '-ttag', ttag,
         '-avl', avl, '-bot', bot]
