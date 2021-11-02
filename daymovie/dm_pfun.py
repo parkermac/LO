@@ -119,7 +119,7 @@ def get_ax_limits(Q):
         Q['xtl'] = [-123, -122.5]
         Q['ytl'] = [47.5, 48, 48.5]
         Q['v_scl'] = 25
-        Q['exp'] = 'dm_PS'
+        Q['exp'] = 'dmPS'
     elif Q['dom'] == 'Psouth':
         # South Sound
         Q['aa'] = [-123.15, -122.5, 47, 47.5]
@@ -260,8 +260,8 @@ def get_moor(ds0, ds1, Ldir, Q, M):
 
 def mask_edges(ds, fld, Q):
     # mask off selected edges, e.g. for NPZD variables
-    xr = ds['lon_rho'][1:-1,1:-1]
-    yr = ds['lat_rho'][1:-1,1:-1]
+    xr = ds['lon_rho'].values
+    yr = ds['lat_rho'].values
     aa = Q['aa']
     clat = np.cos((np.pi/180)*(aa[2]+aa[3])/2)
     pad = .3
