@@ -9,7 +9,7 @@ day 2: 25-49 become 1-25
 day3: 49-73 become 1-25
 
 Run on apogee:
-python post_main.py -gtx cas6_v0_u08k -ro 0 -test True > split.log &
+python post_main.py -gtx cas6_v0_u08k -ro 0 -d [today's datestring] -test True > split.log &
 
 """
 
@@ -26,6 +26,7 @@ result_dict['start_dt'] = datetime.now()
 # ****************** CASE-SPECIFIC CODE *****************
 
 import shutil
+from lo_tools import Lfun
 
 start_time = datetime.now()
 
