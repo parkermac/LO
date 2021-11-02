@@ -94,7 +94,7 @@ for moviename in moviename_list:
 
 for proc in procs:
     stdout, stderr = proc.communicate()
-    if Ldir['testing']:
+    if True:
         if len(stdout) > 0:
             print(' sdtout '.center(60,'-'))
             print(stdout.decode())
