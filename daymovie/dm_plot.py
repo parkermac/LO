@@ -4,6 +4,7 @@ Plot fields in one or more history files.
 Testing calls from ipython on mac:
 
 run dm_plot
+
 run dm_plot -tracks True -mov True -lt hourly
 
 """

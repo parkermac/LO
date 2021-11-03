@@ -77,6 +77,7 @@ def P1(Q, M):
     pfun.add_coast(ax, color='k')
     ax.axis(aa)
     pfun.dar(ax)
+    dm_pfun.add_f_stamp(ax, Q)
         
     # Inset colorbar
     cbaxes = inset_axes(ax, width="40%", height="4%", loc='upper right', borderpad=2) 
@@ -174,7 +175,8 @@ def Phab(Q, M):
     pfun.add_coast(ax, color='k')
     ax.axis(aa)
     pfun.dar(ax)
-        
+    dm_pfun.add_f_stamp(ax, Q)
+    
     # Inset colorbar
     cbaxes = inset_axes(ax, width="40%", height="4%", loc='upper right', borderpad=2) 
     cb = fig.colorbar(cs, cax=cbaxes, orientation='horizontal')

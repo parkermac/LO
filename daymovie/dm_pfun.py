@@ -245,19 +245,6 @@ def get_moor(ds0, ds1, Ldir, Q, M):
     M['Srise'] = Srise
     M['Sset'] = Sset
 
-# def dar(ax):
-#     """
-#     Fixes the plot aspect ratio to be locally Cartesian.
-#     """
-#     yl = ax.get_ylim()
-#     yav = (yl[0] + yl[1])/2
-#     ax.set_aspect(1/np.cos(np.pi*yav/180))
-
-# def add_coast(ax, dir0=Ldir['data'], color='k', lw=0.5):
-#     fn = dir0 + 'coast/coast_pnw.p'
-#     C = pd.read_pickle(fn)
-#     ax.plot(C['lon'].values, C['lat'].values, '-', color=color, linewidth=lw)
-
 def mask_edges(ds, fld, Q):
     # mask off selected edges, e.g. for NPZD variables
     xr = ds['lon_rho'].values
@@ -373,27 +360,11 @@ def add_wind_text(ax, aa, M, fs):
         ha='center', va='center', style='italic', size=.7*fs,
         bbox=dict(facecolor='w', edgecolor='None', alpha=.3))
 
-def add_info(ax, fn, fs=12, loc='lower_right'):
-    # put info on plot
-    T = zrfun.get_basic_info(fn, only_T=True)
-    dt_local = get_dt_local(T['dt'])
-    if loc == 'lower_right':
-        ax.text(.95, .075, dt_local.strftime('%Y-%m-%d'),
-            horizontalalignment='right' , verticalalignment='bottom',
-            transform=ax.transAxes, fontsize=fs)
-        ax.text(.95, .065, dt_local.strftime('%H:%M') + ' ' + dt_local.tzname(),
-            horizontalalignment='right', verticalalignment='top',
-            transform=ax.transAxes, fontsize=fs)
-    elif loc == 'upper_right':
-        ax.text(.95, .935, dt_local.strftime('%Y-%m-%d'),
-            horizontalalignment='right' , verticalalignment='bottom',
-            transform=ax.transAxes, fontsize=fs)
-        ax.text(.95, .925, dt_local.strftime('%H:%M') + ' ' + dt_local.tzname(),
-            horizontalalignment='right', verticalalignment='top',
-            transform=ax.transAxes, fontsize=fs)
-    ax.text(.06, .04, fn.split('/')[-3],
-        verticalalignment='bottom', transform=ax.transAxes,
-        rotation='vertical', fontsize=fs)
+def add_f_stamp(ax, Q):
+    """
+    Add a little stamp for which forecast this is.
+    """
+    ax.text(.03, .03, 'f'+Q['ds0'], va='bottom', fontsize=12, c='gray', transform=ax.transAxes)
 
 def get_dt_local(dt, tzl='US/Pacific'):
     tz_utc = pytz.timezone('UTC')
@@ -401,12 +372,6 @@ def get_dt_local(dt, tzl='US/Pacific'):
     dt_utc = dt.replace(tzinfo=tz_utc)
     dt_local = dt_utc.astimezone(tz_local)
     return dt_local
-
-# def get_aa(ds):
-#     x = ds['lon_psi'][0,:]
-#     y = ds['lat_psi'][:,0]
-#     aa = [x[0], x[-1], y[0], y[-1]]
-#     return aa
 
 def draw_box(ax, aa, linestyle='-', color='k', alpha=1, linewidth=.5, inset=0):
     aa = [aa[0]+inset, aa[1]-inset, aa[2]+inset, aa[3]-inset]

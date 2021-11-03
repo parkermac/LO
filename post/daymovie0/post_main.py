@@ -105,8 +105,9 @@ for proc in procs:
 print('Time to run all jobs = %0.1f sec' % (time() - tt0))
 sys.stdout.flush()
 
-alt_outdir = Ldir['LOo'] / 'daymovies_current'
-Lfun.make_dir(alt_outdir, clean=True)
+out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
+
+Lfun.make_dir(out_dir, clean=True)
 result = 'success'
 for moviename in moviename_list:
     input_filename = Ldir['LOo'] / 'daymovie' / Ldir['gtagex'] / moviename / 'movie.mp4'
@@ -136,7 +137,7 @@ for moviename in moviename_list:
 
     # and save a local copy
     try:
-        shutil.copyfile(input_filename, alt_outdir / output_filename)
+        shutil.copyfile(input_filename, out_dir / output_filename)
     except Exception as e:
         print(' error saving local copy of movie')
         print(e)
