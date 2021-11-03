@@ -29,7 +29,7 @@ print((' Creating daymovies for ' + Ldir['date_string'] + ' ').center(60,'='))
 ds00 = Ldir['date_string']
 dt00 = datetime.strptime(ds00,'%Y.%m.%d')
 
-if False: #Ldir['testing'] == True:
+if Ldir['testing'] == True:
     moviename_list = ['P1_full_oxygen_bot']
 else:
     moviename_list = ['P1_full_salt_top', 'P1_full_oxygen_bot', 'P1_nshelf_oxygen_bot',
@@ -106,8 +106,8 @@ print('Time to run all jobs = %0.1f sec' % (time() - tt0))
 sys.stdout.flush()
 
 out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
+# out_dir was already created by post_argfun.py, or by driver_post.py
 
-Lfun.make_dir(out_dir, clean=True)
 result = 'success'
 for moviename in moviename_list:
     input_filename = Ldir['LOo'] / 'daymovie' / Ldir['gtagex'] / moviename / 'movie.mp4'

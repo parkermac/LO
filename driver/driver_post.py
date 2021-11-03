@@ -5,7 +5,10 @@ It is designed only to run for a single day.
 
 Testing on mac:
 
-python driver_post.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2
+python driver_post.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2 -test True
+
+To run for real on apogee
+python driver_post.py -gtx cas6_v0_u0kb -r forecast -ro 0 > post.log &
 
 """
 
@@ -94,7 +97,11 @@ while all_found == False:
         sleep(sleeptime)
 
 # loop over all jobs
-job_list = ['ubc0']#['surface0']
+if Ldir['testing'] == True:
+    job_list = ['daymovie0']
+else:
+    job_list = ['split0', 'surface0', 'layers0', 'ubc0', 'daymovie0', 'critfc0']
+
 for job in job_list:
     
     # make clean output directories (often just a place for Info)
