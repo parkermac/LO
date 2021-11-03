@@ -5,6 +5,8 @@ using code from Charles Seaton.
 For testing on my mac run in ipython as
 run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -job critfc0 -test True
 
+With -test True it limits the number of files to 3, and prints more to the stdout
+
 """
 
 from pathlib import Path

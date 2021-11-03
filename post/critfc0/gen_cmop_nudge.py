@@ -155,22 +155,43 @@ for i in range(Nfiles):
     #for i in range(len(x)):
     temp_new=np.zeros((depn,nnodes))
     salt_new=np.zeros((depn,nnodes))
+    
+    print('Step %d: salt_new.max = %0.2f' % (1, np.nanmax(salt_new)))
+    
     try:
         psncid = nc.Dataset(ncfile, 'r');
         ocean_time = psncid.variables['ocean_time'][0]
         salt = psncid.variables['salt'][0]
         temp = psncid.variables['temp'][0]
         
+        # This ensures that we feed huge values to RectBivariateSpline for masked places
+        # which are then trimmed by hand in the "salt_new>35" step.
+        Salt = salt.data
+        Salt[salt.mask] = 1e37
+        Temp = temp.data
+        Temp[temp.mask] = 1e37
+        # With the original LiveOcean output (NetCDF3) I think RectBivariateSpline would
+        # misinterpret the mask as 1e37, but with NetCDF4 (from the compression step, but
+        # presumably also maybe with the cas6_v0_u0kb output) it interprets the masked
+        # values as nans, and the interpolation fails.
+        
+        # In general, this is not how I would code this step!  A kDTree would be cleaner.
+        
         psncid.close()
         
         for j in range(0,depn):
-            ft=interpolate.RectBivariateSpline(xrho[0,:],yrho[:,0],temp[j,:,:].T,kx=1,ky=1)
+            ft=interpolate.RectBivariateSpline(xrho[0,:],yrho[:,0],Temp[j,:,:].T,kx=1,ky=1)
             temp_new[j,:]=ft.ev(x,y)
-            fs=interpolate.RectBivariateSpline(xrho[0,:],yrho[:,0],salt[j,:,:].T,kx=1,ky=1)
+            fs=interpolate.RectBivariateSpline(xrho[0,:],yrho[:,0],Salt[j,:,:].T,kx=1,ky=1)
             salt_new[j,:]=fs.ev(x,y)
+        
+        print('Step %d: salt_new.max = %0.2f' % (2, np.nanmax(salt_new)))
         
         temp_new[np.where(salt_new>35)]=float('nan')
         salt_new[np.where(salt_new>35)]=float('nan')
+        
+        print('Step %d: salt_new.max = %0.2f' % (3, np.nanmax(salt_new)))
+        
         good=~np.isnan(salt_new[0,:])
         bad=np.isnan(salt_new[0,:])
         xygood=np.array((x[good],y[good])).T
@@ -186,23 +207,19 @@ for i in range(Nfiles):
         ix_min=np.unravel_index(min_index,x.shape)
         salt_new[:,bad]=salt_new[:,ix_min][:,0,:]
         temp_new[:,bad]=temp_new[:,ix_min][:,0,:]
+        
+        print('Step %d: salt_new.max = %0.2f' % (4, np.nanmax(salt_new)))
+        
         salt_prev = salt_new
         temp_prev = temp_new
         
-        # debugging
-        print(salt_new.shape)
-        print(salt_new.max())
         
     except Exception as e:
         print(e)
         print('Exception in loading new, using previous time step')
         salt_new = salt_prev
         temp_new = temp_prev
-        
-        # debugging
-        print(salt_new.shape)
-        print(salt_new.max())
-        
+                
     print(i+1, ' of ', nfiles, tfile, otime, ocean_time, ncfile)
     
     # write time to output files
