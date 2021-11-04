@@ -117,23 +117,22 @@ for moviename in moviename_list:
     print(' - copying '+output_filename+' to homer')
     sys.stdout.flush()
     
-    # try:
-    #     cmd_list = ['scp',input_filename,
-    #         'pmacc@homer.u.washington.edu:/hw00/d47/pmacc/LO/Figs_active_forecast/'+output_filename]
-    #
-    #     proc = Po(cmd_list,stdout=Pi, stderr=Pi)
-    #     stdout, stderr = proc.communicate()
-    #     if len(stdout) > 0:
-    #         print(' sdtout '.center(60,'-'))
-    #         print(stdout.decode())
-    #     if len(stderr) > 0:
-    #         print(' stderr '.center(60,'-'))
-    #         print(stderr.decode())
-    #     sys.stdout.flush()
-    # except Exception as e:
-    #     print(' error saving movie to homer')
-    #     print(e)
-    #     result = 'fail'
+    try:
+        cmd_list = ['scp',input_filename,
+            'pmacc@homer.u.washington.edu:/hw00/d47/pmacc/LO/Figs_active_forecast/'+output_filename]
+        proc = Po(cmd_list,stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        if len(stdout) > 0:
+            print(' sdtout '.center(60,'-'))
+            print(stdout.decode())
+        if len(stderr) > 0:
+            print(' stderr '.center(60,'-'))
+            print(stderr.decode())
+        sys.stdout.flush()
+    except Exception as e:
+        print(' error saving movie to homer')
+        print(e)
+        result = 'fail'
 
     # and save a local copy
     try:

@@ -10,6 +10,9 @@ python driver_post.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2 -test Tr
 To run for real on apogee
 python driver_post.py -gtx cas6_v0_u0kb -r forecast -ro 0 < /dev/null > post.log &
 
+NOTE: the "< /dev/null" appears to be necessary when running by hand and you stay
+logged on because (maybe) the daymovie0 job is somehow expecting standard input,
+and shen it doesn't get it the job is "Stopped" and you have to use "fg" to start it again.
 """
 
 import sys
