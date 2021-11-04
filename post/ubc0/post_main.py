@@ -43,8 +43,6 @@ from lo_tools import zfun
 import numpy as np
 import pandas as pd
 
-start_time = datetime.now()
-
 print(' - Creating ubc file for ' + Ldir['date_string'])
 
 # this is the name of the file created by extract/box/extract_box.py

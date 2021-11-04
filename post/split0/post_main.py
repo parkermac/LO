@@ -31,8 +31,6 @@ result_dict['start_dt'] = datetime.now()
 import shutil
 from lo_tools import Lfun
 
-start_time = datetime.now()
-
 ds0 = Ldir['date_string']
 dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
 dt1 = dt0 + timedelta(days=1)

@@ -41,6 +41,8 @@ LO_output/tracks/fast0_ndiv12_3d/
 
 NOTE: the default is to save output every hour, even though the underlying calculation may be done in finer steps (the default ndiv=12 means that we use 300 s steps in the RK4 integration).  You can save more frequently using the "sph" (saves per hour) input parameter.  I find this to be convenient during debugging.
 
+#### NOTE: I don't really like the output naming convention.  It would be better to follow the usual convention, with something like LO_output/tracks/[gtagex]/ ...
+
 ---
 
 (4) Plot the results using `tplot.py` as a first generic tool.  Copy this to a new name in LO_user/tracker to start making your own plotting tool.

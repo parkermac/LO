@@ -20,7 +20,7 @@ def intro():
     # get the args and put into Ldir
     args = parser.parse_args()
     argsd = args.__dict__
-    for a in ['gtagex', 'roms_out_num', 'date_string', 'testing', 'job']:
+    for a in ['gtagex', 'roms_out_num', 'date_string', 'job']:
         if argsd[a] == None:
             print('*** Missing required argument to forcing_argfun.intro(): ' + a)
             sys.exit()
@@ -61,6 +61,8 @@ def finale(Ldir, result_dict):
     s2 = ('  start=%s (took %d sec)\n' %
         (result_dict['start_dt'].strftime(time_format), int(total_sec)))
     
+    s3 = ('  %s\n' % (str(out_dir)))
+    
     with open(out_dir / 'Info' / 'results.txt', 'w') as ffout:
-        ffout.write(s1 + s2)
+        ffout.write(s1 + s2 + s3)
     

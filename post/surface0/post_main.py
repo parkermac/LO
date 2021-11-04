@@ -6,7 +6,7 @@ from the history files in a given day.
 
 Testing on mac:
 
-run post_main.py -gtx cas6_v3_lo8b -ro 2 -r backfill -d 2019.07.04 -job surface0
+run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -job surface0
 
 
 """
@@ -28,8 +28,6 @@ from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 from time import time
 import shutil
-
-start_time = datetime.now()
 
 print(' - Creating surface file for ' + Ldir['date_string'])
 
