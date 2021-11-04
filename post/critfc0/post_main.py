@@ -35,7 +35,8 @@ vgrid = Ldir['LO'] / 'post' / Ldir['job'] / 'vgrid.in'
 basedir = Ldir['roms_out'] / Ldir['gtagex']
 outdir = out_dir
 
-cmd = ['python', 'gen_cmop_nudge.py', str(hgrid), str(vgrid), str(depthfile),
+this_dir = str(Ldir['LO'] / 'post' / Ldir['job']) + '/'
+cmd = ['python', this_dir + 'gen_cmop_nudge.py', str(hgrid), str(vgrid), str(depthfile),
     str(basedir), str(outdir), rundate, '-test', str(Ldir['testing'])]
 proc = Po(cmd, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()

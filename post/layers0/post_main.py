@@ -54,7 +54,8 @@ for ii in range(N):
     sys.stdout.flush()
     count_str = ('000000' + str(ii))[-6:]
     temp_out_fn = temp_dir / ('layers_' + count_str + '.nc')
-    cmd_list = ['python', 'make_layers.py', '-in_fn', str(in_fn),
+    this_dir = str(Ldir['LO'] / 'post' / Ldir['job']) + '/'
+    cmd_list = ['python', this_dir + 'make_layers.py', '-in_fn', str(in_fn),
         '-out_fn', str(temp_out_fn), '-test', str(Ldir['testing'])]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
