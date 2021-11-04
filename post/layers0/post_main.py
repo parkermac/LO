@@ -68,7 +68,7 @@ for ii in range(N):
         for proc in proc_list:
             stdout, stderr = proc.communicate()
             # make sure everyone is finished before continuing
-            if Ldir['testing']:
+            if True:
                 if len(stdout) > 0:
                     print('\n'+stdout.decode())
                 if len(stderr) > 0:
@@ -83,7 +83,7 @@ pp2 = Po(['grep','layers'], stdin=pp1.stdout, stdout=Pi)
 cmd_list = ['ncrcat','-p', str(temp_dir), '-O', str(out_fn)]
 proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
-if Ldir['testing']:
+if True:
     if len(stdout) > 0:
         print('\n'+stdout.decode())
     if len(stderr) > 0:

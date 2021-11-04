@@ -39,7 +39,7 @@ cmd = ['python', 'gen_cmop_nudge.py', str(hgrid), str(vgrid), str(depthfile),
     str(basedir), str(outdir), rundate, '-test', str(Ldir['testing'])]
 proc = Po(cmd, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
-if Ldir['testing']:
+if True:
     if len(stdout) > 0:
         print(' sdtout '.center(60,'-'))
         print(stdout.decode())

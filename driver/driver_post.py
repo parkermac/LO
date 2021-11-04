@@ -130,6 +130,7 @@ for job in job_list:
                 print(line.replace('\n',''))
     else:
         print('ERROR: missing results.txt file')
+    sys.stdout.flush()
     
     
 
