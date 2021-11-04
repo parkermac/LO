@@ -8,7 +8,7 @@ Testing on mac:
 python driver_post.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2 -test True
 
 To run for real on apogee
-python driver_post.py -gtx cas6_v0_u0kb -r forecast -ro 0 > post.log &
+python driver_post.py -gtx cas6_v0_u0kb -r forecast -ro 0 < /dev/null > post.log &
 
 """
 

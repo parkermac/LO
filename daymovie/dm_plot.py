@@ -5,6 +5,8 @@ Testing calls from ipython on mac:
 
 run dm_plot
 
+python dm_plot.py -vn speed -dom PS -mov True -lt hourly < /dev/null > test.log &
+
 run dm_plot -tracks True -mov True -lt hourly
 
 """
@@ -123,8 +125,9 @@ elif len(fn_list) > 1:
             '-pix_fmt', 'yuv420p', '-crf', '25', str(outdir)+'/movie.mp4']
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
-        if len(stdout) > 0:
-            print('\n'+stdout.decode())
-        if len(stderr) > 0:
-            print('\n'+stderr.decode())
+        if True:
+            if len(stdout) > 0:
+                print('\n'+stdout.decode())
+            if len(stderr) > 0:
+                print('\n'+stderr.decode())
         
