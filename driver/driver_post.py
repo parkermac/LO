@@ -103,8 +103,8 @@ while all_found == False:
 if Ldir['testing'] == True:
     job_list = ['daymovie0']
 else:
-    job_list = ['drifters0']
-    #job_list = ['split0', 'surface0', 'layers0', 'ubc0', 'daymovie0', 'critfc0', 'drifters0']
+    #job_list = ['drifters0']
+    job_list = ['split0', 'surface0', 'layers0', 'ubc0', 'daymovie0', 'critfc0', 'drifters0']
 
 for job in job_list:
     
