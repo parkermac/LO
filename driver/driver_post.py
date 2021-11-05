@@ -19,7 +19,7 @@ import sys
 import argparse
 from datetime import datetime, timedelta
 import subprocess
-from time import sleep
+from time import time, sleep
 
 from lo_tools import Lfun, zfun
 
@@ -90,6 +90,7 @@ while all_found == False:
             all_found = False
             break
     if all_found:
+        sleep(60) # make sure all copying is able to finish
         break
         
     ntries += 1
@@ -99,6 +100,7 @@ while all_found == False:
     else:
         sleep(sleeptime)
 
+tt0 = time()
 # loop over all jobs
 if Ldir['testing'] == True:
     job_list = ['daymovie0']
@@ -134,7 +136,10 @@ for job in job_list:
                 print(line.replace('\n',''))
     else:
         print('ERROR: missing results.txt file')
+    print('')
     sys.stdout.flush()
+    
+print('Total time for all post jobs = %0.1f sec' % (time()-tt0))
     
     
 
