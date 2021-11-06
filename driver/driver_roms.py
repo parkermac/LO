@@ -226,7 +226,10 @@ while dt <= dt1:
             log_done = False
             while log_done == False:
                 sleep(3)
-                cmd_list = ['lsof', '-u', local_user,'|','grep',str(log_file)]
+                if 'mox' in Ldir['lo_env']:
+                    cmd_list = ['/usr/sbin/lsof', '-u', local_user,'|','grep',str(log_file)]
+                else:
+                    cmd_list = ['lsof', '-u', local_user,'|','grep',str(log_file)]
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 print(' - llcount = %d' % (lcount))
