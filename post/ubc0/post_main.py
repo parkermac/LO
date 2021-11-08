@@ -17,7 +17,7 @@ run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -job ubc0 -test True
 (testing causes it to leave the box extraction around for inspection)
 
 Run on apogee
-run post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -job ubc0
+python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -job ubc0 > ubc0.log &
 
 """
 
@@ -39,7 +39,7 @@ from subprocess import PIPE as Pi
 from time import time
 import shutil
 import xarray as xr
-from lo_tools import zfun
+from lo_tools import Lfun, zfun
 import numpy as np
 import pandas as pd
 
@@ -116,9 +116,19 @@ ds.to_netcdf(out_fn, encoding=Enc_dict)
 ds.close()
 print('Time to compress = %0.2f sec' % (time()- tt0))
 
+# copy the file to the expected place on boiler
+if not Ldir['testing']:
+    blr_dir = Path('/boildat/parker/LiveOcean_roms/output/cas6_v3_lo8b/f' + Ldir['date_string'])
+    Lfun.make_dir(blr_dir)
+    blr_fn = blr_dir / 'low_passed_UBC.nc'
+    blr_fn.unlink(missing_ok=True)
+    shutil.copyfile(out_fn, blr_fn)
+    print('\nPath to boiler file:\n%s' % (str(blr_fn)))
+
 if not Ldir['testing']:
     # clean up
     out_fn_raw.unlink(missing_ok=True)
+
 
 print('\nPath to file:\n%s' % (str(out_fn)))
 
