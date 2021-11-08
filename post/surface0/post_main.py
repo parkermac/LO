@@ -61,7 +61,8 @@ if not Ldir['testing']:
     ff_string = f_string.replace('.','') # azure does not like dots in container names
     container_name = ff_string
     cmd_list = ['python', str(Ldir['LO'] / 'misc' / 'copy_to_azure.py'),
-        '-fn', str(out_fn0), '-out_name', 'ocean_surface.nc', '-container_name', container_name)
+        '-fn', str(out_fn0), '-out_name', 'ocean_surface.nc',
+        '-container_name', container_name]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     print(stdout.decode())
