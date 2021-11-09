@@ -28,6 +28,7 @@ from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 from time import time
 import shutil
+from lo_tools import Lfun
 
 out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
 
