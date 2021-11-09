@@ -31,6 +31,7 @@ from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 from time import time
 import numpy as np
+import shutil
 
 print('Creating layers file for ' + Ldir['date_string'])
 
