@@ -53,7 +53,7 @@ if True:
         print(stderr.decode())
 
 # copy the file to the expected place on boiler
-if not Ldir['testing']:
+if True:#not Ldir['testing']:
     blr_dir = Path('/boildat/parker/LiveOcean_roms/output/cas6_v3_lo8b/f' + Ldir['date_string'])
     Lfun.make_dir(blr_dir)
     
