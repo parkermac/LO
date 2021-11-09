@@ -95,7 +95,7 @@ if True:
 print('Time for full layers extraction = %0.2f sec' % (time()- tt0))
 
 # copy the file to the expected place on boiler
-if True:#not Ldir['testing']:
+if not Ldir['testing']:
     blr_dir = Path('/boildat/parker/LiveOcean_roms/output/cas6_v3_lo8b/f' + Ldir['date_string'])
     Lfun.make_dir(blr_dir)
     blr_fn = blr_dir / 'ocean_layers.nc'
