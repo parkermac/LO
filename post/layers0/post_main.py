@@ -8,6 +8,8 @@ Testing on mac:
 
 run post_main.py -gtx cas6_v3_lo8b -ro 2 -r backfill -d 2019.07.04 -job layers0 -test True
 
+Run on apogee
+python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's date string] -job layers0 > layers0.log &
 
 """
 

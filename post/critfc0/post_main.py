@@ -7,6 +7,9 @@ run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -job critfc0 -test True
 
 With -test True it limits the number of files to 3, and prints more to the stdout
 
+Run on apogee
+python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's date string] -job critfc0 > critfc0.log &
+
 """
 
 from pathlib import Path
