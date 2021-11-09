@@ -91,6 +91,22 @@ if True:
         print('\n'+stderr.decode())
 print('Time for full layers extraction = %0.2f sec' % (time()- tt0))
 
+# copy the file to the expected place on boiler
+if not Ldir['testing']:
+    blr_dir = Path('/boildat/parker/LiveOcean_roms/output/cas6_v3_lo8b/f' + Ldir['date_string'])
+    Lfun.make_dir(blr_dir)
+    blr_fn = blr_dir / 'ocean_layers.nc'
+    blr_fn.unlink(missing_ok=True)
+    shutil.copyfile(out_fn, blr_fn)
+    print('\nPath to boiler file:\n%s' % (str(blr_fn)))
+    
+    # and then write a little text file to alert the user
+    done_fn = blr_dir / 'layers_done.txt'
+    done_fn.unlink(missing_ok=True)
+    with open(done_fn, 'w') as ffout:
+        ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
+    print('Path to done file:\n%s' % (str(done_fn)))
+
 if not Ldir['testing']:
     Lfun.make_dir(temp_dir, clean=True)
 

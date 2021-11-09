@@ -48,6 +48,32 @@ if True:
         print(' stderr '.center(60,'-'))
         print(stderr.decode())
 
+# copy the file to the expected place on boiler
+if not Ldir['testing']:
+    blr_dir = Path('/boildat/parker/LiveOcean_roms/output/cas6_v3_lo8b/f' + Ldir['date_string'])
+    Lfun.make_dir(blr_dir)
+    
+    cmop_date_string = Ldir['date_string'].replace('.','-')
+    salt_name = 'cmop_salt_nu.' + cmop_date_string + '.nc'
+    temp_name = 'cmop_temp_nu.' + cmop_date_string + '.nc'
+    out_salt_fn = out_dir / salt_name
+    out_temp_fn = out_dir / temp_name
+    blr_salt_fn = blr_dir / salt_name
+    blr_temp_fn = blr_dir / temp_name
+    blr_salt_fn.unlink(missing_ok=True)
+    blr_temp_fn.unlink(missing_ok=True)
+    shutil.copyfile(out_salt_fn, blr_salt_fn)
+    shutil.copyfile(out_temp_fn, blr_temp_fn)
+    print('\nPath to boiler file:\n%s' % (str(blr_salt_fn)))
+    print('Path to boiler file:\n%s' % (str(blr_temp_fn)))
+    
+    # and then write a little text file to alert the user
+    done_fn = blr_dir / 'critfc_done.txt'
+    done_fn.unlink(missing_ok=True)
+    with open(done_fn, 'w') as ffout:
+        ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
+    print('Path to done file:\n%s' % (str(done_fn)))
+
 # -------------------------------------------------------
 
 # test for success
