@@ -126,7 +126,7 @@ if not Ldir['testing']:
     print('\nPath to boiler file:\n%s' % (str(blr_fn)))
     
     # and then write a little text file to alert the user
-    done_fn = blr_dir / 'ubc_done.nc'
+    done_fn = blr_dir / 'ubc_done.txt'
     done_fn.unlink(missing_ok=True)
     with open(done_fn, 'w') as ffout:
         ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
