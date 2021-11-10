@@ -8,6 +8,7 @@ a post job that runs with the forecast, but you could also run it by hand for ot
 NOTE: the target directory must not already exist.
 
 Test on apogee:
+run post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -job archive0 -test True
 python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -job archive0 -test True > archive0.log &
 Testing just prints what it would do, but does not actually copy the files.
 
@@ -64,8 +65,8 @@ if do_copy:
     try:
         Lfun.make_dir(out_dir)
         for name in name_list:
-            in_fn = in_dir / fn
-            out_fn = out_dir / fn
+            in_fn = in_dir / name
+            out_fn = out_dir / name
             if Ldir['testing']:
                 print('\n'+str(in_fn))
                 print(str(out_fn))
