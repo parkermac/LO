@@ -5,7 +5,7 @@ It just save history files 1-25 for the current day.  It can be run before or af
 I created this as a standalone program because it a a very niche task.  It is desigend as
 a post job that runs with the forecast, but you could also run it by hand for other days.
 
-NOTE: the target directory must not already exist.
+NOTE: the target directory must not already exist, or if it does it must be empty.
 
 Test on apogee:
 run post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -job archive0 -test True
@@ -40,8 +40,12 @@ in_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
 out_dir = Path('/pgdat1') / 'parker' / 'LiveOcean_roms' / 'output' / 'cas6_v3_lo8b' / f_string
 
 if out_dir.is_dir():
-    print('Error - target directory exists!')
-    sys.exit()
+    try:
+        out_dir.rmdir()
+    except Exception as e:
+        print('Error - target directory exists and is not empty!')
+        print(e)
+        sys.exit()
 
 name_list = []
 for ii in range(1,26):
