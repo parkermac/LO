@@ -36,7 +36,7 @@ print(' - archiving forecast files for ' + ds0)
 f_string = 'f' + ds0
 
 in_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
-out_dir = Ldir['parent'] / 'LiveOcean_roms' / 'output' / 'cas6_v3_lo8b' / f_string
+out_dir = Path('/pgdat1') / 'parker' / 'LiveOcean_roms' / 'output' / 'cas6_v3_lo8b' / f_string
 
 if out_dir.is_dir():
     print('Error - target directory exists!')
