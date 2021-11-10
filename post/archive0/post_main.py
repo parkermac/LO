@@ -13,7 +13,7 @@ python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -job archive
 Testing just prints what it would do, but does not actually copy the files.
 
 Run for real on apogee:
-python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -job archive0 > archive0.log &
+python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -job archive0 > archive0.log &
 """
 
 from pathlib import Path
