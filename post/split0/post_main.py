@@ -9,11 +9,11 @@ day 2: 25-49 become 1-25
 day3: 49-73 become 1-25
 
 Test on apogee:
-python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -job split0 -test True > split.log &
+python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -job split0 -test True > split0.log &
 Testing just prints what it would do, but does not actually copy the files.
 
-Ru for real on apogee:
-python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -job split0 > split.log &
+Run for real on apogee:
+python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -job split0 > split0.log &
 """
 
 from pathlib import Path
@@ -78,6 +78,7 @@ try:
             print(str(fn2))
         else:
             shutil.copyfile(fn0, fn2)
+                
 except Exception as e:
     result = 'fail'
     print('Error while trying to scopy files:')
