@@ -50,7 +50,7 @@ for ii in range(1,26):
 result = 'success'
 do_copy = True
 for name in name_list:
-    fn = in_dir + name
+    fn = in_dir / name
     if fn.is_file():
         pass
     else:
