@@ -78,7 +78,7 @@ if not Ldir['testing']:
     Lfun.make_dir(blr_dir)
     blr_fn = blr_dir / 'ocean_surface.nc'
     blr_fn.unlink(missing_ok=True)
-    shutil.copyfile(out_fn, blr_fn)
+    shutil.copyfile(out_fn0, blr_fn)
     print('\nPath to boiler file:\n%s' % (str(blr_fn)))
     
     # and then write a little text file to alert the user
