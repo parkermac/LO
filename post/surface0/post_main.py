@@ -10,7 +10,7 @@ run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -job surface0 -test True
 
 Run for real on apogee:
 
-python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's date string] -job surface0 > surface.log &
+python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's date string] -job surface0 > surface0.log &
 
 """
 
@@ -56,21 +56,21 @@ if len(stderr) > 0:
     print(stderr.decode())
 print('Elapsed time = %0.2f sec' % (time()-tt0))
 
-# # Send the file to Azure, to be picked up by IOOS EDS Viewer folks
-# if not Ldir['testing']:
-#     f_string = 'f' + Ldir['date_string']
-#     ff_string = f_string.replace('.','') # azure does not like dots in container names
-#     container_name = ff_string
-#     cmd_list = ['python', str(Ldir['LO'] / 'misc' / 'copy_to_azure.py'),
-#         '-fn', str(out_fn0), '-out_name', 'ocean_surface.nc',
-#         '-container_name', container_name]
-#     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-#     stdout, stderr = proc.communicate()
-#     print(stdout.decode())
-#     if len(stderr) > 0:
-#         print(stderr.decode())
-# else:
-#     print('<< Skipped copying file to Azure >>')
+# Send the file to Azure, to be picked up by Patrick Tripp for the IOOS S3-THREDDS server
+if not Ldir['testing']:
+    f_string = 'f' + Ldir['date_string']
+    ff_string = f_string.replace('.','') # azure does not like dots in container names
+    container_name = ff_string
+    cmd_list = ['python', str(Ldir['LO'] / 'misc' / 'copy_to_azure.py'),
+        '-fn', str(out_fn0), '-out_name', 'ocean_surface.nc',
+        '-container_name', container_name]
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+    stdout, stderr = proc.communicate()
+    print(stdout.decode())
+    if len(stderr) > 0:
+        print(stderr.decode())
+else:
+    print('<< Skipped copying file to Azure >>')
     
 # copy the file to the expected place on boiler
 if not Ldir['testing']:

@@ -47,6 +47,8 @@ export PATH=/gscratch/macc/local/netcdf-icc/bin:$PATH
 #export PATH=/gscratch/macc/local/openmpi-ifort/bin:$PATH
 ```
 
+I wonder if the // in NCDIR path is a typo?
+
 ---
 
 #### Steps to compile:
