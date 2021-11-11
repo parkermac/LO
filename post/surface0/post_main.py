@@ -31,6 +31,7 @@ from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 from time import time
 import shutil
+from lo_tools import Lfun
 
 print(' - Creating surface file for ' + Ldir['date_string'])
 
@@ -55,21 +56,37 @@ if len(stderr) > 0:
     print(stderr.decode())
 print('Elapsed time = %0.2f sec' % (time()-tt0))
 
-# Send the file to Azure, to be picked up by IOOS EDS Viewer folks
+# # Send the file to Azure, to be picked up by IOOS EDS Viewer folks
+# if not Ldir['testing']:
+#     f_string = 'f' + Ldir['date_string']
+#     ff_string = f_string.replace('.','') # azure does not like dots in container names
+#     container_name = ff_string
+#     cmd_list = ['python', str(Ldir['LO'] / 'misc' / 'copy_to_azure.py'),
+#         '-fn', str(out_fn0), '-out_name', 'ocean_surface.nc',
+#         '-container_name', container_name]
+#     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+#     stdout, stderr = proc.communicate()
+#     print(stdout.decode())
+#     if len(stderr) > 0:
+#         print(stderr.decode())
+# else:
+#     print('<< Skipped copying file to Azure >>')
+    
+# copy the file to the expected place on boiler
 if not Ldir['testing']:
-    f_string = 'f' + Ldir['date_string']
-    ff_string = f_string.replace('.','') # azure does not like dots in container names
-    container_name = ff_string
-    cmd_list = ['python', str(Ldir['LO'] / 'misc' / 'copy_to_azure.py'),
-        '-fn', str(out_fn0), '-out_name', 'ocean_surface.nc',
-        '-container_name', container_name]
-    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    stdout, stderr = proc.communicate()
-    print(stdout.decode())
-    if len(stderr) > 0:
-        print(stderr.decode())
-else:
-    print('<< Skipped copying file to Azure >>')
+    blr_dir = Path('/boildat/parker/LiveOcean_roms/output/cas6_v3_lo8b/f' + Ldir['date_string'])
+    Lfun.make_dir(blr_dir)
+    blr_fn = blr_dir / 'ocean_surface.nc'
+    blr_fn.unlink(missing_ok=True)
+    shutil.copyfile(out_fn, blr_fn)
+    print('\nPath to boiler file:\n%s' % (str(blr_fn)))
+    
+    # and then write a little text file to alert the user
+    done_fn = blr_dir / 'surface_done.txt'
+    done_fn.unlink(missing_ok=True)
+    with open(done_fn, 'w') as ffout:
+        ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
+    print('Path to done file:\n%s' % (str(done_fn)))
 
 # move the extraction to the expected "post" place
 if Ldir['testing']:
