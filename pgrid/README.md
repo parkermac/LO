@@ -9,6 +9,8 @@ Throughout the steps we maintain and modify the arrays "h" and "mask_rho" to be 
 
 (1) You have to edit the gridname and definition in `LO_user/gfun_user.py`.
 
+There are a number of choices you can set as parameters.  You can see these in the module `gfun.default_choices()`.  They end up in a dict called dch ("default choices") that gets saved and reopened at each step.  You can override any of the defaults in your `gfun_user.py` entry.  Note: you make your grid definition as an if-statement in `gfun_user.py` AND in the line near the top of that module "gridname = ".
+
 The rest of the steps are just running the programs in the right order, with `edit_mask.py` requiring user interaction while running.  I would be tempted to make this more automated, but making the grid is a critical part of the model, and many  things can go wrong, so I leave it in individual steps which you can check on along the way using `plot_grid.py`.
 
 Throughout this code I try to use ROMS naming conventions, except that when manipulating or plotting I refer to: [lon_rho, lat_rho] as [lon, lat].
@@ -17,7 +19,7 @@ Also [plon, plat] is just like [lon_psi, lat_psi] but extended by one on all dir
 
 - The bulleted lists below each step are the dch items used in that step.
 
-(2) `start_grid.py` initializes the grid, bathymetry, and mask. You edit this to define the lon, lat vectors for your grid. It can take a while for big grids, so be patient (e.g. 15 minutes for cas6).
+(2) `start_grid.py` initializes the grid, bathymetry, and mask. You edit this to define the lon, lat vectors for your grid.
 - nudging_edges
 - analytical
 - t_dir/t_list

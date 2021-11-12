@@ -33,8 +33,7 @@ print(str(out_fn).center(60,'-'))
 
 Lfun.make_dir(Gr['gdir'], clean=True)
 
-dch = gfun.default_choices()
-lon, lat, z, dch = gfun_user.make_initial_info(dch)
+lon, lat, z, dch = gfun_user.make_initial_info()
 
 # save the output to NetCDF
 gfu.make_nc(out_fn, lon, lat, z, dch)
