@@ -86,6 +86,9 @@ tag_list = ['rho', 'u', 'v']
 
 # the new grid
 ds = xr.open_dataset(Ldir['grid'] / 'grid.nc')
+
+zbot_plus = -ds.h.values + 0.09 # bottom z plus a bit for WET_DRY cases
+
 xx = {}; yy = {}; mm = {}; xynew = {}
 for tag in tag_list:
     xx[tag] = ds['lon_' + tag].values
@@ -157,6 +160,11 @@ for fn in h_list:
             vv = np.nan * np.ones_like(xx[tag]) 
             vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
             # note that "workers" has replaced "n_jobs"
+            
+            # for WET_DRY, make sure zeta is above bathy by some amount
+            if vn == 'zeta':
+                vv[vv < zbot_plus] = zbot_plus[vv < zbot_plus] + 0.09
+                
             data_dict[vn][tt, :, :] = vv
         elif dm == 3:
             for nn in range(N):
@@ -169,6 +177,7 @@ for fn in h_list:
     tt += 1
     ds.close()
 data_dict['ocean_time'] = np.array(modtime_list)
+
 
 # Write to NetCDF using xarray (this works, hooray!).
 
