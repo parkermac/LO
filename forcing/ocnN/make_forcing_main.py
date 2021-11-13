@@ -157,7 +157,7 @@ for fn in h_list:
         dm = vn_dict[vn][1]
         if dm == 2:
             vtrim = ds[vn][0,iy0[tag]:iy1[tag], ix0[tag]:ix1[tag]].values
-            vv = np.nan * np.ones_like(xx[tag]) 
+            vv = np.nan * np.ones(xx[tag].shape) 
             vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
             # note that "workers" has replaced "n_jobs"
             
@@ -170,7 +170,7 @@ for fn in h_list:
         elif dm == 3:
             for nn in range(N):
                 vtrim = ds[vn][0,nn,iy0[tag]:iy1[tag], ix0[tag]:ix1[tag]].values
-                vv = np.nan * np.ones_like(xx[tag]) 
+                vv = np.nan * np.ones(xx[tag].shape) 
                 vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
                 data_dict[vn][tt, nn, :, :] = vv
     print('tt = %d (%0.2f sec)' % (tt, time()-tt0))
