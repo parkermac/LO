@@ -164,6 +164,7 @@ for fn in h_list:
             # for WET_DRY, make sure zeta is above bathy by some amount
             if vn == 'zeta':
                 vv[vv < zbot_plus] = zbot_plus[vv < zbot_plus]
+                vv[mm['rho'] == 0] = np.nan
                 
             data_dict[vn][tt, :, :] = vv
         elif dm == 3:
