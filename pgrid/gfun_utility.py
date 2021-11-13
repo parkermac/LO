@@ -231,7 +231,7 @@ def GRID_PlusMinusScheme_rx0(MSK, Hobs, rx0max, AreaMatrix,
     """
        
     HH=Hobs.copy()
-    HH = HH + shift
+    HH = HH - shift
     AA = AreaMatrix.copy()
     MM = MSK.copy()
     R=(1-rx0max)/(1+rx0max)
@@ -314,6 +314,6 @@ def GRID_PlusMinusScheme_rx0(MSK, Hobs, rx0max, AreaMatrix,
     print('Number of iterations = ' + str(count))
     if count == maxcount:
         print('\n** WARNING: more iterations needed! **\n')
-    HH = HH - shift
+    HH = HH + shift
     return HH
     

@@ -41,7 +41,8 @@ rx0max = 0.15
 
 # Make sure that anything NOT MASKED is not shallower than min_depth.
 if dch['use_min_depth']:
-    Hobs[(MSK==1) & (Hobs < dch['min_depth'])] = dch['min_depth']
+    # Hobs[(MSK==1) & (Hobs < dch['min_depth'])] = dch['min_depth']
+    Hobs[Hobs < dch['min_depth']] = dch['min_depth']
 
 # create the area matrix
 AreaMatrix = dx * dy
@@ -55,7 +56,7 @@ tt0 = time()
 if dch['min_depth'] > 0:
     shift = 0
 elif dch['min_depth'] <= 0:
-    shift = dch['min_depth'] - 1
+    shift = dch['min_depth'] - 15
     
 # Do the smoothing.
 Hnew = gfu.GRID_PlusMinusScheme_rx0(MSK, Hobs, rx0max, AreaMatrix,

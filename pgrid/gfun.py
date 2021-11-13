@@ -61,7 +61,7 @@ def default_choices(wet_dry=False):
     # list of existing masks to work from
     dch['maskfiles'] = []
     # set z position of INITIAL dividing line (positive up)
-    dch['z_land'] = 0        
+    dch['z_land'] = 0
     # Set unmask_coast to True to unmask all cells crossed by the coastline.
     if dch['wet_dry'] == True:
         dch['unmask_coast'] = True
@@ -72,8 +72,11 @@ def default_choices(wet_dry=False):
     dch['remove_islands'] = True
 
     # SMOOTHING
-    dch['use_min_depth'] = True # now I think this is always a good idea
-    dch['min_depth'] = 4 # meters (positive down)
+    dch['use_min_depth'] = True
+    if dch['wet_dry'] == True:
+        dch['min_depth'] = -4 # meters (positive down)
+    else:
+        dch['min_depth'] = 4 # meters (positive down)
         
     # NUDGING
     # Use nudging edges to decide which edges to have nudging to climatology

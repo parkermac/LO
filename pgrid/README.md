@@ -9,7 +9,9 @@ Throughout the steps we maintain and modify the arrays "h" and "mask_rho" to be 
 
 (1) You have to edit the gridname and definition in `LO_user/gfun_user.py`.
 
-There are a number of choices you can set as parameters.  You can see these in the module `gfun.default_choices()`.  They end up in a dict called dch ("default choices") that gets saved and reopened at each step.  You can override any of the defaults in your `gfun_user.py` entry.  Note: you make your grid definition as an if-statement in `gfun_user.py` AND in the line near the top of that module "gridname = ".
+There are a number of choices you can set as parameters.  You can see these in the module `gfun.default_choices()`.  They end up in a dict called dch ("default choices") that gets saved and reopened at each step.  You can override any of the defaults in your `gfun_user.py` entry.
+
+Note: you make your grid definition as an if-statement in `gfun_user.py` AND in the line near the top of that module "gridname = ".
 
 The rest of the steps are just running the programs in the right order, with `edit_mask.py` requiring user interaction while running.  I would be tempted to make this more automated, but making the grid is a critical part of the model, and many  things can go wrong, so I leave it in individual steps which you can check on along the way using `plot_grid.py`.
 
@@ -33,6 +35,8 @@ Also [plon, plat] is just like [lon_psi, lat_psi] but extended by one on all dir
 (4) `edit_mask.py` allows you to fully experience the joy of hand editing a mask.  You run it the first time just to get rid of obvious issues like Lake Washington and river channels.
 
 (5) `carve_rivers.py` uses files of river tracks to make the river channels.
+
+You may have to go into the resulting csv file and delete rivers by hand in a case where you are masking out a partial basin.  If so, then go back and also mask out the channel using `edit_mask.py`.
 
 (6) `edit_mask.py` now can be run again for real this time, perhaps running many times. NOTE: you can use an optional command line argument -d ## to change "dval" the carving depth used for lines or points from its default value of 5 m.
 

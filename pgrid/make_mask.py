@@ -18,11 +18,15 @@ out_fn = gfun.increment_filename(in_fn, '_m')
 
 # get the grid from NetCDF
 ds = xr.open_dataset(in_fn)
-plon, plat = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
+lon = ds.lon_rho.values
+lat = ds.lat_rho.values
+plon, plat = pfun.get_plon_plat(lon, lat)
 z = -ds.h.values
 mask_rho_orig = ds.mask_rho.values
 plon_vec = plon[0,:]
 plat_vec = plat[:,0]
+lon_vec = lon[0,:]
+lat_vec = lat[:,0]
 
 # load the default choices
 dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))
@@ -33,7 +37,7 @@ def mask_from_existing(in_fn, maskfiles, pgdir):
     latr = ds['lat_rho'].values
     ds.close()
     
-    m10 = np.ones_like(lonr)
+    m10 = np.ones(lonr.shape)
         
     for mf in maskfiles:
         print(' - using ' + pgdir + mf)
@@ -76,8 +80,8 @@ if dch['unmask_coast']:
     cmask = np.isnan(cx)
     cx = cx[~cmask]
     cy = cy[~cmask]
-    ii0, ii1, ifr = zfun.get_interpolant(cx, plon_vec)
-    jj0, jj1, jfr = zfun.get_interpolant(cy, plat_vec)
+    ii0, ii1, ifr = zfun.get_interpolant(cx, lon_vec)
+    jj0, jj1, jfr = zfun.get_interpolant(cy, lat_vec)
     # Don't unmask extrapolated points.
     ii0 = ii0[~np.isnan(ifr) & ~np.isnan(jfr)]
     jj0 = jj0[~np.isnan(ifr) & ~np.isnan(jfr)]
