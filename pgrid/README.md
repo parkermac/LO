@@ -68,7 +68,7 @@ In order to keep track of several choices made about a grid, we use dch, a dict 
 ```
 dch =  gfun.default_choices()
 ```
-You typically override some of the defaults in `start_grid.py` when doing the initial grid specification.  The choices are saved in a pickle file:
+You typically override some of the defaults in `LO_user/pgrid/gfun_user.py` when doing the initial grid specification.  The choices are saved in a pickle file:
 ```
 pickle.dump(dch, open(Gr['gdir'] + 'choices.p', 'wb'))
 ```
