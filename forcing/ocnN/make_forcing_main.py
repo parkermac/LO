@@ -87,13 +87,16 @@ tag_list = ['rho', 'u', 'v']
 # the new grid
 ds = xr.open_dataset(Ldir['grid'] / 'grid.nc')
 
-zbot_plus = -ds.h.values + 0.09 # bottom z plus a bit for WET_DRY cases
-
 xx = {}; yy = {}; mm = {}; xynew = {}
 for tag in tag_list:
     xx[tag] = ds['lon_' + tag].values
     yy[tag] = ds['lat_' + tag].values
     mm[tag] = ds['mask_' + tag].values
+    
+# bottom z plus a bit for WET_DRY cases
+zbot_plus = -ds.h.values + 0.09
+zbot_plus[mm['rho']==0] = np.nan
+
 ds.close()
 
 if Ldir['start_type'] == 'continuation':
@@ -163,8 +166,10 @@ for fn in h_list:
             
             # for WET_DRY, make sure zeta is above bathy by some amount
             if vn == 'zeta':
-                vv[vv < zbot_plus] = zbot_plus[vv < zbot_plus]
-                vv[mm['rho'] == 0] = np.nan
+                vvc = vv.copy()
+                drape_mask = vvc < zbot_plus
+                vv[drape_mask] = zbot_plus[drape_mask]
+                #vv[mm['rho'] == 0] = np.nan
                 
             data_dict[vn][tt, :, :] = vv
         elif dm == 3:
