@@ -164,12 +164,12 @@ for fn in h_list:
             vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
             # note that "workers" has replaced "n_jobs"
             
-            # for WET_DRY, make sure zeta is above bathy by some amount
-            if vn == 'zeta':
-                vvc = vv.copy()
-                drape_mask = vvc < zbot_plus
-                vv[drape_mask] = zbot_plus[drape_mask]
-                #vv[mm['rho'] == 0] = np.nan
+            # # for WET_DRY, make sure zeta is above bathy by some amount
+            # if vn == 'zeta':
+            #     vvc = vv.copy()
+            #     drape_mask = vvc < zbot_plus
+            #     vv[drape_mask] = zbot_plus[drape_mask]
+            #     #vv[mm['rho'] == 0] = np.nan
                 
             data_dict[vn][tt, :, :] = vv
         elif dm == 3:
