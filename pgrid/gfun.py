@@ -33,21 +33,24 @@ def gstart(gridname=gridname):
     Gr ={'gridname': gridname,'pgdir': pgdir, 'gdir': gdir,'ri_dir': ri_dir}
     return Gr
 
-def default_choices(wet_dry=False):
+def default_choices():
     # Default choices (can override in each case)
     dch = dict()
 
     # Decide if the grid will allow wetting and drying.
     # We do this first because it affects several subsequent choices
-    dch['wet_dry'] = wet_dry
+    # dch['wet_dry'] = wet_dry
+    # deprecated 2021.11.15
 
-    # GRID CREATION     
+    # GRID CREATION
     # Set analytical to true when we define the bathymetry analytically.
-    dch['analytical'] = False      
+    dch['analytical'] = False
+    
     # z_offset is an adjustment to zero of the bathymetry to account for
     # the fact that mean sea level is somewhat higher than NAVD88.
     dch['use_z_offset'] = True
     dch['z_offset'] = -1.06
+    
     # specify topography files to use
     t_dir = Ldir['data'] / 'topo'
     dch['t_dir'] = Ldir['data'] / 'topo'
@@ -63,20 +66,14 @@ def default_choices(wet_dry=False):
     # set z position of INITIAL dividing line (positive up)
     dch['z_land'] = 0
     # Set unmask_coast to True to unmask all cells crossed by the coastline.
-    if dch['wet_dry'] == True:
-        dch['unmask_coast'] = True
-    else:
-        dch['unmask_coast'] = False
+    dch['unmask_coast'] = False
     # Set remove_islands to True to automatically remove isolated patches of
     # land or ocean.
     dch['remove_islands'] = True
 
     # SMOOTHING
     dch['use_min_depth'] = True
-    if dch['wet_dry'] == True:
-        dch['min_depth'] = -4 # meters (positive down)
-    else:
-        dch['min_depth'] = 4 # meters (positive down)
+    dch['min_depth'] = 4 # meters (positive down)
         
     # NUDGING
     # Use nudging edges to decide which edges to have nudging to climatology

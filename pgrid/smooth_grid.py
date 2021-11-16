@@ -56,7 +56,9 @@ tt0 = time()
 if dch['min_depth'] > 0:
     shift = 0
 elif dch['min_depth'] <= 0:
-    shift = dch['min_depth'] - 15
+    print('min_depth must be > 0')
+    sys.exit()
+    # shift = dch['min_depth'] - 15
     
 # Do the smoothing.
 Hnew = gfu.GRID_PlusMinusScheme_rx0(MSK, Hobs, rx0max, AreaMatrix,
