@@ -64,7 +64,7 @@ def add_river_tracks(Gr, ds, ax):
         ax.plot(x, y, '-r', linewidth=1, alpha=.3)
         ax.plot(x[-1], y[-1], '*r', alpha=.3)
                     
-def edit_mask_river_tracks(Gr, NR, ax):
+def edit_mask_river_tracks(Gr, NRp, ax, hpad):
     # add river tracks and endpoints for edit_mask.py
     
     rri_fn = Gr['gdir'] / 'roms_river_info.csv'
@@ -82,8 +82,8 @@ def edit_mask_river_tracks(Gr, NR, ax):
     # Plot river endpoints, indicating source direction.  The indexing
     # nudges seem a little non-intuitive, but I believe they are correct.
     for rn in df.index:
-        yy = NR - row_dict_py[rn] - 1
-        xx = col_dict_py[rn]
+        yy = NRp - row_dict_py[rn] - 1 - hpad
+        xx = col_dict_py[rn] + hpad
         # River Source on W side of rho cell
         if uv_dict[rn] == 'u' and isign_dict[rn] == 1:
             # River Source on W side of rho cell

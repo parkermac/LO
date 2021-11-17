@@ -80,6 +80,14 @@ def default_choices():
     # on. And the nudging_days are the the (short, long) timescales to use.
     dch['nudging_edges'] = ['north', 'south', 'east', 'west']
     dch['nudging_days'] = (3.0, 60.0)
+    
+    # RIVERS
+    # Sometimes for nests we mask out a partial basin, and this allows us to also
+    # exclude its rivers.  The downside is that you need to know what those rivers
+    # are in advance.  It you want to do this you might run carve_rivers.py and
+    # decide what to exclude, and then start again, before putting a lot of
+    # time in to edit_mask.py.
+    dch['excluded_rivers'] = []
         
     return dch
 

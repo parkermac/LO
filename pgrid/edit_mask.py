@@ -46,6 +46,7 @@ lat = ds.lat_rho.values
 mask_rho = ds.mask_rho.values
 ds.close()
 
+
 """
 The code works by changing values in an array "hh" which stores
 the modified depth with nan's for the modified mask.  When needed
@@ -58,7 +59,6 @@ NetCDF save of the file.
 
 # flip to work with imshow
 h = np.flipud(H)
-# da = np.flipud(DA)
 m = np.flipud(mask_rho)
 # mask_rho:
 # 1 = water
@@ -67,6 +67,42 @@ hh = h.copy()
 hh[m==0] = np.nan
 
 NR, NC = hh.shape
+
+# Add padding around edges to facilitate editing out areas that extend to the boundary.
+# This is removed at the end before writing to NetCDF.
+hpad = 6
+NRp = NR + 2*hpad
+NCp = NC + 2*hpad
+
+hp = np.zeros((NRp,NCp))
+mp = np.zeros((NRp,NCp))
+hhp = np.nan * np.ones((NRp,NCp))
+
+hp[hpad:-hpad, hpad:-hpad] = h
+hhp[hpad:-hpad, hpad:-hpad] = hh
+mp[hpad:-hpad, hpad:-hpad] = m
+
+h = hp.copy()
+hh = hhp.copy()
+m = mp.copy()
+
+lon = lon[0,:]
+lat = lat[:,0]
+
+dlon = lon[1] - lon[0]
+dlat = lat[1] - lat[0]
+
+lonp = np.nan * np.ones(NCp)
+latp = np.nan * np.ones(NRp)
+lonp[hpad:-hpad] = lon
+latp[hpad:-hpad] = lat
+lonp[:hpad] = np.arange(lon[0] - hpad*dlon, lon[0], dlon)
+lonp[-hpad:] = np.arange(lon[-1]+dlon, lon[-1] + (hpad+1)*dlon, dlon)
+latp[:hpad] = np.arange(lat[0] - hpad*dlat, lat[0], dlat)
+latp[-hpad:] = np.arange(lat[-1]+dlat, lat[-1] + (hpad+1)*dlat, dlat)
+
+lon = lonp.copy()
+lat = latp.copy()
 
 # PLOTTING
 
@@ -91,12 +127,14 @@ aa = ax1.axis()
 
 # add the coastline
 clon, clat = pfun.get_coast()
-cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:], show_warnings=False)
-cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0], show_warnings=False)
-ax1.plot(cx0 + cxf, NR - (cy0 + cyf) - 1, '-k')
+# cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:], show_warnings=False)
+# cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0], show_warnings=False)
+cx0, cx1, cxf = zfun.get_interpolant(clon, lon, show_warnings=False)
+cy0, cy1, cyf = zfun.get_interpolant(clat, lat, show_warnings=False)
+ax1.plot(cx0 + cxf, NRp - (cy0 + cyf) - 1, '-k')
 
 # add river info if rivers have been carved
-gfp.edit_mask_river_tracks(Gr, NR, ax1)
+gfp.edit_mask_river_tracks(Gr, NRp, ax1, hpad)
 ax1.axis(aa)
 
 # Create control buttons
@@ -145,15 +183,15 @@ for bnum in bdict.keys():
 plt.show()
 
 # polygon functions
-def get_indices_in_polygon(plon_poly, plat_poly, NR, NC):
+def get_indices_in_polygon(plon_poly, plat_poly, NRp, NCp):
     # get indices of points inside a polygon
     V = np.ones((len(plon_poly),2))
     V[:,0] = plon_poly
     V[:,1] = plat_poly
     P = mpath.Path(V)
     # grid centers
-    x = np.arange(NC)
-    y = np.arange(NR)
+    x = np.arange(NCp)
+    y = np.arange(NRp)
     # matrix versions of grids
     X, Y = np.meshgrid(x,y)
     M, L = X.shape
@@ -245,7 +283,7 @@ while flag_get_ginput:
             hh_prev = hh.copy()
             flag_continue = False
             ax1.set_title('PAUSED: Changed Poly to Land')
-            ji_rho_in = get_indices_in_polygon(plon_poly, plat_poly, NR, NC)
+            ji_rho_in = get_indices_in_polygon(plon_poly, plat_poly, NRp, NCp)
             hh[ji_rho_in[:,0], ji_rho_in[:,1]] = np.nan
             cs.set_data(hh)
             remove_poly()
@@ -253,7 +291,7 @@ while flag_get_ginput:
             hh_prev = hh.copy()
             flag_continue = False
             ax1.set_title('PAUSED: Changed Poly to Water')
-            ji_rho_in = get_indices_in_polygon(plon_poly, plat_poly, NR, NC)
+            ji_rho_in = get_indices_in_polygon(plon_poly, plat_poly, NRp, NCp)
             hh[ji_rho_in[:,0], ji_rho_in[:,1]] = h[ji_rho_in[:,0], ji_rho_in[:,1]]
             cs.set_data(hh)
             remove_poly()
@@ -361,6 +399,11 @@ while flag_get_ginput:
 # (I should make a discard changes button)
 
 # update fields for output
+
+# rhmove hpad
+h = h[hpad:-hpad, hpad:-hpad]
+hh = hh[hpad:-hpad, hpad:-hpad]
+
 h = np.flipud(h)
 hh = np.flipud(hh)
 newmask = np.ones((NR, NC), dtype=float)
