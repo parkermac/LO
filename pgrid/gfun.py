@@ -74,6 +74,7 @@ def default_choices():
     # SMOOTHING
     dch['use_min_depth'] = True
     dch['min_depth'] = 4 # meters (positive down)
+    dch['rx0max'] = 0.15
         
     # NUDGING
     # Use nudging edges to decide which edges to have nudging to climatology

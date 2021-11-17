@@ -37,7 +37,7 @@ dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))
 # Smoothing set up
 MSK = mask_rho.copy()
 Hobs = h.copy()
-rx0max = 0.15
+rx0max = dch['rx0max']
 
 # Make sure that anything NOT MASKED is not shallower than min_depth.
 if dch['use_min_depth']:
@@ -58,7 +58,6 @@ if dch['min_depth'] > 0:
 elif dch['min_depth'] <= 0:
     print('min_depth must be > 0')
     sys.exit()
-    # shift = dch['min_depth'] - 15
     
 # Do the smoothing.
 Hnew = gfu.GRID_PlusMinusScheme_rx0(MSK, Hobs, rx0max, AreaMatrix,

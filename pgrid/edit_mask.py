@@ -19,13 +19,13 @@ import xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 import sys
+import pandas as pd
 
 from lo_tools import Lfun, zfun
 from lo_tools import plotting_functions as pfun
 
 import gfun
 import gfun_utility as gfu
-import gfun_plotting as gfp
 
 Gr =gfun.gstart()
 
@@ -46,7 +46,6 @@ lat = ds.lat_rho.values
 mask_rho = ds.mask_rho.values
 ds.close()
 
-
 """
 The code works by changing values in an array "hh" which stores
 the modified depth with nan's for the modified mask.  When needed
@@ -65,12 +64,12 @@ m = np.flipud(mask_rho)
 # 0 = land
 hh = h.copy()
 hh[m==0] = np.nan
-
 NR, NC = hh.shape
 
-# Add padding around edges to facilitate editing out areas that extend to the boundary.
-# This is removed at the end before writing to NetCDF.
-hpad = 6
+# ----------------- padding ------------------------------------
+# Add padding around edges to facilitate editing out areas that
+# extend to the boundary.  This is removed at the end before writing to NetCDF.
+hpad = 12
 NRp = NR + 2*hpad
 NCp = NC + 2*hpad
 
@@ -103,12 +102,13 @@ latp[-hpad:] = np.arange(lat[-1]+dlat, lat[-1] + (hpad+1)*dlat, dlat)
 
 lon = lonp.copy()
 lat = latp.copy()
+# ----------------- padding ------------------------------------
 
 # PLOTTING
 
 # set up the axes
 plt.close('all')
-fig = plt.figure(figsize=(16,13)) # (13,8) is good for my laptop
+fig = plt.figure(figsize=(20,13)) # (13,8) is good for my laptop
 ax1 = plt.subplot2grid((1,3), (0,0), colspan=2) # map
 ax2 = plt.subplot2grid((1,3), (0,2), colspan=1) # buttons
 
@@ -133,8 +133,39 @@ cx0, cx1, cxf = zfun.get_interpolant(clon, lon, show_warnings=False)
 cy0, cy1, cyf = zfun.get_interpolant(clat, lat, show_warnings=False)
 ax1.plot(cx0 + cxf, NRp - (cy0 + cyf) - 1, '-k')
 
+def edit_mask_river_tracks(Gr, NRp, ax, hpad):
+    # add river tracks and endpoints for edit_mask.py
+    rri_fn = Gr['gdir'] / 'roms_river_info.csv'
+    if rri_fn.is_file():
+        df = pd.read_csv(rri_fn, index_col='rname')
+    else:
+        print('Note from edit_mask_river_tracks(): missing roms_river_info.csv')
+        return
+    uv_dict = df['uv']
+    row_dict_py = df['row_py']
+    col_dict_py = df['col_py']
+    isign_dict = df['isign']
+    idir_dict = df['idir']
+    # Plot river endpoints, indicating source direction.  The indexing
+    # nudges seem a little non-intuitive, but I believe they are correct.
+    for rn in df.index:
+        yy = NRp - row_dict_py[rn] - 1 - hpad
+        xx = col_dict_py[rn] + hpad
+        if uv_dict[rn] == 'u' and isign_dict[rn] == 1:
+            # River Source on W side of rho cell
+            ax.plot(xx+.5, yy, '>r')
+        elif uv_dict[rn] == 'u' and isign_dict[rn] == -1:
+            # River Source on E side of rho cell
+            ax.plot(xx+.5, yy, '<r')
+        elif uv_dict[rn] == 'v' and isign_dict[rn] == 1:
+            # River Source on S side of rho cell
+            ax.plot(xx, yy-.5, '^b')
+        elif uv_dict[rn] == 'v' and isign_dict[rn] == -1:
+            # River Source on N side of rho cell
+            ax.plot(xx, yy-.5, 'vb')    
 # add river info if rivers have been carved
-gfp.edit_mask_river_tracks(Gr, NRp, ax1, hpad)
+edit_mask_river_tracks(Gr, NRp, ax1, hpad)
+
 ax1.axis(aa)
 
 # Create control buttons
@@ -146,7 +177,7 @@ blist = ['start', 'pause', 'continueM', 'continueZ',
 Blist = ['Start', 'Pause', 'Edit Mask', 'Edit Depth (' + str(dval) + ' m)',
          'Polygon to Land', 'Polygon to Water',
          'Line to Land', 'Line to Water', 'Start Polygon/Line',
-         'Undo', 'Discard', 'Done']
+         'Undo', 'Discard ALL Edits', 'Done']
 NB = len(blist) # number of buttons
 ybc = np.arange(NB+1) - .5
 offset = 1e5 # kludgey way to distinguish buttons from topography in the ginput

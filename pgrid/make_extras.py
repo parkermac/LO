@@ -25,6 +25,8 @@ dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))
 if dch['use_min_depth']:
     # set min depth everywhere
     h[ h <= dch['min_depth'] ] = dch['min_depth']
+    # also set it to min_depth where masked
+    h[mask_rho == 0] = dch['min_depth']
 
 # Make the masks.
 

@@ -64,40 +64,6 @@ def add_river_tracks(Gr, ds, ax):
         ax.plot(x, y, '-r', linewidth=1, alpha=.3)
         ax.plot(x[-1], y[-1], '*r', alpha=.3)
                     
-def edit_mask_river_tracks(Gr, NRp, ax, hpad):
-    # add river tracks and endpoints for edit_mask.py
-    
-    rri_fn = Gr['gdir'] / 'roms_river_info.csv'
-    if rri_fn.is_file():
-        df = pd.read_csv(rri_fn, index_col='rname')
-    else:
-        print('Note from edit_mask_river_tracks(): missing roms_river_info.csv')
-        return
-        
-    uv_dict = df['uv']
-    row_dict_py = df['row_py']
-    col_dict_py = df['col_py']
-    isign_dict = df['isign']
-    idir_dict = df['idir']
-    # Plot river endpoints, indicating source direction.  The indexing
-    # nudges seem a little non-intuitive, but I believe they are correct.
-    for rn in df.index:
-        yy = NRp - row_dict_py[rn] - 1 - hpad
-        xx = col_dict_py[rn] + hpad
-        # River Source on W side of rho cell
-        if uv_dict[rn] == 'u' and isign_dict[rn] == 1:
-            # River Source on W side of rho cell
-            ax.plot(xx+.5, yy, '>r')
-        elif uv_dict[rn] == 'u' and isign_dict[rn] == -1:
-            # River Source on E side of rho cell
-            ax.plot(xx+.5, yy, '<r')
-        elif uv_dict[rn] == 'v' and isign_dict[rn] == 1:
-            # River Source on S side of rho cell
-            ax.plot(xx, yy-.5, '^b')
-        elif uv_dict[rn] == 'v' and isign_dict[rn] == -1:
-            # River Source on N side of rho cell
-            ax.plot(xx, yy-.5, 'vb')    
-
 def show_z_info(zm, ax):
     # find the max value of z (DEBUGGING)
     (rowmax, colmax) = np.unravel_index(np.argmax(zm), zm.shape)

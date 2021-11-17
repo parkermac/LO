@@ -206,8 +206,6 @@ def make_nudgcoef(dch, out_dir, N, NR, NC):
     ds.to_netcdf(out_fn, encoding=encoding_dict)
     
     ds.close()
-    
-
 
 def GRID_PlusMinusScheme_rx0(MSK, Hobs, rx0max, AreaMatrix,
     fjord_cliff_edges = True, shift=0):
