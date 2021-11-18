@@ -15,6 +15,8 @@ the color limits will all be set to match those set by auto_lims() from the firs
 
 Use -avl False to have color limits all set to match those set by pinfo.vlims_dict.
 
+Using -test True will create the object "ds", an xarray Dataset of the most recent history file.
+
 """
 import os, sys
 import argparse
@@ -170,3 +172,7 @@ elif len(fn_list) > 1:
             print('\n'+stdout.decode())
         if len(stderr) > 0:
             print('\n'+stderr.decode())
+            
+if Ldir['testing']:
+    import xarray as xr
+    ds = xr.open_dataset(fn)

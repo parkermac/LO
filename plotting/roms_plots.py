@@ -449,7 +449,8 @@ def P_ths(in_dict):
 
 def P_debug(in_dict):
     # Focused on debugging
-    vn_list = ['salt','zeta', 'u', 'v']
+    vn_list = ['salt', 'u', 'v', 'zeta']
+    do_wetdry = False
     
     # START
     fs = 10
@@ -468,8 +469,16 @@ def P_debug(in_dict):
         x = ds['lon_'+tag].values
         y = ds['lat_'+tag].values
         px, py = pfun.get_plon_plat(x,y)
-        if vn in ['zeta', 'ubar', 'vbar']:
+        if vn in ['ubar', 'vbar']:
             v = ds[vn][0,:,:].values
+        elif vn == 'zeta':
+            v = ds[vn][0,:,:].values
+            if 'wetdry_mask_rho' in ds.data_vars:
+                do_wetdry = True
+                mr = ds.mask_rho.values
+                mwd = ds.wetdry_mask_rho[0,:,:].values
+                v[mr==0] = np.nan
+                #v[mwd==1] = np.nan
         else:
             v = ds[vn][0, -1,:,:].values
         ax = fig.add_subplot(1, len(vn_list), ii)
