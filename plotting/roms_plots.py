@@ -480,11 +480,15 @@ def P_debug(in_dict):
                 v[mr==0] = np.nan
                 #v[mwd==1] = np.nan
         else:
-            v = ds[vn][0, -1,:,:].values
+            v = ds[vn][0, 6,:,:].values
         ax = fig.add_subplot(1, len(vn_list), ii)
         ax.set_xticks([])
         ax.set_yticks([])
         cs = ax.pcolormesh(px, py, v, cmap='rainbow')
+
+        # so0 hack:
+        ax.plot(x[16,346],y[16,346],'*y', markersize=24, mec='k')
+
         pfun.add_coast(ax)
         ax.axis(pfun.get_aa(ds))
         pfun.dar(ax)
