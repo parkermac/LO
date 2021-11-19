@@ -60,7 +60,7 @@ pfun.start_plot(figsize=(12,12))
 # bathymetry
 fig = plt.figure()
 ax = fig.add_subplot(111)
-cs = ax.pcolormesh(plon, plat, zm, vmin=-10, vmax=0, cmap='Spectral_r')
+cs = ax.pcolormesh(plon, plat, zm, vmin=-5, vmax=0, cmap='Spectral_r')
 fig.colorbar(cs, ax=ax)
 pfun.add_coast(ax)
 pfun.dar(ax)

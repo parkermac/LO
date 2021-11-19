@@ -163,14 +163,6 @@ for fn in h_list:
             vv = np.nan * np.ones(xx[tag].shape) 
             vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
             # note that "workers" has replaced "n_jobs"
-            
-            # # for WET_DRY, make sure zeta is above bathy by some amount
-            # if vn == 'zeta':
-            #     vvc = vv.copy()
-            #     drape_mask = vvc < zbot_plus
-            #     vv[drape_mask] = zbot_plus[drape_mask]
-            #     #vv[mm['rho'] == 0] = np.nan
-                
             data_dict[vn][tt, :, :] = vv
         elif dm == 3:
             for nn in range(N):
@@ -209,12 +201,6 @@ out_fn.unlink(missing_ok=True)
 Ofun_nc_xarray.make_bry_file(in_fn, out_fn)
 print('\n- Write bry file: %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
-    
-# # use the old netCDF4 methods (deprecated)
-# NT, N, NR, NC = data_dict['salt'].shape
-# Ofun_nc.make_clm_file(out_dir, data_dict, N, NR, NC)
-# Ofun_nc.make_ini_file(out_dir)
-# Ofun_nc.make_bry_file(out_dir)
     
 def print_info(fn):
     print('\n' + str(fn))
