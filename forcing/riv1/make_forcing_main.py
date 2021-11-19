@@ -3,6 +3,9 @@ This is the main program for making the RIV forcing file.  It has been re-coded 
 of the new pre/river output, and the alpha/river_functions.py.  It does not use the
 old river class framework.
 
+2021.11.19 This is identical to riv0 except in the calculation of Vshape.  This uses even
+weights per bin which is a better approximation when using Vtranform = 2.
+
 Test on mac in ipython:
 
 run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2019.07.04 -test True -f riv0

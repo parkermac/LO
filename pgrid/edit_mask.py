@@ -118,7 +118,8 @@ from matplotlib import colors
 # make a color map of fixed colors
 cmap = colors.ListedColormap(['coral', 'orange', 'lightgreen', 'seagreen',
                               'lightblue', 'cornflowerblue', 'mediumslateblue', 'blueviolet'])
-bounds=[-10, -5, 0, 5, 10, 20, 100, 200, 4000]
+# bounds=[-10, -5, 0, 5, 10, 20, 100, 200, 4000]
+bounds=[-5, 0, 1, 2, 3, 5, 10, 20, 4000]
 norm = colors.BoundaryNorm(bounds, cmap.N)
 # tell imshow about color map so that only set colors are used
 cs = ax1.imshow(h, interpolation='nearest', cmap=cmap, norm=norm)
@@ -348,7 +349,7 @@ while flag_get_ginput:
                         hh[JJ[pp], II[pp]] = np.max((h[JJ[pp], II[pp]], dval))
                 # this sets the depth of points crossed by the line to dval
                 # or the original bathymetry - whichever is deeper.
-                ax1.set_title('PAUSED: Changed line to Water of depth '
+                ax1.set_title('PAUSED: Changed line to Water of depth >= '
                               + str(dval) + ' m')
             cs.set_data(hh)
             remove_poly()
@@ -372,8 +373,7 @@ while flag_get_ginput:
                     II, JJ = zfun.get_stairstep(ix0, ix1, iy0, iy1)
                     for pp in range(len(II)):
                         hh[JJ[pp], II[pp]] = np.nan
-                ax1.set_title('PAUSED: Changed line to Water of depth '
-                              + str(dval) + ' m')
+                ax1.set_title('PAUSED: Changed line to land')
             cs.set_data(hh)
             remove_poly()
             

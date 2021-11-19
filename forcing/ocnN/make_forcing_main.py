@@ -30,14 +30,12 @@ import numpy as np
 from lo_tools import Lfun, zfun, zrfun
 
 import Ofun_nc_xarray
-import Ofun_nc
 # defaults
 verbose = True
 if Ldir['testing']:
     # verbose = True
     from importlib import reload
     reload(Ofun_nc_xarray)
-    reload(Ofun_nc)
 
 # this directory is created, along with Info and Data subdirectories, by ffun.intro()
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
@@ -93,10 +91,6 @@ for tag in tag_list:
     yy[tag] = ds['lat_' + tag].values
     mm[tag] = ds['mask_' + tag].values
     
-# bottom z plus a bit for WET_DRY cases
-zbot_plus = -ds.h.values + 0.09
-zbot_plus[mm['rho']==0] = np.nan
-
 ds.close()
 
 if Ldir['start_type'] == 'continuation':
@@ -115,6 +109,7 @@ if pad > 0:
 for tag in tag_list:
     xynew[tag] = np.array((xx[tag][mm[tag]==1],yy[tag][mm[tag]==1])).T
 
+tt0 = time()
 # Create 2-D search trees for the old grid
 ds = xr.open_dataset(h_list[0])
 N = len(ds.s_rho.values)
@@ -132,6 +127,8 @@ for tag in tag_list:
     xyorig = np.array((xtrim[tag][mtrim[tag]==1],ytrim[tag][mtrim[tag]==1])).T
     xyT[tag] = cKDTree(xyorig)
 ds.close()
+print('Time to make Trees = %0.2f sec' % (time()-tt0))
+sys.stdout.flush()
 
 # associate variables to process with grids
 vn_dict = {'salt':('rho',3), 'temp':('rho',3), 'zeta':('rho',2),
@@ -208,13 +205,12 @@ def print_info(fn):
     print(ds)
     ds.close()
 
-nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
-# print info about the files to the screen
-for fn in nc_list:
-    print_info(out_dir / fn)
-
 # check results
 nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
+if False:
+    # print info about the files to the screen
+    for fn in nc_list:
+        print_info(out_dir / fn)
 result_dict['result'] = 'success'
 for fn in nc_list:
     if (out_dir / fn).is_file():
