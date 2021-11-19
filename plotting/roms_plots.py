@@ -487,7 +487,9 @@ def P_debug(in_dict):
         cs = ax.pcolormesh(px, py, v, cmap='rainbow')
 
         # so0 hack:
-        ax.plot(x[336, 117],y[336, 117],'*y', markersize=24, mec='k')
+        # ax.plot(x[336, 117],y[336, 117],'*y', markersize=24, mec='k')
+        
+        # ind = np.unravel_index(np.nanargmax(a, axis=None), a.shape)
 
         pfun.add_coast(ax)
         ax.axis(pfun.get_aa(ds))
