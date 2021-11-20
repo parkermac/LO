@@ -449,7 +449,7 @@ def P_ths(in_dict):
 
 def P_debug(in_dict):
     # Focused on debugging
-    vn_list = ['salt', 'u', 'v', 'zeta']
+    vn_list = ['u', 'v', 'zeta']
     do_wetdry = False
     
     # START
@@ -473,18 +473,21 @@ def P_debug(in_dict):
             v = ds[vn][0,:,:].values
         elif vn == 'zeta':
             v = ds[vn][0,:,:].values
-            if 'wetdry_mask_rho' in ds.data_vars:
-                do_wetdry = True
-                mr = ds.mask_rho.values
-                mwd = ds.wetdry_mask_rho[0,:,:].values
-                v[mr==0] = np.nan
-                #v[mwd==1] = np.nan
+            h = ds.h.values
+            mr = ds.mask_rho.values
+            v[mr==0] = np.nan
+            h[mr==0] = np.nan
+            v = v + h
+            vn = 'depth'
         else:
             v = ds[vn][0, -1,:,:].values
         ax = fig.add_subplot(1, len(vn_list), ii)
         ax.set_xticks([])
         ax.set_yticks([])
-        cs = ax.pcolormesh(px, py, v, cmap='rainbow')
+        if vn == 'depth':
+            cs = ax.pcolormesh(px, py, v, cmap='rainbow',vmin=0,vmax=4)
+        else:
+            cs = ax.pcolormesh(px, py, v, cmap='rainbow')
 
         # so0 hack:
         # ax.plot(x[336, 117],y[336, 117],'*y', markersize=24, mec='k')
