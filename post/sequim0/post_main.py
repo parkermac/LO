@@ -9,7 +9,7 @@ run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -job sequim0 -test True
 
 Run for real on apogee:
 
-python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's date string] -job sequim0 > sequim0.log &
+python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's date string] -job sequim0 > sequim.log &
 
 """
 
