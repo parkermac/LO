@@ -449,7 +449,7 @@ def P_ths(in_dict):
 
 def P_debug(in_dict):
     # Focused on debugging
-    vn_list = ['u', 'v', 'zeta']
+    vn_list = ['temp', 'u', 'v', 'zeta']
     do_wetdry = False
     
     # START
