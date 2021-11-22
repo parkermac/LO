@@ -214,47 +214,147 @@ for ii in range(NT):
 print('Time to run all extractions = %0.1f sec' % (time()-tt0))
 sys.stdout.flush()
 
-# concatenate the dicts into one file
-data_dict = dict()
+# +++++++++ end parallel subprocess +++++++++++++++++++++++++++++++++
+
+
+# @@@@@@@@@@@@@@@@ write to ocean_clm.nc @@@@@@@@@@@@@@@@@@@@@@@@@@
+
+"""
+Write fields to ocean_clm.nc.
+"""
+tt0 = time()
+
+# associate variables with dimenstions
+vn_dict = {
+        'zeta': ('zeta_time', 'eta_rho', 'xi_rho'),
+        'ubar': ('v2d_time', 'eta_u', 'xi_u'),
+        'vbar': ('v2d_time', 'eta_v', 'xi_v'),
+        'salt': ('salt_time', 's_rho', 'eta_rho', 'xi_rho'),
+        'temp': ('temp_time', 's_rho', 'eta_rho', 'xi_rho'),
+        'u': ('v3d_time', 's_rho', 'eta_u', 'xi_u'),
+        'v': ('v3d_time', 's_rho', 'eta_v', 'xi_v')
+        }
+# assign attributes to variables
+attrs_dict = {
+        'zeta': {'long_name': 'sea surface height climatology', 'units':'meter'},
+        'ubar': {'long_name': 'vertically averaged u-momentum climatology', 'units':'meter second-1'},
+        'vbar': {'long_name': 'vertically averaged v-momentum climatology', 'units':'meter second-1'},
+        'salt': {'long_name': 'salinity climatology', 'units':'g kg-1'},
+        'temp': {'long_name': 'potential temperature climatology', 'units':'Celsius'},
+        'u': {'long_name': 'u-momentum component climatology', 'units':'meter second-1'},
+        'v': {'long_name': 'v-momentum component climatology', 'units':'meter second-1'}
+        }
+        
+# write fields to the Dataset
+ds = xr.Dataset()
+ot_vec = np.nan * np.ones(NT)
 ii = 0
 for temp_out_fn in temp_out_fn_list:
     dd = pickle.load(open(temp_out_fn, 'rb'))
+    
     if ii == 0:
+        
+        # initialize the variables in the Dataset
         for vn in dd.keys():
             if vn == 'ocean_time':
-                data_dict[vn] = np.nan * np.ones(NT)
+                pass
+                #data_dict[vn] = np.nan * np.ones(NT)
             else:
-                data_dict[vn] = np.nan * np.ones(((NT,) + dd[vn].shape))
+                #data_dict[vn] = np.nan * np.ones(((NT,) + dd[vn].shape))
+                ds[vn] = (vn_dict[vn] , np.nan * np.ones((NT,) + dd[vn].shape))
+                ds[vn].attrs = attrs_dict[vn]
+                
     for vn in dd.keys():
         ddv = dd[vn]
         if vn == 'ocean_time':
-            data_dict[vn][ii] = ddv
+            #data_dict[vn][ii] = ddv
+            ot_vec[ii] = ddv
         else:
             if ddv.ndim == 2:
-                data_dict[vn][ii, :, :] = ddv
+                ds[vn][ii, :, :] = ddv
             elif ddv.ndim == 3:
-                data_dict[vn][ii, :, :, :] = ddv
+                ds[vn][ii, :, :, :] = ddv
             else:
-                print('problem with the temporary data dict!')
+                print('problem with ndim?')
     ii += 1
-        
-# +++++++++ end parallel subprocess +++++++++++++++++++++++++++++++++
+
+ds['ocean_time'] = (('ocean_time',), ot_vec)
+ds['ocean_time'].attrs['units'] = Lfun.roms_time_units
+ds['ocean_time'].attrs['long_name'] = 'ocean time'
+
+for vn in vn_dict.keys():
+    # time coordinates
+    vnt = vn_dict[vn][0]
+    ds[vnt] = ((vnt,), ot_vec)
+    ds[vnt].attrs['units'] = Lfun.roms_time_units
+    # fields
+    # ds[vn] = (vn_dict[vn], make_masked(data_dict[vn]))
+    # ds[vn].attrs = attrs_dict[vn]
+    
+
+# add time coordinate
+# ds['ocean_time'] = (('ocean_time',), data_dict['ocean_time'])
+# for vn in vn_dict.keys():
+#     # time coordinates
+#     vnt = vn_dict[vn][0]
+#     ds[vnt] = ((vnt,), data_dict['ocean_time'])
+#     ds[vnt].attrs['units'] = Lfun.roms_time_units
+
+# and save to NetCDF
+out_fn = out_dir / 'ocean_clm.nc'
+out_fn.unlink(missing_ok=True)
+enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
+Enc_dict = {vn:enc_dict for vn in vn_dict.keys()}
+ds.to_netcdf(out_fn, encoding=Enc_dict)
+ds.close()
+    
+
+# # concatenate the dicts into one file
+# data_dict = dict()
+# ii = 0
+# for temp_out_fn in temp_out_fn_list:
+#     dd = pickle.load(open(temp_out_fn, 'rb'))
+#     if ii == 0:
+#         for vn in dd.keys():
+#             if vn == 'ocean_time':
+#                 data_dict[vn] = np.nan * np.ones(NT)
+#             else:
+#                 data_dict[vn] = np.nan * np.ones(((NT,) + dd[vn].shape))
+#     for vn in dd.keys():
+#         ddv = dd[vn]
+#         if vn == 'ocean_time':
+#             data_dict[vn][ii] = ddv
+#         else:
+#             if ddv.ndim == 2:
+#                 data_dict[vn][ii, :, :] = ddv
+#             elif ddv.ndim == 3:
+#                 data_dict[vn][ii, :, :, :] = ddv
+#             else:
+#                 print('problem with the temporary data dict!')
+#     ii += 1
+
+print('- Write clm file: %0.2f sec' % (time()-tt0))
+sys.stdout.flush()
+# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+# clean up
+Lfun.make_dir(temp_dir, clean=True)
 
 # Write to NetCDF using xarray (this works, hooray!).
 
-tt0 = time()
-out_fn = out_dir / 'ocean_clm.nc'
-out_fn.unlink(missing_ok=True)
-Ofun_nc_xarray.make_clm_file(data_dict, out_fn)
-print('\n- Write clm file: %0.2f sec' % (time()-tt0))
-sys.stdout.flush()
+# tt0 = time()
+# out_fn = out_dir / 'ocean_clm.nc'
+# out_fn.unlink(missing_ok=True)
+# Ofun_nc_xarray.make_clm_file(data_dict, out_fn)
+# print('\n- Write clm file: %0.2f sec' % (time()-tt0))
+# sys.stdout.flush()
 
 tt0 = time()
 in_fn = out_dir / 'ocean_clm.nc'
 out_fn = out_dir / 'ocean_ini.nc'
 out_fn.unlink(missing_ok=True)
 Ofun_nc_xarray.make_ini_file(in_fn, out_fn)
-print('\n- Write ini file: %0.2f sec' % (time()-tt0))
+print('- Write ini file: %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
 
 tt0 = time()
@@ -262,7 +362,7 @@ in_fn = out_dir / 'ocean_clm.nc'
 out_fn = out_dir / 'ocean_bry.nc'
 out_fn.unlink(missing_ok=True)
 Ofun_nc_xarray.make_bry_file(in_fn, out_fn)
-print('\n- Write bry file: %0.2f sec' % (time()-tt0))
+print('- Write bry file: %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
     
 def print_info(fn):
@@ -273,7 +373,7 @@ def print_info(fn):
 
 # check results
 nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
-if False:
+if True:
     # print info about the files to the screen
     for fn in nc_list:
         print_info(out_dir / fn)
