@@ -95,7 +95,7 @@ if dch['remove_islands']:
     # The number in range() determines how long of a feature is removed.
     # What the algorithm will not do, for example, is get rid of
     # a square lake of 4 cells.    
-    for ii in range(5):
+    for ii in range(7): # was range(5)
         NR, NC = m.shape
         mm = m[1:-1, 1:-1]
         mn = m[2:, 1:-1]

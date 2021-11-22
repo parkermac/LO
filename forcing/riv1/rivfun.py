@@ -191,8 +191,7 @@ def write_to_nc(out_fn, S, gri_df, qt_df_dict, dt_ind):
     for rn in gri_df.index:
         qt_df = qt_df_dict[rn]
         flow = qt_df['final'].values
-        print('Warning from riv1: setting flow to zero!')
-        v_var[:, rc[rn]] = 0 * flow * gri_df.loc[rn, 'isign']
+        v_var[:, rc[rn]] = flow * gri_df.loc[rn, 'isign']
     v_var.long_name = 'river runoff vertically integrated mass transport'
     v_var.positive = "LuvSrc=T flow in positive u,v direction, LwSrc=T flow into RHO-cell"
     v_var.negative = "LuvSrc=T flow in negative u,v direction, LwSrc=T flow out of RHO-cell"

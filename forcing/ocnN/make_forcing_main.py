@@ -59,126 +59,6 @@ h_list = sorted(in_dir.glob('ocean_his_*'))
 if Ldir['testing']:
     h_list = h_list[:2]
 
-# meant to be replaced by get_one_time.py
-if False:
-    
-    def get_bounds(x_big, y_big, x_small, y_small, pad=3):
-        """
-        This function takes two pairs of plaid, 2-D, lon, lat arrays:
-        - one pair bigger (that we hope to nest inside) and
-        - one pair smaller (the grid of the nest)
-        and returns the indices to use for making a trimmed version of
-        the bigger grid that the smaller grid still fits inside.
-        We add "pad" around the edges to make sure things fit comfortably.
-        """
-        # First: error checking
-        if (x_small[0,0] < x_big[0,pad]) or (x_small[0,-1] > x_big[0,-pad]):
-            print('ERROR: lon out of bounds ')
-            sys.exit()
-        if (y_small[0,0] < y_big[pad,0]) or (y_small[-1,0] > y_big[-pad,0]):
-            print('ERROR: lat out of bounds ')
-            sys.exit()
-        # Second: get indices
-        ix0 = zfun.find_nearest_ind(x_big[0,:], x_small[0,0]) - pad
-        ix1 = zfun.find_nearest_ind(x_big[0,:], x_small[0,-1]) + pad
-        iy0 = zfun.find_nearest_ind(y_big[:,0], y_small[0,0]) - pad
-        iy1 = zfun.find_nearest_ind(y_big[:,0], y_small[-1,0]) + pad
-        return ix0, ix1, iy0, iy1
-
-    tag_list = ['rho', 'u', 'v']
-
-    # the new grid
-    ds = xr.open_dataset(Ldir['grid'] / 'grid.nc')
-
-    xx = {}; yy = {}; mm = {}; xynew = {}
-    for tag in tag_list:
-        xx[tag] = ds['lon_' + tag].values
-        yy[tag] = ds['lat_' + tag].values
-        mm[tag] = ds['mask_' + tag].values
-    
-    ds.close()
-
-    if Ldir['start_type'] == 'continuation':
-        pad = 20
-    elif Ldir['start_type'] == 'new':
-        pad = 0
-    else:
-        print('Error: Unrecognized start_type')
-        sys.exit()
-    if pad > 0:
-        # mask out the inside of the nest fields, since we only use
-        # the edges (unless Ldir['start_type']=='new')
-        for tag in tag_list:
-            mm[tag][pad:-pad, pad:-pad] = 0 # this speeds things up
-    
-    for tag in tag_list:
-        xynew[tag] = np.array((xx[tag][mm[tag]==1],yy[tag][mm[tag]==1])).T
-
-    tt0 = time()
-    # Create 2-D search trees for the old grid
-    ds = xr.open_dataset(h_list[0])
-    N = len(ds.s_rho.values)
-    xtrim = {}; ytrim = {}; mtrim = {}; xyT = {}
-    ix0 = {}; ix1 = {}; iy0 = {}; iy1 = {}
-    for tag in tag_list:
-        x = ds['lon_' + tag].values
-        y = ds['lat_' + tag].values
-        m = ds['mask_' + tag].values # 1=water
-        # trim the old grid before making the search tree
-        ix0[tag], ix1[tag], iy0[tag], iy1[tag] = get_bounds(x, y, xx[tag], yy[tag])
-        xtrim[tag] = x[iy0[tag]:iy1[tag], ix0[tag]:ix1[tag]]
-        ytrim[tag] = y[iy0[tag]:iy1[tag], ix0[tag]:ix1[tag]]
-        mtrim[tag] = m[iy0[tag]:iy1[tag], ix0[tag]:ix1[tag]]
-        xyorig = np.array((xtrim[tag][mtrim[tag]==1],ytrim[tag][mtrim[tag]==1])).T
-        xyT[tag] = cKDTree(xyorig)
-    ds.close()
-    print('Time to make Trees = %0.2f sec' % (time()-tt0))
-    sys.stdout.flush()
-
-    # associate variables to process with grids
-    vn_dict = {'salt':('rho',3), 'temp':('rho',3), 'zeta':('rho',2),
-            'u':('u',3), 'v':('v',3), 'ubar':('u',2), 'vbar':('v',2)}
-
-    # create blank arrays for results
-    data_dict = dict()
-    for vn in vn_dict.keys():
-        tag = vn_dict[vn][0]
-        dm = vn_dict[vn][1]
-        NR, NC = xx[tag].shape
-        if dm == 2:
-            data_dict[vn] = np.nan* np.ones((NT,NR,NC))
-        elif dm == 3:
-            data_dict[vn] = np.nan* np.ones((NT,N,NR,NC))
-
-    # Interpolate to fill all data arrays for new grid.
-    tt = 0
-    modtime_list = []
-    for fn in h_list:
-        tt0 = time()
-        ds = xr.open_dataset(fn, decode_times=False)
-        modtime_list.append(ds.ocean_time.values[0])
-        for vn in vn_dict.keys():
-            tag = vn_dict[vn][0]
-            dm = vn_dict[vn][1]
-            if dm == 2:
-                vtrim = ds[vn][0,iy0[tag]:iy1[tag], ix0[tag]:ix1[tag]].values
-                vv = np.nan * np.ones(xx[tag].shape) 
-                vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
-                # note that "workers" has replaced "n_jobs"
-                data_dict[vn][tt, :, :] = vv
-            elif dm == 3:
-                for nn in range(N):
-                    vtrim = ds[vn][0,nn,iy0[tag]:iy1[tag], ix0[tag]:ix1[tag]].values
-                    vv = np.nan * np.ones(xx[tag].shape) 
-                    vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
-                    data_dict[vn][tt, nn, :, :] = vv
-        print('tt = %d (%0.2f sec)' % (tt, time()-tt0))
-        sys.stdout.flush()
-        tt += 1
-        ds.close()
-    data_dict['ocean_time'] = np.array(modtime_list)
-
-
 # +++++++++++ parallel subprocess +++++++++++++++++++++++++++++++++++
 temp_dir = out_dir / 'Data'
 Lfun.make_dir(temp_dir, clean=True)
@@ -213,141 +93,16 @@ for ii in range(NT):
     ii += 1
 print('Time to run all extractions = %0.1f sec' % (time()-tt0))
 sys.stdout.flush()
-
 # +++++++++ end parallel subprocess +++++++++++++++++++++++++++++++++
 
+# Write files to NetCDF.
 
-# @@@@@@@@@@@@@@@@ write to ocean_clm.nc @@@@@@@@@@@@@@@@@@@@@@@@@@
-
-"""
-Write fields to ocean_clm.nc.
-"""
 tt0 = time()
-
-# associate variables with dimenstions
-vn_dict = {
-        'zeta': ('zeta_time', 'eta_rho', 'xi_rho'),
-        'ubar': ('v2d_time', 'eta_u', 'xi_u'),
-        'vbar': ('v2d_time', 'eta_v', 'xi_v'),
-        'salt': ('salt_time', 's_rho', 'eta_rho', 'xi_rho'),
-        'temp': ('temp_time', 's_rho', 'eta_rho', 'xi_rho'),
-        'u': ('v3d_time', 's_rho', 'eta_u', 'xi_u'),
-        'v': ('v3d_time', 's_rho', 'eta_v', 'xi_v')
-        }
-# assign attributes to variables
-attrs_dict = {
-        'zeta': {'long_name': 'sea surface height climatology', 'units':'meter'},
-        'ubar': {'long_name': 'vertically averaged u-momentum climatology', 'units':'meter second-1'},
-        'vbar': {'long_name': 'vertically averaged v-momentum climatology', 'units':'meter second-1'},
-        'salt': {'long_name': 'salinity climatology', 'units':'g kg-1'},
-        'temp': {'long_name': 'potential temperature climatology', 'units':'Celsius'},
-        'u': {'long_name': 'u-momentum component climatology', 'units':'meter second-1'},
-        'v': {'long_name': 'v-momentum component climatology', 'units':'meter second-1'}
-        }
-        
-# write fields to the Dataset
-ds = xr.Dataset()
-ot_vec = np.nan * np.ones(NT)
-ii = 0
-for temp_out_fn in temp_out_fn_list:
-    dd = pickle.load(open(temp_out_fn, 'rb'))
-    
-    if ii == 0:
-        
-        # initialize the variables in the Dataset
-        for vn in dd.keys():
-            if vn == 'ocean_time':
-                pass
-                #data_dict[vn] = np.nan * np.ones(NT)
-            else:
-                #data_dict[vn] = np.nan * np.ones(((NT,) + dd[vn].shape))
-                ds[vn] = (vn_dict[vn] , np.nan * np.ones((NT,) + dd[vn].shape))
-                ds[vn].attrs = attrs_dict[vn]
-                
-    for vn in dd.keys():
-        ddv = dd[vn]
-        if vn == 'ocean_time':
-            #data_dict[vn][ii] = ddv
-            ot_vec[ii] = ddv
-        else:
-            if ddv.ndim == 2:
-                ds[vn][ii, :, :] = ddv
-            elif ddv.ndim == 3:
-                ds[vn][ii, :, :, :] = ddv
-            else:
-                print('problem with ndim?')
-    ii += 1
-
-ds['ocean_time'] = (('ocean_time',), ot_vec)
-ds['ocean_time'].attrs['units'] = Lfun.roms_time_units
-ds['ocean_time'].attrs['long_name'] = 'ocean time'
-
-for vn in vn_dict.keys():
-    # time coordinates
-    vnt = vn_dict[vn][0]
-    ds[vnt] = ((vnt,), ot_vec)
-    ds[vnt].attrs['units'] = Lfun.roms_time_units
-    # fields
-    # ds[vn] = (vn_dict[vn], make_masked(data_dict[vn]))
-    # ds[vn].attrs = attrs_dict[vn]
-    
-
-# add time coordinate
-# ds['ocean_time'] = (('ocean_time',), data_dict['ocean_time'])
-# for vn in vn_dict.keys():
-#     # time coordinates
-#     vnt = vn_dict[vn][0]
-#     ds[vnt] = ((vnt,), data_dict['ocean_time'])
-#     ds[vnt].attrs['units'] = Lfun.roms_time_units
-
-# and save to NetCDF
 out_fn = out_dir / 'ocean_clm.nc'
 out_fn.unlink(missing_ok=True)
-enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
-Enc_dict = {vn:enc_dict for vn in vn_dict.keys()}
-ds.to_netcdf(out_fn, encoding=Enc_dict)
-ds.close()
-    
-
-# # concatenate the dicts into one file
-# data_dict = dict()
-# ii = 0
-# for temp_out_fn in temp_out_fn_list:
-#     dd = pickle.load(open(temp_out_fn, 'rb'))
-#     if ii == 0:
-#         for vn in dd.keys():
-#             if vn == 'ocean_time':
-#                 data_dict[vn] = np.nan * np.ones(NT)
-#             else:
-#                 data_dict[vn] = np.nan * np.ones(((NT,) + dd[vn].shape))
-#     for vn in dd.keys():
-#         ddv = dd[vn]
-#         if vn == 'ocean_time':
-#             data_dict[vn][ii] = ddv
-#         else:
-#             if ddv.ndim == 2:
-#                 data_dict[vn][ii, :, :] = ddv
-#             elif ddv.ndim == 3:
-#                 data_dict[vn][ii, :, :, :] = ddv
-#             else:
-#                 print('problem with the temporary data dict!')
-#     ii += 1
-
+Ofun_nc_xarray.make_clm_file(temp_out_fn_list, NT, out_fn)
 print('- Write clm file: %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
-# @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
-
-# clean up
-Lfun.make_dir(temp_dir, clean=True)
-
-# Write to NetCDF using xarray (this works, hooray!).
-
-# tt0 = time()
-# out_fn = out_dir / 'ocean_clm.nc'
-# out_fn.unlink(missing_ok=True)
-# Ofun_nc_xarray.make_clm_file(data_dict, out_fn)
-# print('\n- Write clm file: %0.2f sec' % (time()-tt0))
-# sys.stdout.flush()
 
 tt0 = time()
 in_fn = out_dir / 'ocean_clm.nc'
@@ -364,6 +119,9 @@ out_fn.unlink(missing_ok=True)
 Ofun_nc_xarray.make_bry_file(in_fn, out_fn)
 print('- Write bry file: %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
+
+# clean up
+Lfun.make_dir(temp_dir, clean=True)
     
 def print_info(fn):
     print('\n' + str(fn))
@@ -373,7 +131,7 @@ def print_info(fn):
 
 # check results
 nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
-if True:
+if False:
     # print info about the files to the screen
     for fn in nc_list:
         print_info(out_dir / fn)
