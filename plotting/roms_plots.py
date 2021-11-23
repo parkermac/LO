@@ -66,8 +66,8 @@ def P_basic(in_dict):
             #pfun.add_windstress_flower(ax, ds)
             pfun.add_bathy_contours(ax, ds, txt=True)
         elif ii == 2:
-            pass
-            #pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
+            ax.set_yticklabels([])
+            pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
         ii += 1
     #fig.tight_layout()
     # FINISH
@@ -449,12 +449,12 @@ def P_ths(in_dict):
 
 def P_debug(in_dict):
     # Focused on debugging
-    vn_list = ['temp', 'u', 'v', 'zeta']
+    vn_list = ['u', 'v', 'zeta']
     do_wetdry = False
     
     # START
     fs = 10
-    pfun.start_plot(fs=fs, figsize=(6*len(vn_list),8))
+    pfun.start_plot(fs=fs, figsize=(8*len(vn_list),10))
     fig = plt.figure()
     ds = xr.open_dataset(in_dict['fn'])
     # PLOT CODE
@@ -469,8 +469,11 @@ def P_debug(in_dict):
         x = ds['lon_'+tag].values
         y = ds['lat_'+tag].values
         px, py = pfun.get_plon_plat(x,y)
-        if vn in ['ubar', 'vbar']:
-            v = ds[vn][0,:,:].values
+        if vn in ['u', 'v']:
+            v = ds[vn][0,-1,:,:].values
+            vmin = -2
+            vmax = 2
+            cmap='hsv_r'
         elif vn == 'zeta':
             v = ds[vn][0,:,:].values
             h = ds.h.values
@@ -479,27 +482,23 @@ def P_debug(in_dict):
             h[mr==0] = np.nan
             v = v + h
             vn = 'depth'
+            vmin = 2
+            vmax = 4
+            cmap='RdYlGn'
         else:
             v = ds[vn][0, -1,:,:].values
         ax = fig.add_subplot(1, len(vn_list), ii)
         ax.set_xticks([])
         ax.set_yticks([])
-        if vn == 'depth':
-            cs = ax.pcolormesh(px, py, v, cmap='rainbow',vmin=0,vmax=4)
-        else:
-            cs = ax.pcolormesh(px, py, v, cmap='rainbow')
-
-        # so0 hack:
-        # ax.plot(x[336, 117],y[336, 117],'*y', markersize=24, mec='k')
-        
-        # ind = np.unravel_index(np.nanargmax(a, axis=None), a.shape)
-
+        cs = ax.pcolormesh(px, py, v, cmap=cmap, vmin=vmin, vmax=vmax)
         pfun.add_coast(ax)
         ax.axis(pfun.get_aa(ds))
         pfun.dar(ax)
+        if ii == 1:
+            pfun.add_info(ax, in_dict['fn'], his_num=True)
         vmax, vjmax, vimax, vmin, vjmin, vimin = pfun.maxmin(v)
-        ax.plot(x[vjmax,vimax], y[vjmax,vimax],'*k')
-        ax.plot(x[vjmin,vimin], y[vjmin,vimin],'ok')
+        ax.plot(x[vjmax,vimax], y[vjmax,vimax],'*y', mec='k', markersize=15)
+        ax.plot(x[vjmin,vimin], y[vjmin,vimin],'oy', mec='k', markersize=10)
         ax.set_title(('%s ((*)max=%0.1f, (o)min=%0.1f)' % (vn, vmax, vmin)))
         ii += 1
 

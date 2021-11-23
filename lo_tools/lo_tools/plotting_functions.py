@@ -225,7 +225,7 @@ def add_windstress_flower(ax, ds, t_scl=1, t_leglen=0.1, center=(.85,.25), fs=12
     ax.text(x, y-.1, str(t_leglen) + ' Pa',
         horizontalalignment='center', alpha=t_alpha, transform=ax.transAxes, fontsize=fs)
 
-def add_info(ax, fn, fs=12, loc='lower_right'):
+def add_info(ax, fn, fs=12, loc='lower_right', his_num=False):
     # put info on plot
     T = zrfun.get_basic_info(fn, only_T=True)
     dt_local = get_dt_local(T['dt'])
@@ -238,6 +238,12 @@ def add_info(ax, fn, fs=12, loc='lower_right'):
             horizontalalignment='right', verticalalignment='top',
             transform=ax.transAxes, fontsize=fs,
             bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
+        if his_num:
+            ax.text(.95, .01, fn.name.split('.')[0].split('_')[-1],
+                horizontalalignment='right', verticalalignment='bottom',
+                transform=ax.transAxes, fontsize=fs,
+                bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
+            
     elif loc == 'upper_right':
         ax.text(.95, .935, dt_local.strftime('%Y-%m-%d'),
             horizontalalignment='right' , verticalalignment='bottom',
