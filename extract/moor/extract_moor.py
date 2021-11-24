@@ -138,7 +138,7 @@ if Ldir['get_tsa']:
 if Ldir['get_vel']:
     vn_list += ',u,v,w,ubar,vbar'
 if Ldir['get_bio']:
-    vn_list += ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC'
+    vn_list += ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,rho'
 if Ldir['get_surfbot']:
     vn_list += ',Pair,Uwind,Vwind,shflux,ssflux,latent,sensible,lwrad,swrad,sustr,svstr,bustr,bvstr'
     
