@@ -1,7 +1,9 @@
 """
 This is a driver for doing multiple mooring extractions.  It reads in
 a dict from LO_user/extract/moor/job_lists.py and uses this to run extract_moor.py as a
-series of subprocesses
+series of subprocesses.
+
+2021.11.24 Now it should move the output to a folder named after the job.
 
 Run from the command line like:
 python multi_mooring_driver.py -gtx cas6_v3_lo8b -test True > mmd.log &
@@ -20,6 +22,7 @@ from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import os
 from time import time
+import shutil
 
 pid = os.getpid()
 print(' multi_mooring_driver '.center(60,'='))
@@ -95,7 +98,15 @@ sta_dict = job_lists.get_sta_dict(Ldir['job'])
 log_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor' / 'logs'
 Lfun.make_dir(log_dir)
 
+# make place to copy the results to for this job
+out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor'
+jout_dir = out_dir / Ldir['job']
+Lfun.make_dir(jout_dir)
+
+print('Results will go to %s' % (str(jout_dir)))
+
 ii = 1
+jout_fn_list = []
 njobs = len(sta_dict.keys())
 for sn in sta_dict.keys():
     tt0 = time()
@@ -111,6 +122,11 @@ for sn in sta_dict.keys():
         '-get_bio', str(Ldir['get_bio']), '-get_surfbot', str(Ldir['get_surfbot'])]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
+    
+    # copy the results to a folder named for the job
+    moor_fn = out_dir / (sn + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
+    job_moor_fn = jout_dir / (sn + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
+    shutil.copyfile(moor_fn, job_moor_fn)
     
     # write screen output to logs
     sout_fn = log_dir / (sn + '_screen_output.txt')
