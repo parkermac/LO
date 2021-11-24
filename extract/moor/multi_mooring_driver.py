@@ -98,7 +98,7 @@ sta_dict = job_lists.get_sta_dict(Ldir['job'])
 log_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor' / 'logs'
 Lfun.make_dir(log_dir)
 
-# make place to copy the results to for this job
+# make place to copy the results of this job
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor'
 jout_dir = out_dir / Ldir['job']
 Lfun.make_dir(jout_dir)
@@ -126,7 +126,10 @@ for sn in sta_dict.keys():
     # copy the results to a folder named for the job
     moor_fn = out_dir / (sn + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
     job_moor_fn = jout_dir / (sn + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
-    shutil.copyfile(moor_fn, job_moor_fn)
+    try:
+        shutil.copyfile(moor_fn, job_moor_fn)
+    except FileNotFoundError:
+        print(' - error making %s' % (job_moor_fn.name))
     
     # write screen output to logs
     sout_fn = log_dir / (sn + '_screen_output.txt')
