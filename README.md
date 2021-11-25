@@ -82,7 +82,7 @@ conda env create -f loenv.yml > env.log &
 ```
 This may take a half hour or so, which is why I added the `> env.log &` at the end of the command. You can look in the .yml file to see what is being installed.  It even adds the non-python nco toolbox and ffmpeg.  It also adds LO/lo_tools as a local "package" so that when you are in (loenv) you can access any of the modules in LO/lo_tools/lo_tools with a line in your python code like `from lo_tools import zfun`.  Instructions for a simple approach to making your own local packages can be found [HERE](https://pythonchb.github.io/PythonTopics/where_to_put_your_code.html).
 
-If you like you can make your own .yml and make your own environment, especially if you wan to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package.
+If you like you can make your own .yml and make your own environment, especially if you want to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package.
 
 Then if you want to use this environment all the time add this line:
 ```
@@ -90,11 +90,11 @@ conda activate loenv
 ```
 to your .bashrc or .bash_profile, and "source" it.  Now (loenv) will appear at the start of your bash prompt.
 
-In the past I recommended updating your modules every now and then using:
+If you want to update the packages in the environment, go to LO where the loenv.yml file is, make sure loenv is activated, and then do:
 ```
-conda update --all
+conda env update -f loenv.yml
 ```
-BUT a couple of times recently this broke my installation, leaving me with a non-functioning numpy (frowny face).  I fixed it by deleting the loenv folder in /Applications/miniconda3/envs (on my mac) and recreating the environment from scratch (the "conda create" step above).  This only took 10 minutes this time and fixed both the numpy and cartopy problems.
+which only took a minute or two the last time I tried it.  This is also what you do after you make any change to your .yml file, like adding a package.  There are more complete instructions for working with conda environments [HERE](https://www.earthdatascience.org/courses/intro-to-earth-data-science/python-code-fundamentals/use-python-packages/use-conda-environments-and-install-packages/).
 
 #### (4) Fork LO_user
 

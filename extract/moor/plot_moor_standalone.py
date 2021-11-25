@@ -3,7 +3,7 @@ Stand-alone code to plot a user-specified mooring extraction.
 """
 from pathlib import Path
 moor_fn = Path('/Users/pm8/Documents/LO_output/extract/cas6_v3_lo8b/'
-    +'moor/Little_Dewatto_2017.01.01_2017.12.31.nc')
+    +'moor/North_Station_2021.09.24_2021.11.24.nc')
 
 import xarray as xr
 import matplotlib.pyplot as plt
