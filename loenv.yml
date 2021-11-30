@@ -39,7 +39,8 @@ dependencies:
     - -e lo_tools # package of local modules
     - azure-storage-blob
     - PyCO2SYS
-    - nwm # to access the National Water Model
+    # - nwm # to access the National Water Model
+    # - hydrotools # different access to National Water Model
   # and some non-python tools
   - ffmpeg
   - nco
