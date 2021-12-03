@@ -1,12 +1,16 @@
 """
-This creates and populates directories for ROMS runs on mox or similar.  It is
-designed to work with the "BLANK" version of the .in file,
-replacing things like $whatever$ with meaningful values.
+This creates and populates directories for ROMS runs on mox or similar.
+Its main product is the .in file used for a ROMS run.
+
+It is designed to work with the BLANK.in file, replacing things like
+$whatever$ with meaningful values.
 
 To test from ipython on mac:
-run make_dot_in -g cas6 -t v3 -x lo8kb -r backfill -s continuation -d 2019.07.04 -bu 0 -np 196
+run make_dot_in -g cas6 -t v0 -x uu0k -r backfill -s continuation -d 2019.07.04 -bu 0 -np 400
 
-If you call with -short_roms True it will create dot_in that only runs ROMS for 1 hour.
+If you call with -short_roms True it will create a .in that runs for a shorter time or
+writes history files more frequently (exact behavior is in the code below).  This can
+be really useful for debugging.
 
 """
 
@@ -39,7 +43,7 @@ if Ldir['ex_name'] != ex_name_check:
     sys.exit()
 
 fdt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
-fdt_yesterday = fdt - timedelta(1)
+fdt_yesterday = fdt - timedelta(days=1)
 
 print(' --- making dot_in for ' + Ldir['date_string'])
 # initialize dict to hold values that we will substitute into the dot_in file.
@@ -50,7 +54,7 @@ D['EX_NAME'] = Ldir['ex_name'].upper()
 #### USER DEFINED VALUES ####
 
 # which ROMS code to use
-D['roms_name'] = 'LO_ROMS'
+D['roms_name'] = 'LO_roms_source'
 
 multi_core = True # use more than one core
 
@@ -88,6 +92,19 @@ with open(this_dir / 'forcing_list.csv', 'r') as f:
     for line in f:
         which_force, force_choice = line.strip().split(',')
         D[which_force] = force_choice
+        # Note that the last of these will not be a force, but will
+        # instead encode the open boundaries, e.g.: D['open'] = 'NSW'
+        
+# populate open boundary choices
+for O in list('NSEW'):
+    if O in list(D['open']):
+        D[O+'fs'] = 'Cha'
+        D[O+'2']  = 'Fla'
+        D[O+'3']  = 'RadNud'
+    else:
+        D[O+'fs'] = 'Clo'
+        D[O+'2']  = 'Clo'
+        D[O+'3']  = 'Clo'
 
 #### END USER DEFINED VALUES ####
 
@@ -158,7 +175,7 @@ D['dstart'] = int(Lfun.datetime_to_modtime(fdt) / 86400.)
 D['grid_dir'] = Ldir['grid']
 force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string'])
 D['force_dir'] = force_dir
-D['roms_code_dir'] = Ldir['roms_code']
+D['roms_code_dir'] = Ldir['parent']
 
 # get horizontal coordinate info
 with open(Ldir['grid'] / 'XY_COORDINATE_INFO.csv','r') as xyf:
@@ -208,16 +225,16 @@ f.close()
 f2.close()
 
 ## create npzd2o_Banas.in #######################
-f = open(dot_in_dir / 'npzd2o_Banas_BLANK.in','r')
-bio_dot_in_name = 'npzd2o_Banas.in'
-f3 = open(out_dir / bio_dot_in_name,'w')
-for line in f:
-    for var in D.keys():
-        if '$'+var+'$' in line:
-            line2 = line.replace('$'+var+'$', str(D[var]))
-            line = line2
-        else:
-            line2 = line
-    f3.write(line2)
-f.close()
-f3.close()
+# f = open(dot_in_dir / 'npzd2o_Banas_BLANK.in','r')
+# bio_dot_in_name = 'npzd2o_Banas.in'
+# f3 = open(out_dir / bio_dot_in_name,'w')
+# for line in f:
+#     for var in D.keys():
+#         if '$'+var+'$' in line:
+#             line2 = line.replace('$'+var+'$', str(D[var]))
+#             line = line2
+#         else:
+#             line2 = line
+#     f3.write(line2)
+# f.close()
+# f3.close()
