@@ -29,6 +29,6 @@ This is for running all the post-processing jobs.  It is mainly aimed at the dai
 
 ---
 
-`copy_to_azure.py` is a utility to copy a file like a box extraction to azure for sharing.
+`timestep_record.py` is a utility to make a pandas Series from the timesteps used in a model run over an arbitrary time span.
 
 `test_Ldir.py` is a tool to test what is in Ldir. It avoids the use of the lo_tools package so it can run on the hyak clusters (mox and klone), and cron.
