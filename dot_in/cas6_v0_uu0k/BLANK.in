@@ -1048,7 +1048,7 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
 ! continuation (\) or a vertical bar (|) symbol after each entry, except
 ! the last one.
 
-     NFFILES == 9                          ! number of unique forcing files
+     NFFILES == 8                          ! number of unique forcing files
 
      FRCNAME == $force_dir$/$atm$/lwrad_down.nc \
                 $force_dir$/$atm$/Pair.nc \
