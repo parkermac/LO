@@ -20,5 +20,5 @@ module load intel/oneAPI
 NFDIR=/gscratch/macc/local/netcdf-ifort/
 export LD_LIBRARY_PATH=${NFDIR}/lib:${LD_LIBRARY_PATH}
 
-mpirun $roms_ex_dir$/oceanM $roms_out_dir$/liveocean.in > $roms_out_dir$/log.txt
+mpirun $roms_ex_dir$/romsM $roms_out_dir$/liveocean.in > $roms_out_dir$/log.txt
 
