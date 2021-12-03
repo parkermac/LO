@@ -72,5 +72,7 @@ while dt <= dt1:
     dt += timedelta(days=1)
 
 # save_output
-dt_ser.to_pickle(Ldir['LOo'] / 'misc' / ('dt_ser_' + Ldir['gtagex'] + '.p'))
+out_fn = Ldir['LOo'] / 'misc' / ('dt_ser_' + Ldir['gtagex'] + '.p')
+out_fun.unlink(missing_ok=True)
+dt_ser.to_pickle(out_fn)
 
