@@ -151,13 +151,16 @@ while dt <= dt1:
         Lfun.make_dir(force_dir, clean=True)
         # Copy the forcing files, one folder at a time.
         for force in force_dict.keys():
-            force_choice = force_dict[force]
-            cmd_list = ['scp','-r',
-                remote_dir + '/LO_output/forcing/' + Ldir['gtag_alt'] + '/' + f_string + '/' + force_choice,
-                str(force_dir)]
-            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
+            if force == 'open':
+                pass
+            else:
+                force_choice = force_dict[force]
+                cmd_list = ['scp','-r',
+                    remote_dir + '/LO_output/forcing/' + Ldir['gtag_alt'] + '/' + f_string + '/' + force_choice,
+                    str(force_dir)]
+                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
         print(' - time to get forcing = %d sec' % (time()-tt0))
         sys.stdout.flush()
     else:
