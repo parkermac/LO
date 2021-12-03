@@ -8,9 +8,7 @@ run timestep_record.py
 To run for real on perigee
 python timestep_record.py -gtx cas6_v3_lo8b -ro 2 -0 2017.01.01 -1 2021.11.30
 
-NOTE: the "< /dev/null" appears to be necessary when running by hand and you stay
-logged on because (maybe) the daymovie0 job is somehow expecting standard input,
-and shen it doesn't get it the job is "Stopped" and you have to use "fg" to start it again.
+This runs very quickly, like a few seconds.
 """
 
 import argparse
@@ -60,6 +58,7 @@ while dt <= dt1:
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
     fn = roms_out_dir / 'log.txt'
+    # example line I am searching for
     #      40.000  dt                Timestep size (s) for 3-D equations.
     try:
         with open(fn, 'r') as x:
@@ -81,4 +80,7 @@ Lfun.make_dir(out_dir)
 out_fn = out_dir / ('dt_ser_' + Ldir['gtagex'] + '.p')
 out_fn.unlink(missing_ok=True)
 dt_ser.to_pickle(out_fn)
+
+print('Pickled Series saved in:')
+print(str(out_fn))
 
