@@ -60,12 +60,15 @@ while dt <= dt1:
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
     fn = roms_out_dir / 'log.txt'
     #      40.000  dt                Timestep size (s) for 3-D equations.
-    with open(fn, 'r') as x:
-        for line in x:
-            if 'Timestep size (s) for 3-D equations' in line:
-                timestep = line.strip().split(' ')[0]
-                dt_ser[dt] = float(timestep)
-                break
+    try:
+        with open(fn, 'r') as x:
+            for line in x:
+                if 'Timestep size (s) for 3-D equations' in line:
+                    timestep = line.strip().split(' ')[0]
+                    dt_ser[dt] = float(timestep)
+                    break
+    except FileNotFoundError:
+        pass
     dt += timedelta(days=1)
 
 # save_output
