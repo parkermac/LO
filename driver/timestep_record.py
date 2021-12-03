@@ -55,6 +55,7 @@ dt1 = datetime.strptime(ds1, Lfun.ds_fmt)
 # Loop over days
 dt_ser = pd.Series(dtype=float)
 dt = dt0
+ii = 0
 while dt <= dt1:
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
@@ -66,13 +67,16 @@ while dt <= dt1:
                 if 'Timestep size (s) for 3-D equations' in line:
                     timestep = line.strip().split(' ')[0]
                     dt_ser[dt] = float(timestep)
+                    ii += 1
                     break
     except FileNotFoundError:
         pass
     dt += timedelta(days=1)
 
+print(ii)
+
 # save_output
 out_fn = Ldir['LOo'] / 'misc' / ('dt_ser_' + Ldir['gtagex'] + '.p')
-out_fun.unlink(missing_ok=True)
+out_fn.unlink(missing_ok=True)
 dt_ser.to_pickle(out_fn)
 
