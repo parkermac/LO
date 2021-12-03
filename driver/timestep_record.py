@@ -76,7 +76,9 @@ while dt <= dt1:
 print(ii)
 
 # save_output
-out_fn = Ldir['LOo'] / 'misc' / ('dt_ser_' + Ldir['gtagex'] + '.p')
+out_dir = Ldir['LOo'] / 'misc'
+Lfun.make_dir(out_dir)
+out_fn = out_dir / ('dt_ser_' + Ldir['gtagex'] + '.p')
 out_fn.unlink(missing_ok=True)
 dt_ser.to_pickle(out_fn)
 
