@@ -18,6 +18,9 @@ The /dev/null input avoids occasionally having the job "stopped".
 DEVELOPMENT NOTES: see the "various flags to facilitate testing" part of the arguments for other testing flags.
 The -v (verbose) flag gives really useful screen output, so I have set its default to True.
 
+2021.12.03 This version is copied from driver_roms.py and only differs in that the batch file
+it creates is designed to work with our new LO_roms_source and LO_roms_user.
+
 """
 
 import sys
@@ -123,7 +126,8 @@ while dt <= dt1:
     dot_in_shared_dir = Ldir['LO'] / 'dot_in' / 'shared'
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
     log_file = roms_out_dir / 'log.txt'
-    roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
+    #roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
+    roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
     if args.verbose:
         print(' - force_dir:    ' + str(force_dir))
         print(' - dot_in_dir:   ' + str(dot_in_dir))
@@ -184,7 +188,7 @@ while dt <= dt1:
             
             # Create batch script
             if 'klone' in Ldir['lo_env']:
-                batch_name = 'make_klone_batch.py'
+                batch_name = 'make_klone_batch0.py'
             elif 'mox' in Ldir['lo_env']:
                 batch_name = 'make_mox_batch.py'
             cmd_list = ['python3', str(dot_in_shared_dir / batch_name),
@@ -206,7 +210,7 @@ while dt <= dt1:
             # Run ROMS using the batch script.
             if 'klone' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc','--wait',
-                    str(roms_out_dir / 'klone_batch.sh')]
+                    str(roms_out_dir / 'klone_batch0.sh')]
             elif 'mox' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
                     str(roms_out_dir / 'mox_batch.sh')]
