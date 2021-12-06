@@ -7,15 +7,15 @@ with the outermost corners being on the rho-grid.
 Job definitions are in LO_user/extract/box/job_definitions.py
 
 Testing:
-run extract_box -gtx cas6_v3_lo8b -job yang_sequim -test True
+run extract_box -gtx cas6_v3_lo8b -job sequim0 -test True
 
 same but with all flags:
-run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt daily -job yang_sequim -test True
+run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt daily -job sequim0 -test True
 
-this command replicates what post/surface1 does
-run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -lt hourly -job surface1 -uv_to_rho True -surf True
+this command replicates what post/surface0 does
+run extract_box -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -lt hourly -job surface0 -uv_to_rho True -surf True
 or
-python extract_box.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -lt hourly -job surface1 -uv_to_rho True -surf True
+python extract_box.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.04 -lt hourly -job surface0 -uv_to_rho True -surf True
 
 Performance: this is very fast, takes just a few seconds for three days on boiler (for yang_sequim).
 """
