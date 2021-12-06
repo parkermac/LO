@@ -12,6 +12,7 @@ pth = Path(__file__).absolute().parent
 
 # get command line arguments
 import argparse
+import numpy as np
 
 parser = argparse.ArgumentParser()
 
@@ -24,7 +25,7 @@ parser.add_argument('-x', '--ex_name', type=str, help="executable name")
 
 args = parser.parse_args()
 in_dict = args.__dict__
-in_dict['node_num'] = int(in_dict['np_num'] / in_dict['cores_per_node'])
+in_dict['node_num'] = int(np.min(1, int(in_dict['np_num'] / in_dict['cores_per_node'])))
 
 ## create lo_batch.sh - batch job script  ##########################
 
