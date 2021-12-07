@@ -127,7 +127,7 @@ def get_qt(gri_df, ri_df, dt_ind, yd_ind, Ldir, dt1, days):
     return qt_df_dict
         
 def write_to_nc(out_fn, S, gri_df, qt_df_dict, dt_ind):
-    
+        
     out_fn.unlink(missing_ok=True)# get rid of the old version, if it exists
     foo = nc.Dataset(out_fn, 'w')
     
@@ -157,6 +157,7 @@ def write_to_nc(out_fn, S, gri_df, qt_df_dict, dt_ind):
         v_var[count] = Lfun.datetime_to_modtime(item)
         count += 1
     v_var.long_name = 'river runoff time'
+        
     v_var.units = Lfun.roms_time_units
 
     v_var = foo.createVariable('river_direction', float, ('river',))
@@ -165,7 +166,7 @@ def write_to_nc(out_fn, S, gri_df, qt_df_dict, dt_ind):
     v_var.long_name = 'river runoff direction'
     v_var.flag_values = "0, 1"
     v_var.flag_meanings = "flow across u-face, flow across v-face"
-    v_varLwSrc_True = "flag not used"
+    v_var.LwSrc_True = "flag not used"
 
     v_var = foo.createVariable('river_Xposition', float, ('river',))
     for rn in gri_df.index:
