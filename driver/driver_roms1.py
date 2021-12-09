@@ -1,22 +1,16 @@
 """
 This runs ROMS for one or more days, allowing for either a forecast or backfill.
 
-Designed to be run from klone, and depends on other drivers having been run first on apogee.
+NEW:
+- runs forecast as three separate days
+- saves blowup log and last history files
+- other improvements to stdout
 
-The -np and -N flags specify the total number of cores, and the
-cores per node.  For the current klone environment, acceptable choices are
--np any multiple of 40 up to 400, and -N 40
-NOTE: np has to be an even multiple of N, and N has to be <= the number
-of nodes of that size that I own.
-
-To test on mac in ipython:
-run driver_roms_mox -g cas6 -t v3t075 -x lo8 -r backfill -s continuation -0 2019.07.04 -np 200 -N 40 -v True --get_forcing False --run_roms False --move_his False
+Test on mac:
+run driver_roms1.py -g cas6 -t v0 -x u0mb -r forecast -s continuation -np 196 -N 28 --get_forcing False --run_roms False --move_his False
 
 When running by hand on klone or mox it may help to use < /dev/null > test.log & at the end of the command.
 The /dev/null input avoids occasionally having the job "stopped".
-
-DEVELOPMENT NOTES: see the "various flags to facilitate testing" part of the arguments for other testing flags.
-The -v (verbose) flag gives really useful screen output, so I have set its default to True.
 
 """
 
@@ -28,7 +22,7 @@ from pathlib import Path
 import subprocess
 from time import time, sleep
 
-# add the path by hand so that it will run on klone (outside of loenv)
+# add the path by hand so that it will run on klone or mox (outside of loenv)
 pth = Path(__file__).absolute().parent.parent / 'lo_tools' / 'lo_tools'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
@@ -36,16 +30,17 @@ import Lfun
 
 parser = argparse.ArgumentParser()
 # arguments without defaults are required
-parser.add_argument('-g', '--gridname', type=str)   # e.g. cas2
-parser.add_argument('-t', '--tag', type=str)        # e.g. v3
+parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
+parser.add_argument('-t', '--tag', type=str)        # e.g. v0
 parser.add_argument('-ta', '--tag_alt', type=str, default='') # used to make gtag in "remote_dir"
-parser.add_argument('-x', '--ex_name', type=str)    # e.g. lo8b
+parser.add_argument('-x', '--ex_name', type=str)    # e.g. u0k
 parser.add_argument('-r', '--run_type', type=str)   # forecast or backfill
 parser.add_argument('-s', '--start_type', type=str) # new or continuation
+# -0 and -1 only required for -r backfill
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
 parser.add_argument('-np', '--np_num', type=int) # e.g. 200, number of cores
-parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone
+parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone, 28 on mox
 # various flags to facilitate testing
 parser.add_argument('-v', '--verbose', default=True, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
@@ -81,8 +76,11 @@ local_user = Ldir['local_user']
 if args.run_type == 'forecast':
     ds0 = datetime.now().strftime(Lfun.ds_fmt)
     dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
-    dt1 = dt0
+    
+    # NOTE: to run as separate days we need Ldir['forecast_days'] to be an integer
+    dt1 = dt0 + timedelta(days = (float(Ldir['forecast_days']) - 1))
     ds1 = dt1.strftime(Lfun.ds_fmt)
+    
 elif args.run_type == 'backfill': # you have to provide at least ds0 for backfill
     ds0 = args.ds0
     if len(args.ds1) == 0:
@@ -101,9 +99,9 @@ def messages(stdout, stderr, mtitle, test_flag):
     # utility function for displaying subprocess info
     if test_flag:
         print((' ' + mtitle + ' ').center(60,'='))
-        if len(stdout) > 0:
-            print(' sdtout '.center(60,'-'))
-            print(stdout.decode())
+        # if len(stdout) > 0:
+        #     print(' sdtout '.center(60,'-'))
+        #     print(stdout.decode())
         if len(stderr) > 0:
             print(' stderr '.center(60,'-'))
             print(stderr.decode())
@@ -113,7 +111,9 @@ def messages(stdout, stderr, mtitle, test_flag):
 dt = dt0
 while dt <= dt1:
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
-    print('>> ' + f_string + ' <<')
+    f_string0 = 'f' + dt0.strftime(Lfun.ds_fmt) # used for forcing a forecast
+    print('')
+    print((' ' + f_string + ' ').center(60,'O'))
     print(' > started at %s' % (datetime.now().strftime('%Y.%m.%d %H:%M:%S')))
     sys.stdout.flush()
     
@@ -148,8 +148,14 @@ while dt <= dt1:
         # Copy the forcing files, one folder at a time.
         for force in force_dict.keys():
             force_choice = force_dict[force]
+            
+            if args.run_type == 'backfill':
+                F_string = f_string
+            elif args.run_type == 'forecast':
+                F_string = f_string0
+                
             cmd_list = ['scp','-r',
-                remote_dir + '/LO_output/forcing/' + Ldir['gtag_alt'] + '/' + f_string + '/' + force_choice,
+                remote_dir + '/LO_output/forcing/' + Ldir['gtag_alt'] + '/' + F_string + '/' + force_choice,
                 str(force_dir)]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
@@ -174,7 +180,7 @@ while dt <= dt1:
             # Make the dot_in file.  NOTE: roms_out_dir is made clean by make_dot_in.py
             cmd_list = ['python3', str(dot_in_dir / 'make_dot_in.py'),
                         '-g', args.gridname, '-t', args.tag, '-x', args.ex_name,
-                        '-r', args.run_type, '-s', args.start_type,
+                        '-r', 'backfill', '-s', args.start_type,
                         '-d', dt.strftime(Lfun.ds_fmt),
                         '-bu', str(blow_ups), '-np', str(args.np_num),
                         '-short_roms', str(args.short_roms)]
@@ -186,6 +192,8 @@ while dt <= dt1:
             if 'klone' in Ldir['lo_env']:
                 batch_name = 'make_klone_batch.py'
             elif 'mox' in Ldir['lo_env']:
+                batch_name = 'make_mox_batch.py'
+            else: # for testing
                 batch_name = 'make_mox_batch.py'
             cmd_list = ['python3', str(dot_in_shared_dir / batch_name),
                 '-xd', str(roms_ex_dir),
@@ -251,6 +259,25 @@ while dt <= dt1:
                         print(' - Run blew up, blow ups = ' + str(blow_ups))
                         found_line = True
                         roms_worked = False
+                        
+                        # save some info if the run blew up
+                        print(' - blew up at %s' % (datetime.now().strftime('%Y.%m.%d %H:%M:%S')))
+                        roms_bu_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / (f_string + '_blowup')
+                        Lfun.make_dir(roms_bu_out_dir, clean=True)
+                        try:
+                            shutil.copy(roms_out_dir / 'log.txt', roms_bu_out_dir)
+                            print(' - log.txt file saved to %s' % (str(roms_bu_out_dir)))
+                        except FileNotFoundError:
+                            print(' - log.txt file not found')
+                        his_list = roms_out_dir.glob('ocean_his_*.nc')
+                        his_list.sort()
+                        if len(his_list) > 0:
+                            shutil.copy(his_list[-1], roms_bu_out_dir)
+                            print(' - %s saved to %s' % (his_list[-1].name, str(roms_bu_out_dir)))
+                        else:
+                            print(' - no history files found')
+                        print
+                        
                         break
                     elif 'ERROR' in line:
                         print(' - Run had an error. Check the log file.')
@@ -295,8 +322,10 @@ while dt <= dt1:
             dt_prev = dt - timedelta(days=2)
             f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
             roms_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / f_string_prev
+            roms_bu_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / (f_string_prev + '_blowup')
             force_dir_prev = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string_prev
             shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
+            shutil.rmtree(str(roms_bu_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(force_dir_prev), ignore_errors=True)
             print(' - time to move history files and clean up = %d sec' % (time()-tt0))
             sys.stdout.flush()
