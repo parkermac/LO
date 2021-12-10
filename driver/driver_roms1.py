@@ -9,6 +9,9 @@ NEW:
 Test on mac:
 run driver_roms1.py -g cas6 -t v0 -x u0mb -r forecast -s continuation -np 196 -N 28 --get_forcing False --run_roms False --move_his False
 
+Run for real on mox:
+python3 driver_roms1.py -g cas6 -t v0 -x u0mb -r forecast -s continuation -np 196 -N 28 < /dev/null > test.log &
+
 When running by hand on klone or mox it may help to use < /dev/null > test.log & at the end of the command.
 The /dev/null input avoids occasionally having the job "stopped".
 
