@@ -12,6 +12,10 @@ run driver_roms1.py -g cas6 -t v0 -x u0mb -r forecast -s continuation -np 196 -N
 Run for real on mox:
 python3 driver_roms1.py -g cas6 -t v0 -x u0mb -r forecast -s continuation -np 196 -N 28 < /dev/null > test.log &
 
+Run for real on klone (no bio - for testing):
+python3 driver_roms1.py -g cas6 -t v0 -x u0k -r forecast -np 400 -N 40 --move_his False < /dev/null > test.log &
+
+
 When running by hand on klone or mox it may help to use < /dev/null > test.log & at the end of the command.
 The /dev/null input avoids occasionally having the job "stopped".
 
@@ -38,7 +42,7 @@ parser.add_argument('-t', '--tag', type=str)        # e.g. v0
 parser.add_argument('-ta', '--tag_alt', type=str, default='') # used to make gtag in "remote_dir"
 parser.add_argument('-x', '--ex_name', type=str)    # e.g. u0k
 parser.add_argument('-r', '--run_type', type=str)   # forecast or backfill
-parser.add_argument('-s', '--start_type', type=str) # new or continuation
+parser.add_argument('-s', '--start_type', type=str, default='continuation') # new or continuation
 # -0 and -1 only required for -r backfill
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
