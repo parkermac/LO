@@ -45,3 +45,14 @@ This is for running all the post-processing jobs.  It is mainly aimed at the dai
 `timestep_record.py` is a utility to make a pandas Series from the timesteps used in a model run over an arbitrary time span.
 
 `test_Ldir.py` is a tool to test what is in Ldir. It avoids the use of the lo_tools package so it can run on the hyak clusters (mox and klone), and cron.
+
+---
+
+#### batch
+
+This folder contains the files used to create the batch files used to run ROMS on klone or mox.  It is meant to replace the files in LO/dot_in/shared because the batch file naming only interacts with the driver_roms code, not with the dot_in_code.  Each case consists of 2 files, named for the cluster (klone or mox) and the driver number - e.g. these files go with `driver_roms1.py`:
+
+- `klone1_batch_BLANK.sh` is the template
+- `klone1_make_batch.py` fills in the template (when called by `driver_roms1.py`)
+
+and these produce `LO_roms/[gtagex]/[f_string]/klone1_batch.sh`
