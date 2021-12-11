@@ -29,8 +29,8 @@ in_dict['node_num'] = int(ceil(in_dict['np_num'] / in_dict['cores_per_node']))
 
 ## create lo_batch.sh - batch job script  ##########################
 
-f  = open(pth / 'klone1_batch_BLANK.sh','r')
-f2 = open(Path(in_dict['roms_out_dir']) / 'klone1_batch.sh','w')
+f  = open(pth / 'mox1_batch_BLANK.sh','r')
+f2 = open(Path(in_dict['roms_out_dir']) / 'mox1_batch.sh','w')
 
 for line in f:
     for var in in_dict.keys():
