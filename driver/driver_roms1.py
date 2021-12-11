@@ -197,11 +197,11 @@ while dt <= dt1:
             
             # Create batch script
             if 'klone' in Ldir['lo_env']:
-                batch_name = 'make_klone_batch0.py'
+                batch_name = 'make_klone_batch.py'
             elif 'mox' in Ldir['lo_env']:
                 batch_name = 'make_mox_batch.py'
             else: # for testing
-                batch_name = 'make_klone_batch0.py'
+                batch_name = 'make_klone_batch.py'
             cmd_list = ['python3', str(dot_in_shared_dir / batch_name),
                 '-xd', str(roms_ex_dir),
                 '-rod', str(roms_out_dir),
@@ -221,7 +221,7 @@ while dt <= dt1:
             # Run ROMS using the batch script.
             if 'klone' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc','--wait',
-                    str(roms_out_dir / 'klone_batch0.sh')]
+                    str(roms_out_dir / 'klone_batch.sh')]
             elif 'mox' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
                     str(roms_out_dir / 'mox_batch.sh')]
