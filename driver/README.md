@@ -32,6 +32,7 @@ This is meant to be an update to the current forecast driver `driver_roms.py`, w
 - Run forecast as three separate days
 - Save blowup log and last history file (and clean these up later)
 - add timestamp and history file number info to stdout when blowup happens.
+- this is the first use of the newly-reorganized batch files, kept in LO/driver/batch, and with numbers (e.g klone1_) corresponding to the driver.
 
 ---
 

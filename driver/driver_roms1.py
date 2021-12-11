@@ -5,12 +5,13 @@ NEW:
 - runs forecast as three separate days
 - saves blowup log and last history files
 - other improvements to stdout
+- uses new LO/driver/batch files
 
 Test on mac:
-run driver_roms1.py -g cas6 -t v0 -x u0mb -r forecast -s continuation -np 196 -N 28 --get_forcing False --run_roms False --move_his False
+run driver_roms1.py -g cas6 -t v0 -x u0k -r forecast -np 400 -N 40 --get_forcing False --run_roms False --move_his False
 
 Run for real on mox:
-python3 driver_roms1.py -g cas6 -t v0 -x u0mb -r forecast -s continuation -np 196 -N 28 < /dev/null > test.log &
+python3 driver_roms1.py -g cas6 -t v0 -x u0mb -r forecast -np 196 -N 28 < /dev/null > test.log &
 
 Run for real on klone (no bio - for testing):
 python3 driver_roms1.py -g cas6 -t v0 -x u0k -r forecast -np 400 -N 40 --move_his False < /dev/null > test.log &
@@ -197,12 +198,12 @@ while dt <= dt1:
             
             # Create batch script
             if 'klone' in Ldir['lo_env']:
-                batch_name = 'make_klone_batch.py'
+                batch_name = 'klone1_make_batch.py'
             elif 'mox' in Ldir['lo_env']:
-                batch_name = 'make_mox_batch.py'
+                batch_name = 'mox1_make_batch.py'
             else: # for testing
-                batch_name = 'make_klone_batch.py'
-            cmd_list = ['python3', str(dot_in_shared_dir / batch_name),
+                batch_name = 'klone1_make_batch.py'
+            cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
                 '-xd', str(roms_ex_dir),
                 '-rod', str(roms_out_dir),
                 '-np', str(args.np_num),
@@ -221,10 +222,10 @@ while dt <= dt1:
             # Run ROMS using the batch script.
             if 'klone' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc','--wait',
-                    str(roms_out_dir / 'klone_batch.sh')]
+                    str(roms_out_dir / 'klone1_batch.sh')]
             elif 'mox' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
-                    str(roms_out_dir / 'mox_batch.sh')]
+                    str(roms_out_dir / 'mox1_batch.sh')]
             # The --wait flag will cause the subprocess to not return until the job has terminated.
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
