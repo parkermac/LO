@@ -18,7 +18,8 @@ parser = argparse.ArgumentParser()
 
 # positional arguments
 parser.add_argument('-xd', '--roms_ex_dir', type=str, help="path to ROMS executable")
-parser.add_argument('-rod', '--roms_out_dir', type=str, help="path to ROMS output - and the dot_in file")
+parser.add_argument('-rxn', '--roms_ex_name', type=str, help="name of the ROMS executable")
+parser.add_argument('-rod', '--roms_out_dir', type=str, help="path to ROMS output")
 parser.add_argument('-np', '--np_num', type=int, help="number of cores to use")
 parser.add_argument('-N', '--cores_per_node', type=int, help="cores per node")
 parser.add_argument('-x', '--ex_name', type=str, help="executable name")

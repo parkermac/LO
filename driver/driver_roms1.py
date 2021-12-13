@@ -137,9 +137,11 @@ while dt <= dt1:
     if Ldir['ex_name'][1] == Ldir['ex_name'][0]:
         # use updated ROMS
         roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
+        roms_ex_name = 'romsM'
     else:
         # use old ROMS
         roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
+        roms_ex_name = 'oceanM'
     
     if args.verbose:
         print(' - force_dir:    ' + str(force_dir))
@@ -215,6 +217,7 @@ while dt <= dt1:
                 batch_name = 'klone1_make_batch.py'
             cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
                 '-xd', str(roms_ex_dir),
+                '-rxn', roms_ex_name,
                 '-rod', str(roms_out_dir),
                 '-np', str(args.np_num),
                 '-N', str(args.cores_per_node),
