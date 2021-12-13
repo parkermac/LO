@@ -18,5 +18,5 @@
 module load icc_17-impi_2017
 module load netcdf_fortran+c_4.4.1.1-icc_17
 
-mpirun -np $np_num$ $roms_ex_dir$/oceanM $roms_out_dir$/liveocean.in > $roms_out_dir$/log.txt
+mpirun -np $np_num$ $roms_ex_dir$/$roms_ex_name$ $roms_out_dir$/liveocean.in > $roms_out_dir$/log.txt
 
