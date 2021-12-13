@@ -131,7 +131,16 @@ while dt <= dt1:
     dot_in_shared_dir = Ldir['LO'] / 'dot_in' / 'shared'
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
     log_file = roms_out_dir / 'log.txt'
-    roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
+    
+    # Decide where to look for executable based on the pattern in the
+    # name: repeated first letter (like 'uu') means use updated ROMS.
+    if Ldir['ex_name'][1] == Ldir['ex_name'][0]:
+        # use updated ROMS
+        roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
+    else:
+        # use old ROMS
+        roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
+    
     if args.verbose:
         print(' - force_dir:    ' + str(force_dir))
         print(' - dot_in_dir:   ' + str(dot_in_dir))
@@ -155,19 +164,20 @@ while dt <= dt1:
         Lfun.make_dir(force_dir, clean=True)
         # Copy the forcing files, one folder at a time.
         for force in force_dict.keys():
-            force_choice = force_dict[force]
-            
-            if args.run_type == 'backfill':
-                F_string = f_string
-            elif args.run_type == 'forecast':
-                F_string = f_string0
-                
-            cmd_list = ['scp','-r',
-                remote_dir + '/LO_output/forcing/' + Ldir['gtag_alt'] + '/' + F_string + '/' + force_choice,
-                str(force_dir)]
-            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
+            if force == 'open':
+                pass
+            else:
+                force_choice = force_dict[force]
+                if args.run_type == 'backfill':
+                    F_string = f_string
+                elif args.run_type == 'forecast':
+                    F_string = f_string0
+                cmd_list = ['scp','-r',
+                    remote_dir + '/LO_output/forcing/' + Ldir['gtag_alt'] + '/' + F_string + '/' + force_choice,
+                    str(force_dir)]
+                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
         print(' - time to get forcing = %d sec' % (time()-tt0))
         sys.stdout.flush()
     else:
