@@ -95,13 +95,13 @@ if 'apogee' in Ldir['lo_env']:
 
     # (i) make the output directory
     cmd_list = ['ssh', share_user, 'mkdir -p ' + share_dir]
-    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     messages(stdout, stderr, 'Make output directory on for sharing', True)
     
     # (ii) copy the extraction to there
     cmd_list = ['scp',str(out_fn), share_user + ':' + share_dir]
-    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     messages(stdout, stderr, 'Copying extraction to ' + share_dir, True)
         
@@ -111,7 +111,7 @@ if 'apogee' in Ldir['lo_env']:
     with open(done_fn, 'w') as ffout:
         ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
     cmd_list = ['scp',str(done_fn), share_user + ':' + share_dir]
-    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     messages(stdout, stderr, 'Copying done file', True)
 

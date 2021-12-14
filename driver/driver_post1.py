@@ -21,7 +21,8 @@ and shen it doesn't get it the job is "Stopped" and you have to use "fg" to star
 import sys
 import argparse
 from datetime import datetime, timedelta
-import subprocess
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
 from time import time, sleep
 
 from lo_tools import Lfun, zfun
@@ -128,7 +129,7 @@ for job in job_list:
                 '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
                 '-r', Ldir['run_type'], '-d', Ldir['date_string'],
                 '-job', job, '-test', str(Ldir['testing'])]
-    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     with open(out_dir / 'Info' / 'screen_output.txt', 'w') as fout:
         fout.write(stdout.decode())
