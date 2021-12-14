@@ -4,12 +4,10 @@ Zhaoqing Yang at PNNL.  The region is Sequim Bay
 
 
 Testing on mac:
-
-run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -job sequim0 -test True
+run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -r backfill -job sequim1 -test True
 
 Run for real on apogee:
-
-python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's date string] -job sequim0 > sequim.log &
+python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's date string] -r forecast -job sequim1
 
 """
 
@@ -69,28 +67,53 @@ if len(stderr) > 0:
     print(stderr.decode())
 print('Elapsed time = %0.2f sec' % (time()-tt0))
 
-# copy the file to the expected place on boiler
-if not Ldir['testing']:
-    blr_dir = Path('/boildat/parker/LiveOcean_roms/output/cas6_v3_lo8b/f' + Ldir['date_string'])
-    Lfun.make_dir(blr_dir)
-    blr_fn = blr_dir / (box_job + '.nc')
-    blr_fn.unlink(missing_ok=True)
-    shutil.copyfile(out_fn0, blr_fn)
-    print('\nPath to boiler file:\n%s' % (str(blr_fn)))
-    
-    # and then write a little text file to alert the user
-    done_fn = blr_dir / 'sequim_done.txt'
-    done_fn.unlink(missing_ok=True)
-    with open(done_fn, 'w') as ffout:
-        ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
-    print('Path to done file:\n%s' % (str(done_fn)))
-
 # move the extraction to the expected "post" place
 if Ldir['testing']:
     shutil.copyfile(out_fn0, out_fn)
 else:
     shutil.move(out_fn0, out_fn)
 print('\nPath to file:\n%s' % (str(out_fn)))
+
+def messages(stdout, stderr, mtitle, test_flag):
+    # utility function for displaying subprocess info
+    if test_flag:
+        print((' ' + mtitle + ' ').center(60,'='))
+        if len(stdout) > 0:
+            print(' sdtout '.center(60,'-'))
+            print(stdout.decode())
+        if len(stderr) > 0:
+            print(' stderr '.center(60,'-'))
+            print(stderr.decode())
+        sys.stdout.flush()
+
+# copy the file to the expected place on the new server
+if 'apogee' in Ldir['lo_env']:
+    
+    share_user = 'parker@liveocean.apl.uw.edu'
+    print('Warning: copying extractions to server for sharing only works for parker from apogee.')
+    share_dir = '/data/www/liveocean/output/' + 'f' + Ldir['date_string']
+
+    # (i) make the output directory
+    cmd_list = ['ssh', share_user, 'mkdir -p ' + share_dir]
+    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = proc.communicate()
+    messages(stdout, stderr, 'Make output directory on for sharing', True)
+    
+    # (ii) copy the extraction to there
+    cmd_list = ['scp',str(out_fn), share_user + ':' + share_dir]
+    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = proc.communicate()
+    messages(stdout, stderr, 'Copying extraction to ' + share_dir, True)
+        
+    # (iii) then write a little text file to alert the user
+    done_fn = out_fn / (share_name + '_done.txt')
+    done_fn.unlink(missing_ok=True)
+    with open(done_fn, 'w') as ffout:
+        ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
+    cmd_list = ['scp',str(done_fn), share_user + ':' + share_dir]
+    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    stdout, stderr = proc.communicate()
+    messages(stdout, stderr, 'Copying done file', True)
 
 # -------------------------------------------------------
 

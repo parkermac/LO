@@ -7,8 +7,11 @@ history files organized into one-day folders.
 Testing on mac:
 run driver_post1.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2 -test True
 
+Test on apogee:
+python driver_post1.py -gtx cas6_v0_u0mb -r forecast -ro 0 -test True
+
 To run for real on apogee
-python driver_post1.py -gtx cas6_v0_u0kb -r forecast -ro 0 < /dev/null > post.log &
+python driver_post1.py -gtx cas6_v0_u0mb -r forecast -ro 0 < /dev/null > post.log &
 
 NOTE: the "< /dev/null" appears to be necessary when running by hand and you stay
 logged on because (maybe) the daymovie0 job is somehow expecting standard input,
