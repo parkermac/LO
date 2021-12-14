@@ -52,7 +52,7 @@ out_fn0 = out_dir0 / (box_job + '_' + ds0 + '_' + ds1 + '.nc')
 
 # this it the name of the file we will copy the output to
 out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
-out_fn = out_dir / (box_job + '.nc')
+out_fn = out_dir / (share_name + '.nc')
 
 # run extract_box.py to do the actual job
 tt0 = time()
