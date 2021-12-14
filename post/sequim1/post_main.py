@@ -34,29 +34,34 @@ from lo_tools import Lfun
 
 print(' - Creating extraction file for ' + Ldir['date_string'])
 
+# create time range
 ds0 = Ldir['date_string']
-dt0 = datetime.strptime(ds0, Ldun.ds_fmt)
+dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
 if Ldir['run_type'] == 'backfill':
     ds1 = ds0
 elif Ldir['run_type'] == 'forecast':
     ndays = Ldir['forecast_days']
     dt1 = dt0 = timedelta(days=ndays-1)
-    ds1 = dt1.strftime(Ldun.ds_fmt)
+    ds1 = dt1.strftime(Lfun.ds_fmt)
+
+# name of box job to use (different from Ldir['job'])
+box_job = 'sequim0'
+share_name = 'sequim' # eventually use this for the public server name
 
 # this is the name of the file created by extract/box/extract_box.py
 out_dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box'
-out_fn0 = out_dir0 / (Ldir['job'] + '_' + ds0 + '_' + ds1 + '.nc')
+out_fn0 = out_dir0 / (box_job + '_' + ds0 + '_' + ds1 + '.nc')
 
 # this it the name of the file we will copy the output to
 out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
-out_fn = out_dir / 'sequim0.nc'
+out_fn = out_dir / (box_job + '.nc')
 
 # run extract_box.py to do the actual job
 tt0 = time()
 cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'box' / 'extract_box.py'),
     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
-    '-0', Ldir['date_string'], '-1', Ldir['date_string'],
-    '-lt', 'allhours', '-job', 'sequim0']
+    '-0', ds0, '-1', ds1,
+    '-lt', 'hourly', '-job', box_job]
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
 print(stdout.decode())
@@ -68,7 +73,7 @@ print('Elapsed time = %0.2f sec' % (time()-tt0))
 if not Ldir['testing']:
     blr_dir = Path('/boildat/parker/LiveOcean_roms/output/cas6_v3_lo8b/f' + Ldir['date_string'])
     Lfun.make_dir(blr_dir)
-    blr_fn = blr_dir / 'sequim0.nc'
+    blr_fn = blr_dir / (box_job + '.nc')
     blr_fn.unlink(missing_ok=True)
     shutil.copyfile(out_fn0, blr_fn)
     print('\nPath to boiler file:\n%s' % (str(blr_fn)))

@@ -5,8 +5,7 @@ It is designed only to run for a single forecast, and expects to find the
 history files organized into one-day folders.
 
 Testing on mac:
-
-python driver_post1.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2 -test True
+run driver_post1.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2 -test True
 
 To run for real on apogee
 python driver_post1.py -gtx cas6_v0_u0kb -r forecast -ro 0 < /dev/null > post.log &
@@ -73,15 +72,14 @@ print((' Post-processing %s for %s' % (Ldir['run_type'], Ldir['date_string'])).c
 maxcount=480; sleeptime=60 # will keep looking for 8 hours, e.g. 5 AM to 1 PM
     
 ds0 = Ldir['date_string']
-dt0 = datetime.strptime(ds0, Ldun.ds_fmt)
-
+dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
 if Ldir['run_type'] == 'backfill':
     ds1 = ds0
 elif Ldir['run_type'] == 'forecast':
     ndays = Ldir['forecast_days']
     dt1 = dt0 = timedelta(days=ndays-1)
-    ds1 = dt1.strftime(Ldun.ds_fmt)
-his_fn_list = get_fn_list('hourly', Ldir, ds0, ds1)
+    ds1 = dt1.strftime(Lfun.ds_fmt)
+his_fn_list = Lfun.get_fn_list('hourly', Ldir, ds0, ds1)
 
 all_found = False
 ntries = 0
