@@ -39,7 +39,7 @@ if Ldir['run_type'] == 'backfill':
     ds1 = ds0
 elif Ldir['run_type'] == 'forecast':
     ndays = Ldir['forecast_days']
-    dt1 = dt0 = timedelta(days=ndays-1)
+    dt1 = dt0 + timedelta(days=ndays-1)
     ds1 = dt1.strftime(Lfun.ds_fmt)
 
 # name of box job to use (different from Ldir['job'])

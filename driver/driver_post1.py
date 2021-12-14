@@ -119,6 +119,10 @@ for job in job_list:
     Lfun.make_dir(out_dir / 'Data')
     Lfun.make_dir(out_dir / 'Info')
     
+    if Ldir['testing']:
+        print(job.center(60, '-'))
+        print(str(out_dir))
+    
     j_fn = Ldir['LO'] / 'post' / job / 'post_main.py'
     cmd_list = ['python3', str(j_fn),
                 '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
