@@ -106,7 +106,7 @@ if 'apogee' in Ldir['lo_env']:
     messages(stdout, stderr, 'Copying extraction to ' + share_dir, True)
         
     # (iii) then write a little text file to alert the user
-    done_fn = out_fn / (share_name + '_done.txt')
+    done_fn = out_dir / (share_name + '_done.txt')
     done_fn.unlink(missing_ok=True)
     with open(done_fn, 'w') as ffout:
         ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
