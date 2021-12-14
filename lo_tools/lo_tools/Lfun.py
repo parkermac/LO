@@ -155,7 +155,7 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=1):
     """
     INPUT:
     A function for getting list of history files.
-    - list items are strings of the full path
+    List items are Path objects
     """
     dt0 = datetime.strptime(ds0, ds_fmt)
     dt1 = datetime.strptime(ds1, ds_fmt)

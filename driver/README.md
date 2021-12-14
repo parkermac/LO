@@ -21,24 +21,30 @@ This is much improved from the LiveOcean version:
 - It should run on both **klone** and **mox** in the hyak system.  You need to set specifics about each machine for each user in `LO_user/get_lo_info.py`.
 - There is a new [tag_alt] logic which allows you to add new forcing variations to some existing [gtag], but do all the ROMS writing to a different [gtag]. The [tag_alt] flag refers to the existing one where the forcing is read from.
 
-#### `driver_roms0.py`
-
-This is for running the updated ROMS code, such as the uu0k executable.  It currently only runs on klone.  It relies on new "0" versions of the LO/dot_in/shared batch scripts.
-
 #### `driver_roms1.py`
 
 This is meant to be an update to the current forecast driver `driver_roms.py`, with several improvements:
 
-- Run forecast as three separate days
-- Save blowup log and last history file (and clean these up later)
-- add timestamp and history file number info to stdout when blowup happens.
-- this is the first use of the newly-reorganized batch files, kept in LO/driver/batch, and with numbers (e.g klone1_) corresponding to the driver.
+- Runs forecast as three separate days.
+- Saves blowup log and last history file (and cleans these up later).
+- Adds timestamp and history file number info to stdout when blowup happens.
+- This is the first use of the newly-reorganized batch files, kept in `LO/driver/batch`, and with numbers (e.g klone1_) corresponding to the driver.
+- This also works with the updated ROMS executables such as uu0k. It knows where to look for them by seeing if the first letter of the ex_name is repeated.
+- No longer requires the -s kwarg unless the start_type is new (because the default is continuation).
 
 ---
 
 #### `driver_post.py`
 
 This is for running all the post-processing jobs.  It is mainly aimed at the daily forecast.  It checks to see that all expected history files are in place before beginning.
+
+---
+
+#### `driver_post1.py`
+
+This is for running all the post-processing jobs.  It is mainly aimed at the daily forecast.  It checks to see that all expected history files are in place before beginning.
+
+It is designed to work with a forecast that shows up as three separate days, as would be produced by `driver_roms1.py`.
 
 ---
 
