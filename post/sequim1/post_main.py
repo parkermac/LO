@@ -2,7 +2,6 @@
 This is the main program for making a box extraction of the daily forecast for
 Zhaoqing Yang at PNNL.  The region is Sequim Bay
 
-
 Testing on mac:
 run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -r backfill -job sequim1 -test True
 
@@ -32,7 +31,7 @@ from lo_tools import Lfun
 
 print(' - Creating extraction file for ' + Ldir['date_string'])
 
-# create time range
+# create time range for box extraction
 ds0 = Ldir['date_string']
 dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
 if Ldir['run_type'] == 'backfill':
@@ -44,13 +43,13 @@ elif Ldir['run_type'] == 'forecast':
 
 # name of box job to use (different from Ldir['job'])
 box_job = 'sequim0'
-share_name = 'sequim' # eventually use this for the public server name
+share_name = 'sequim' # use this for the public server name
 
 # this is the name of the file created by extract/box/extract_box.py
 out_dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box'
 out_fn0 = out_dir0 / (box_job + '_' + ds0 + '_' + ds1 + '.nc')
 
-# this it the name of the file we will copy the output to
+# this it the name of the file we will copy/move the output to
 out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
 out_fn = out_dir / (share_name + '.nc')
 
@@ -58,8 +57,7 @@ out_fn = out_dir / (share_name + '.nc')
 tt0 = time()
 cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'box' / 'extract_box.py'),
     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
-    '-0', ds0, '-1', ds1,
-    '-lt', 'hourly', '-job', box_job]
+    '-0', ds0, '-1', ds1, '-lt', 'hourly', '-job', box_job]
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
 print(stdout.decode())
@@ -67,7 +65,7 @@ if len(stderr) > 0:
     print(stderr.decode())
 print('Elapsed time = %0.2f sec' % (time()-tt0))
 
-# move the extraction to the expected "post" place
+# copy/move the extraction to the expected "post" place
 if Ldir['testing']:
     shutil.copyfile(out_fn0, out_fn)
 else:

@@ -17,9 +17,17 @@ squeue -A macc
 
 ---
 
-These notes are generally specific to klone at this point, but here is a little mox-specific info:
+#### Getting resource info
 
-mox: we own 196 cores (7 nodes with 28 cores each) plus another 64 (2 nodes with 32 cores each).  To check on our disk allocation look in the file `/gscratch/macc/usage_report.txt`.
+`hyakstorage` will give info about storage.  Use `hyakstorage --help` to get more info on command options.
+
+`hyakalloc` will give info on the nodes we own.
+
+**mox**: we own 196 cores (7 nodes with 28 cores each) plus another 64 (2 nodes with 32 cores each).
+
+**klone**: we own 400 cores (10 nodes with 40 cores each).
+
+To check on our disk allocation you can also look in the file `/gscratch/macc/usage_report.txt` although this will be phased out.
 
 ---
 
