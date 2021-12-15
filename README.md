@@ -145,9 +145,9 @@ Things that I type in [ ] below mean that they would be replaced by specific str
 
 Grids are just identified by [gridname].
 
-Collections of forcing files are identified by [gridname]_[tag] which is also referred to as [gtag] or Ldir['gtag'].
+Collections of forcing files are identified by [gridname]\_[tag] which is also referred to as [gtag] or Ldir['gtag'].
 
-A specific run is identified by [gridname]_[tag]_[ex_name] which is also referred to as [gtagex] or Ldir['gtagex'].
+A specific run is identified by [gridname]\_[tag]\_[ex_name] which is also referred to as [gtagex] or Ldir['gtagex'].
 
 NOTE: some of the code will parse a gtagex into it constituent gridname, tag, and ex_name.  To do so it assumes these are separated by an underscore "_", so don't use underscores in any of your gridnames, tags, or ex_names.
 

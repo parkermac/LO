@@ -50,19 +50,20 @@ def finale(Ldir, result_dict):
     out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
     time_format = '%Y.%m.%d %H:%M:%S'
     total_sec = (result_dict['end_dt']-result_dict['start_dt']).total_seconds()
-    if 'note' in result_dict.keys():
-        pass
-    else:
-        result_dict['note'] = 'NONE'
-        
-    s1 = ('* post_job=%s, day=%s, result=%s, note=%s\n' %
-        (Ldir['job'], Ldir['date_string'], result_dict['result'], result_dict['note']))
     
-    s2 = ('  start=%s (took %d sec)\n' %
+    s1 = ('%s %s %s\n' %
+        (Ldir['job'], Ldir['date_string'], result_dict['result'].upper()))
+    
+    s2 = ('start=%s (took %d sec)\n' %
         (result_dict['start_dt'].strftime(time_format), int(total_sec)))
     
-    s3 = ('  %s\n' % (str(out_dir)))
+    s3 = ('%s\n' % (str(out_dir)))
+    
+    S = s1 + s2 + s3
+    
+    if 'note' in result_dict.keys():
+        S = S + ('NOTE: %s\n' % (result_dict['note']))
     
     with open(out_dir / 'Info' / 'results.txt', 'w') as ffout:
-        ffout.write(s1 + s2 + s3)
+        ffout.write(S)
     

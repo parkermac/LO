@@ -256,6 +256,19 @@ def csv_to_dict(in_fn):
             out_dict[k] = str(v).replace('\n','')
     return out_dict
     
+def messages(stdout, stderr, mtitle, test_flag=True):
+    """
+    A utility function for displaying subprocess info.
+    """
+    if test_flag:
+        print((' ' + mtitle + ' ').center(60,'='))
+        if len(stdout) > 0:
+            print(' sdtout '.center(60,'-'))
+            print(stdout.decode())
+        if len(stderr) > 0:
+            print(' stderr '.center(60,'-'))
+            print(stderr.decode())
+        sys.stdout.flush()
 
 if __name__ == '__main__':
     # TESTING: run Lfun will execute these

@@ -1,6 +1,8 @@
 """
-This is the main program for making a box extraction of the daily forecast for
-Zhaoqing Yang at PNNL.  The region is Sequim Bay
+This is the main program for making a box extraction of the daily forecast and sending
+the results to the APL server.
+
+This is for Zhaoqing Yang at PNNL.  The region is Sequim Bay.
 
 Testing on mac:
 run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -r backfill -job sequim1 -test True
@@ -22,6 +24,20 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
+# +++ These are the main things to edit when changing jobs. +++
+
+# Set the job name for LO/extract/box/extract_box.py, which refers to a choice
+# in LO_user/extract/box/job_definitions.py.
+box_job = 'sequim0'
+# Note that box_job can be different from Ldir['job'] from the command line
+# arguments.  Ldir['job'] controls the naming of where we archive the extraction:
+# LO_output/post/[gtagex]/[fstring]/Ldir['job']
+
+# This will be used for the file name that goes to the public server.
+share_name = 'sequim'
+
+# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+
 # imports
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
@@ -40,10 +56,6 @@ elif Ldir['run_type'] == 'forecast':
     ndays = Ldir['forecast_days']
     dt1 = dt0 + timedelta(days=ndays-1)
     ds1 = dt1.strftime(Lfun.ds_fmt)
-
-# name of box job to use (different from Ldir['job'])
-box_job = 'sequim0'
-share_name = 'sequim' # use this for the public server name
 
 # this is the name of the file created by extract/box/extract_box.py
 out_dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box'
@@ -67,24 +79,13 @@ print('Elapsed time = %0.2f sec' % (time()-tt0))
 
 # copy/move the extraction to the expected "post" place
 if Ldir['testing']:
+    # when testing we keep the original extraction to make it easier to plot
     shutil.copyfile(out_fn0, out_fn)
 else:
     shutil.move(out_fn0, out_fn)
 print('\nPath to file:\n%s' % (str(out_fn)))
 
-def messages(stdout, stderr, mtitle, test_flag):
-    # utility function for displaying subprocess info
-    if test_flag:
-        print((' ' + mtitle + ' ').center(60,'='))
-        if len(stdout) > 0:
-            print(' sdtout '.center(60,'-'))
-            print(stdout.decode())
-        if len(stderr) > 0:
-            print(' stderr '.center(60,'-'))
-            print(stderr.decode())
-        sys.stdout.flush()
-
-# copy the file to the expected place on the new server
+# copy the file to the server
 if 'apogee' in Ldir['lo_env']:
     
     share_user = 'parker@liveocean.apl.uw.edu'
@@ -95,15 +96,15 @@ if 'apogee' in Ldir['lo_env']:
     cmd_list = ['ssh', share_user, 'mkdir -p ' + share_dir]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
-    messages(stdout, stderr, 'Make output directory on for sharing', True)
+    Lfun.messages(stdout, stderr, 'Make output directory on server')
     
     # (ii) copy the extraction to there
     cmd_list = ['scp',str(out_fn), share_user + ':' + share_dir]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
-    messages(stdout, stderr, 'Copying extraction to ' + share_dir, True)
+    Lfun.messages(stdout, stderr, 'Copying extraction to ' + share_dir)
         
-    # (iii) then write a little text file to alert the user
+    # (iii) then write a little text file to alert users
     done_fn = out_dir / (share_name + '_done.txt')
     done_fn.unlink(missing_ok=True)
     with open(done_fn, 'w') as ffout:
@@ -111,7 +112,7 @@ if 'apogee' in Ldir['lo_env']:
     cmd_list = ['scp',str(done_fn), share_user + ':' + share_dir]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
-    messages(stdout, stderr, 'Copying done file', True)
+    Lfun.messages(stdout, stderr, 'Copying done file to server')
 
 # -------------------------------------------------------
 
