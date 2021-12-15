@@ -8,7 +8,7 @@ Testing on mac:
 run driver_post1.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2 -test True
 
 Test on apogee:
-python driver_post1.py -gtx cas6_v0_u0mb -r forecast -ro 0 -test True
+python driver_post1.py -gtx cas6_v0_u0mb -r forecast -ro 0 -test True < /dev/null > test_post.log &
 
 To run for real on apogee
 python driver_post1.py -gtx cas6_v0_u0mb -r forecast -ro 0 < /dev/null > post.log &
@@ -108,9 +108,9 @@ while all_found == False:
 tt0 = time()
 # loop over all jobs
 if Ldir['testing'] == True:
-    job_list = ['sequim1']
+    job_list = ['sequim1', 'ubc1', 'surface1']
 else:
-    job_list = ['surface1', 'layers1', 'ubc1', 'sequim1', 'daymovie1', 'critfc1', 'drifters1', 'archive1']
+    job_list = ['surface1', 'layers1', 'ubc1', 'sequim1', 'daymovie0', 'critfc1', 'drifters0', 'archive0']
 
 for job in job_list:
     
