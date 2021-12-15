@@ -108,7 +108,8 @@ while all_found == False:
 tt0 = time()
 # loop over all jobs
 if Ldir['testing'] == True:
-    job_list = ['sequim1', 'ubc1', 'surface1']
+    #job_list = ['sequim1', 'ubc1', 'surface1']
+    job_list = ['layers1']
 else:
     job_list = ['surface1', 'layers1', 'ubc1', 'sequim1', 'daymovie0', 'critfc1', 'drifters0', 'archive0']
 
