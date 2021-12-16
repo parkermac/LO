@@ -86,7 +86,7 @@ def copy_to_server(Ldir, out_fn):
         stdout, stderr = proc.communicate()
         Lfun.messages(stdout, stderr, 'Make output directory on server')
     
-        is_done = False:
+        is_done = False
         try:
             # (ii) copy the extraction to there
             cmd_list = ['scp',str(out_fn), share_user + ':' + share_dir]
