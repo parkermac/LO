@@ -25,7 +25,7 @@ result_dict['start_dt'] = datetime.now()
 # ****************** CASE-SPECIFIC CODE *****************
 
 # This will be used for the file names that go to the public server.
-share_name_list = ['critfc_salt_nu', 'critfc_temp_nu']
+share_name_list = ['critfc_salt', 'critfc_temp']
 
 # imports
 from subprocess import Popen as Po

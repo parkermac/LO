@@ -126,8 +126,10 @@ for dl in date_list:
 fn_list = fn_list[8:81]
 
 # initialize output files - NetCDF version
-salt_fn = '%s/cmop_salt_nu.%4d-%02d-%02d.nc' % (outdir,year,month,day)
-temp_fn = '%s/cmop_temp_nu.%4d-%02d-%02d.nc' % (outdir,year,month,day)
+# salt_fn = '%s/cmop_salt_nu.%4d-%02d-%02d.nc' % (outdir,year,month,day)
+# temp_fn = '%s/cmop_temp_nu.%4d-%02d-%02d.nc' % (outdir,year,month,day)
+salt_fn = '%s/critfc_salt.nc' % (outdir)
+temp_fn = '%s/critfc_temp.nc' % (outdir)
 print('=== OUTPUT FILE NAMES:=========================')
 print(salt_fn)
 print(temp_fn)
