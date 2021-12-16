@@ -74,11 +74,9 @@ def copy_to_server(Ldir, out_fn):
     """
     Copy the  extraction file to the server and write a little "done" file.
     """
-
     if 'apogee' in Ldir['lo_env']:
     
         share_user = 'parker@liveocean.apl.uw.edu'
-        print('Warning: copying extractions to server for sharing only works for parker from apogee.')
         share_dir = '/data/www/liveocean/output/' + 'f' + Ldir['date_string']
 
         # (i) make the output directory
@@ -112,4 +110,9 @@ def copy_to_server(Ldir, out_fn):
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
             Lfun.messages(stdout, stderr, 'Copying done file to server')
+            
+    else:
+        print('** Did not copy output to server! **')
+        print('Warning: copying extractions to server for sharing only works for parker from apogee.')
+        
     

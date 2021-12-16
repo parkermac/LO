@@ -46,7 +46,7 @@ elif Ldir['run_type'] == 'forecast':
     dt1 = dt0 + timedelta(days=ndays-1)
     ds1 = dt1.strftime(Lfun.ds_fmt)
 
-# these are the names of the files we will create
+# the post output directory
 out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / Ldir['job']
 
 # critfc code inputs
@@ -57,6 +57,7 @@ vgrid = Ldir['LO'] / 'post' / Ldir['job'] / 'vgrid.in'
 basedir = Ldir['roms_out'] / Ldir['gtagex']
 outdir = out_dir
 
+# run the critfc code
 this_dir = str(Ldir['LO'] / 'post' / Ldir['job']) + '/'
 cmd = ['python', this_dir + 'gen_cmop_nudge.py', str(hgrid), str(vgrid), str(depthfile),
     str(basedir), str(outdir), rundate, '-test', str(Ldir['testing'])]
@@ -71,36 +72,9 @@ if True:
         print(stderr.decode())
 
 # copy the files to the server
-if 'apogee' in Ldir['lo_env']:
-    
-    share_user = 'parker@liveocean.apl.uw.edu'
-    print('Warning: copying extractions to server for sharing only works for parker from apogee.')
-    share_dir = '/data/www/liveocean/output/' + 'f' + Ldir['date_string']
-
-    # (i) make the output directory
-    cmd_list = ['ssh', share_user, 'mkdir -p ' + share_dir]
-    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    stdout, stderr = proc.communicate()
-    Lfun.messages(stdout, stderr, 'Make output directory on server')
-    
-    for share_name in share_name_list:
-        out_fn = out_dir / (share_name + '.nc')
-        
-        # (ii) copy the extraction to there
-        cmd_list = ['scp',str(out_fn), share_user + ':' + share_dir]
-        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-        stdout, stderr = proc.communicate()
-        Lfun.messages(stdout, stderr, 'Copying extraction to ' + share_dir)
-        
-        # (iii) then write a little text file to alert users
-        done_fn = out_dir / (share_name + '_done.txt')
-        done_fn.unlink(missing_ok=True)
-        with open(done_fn, 'w') as ffout:
-            ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
-        cmd_list = ['scp',str(done_fn), share_user + ':' + share_dir]
-        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-        stdout, stderr = proc.communicate()
-        Lfun.messages(stdout, stderr, 'Copying done file to server')
+for share_name in share_name_list:
+    out_fn = out_dir / (share_name + '.nc')
+    post_argfun.copy_to_server(Ldir, out_fn)
 
 # -------------------------------------------------------
 

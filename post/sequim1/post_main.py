@@ -86,33 +86,7 @@ else:
 print('\nPath to file:\n%s' % (str(out_fn)))
 
 # copy the file to the server
-if 'apogee' in Ldir['lo_env']:
-    
-    share_user = 'parker@liveocean.apl.uw.edu'
-    print('Warning: copying extractions to server for sharing only works for parker from apogee.')
-    share_dir = '/data/www/liveocean/output/' + 'f' + Ldir['date_string']
-
-    # (i) make the output directory
-    cmd_list = ['ssh', share_user, 'mkdir -p ' + share_dir]
-    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    stdout, stderr = proc.communicate()
-    Lfun.messages(stdout, stderr, 'Make output directory on server')
-    
-    # (ii) copy the extraction to there
-    cmd_list = ['scp',str(out_fn), share_user + ':' + share_dir]
-    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    stdout, stderr = proc.communicate()
-    Lfun.messages(stdout, stderr, 'Copying extraction to ' + share_dir)
-        
-    # (iii) then write a little text file to alert users
-    done_fn = out_dir / (share_name + '_done.txt')
-    done_fn.unlink(missing_ok=True)
-    with open(done_fn, 'w') as ffout:
-        ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
-    cmd_list = ['scp',str(done_fn), share_user + ':' + share_dir]
-    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    stdout, stderr = proc.communicate()
-    Lfun.messages(stdout, stderr, 'Copying done file to server')
+post_argfun.copy_to_server(Ldir, out_fn)
 
 # -------------------------------------------------------
 
