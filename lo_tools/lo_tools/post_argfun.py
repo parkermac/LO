@@ -5,6 +5,8 @@ Shared helper functions for the extraction code, especially for argument passing
 import argparse
 import sys
 from lo_tools import Lfun
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
 
 def intro():
     parser = argparse.ArgumentParser()
@@ -66,4 +68,47 @@ def finale(Ldir, result_dict):
     
     with open(out_dir / 'Info' / 'results.txt', 'w') as ffout:
         ffout.write(S)
+        
+def copy_to_server(Ldir, out_fn):
+    """
+    Copy the  extraction file to the server and write a little "done" file.
+    """
+
+    if 'apogee' in Ldir['lo_env']:
+    
+        share_user = 'parker@liveocean.apl.uw.edu'
+        print('Warning: copying extractions to server for sharing only works for parker from apogee.')
+        share_dir = '/data/www/liveocean/output/' + 'f' + Ldir['date_string']
+
+        # (i) make the output directory
+        cmd_list = ['ssh', share_user, 'mkdir -p ' + share_dir]
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        Lfun.messages(stdout, stderr, 'Make output directory on server')
+    
+        is_done = False:
+        try:
+            # (ii) copy the extraction to there
+            cmd_list = ['scp',str(out_fn), share_user + ':' + share_dir]
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            Lfun.messages(stdout, stderr, 'Copying extraction to ' + share_dir)
+            is_done = True
+        except Exception as e:
+            # I wonder if checking stderr might be a better error trap?
+            print('Problem moving file to server')
+            print(e)
+        
+        if is_done:
+            # (iii) then write a little text file to alert users
+            share_name = out_fn.name.replace('.nc','')
+            out_dir = out_fn.parent
+            done_fn = out_dir / (share_name + '_done.txt')
+            done_fn.unlink(missing_ok=True)
+            with open(done_fn, 'w') as ffout:
+                ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
+            cmd_list = ['scp',str(done_fn), share_user + ':' + share_dir]
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            Lfun.messages(stdout, stderr, 'Copying done file to server')
     

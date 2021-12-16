@@ -15,7 +15,7 @@ python driver_post1.py -gtx cas6_v0_u0mb -r forecast -ro 0 < /dev/null > post.lo
 
 NOTE: the "< /dev/null" appears to be necessary when running by hand and you stay
 logged on because (maybe) the daymovie0 job is somehow expecting standard input,
-and shen it doesn't get it the job is "Stopped" and you have to use "fg" to start it again.
+and when it doesn't get it the job is "Stopped" and you have to use "fg" to start it again.
 """
 
 import sys
@@ -109,7 +109,7 @@ tt0 = time()
 # loop over all jobs
 if Ldir['testing'] == True:
     #job_list = ['sequim1', 'ubc1', 'surface1']
-    job_list = ['critfc1']
+    job_list = ['ubc1']
 else:
     job_list = ['surface1', 'layers1', 'ubc1', 'sequim1', 'daymovie0', 'critfc1', 'drifters0', 'archive0']
 
