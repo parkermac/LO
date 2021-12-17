@@ -106,3 +106,12 @@ So, in summary: for going from klone1 to apogee it added to:
 - ~/.ssh/authorized_keys on apogee
 
 Now I can run `ssh-copy-id` again for other computers, without having to do the `ssh-keygen` step.
+
+---
+
+#### Miscellany
+
+I had some old notes about thing that may have been required in the klone crontab, but it is possible that they are no longer relevant:
+
+- LANG=en-US.UTF-8
+- HOSTNAME=klone

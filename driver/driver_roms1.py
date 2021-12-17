@@ -339,8 +339,8 @@ while dt <= dt1:
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
-            # (iii) delete roms_out_dir and forcing files from the day before yesterday
-            dt_prev = dt - timedelta(days=2)
+            # (iii) delete roms_out_dir and forcing files from several days in the past
+            dt_prev = dt - timedelta(days=4)
             f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
             roms_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / f_string_prev
             roms_bu_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / (f_string_prev + '_blowup')
