@@ -15,13 +15,15 @@ Ldir = Lfun.Lstart()
 
 # choose the file
 in_dir0 = Ldir['LOo'] / 'extract'
-gtagex = Lfun.choose_item(in_dir0, tag='', exclude_tag='', itext='** Choose gtagex from list **')
+gtagex = Lfun.choose_item(in_dir0, tag='', exclude_tag='',
+    itext='** Choose gtagex from list **')
 in_dir = in_dir0 / gtagex / 'moor'
-moor_name = Lfun.choose_item(in_dir, tag='.nc', exclude_tag='', itext='** Choose mooring extraction from list **')
+moor_name = Lfun.choose_item(in_dir, tag='.nc', exclude_tag='',
+    itext='** Choose mooring extraction from list **')
 moor_fn = in_dir / moor_name
 
 # load everything using xarray
-ds = xr.load_dataset(moor_fn)
+ds = xr.open_dataset(moor_fn)
 ot = ds.ocean_time.values
 ot_dt = pd.to_datetime(ot)
 t = (ot_dt - ot_dt[0]).total_seconds().to_numpy()
@@ -43,6 +45,7 @@ ox = ds['oxygen'].values
 z = ds['z_w'].values
 NT, NZ = z.shape
 Z = z.mean(axis=0)
+Z = Z - Z[-1] # adjust top to zero
 
 # coordinate arrays for plotting
 TT = T.reshape((NT,1))*np.ones((1,NZ))
@@ -72,11 +75,11 @@ fig.colorbar(cs)
 ax.set_ylim(top=5)
 ax.set_ylabel('Z [m]')
 ax.text(.05, .1, 'Potential Temperature [deg C]', c='w', weight='bold', transform=ax.transAxes)
-ax.set_xlabel('Time [days from start of record]')
+#ax.set_xlabel('Time [days from start of record]')
 
 ax = fig.add_subplot(313)
 #cs = ax.pcolormesh(TT, ZZ, OX, cmap=cm.oxy, vmin=0, vmax=10)
-cs = ax.pcolormesh(TT, ZZ, OX, cmap='jet', vmin=0, vmax=4)
+cs = ax.pcolormesh(TT, ZZ, OX, cmap='jet', vmin=0, vmax=10)
 fig.colorbar(cs)
 ax.set_ylim(top=5)
 ax.set_xlabel('Time [days from start of record]')

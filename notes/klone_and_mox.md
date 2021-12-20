@@ -4,22 +4,33 @@
 
 klone: We own 400 cores (10 nodes with 40 cores each).  We are allocated 1 TB of storage for each node, so 10 TB total.  You can check to see how close we are to our quota on klone with the command `hyakalloc`.
 
-ssh to `klone.hyak.uw.edu` to get to it (similar for mox, but you can specify mox1 and mox2, or just mox).  They seem to be the same except that you might not see cron jobs on one that were set up on the other.
+Here are examples of aliases I have on my mac ~/.bash_profile (equivalent to ~/.bashrc on the linux machines) to quickly get to my machines
+```
+alias klo='ssh pmacc@klone1.hyak.uw.edu'
+alias mox1='ssh pmacc@mox1.hyak.uw.edu'
+alias mox2='ssh pmacc@mox2.hyak.uw.edu'
+alias pgee='ssh parker@perigee.ocean.washington.edu'
+alias agee='ssh parker@apogee.ocean.washington.edu'
+```
+Note: klone1 is the same as klone.  If you just ssh to mox you end up randomly at either mox1 or mox2, which are the same machine except that they keep separate crontabs (see below). I always ssh to mox1 to avoid confusion.
 
-`/gscratch/macc` is our working directory, and I have created my own directory inside that: parker.
+`/gscratch/macc` is our working directory on both mox and klone, and I have created my own directory inside that: parker, where the whole LO system lives.
 
-There appears to be a klone1 so I will use that to be explicit (klo alias on my mac) although this is probably not required.  There is no klone2.  In contrast, on mox there is a mox1 and mox2.
-
-When you have a job running you can check on it using
+When you have a job running on klone you can check on it using:
 ```
 squeue -A macc
 ```
-
+or on mox:
+```
+squeue -p macc
+```
 ---
 
 #### Getting resource info
 
-`hyakstorage` will give info about storage.  Use `hyakstorage --help` to get more info on command options.
+`hyakstorage` will give info about storage on klone.  Use `hyakstorage --help` to get more info on command options. Not yet working on mox.
+
+To check on our disk allocation on mox you can also look in the file `/gscratch/macc/usage_report.txt` although this will be phased out soon.
 
 `hyakalloc` will give info on the nodes we own.
 
@@ -27,7 +38,6 @@ squeue -A macc
 
 **klone**: we own 400 cores (10 nodes with 40 cores each).
 
-To check on our disk allocation you can also look in the file `/gscratch/macc/usage_report.txt` although this will be phased out.
 
 ---
 
@@ -54,12 +64,11 @@ export PATH=/gscratch/macc/local/netcdf-ifort/bin:$PATH
 export PATH=/gscratch/macc/local/netcdf-icc/bin:$PATH
 #export PATH=/gscratch/macc/local/openmpi-ifort/bin:$PATH
 ```
-
-I wonder if the // in NCDIR path is a typo?
+I assume the // in NCDIR path is a typo.
 
 ---
 
-#### Steps to compile:
+#### Steps to compile on klone:
 ```
 cd LiveOcean_roms/LO_ROMS
 srun -p compute -A macc --pty bash -l
@@ -68,7 +77,13 @@ make -f /gscratch/macc/parker/LiveOcean_roms/makefiles/[ex_name]/makefile
 ```
 Then `logout` to get back to the usual shell.  You have to do this because the `srun` command logged you onto one of the compute nodes.
 
-Note: `compute` in the srun command was `macc` on **mox**.  Other than that the process on mox is identical.
+On mox the steps are only slightly different. The `compute` in the srun command is `macc` on **mox**:
+```
+cd LiveOcean_roms/LO_ROMS
+srun -p macc -A macc --pty bash -l
+make clean
+make -f /gscratch/macc/parker/LiveOcean_roms/makefiles/[ex_name]/makefile
+```
 
 ---
 
@@ -109,9 +124,22 @@ Now I can run `ssh-copy-id` again for other computers, without having to do the 
 
 ---
 
-#### Miscellany
+#### Running things by cron
 
-I had some old notes about thing that may have been required in the klone crontab, but it is possible that they are no longer relevant:
+The current klone crontab looks like:
+```
+LANG=en-US.UTF-8
+LOdnew="/gscratch/macc/parker/LO/driver"
+30 08 * * * source ~/.bashrc; python3 $LOdnew/driver_roms1.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 > $LOdnew/ak_cron.log
+# 33 17 * * * source ~/.bashrc; python3 $LOdnew/test_Ldir.py > $LOdnew/cron_test.log
+```
+The LANG addition appears to be needed when the driver starts to copy the forcing files from a remote machine like apogee.  In the past I also had to set HOSTNAME=klone, but I believe the newer drivers get around this problem. I suspect the quotes around the LOdnew entry are not needed.
 
-- LANG=en-US.UTF-8
-- HOSTNAME=klone
+The current mox1 crontab looks like:
+```
+LOdnew="/gscratch/macc/parker/LO/driver"
+00 03 * * * source ~/.bashrc; python3 $LOdnew/driver_roms.py -g cas6 -t v0 -x u0mb -r forecast -s continuation -np 196 -N 28 > $LOdnew/am_cron.log
+30 06 * * * source ~/.bashrc; mail -s 'LO_mox' pmacc@uw.edu < $LOdnew/am_cron.log
+31 06 * * * source ~/.bashrc; mail -s 'LO_mox' darrd@uw.edu < $LOdnew/am_cron.log
+```
+Note that even though mox1 and mox2 run the same compute cluster, the crontab is specific to which one you were logged into when you created it.  So if I go to mox2 the crontab is empty.  For this reason I always use a mox1 alias when logging onto mox.

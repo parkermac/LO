@@ -123,11 +123,15 @@ for sn in sta_dict.keys():
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     
-    # copy the results to a folder named for the job
+    # copy or move the results to a folder named for the job
     moor_fn = out_dir / (sn + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
     job_moor_fn = jout_dir / (sn + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
     try:
-        shutil.copyfile(moor_fn, job_moor_fn)
+        if Ldir['testing']:
+            # when testing we keep the original extraction to make it easier to plot
+            shutil.copyfile(moor_fn, job_moor_fn)
+        else:
+            shutil.move(moor_fn, job_moor_fn)
     except FileNotFoundError:
         print(' - error making %s' % (job_moor_fn.name))
     
