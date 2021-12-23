@@ -68,7 +68,10 @@ I assume the // in NCDIR path is a typo.
 
 ---
 
-#### Steps to compile on klone:
+#### Steps to compile:
+
+On klone:
+
 ```
 cd LiveOcean_roms/LO_ROMS
 srun -p compute -A macc --pty bash -l
