@@ -290,14 +290,17 @@ while dt <= dt1:
                             print(' - log.txt file saved to %s' % (str(roms_bu_out_dir)))
                         except FileNotFoundError:
                             print(' - log.txt file not found')
-                        his_list = roms_out_dir.glob('ocean_his_*.nc')
-                        his_list.sort()
-                        if len(his_list) > 0:
-                            shutil.copy(his_list[-1], roms_bu_out_dir)
-                            print(' - %s saved to %s' % (his_list[-1].name, str(roms_bu_out_dir)))
-                        else:
-                            print(' - no history files found')
-                        print
+                            
+                        # Skip this for now until I understand glob generators better.
+                        #
+                        # his_list = roms_out_dir.glob('ocean_his_*.nc')
+                        # his_list.sort()
+                        # if len(his_list) > 0:
+                        #     shutil.copy(his_list[-1], roms_bu_out_dir)
+                        #     print(' - %s saved to %s' % (his_list[-1].name, str(roms_bu_out_dir)))
+                        # else:
+                        #     print(' - no history files found')
+                        # print
                         
                         break
                     elif 'ERROR' in line:
