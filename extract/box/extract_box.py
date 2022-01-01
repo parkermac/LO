@@ -183,14 +183,14 @@ for ii in range(N):
     ii += 1
 
 # Ensure that all days have the same fill value.  This was required for cas6_v3_lo8b
-# when passing from 2021.10.31 to 2021.11.01 because they had inconsistent fill values
+# when passing from 2021.10.31 to 2021.11.01 because they had inconsistent fill values,
 # which leaks through the ncrcat call below.
 tt1 = time()
 enc_dict = {'_FillValue':1e20}
 vn_List = vn_list.split(',')
 Enc_dict = {vn:enc_dict for vn in vn_List}
 for out_fn in list(temp_dir.glob('box_*.nc')):
-    ds = xr.load_dataset(out_fn)
+    ds = xr.load_dataset(out_fn) # need to load, not open, for overwrite
     ds.to_netcdf(out_fn, encoding=Enc_dict)
     ds.close()
 print(' - Time for adding fill value = %0.2f sec' % (time()- tt1))
