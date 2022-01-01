@@ -181,7 +181,18 @@ for ii in range(N):
         # make sure everyone is finished before continuing
         proc_list = []
     ii += 1
-    
+
+# ensure that all days have the same fill value
+tt1 = time()
+enc_dict = {'_FillValue':1e20}
+vn_List = vn_list.split(',')
+Enc_dict = {vn:enc_dict for vn in vn_List}
+for out_fn in list(temp_dir.glob('box_*.nc')):
+    ds = xr.load_dataset(out_fn)
+    ds.to_netcdf(out_fn, encoding=Enc_dict)
+    ds.close()
+print(' - Time for adding fill value = %0.2f sec' % (time()- tt1))
+
 # concatenate the records into one file
 # This bit of code is a nice example of how to replicate a bash pipe
 pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
