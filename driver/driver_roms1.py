@@ -22,7 +22,7 @@ The /dev/null input avoids occasionally having the job "stopped".
 
 """
 
-import sys
+import sys, os
 import shutil
 import argparse
 from datetime import datetime, timedelta
@@ -290,17 +290,19 @@ while dt <= dt1:
                             print(' - log.txt file saved to %s' % (str(roms_bu_out_dir)))
                         except FileNotFoundError:
                             print(' - log.txt file not found')
-                            
-                        # Skip this for now until I understand glob generators better.
                         #
-                        # his_list = roms_out_dir.glob('ocean_his_*.nc')
-                        # his_list.sort()
-                        # if len(his_list) > 0:
-                        #     shutil.copy(his_list[-1], roms_bu_out_dir)
-                        #     print(' - %s saved to %s' % (his_list[-1].name, str(roms_bu_out_dir)))
-                        # else:
-                        #     print(' - no history files found')
-                        # print
+                        try:
+                            his_list = roms_out_dir.glob('ocean_his_*.nc')
+                            his_list = list(his_list)
+                            his_list.sort()
+                            if len(his_list) > 0:
+                                shutil.copy(his_list[-1], roms_bu_out_dir)
+                                print(' - %s saved to %s' % (his_list[-1].name, str(roms_bu_out_dir)))
+                            else:
+                                print(' - no history files found')
+                        except Exception as e:
+                            print(' - problem saving blow-up history file:')
+                            print(e)
                         
                         break
                     elif 'ERROR' in line:
