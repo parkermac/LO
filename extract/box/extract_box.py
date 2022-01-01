@@ -182,7 +182,9 @@ for ii in range(N):
         proc_list = []
     ii += 1
 
-# # ensure that all days have the same fill value
+# Ensure that all days have the same fill value.  This was required for cas6_v3_lo8b
+# when passing from 2021.10.31 to 2021.11.01 because they had inconsistent fill values
+# which leaks through the ncrcat call below.
 tt1 = time()
 enc_dict = {'_FillValue':1e20}
 vn_List = vn_list.split(',')
