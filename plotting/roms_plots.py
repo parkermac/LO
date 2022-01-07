@@ -713,6 +713,76 @@ def P_sect(in_dict):
         plt.close()
     else:
         plt.show()
+        
+def P_sect_soundspeed(in_dict):
+    """
+    Soundspeed section plot
+    """
+    import gsw
+
+    ds = xr.open_dataset(in_dict['fn'])
+    # create track by hand
+    x = np.linspace(-124.85,-124.2, 100) # shelf only
+    #x = np.linspace(-126,-124.2, 100) # shows SOFAR channel
+    y = 47 * np.ones(x.shape)
+    v2, v3, dist, idist0 = pfun.get_section(ds, 'salt', x, y, in_dict)
+    s = v3['sectvarf']
+    v2, v3, dist, idist0 = pfun.get_section(ds, 'temp', x, y, in_dict)
+    th = v3['sectvarf']
+
+    X = v3['distf']
+    Z = v3['zrf']
+    # adjust Z so surface is at 0
+    Z = Z - Z[-1,:]
+
+    p = gsw.p_from_z(Z, 47)
+    SA = gsw.SA_from_SP(s, p, -125, 47)
+    CT = gsw.CT_from_pt(SA, th)
+    spd = gsw.sound_speed(SA, CT, p)
+
+    # START
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(16,9))
+    fig, axes = plt.subplots(nrows=3, ncols=2)
+
+    ax = axes[0,0]
+    cs = ax.pcolormesh(X, Z, SA, cmap='jet')
+    fig.colorbar(cs, ax=ax)
+    ax.text(.95, .05, 'Absolute Salinity', transform=ax.transAxes, ha='right')
+
+    ax = axes[1,0]
+    cs = ax.pcolormesh(X, Z, CT, cmap='jet')
+    fig.colorbar(cs, ax=ax)
+    ax.text(.95, .05, 'Conservative Temperature', transform=ax.transAxes, ha='right')
+
+    ax = axes[2,0]
+    cs = ax.pcolormesh(X, Z, spd, cmap='jet')
+    fig.colorbar(cs, ax=ax)
+    ax.text(.95, .05, 'Soundspeed [m/s]', transform=ax.transAxes, ha='right')
+
+    ax = axes[0,1]
+    ax.plot(SA,Z, alpha=.2)
+    ax.text(.05, .05, 'Absolute Salinity', transform=ax.transAxes, ha='left')
+
+    ax = axes[1,1]
+    ax.plot(CT,Z, alpha=.2)
+    ax.text(.95, .05, 'Conservative Temperature', transform=ax.transAxes, ha='right')
+
+    ax = axes[2,1]
+    ax.plot(spd,Z, alpha=.2)
+    ax.text(.95, .05, 'Soundspeed [m/s]', transform=ax.transAxes, ha='right')
+
+    fig.suptitle(str(in_dict['fn']))
+
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+    
 
 def P_splash(in_dict):
     """
