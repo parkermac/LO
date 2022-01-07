@@ -7,10 +7,13 @@
 #### A typical workflow would consist of two steps.  First, from the command line do:
 
 ```
-python get_dt_lists.py -a True
+python get_dt_lists.py
 ```
 
-This is how you would do it the first time when building an archive from scratch.  After that you would drop the -a True argument (which forces it go get everything).  Next, actually get any required hycom extractions by doing:
+If you were doing it for the first time when building an archive from scratch you would do
+`python get_dt_lists.py -a True` (which forces it go get everything, TAKES DAYS).
+
+Next, actually get any required hycom extractions by doing:
 
 ```
 python get_hycom_days.py > log_days &
