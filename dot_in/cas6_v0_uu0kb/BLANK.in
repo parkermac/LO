@@ -73,8 +73,9 @@
 ! Input variable information file name.  This file needs to be processed
 ! first so all information arrays can be initialized properly.
 
-     VARNAME = $roms_code_dir$/$roms_name$/ROMS/External/varinfo.dat
-
+!     VARNAME = $roms_code_dir$/$roms_name$/ROMS/External/varinfo.dat
+      VARNAME = /gscratch/macc/parker/LO_roms_user/Biology/varinfo.dat
+      
 ! Number of nested grids.
 
       Ngrids =  1
