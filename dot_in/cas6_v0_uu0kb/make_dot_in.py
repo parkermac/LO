@@ -53,8 +53,8 @@ D['EX_NAME'] = Ldir['ex_name'].upper()
 
 #### USER DEFINED VALUES ####
 
-# which ROMS code to use
-D['roms_name'] = 'LO_roms_source'
+# where to find varinfo.dat
+D['varinfo_dir'] = Ldir['parent'] / 'LO_roms_user' / 'Biology'
 
 multi_core = True # use more than one core
 
@@ -87,7 +87,7 @@ rst_interval = 10 # days between writing to the restart file (e.g. 5)
 # Find which forcings to look for (search the csv file in this directory).
 # We use the csv file because driver_roms_mox.py also uses it to copy forcing
 # without extra stuff.
-this_dir = ppth = Path(__file__).absolute().parent
+this_dir = Path(__file__).absolute().parent
 with open(this_dir / 'forcing_list.csv', 'r') as f:
     for line in f:
         which_force, force_choice = line.strip().split(',')
@@ -178,7 +178,6 @@ D['dstart'] = int(Lfun.datetime_to_modtime(fdt) / 86400.)
 D['grid_dir'] = Ldir['grid']
 force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string'])
 D['force_dir'] = force_dir
-D['roms_code_dir'] = Ldir['parent']
 
 # get horizontal coordinate info
 with open(Ldir['grid'] / 'XY_COORDINATE_INFO.csv','r') as xyf:
@@ -220,7 +219,7 @@ for line in f:
     for var in D.keys():
         if '$'+var+'$' in line:
             line2 = line.replace('$'+var+'$', str(D[var]))
-            line = line2
+            line = line2 # needed because we loop over all "var" for line
         else:
             line2 = line
     f2.write(line2)
