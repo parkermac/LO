@@ -59,6 +59,9 @@ def get_plon_plat(lon, lat):
     "psi" grids that are suitable for plotting using pcolormesh
     for any field on the original grid.
     NOTE: It checks to make sure the original grid is plaid.
+    
+    You would pass it G['lon_rho'] and G['lat_rho'], for
+    a field on the rho grid.
     """
     # input checking
     Lon = lon[0,:]
