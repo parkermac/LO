@@ -17,12 +17,14 @@ out_dir = Ldir['LOo'] / 'obs' / 'wcoa2021'
 Lfun.make_dir(out_dir)
 
 fn = 'WCOA2021_StationLocations_wTimeandDate.xlsx'
-
 in_fn = in_dir / fn
 a = pd.read_excel(in_fn)
 
 for ii in a.index:
     a.loc[ii,'Datetime'] = (a.loc[ii,'Date (UTC)'].to_pydatetime()
         + timedelta(days=a.loc[ii,'Time (UTC)'].hour/24))
-#
-# A.to_pickle(out_dir / 'sta_df.p')
+        
+a = a.rename(columns={'Station Name':'Station', 'Lat':'Latitude', 'Long':'Longitude'})
+a['Cruise'] = 'WCOA2021'
+A = a[['Station', 'Longitude', 'Latitude', 'Datetime', 'Cruise']]
+A.to_pickle(out_dir / 'sta_df.p')
