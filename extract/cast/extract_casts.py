@@ -167,6 +167,22 @@ elif Ldir['cruises'] == 'wcoa':
             else:
                 get_cast(out_fn, fn, lon, lat)
                 
+elif Ldir['cruises'] == 'wcoa2021':
+    sta_fn = Ldir['LOo'] / 'obs' / 'wcoa2021' / 'sta_df.p'
+    if sta_fn.is_file():
+        sta_df = pd.read_pickle(sta_fn)
+    cruises = sta_df['Cruise'].unique()
+    for cruise in cruises:
+        c_df = sta_df[sta_df['Cruise']==cruise]
+        for index, row in sta_df.iterrows():
+            sn = row['Station']
+            lon = row['Longitude']
+            lat = row['Latitude']
+            dt = row['Datetime']
+            out_fn = out_dir / (cruise + '_' + str(sn) + '_' + dt.strftime(Lfun.ds_fmt) + '.nc')
+            fn = get_his_fn_from_dt(Ldir, dt)
+            get_cast(out_fn, fn, lon, lat)
+                
 elif Ldir['cruises'] == 'newport_line':
     sta_fn = Ldir['LOo'] / 'obs' / 'newport_line' / 'sta_df.p'
     if sta_fn.is_file():
