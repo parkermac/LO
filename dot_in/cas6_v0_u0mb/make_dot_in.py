@@ -105,6 +105,9 @@ if multi_core:
     elif Ldir['np_num'] == 144:
         ntilei = '8' # number of tiles in I-direction
         ntilej = '18' # number of tiles in J-direction
+    elif Ldir['np_num'] == 168:
+        ntilei = '12' # number of tiles in I-direction
+        ntilej = '14' # number of tiles in J-direction
     elif Ldir['np_num'] == 196:
         ntilei = '14' # number of tiles in I-direction
         ntilej = '14' # number of tiles in J-direction
