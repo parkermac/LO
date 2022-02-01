@@ -46,6 +46,7 @@ parser.add_argument('-get_tsa', type=zfun.boolean_string, default=False)
 parser.add_argument('-get_vel', type=zfun.boolean_string, default=False)
 parser.add_argument('-get_bio', type=zfun.boolean_string, default=False)
 parser.add_argument('-get_surfbot', type=zfun.boolean_string, default=False)
+parser.add_argument('-get_pressure', type=zfun.boolean_string, default=False)
 # OR select all of them
 parser.add_argument('-get_all', type=zfun.boolean_string, default=False)
 # Optional: set max number of subprocesses to run at any time
@@ -141,6 +142,8 @@ if Ldir['get_bio']:
     vn_list += ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,rho'
 if Ldir['get_surfbot']:
     vn_list += ',Pair,Uwind,Vwind,shflux,ssflux,latent,sensible,lwrad,swrad,sustr,svstr,bustr,bvstr'
+if Ldir['get_pressure']: # fields used for 1-D pressure analysis
+    vn_list += ',salt,temp,rho,Pair'
     
 proc_list = []
 N = len(fn_list)

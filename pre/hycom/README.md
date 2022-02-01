@@ -11,7 +11,7 @@ python get_dt_lists.py
 ```
 
 If you were doing it for the first time when building an archive from scratch you would do
-`python get_dt_lists.py -a True` (which forces it go get everything, TAKES DAYS).
+`python get_dt_lists.py -a True` (which forces it go get everything, WARNING: This. Takes. Days.).
 
 Next, actually get any required hycom extractions by doing:
 
@@ -35,7 +35,7 @@ The geographic area for extractions is set in hfun.get_extraction_limits().
 
 The default is that this just updates the list for the last experiment in hy_dict.  You can update all by running it with the flag -a True.
 
-**You should run this first when updating the archive of extractions, because the extraction code relies on the lists to specify which days to look for.**
+**As mentioned above, you should run this first when updating the archive of extractions, because the extraction code relies on the lists to specify which days to look for.**
 
 ---
 

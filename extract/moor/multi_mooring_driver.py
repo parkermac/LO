@@ -44,6 +44,7 @@ parser.add_argument('-get_tsa', type=Lfun.boolean_string, default=False)
 parser.add_argument('-get_vel', type=Lfun.boolean_string, default=False)
 parser.add_argument('-get_bio', type=Lfun.boolean_string, default=False)
 parser.add_argument('-get_surfbot', type=Lfun.boolean_string, default=False)
+parser.add_argument('-get_pressure', type=Lfun.boolean_string, default=False)
 # OR select all of them
 parser.add_argument('-get_all', type=Lfun.boolean_string, default=False)
 # Optional: set max number of subprocesses to run at any time
@@ -119,7 +120,8 @@ for sn in sta_dict.keys():
         '-0', Ldir['ds0'], '-1', Ldir['ds1'], '-lt', Ldir['list_type'],
         '-sn', sn, '-lon', x, '-lat', y,
         '-get_tsa', str(Ldir['get_tsa']), '-get_vel', str(Ldir['get_vel']),
-        '-get_bio', str(Ldir['get_bio']), '-get_surfbot', str(Ldir['get_surfbot'])]
+        '-get_bio', str(Ldir['get_bio']), '-get_surfbot', str(Ldir['get_surfbot']),
+        '-get_pressure', str(Ldir['get_pressure'])]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     
