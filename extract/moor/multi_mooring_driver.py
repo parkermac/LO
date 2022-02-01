@@ -118,7 +118,7 @@ for sn in sta_dict.keys():
     cmd_list = ['python','extract_moor.py',
         '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
         '-0', Ldir['ds0'], '-1', Ldir['ds1'], '-lt', Ldir['list_type'],
-        '-sn', sn, '-lon', x, '-lat', y,
+        '-sn', sn, '-lon', x, '-lat', y, '-Nproc', str(Ldir['Nproc'],
         '-get_tsa', str(Ldir['get_tsa']), '-get_vel', str(Ldir['get_vel']),
         '-get_bio', str(Ldir['get_bio']), '-get_surfbot', str(Ldir['get_surfbot']),
         '-get_pressure', str(Ldir['get_pressure'])]
