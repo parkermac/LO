@@ -143,7 +143,7 @@ if Ldir['get_bio']:
 if Ldir['get_surfbot']:
     vn_list += ',Pair,Uwind,Vwind,shflux,ssflux,latent,sensible,lwrad,swrad,sustr,svstr,bustr,bvstr'
 if Ldir['get_pressure']: # fields used for 1-D pressure analysis
-    vn_list += ',salt,temp,rho,Pair'
+    vn_list += ',salt,temp,u,v,Pair,Uwind,Vwind'
     
 proc_list = []
 N = len(fn_list)
