@@ -142,9 +142,12 @@ if Ldir['get_bio']:
     vn_list += ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,rho'
 if Ldir['get_surfbot']:
     vn_list += ',Pair,Uwind,Vwind,shflux,ssflux,latent,sensible,lwrad,swrad,sustr,svstr,bustr,bvstr'
+# The choice below is a custom job that is not part of get_all.  It is problematic to add such jobs becasue
+# you also have to add them to the args at the top of this code and the multi_mooring_driver.
 if Ldir['get_pressure']: # fields used for 1-D pressure analysis
     vn_list += ',salt,temp,u,v,Pair,Uwind,Vwind'
-    
+
+tt_ncks = time()
 proc_list = []
 N = len(fn_list)
 print('Times to extract =  %d' % (N))
@@ -155,10 +158,9 @@ for ii in range(N):
     out_fn = temp_dir / ('moor_temp_' + count_str + '.nc')
     cmd_list1 = ['ncks',
         '-v', vn_list,
-        '-d', 'xi_rho,'+str(ilon), '-d', 'eta_rho,'+str(ilat)]
-    if Ldir['get_vel'] or Ldir['get_surfbot']:
-        cmd_list1 += ['-d', 'xi_u,'+str(ilon), '-d', 'eta_u,'+str(ilat),
-            '-d', 'xi_v,'+str(ilon), '-d', 'eta_v,'+str(ilat)]
+        '-d', 'xi_rho,'+str(ilon), '-d', 'eta_rho,'+str(ilat),
+        '-d', 'xi_u,'+str(ilon), '-d', 'eta_u,'+str(ilat),
+        '-d', 'xi_v,'+str(ilon), '-d', 'eta_v,'+str(ilat)]
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
@@ -183,7 +185,9 @@ for ii in range(N):
             proc.communicate()
         # make sure everyone is finished before continuing
         proc_list = []
+print(' - time for ncks %0.2f sec' % (time()-tt_ncks))
 
+tt_cat = time()
 # concatenate the day records into one file
 # This bit of code is a nice example of how to replicate a bash pipe
 pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
@@ -191,6 +195,7 @@ pp2 = Po(['grep','moor_temp'], stdin=pp1.stdout, stdout=Pi)
 cmd_list = ['ncrcat','-p', str(temp_dir), '-O',str(moor_fn)]
 proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi)
 proc.communicate()
+print(' - time for ncrcat %0.2f sec' % (time()-tt_cat))
 
 # add z_coordinates to the file using xarray
 ds = xr.load_dataset(moor_fn)
@@ -209,7 +214,8 @@ ds.z_w.attrs['units'] = 'm'
 ds.z_rho.attrs['long name'] = 'vertical position on s_rho grid, positive up'
 ds.z_w.attrs['long name'] = 'vertical position on s_w grid, positive up'
 # add units to salt
-ds.salt.attrs['units'] = 'g kg-1'
+if 'salt' in ds.data_vars:
+    ds.salt.attrs['units'] = 'g kg-1'
 # update the time long name
 ds.ocean_time.attrs['long_name'] = 'Time [UTC]'
 # update format attribute
@@ -222,7 +228,7 @@ ds.close()
 Lfun.make_dir(temp_dir, clean=True)
 temp_dir.rmdir()
 
-print('Total Elapsed time was %0.2f sec' % (time()-tt00))
+print('- total Elapsed time was %0.2f sec' % (time()-tt00))
 
-print('\nPath to file:\n%s' % (str(moor_fn)))
+print('Path to file:\n%s' % (str(moor_fn)))
 
