@@ -26,7 +26,6 @@ import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 
 def start_plot(fs=14, figsize=(14,10)):
-    fs = 14
     plt.rc('font', size=fs)
     plt.rc('figure', figsize=figsize)
     

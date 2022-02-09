@@ -30,19 +30,20 @@ Lfun.make_dir(out_dir, clean=True)
 gridname=gtagex.split('_')[0]
 sect_df = tef_fun.get_sect_df(gridname)
 
-testing = True
+testing = False
 
 if testing:
     from importlib import reload
     reload(flux_fun)
 
 if testing:
-    sect_list = ['ai4']
+    sect_list = ['jdf1']
 else:
     sect_list = list(sect_df.index)
 
 # PLOTTING
 fs = 12
+plt.close('all')
 pfun.start_plot(fs=fs, figsize=(21,10))
 
 for sect_name in sect_list:
@@ -67,7 +68,7 @@ for sect_name in sect_list:
         NR = 2; NC = 1
         
     # filter more in time (requires that Q be the first item in vn_list)
-    nhan = 20 # length of Hanning window in days (use 1 for no filtering)
+    nhan = 1 # length of Hanning window in days (use 1 for no filtering)
     for vn in vn_list_long:
         if vn == 'Q':
             tef_df['Q_in'] = zfun.lowpass(tef_df['Qin'].to_numpy(), n=nhan)
@@ -93,8 +94,8 @@ for sect_name in sect_list:
                 'alkalinity': r'Alkalinity $[\mu equiv\ L^{-1}]$'}
     import string
     abc = list(string.ascii_lowercase)
-    incolor = 'purple'
-    outcolor = 'green'
+    incolor = 'r'
+    outcolor = 'b'
     lw = 2
     
     fig, axes = plt.subplots(nrows=NR, ncols=NC, squeeze=False)
