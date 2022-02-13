@@ -62,3 +62,17 @@ This folder contains the files used to create the batch files used to run ROMS o
 - `klone1_make_batch.py` fills in the template (when called by `driver_roms1.py`)
 
 and these produce `LO_roms/[gtagex]/[f_string]/klone1_batch.sh`
+
+---
+
+#### crontabs
+
+This folder contains text files of the current crontabs for all computers in the system that use them.
+
+I think that you should be able to install one with a command (from LO/driver) such as:
+
+```
+crontab crontabs/apogee.txt
+```
+
+but I haven't tested it yet.

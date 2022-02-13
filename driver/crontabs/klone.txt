@@ -1,0 +1,5 @@
+LANG=en-US.UTF-8
+LOdnew="/gscratch/macc/parker/LO/driver"
+20 03 * * * source ~/.bashrc; python3 $LOdnew/driver_roms1.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 > $LOdnew/ak_cron.log
+30 06 * * * source ~/.bashrc; mail -S smtp=klone-head01:25 -s 'LOcean results' pmacc@uw.edu < $LOdnew/ak_cron.log
+31 06 * * * source ~/.bashrc; mail -S smtp=klone-head01:25 -s 'LOcean results' darrd@uw.edu < $LOdnew/ak_cron.log
