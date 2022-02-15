@@ -141,7 +141,7 @@ def make_nc(out_fn, lon, lat, z, dch):
         data_dict['lon_'+tag] = (('eta_'+tag, 'xi_'+tag), lon_lat_dict['lon_'+tag])
         data_dict['lat_'+tag] = (('eta_'+tag, 'xi_'+tag), lon_lat_dict['lat_'+tag])
         # masks follow ROMS convention: 1 = water, 0 = land
-        data_dict['mask_'+tag] = (('eta_'+tag, 'xi_'+tag), np.ones_like(lon_lat_dict['lon_'+tag]))
+        data_dict['mask_'+tag] = (('eta_'+tag, 'xi_'+tag), np.ones(lon_lat_dict['lon_'+tag].shape))
     
     # create the Dataset and write to NetCDF (overwrites existing file)
     ds = xr.Dataset(data_dict)

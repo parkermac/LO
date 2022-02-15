@@ -431,7 +431,7 @@ while flag_get_ginput:
 
 # update fields for output
 
-# rhmove hpad
+# remove hpad
 h = h[hpad:-hpad, hpad:-hpad]
 hh = hh[hpad:-hpad, hpad:-hpad]
 
@@ -448,6 +448,7 @@ hh[np.isnan(hh)] = h[np.isnan(hh)]
 if np.any(mask_rho != newmask) or np.any(h != hh):
     print('Creating ' + str(out_fn))
     # save the updated mask and z
+    ds = xr.open_dataset(in_fn)
     ds.update({'mask_rho': (('eta_rho', 'xi_rho'), newmask)})
     ds.update({'h': (('eta_rho', 'xi_rho'), hh)})
     ds.to_netcdf(out_fn)

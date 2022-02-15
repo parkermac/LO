@@ -21,7 +21,7 @@ base_tag = gfun_user.base_tag
 
 Ldir = Lfun.Lstart(gridname=base_gridname, tag=base_tag)
 
-print(Ldir['gtag'])
+#print(Ldir['gtag'])
 
 def gstart(gridname=gridname):
     """

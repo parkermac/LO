@@ -80,3 +80,9 @@ You can use `plot_grid.py` to look at any of the grids.  You can override the de
 ```
 run plot_grid.py -g sal0
 ```
+
+---
+
+#### Development Notes
+
+Throughout this code I use xr.open_dataset() and then the update method to store changed variables before saving to a new file.  I am not totally clear about this.  Maybe I should be using load_dataset(), or maybe it all works fine because I am saving to a new NetCDF file anytime there are changes.
