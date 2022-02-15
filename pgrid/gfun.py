@@ -10,7 +10,6 @@ pth = Path(__file__).absolute().parent.parent.parent / 'LO_user' / 'pgrid'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import gfun_user
-
 # assume the user will be editing things
 from importlib import reload
 reload(gfun_user)
@@ -21,6 +20,8 @@ base_gridname = gfun_user.base_gridname
 base_tag = gfun_user.base_tag
 
 Ldir = Lfun.Lstart(gridname=base_gridname, tag=base_tag)
+
+print(Ldir['gtag'])
 
 def gstart(gridname=gridname):
     """

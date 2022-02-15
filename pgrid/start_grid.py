@@ -18,6 +18,8 @@ import gfun
 import gfun_utility as gfu
 Gr =gfun.gstart()
 import gfun_user # path added by gfun.gstart()
+from importlib import reload
+reload(gfun_user)
 
 if Gr['gdir'].is_dir():
     ans = input('Grid ' + Gr['gridname'] + ' exists.  Overwrite? (y/n)')

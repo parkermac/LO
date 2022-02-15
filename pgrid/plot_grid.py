@@ -20,6 +20,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import xarray as xr
 import numpy as np
+import pickle
 
 testing = True
 if testing:
@@ -29,6 +30,9 @@ if testing:
 
 # select grid file
 in_fn = gfun.select_file(Gr)
+
+# load the default choices
+dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))
 
 # get river info if it exists
 do_riv = False
@@ -62,7 +66,10 @@ fig = plt.figure()
 ax = fig.add_subplot(111)
 cs = ax.pcolormesh(plon, plat, zm, vmin=-20, vmax=-4, cmap='Spectral_r')
 fig.colorbar(cs, ax=ax)
-pfun.add_coast(ax)
+if dch['analytical'] == True:
+    pass
+else:
+    pfun.add_coast(ax)
 pfun.dar(ax)
 ax.axis(ax_lims)
 ax.set_title(in_fn.name)
