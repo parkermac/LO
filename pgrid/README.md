@@ -26,6 +26,8 @@ Also [plon, plat] is just like [lon_psi, lat_psi] but extended by one on all dir
 - analytical
 - t_dir/t_list
 - use_z_offset/z_offset
+- excluded_rivers
+- any other of the default choices in `gfun.default_choices()`
 
 (3) `make_mask.py` makes a first pass at the mask.
 - z_land
@@ -36,7 +38,7 @@ Also [plon, plat] is just like [lon_psi, lat_psi] but extended by one on all dir
 
 (5) `carve_rivers.py` uses files of river tracks to make the river channels.
 
-You may have to go into the resulting csv file and delete rivers by hand in a case where you are masking out a partial basin.  If so, then go back and also mask out the channel using `edit_mask.py`.
+You can set a list of rivers to exclude in `gfun_user.py`.
 
 (6) `edit_mask.py` now can be run again for real this time, perhaps running many times. NOTE: you can use an optional command line argument -d ## to change "dval" the carving depth used for lines or points from its default value of 5 m.
 
@@ -50,7 +52,7 @@ NOTE: you may want to run `carve_rivers.py` again at this point just to make jus
 
 (9) `grid_to_LO.py` writes the grid.nc file that is used by ROMS, saving it in LO_data/grids. It also saves S-coordinate info.
 
-It copies or creates: grid.nc, nudgcoef.nc, river_info.csv [careful with name], S_COORDINATE_INFO.csv, XY_COORDINATE_INFO.csv.
+It copies or creates: grid.nc, nudgcoef.nc, river_info.csv, S_COORDINATE_INFO.csv, XY_COORDINATE_INFO.csv. NOTE: the river_info.csv file contains the index and direction info used by ROMS. Don't confuse it with the file of the same name (sorry) that is in LO_output/pre/river.
 - nudging_edges
 - nudging_days
 
