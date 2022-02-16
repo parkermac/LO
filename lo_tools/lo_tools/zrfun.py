@@ -247,9 +247,15 @@ def get_S(S_info_dict):
     S['Cs_w'] = Cs_w
     return S
     
-def get_varinfo(vn):
+def get_varinfo(vn, vartype='state'):
+    """
+    This looks through the ROMS varinfo.dat and returns a dict for a given variable.
+    """
+    
+    # specify which varinfo.dat to use
     Ldir = Lfun.Lstart()
     fn = Ldir['parent'] / 'LO_roms_source' / 'ROMS' / 'External' / 'varinfo.dat'
+
     # parse the file into a list of lists
     ff = []
     with open(fn, 'r') as f:
@@ -258,27 +264,53 @@ def get_varinfo(vn):
             aa = a.replace('\n','').strip().split("'")
             aaa = [item for item in aa if len(item) > 0]
             ff.append(aaa)
+
     # make a dict for the variable
     ii = 0
     for l in ff:
         if len(l) >= 2:
-            # this version works for state variables
-            if (l[0] == vn) and (('Input/Output' in l[1]) or ('Input/Ouput' in l[1])):
-            
-            # this version works for boundary variables
-            #if (l[0] == vn):
-            
-                #print('%d: %s' % (ii, l))
-                # fill a dict for this variable based on the key below
-                # copied from varinfo.dat
-                d = {}
-                d['long_name'] =    ff[ii+1][0]
-                d['units'] =        ff[ii+2][0]
-                d['field_type'] =   ff[ii+3][0]
-                d['time_name'] =    ff[ii+4][0]
-                d['index_name'] =   ff[ii+5][0]
-                d['grid_type'] =    ff[ii+6][0]
-                d['scale'] =        ff[ii+7][0]
+            cond1 = (vartype == 'state') and ((l[0] == vn) and (('Input/Output' in l[1]) or ('Input/Ouput' in l[1])))
+            cond2 = (vartype in ['boundary', 'climatology']) and (l[0] == vn) and (l[1] == '! Input')
+            if cond1 or cond2:
+                #print('%d: %s' % (ii, l)) # debugging
+                # fill a dict for this variable based on assumed line numbering format
+                vinfo = {}
+                vinfo['long_name'] =    ff[ii+1][0]
+                vinfo['units'] =        ff[ii+2][0]
+                vinfo['field_type'] =   ff[ii+3][0]
+                vinfo['time_name'] =    ff[ii+4][0]
+                vinfo['index_name'] =   ff[ii+5][0]
+                vinfo['grid_type'] =    ff[ii+6][0]
+                vinfo['scale'] =        ff[ii+7][0]
+                break
         ii += 1
-    return d
+        
+    # Associate grid_type with a tuple of spatial dimensions
+    grid_type_dict = {
+            'r2dvar': ('eta_rho', 'xi_rho'),
+            'u2dvar': ('eta_u', 'xi_u'),
+            'v2dvar': ('eta_v', 'xi_v'),
+            'r3dvar': ('s_rho', 'eta_rho', 'xi_rho'),
+            'u3dvar': ('s_rho', 'eta_u', 'xi_u'),
+            'v3dvar': ('s_rho', 'eta_v', 'xi_v')
+            }
+    vinfo['space_dims_tup'] = grid_type_dict[vinfo['grid_type']]
+    
+    # fix a long_name typo
+    if vn in ['ubar', 'vbar']:
+        vinfo['long_name'] = vinfo['long_name'].replace('integrated', 'averaged')
+    
+    return vinfo
+    
+"""
+This is a dict to use for compression when saving an xarray Dataset, e.g. with lines like:
+    Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
+    ds.to_netcdf(out_fn, encoding=Enc_dict)
+Using compression (zlib=True, complevel=1) results in files that are just 2% of the
+uncompressed files (for hc0, which has a lot of nan's).
+Using complevel=9 makes the files half as big as complevel=1, but takes much about 10x longer.
+"""
+enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
+
+
 

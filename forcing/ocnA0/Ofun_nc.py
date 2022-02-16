@@ -12,15 +12,8 @@ RESULT: this works great with ROMS as long as we:
 import os
 import xarray as xr
 import numpy as np
-from lo_tools import Lfun
+from lo_tools import Lfun, zrfun
 import pickle
-
-enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
-# Using compression (zlib=True, complevel=1) results in files that are just 2% of the
-# uncompressed files (for hc0, which has a lot of nan's).
-# Using complevel=9 makes the files half as big as complevel=1, but takes much about 10x longer.
-
-
 
 def make_ini_file(in_fn, out_fn):
     """
@@ -41,7 +34,7 @@ def make_ini_file(in_fn, out_fn):
     for cn in ds0.coords:
         ds.coords[cn] = ds0.coords[cn][[0]]
     ds0.close()
-    Enc_dict = {vn:enc_dict for vn in ds.data_vars}
+    Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
     # and save to NetCDF
     ds.to_netcdf(out_fn, encoding=Enc_dict)
     ds.close()
@@ -91,7 +84,7 @@ def make_bry_file(in_fn, out_fn):
     for cn in ds0.coords:
         ds.coords[cn] = ds0.coords[cn]
     ds0.close()
-    Enc_dict = {vn:enc_dict for vn in ds.data_vars}
+    Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
     # and save to NetCDF
     ds.to_netcdf(out_fn, encoding=Enc_dict)
     ds.close()
