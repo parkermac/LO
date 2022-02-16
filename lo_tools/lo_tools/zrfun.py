@@ -246,4 +246,39 @@ def get_S(S_info_dict):
     S['Cs_r'] = Cs_r
     S['Cs_w'] = Cs_w
     return S
+    
+def get_varinfo(vn):
+    Ldir = Lfun.Lstart()
+    fn = Ldir['parent'] / 'LO_roms_source' / 'ROMS' / 'External' / 'varinfo.dat'
+    # parse the file into a list of lists
+    ff = []
+    with open(fn, 'r') as f:
+        for a in f:
+            # make a list out of each line
+            aa = a.replace('\n','').strip().split("'")
+            aaa = [item for item in aa if len(item) > 0]
+            ff.append(aaa)
+    # make a dict for the variable
+    ii = 0
+    for l in ff:
+        if len(l) >= 2:
+            # this version works for state variables
+            if (l[0] == vn) and (('Input/Output' in l[1]) or ('Input/Ouput' in l[1])):
+            
+            # this version works for boundary variables
+            #if (l[0] == vn):
+            
+                #print('%d: %s' % (ii, l))
+                # fill a dict for this variable based on the key below
+                # copied from varinfo.dat
+                d = {}
+                d['long_name'] =    ff[ii+1][0]
+                d['units'] =        ff[ii+2][0]
+                d['field_type'] =   ff[ii+3][0]
+                d['time_name'] =    ff[ii+4][0]
+                d['index_name'] =   ff[ii+5][0]
+                d['grid_type'] =    ff[ii+6][0]
+                d['scale'] =        ff[ii+7][0]
+        ii += 1
+    return d
 
