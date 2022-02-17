@@ -89,10 +89,7 @@ out_fn = out_dir / 'ocean_clm.nc'
 out_fn.unlink(missing_ok=True)
 ds = xr.Dataset()
 for vn in V.keys():
-    if vn in ['salt', 'temp']:
-        vinfo = zrfun.get_varinfo(vn)
-    else:
-        vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+    vinfo = zrfun.get_varinfo(vn, vartype='climatology')
     tname = vinfo['time_name']
     dims = (vinfo['time_name'],) + vinfo['space_dims_tup']
     ds[vn] = (dims, V[vn])
