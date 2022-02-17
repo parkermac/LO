@@ -94,7 +94,7 @@ for vn in V.keys():
     ds[vn] = (dims, V[vn])
     ds[vn].attrs['units'] = vinfo['units']
     ds[vn].attrs['long_name'] = vinfo['long_name']
-# time coordinates
+# time coordinate
 ds['ocean_time'] = (('ocean_time',), ot_vec)
 ds['ocean_time'].attrs['units'] = Lfun.roms_time_units
 ds['ocean_time'].attrs['long_name'] = 'ocean time'

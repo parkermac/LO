@@ -262,14 +262,16 @@ def get_varinfo(vn, vartype='state'):
         for a in f:
             # make a list out of each line
             aa = a.replace('\n','').strip().split("'")
-            aaa = [item for item in aa if len(item) > 0]
+            aaa = [item.strip() for item in aa if len(item) > 0]
             ff.append(aaa)
 
     # make a dict for the variable
     ii = 0
     for l in ff:
         if len(l) >= 2:
-            cond1 = (vartype == 'state') and ((l[0] == vn) and (('Input/Output' in l[1]) or ('Input/Ouput' in l[1])))
+            cond1 = ((vartype == 'state') and ((l[0] == vn)
+                    and (('Input/Output' in l[1]) or ('Input/Ouput' in l[1]))))
+                    # Note the amusing "Ouput" typo
             cond2 = (vartype in ['boundary', 'climatology']) and (l[0] == vn) and (l[1] == '! Input')
             if cond1 or cond2:
                 #print('%d: %s' % (ii, l)) # debugging
@@ -292,7 +294,8 @@ def get_varinfo(vn, vartype='state'):
             'v2dvar': ('eta_v', 'xi_v'),
             'r3dvar': ('s_rho', 'eta_rho', 'xi_rho'),
             'u3dvar': ('s_rho', 'eta_u', 'xi_u'),
-            'v3dvar': ('s_rho', 'eta_v', 'xi_v')
+            'v3dvar': ('s_rho', 'eta_v', 'xi_v'),
+            'nulvar': ('BLANK',)
             }
     vinfo['space_dims_tup'] = grid_type_dict[vinfo['grid_type']]
     
