@@ -20,7 +20,7 @@ def make_ini_file(in_fn, out_fn):
     Create the ini file from the first time of the clm file.
     """
     ds0 = xr.open_dataset(in_fn, decode_times=False)
-    ot_vec = ds0.ocean_time.values
+    ot_vec = ds0.zeta_time.values
     ds = xr.Dataset()
     ds['ocean_time'] = (('ocean_time',), [ot_vec[0]])
     ds['ocean_time'].attrs['units'] = Lfun.roms_time_units
