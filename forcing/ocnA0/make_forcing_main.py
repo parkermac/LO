@@ -93,14 +93,14 @@ for vn in V.keys():
         vinfo = zrfun.get_varinfo(vn)
     else:
         vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+    tname = vinfo['time_name']
     dims = (vinfo['time_name'],) + vinfo['space_dims_tup']
     ds[vn] = (dims, V[vn])
     ds[vn].attrs['units'] = vinfo['units']
     ds[vn].attrs['long_name'] = vinfo['long_name']
-# time coordinate
-ds['ocean_time'] = (('ocean_time',), ot_vec)
-ds['ocean_time'].attrs['units'] = Lfun.roms_time_units
-ds['ocean_time'].attrs['long_name'] = 'ocean time'
+    # time coordinate
+    ds[tname] = (('ocean_time',), ot_vec)
+    ds[tname].attrs['units'] = Lfun.roms_time_units
 # and save to NetCDF
 Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
 ds.to_netcdf(out_fn, encoding=Enc_dict)
