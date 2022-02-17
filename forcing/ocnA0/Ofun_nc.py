@@ -19,20 +19,21 @@ def make_ini_file(in_fn, out_fn):
     """
     Create the ini file from the first time of the clm file.
     """
-    ds0 = xr.open_dataset(in_fn)
+    ds0 = xr.open_dataset(in_fn, decode_times=False)
+    ot_vec = ds0.ocean_time.values
     ds = xr.Dataset()
+    ds['ocean_time'] = (('ocean_time',), [ot_vec[0]])
+    ds['ocean_time'].attrs['units'] = Lfun.roms_time_units
     for vn in ds0.data_vars:
+        vinfo = zrfun.get_varinfo(vn)
         ndims = len(ds0[vn].dims)
         if ndims == 3:
-            ds[vn] = (ds0[vn].dims, ds0[vn].values[[0],:,:])
+            ds[vn] = (('ocean_time',) + ds0[vn].dims[1:], ds0[vn].values[[0],:,:])
             # Note: we use [0] instead of 0 to retain the singleton dimension
         elif ndims == 4:
-            ds[vn] = (ds0[vn].dims, ds0[vn].values[[0],:,:,:])
-        Attrs = ds0[vn].attrs
-        #Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
-        ds[vn].attrs = Attrs
-    for cn in ds0.coords:
-        ds.coords[cn] = ds0.coords[cn][[0]]
+            ds[vn] = (('ocean_time',) + ds0[vn].dims[1:], ds0[vn].values[[0],:,:,:])
+        ds[vn].attrs['units'] = vinfo['units']
+        ds[vn].attrs['long_name'] = vinfo['long_name']
     ds0.close()
     Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
     # and save to NetCDF
