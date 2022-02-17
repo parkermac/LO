@@ -74,7 +74,8 @@ ds['river_name'].attrs['long_name'] = 'river name'
 vn = 'river_Vshape'
 vinfo = zrfun.get_varinfo(vn, vartype='climatology')
 dims = ('s_rho', 'river')
-# for Vtransform = 2, even spacing is a good approximation
+# For Vtransform = 2, even spacing is a good approximation, and
+# we implement this by using 1/N as the fraction in each vertical cell.
 Vshape = (1/N) * np.ones((N, NRIV))
 ds[vn] = (dims, Vshape)
 ds[vn].attrs['long_name'] = vinfo['long_name']
@@ -85,7 +86,7 @@ for vn in ['river_Xposition', 'river_Eposition', 'river_direction']:
     if vn == 'river_direction':
         ds[vn] = (('river',), gri_df.idir.to_numpy())
     elif vn == 'river_Xposition':
-        X_vec = np.nan * np.ones(Nriv)
+        X_vec = np.nan * np.ones(NRIV)
         ii = 0
         for rn in gri_df.index:
             if gri_df.loc[rn, 'idir'] == 0:
@@ -93,27 +94,50 @@ for vn in ['river_Xposition', 'river_Eposition', 'river_direction']:
             elif gri_df.loc[rn, 'idir'] == 1:
                 X_vec[ii] = gri_df.loc[rn, 'col_py']
             ii += 1
-        
+        ds[vn] = (('river',), X_vec)
+    elif vn == 'river_Eposition':
+        E_vec = np.nan * np.ones(NRIV)
+        ii = 0
+        for rn in gri_df.index:
+            if gri_df.loc[rn, 'idir'] == 0:
+                E_vec[ii] = gri_df.loc[rn, 'row_py']
+            elif gri_df.loc[rn, 'idir'] == 1:
+                E_vec[ii] = gri_df.loc[rn, 'row_py'] + 1
+            ii += 1
+        ds[vn] = (('river',), E_vec)
     ds[vn].attrs['long_name'] = vinfo['long_name']
+        
+# Add transport
+vn = 'river_transport'
+vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+dims = (vinfo['time_name'],) + ('river',)
+Q_mat = np.zeros((NT, NRIV))
+ii = 0
+for rn in gri_df.index:
+    if rn == 'creek0':
+        Q_mat[:,ii] = 1000 * np.ones(NT)
+        # You could make the transport a function of time, for example by making
+        # dti = pd.DatetimeIndex([dt0, dt1]) and then using a function of
+        # dti.dayofyear.
+    else:
+        # You could add other rivers here
+        pass
+ds[vn] = (dims, Q_mat)
+ds[vn].attrs['long_name'] = vinfo['long_name']
+ds[vn].attrs['units'] = vinfo['units']
+
+# Add salinity and temperature
+for vn in ['river_salt', 'river_temp']:
+    vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+    dims = (vinfo['time_name'],) + ('s_rho', 'river')
+    if vn == 'river_salt':
+        TR_mat = np.zeros((NT, N, NRIV))
+    elif vn == 'river_temp':
+        TR_mat = 10 * np.ones((NT, N, NRIV))
+    ds[vn] = (dims, TR_mat)
+    ds[vn].attrs['long_name'] = vinfo['long_name']
+    ds[vn].attrs['units'] = vinfo['units']
     
-
-
-    # # Write Eamp
-    # vn = 'tide_Eamp'
-    # vinfo = zrfun.get_varinfo(vn, vartype='climatology')
-    # dims = ('tide_period',) + vinfo['space_dims_tup']
-    # ds[vn] = (dims, Eamp)
-    # ds[vn].attrs['units'] = vinfo['units']
-    # ds[vn].attrs['long_name'] = vinfo['long_name']
-    #
-    # # Write all other fields
-    # for vn in ['tide_Ephase', 'tide_Cangle', 'tide_Cphase', 'tide_Cmax', 'tide_Cmin']:
-    #     vinfo = zrfun.get_varinfo(vn, vartype='climatology')
-    #     dims = ('tide_period',) + vinfo['space_dims_tup']
-    #     ds[vn] = (dims, omat)
-    #     ds[vn].attrs['units'] = vinfo['units']
-    #     ds[vn].attrs['long_name'] = vinfo['long_name']
-
 # Save to NetCDF
 ds.to_netcdf(out_fn)
 ds.close()

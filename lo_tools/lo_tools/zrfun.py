@@ -272,8 +272,10 @@ def get_varinfo(vn, vartype='state'):
             cond1 = ((vartype == 'state') and ((l[0] == vn)
                     and (('Input/Output' in l[1]) or ('Input/Ouput' in l[1]))))
                     # Note the amusing "Ouput" typo
-            cond2 = (vartype in ['boundary', 'climatology']) and (l[0] == vn) and (l[1] == '! Input')
-            if cond1 or cond2:
+            cond2 = (vartype == 'climatology') and (l[0] == vn) and (l[1] == '! Input')
+            cond3 = ((vartype == 'atm') and ((l[0] == vn)
+                    and (('Input/Output' in l[1]) or (l[1] == '! Input'))))
+            if cond1 or cond2 or cond3:
                 #print('%d: %s' % (ii, l)) # debugging
                 # fill a dict for this variable based on assumed line numbering format
                 vinfo = {}

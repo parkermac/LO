@@ -23,3 +23,4 @@ In the old LiveOcean framework these were kept in the LiveOcean_roms/makefiles/[
 ### Notes on specific [gtagex]:
 
 - cas6_v0_uu0k is the first attempt to use the updated ROMS on LO_roms_source, with the executable in uu0k in LO_roms_user.  It is designed to run a physics-only version of current forecast (cas6_v0_u0mb).  The "k" is for klone.
+- ae0_v0_uu1k is the first attempt to make an analytical run.  It does not have atm forcing, and so I set NFFILES == 0 near the end of BLANK.in.

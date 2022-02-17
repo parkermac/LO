@@ -77,7 +77,7 @@ ds[vn].attrs['long_name'] = vinfo['long_name']
 for vn in ['tide_Ephase', 'tide_Cangle', 'tide_Cphase', 'tide_Cmax', 'tide_Cmin']:
     vinfo = zrfun.get_varinfo(vn, vartype='climatology')
     dims = ('tide_period',) + vinfo['space_dims_tup']
-    ds[vn] = (dims, omat)
+    ds[vn] = (dims, omat.copy())
     ds[vn].attrs['units'] = vinfo['units']
     ds[vn].attrs['long_name'] = vinfo['long_name']
 
