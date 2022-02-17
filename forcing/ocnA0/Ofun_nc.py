@@ -29,7 +29,7 @@ def make_ini_file(in_fn, out_fn):
         elif ndims == 4:
             ds[vn] = (ds0[vn].dims, ds0[vn].values[[0],:,:,:])
         Attrs = ds0[vn].attrs
-        Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
+        #Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
         ds[vn].attrs = Attrs
     for cn in ds0.coords:
         ds.coords[cn] = ds0.coords[cn][[0]]
@@ -43,7 +43,8 @@ def make_bry_file(in_fn, out_fn):
     """
     Create the bry file from the edges of the clm file.
     """
-    ds0 = xr.open_dataset(in_fn)
+    ds0 = xr.open_dataset(in_fn, decode_times=False)
+    ot_vec = ds0.ocean_time.values
     ds = xr.Dataset()
     for vn in ds0.data_vars:
         dm = ds0[vn].dims
@@ -51,11 +52,20 @@ def make_bry_file(in_fn, out_fn):
         for D in ['north', 'south', 'east', 'west']:
             # rename variable
             Vn = vn + '_' + D
+            vinfo = zrfun.get_varinfo(Vn, vartype='climatology')
+            tname = vinfo['time_name']
+            
+            # create time coordinate
+            ds[tname] = ((tname,), ot_vec)
+            ds[tname].attrs['units'] = Lfun.roms_time_units
+            
             # trim dimensions
             if D in ['east','west']:
                 Dm = tuple(item for item in dm if 'xi_' not in item)
             elif D in ['north','south']:
                 Dm = tuple(item for item in dm if (('eta_' not in item) or ('zeta' in item)))
+            # replace time dimension
+            Dm = tuple(tname if item == 'ocean_time' else item for item in Dm) 
 
             # write boundary arrays
             if ndims == 3:
@@ -78,9 +88,8 @@ def make_bry_file(in_fn, out_fn):
                     ds[Vn] = (Dm, ds0[vn].values[:,:,:,0])
                     
             # add attributes
-            Attrs = ds0[vn].attrs
-            Attrs['long_name'] = Attrs['long_name'].replace('climatology','').strip()
-            ds[Vn].attrs = Attrs
+            ds[Vn].attrs['units'] = vinfo['units']
+            ds[Vn].attrs['long_name'] = vinfo['long_name']
     for cn in ds0.coords:
         ds.coords[cn] = ds0.coords[cn]
     ds0.close()
