@@ -254,7 +254,7 @@ def get_varinfo(vn, vartype='state'):
     
     # specify which varinfo.dat to use
     Ldir = Lfun.Lstart()
-    fn = Ldir['parent'] / 'LO_roms_source' / 'ROMS' / 'External' / 'varinfo.dat'
+    fn = Ldir['data'] / 'roms_varinfo' / 'varinfo.dat'
 
     # parse the file into a list of lists
     ff = []
