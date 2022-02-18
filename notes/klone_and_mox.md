@@ -10,7 +10,7 @@ alias mox2='ssh pmacc@mox2.hyak.uw.edu'
 alias pgee='ssh parker@perigee.ocean.washington.edu'
 alias agee='ssh parker@apogee.ocean.washington.edu'
 ```
-Note: klone1 is the same as klone.  If you just ssh to mox you end up randomly at either mox1 or mox2, which are the same machine except that they keep separate crontabs (see below). I always ssh to mox1 to avoid confusion.
+Note: klone1 is the same as klone.  If you just ssh to mox you end up randomly at either mox1 or mox2, which are the same machine except that they keep separate crontabs. I always ssh to mox1 to avoid confusion.
 
 `/gscratch/macc` is our working directory on both mox and klone, and I have created my own directory inside that: parker, where the whole LO system lives.
 
@@ -36,16 +36,6 @@ To check on our disk allocation on mox you can also look in the file `/gscratch/
 
 **klone**: we own 400 cores (10 nodes with 40 cores each). We are allocated 1 TB of storage for each node, so 10 TB total.
 
----
-
-#### From David Darr: klone requires only modest changes to Linux-ifort_mox.mk, renamed Linux-ifort_klone.mk (in LiveOcean_roms/LO_ROMS/Compilers).  The only difference actually is that the two instances of:
-```
-NC_CONFIG ?= nc-config
-```
-are now:
-```
-NC_CONFIG ?= nf-config
-```
 
 ---
 
@@ -60,30 +50,20 @@ export LD_LIBRARY_PATH=${NFDIR}/lib:${NCDIR}/lib:${LD_LIBRARY_PATH}
 export PATH=/gscratch/macc/local/netcdf-ifort/bin:$PATH
 export PATH=/gscratch/macc/local/netcdf-icc/bin:$PATH
 #export PATH=/gscratch/macc/local/openmpi-ifort/bin:$PATH
+
+# User specific aliases and functions
+alias cdpm='cd /gscratch/macc/parker'
+alias cdLo='cd /gscratch/macc/parker/LO'
+alias cdLu='cd /gscratch/macc/parker/LO_user'
+alias cdLoo='cd /gscratch/macc/parker/LO_output'
+alias cdLor='cd /gscratch/macc/parker/LO_roms'
+alias cdLru='cd /gscratch/macc/parker/LO_roms_user'
+alias cdLrs='cd /gscratch/macc/parker/LO_roms_source'
+alias cdLod='cd /gscratch/macc/parker/LO_data'
+alias pmsrun='srun -p compute -A macc --pty bash -l'
 ```
 I assume the // in NCDIR path is a typo.
 
----
-
-#### Steps to compile:
-
-On klone:
-
-```
-cd LiveOcean_roms/LO_ROMS
-srun -p compute -A macc --pty bash -l
-make clean
-make -f /gscratch/macc/parker/LiveOcean_roms/makefiles/[ex_name]/makefile
-```
-Then `logout` to get back to the usual shell.  You have to do this because the `srun` command logged you onto one of the compute nodes.
-
-On mox the steps are only slightly different. The `compute` in the srun command is `macc` on **mox**:
-```
-cd LiveOcean_roms/LO_ROMS
-srun -p macc -A macc --pty bash -l
-make clean
-make -f /gscratch/macc/parker/LiveOcean_roms/makefiles/[ex_name]/makefile
-```
 
 ---
 
@@ -127,3 +107,40 @@ Now I can run `ssh-copy-id` again for other computers, without having to do the 
 #### Running things by cron
 
 See LO/driver/crontabs for curent versions.  These are discussed more in LO/README.md.
+
+---
+
+#### OBSOLETE
+
+---
+
+#### From David Darr: klone requires only modest changes to Linux-ifort_mox.mk, renamed Linux-ifort_klone.mk (in LiveOcean_roms/LO_ROMS/Compilers).  The only difference actually is that the two instances of:
+```
+NC_CONFIG ?= nc-config
+```
+are now:
+```
+NC_CONFIG ?= nf-config
+```
+
+---
+
+#### Steps to compile:
+
+On klone:
+
+```
+cd LiveOcean_roms/LO_ROMS
+srun -p compute -A macc --pty bash -l
+make clean
+make -f /gscratch/macc/parker/LiveOcean_roms/makefiles/[ex_name]/makefile
+```
+Then `logout` to get back to the usual shell.  You have to do this because the `srun` command logged you onto one of the compute nodes.
+
+On mox the steps are only slightly different. The `compute` in the srun command is `macc` on **mox**:
+```
+cd LiveOcean_roms/LO_ROMS
+srun -p macc -A macc --pty bash -l
+make clean
+make -f /gscratch/macc/parker/LiveOcean_roms/makefiles/[ex_name]/makefile
+```
