@@ -24,8 +24,11 @@ The main users of this repo are people who are in some way collaborating with me
 
 *All the instructions assume you are working from the linux (bash) command line. When I say "go to" I mean navigate to that place, and "do" means enter that command from the linux command line and hit return.*
 
-#### (1) Install miniconda on your machine and then create the "loenv" environment.
+For mac users you already have the linux operating system and a terminal. To help with cross-platform compatibility we will used the bash shell (instead of the new mac default zsh), so you should issue this command in your terminal window: `chsh -s /bin/bash`
 
+Windows users need to download Ubuntu and get it configured. Here is a [LINK](https://ubuntu.com/download/desktop) to the download. Here is [INFO](https://docs.microsoft.com/en-us/windows/wsl/install) about the best practice to get this set up before installing miniconda. WSL is basically configuring linux within windows for ubuntu to use.  Then just work from a terminal window using ubuntu as your version of linux. _Thanks to Marissa Leatherman for these tips._
+
+#### (1) Install miniconda on your machine and then create the "loenv" environment.
 
 Anaconda is a great way to get python. We will use a minimal installation of python3 called "miniconda" and then create a conda "environment" and add required packages to it ourselves.  This keeps things lightweight and less likely to suffer from package conflicts.
 
