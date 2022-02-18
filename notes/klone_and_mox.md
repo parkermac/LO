@@ -2,8 +2,6 @@
 
 #### Overview: klone and mox are UW supercomputers in the hyak system.
 
-klone: We own 400 cores (10 nodes with 40 cores each).  We are allocated 1 TB of storage for each node, so 10 TB total.  You can check to see how close we are to our quota on klone with the command `hyakalloc`.
-
 Here are examples of aliases I have on my mac ~/.bash_profile (equivalent to ~/.bashrc on the linux machines) to quickly get to my machines
 ```
 alias klo='ssh pmacc@klone1.hyak.uw.edu'
@@ -34,10 +32,9 @@ To check on our disk allocation on mox you can also look in the file `/gscratch/
 
 `hyakalloc` will give info on the nodes we own.
 
-**mox**: we own 196 cores (7 nodes with 28 cores each) plus another 64 (2 nodes with 32 cores each).
+**mox**: we own 196 cores (7 nodes with 28 cores each), plus another 64 (2 nodes with 32 cores each).
 
-**klone**: we own 400 cores (10 nodes with 40 cores each).
-
+**klone**: we own 400 cores (10 nodes with 40 cores each). We are allocated 1 TB of storage for each node, so 10 TB total.
 
 ---
 
@@ -129,20 +126,4 @@ Now I can run `ssh-copy-id` again for other computers, without having to do the 
 
 #### Running things by cron
 
-The current klone crontab looks like:
-```
-LANG=en-US.UTF-8
-LOdnew="/gscratch/macc/parker/LO/driver"
-30 08 * * * source ~/.bashrc; python3 $LOdnew/driver_roms1.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 > $LOdnew/ak_cron.log
-# 33 17 * * * source ~/.bashrc; python3 $LOdnew/test_Ldir.py > $LOdnew/cron_test.log
-```
-The LANG addition appears to be needed when the driver starts to copy the forcing files from a remote machine like apogee.  In the past I also had to set HOSTNAME=klone, but I believe the newer drivers get around this problem. I suspect the quotes around the LOdnew entry are not needed.
-
-The current mox1 crontab looks like:
-```
-LOdnew="/gscratch/macc/parker/LO/driver"
-00 03 * * * source ~/.bashrc; python3 $LOdnew/driver_roms.py -g cas6 -t v0 -x u0mb -r forecast -s continuation -np 196 -N 28 > $LOdnew/am_cron.log
-30 06 * * * source ~/.bashrc; mail -s 'LO_mox' pmacc@uw.edu < $LOdnew/am_cron.log
-31 06 * * * source ~/.bashrc; mail -s 'LO_mox' darrd@uw.edu < $LOdnew/am_cron.log
-```
-Note that even though mox1 and mox2 run the same compute cluster, the crontab is specific to which one you were logged into when you created it.  So if I go to mox2 the crontab is empty.  For this reason I always use a mox1 alias when logging onto mox.
+See LO/driver/crontabs for curent versions.  These are discussed more in LO/README.md.
