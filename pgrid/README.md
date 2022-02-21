@@ -4,6 +4,8 @@
 
 Throughout the steps we maintain and modify the arrays "h" and "mask_rho" to be complete 2-D arrays with no nan's.  mask_rho follows the ROMS convention of having 1 = water, 0 = land.
 
+To see what variables ROMS expects to find in a grid file, have a look in `LO_roms_source/ROMS/Utility/get_grid.F`.
+
 ---
 #### Suggested order to run the code
 
