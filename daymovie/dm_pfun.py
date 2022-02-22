@@ -137,6 +137,12 @@ def get_ax_limits(Q):
         Q['xtl'] = [-126, -125, -124]
         Q['ytl'] = [46, 47, 48]
         Q['v_scl'] = 25
+    elif Q['dom'] == 'wcvi':
+        # West Coast Vancouver Island
+        Q['aa'] = [-129, -124, 48, 51]
+        Q['xtl'] = [-128, -127, -126, -125]
+        Q['ytl'] = [48, 49, 50, 51]
+        Q['v_scl'] = 25
         
 def get_moor_info(Q):
     # set mooring info
@@ -161,6 +167,12 @@ def get_moor_info(Q):
         M['lat'] = 46.6
         M['city'] = 'Westport'
         M['wscl'] = 20
+    elif Q['dom'] == 'wcvi':
+        M['lon'] = -128
+        M['lat'] = 49
+        M['city'] = 'Westport'
+        M['wscl'] = 20
+    
     return M
 
 def plot_time_series(ax, M, T):
