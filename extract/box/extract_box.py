@@ -91,15 +91,18 @@ if Ldir['surf'] and Ldir['bot']:
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box'
 Lfun.make_dir(out_dir)
 if Ldir['surf']:
-    box_fn = out_dir / (Ldir['job'] + '_surf_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
+    bname = Ldir['job'] + '_surf_' + Ldir['ds0'] + '_' + Ldir['ds1']
+    box_fn = out_dir / (bname + '.nc')
 elif Ldir['bot']:
-    box_fn = out_dir / (Ldir['job'] + '_bot_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
+    bname = Ldir['job'] + '_bot_' + Ldir['ds0'] + '_' + Ldir['ds1']
+    box_fn = out_dir / (bname + '.nc')
 else:
-    box_fn = out_dir / (Ldir['job'] + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
+    bname = Ldir['job'] + '_' + Ldir['ds0'] + '_' + Ldir['ds1']
+    box_fn = out_dir / ( + '.nc')
 box_fn.unlink(missing_ok=True)
 
 # name the temp dir to accumulate individual extractions
-temp_dir = out_dir / ('temp_' + Ldir['job'])
+temp_dir = out_dir / ('temp_' + bname)
 Lfun.make_dir(temp_dir, clean=True)
 
 # get list of files to work on
