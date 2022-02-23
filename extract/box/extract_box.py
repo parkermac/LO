@@ -98,7 +98,7 @@ elif Ldir['bot']:
     box_fn = out_dir / (bname + '.nc')
 else:
     bname = Ldir['job'] + '_' + Ldir['ds0'] + '_' + Ldir['ds1']
-    box_fn = out_dir / ( + '.nc')
+    box_fn = out_dir / (bname + '.nc')
 box_fn.unlink(missing_ok=True)
 
 # name the temp dir to accumulate individual extractions
