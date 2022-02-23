@@ -60,14 +60,18 @@ These will make files in LO_output/forcing/ae0_v0/f2020.01.01 and f2020.01.02. T
 
 Get an account on the hyak supercomputer klone from David Darr.
 
-In your main directory /gscratch/macc/[username] clone the LO, LO_user, and LO_roms_user repositories.
+In your main directory /gscratch/macc/[username] = (*) clone the LO, LO_user, and LO_roms_user repositories.
 
 There is no need to install python on klone.  It already exists in a basic state.
+
+Get a ROMS user account, and then use svn to put a copy of the ROMS source code onto klone in (*)/LO_roms_source
+
+Compile uu1k on klone.
 
 ```
 scp -r parker@apogee.ocean.washington.edu:/dat1/parker/LO_data/grids/ae0 .
 ```
 
 ```
-python3 driver_roms1.py -g ae0 -t v0 -x uu1k -r backfill -s new -0 2020.01.01 -1 2020.01.02 -np 40 -N 40 < /dev/null > ae.log &
+python3 driver_roms2.py -g ae0 -t v0 -x uu1k -r backfill -s new -0 2020.01.01 -1 2020.01.02 -np 40 -N 40 < /dev/null > ae.log &
 ```
