@@ -10,8 +10,8 @@ Ldir = Lfun.Lstart()
 
 in_fn = Ldir['roms_out2'] / 'cas6_v3_lo8b' / 'f2019.07.04' / 'ocean_his_0025.nc'
 
-out_dir = Ldir['roms_out'] / 'cas6_v0_uu0kb' / 'f2019.07.04'
-Lfun.make_dir(out_dir, clean=True)
+out_dir = Ldir['roms_out'] / 'cas6_v00_uu0kb' / 'f2019.07.04'
+Lfun.make_dir(out_dir)
 out_fn = out_dir / 'ocean_his_0025.nc'
 
 ds0 = xr.open_dataset(in_fn, decode_times=False)
