@@ -407,7 +407,6 @@ def P_Chl_DO(in_dict):
     else:
         plt.show()
         
-
 def P_DO_WA_shelf(in_dict):
     # Focus on bottom DO on the WA shelf
     aa = [-126.1, -123.7, 45.8, 48.8]
@@ -609,6 +608,69 @@ def P_layer(in_dict):
     else:
         plt.show()
 
+def P_bpress(in_dict):
+    """
+    Specialized plot related to bottom pressure anomalies.
+    """
+    # START
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(14,10))
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
+    # PLOT CODE
+    sta_dict = {
+        'CE01':(-124.095, 44.6598), # Oregon Inshore (25 m)
+        'CE02':(-124.304, 44.6393), # Oregon Shelf (80 m)
+        'CE04':(-124.956, 44.3811), # Oregon Offshore (588 m)
+        'PN01A':(-125.3983, 44.5096), # Slope Base (2905 m)
+        }
+    vn_list = ['salt', 'temp']
+    z_level = -300
+    zfull = pfun.get_zfull(ds, in_dict['fn'], 'rho')
+    ii = 1
+    for vn in vn_list:
+        if in_dict['auto_vlims']:
+            pinfo.vlims_dict[vn] = ()
+        ax = fig.add_subplot(1, len(vn_list), ii)
+        laym = pfun.get_laym(ds, zfull, ds['mask_rho'][:], vn, z_level)
+        v_scaled = pinfo.fac_dict[vn]*laym
+        vlims = pinfo.vlims_dict[vn]
+        if len(vlims) == 0:
+            if vn == 'salt':
+                vlims = pfun.auto_lims(v_scaled, vlims_fac=0.3)
+            elif vn == 'temp':
+                vlims = pfun.auto_lims(v_scaled, vlims_fac=2)
+            else:
+                vlims = pfun.auto_lims(v_scaled)
+            pinfo.vlims_dict[vn] = vlims
+        cs = ax.pcolormesh(ds['lon_psi'][:], ds['lat_psi'][:], v_scaled[1:-1,1:-1],
+                           vmin=vlims[0], vmax=vlims[1], cmap=pinfo.cmap_dict[vn])
+        cb = fig.colorbar(cs)
+        pfun.add_bathy_contours(ax, ds, txt=True)
+        pfun.add_coast(ax)
+        ax.axis(pfun.get_aa(ds))
+        pfun.dar(ax)
+        ax.set_xlabel('Longitude')
+        ax.set_title('%s %s on Z = %d (m)' % (pinfo.tstr_dict[vn], pinfo.units_dict[vn], z_level))
+        if ii == 1:
+            pfun.add_info(ax, in_dict['fn'])
+            ax.set_ylabel('Latitude')
+            pfun.add_windstress_flower(ax, ds)
+        if ii == 2:
+            pfun.add_velocity_vectors(ax, ds, in_dict['fn'], zlev=z_level, v_scl=5, v_leglen=0.3)
+            for sta in sta_dict.keys():
+                ax.plot(sta_dict[sta][0], sta_dict[sta][1], 'o', mfc='y', mec='k', ms=10)
+        ii += 1
+    fig.tight_layout()
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+        
 def P_sect(in_dict):
     """
     This plots a map and a section (distance, z), and makes sure
