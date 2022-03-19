@@ -10,6 +10,7 @@ from lo_tools import zfun
 verbose = False
 
 def add_bio(nc_dir, G, add_CTD=False):
+    # This method is obsolete 2022.03.19
     print('-Writing bio variables to ocean_clm.nc')
     # name output file
     clm_fn = nc_dir / 'ocean_clm.nc'
