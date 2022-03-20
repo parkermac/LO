@@ -73,7 +73,9 @@
 ! Input variable information file name.  This file needs to be processed
 ! first so all information arrays can be initialized properly.
 
-     VARNAME = $roms_code_dir$/$roms_name$/ROMS/External/varinfo.dat
+!      VARNAME = $roms_code_dir$/$roms_name$/ROMS/External/varinfo.dat
+
+     VARNAME = $roms_varinfo_dir$/varinfo.yaml
 
 ! Number of nested grids.
 
