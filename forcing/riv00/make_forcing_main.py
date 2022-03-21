@@ -180,7 +180,7 @@ bvn_list = ['NO3', 'NH4', 'LDeN', 'SDeN', 'LDeC', 'SDeC',
         'TIC', 'alkalinity', 'Oxyg']
 for bvn in bvn_list:
     vn = 'river_' + bvn
-    vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+    vinfo = zrfun.get_varinfo(vn)
     dims = (vinfo['time_name'],) + ('s_rho', 'river')
     B_mat = np.nan * np.zeros((NT, N, NRIV))
     rr = 0

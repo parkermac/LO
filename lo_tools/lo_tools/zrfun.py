@@ -8,6 +8,8 @@ import xarray as xr
 import numpy as np
 import pandas as pd
 from lo_tools import Lfun
+import sys
+import pickle
 
 def get_basic_info(fn, only_G=False, only_S=False, only_T=False):
     """
@@ -246,16 +248,50 @@ def get_S(S_info_dict):
     S['Cs_r'] = Cs_r
     S['Cs_w'] = Cs_w
     return S
-    
-def get_varinfo(vn, vartype='state'):
+
+def make_varinfo_list():
     """
-    This looks through the ROMS varinfo.yaml and returns a dict for a given variable.
+    This method pre-parses varinfo.yaml into a list for faster use by get_varinfo()
     
     Configured to use the new ROMS varinfo.yaml (1/2022), but you need a few edits
     so we use our modified version in LO_roms_source/npzd_banas.
     """
     import yaml
+        
+    # specify which varinfo.yaml to use
+    Ldir = Lfun.Lstart()
+    fn = Ldir['parent'] / 'LO_roms_user' / 'varinfo' / 'varinfo.yaml'
     
+    # parse into a list of dicts
+    with open(fn,'r') as f:
+        yaml_dict = yaml.safe_load(f)
+    short_list = yaml_dict['metadata'] # a list of dicts, one per item
+    
+    # remove some things from the list
+    short_list = [item for item in short_list if 'adjoint' not in item['field']]
+    short_list = [item for item in short_list if 'tangent' not in item['field']]
+    short_list = [item for item in short_list if 'functional' not in item['field']]
+    
+    out_dir = Ldir['data'] / 'varinfo'
+    Lfun.make_dir(out_dir)
+    out_fn = out_dir / 'varinfo_list.p'
+    pickle.dump(short_list, open(out_fn, 'wb'))
+    
+def get_varinfo(vn, vartype='state'):
+    """
+    This looks through the pre-parsed varinfo.yaml and returns a dict for a given variable.
+    """
+    Ldir = Lfun.Lstart()
+    in_fn = Ldir['data'] / 'varinfo' / 'varinfo_list.p'
+    if in_fn.is_file():
+        short_list = pickle.load(open(in_fn, 'rb'))
+    else:
+        make_varinfo_list()
+        short_list = pickle.load(open(in_fn, 'rb'))
+        
+    # get the dict for the requested variable
+    short_list = [item for item in short_list if item['variable']==vn]
+        
     # Associate grid_type with a tuple of spatial dimensions
     grid_type_dict = {
             'r2dvar': ('eta_rho', 'xi_rho'),
@@ -267,24 +303,6 @@ def get_varinfo(vn, vartype='state'):
             'nulvar': ('BLANK',)
             }
     
-    # specify which varinfo.yaml to use
-    Ldir = Lfun.Lstart()
-    #fn = Ldir['data'] / 'roms_varinfo' / 'varinfo.dat'
-    fn = Ldir['parent'] / 'LO_roms_user' / 'npzd_banas' / 'varinfo.yaml'
-    
-    # parse into a list of dicts
-    with open(fn,'r') as f:
-        yaml_dict = yaml.safe_load(f)
-    yaml_list = yaml_dict['metadata'] # a list of dicts, one per item
-    
-    # get the dict for the requested variable
-    short_list = [item for item in yaml_list if item['variable']==vn]
-    
-    # remove some things from the list
-    short_list = [item for item in short_list if 'adjoint' not in item['field']]
-    short_list = [item for item in short_list if 'tangent' not in item['field']]
-    short_list = [item for item in short_list if 'functional' not in item['field']]
-    
     if vartype=='state':
         short_list = [item for item in short_list if 'climatology' not in item['long_name']]
     elif vartype=='climatology':
@@ -294,6 +312,9 @@ def get_varinfo(vn, vartype='state'):
         else:
             # the rest are the same as state variables
             short_list = [item for item in short_list if 'climatology' not in item['long_name']]
+    else:
+        print('Error in zrfun.get_varinfo(), unknown vartype: ' + vartype)
+        sys.exit()
     
     if len(short_list)==1:
         vinfo = short_list[0]
@@ -306,47 +327,6 @@ def get_varinfo(vn, vartype='state'):
         print('Error in zrfun.get_varinfo: vn not unique for ' + vn)
         vinfo = short_list
         return vinfo
-
-    # # parse the file into a list of lists
-    # ff = []
-    # with open(fn, 'r') as f:
-    #     for a in f:
-    #         # make a list out of each line
-    #         aa = a.replace('\n','').strip().split("'")
-    #         aaa = [item.strip() for item in aa if len(item) > 0]
-    #         ff.append(aaa)
-    #
-    # # make a dict for the variable
-    # ii = 0
-    # for l in ff:
-    #     if len(l) >= 2:
-    #         cond1 = ((vartype == 'state') and ((l[0] == vn)
-    #                 and (('Input/Output' in l[1]) or ('Input/Ouput' in l[1]))))
-    #                 # Note the amusing "Ouput" typo
-    #         cond2 = (vartype == 'climatology') and (l[0] == vn) and (l[1] == '! Input')
-    #         cond3 = ((vartype == 'atm') and ((l[0] == vn)
-    #                 and (('Input/Output' in l[1]) or (l[1] == '! Input'))))
-    #         if cond1 or cond2 or cond3:
-    #             #print('%d: %s' % (ii, l)) # debugging
-    #             # fill a dict for this variable based on assumed line numbering format
-    #             vinfo = {}
-    #             vinfo['long_name'] =    ff[ii+1][0]
-    #             vinfo['units'] =        ff[ii+2][0]
-    #             vinfo['field_type'] =   ff[ii+3][0]
-    #             vinfo['time_name'] =    ff[ii+4][0]
-    #             vinfo['index_name'] =   ff[ii+5][0]
-    #             vinfo['grid_type'] =    ff[ii+6][0]
-    #             vinfo['scale'] =        ff[ii+7][0]
-    #             break
-    #     ii += 1
-    #
-    # vinfo['space_dims_tup'] = grid_type_dict[vinfo['grid_type']]
-    #
-    # # fix a long_name typo
-    # if vn in ['ubar', 'vbar']:
-    #     vinfo['long_name'] = vinfo['long_name'].replace('integrated', 'averaged')
-    #
-    # return vinfo
     
 """
 This is a dict to use for compression when saving an xarray Dataset, e.g. with lines like:

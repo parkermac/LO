@@ -54,6 +54,7 @@ verbose = False
 
 if Ldir['testing']:
     verbose = True
+    #planC = True
 
 testing_ncks = False
 testing_fmrc = False
@@ -67,12 +68,15 @@ this_dt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
 # *** automate when to set add_CTD to True ***
 if this_dt == datetime(2016,12,15):
     print('WARNING: adding CTD data to extrapolation!!')
+    print('AND this is not supported yet')
+    sys.exit()
     add_CTD = True
     
 # this is where all the pre-processed files will go
 h_out_dir = out_dir / 'Data'
-# this already exists, but we make sure it is clean so that testing is more consistent
-# with operational use
+# This already exists becasue it is created by the initialization, but we make sure it is clean
+# so that testing, which does not make a clean version, is more consistent with operational use,
+# which does.
 Lfun.make_dir(h_out_dir, clean=True)
 
 if Ldir['run_type'] == 'forecast':
@@ -294,41 +298,32 @@ elif planC == True:
     ds_yesterday = datetime.strftime(dt_yesterday, format=Lfun.ds_fmt)
     clm_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + ds_yesterday) / Ldir['frc'] / 'ocean_clm.nc'
     clm_today = out_dir / 'ocean_clm.nc'
-    shutil.copyfile(clm_yesterday, clm_today) # works with Path objects
     
-    # using xarray
-    # This is a little tricky.  You have to use load_dataset()
-    # in order to overwrite the time vector.  You have to use decode_times=False
-    # to have the math of adding a day to the last time work right.  And
-    # finally you have to add the time units attribute again.
-    # Also, in order to see the time units you have to open the resulting
-    # file with decode_times=False.
-    # clm_today = out_dir / 'ocean_clm.nc' # debugging
-    ds = xr.load_dataset(clm_today, decode_times=False)
+    # new cleaner method: use open_dataset, update, and save to a new name
+    ds = xr.open_dataset(clm_yesterday, decode_times=False)
     tname_list = [item for item in ds.coords if 'time' in item]
     for tname in tname_list:
         ot_vec = ds[tname].values
         ot_vec[-1] += 86400
-        ds[tname] = (('ocean_time',), ot_vec)
+        ds.update({tname: (('ocean_time',), ot_vec)})
+        #ds[tname] = (('ocean_time',), ot_vec)
         ds[tname].attrs['units'] = Lfun.roms_time_units
     ds.to_netcdf(clm_today)
     ds.close()
     # debugging
     # ds = xr.open_dataset(clm_today)
     # dst = xr.open_dataset(clm_today, decode_times=False)
+    # sys.exit()
     
-
-# if do_bio and (planC==False):
-#     G = zrfun.get_basic_info(Ldir['grid'] / 'grid.nc', only_G=True)
-#     Ofun_bio.add_bio(out_dir, G, add_CTD=add_CTD)
-
-# Write climatology file: first use of zrfun.get_varinfo().
+# Write climatology file making use of zrfun.get_varinfo().
 tt0 = time()
 out_fn = out_dir / 'ocean_clm.nc'
 out_fn.unlink(missing_ok=True)
 ds = xr.Dataset()
 for vn in V.keys():
+    # tt00 = time()
     vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+    # print(' -- time to get varinfo: %0.2f sec' % (time()-tt00))
     tname = vinfo['time_name']
     dims = (vinfo['time_name'],) + vinfo['space_dims_tup']
     ds[vn] = (dims, V[vn])

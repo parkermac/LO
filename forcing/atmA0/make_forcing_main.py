@@ -57,7 +57,7 @@ for vn in vn_list:
     out_fn = out_dir / (vn + '.nc')
     out_fn.unlink(missing_ok=True)
     ds = xr.Dataset()
-    vinfo = zrfun.get_varinfo(vn, vartype='atm')
+    vinfo = zrfun.get_varinfo(vn)
     tname =  vinfo['time_name']
     dims = (tname,) + vinfo['space_dims_tup']
     # You could intervene here by writing something different than omat.
