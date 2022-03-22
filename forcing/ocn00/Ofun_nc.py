@@ -66,7 +66,7 @@ def make_bry_file(in_fn, out_fn):
             except Exception as e:
                 print(Vn)
                 print(e)
-            tname = vinfo['time_name']
+            tname = vinfo['time']
             
             # create time coordinate
             ds[tname] = ((tname,), ot_vec)
@@ -77,8 +77,9 @@ def make_bry_file(in_fn, out_fn):
                 Dm = tuple(item for item in dm if 'xi_' not in item)
             elif D in ['north','south']:
                 Dm = tuple(item for item in dm if (('eta_' not in item) or ('zeta' in item)))
+            
             # replace time dimension
-            Dm = tuple(tname if item == 'ocean_time' else item for item in Dm) 
+            Dm = tuple(tname if '_time' in item else item for item in Dm) 
 
             # write boundary arrays
             if ndims == 3:
@@ -103,8 +104,10 @@ def make_bry_file(in_fn, out_fn):
             # add attributes
             ds[Vn].attrs['units'] = vinfo['units']
             ds[Vn].attrs['long_name'] = vinfo['long_name']
-    for cn in ds0.coords:
-        ds.coords[cn] = ds0.coords[cn]
+    
+    # for cn in ds0.coords:
+    #     ds.coords[cn] = ds0.coords[cn]
+        
     ds0.close()
     Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
     # and save to NetCDF

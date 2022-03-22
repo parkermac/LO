@@ -330,7 +330,7 @@ for vn in V.keys():
     ds[vn].attrs['units'] = vinfo['units']
     ds[vn].attrs['long_name'] = vinfo['long_name']
     # time coordinate
-    ds[tname] = (('ocean_time',), ot_vec)
+    ds[tname] = ((tname,), ot_vec)
     ds[tname].attrs['units'] = Lfun.roms_time_units
 # and save to NetCDF
 Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
@@ -367,8 +367,12 @@ def print_info(fn):
 nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
 if Ldir['testing']:
     # print info about the files to the screen
-    for fn in nc_list:
-        print_info(out_dir / fn)
+    # for fn in nc_list:
+    #     print_info(out_dir / fn)
+    dsc = xr.open_dataset(out_dir / 'ocean_clm.nc', decode_times=False)
+    dsi = xr.open_dataset(out_dir / 'ocean_ini.nc', decode_times=False)
+    dsb = xr.open_dataset(out_dir / 'ocean_bry.nc', decode_times=False)
+        
 result_dict['result'] = 'success'
 for fn in nc_list:
     if (out_dir / fn).is_file():
