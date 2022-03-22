@@ -1,0 +1,38 @@
+# .bashrc
+
+# Source global definitions
+if [ -f /etc/bashrc ]; then
+	. /etc/bashrc
+fi
+
+# User specific environment
+if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]
+then
+    PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+fi
+export PATH
+
+module load intel/oneAPI
+LODIR=/gscratch/macc/local
+#OMPI=${LODIR}/openmpi-ifort
+NFDIR=${LODIR}/netcdf-ifort
+NCDIR=${LODIR}//netcdf-icc
+export LD_LIBRARY_PATH=${NFDIR}/lib:${NCDIR}/lib:${LD_LIBRARY_PATH}
+export PATH=/gscratch/macc/local/netcdf-ifort/bin:$PATH
+export PATH=/gscratch/macc/local/netcdf-icc/bin:$PATH
+#export PATH=/gscratch/macc/local/openmpi-ifort/bin:$PATH
+
+
+# Uncomment the following line if you don't like systemctl's auto-paging feature:
+# export SYSTEMD_PAGER=
+
+# User specific aliases and functions
+alias cdpm='cd /gscratch/macc/parker'
+alias cdLo='cd /gscratch/macc/parker/LO'
+alias cdLu='cd /gscratch/macc/parker/LO_user'
+alias cdLoo='cd /gscratch/macc/parker/LO_output'
+alias cdLor='cd /gscratch/macc/parker/LO_roms'
+alias cdLru='cd /gscratch/macc/parker/LO_roms_user'
+alias cdLrs='cd /gscratch/macc/parker/LO_roms_source'
+alias cdLod='cd /gscratch/macc/parker/LO_data'
+alias pmsrun='srun -p compute -A macc --pty bash -l'

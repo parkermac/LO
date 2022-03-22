@@ -16,7 +16,7 @@
 #SBATCH --mem=128G
 
 ## Exclude nodes for debugging 2022.03.17
-#SBATCH --exclude=n2231,n2399
+## #SBATCH --exclude=n2231,n2399
 
 module load icc_17-impi_2017
 module load netcdf_fortran+c_4.4.1.1-icc_17

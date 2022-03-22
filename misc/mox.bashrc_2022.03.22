@@ -1,0 +1,39 @@
+#  Basic bash startup
+. /usr/local/lib/std.v2.bashrc
+
+case $- in
+*i*)
+
+   # Put interactive-only Bourne shell compatible login startup here.
+
+   # Uncomment one or more of the following for paranoid behavior
+
+   #set -o noclobber
+   #alias cp='cp -i'
+   #alias mv='mv -i'
+   #alias rm='rm -i'
+
+   # Uncomment the following if you want traditional behavior
+
+   #unalias vi
+   #unalias ls
+
+esac
+
+# Commands to facilitate compiling ROMS 2017.12.19
+module load icc_17-impi_2017
+module load netcdf_fortran+c_4.4.1.1-icc_17
+export I_MPI_F90=ifort
+
+# added by Anaconda3 installer
+# export PATH="/gscratch/macc/anaconda3/bin:$PATH"
+
+# Aliases
+alias cdpm='cd /gscratch/macc/parker'
+alias cdlo='cd /gscratch/macc/parker/LiveOcean'
+alias cdLo='cd /gscratch/macc/parker/LO'
+alias cdLu='cd /gscratch/macc/parker/LO_user'
+alias cdLor='cd /gscratch/macc/parker/LO_roms'
+alias cdloo='cd /gscratch/macc/parker/LiveOcean_output'
+alias cdlod='cd /gscratch/macc/parker/LiveOcean_data'
+alias cdlor='cd /gscratch/macc/parker/LiveOcean_roms'
