@@ -45,7 +45,7 @@ def make_bry_file(in_fn, out_fn):
     Create the bry file from the edges of the clm file.
     """
     ds0 = xr.open_dataset(in_fn, decode_times=False)
-    ot_vec = ds0.ocean_time.values
+    ot_vec = ds0.salt_time.values
     ds = xr.Dataset()
     for vn in ds0.data_vars:
         dm = ds0[vn].dims
