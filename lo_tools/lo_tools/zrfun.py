@@ -319,7 +319,15 @@ def get_varinfo(vn, vartype='state'):
     if len(short_list)==1:
         vinfo = short_list[0]
         vinfo['space_dims_tup'] = grid_type_dict[vinfo['type']]
-        vinfo['time_name'] = vinfo['time'] # for backward compatibility
+        vinfo['time_name'] = vinfo['time'] # for compatibility with forcing code
+        
+        # rename the time variable to work with climatology
+        if vartype=='climatology':
+            if vn in ['zeta', 'u', 'v', 'ubar', 'vbar']:
+                pass
+            else:
+                vinfo['time_name'] = vn + '_time'
+        
         if vn in ['ubar', 'vbar']:
             vinfo['long_name'] = vinfo['long_name'].replace('integrated', 'averaged')
         return vinfo
