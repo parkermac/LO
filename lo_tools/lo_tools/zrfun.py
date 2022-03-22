@@ -322,6 +322,7 @@ def get_varinfo(vn, vartype='state'):
         vinfo['time_name'] = vinfo['time'] # for compatibility with forcing code
         
         # rename the time variable to work with climatology
+        # NOTE: this does not work for the bry files - for these you just use vinfo['time'].
         if vartype=='climatology':
             if vn in ['zeta', 'u', 'v', 'ubar', 'vbar']:
                 pass

@@ -5,6 +5,20 @@ Testing:
 
 run make_forcing_main.py -g cas6 -t v0 -r backfill -s continuation -d 2019.07.04 -f ocn00 -test True
 
+This is the first code that uses the new varinfo.yaml file and the associated method
+zrfun.get_varinfo() [around line 328].  The handling of time coordinate names proved to be
+especially tricky, so here is what I have learned:
+
+For the clm and bry files the time coordinate for each field has the form [varname]_time,
+e.g. salt_time, NO3_time, etc.  This apples to both the climatology and the bry fields,
+so the both salt (clm) and salt_east (bry) need their time to be salt_time.  BUT, a few of
+the fields have times that break this rule (zeta, ubar, vbar, u, v) and they have time
+names that can be found in the Climatology section of varinfo.yaml.  For example ubar uses
+v2d_time
+
+The ini file uses state variables, and all of these have there time coordinate called
+ocean_time.
+
 """
 
 from pathlib import Path
