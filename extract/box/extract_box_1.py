@@ -75,12 +75,16 @@ Ldir = Lfun.Lstart(gridname=gridname, tag=tag, ex_name=ex_name)
 for a in argsd.keys():
     if a not in Ldir.keys():
         Ldir[a] = argsd[a]
+
 # testing
+skip_first_steps = False
 if Ldir['testing']:
-    Ldir['roms_out_num'] = 2
-    Ldir['ds0'] = '2019.07.04'
-    Ldir['ds1'] = '2019.07.06'
-    Ldir['list_type'] = 'daily'
+    # Ldir['roms_out_num'] = 2
+    # Ldir['ds0'] = '2019.07.04'
+    # Ldir['ds1'] = '2019.07.06'
+    # Ldir['list_type'] = 'daily'
+    skip_first_steps = True
+    
 # set where to look for model output
 if Ldir['roms_out_num'] == 0:
     pass
@@ -101,121 +105,129 @@ elif Ldir['bot']:
 else:
     bname = Ldir['job'] + '_' + Ldir['ds0'] + '_' + Ldir['ds1']
 box_fn = out_dir / (bname + '.nc')
-box_fn.unlink(missing_ok=True)
 # also make a temporary name for adding variables
 box_temp_fn = out_dir / (bname + '_temp.nc')
-box_temp_fn.unlink(missing_ok=True)
-
 # name the temp dir to accumulate individual extractions
 temp_dir = out_dir / ('temp_' + bname)
-Lfun.make_dir(temp_dir, clean=True)
 
-# get list of files to work on
-fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
-if Ldir['testing']:
-    fn_list = fn_list[:5]
-G, S, T = zrfun.get_basic_info(fn_list[0])
-Lon = G['lon_rho'][0,:]
-Lat = G['lat_rho'][:,0]
+if skip_first_steps == True:
+    pass
+    # assume these things have been done
+else:
+    box_fn.unlink(missing_ok=True)
+    box_temp_fn.unlink(missing_ok=True)
+    Lfun.make_dir(temp_dir, clean=True)
+
+    # get list of files to work on
+    fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
+    if Ldir['testing']:
+        fn_list = fn_list[:5]
+    G, S, T = zrfun.get_basic_info(fn_list[0])
+    Lon = G['lon_rho'][0,:]
+    Lat = G['lat_rho'][:,0]
     
-def check_bounds(lon, lat):
-    # error checking
-    if (lon < Lon[0]) or (lon > Lon[-1]):
-        print('ERROR: lon out of bounds ')
-        sys.exit()
-    if (lat < Lat[0]) or (lat > Lat[-1]):
-        print('ERROR: lat out of bounds ')
-        sys.exit()
-    # get indices
-    ilon = zfun.find_nearest_ind(Lon, lon)
-    ilat = zfun.find_nearest_ind(Lat, lat)
-    return ilon, ilat
+    def check_bounds(lon, lat):
+        # error checking
+        if (lon < Lon[0]) or (lon > Lon[-1]):
+            print('ERROR: lon out of bounds ')
+            sys.exit()
+        if (lat < Lat[0]) or (lat > Lat[-1]):
+            print('ERROR: lat out of bounds ')
+            sys.exit()
+        # get indices
+        ilon = zfun.find_nearest_ind(Lon, lon)
+        ilat = zfun.find_nearest_ind(Lat, lat)
+        return ilon, ilat
 
-# get the indices and check that they are in the grid
-pth = Ldir['LOu'] / 'extract' / 'box'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import job_definitions
-from importlib import reload
-reload(job_definitions)
-aa, vn_list = job_definitions.get_box(Ldir['job'], Lon, Lat)
-lon0, lon1, lat0, lat1 = aa
-ilon0, ilat0 = check_bounds(lon0, lat0)
-ilon1, ilat1 = check_bounds(lon1, lat1)
+    # get the indices and check that they are in the grid
+    pth = Ldir['LOu'] / 'extract' / 'box'
+    if str(pth) not in sys.path:
+        sys.path.append(str(pth))
+    import job_definitions
+    from importlib import reload
+    reload(job_definitions)
+    aa, vn_list = job_definitions.get_box(Ldir['job'], Lon, Lat)
+    lon0, lon1, lat0, lat1 = aa
+    ilon0, ilat0 = check_bounds(lon0, lat0)
+    ilon1, ilat1 = check_bounds(lon1, lat1)
 
-# NOTE: ncks indexing is zero-based but is INCLUSIVE of the last point.
-# NOTE: ncks extractions retain singleton dimensions
+    # NOTE: ncks indexing is zero-based but is INCLUSIVE of the last point.
+    # NOTE: ncks extractions retain singleton dimensions
 
-# do the extractions
-N = len(fn_list)
-proc_list = []
-tt0 = time()
-print('Working on ' + box_fn.name + ' (' + str(N) + ' times)')
-for ii in range(N):
-    fn = fn_list[ii]
-    sys.stdout.flush()
-    # extract one day at a time using ncks
-    count_str = ('000000' + str(ii))[-6:]
-    out_fn = temp_dir / ('box_' + count_str + '.nc')
-    cmd_list1 = ['ncks',
-        '-v', vn_list,
-        '-d', 'xi_rho,'+str(ilon0)+','+str(ilon1), '-d', 'eta_rho,'+str(ilat0)+','+str(ilat1),
-        '-d', 'xi_u,'+str(ilon0)+','+str(ilon1-1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
-        '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0)+','+str(ilat1-1)]
-    if Ldir['surf']:
-        cmd_list1 += ['-d','s_rho,'+str(S['N']-1)]
-    elif Ldir['bot']:
-        cmd_list1 += ['-d','s_rho,0']
-    cmd_list1 += ['-O', str(fn), str(out_fn)]
-    proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
-    proc_list.append(proc)
-
-    # screen output about progress
-    if (np.mod(ii,10) == 0) and ii>0:
-        print(str(ii), end=', ')
+    # do the extractions
+    N = len(fn_list)
+    proc_list = []
+    tt0 = time()
+    print('Working on ' + box_fn.name + ' (' + str(N) + ' times)')
+    for ii in range(N):
+        fn = fn_list[ii]
         sys.stdout.flush()
-    if (np.mod(ii,50) == 0) and (ii > 0):
-        print('') # line feed
-        sys.stdout.flush()
-    if (ii == N-1):
-        print(str(ii))
-        sys.stdout.flush()
+        # extract one day at a time using ncks
+        count_str = ('000000' + str(ii))[-6:]
+        out_fn = temp_dir / ('box_' + count_str + '.nc')
+        cmd_list1 = ['ncks',
+            '-v', vn_list,
+            '-d', 'xi_rho,'+str(ilon0)+','+str(ilon1), '-d', 'eta_rho,'+str(ilat0)+','+str(ilat1),
+            '-d', 'xi_u,'+str(ilon0)+','+str(ilon1-1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
+            '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0)+','+str(ilat1-1)]
+        if Ldir['surf']:
+            cmd_list1 += ['-d','s_rho,'+str(S['N']-1)]
+        elif Ldir['bot']:
+            cmd_list1 += ['-d','s_rho,0']
+        cmd_list1 += ['-O', str(fn), str(out_fn)]
+        proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
+        proc_list.append(proc)
+
+        # screen output about progress
+        if (np.mod(ii,10) == 0) and ii>0:
+            print(str(ii), end=', ')
+            sys.stdout.flush()
+        if (np.mod(ii,50) == 0) and (ii > 0):
+            print('') # line feed
+            sys.stdout.flush()
+        if (ii == N-1):
+            print(str(ii))
+            sys.stdout.flush()
         
-    # Nproc controls how many ncks subprocesses we allow to stack up
-    # before we require them all to finish.
-    if ((np.mod(ii,Ldir['Nproc']) == 0) and (ii > 0)) or (ii == N-1):
-        for proc in proc_list:
-            proc.communicate()
-        # make sure everyone is finished before continuing
-        proc_list = []
-    ii += 1
+        # Nproc controls how many ncks subprocesses we allow to stack up
+        # before we require them all to finish.
+        if ((np.mod(ii,Ldir['Nproc']) == 0) and (ii > 0)) or (ii == N-1):
+            for proc in proc_list:
+                proc.communicate()
+            # make sure everyone is finished before continuing
+            proc_list = []
+        ii += 1
 
-# Ensure that all days have the same fill value.  This was required for cas6_v3_lo8b
-# when passing from 2021.10.31 to 2021.11.01 because they had inconsistent fill values,
-# which leaks through the ncrcat call below.
-tt1 = time()
-enc_dict = {'_FillValue':1e20}
-vn_List = vn_list.split(',')
-Enc_dict = {vn:enc_dict for vn in vn_List}
-for out_fn in list(temp_dir.glob('box_*.nc')):
-    ds = xr.load_dataset(out_fn) # need to load, not open, for overwrite
-    ds.to_netcdf(out_fn, encoding=Enc_dict)
-    ds.close()
-print(' - Time for adding fill value = %0.2f sec' % (time()- tt1))
+    # Ensure that all days have the same fill value.  This was required for cas6_v3_lo8b
+    # when passing from 2021.10.31 to 2021.11.01 because they had inconsistent fill values,
+    # which leaks through the ncrcat call below.
+    tt1 = time()
+    enc_dict = {'_FillValue':1e20}
+    vn_List = vn_list.split(',')
+    Enc_dict = {vn:enc_dict for vn in vn_List}
+    for out_fn in list(temp_dir.glob('box_*.nc')):
+        ds = xr.load_dataset(out_fn) # need to load, not open, for overwrite
+        ds.to_netcdf(out_fn, encoding=Enc_dict)
+        ds.close()
+    print(' - Time for adding fill value = %0.2f sec' % (time()- tt1))
+    sys.stdout.flush()
 
-# concatenate the records into one file
-# This bit of code is a nice example of how to replicate a bash pipe
-pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
-pp2 = Po(['grep','box'], stdin=pp1.stdout, stdout=Pi)
-cmd_list = ['ncrcat','-p', str(temp_dir), '-O', str(box_fn)]
-proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
-stdout, stderr = proc.communicate()
-if Ldir['testing']:
+    # concatenate the records into one file
+    # This bit of code is a nice example of how to replicate a bash pipe
+    pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
+    pp2 = Po(['grep','box'], stdin=pp1.stdout, stdout=Pi)
+    cmd_list = ['ncrcat','-p', str(temp_dir), '-O', str(box_fn)]
+    proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
+    stdout, stderr = proc.communicate()
+    # if Ldir['testing']:
     if len(stdout) > 0:
         print('\n'+stdout.decode())
     if len(stderr) > 0:
         print('\n'+stderr.decode())
-print('Time for initial extraction = %0.2f sec' % (time()- tt0))
+    print('Time for initial extraction = %0.2f sec' % (time()- tt0))
+    sys.stdout.flush()
+    
+    # end of "first steps"
 
 # add z variables
 # NOTE: this only works if you have salt as a saved field!
@@ -237,76 +249,89 @@ if (Ldir['surf']==False) and (Ldir['bot']==False):
     ds.close()
     box_temp_fn.replace(box_fn)
     print('Time to add z variables = %0.2f sec' % (time()- tt0))
+    sys.stdout.flush()
 
 if Ldir['uv_to_rho']:
-    # interpolate anything on the u and v grids to the rho grid, assuming
-    # zero values where masked, and leaving a masked ring around the outermost edge
+    try:
+        # interpolate anything on the u and v grids to the rho grid, assuming
+        # zero values where masked, and leaving a masked ring around the outermost edge
+        tt0 = time()
+        ds = xr.open_dataset(box_fn)
+        Maskr = ds.mask_rho.values == 1 # True over water
+        NR, NC = Maskr.shape
+        for vn in ds.data_vars:
+            if ('xi_u' in ds[vn].dims) and ('ocean_time' in ds[vn].dims):
+                if len(ds[vn].dims) == 4:
+                    uu = ds[vn].values
+                    NT, N, NRu, NCu = uu.shape
+                    uu[np.isnan(uu)] = 0
+                    UU = (uu[:,:,1:-1,1:]+uu[:,:,1:-1,:-1])/2
+                    uuu = np.nan * np.ones((NT, N, NR, NC))
+                    uuu[:,:,1:-1,1:-1] = UU
+                    Maskr3 = np.tile(Maskr.reshape(1,1,NR,NC),[NT,N,1,1])
+                    uuu[~Maskr3] = np.nan
+                    ds.update({vn:(('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), uuu)})
+                elif len(ds[vn].dims) == 3:
+                    uu = ds[vn].values
+                    NT, NRu, NCu = uu.shape
+                    uu[np.isnan(uu)] = 0
+                    UU = (uu[:,1:-1,1:]+uu[:,1:-1,:-1])/2
+                    uuu = np.nan * np.ones((NT, NR, NC))
+                    uuu[:,1:-1,1:-1] = UU
+                    Maskr3 = np.tile(Maskr.reshape(1,NR,NC),[NT,1,1])
+                    uuu[~Maskr3] = np.nan
+                    ds.update({vn:(('ocean_time', 'eta_rho', 'xi_rho'), uuu)})
+            elif ('xi_v' in ds[vn].dims) and ('ocean_time' in ds[vn].dims):
+                if len(ds[vn].dims) == 4:
+                    vv = ds[vn].values
+                    NT, N, NRv, NCv = vv.shape
+                    vv[np.isnan(vv)] = 0
+                    VV = (vv[:,:,1:,1:-1]+vv[:,:,:-1,1:-1])/2
+                    vvv = np.nan * np.ones((NT, N, NR, NC))
+                    vvv[:,:,1:-1,1:-1] = VV
+                    Maskr3 = np.tile(Maskr.reshape(1,1,NR,NC),[NT,N,1,1])
+                    vvv[~Maskr3] = np.nan
+                    ds.update({vn:(('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), vvv)})
+                elif len(ds[vn].dims) == 3:
+                    vv = ds[vn].values
+                    NT, NRv, NCv = vv.shape
+                    vv[np.isnan(vv)] = 0
+                    VV = (vv[:,1:,1:-1]+vv[:,:-1,1:-1])/2
+                    vvv = np.nan * np.ones((NT, NR, NC))
+                    vvv[:,1:-1,1:-1] = VV
+                    Maskr3 = np.tile(Maskr.reshape(1,NR,NC),[NT,1,1])
+                    vvv[~Maskr3] = np.nan
+                    ds.update({vn:(('ocean_time', 'eta_rho', 'xi_rho'), vvv)})
+        ds.to_netcdf(box_temp_fn)
+        ds.close()
+        box_temp_fn.replace(box_fn)
+        print('Time to interpolate uv variables to rho grid = %0.2f sec' % (time()- tt0))
+        sys.stdout.flush()
+    except Exception as e:
+        print('Exception during uv_to_rho step')
+        print(e)
+    
+try:
+    # squeeze and compress the resulting file
     tt0 = time()
     ds = xr.open_dataset(box_fn)
-    Maskr = ds.mask_rho.values == 1 # True over water
-    NR, NC = Maskr.shape
-    for vn in ds.data_vars:
-        if ('xi_u' in ds[vn].dims) and ('ocean_time' in ds[vn].dims):
-            if len(ds[vn].dims) == 4:
-                uu = ds[vn].values
-                NT, N, NRu, NCu = uu.shape
-                uu[np.isnan(uu)] = 0
-                UU = (uu[:,:,1:-1,1:]+uu[:,:,1:-1,:-1])/2
-                uuu = np.nan * np.ones((NT, N, NR, NC))
-                uuu[:,:,1:-1,1:-1] = UU
-                Maskr3 = np.tile(Maskr.reshape(1,1,NR,NC),[NT,N,1,1])
-                uuu[~Maskr3] = np.nan
-                ds.update({vn:(('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), uuu)})
-            elif len(ds[vn].dims) == 3:
-                uu = ds[vn].values
-                NT, NRu, NCu = uu.shape
-                uu[np.isnan(uu)] = 0
-                UU = (uu[:,1:-1,1:]+uu[:,1:-1,:-1])/2
-                uuu = np.nan * np.ones((NT, NR, NC))
-                uuu[:,1:-1,1:-1] = UU
-                Maskr3 = np.tile(Maskr.reshape(1,NR,NC),[NT,1,1])
-                uuu[~Maskr3] = np.nan
-                ds.update({vn:(('ocean_time', 'eta_rho', 'xi_rho'), uuu)})
-        elif ('xi_v' in ds[vn].dims) and ('ocean_time' in ds[vn].dims):
-            if len(ds[vn].dims) == 4:
-                vv = ds[vn].values
-                NT, N, NRv, NCv = vv.shape
-                vv[np.isnan(vv)] = 0
-                VV = (vv[:,:,1:,1:-1]+vv[:,:,:-1,1:-1])/2
-                vvv = np.nan * np.ones((NT, N, NR, NC))
-                vvv[:,:,1:-1,1:-1] = VV
-                Maskr3 = np.tile(Maskr.reshape(1,1,NR,NC),[NT,N,1,1])
-                vvv[~Maskr3] = np.nan
-                ds.update({vn:(('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), vvv)})
-            elif len(ds[vn].dims) == 3:
-                vv = ds[vn].values
-                NT, NRv, NCv = vv.shape
-                vv[np.isnan(vv)] = 0
-                VV = (vv[:,1:,1:-1]+vv[:,:-1,1:-1])/2
-                vvv = np.nan * np.ones((NT, NR, NC))
-                vvv[:,1:-1,1:-1] = VV
-                Maskr3 = np.tile(Maskr.reshape(1,NR,NC),[NT,1,1])
-                vvv[~Maskr3] = np.nan
-                ds.update({vn:(('ocean_time', 'eta_rho', 'xi_rho'), vvv)})
-    ds.to_netcdf(box_temp_fn)
+    ds = ds.squeeze() # remove singleton dimensions
+    enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
+    Enc_dict = {vn:enc_dict for vn in ds.data_vars if 'ocean_time' in ds[vn].dims}
+    ds.to_netcdf(box_temp_fn, encoding=Enc_dict)
     ds.close()
     box_temp_fn.replace(box_fn)
-    print('Time to interpolate uv variables to rho grid = %0.2f sec' % (time()- tt0))
+    print('Time to compress = %0.2f sec' % (time()- tt0))
+    sys.stdout.flush()
+except Exception as e:
+    print('Exception during squeeze and compress step')
+    print(e)
 
-# squeeze and compress the resulting file
-tt0 = time()
-ds = xr.open_dataset(box_fn)
-ds = ds.squeeze() # remove singleton dimensions
-enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
-Enc_dict = {vn:enc_dict for vn in ds.data_vars if 'ocean_time' in ds[vn].dims}
-ds.to_netcdf(box_temp_fn, encoding=Enc_dict)
-ds.close()
-box_temp_fn.replace(box_fn)
-print('Time to compress = %0.2f sec' % (time()- tt0))
 
-# clean up
-Lfun.make_dir(temp_dir, clean=True)
-temp_dir.rmdir()
+if Ldir['testing'] == False:
+    # clean up
+    Lfun.make_dir(temp_dir, clean=True)
+    temp_dir.rmdir()
 
 print('Size of full rho-grid = %s' % (str(G['lon_rho'].shape)))
 print(' Contents of extracted box file: '.center(60,'-'))
