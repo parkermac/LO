@@ -42,7 +42,7 @@ print('PID for this job = ' + str(pid))
 # command line arugments
 parser = argparse.ArgumentParser()
 # which run to use
-parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas6_v3_l08b
+parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas6_v3_lo8b
 parser.add_argument('-ro', '--roms_out_num', type=int) # 2 = Ldir['roms_out2'], etc.
 # select time period and frequency
 parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
@@ -77,13 +77,11 @@ for a in argsd.keys():
         Ldir[a] = argsd[a]
 
 # testing
-skip_first_steps = False
 if Ldir['testing']:
-    # Ldir['roms_out_num'] = 2
-    # Ldir['ds0'] = '2019.07.04'
-    # Ldir['ds1'] = '2019.07.06'
-    # Ldir['list_type'] = 'daily'
-    skip_first_steps = True
+    Ldir['roms_out_num'] = 2
+    Ldir['ds0'] = '2019.07.04'
+    Ldir['ds1'] = '2019.07.06'
+    Ldir['list_type'] = 'daily'
     
 # set where to look for model output
 if Ldir['roms_out_num'] == 0:
@@ -110,124 +108,116 @@ box_temp_fn = out_dir / (bname + '_temp.nc')
 # name the temp dir to accumulate individual extractions
 temp_dir = out_dir / ('temp_' + bname)
 
-if skip_first_steps == True:
-    pass
-    # assume these things have been done
-else:
-    box_fn.unlink(missing_ok=True)
-    box_temp_fn.unlink(missing_ok=True)
-    Lfun.make_dir(temp_dir, clean=True)
+box_fn.unlink(missing_ok=True)
+box_temp_fn.unlink(missing_ok=True)
+Lfun.make_dir(temp_dir, clean=True)
 
-    # get list of files to work on
-    fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
-    if Ldir['testing']:
-        fn_list = fn_list[:5]
-    G, S, T = zrfun.get_basic_info(fn_list[0])
-    Lon = G['lon_rho'][0,:]
-    Lat = G['lat_rho'][:,0]
-    
-    def check_bounds(lon, lat):
-        # error checking
-        if (lon < Lon[0]) or (lon > Lon[-1]):
-            print('ERROR: lon out of bounds ')
-            sys.exit()
-        if (lat < Lat[0]) or (lat > Lat[-1]):
-            print('ERROR: lat out of bounds ')
-            sys.exit()
-        # get indices
-        ilon = zfun.find_nearest_ind(Lon, lon)
-        ilat = zfun.find_nearest_ind(Lat, lat)
-        return ilon, ilat
+# get list of files to work on
+fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
+G, S, T = zrfun.get_basic_info(fn_list[0])
+Lon = G['lon_rho'][0,:]
+Lat = G['lat_rho'][:,0]
 
-    # get the indices and check that they are in the grid
-    pth = Ldir['LOu'] / 'extract' / 'box'
-    if str(pth) not in sys.path:
-        sys.path.append(str(pth))
-    import job_definitions
-    from importlib import reload
-    reload(job_definitions)
-    aa, vn_list = job_definitions.get_box(Ldir['job'], Lon, Lat)
-    lon0, lon1, lat0, lat1 = aa
-    ilon0, ilat0 = check_bounds(lon0, lat0)
-    ilon1, ilat1 = check_bounds(lon1, lat1)
+def check_bounds(lon, lat):
+    # error checking
+    if (lon < Lon[0]) or (lon > Lon[-1]):
+        print('ERROR: lon out of bounds ')
+        sys.exit()
+    if (lat < Lat[0]) or (lat > Lat[-1]):
+        print('ERROR: lat out of bounds ')
+        sys.exit()
+    # get indices
+    ilon = zfun.find_nearest_ind(Lon, lon)
+    ilat = zfun.find_nearest_ind(Lat, lat)
+    return ilon, ilat
 
-    # NOTE: ncks indexing is zero-based but is INCLUSIVE of the last point.
-    # NOTE: ncks extractions retain singleton dimensions
+# get the indices and check that they are in the grid
+pth = Ldir['LOu'] / 'extract' / 'box'
+if str(pth) not in sys.path:
+    sys.path.append(str(pth))
+import job_definitions
+from importlib import reload
+reload(job_definitions)
+aa, vn_list = job_definitions.get_box(Ldir['job'], Lon, Lat)
+lon0, lon1, lat0, lat1 = aa
+ilon0, ilat0 = check_bounds(lon0, lat0)
+ilon1, ilat1 = check_bounds(lon1, lat1)
 
-    # do the extractions
-    N = len(fn_list)
-    proc_list = []
-    tt0 = time()
-    print('Working on ' + box_fn.name + ' (' + str(N) + ' times)')
-    for ii in range(N):
-        fn = fn_list[ii]
+# NOTE: ncks indexing is zero-based but is INCLUSIVE of the last point.
+# NOTE: ncks extractions retain singleton dimensions
+
+# do the extractions
+N = len(fn_list)
+proc_list = []
+tt0 = time()
+print('Working on ' + box_fn.name + ' (' + str(N) + ' times)')
+for ii in range(N):
+    fn = fn_list[ii]
+    sys.stdout.flush()
+    # extract one day at a time using ncks
+    count_str = ('000000' + str(ii))[-6:]
+    out_fn = temp_dir / ('box_' + count_str + '.nc')
+    cmd_list1 = ['ncks',
+        '-v', vn_list,
+        '-d', 'xi_rho,'+str(ilon0)+','+str(ilon1), '-d', 'eta_rho,'+str(ilat0)+','+str(ilat1),
+        '-d', 'xi_u,'+str(ilon0)+','+str(ilon1-1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
+        '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0)+','+str(ilat1-1)]
+    if Ldir['surf']:
+        cmd_list1 += ['-d','s_rho,'+str(S['N']-1)]
+    elif Ldir['bot']:
+        cmd_list1 += ['-d','s_rho,0']
+    cmd_list1 += ['-O', str(fn), str(out_fn)]
+    proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
+    proc_list.append(proc)
+
+    # screen output about progress
+    if (np.mod(ii,10) == 0) and ii>0:
+        print(str(ii), end=', ')
         sys.stdout.flush()
-        # extract one day at a time using ncks
-        count_str = ('000000' + str(ii))[-6:]
-        out_fn = temp_dir / ('box_' + count_str + '.nc')
-        cmd_list1 = ['ncks',
-            '-v', vn_list,
-            '-d', 'xi_rho,'+str(ilon0)+','+str(ilon1), '-d', 'eta_rho,'+str(ilat0)+','+str(ilat1),
-            '-d', 'xi_u,'+str(ilon0)+','+str(ilon1-1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
-            '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0)+','+str(ilat1-1)]
-        if Ldir['surf']:
-            cmd_list1 += ['-d','s_rho,'+str(S['N']-1)]
-        elif Ldir['bot']:
-            cmd_list1 += ['-d','s_rho,0']
-        cmd_list1 += ['-O', str(fn), str(out_fn)]
-        proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
-        proc_list.append(proc)
-
-        # screen output about progress
-        if (np.mod(ii,10) == 0) and ii>0:
-            print(str(ii), end=', ')
-            sys.stdout.flush()
-        if (np.mod(ii,50) == 0) and (ii > 0):
-            print('') # line feed
-            sys.stdout.flush()
-        if (ii == N-1):
-            print(str(ii))
-            sys.stdout.flush()
-        
-        # Nproc controls how many ncks subprocesses we allow to stack up
-        # before we require them all to finish.
-        if ((np.mod(ii,Ldir['Nproc']) == 0) and (ii > 0)) or (ii == N-1):
-            for proc in proc_list:
-                proc.communicate()
-            # make sure everyone is finished before continuing
-            proc_list = []
-        ii += 1
-
-    # Ensure that all days have the same fill value.  This was required for cas6_v3_lo8b
-    # when passing from 2021.10.31 to 2021.11.01 because they had inconsistent fill values,
-    # which leaks through the ncrcat call below.
-    tt1 = time()
-    enc_dict = {'_FillValue':1e20}
-    vn_List = vn_list.split(',')
-    Enc_dict = {vn:enc_dict for vn in vn_List}
-    for out_fn in list(temp_dir.glob('box_*.nc')):
-        ds = xr.load_dataset(out_fn) # need to load, not open, for overwrite
-        ds.to_netcdf(out_fn, encoding=Enc_dict)
-        ds.close()
-    print(' - Time for adding fill value = %0.2f sec' % (time()- tt1))
-    sys.stdout.flush()
-
-    # concatenate the records into one file
-    # This bit of code is a nice example of how to replicate a bash pipe
-    pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
-    pp2 = Po(['grep','box'], stdin=pp1.stdout, stdout=Pi)
-    cmd_list = ['ncrcat','-p', str(temp_dir), '-O', str(box_fn)]
-    proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
-    stdout, stderr = proc.communicate()
-    # if Ldir['testing']:
-    if len(stdout) > 0:
-        print('\n'+stdout.decode())
-    if len(stderr) > 0:
-        print('\n'+stderr.decode())
-    print('Time for initial extraction = %0.2f sec' % (time()- tt0))
-    sys.stdout.flush()
+    if (np.mod(ii,50) == 0) and (ii > 0):
+        print('') # line feed
+        sys.stdout.flush()
+    if (ii == N-1):
+        print(str(ii))
+        sys.stdout.flush()
     
-    # end of "first steps"
+    # Nproc controls how many ncks subprocesses we allow to stack up
+    # before we require them all to finish.
+    if ((np.mod(ii,Ldir['Nproc']) == 0) and (ii > 0)) or (ii == N-1):
+        for proc in proc_list:
+            proc.communicate()
+        # make sure everyone is finished before continuing
+        proc_list = []
+    ii += 1
+
+# Ensure that all days have the same fill value.  This was required for cas6_v3_lo8b
+# when passing from 2021.10.31 to 2021.11.01 because they had inconsistent fill values,
+# which leaks through the ncrcat call below.
+tt1 = time()
+enc_dict = {'_FillValue':1e20}
+vn_List = vn_list.split(',')
+Enc_dict = {vn:enc_dict for vn in vn_List}
+for out_fn in list(temp_dir.glob('box_*.nc')):
+    ds = xr.load_dataset(out_fn) # need to load, not open, for overwrite
+    ds.to_netcdf(out_fn, encoding=Enc_dict)
+    ds.close()
+print(' - Time for adding fill value = %0.2f sec' % (time()- tt1))
+sys.stdout.flush()
+
+# concatenate the records into one file
+# This bit of code is a nice example of how to replicate a bash pipe
+pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
+pp2 = Po(['grep','box'], stdin=pp1.stdout, stdout=Pi)
+cmd_list = ['ncrcat','-p', str(temp_dir), '-O', str(box_fn)]
+proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
+stdout, stderr = proc.communicate()
+# if Ldir['testing']:
+if len(stdout) > 0:
+    print('\n'+stdout.decode())
+if len(stderr) > 0:
+    print('\n'+stderr.decode())
+print('Time for initial extraction = %0.2f sec' % (time()- tt0))
+sys.stdout.flush()
 
 # add z variables
 # NOTE: this only works if you have salt as a saved field!
