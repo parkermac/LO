@@ -211,7 +211,6 @@ pp2 = Po(['grep','box'], stdin=pp1.stdout, stdout=Pi)
 cmd_list = ['ncrcat','-p', str(temp_dir), '-O', str(box_fn)]
 proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
-# if Ldir['testing']:
 if len(stdout) > 0:
     print('\n'+stdout.decode())
 if len(stderr) > 0:
