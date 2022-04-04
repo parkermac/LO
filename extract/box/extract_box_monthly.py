@@ -20,8 +20,10 @@ I consider this code a hack to solve a pressing problem, but in the long run I w
 be using more sophisticated tools like zarr and dask.
 
 Testing:
+run extract_box_monthly.py -gtx cas6_v3_lo8b -job byrd -surf True -uv_to_rho True -test True
 
-run extract_box_monthly.py -gtx cas6_v3_lo8b -job byrd -surf True -test True
+Production run:
+python extract_box_monthly.py -gtx cas6_v3_lo8b -ro 2 -lt hourly -0 2019.01.01 -1 2019.12.31 -job byrd -surf True -uv_to_rho True > byrd.log &
 
 """
 
@@ -330,7 +332,7 @@ for cc0 in range(0,NFN-Nchunk,Nchunk):
             ds.to_netcdf(box_temp_fn)
             ds.close()
             box_temp_fn.replace(box_fn)
-            print('Time to interpolate uv variables to rho grid = %0.2f sec' % (time()- tt0))
+            print(' Time to interpolate uv variables to rho grid = %0.2f sec' % (time()- tt0))
             sys.stdout.flush()
         except Exception as e:
             print('Exception during uv_to_rho step')
