@@ -149,21 +149,17 @@ box_fn_final = out_dir / (Ldir['job'] + bb_str + dd_str + '.nc')
 ## Start of month loop
 tt00 = time()
 NFN = len(fn_list)
-if Ldir['testing']:
-    Nchunk = 24
-else:
-    Nchunk = 24*30
-    
+cca = np.arange(NFN)
+ccas = np.array_split(cca, 12)
+
 counter = 0
-for cc0 in range(0,NFN-Nchunk,Nchunk):
-    cc1 = np.min((NFN, cc0 + Nchunk))
-    if NFN - cc1 < 3:
-        # avoid single-time chunks
-        cc1 = NFN
+for this_cca in ccas:
+    cc0 = this_cca[0]
+    cc1 = this_cca[-1]
     print('\nWorking on index range %d:%d' % (cc0, cc1))
     sys.stdout.flush()
     
-    this_fn_list = fn_list[cc0:cc1]
+    this_fn_list = fn_list[cc0:cc1+1]
 
     box_fn = out_dir / ('chunk_' + ('0000' + str(counter))[-4:] +'.nc')
     # also make a temporary name for adding variables
@@ -342,8 +338,10 @@ for cc0 in range(0,NFN-Nchunk,Nchunk):
     try:
         tt0 = time()
         ds = xr.open_dataset(box_fn)
-        ds = ds.squeeze() # remove singleton dimensions
+        ds = ds.squeeze(drop=True) # remove singleton dimensions
+        ds.to_netcdf(box_temp_fn)
         ds.close()
+        box_temp_fn.replace(box_fn)
         print(' Time to squeeze = %0.2f sec' % (time()- tt0))
         sys.stdout.flush()
     except Exception as e:
