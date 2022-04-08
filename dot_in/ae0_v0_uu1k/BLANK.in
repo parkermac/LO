@@ -73,7 +73,7 @@
 ! Input variable information file name.  This file needs to be processed
 ! first so all information arrays can be initialized properly.
 
-     VARNAME = $roms_code_dir$/$roms_name$/ROMS/External/varinfo.dat
+     VARNAME = $roms_varinfo_dir$/varinfo.yaml
 
 ! Number of nested grids.
 
@@ -558,10 +558,10 @@ Hout(idBath) == F       ! bath               time-dependent bathymetry
 
 Hout(idTvar) == T T     ! temp, salt         temperature and salinity
 
-Hout(idpthR) == T       ! z_rho              time-varying depths of RHO-points
-Hout(idpthU) == T       ! z_u                time-varying depths of U-points
-Hout(idpthV) == T       ! z_v                time-varying depths of V-points
-Hout(idpthW) == T       ! z_w                time-varying depths of W-points
+Hout(idpthR) == F       ! z_rho              time-varying depths of RHO-points
+Hout(idpthU) == F       ! z_u                time-varying depths of U-points
+Hout(idpthV) == F       ! z_v                time-varying depths of V-points
+Hout(idpthW) == F       ! z_w                time-varying depths of W-points
 
 Hout(idUsms) == T       ! sustr              surface U-stress
 Hout(idVsms) == T       ! svstr              surface V-stress
