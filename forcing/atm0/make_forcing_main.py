@@ -51,7 +51,7 @@ elif 'boiler' in Ldir['lo_env']:
     wrf_dir = Path('/data1/darr/wrf_crons/wrfout')
 elif 'apogee' in Ldir['lo_env']:
     # wrf_dir = Path('/boildat/darr/wrf_crons/wrfout')
-    wrf_dir = Path('/pgdat1/parker/wrf')
+    wrf_dir = Path('/pgdat1/parker/LO_data/wrf')
 elif 'perigee' in Ldir['lo_env']:
     wrf_dir = Path('/boildat1/darr/wrf_crons/wrfout')
 # else:
