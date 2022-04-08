@@ -6,8 +6,8 @@ with the outermost corners being on the rho-grid.
 
 Job definitions are in LO_user/extract/box/job_definitions.py
 
-This "monthly" version has a somewhat more complicated structure compared with
-the original extract_box.py.  It breaks a long job up into month-long chunks
+This "chunks" version has a somewhat more complicated structure compared with
+the original extract_box.py.  It breaks a long job up into some number [12] of chunks
 and then uses ncrcat on them at the end (I hope).  This was prompted by failures
 of the original code when getting a year of hourly surface fields (the byrd job).
 It worked for the inital extraction and concatenation, but failed at both the 
@@ -20,10 +20,10 @@ I consider this code a hack to solve a pressing problem, but in the long run I w
 be using more sophisticated tools like zarr and dask.
 
 Testing:
-run extract_box_monthly.py -gtx cas6_v3_lo8b -job byrd -surf True -uv_to_rho True -test True
+run extract_box_chunks.py -gtx cas6_v3_lo8b -job byrd -surf True -uv_to_rho True -test True
 
 Production run:
-python extract_box_monthly.py -gtx cas6_v3_lo8b -ro 2 -lt hourly -0 2019.01.01 -1 2019.12.31 -job byrd -surf True -uv_to_rho True > byrd.log &
+python extract_box_chunks.py -gtx cas6_v3_lo8b -ro 2 -lt hourly -0 2019.01.01 -1 2019.12.31 -job byrd -surf True -uv_to_rho True > byrd.log &
 
 """
 
@@ -106,7 +106,7 @@ elif Ldir['bot']:
 else:
     bb_str = '_'
 
-out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box' / (Ldir['job'] + bb_str + dd_str + '_monthly')
+out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box' / (Ldir['job'] + bb_str + dd_str + '_chunks')
 Lfun.make_dir(out_dir, clean=True)
 
 # get list of files to work on
