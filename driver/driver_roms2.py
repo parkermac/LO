@@ -140,7 +140,7 @@ while dt <= dt1:
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
     f_string0 = 'f' + dt0.strftime(Lfun.ds_fmt) # used for forcing a forecast
     print('')
-    print((' ' + f_string + ' ').center(Ncenter,'O'))
+    print((' ' + f_string + ' ').center(Ncenter,'='))
     print(' > started at %s' % (datetime.now().strftime('%Y.%m.%d %H:%M:%S')))
     sys.stdout.flush()
     
