@@ -1,28 +1,22 @@
 """
 This runs ROMS for one or more days, allowing for either a forecast or backfill.
 
-NEW:
+Like driver_roms1.py this code:
 - runs forecast as three separate days
 - saves blowup log and last history files
 - other improvements to stdout
 - uses new LO/driver/batch files
 
-Test on mac:
-run driver_roms2.py -g cas6 -t v0 -x u0k -r forecast -np 400 -N 40 --get_forcing False --run_roms False --move_his False
-
-Run for real on mox:
-python3 driver_roms2.py -g cas6 -t v0 -x u0mb -r forecast -np 196 -N 28 < /dev/null > test.log &
-
-Run for real on klone (no bio - for testing):
-python3 driver_roms2.py -g cas6 -t v0 -x u0k -r forecast -np 400 -N 40 --move_his False < /dev/null > test.log &
-
-When running by hand on klone or mox it may help to use < /dev/null > test.log & at the end of the command.
-The /dev/null input avoids occasionally having the job "stopped".
-
-NOTE: this is just like driver_roms1.py but is a place to try out improvements and bug fixes:
+NEW compared to driver_roms1.py:
 - make less verbose unless there are errors
 - fix --start_type new bug
+- assume we are using LO_roms_user (only works for new ROMS)
 
+Run analytical model on klone:
+python3 driver_roms2.py -g ae0 -t v0 -x uu1k -r backfill -s new -0 2020.01.01 -1 2020.01.02 -np 40 -N 40 < /dev/null > ae.log &
+
+For testing/debugging these flags can be very useful:
+-v True --get_forcing False --short_roms True --move_his False
 """
 
 import sys, os
@@ -93,6 +87,18 @@ if args.run_type == 'forecast':
     ds1 = dt1.strftime(Lfun.ds_fmt)
     
 elif args.run_type == 'backfill': # you have to provide at least ds0 for backfill
+
+    # Don't run backfill at the same time of day as the expected forecast
+    dtnow = datetime.now()
+    iisleep = 1
+    while (dtnow.hour >= 3) and (dtnow.hour <= 7):
+        print('Ten-minute naps:')
+        print(str(iisleep), end=', ')
+        sys.stdout.flush()
+        sleep(600)
+        dtnow = datetime.now()
+        iisleep += 1
+    
     ds0 = args.ds0
     if len(args.ds1) == 0:
         ds1 = ds0
@@ -106,7 +112,7 @@ else:
 print('Running ROMS %s %s-%s ' % (args.run_type, ds0, ds1))
 sys.stdout.flush()
 
-Ncenter = 20
+Ncenter = 30
 def messages(stdout, stderr, mtitle, verbose):
     # utility function for displaying subprocess info
     if verbose:
@@ -132,35 +138,31 @@ while dt <= dt1:
         
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
     f_string0 = 'f' + dt0.strftime(Lfun.ds_fmt) # used for forcing a forecast
-    if args.verbose:
-        print('')
-        print((' ' + f_string + ' ').center(Ncenter,'O'))
-        print(' > started at %s' % (datetime.now().strftime('%Y.%m.%d %H:%M:%S')))
-        sys.stdout.flush()
+    print('')
+    print((' ' + f_string + ' ').center(Ncenter,'O'))
+    print(' > started at %s' % (datetime.now().strftime('%Y.%m.%d %H:%M:%S')))
+    sys.stdout.flush()
     
     # Set various paths.
     force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string
-    dot_in_dir = Ldir['LO'] / 'dot_in' / Ldir['gtagex']
-    dot_in_shared_dir = Ldir['LO'] / 'dot_in' / 'shared'
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
     log_file = roms_out_dir / 'log.txt'
     
-    # Decide where to look for executable based on the pattern in the
-    # name: repeated first letter (like 'uu') means use updated ROMS.
-    if Ldir['ex_name'][1] == Ldir['ex_name'][0]:
-        # use updated ROMS
-        roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
-        roms_ex_name = 'romsM'
-    else:
-        # use old ROMS
-        roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
-        roms_ex_name = 'oceanM'
+    # Look to see if there is a user instance of this dot_in, and if so, use it.
+    user_dot_in_dir = Ldir['LOu'] / 'dot_in' / Ldir['gtagex']
+    dot_in_dir = Ldir['LO'] / 'dot_in' / Ldir['gtagex']
+    if user_dot_in_dir.is_dir():
+        dot_in_dir = user_dot_in_dir
     
+    # Decide where to look for executable.  Assumes we are using the
+    # updated ROMS.
+    roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
+    roms_ex_name = 'romsM'
+    
+    print(' - roms_out_dir: ' + str(roms_out_dir))
     if args.verbose:
         print(' - force_dir:    ' + str(force_dir))
         print(' - dot_in_dir:   ' + str(dot_in_dir))
-        print(' - dot_in_shared_dir: ' + str(dot_in_shared_dir))
-        print(' - roms_out_dir: ' + str(roms_out_dir))
         print(' - log_file:     ' + str(log_file))
         print(' - roms_ex_dir:  ' + str(roms_ex_dir))
         sys.stdout.flush()
@@ -193,8 +195,7 @@ while dt <= dt1:
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
-        if args.verbose:
-            print(' - time to get forcing = %d sec' % (time()-tt0))
+        print(' - time to get forcing = %d sec' % (time()-tt0))
         sys.stdout.flush()
     else:
         print(' ** skipped getting forcing')
@@ -239,7 +240,6 @@ while dt <= dt1:
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Create batch script', args.verbose)
-            
         else:
             print(' ** skipped making dot_in and batch script')
             args.run_roms = False # never run ROMS if we skipped making the dot_in
