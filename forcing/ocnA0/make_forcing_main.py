@@ -24,8 +24,7 @@ result_dict['start_dt'] = datetime.now()
 import xarray as xr
 from time import time
 import numpy as np
-from lo_tools import Lfun, zfun, zrfun
-import Ofun_nc
+from lo_tools import Lfun, zfun, zrfun, Ofun_nc
 
 if Ldir['testing']:
     verbose = True

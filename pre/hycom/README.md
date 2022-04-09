@@ -2,6 +2,8 @@
 
 ## This code is designed to make a backfill archive for the GOFS 3.0 and 3.1 versions of HYCOM.
 
+NOTE: HYCOM has a 22-year reanalysis 1994-2015: GLBv0.08, 53x.  I have not made use of this yet but it could be great for longer hindcasts.  The notes below are for more recent years, and are used for the current system.
+
 ---
 
 #### A typical workflow would consist of two steps.  First, from the command line do:
