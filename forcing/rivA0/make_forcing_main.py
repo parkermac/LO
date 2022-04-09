@@ -110,7 +110,7 @@ for vn in ['river_Xposition', 'river_Eposition', 'river_direction']:
 # Add transport
 vn = 'river_transport'
 vinfo = zrfun.get_varinfo(vn, vartype='climatology')
-dims = (vinfo['time_name'],) + ('river',)
+dims = (vinfo['time'],) + ('river',)
 Q_mat = np.zeros((NT, NRIV))
 ii = 0
 for rn in gri_df.index:
@@ -130,7 +130,7 @@ ds[vn].attrs['units'] = vinfo['units']
 # Add salinity and temperature
 for vn in ['river_salt', 'river_temp']:
     vinfo = zrfun.get_varinfo(vn, vartype='climatology')
-    dims = (vinfo['time_name'],) + ('s_rho', 'river')
+    dims = (vinfo['time'],) + ('s_rho', 'river')
     if vn == 'river_salt':
         TR_mat = np.zeros((NT, N, NRIV))
     elif vn == 'river_temp':
