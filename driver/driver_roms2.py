@@ -9,8 +9,9 @@ Like driver_roms1.py this code:
 
 NEW compared to driver_roms1.py:
 - make less verbose unless there are errors
-- fix --start_type new bug
+- fixed --start_type new bug
 - assume we are using LO_roms_user (only works for new ROMS)
+- backfill sleeps during expected forecast time of day
 
 Run analytical model on klone:
 python3 driver_roms2.py -g ae0 -t v0 -x uu1k -r backfill -s new -0 2020.01.01 -1 2020.01.02 -np 40 -N 40 < /dev/null > ae.log &
