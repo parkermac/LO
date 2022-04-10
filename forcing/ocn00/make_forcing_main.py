@@ -42,9 +42,8 @@ import pickle
 import netCDF4 as nc
 import pandas as pd
 
-from lo_tools import Lfun, zfun, zrfun
+from lo_tools import Lfun, zfun, zrfun, Ofun_nc
 import Ofun
-import Ofun_nc
 import Ofun_CTD
 import Ofun_bio
 
@@ -52,7 +51,6 @@ if Ldir['testing']:
     verbose = True
     from importlib import reload
     reload(Ofun)
-    reload(Ofun_nc)
     reload(Ofun_CTD)
     reload(Ofun_bio)
     reload(zrfun)
