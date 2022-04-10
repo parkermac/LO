@@ -3,7 +3,7 @@ Functions to use with atmospheric forcing.  Translated from matlab to python.
 """
 
 import numpy as np
-import netCDF4 as nc
+import xarray as xr
 import seawater as sw
 import matplotlib.path as mpath
 
@@ -11,59 +11,16 @@ invar_list = ['Q2', 'T2', 'PSFC', 'U10', 'V10','RAINCV', 'RAINNCV', 'SWDOWN', 'G
 
 outvar_list = ['Pair','rain','swrad','lwrad_down','Tair','Qair','Uwind','Vwind']
 
-# for plotting, paired with outvar_list
-lim_list = [(800,1050), (0,1e-6), (0,900), (0,400), (0,20), (50,100), (-10, 10), (-10,10)]
-
-longname_dict = dict()
-units_dict = dict()
-timename_dict = dict()
-for vn in outvar_list:
-    if vn == 'Pair':
-        nclongname = 'surface air pressure' 
-        ncunits = 'millibar' 
-        nctimename = 'pair_time' 
-    elif vn == 'rain':
-        nclongname = 'rain fall rate' 
-        ncunits = 'kilograms meter-2 second-1' 
-        nctimename = 'rain_time' 
-    elif vn == 'swrad':
-        nclongname = 'solar shortwave radiation flux' 
-        ncunits = 'watts meter-2' 
-        nctimename = 'srf_time' 
-    elif vn == 'lwrad_down':
-        nclongname = 'downwelling longwave radiation flux' 
-        ncunits = 'watts meter-2' 
-        nctimename = 'lrf_time' 
-    elif vn == 'Tair':
-        nclongname = 'surface air temperature' 
-        ncunits = 'Celsius' 
-        nctimename = 'tair_time' 
-    elif vn == 'Qair':
-        nclongname = 'surface air relative humidity' 
-        ncunits = 'percentage' 
-        nctimename = 'qair_time' 
-    elif vn == 'Uwind':
-        nclongname = 'surface u-wind component' 
-        ncunits = 'meter second-1' 
-        nctimename = 'wind_time' 
-    elif vn == 'Vwind':
-        nclongname = 'surface v-wind component' 
-        ncunits = 'meter second-1' 
-        nctimename = 'wind_time'
-    longname_dict[vn] = nclongname
-    units_dict[vn] = ncunits
-    timename_dict[vn] = nctimename
     
 def get_wrf_grid(fn):
-    wds = nc.Dataset(fn)
-    lon = wds['XLONG'][:].squeeze()
-    lat = wds['XLAT'][:].squeeze()
+    wds = xr.open_dataset(fn)
+    lon = wds['XLONG'].values.squeeze()
+    lat = wds['XLAT'].values.squeeze()
     if False: # Make True to see wrf variable names
-        print('\n' + fn.split('/')[-1].center(60,'-'))
+        print('\n' + fn.name.split('/')[-1].center(60,'-'))
         vn_list = []
-        for vn in wds.variables:
-            vn_list.append(vn)
-        print(vn_list)
+        for vn in wds.data_vars:
+            print(vn)
     wds.close()
     # Get grid size info at the middle of each wrf domain
     NR, NC = lon.shape
@@ -109,11 +66,11 @@ def gather_and_process_fields(fn, imax, ca, sa, outvar_list):
     # This is where we define any transformations to get from WRF to ROMS variables.
     # we pass outvar_list only because it may have been shortened by the calling program
     # while testing.
-    ds = nc.Dataset(fn)
+    ds = xr.open_dataset(fn)
     iv_dict = dict()
     for ivn in invar_list:
         # we trim fields to match the trimmed coordinate arrays
-        iv_dict[ivn] = ds[ivn][0,:,:imax].squeeze()
+        iv_dict[ivn] = ds[ivn][0,:,:imax].values.squeeze()
     ds.close()
     # then convert to ROMS units/properties, still on the WRF grid
     # invar_list = ['Q2', 'T2', 'PSFC', 'U10', 'V10','RAINCV', 'RAINNCV', 'SWDOWN', 'GLW']
@@ -178,29 +135,9 @@ def Z_wmo_RH(P,T,Q):
     #           WMO-No. 8 (Seventh edition) (6 August 2008)
     #
     # Note 2019.05.15: this document no longer exists on the web.
-
     e_prime = Q*P/(0.62198+Q) # WHO equation 4.A.6
     fp = 1.0016 + 3.15e-6*P - 0.074/P # from Annex 4.B
     ew = 6.112*np.exp(17.62*T/(243.12 + T)) # from Annex 4.B
     ew_prime = fp*ew # from Annex 4.B
     RH = 100 * e_prime/ew_prime # from Annex 4.B
-
     return RH
-    
-    
-if __name__ == '__main__':
-    # examples of uses of the functions, executed in ipython as:
-    # run atm_fun.py
-
-    RH = Z_wmo_RH(1000, 10, .001)
-    RH_expect = 13.031628710406915
-    print('\nTest of Z_wmo_RH:')
-    print(' Value - Expected Value = %0.1g\n' % (RH_expect - RH))
-    
-    print('\nTest of variable attributes')
-    for vn in outvar_list:
-        print('\n' + vn + ':')
-        print(' longname = %s' % (longname_dict[vn]))
-        print(' units = %s' % (units_dict[vn]))
-        print(' timename = %s' % (timename_dict[vn]))
-        
