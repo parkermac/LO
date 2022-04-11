@@ -37,9 +37,9 @@ Contacts at NANOOS:
 - Jan A. Newton <janewton@uw.edu> Admin.
 
 Contacts at SCOOT:
-- Henry Amestoy <henry.amestoy@scootscience.com>
 - Evan Goodwin <evan@scootscience.com>
 - Iwen Su <iwen@scootscience.com>
+- Connor Dibble <connor.dibble@scootscience.com>
 
 ---
 
@@ -69,3 +69,12 @@ Output: `critfc_[salt,temp].nc` (two files) [2.8 GB total]
 
 Contact:
 - Charles Seaton <cseaton@critfc.org>
+
+---
+
+### Hood Canal nest
+
+Output: forecast history files via an account on perigee or apogee
+
+Contact:
+- Harper Simmons <hlsimmons@alaska.edu>
