@@ -80,6 +80,11 @@ while dt <= dt1:
     
     # run the code
     f_fn = Ldir['LO'] / 'forcing' / args.frc / 'make_forcing_main.py'
+    # If the user has this forcing in LO_user, then default to that:
+    f_fn_alt = Ldir['LOu'] / 'forcing' / args.frc / 'make_forcing_main.py'
+    if f_fn_alt.is_file():
+        f_fn = f_fn_alt
+        
     cmd_list = ['python3', str(f_fn),
                 '-g', args.gridname, '-t', args.tag, '-f', args.frc,
                 '-r', args.run_type, '-s', args.start_type,
