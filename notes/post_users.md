@@ -77,4 +77,4 @@ Contact:
 Output: forecast history files via an account on perigee or apogee
 
 Contact:
-- Harper Simmons <hlsimmons@alaska.edu>
+- Harper Simmons <harpers@uw.edu>
