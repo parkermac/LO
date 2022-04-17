@@ -3,7 +3,7 @@ This is the main program for making the TIDE forcing file.
 
 Test on mac in ipython:
 
-run make_forcing_main.py -g cas6 -t v3 -r backfill -s continuation -d 2019.07.04 -f tide00 -test True
+run make_forcing_main.py -g cas6 -t v0 -r backfill -s continuation -d 2019.07.04 -f tide00 -test True
 
 """
 
@@ -39,12 +39,12 @@ NR, NC = G['lon_rho'].shape
 # >>>>>>>>>>> get tpxo fields >>>>>>>>>>>>>>>>>>>>>>>
 # >>>>>>>>>> and interpolate to ROMS grid >>>>>>>>>>>
 
-
 # Constituents to work on
 if Ldir['testing']:
     c_list = ['m2']
 else:
     c_list =  ['m2','s2','k1','o1', 'n2','p1','k2','q1']
+c_dict = dict() # a place to hold the period data
 
 # Set the day to look at, and the dmain to extract.
 time_dt = datetime.strptime(date_string, Ldir['ds_fmt'])
@@ -72,6 +72,8 @@ for con in c_list:
     om, lon, lat, plon, plat, h, amp, phase, umajor, uminor, uincl, uphase = \
         tpxo_fun.get_tpxo_clip(Ldir, con, time_dt, domain_tup)
         
+    c_dict[con] = 2*np.pi/(om*3600)
+    
     tpxo_dict = {'tide_Eamp':amp,
                 'tide_Ephase':phase,
                 'tide_Cangle':uincl,
@@ -128,61 +130,58 @@ for con in c_list:
             
             plt.show()
             pfun.end_plot()
+            break
 
     counter += 1
 
-if False:    
-    # >>>>>>>> write to NetCDF >>>>>>>>>>>>>>>>>>>>>>>>>>>
+# >>>>>>>> write to NetCDF >>>>>>>>>>>>>>>>>>>>>>>>>>>
 
-    # Create the period and Eamp arrays
-    ds = xr.Dataset()
-    p_list = []
-    Eamp = omat.copy()
-    ii = 0
-    for c in cons_dict.keys():
-        p_list.append(cons_dict[c][0])
-        a = cons_dict[c][1]
-        Eamp[ii,:,:] = a * np.ones((1, NR, NC))
-        ii += 1
-    p_vec = np.array(p_list)
-    Eamp[mr3==0] = np.nan
+# Create the period and Eamp arrays
+ds = xr.Dataset()
 
-    # Write the period coordinate
-    vn = 'tide_period'
-    vinfo = zrfun.get_varinfo(vn, vartype='climatology')
-    ds[vn] = (('tide_period',), p_vec)
-    ds[vn].attrs['units'] = vinfo['units']
-    ds[vn].attrs['long_name'] = vinfo['long_name']
+p_vec = np.nan * np.ones(Ncons)
+ii = 0
+for con in c_list:
+    p_vec[ii] = c_dict[con]
+    ii += 1
+    
+# Write the period coordinate
+vn = 'tide_period'
+vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+ds[vn] = (('tide_period',), p_vec)
+ds[vn].attrs['units'] = vinfo['units']
+ds[vn].attrs['long_name'] = vinfo['long_name']
 
-    # Write Eamp
-    vn = 'tide_Eamp'
+# Add constituent names
+vn = 'constituent_name'
+ds[vn] = (('tide_period',), c_list)
+ds[vn].attrs['units'] = 'hours'
+
+# add lon and lat for convenience
+ds['lon_rho'] = (('eta_rho', 'xi_rho'), rlon)
+ds['lat_rho'] = (('eta_rho', 'xi_rho'), rlat)
+
+# Write all other fields
+for vn in item_list:
     vinfo = zrfun.get_varinfo(vn, vartype='climatology')
     dims = ('tide_period',) + vinfo['space_dims_tup']
-    ds[vn] = (dims, Eamp)
+    ds[vn] = (dims, R_dict[vn])
     ds[vn].attrs['units'] = vinfo['units']
     ds[vn].attrs['long_name'] = vinfo['long_name']
 
-    # Write all other fields
-    for vn in ['tide_Ephase', 'tide_Cangle', 'tide_Cphase', 'tide_Cmax', 'tide_Cmin']:
-        vinfo = zrfun.get_varinfo(vn, vartype='climatology')
-        dims = ('tide_period',) + vinfo['space_dims_tup']
-        ds[vn] = (dims, omat.copy())
-        ds[vn].attrs['units'] = vinfo['units']
-        ds[vn].attrs['long_name'] = vinfo['long_name']
+# Compress and save to NetCDF
+Enc_dict = {vn:zrfun.enc_dict for vn in item_list}
+ds.to_netcdf(out_fn, encoding=Enc_dict)
+ds.close()    
+# -------------------------------------------------------
 
-    # Compress and save to NetCDF
-    Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
-    ds.to_netcdf(out_fn, encoding=Enc_dict)
-    ds.close()    
-    # -------------------------------------------------------
+# test for success
+if True:
+    result_dict['result'] = 'success' # success or fail
+else:
+    result_dict['result'] = 'fail'
 
-    # test for success
-    if True:
-        result_dict['result'] = 'success' # success or fail
-    else:
-        result_dict['result'] = 'fail'
+# *******************************************************
 
-    # *******************************************************
-
-    result_dict['end_dt'] = datetime.now()
-    ffun.finale(Ldir, result_dict)
+result_dict['end_dt'] = datetime.now()
+ffun.finale(Ldir, result_dict)
