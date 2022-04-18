@@ -19,6 +19,8 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
+ad_hoc_adjustment = True
+
 date_string = Ldir['date_string']
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + date_string) / Ldir['frc']
 
@@ -34,7 +36,6 @@ grid_fn = Ldir['grid'] / 'grid.nc'
 
 G = zrfun.get_basic_info(grid_fn, only_G=True)
 NR, NC = G['lon_rho'].shape
-
 
 # >>>>>>>>>>> get tpxo fields >>>>>>>>>>>>>>>>>>>>>>>
 # >>>>>>>>>> and interpolate to ROMS grid >>>>>>>>>>>
@@ -71,6 +72,29 @@ for con in c_list:
     # this is where we do the entire tpxo9 extraction and processing
     om, lon, lat, plon, plat, h, amp, phase, umajor, uminor, uincl, uphase = \
         tpxo_fun.get_tpxo_clip(Ldir, con, time_dt, domain_tup)
+    
+    if ad_hoc_adjustment:
+        print('> tide00 doing ad hoc adjustment of amplitudes <')
+        # ad hoc amplitude adjustments
+        if con == 'o1':
+            fadj = 1.21*1.087
+        elif con == 'k1':
+            fadj = 1.21*1.11
+        elif con == 'p1':
+            fadj = 1.21
+        elif con == 'q1':
+            fadj = 1.21
+        elif con == 'm2':
+            fadj = 1.17*1.075
+        elif con == 's2':
+            fadj = 1.261*1.13
+        elif con == 'n2':
+            fadj = 1.196*1.11
+        elif con == 'k2':
+            fadj = 1.2*1.11
+        amp = fadj * amp
+        umajor = fadj * umajor
+        uminor = fadj * uminor
         
     c_dict[con] = 2*np.pi/(om*3600)
     
