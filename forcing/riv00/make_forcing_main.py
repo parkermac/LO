@@ -145,10 +145,9 @@ dims = (vinfo['time'],) + ('river',)
 Q_mat = np.zeros((NT, NRIV))
 rr = 0
 for rn in gri_df.index:
-    for rn in gri_df.index:
-        qt_df = qt_df_dict[rn]
-        flow = qt_df['final'].values
-        Q_mat[:,rr] = flow * gri_df.loc[rn, 'isign']
+    qt_df = qt_df_dict[rn]
+    flow = qt_df['final'].values
+    Q_mat[:,rr] = flow * gri_df.loc[rn, 'isign']
     rr += 1
 ds[vn] = (dims, Q_mat)
 ds[vn].attrs['long_name'] = vinfo['long_name']
