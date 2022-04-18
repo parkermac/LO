@@ -246,7 +246,7 @@ if planB == False:
         tt = d2i_dict[fn2]
         for vn in outvar_list:
             this_field = ovc_dict[vn]
-            this_field[G['mask_rho']==0] = np.nan
+            #this_field[G['mask_rho']==0] = np.nan
             D[vn][tt,:,:] = this_field
             
     for vn in outvar_list:
