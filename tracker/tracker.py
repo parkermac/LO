@@ -51,18 +51,19 @@ import numpy as np
 from lo_tools import Lfun, zfun
 Ldir = Lfun.Lstart()
 
-from importlib import reload
-
-pth = Ldir['LOu'] / 'tracker'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import experiments as exp
-reload(exp)
+# get the experiments module, looking first in LO_user
+pth = Ldir['LO'] / 'tracker'
+upth = Ldir['LOu'] / 'tracker'
+if (upth / 'experiments.py').is_file():
+    print('Importing experiments from LO_user')
+    exp = Lfun.module_from_file('experiments', upth / 'experiments.py')
+else:
+    print('Importing experiments from LO')
+    exp = Lfun.module_from_file('experiments', pth / 'experiments.py')
 
 import trackfun_nc as tfnc
-reload(tfnc)
 
-# The import of trackfun or user_trackfun is done later in this program,
+# The import of trackfun is done later in this program,
 # about 100 lines down.
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -201,15 +202,15 @@ Lfun.dict_to_csv(TR, outdir0 / 'exp_info.csv')
 # and write the same info to outdir as part of the archived run output
 Lfun.dict_to_csv(TR, outdir / 'exp_info.csv')
 
-# Load the trackfun module.
-# NOTE: we have to load this module AFTER we write [outdir0]/exp_info.csv
-# because it uses that information to decide which KDTrees to load.  Crude.
-if (Ldir['LOu'] / 'tracker' / 'user_trackfun.py').is_file():
-    sys.path.append(str(Ldir['LOu'] / 'tracker'))
-    import user_trackfun as tfun
+# get the trackfun module, looking first in LO_user
+pth = Ldir['LO'] / 'tracker'
+upth = Ldir['LOu'] / 'tracker'
+if (upth / 'trackfun.py').is_file():
+    print('Importing trackfun from LO_user')
+    tfun = Lfun.module_from_file('trackfun', upth / 'trackfun.py')
 else:
-    import trackfun as tfun
-reload(tfun)
+    print('Importing trackfun from LO')
+    tfun = Lfun.module_from_file('trackfun', pth / 'trackfun.py')
 
 # get the initial particle location vectors
 plon00, plat00, pcs00 = exp.get_ic(TR)

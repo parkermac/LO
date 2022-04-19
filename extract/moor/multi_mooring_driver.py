@@ -86,11 +86,15 @@ if Ldir['get_all']:
     Ldir['get_bio'] = True
     Ldir['get_surfbot'] = True
 
-# get the job list module
-job_dir = Ldir['LOu'] / 'extract' / 'moor'
-if str(job_dir) not in sys.path:
-    sys.path.append(str(job_dir))
-import job_lists
+# get the job_lists module, looking first in LO_user
+pth = Ldir['LO'] / 'extract' / 'moor'
+upth = Ldir['LOu'] / 'extract' / 'moor'
+if (upth / 'job_lists.py').is_file():
+    print('Importing job_lists from LO_user')
+    job_lists = Lfun.module_from_file('job_lists', upth / 'job_lists.py')
+else:
+    print('Importing job_lists from LO')
+    job_lists = Lfun.module_from_file('job_lists', pth / 'job_lists.py')
 
 # Get job dict:
 sta_dict = job_lists.get_sta_dict(Ldir['job'])

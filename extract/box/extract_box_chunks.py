@@ -128,13 +128,15 @@ def check_bounds(lon, lat):
     ilat = zfun.find_nearest_ind(Lat, lat)
     return ilon, ilat
 
-# get the indices and check that they are in the grid
-pth = Ldir['LOu'] / 'extract' / 'box'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import job_definitions
-from importlib import reload
-reload(job_definitions)
+# get the job_definitions module, looking first in LO_user
+pth = Ldir['LO'] / 'extract' / 'box'
+upth = Ldir['LOu'] / 'extract' / 'box'
+if (upth / 'job_definitions.py').is_file():
+    print('Importing job_definitions from LO_user')
+    job_definitions = Lfun.module_from_file('job_definitions', upth / 'job_definitions.py')
+else:
+    print('Importing job_definitions from LO')
+    job_definitions = Lfun.module_from_file('job_definitions', pth / 'job_definitions.py')
 aa, vn_list = job_definitions.get_box(Ldir['job'], Lon, Lat)
 lon0, lon1, lat0, lat1 = aa
 ilon0, ilat0 = check_bounds(lon0, lat0)

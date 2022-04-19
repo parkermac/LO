@@ -3,25 +3,25 @@ Organizational functions for pgrid.
 """
 
 from lo_tools import Lfun
+Ldir = Lfun.Lstart()
 
-import sys
-from pathlib import Path
-pth = Path(__file__).absolute().parent.parent.parent / 'LO_user' / 'pgrid'
-if str(pth) not in sys.path:
-    sys.path.append(str(pth))
-import gfun_user
-# assume the user will be editing things
-from importlib import reload
-reload(gfun_user)
+# get the gfun_user module, looking first in LO_user
+pth = Ldir['LO'] / 'pgrid'
+upth = Ldir['LOu'] / 'pgrid'
+if (upth / 'gfun_user.py').is_file():
+    print('Importing gfun_user from LO_user')
+    gfun_user = Lfun.module_from_file('gfun_user', upth / 'gfun_user.py')
+else:
+    print('Importing gfun_user from LO')
+    gfun_user = Lfun.module_from_file('gfun_user', pth / 'gfun_user.py')
 
 # get info from LO_user/pgrid/gfun_user.py
 gridname = gfun_user.gridname
 base_gridname = gfun_user.base_gridname
 base_tag = gfun_user.base_tag
 
+# remake Ldir
 Ldir = Lfun.Lstart(gridname=base_gridname, tag=base_tag)
-
-#print(Ldir['gtag'])
 
 def gstart(gridname=gridname):
     """

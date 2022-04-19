@@ -7,16 +7,18 @@ whatever python3 exists on the large clusters we use for ROMS, e.g. mox and klon
 Re-coded 2022.04.19 to first look for LO_user/get_lo_info.py, and if not found
 then look for LO/get_user_info.py.  The goal is to clean out LO_user of all of the code
 that the LO developer (MacCready) would edit.  Then we add "hooks" to look for
-user versions in LO_user at stretegic places, as is done below.
+user versions in LO_user at strategic places, as is done below.
 """
 import os, sys, shutil
 from pathlib import Path 
 from datetime import datetime, timedelta
+import importlib.util
 
 # get initial version of Ldir when this module is loaded
 upth = Path(__file__).absolute().parent.parent.parent.parent / 'LO_user'
 pth = Path(__file__).absolute().parent.parent.parent.parent / 'LO'
 
+# get the job_definitions module, looking first in LO_user
 if (upth / 'get_lo_info.py').is_file():
     if str(upth) not in sys.path:
         sys.path.append(str(upth))
@@ -34,10 +36,6 @@ elif (pth / 'get_lo_info.py').is_file():
 else:
     print('Error from Lfun: missing LO/get_lo_info.py and LO_user/get_lo_info.py')
     sys.exit()
-
-if False:
-    from importlib import reload
-    reload(glo)
 
 # initialize Ldir for this module
 Ldir = glo.Ldir0.copy()
@@ -282,6 +280,16 @@ def messages(stdout, stderr, mtitle, test_flag=True):
             print(' stderr '.center(60,'-'))
             print(stderr.decode())
         sys.stdout.flush()
+        
+def module_from_file(module_name, file_path):
+    """
+    This is used for the hook ot LO_user.  It allows you to import a module from a
+    specific path, even if a module of the same name exists in the current directory.
+    """
+    spec = importlib.util.spec_from_file_location(module_name, file_path)
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 if __name__ == '__main__':
     # TESTING: run Lfun will execute these
