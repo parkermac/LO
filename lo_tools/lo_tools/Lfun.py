@@ -3,15 +3,28 @@ Module of functions for LO version of LiveOcean.
 
 This is purposely kept to a minimum of imports so that it will run with
 whatever python3 exists on the large clusters we use for ROMS, e.g. mox and klone.
+
+Re-coded 2022.04.19 to first look for LO_user/get_lo_info.py, and if not found
+then look for LO/get_user_info.py.  The goal is to clean out LO_user of all of the code
+that the LO developer (MacCready) would edit.  Then we add "hooks" to look for
+user versions in LO_user at stretegic places, as is done below.
 """
 import os, sys, shutil
 from pathlib import Path 
 from datetime import datetime, timedelta
 
 # get initial version of Ldir when this module is loaded
-pth = Path(__file__).absolute().parent.parent.parent.parent / 'LO_user'
+upth = Path(__file__).absolute().parent.parent.parent.parent / 'LO_user'
+pth = Path(__file__).absolute().parent.parent.parent.parent / 'LO'
 
-if (pth / 'get_lo_info.py').is_file():
+if (upth / 'get_lo_info.py').is_file():
+    if str(upth) not in sys.path:
+        sys.path.append(str(upth))
+    try:
+        import get_lo_info as glo
+    except Exception as e:
+        print(e)
+elif (pth / 'get_lo_info.py').is_file():
     if str(pth) not in sys.path:
         sys.path.append(str(pth))
     try:
@@ -19,7 +32,7 @@ if (pth / 'get_lo_info.py').is_file():
     except Exception as e:
         print(e)
 else:
-    print('Error from Lfun: missing LO_user/get_lo_info.py')
+    print('Error from Lfun: missing LO/get_lo_info.py and LO_user/get_lo_info.py')
     sys.exit()
 
 if False:
