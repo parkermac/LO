@@ -8,7 +8,7 @@ run pan_plot
 (it will prompt for the plot type)
 
 Here is an example with explicit flags:
-run pan_plot -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -lt snapshot -pt P_Chl_DO -avl False
+run pan_plot -gtx cas6_v0_live -ro 0 -0 2019.07.04 -lt snapshot -pt P_Chl_DO -avl False
 
 When using the default -avl True for multiple plots (e.g. when making a movie)
 the color limits will all be set to match those set by auto_lims() from the first plot.
@@ -32,8 +32,8 @@ reload(roms_plots)
 parser = argparse.ArgumentParser()
 
 # which run to use
-parser.add_argument('-gtx', '--gtagex', default='cas6_v3_lo8b', type=str)
-parser.add_argument('-ro', '--roms_out_num', default=2, type=int)
+parser.add_argument('-gtx', '--gtagex', default='cas6_v0_live', type=str)
+parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
 # 2 = Ldir['roms_out2'], etc.
 
 # select time period and frequency

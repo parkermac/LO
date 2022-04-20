@@ -2,12 +2,12 @@
 This is the one place where you set the path structure of the LO code.
 The info is stored in the dict Ldir.
 
-All paths are pathlib.Path objects
+All paths are pathlib.Path objects.
 
 This program is meant to be loaded as a module by Lfun which then adds more
 entries to the Ldir dict based on which model run you are working on.
 
-Users should create LO_user/get_lo_info.py, edit as needed, and make it into
+Users should copy this to LO_user/get_lo_info.py, edit as needed, and make it into
 their own GitHub repo.
 
 """

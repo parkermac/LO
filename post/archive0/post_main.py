@@ -1,11 +1,14 @@
 """
 This is the main program for archiving the daily forecast to another place.
-It just save history files 1-25 for the current day.  It can be run before or after split0.
+It copies all three days of the forecast, overwriting existing days 1 and 2 from the
+previous forecast.
 
-I created this as a standalone program because it a a very niche task.  It is desigend as
-a post job that runs with the forecast, but you could also run it by hand for other days.
+I created this as a standalone program because it is a very niche task.  It is designed as
+a post job that runs with the forecast.  I would avoid using it for backfill jobs because it
+has the potential to overwrite things you wanted to keep.
 
-NOTE: the target directory must not already exist, or if it does it must be empty.
+Test on mac:
+run post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -r forecast -job archive0 -test True
 
 Test on apogee:
 run post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -job archive0 -test True
@@ -13,7 +16,7 @@ python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -job archive
 Testing just prints what it would do, but does not actually copy the files.
 
 Run for real on apogee:
-python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -job archive0 > archive0.log &
+python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -r forecast -job archive0 > archive0.log &
 """
 
 from pathlib import Path
@@ -28,58 +31,44 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
-import shutil
-from lo_tools import Lfun
+from subprocess import Popen as PO
+from subprocess import PIPE as PI
 
 ds0 = Ldir['date_string']
-
-print(' - archiving forecast files for ' + ds0)
-f_string = 'f' + ds0
-
-in_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
-out_dir = Path('/pgdat1') / 'parker' / 'LiveOcean_roms' / 'output' / 'cas6_v3_lo8b' / f_string
-
-if out_dir.is_dir():
-    try:
-        out_dir.rmdir()
-    except Exception as e:
-        print('Error - target directory exists and is not empty!')
-        print(e)
-        sys.exit()
-
-name_list = []
-for ii in range(1,26):
-    hh = ('0000' + str(ii))[-4:]
-    name_list.append('ocean_his_' + hh + '.nc')
+dt0 = datetime.strptime(ds0, Ldir['ds_fmt'])
+if Ldir['run_type'] == 'backfill':
+    dt1 = dt0
+elif Ldir['run_type'] == 'forecast':
+    ndays = Ldir['forecast_days']
+    dt1 = dt0 + timedelta(days=ndays-1)
 
 result = 'success'
-do_copy = True
-for name in name_list:
-    fn = in_dir / name
-    if fn.is_file():
-        pass
+this_dt = dt0
+while this_dt <= dt1:
+    this_ds = this_dt.strftime(Ldir['ds_fmt'])
+    print(' - archiving files for ' + this_ds)
+    f_string = 'f' + this_ds
+    in_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
+    out_dir = Path('/pgdat1') / 'parker' / 'LO_roms' / 'output' / 'cas6_v0_live' / f_string
+    if Ldir['testing'] == True:
+        # For testing we just print the directories
+        print('   in_dir: %s' % (str(in_dir)))
+        print('   out_dir: %s' % (str(out_dir)))
     else:
-        do_copy = False
-        result = 'fail'
-        result_dict['note'] = 'Missing file ' + name
-        break
-    
-result = 'success'
-if do_copy:
-    try:
-        Lfun.make_dir(out_dir)
-        for name in name_list:
-            in_fn = in_dir / name
-            out_fn = out_dir / name
-            if Ldir['testing']:
-                print('\n'+str(in_fn))
-                print(str(out_fn))
-            else:
-                shutil.copyfile(in_fn, out_fn)
-    except Exception as e:
-        result = 'fail'
-        print('Error while trying to copy files:')
-        print(e)
+        # Copy the contents of in_dir to out_dir (overwrite existing files)
+        cmd_list = ['scp','-r', str(in_dir), str(out_dir)]
+        proc = PO(cmd_list, stdout=PI, stderr=PI)
+        stdout, stderr = proc.communicate()
+        Ncenter = 30
+        if len(stdout) > 0:
+            print(' sdtout '.center(Ncenter,'-'))
+            print(stdout.decode())
+        if len(stderr) > 0:
+            result = 'fail'
+            print(' stderr '.center(Ncenter,'-'))
+            print(stderr.decode())
+        sys.stdout.flush()
+    this_dt += timedelta(days=1)
 
 # -------------------------------------------------------
 
