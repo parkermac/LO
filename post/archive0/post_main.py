@@ -7,16 +7,9 @@ I created this as a standalone program because it is a very niche task.  It is d
 a post job that runs with the forecast.  I would avoid using it for backfill jobs because it
 has the potential to overwrite things you wanted to keep.
 
-Test on mac:
+Test on mac or apogee:
 run post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -r forecast -job archive0 -test True
 
-Test on apogee:
-run post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -job archive0 -test True
-python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -job archive0 -test True > archive0.log &
-Testing just prints what it would do, but does not actually copy the files.
-
-Run for real on apogee:
-python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's datestring] -r forecast -job archive0 > archive0.log &
 """
 
 from pathlib import Path
@@ -49,7 +42,7 @@ while this_dt <= dt1:
     print(' - archiving files for ' + this_ds)
     f_string = 'f' + this_ds
     in_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
-    out_dir = Path('/pgdat1') / 'parker' / 'LO_roms' / 'output' / 'cas6_v0_live' / f_string
+    out_dir = Path('/pgdat1') / 'parker' / 'LO_roms' / 'cas6_v0_live' / f_string
     if Ldir['testing'] == True:
         # For testing we just print the directories
         print('   in_dir: %s' % (str(in_dir)))
