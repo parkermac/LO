@@ -10,6 +10,8 @@ has the potential to overwrite things you wanted to keep.
 Test on mac or apogee:
 run post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -r forecast -job archive0 -test True
 
+Run for real on apogee:
+python post_main.py -gtx cas6_v0_u0kb -ro 0 -d [today's datestring] -r forecast -job archive0 < /dev/null > post.log &
 """
 
 from pathlib import Path
@@ -42,13 +44,13 @@ while this_dt <= dt1:
     print(' - archiving files for ' + this_ds)
     f_string = 'f' + this_ds
     in_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
-    out_dir = Path('/pgdat1') / 'parker' / 'LO_roms' / 'cas6_v0_live' / f_string
+    out_dir = Path('/pgdat1') / 'parker' / 'LO_roms' / 'cas6_v0_live'
     if Ldir['testing'] == True:
         # For testing we just print the directories
         print('   in_dir: %s' % (str(in_dir)))
         print('   out_dir: %s' % (str(out_dir)))
     else:
-        # Copy the contents of in_dir to out_dir (overwrite existing files)
+        # Copy in_dir to out_dir (overwrite if existing)
         cmd_list = ['scp','-r', str(in_dir), str(out_dir)]
         proc = PO(cmd_list, stdout=PI, stderr=PI)
         stdout, stderr = proc.communicate()
