@@ -260,7 +260,7 @@ def make_varinfo_list():
         
     # specify which varinfo.yaml to use
     Ldir = Lfun.Lstart()
-    fn = Ldir['parent'] / 'LO_roms_user' / 'varinfo' / 'varinfo.yaml'
+    fn = Ldir['parent'] / 'LO_roms_source_alt' / 'varinfo' / 'varinfo.yaml'
     
     # parse into a list of dicts
     with open(fn,'r') as f:
