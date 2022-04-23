@@ -256,7 +256,14 @@ if planB == False:
         vinfo = zrfun.get_varinfo(vn)
         tname =  vinfo['time_name']
         dims = (tname,) + vinfo['space_dims_tup']
-        # You could intervene here by writing something different than omat.
+        # take time derivative or rain, converting [mm]
+        # to [kg m-2 s-1]
+        if vn == 'rain':
+            rmat = D[vn].copy()
+            rrmat = np.ones(rmat.shape)
+            rrmat[:-1,:,:] = np.diff(rmat, axis=0) / 3600
+            rrmat[-1,:,:] = rrmat[-2,:,:]
+            D[vn] = rrmat
         ds[vn] = (dims, D[vn])
         ds[vn].attrs['units'] = vinfo['units']
         ds[vn].attrs['long_name'] = vinfo['long_name']

@@ -7,7 +7,7 @@ import xarray as xr
 import seawater as sw
 import matplotlib.path as mpath
 
-invar_list = ['Q2', 'T2', 'PSFC', 'U10', 'V10','RAINCV', 'RAINNCV', 'SWDOWN', 'GLW']
+invar_list = ['Q2', 'T2', 'PSFC', 'U10', 'V10','RAINC', 'RAINNC', 'SWDOWN', 'GLW']
 
 outvar_list = ['Pair','rain','swrad','lwrad_down','Tair','Qair','Uwind','Vwind']
 
@@ -73,17 +73,17 @@ def gather_and_process_fields(fn, imax, ca, sa, outvar_list):
         iv_dict[ivn] = ds[ivn][0,:,:imax].values.squeeze()
     ds.close()
     # then convert to ROMS units/properties, still on the WRF grid
-    # invar_list = ['Q2', 'T2', 'PSFC', 'U10', 'V10','RAINCV', 'RAINNCV', 'SWDOWN', 'GLW']
-    # outvar_list = ['Pair','rain','swrad','lwrad_down','Tair','Qair','Uwind','Vwind']
     ov_dict = dict()
     for ovn in outvar_list:
         if ovn == 'Pair':
             # convert Pa to mbar
             ov_dict[ovn] = iv_dict['PSFC']/100 
         elif ovn == 'rain':
-            # set this to zero because (a) we don't really understand the units
-            # and (b) is it not used in the simulations at this point 2019.05.22
-            ov_dict[ovn] = 0 * (iv_dict['RAINCV']+iv_dict['RAINNCV'])
+            # This is accumulated precipitation [mm] and will be converted to
+            # the units expected by ROMS [kg m-2 s-1] in the main code after
+            # all hours have been gathered into one array (because we have to
+            # take a time derivative).
+            ov_dict[ovn] = iv_dict['RAINC']+iv_dict['RAINNC']
         elif ovn == 'Tair':
             # convert K to C
             ov_dict[ovn] = iv_dict['T2'] - 273.15
