@@ -175,7 +175,7 @@ for vn in ['river_salt', 'river_temp']:
     ds[vn].attrs['units'] = vinfo['units']
     
 # Add biology
-bvn_list = ['NO3', 'NH4', 'LDeN', 'SDeN', 'LDeC', 'SDeC',
+bvn_list = ['NO3', 'NH4', 'Phyt', 'Zoop', 'LDeN', 'SDeN', 'Chlo', 'LDeC', 'SDeC', 'RDeC',
         'TIC', 'alkalinity', 'Oxyg']
 for bvn in bvn_list:
     vn = 'river_' + bvn
