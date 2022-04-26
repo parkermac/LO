@@ -5,10 +5,13 @@ updated ROMS, including bio variables, from an old ROMS file.
 
 import xarray as xr
 from lo_tools import Lfun, zrfun
+from pathlib import Path
 
 Ldir = Lfun.Lstart()
 
-in_fn = Ldir['roms_out'] / 'cas6_v0_live' / 'f2021.11.09' / 'ocean_his_0025.nc'
+in_dir0 = Path('/pgdat1/parker/LO_roms')
+
+in_fn = in_dir0 / 'cas6_v0_live' / 'f2021.11.09' / 'ocean_his_0025.nc'
 
 out_dir = Ldir['roms_out'] / 'cas6_v0_uu0kb' / 'f2021.11.09'
 Lfun.make_dir(out_dir)
