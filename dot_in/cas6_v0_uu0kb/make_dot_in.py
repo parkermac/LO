@@ -53,8 +53,8 @@ D['EX_NAME'] = Ldir['ex_name'].upper()
 
 #### USER DEFINED VALUES ####
 
-# where to find varinfo.dat
-D['varinfo_dir'] = Ldir['parent'] / 'LO_roms_source' / 'ROMS' / 'External'
+# which ROMS code to use
+D['roms_name'] = 'LO_roms_source'
 
 multi_core = True # use more than one core
 
@@ -178,6 +178,7 @@ D['dstart'] = int(Lfun.datetime_to_modtime(fdt) / 86400.)
 D['grid_dir'] = Ldir['grid']
 force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string'])
 D['force_dir'] = force_dir
+D['roms_varinfo_dir'] = Ldir['parent'] / 'LO_roms_source_alt' / 'varinfo'
 
 # get horizontal coordinate info
 with open(Ldir['grid'] / 'XY_COORDINATE_INFO.csv','r') as xyf:

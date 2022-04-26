@@ -8,9 +8,9 @@ from lo_tools import Lfun, zrfun
 
 Ldir = Lfun.Lstart()
 
-in_fn = Ldir['roms_out2'] / 'cas6_v3_lo8b' / 'f2019.07.04' / 'ocean_his_0025.nc'
+in_fn = Ldir['roms_out'] / 'cas6_v0_live' / 'f2021.11.09' / 'ocean_his_0025.nc'
 
-out_dir = Ldir['roms_out'] / 'cas6_v00_uu0kb' / 'f2019.07.04'
+out_dir = Ldir['roms_out'] / 'cas6_v0_uu0kb' / 'f2021.11.09'
 Lfun.make_dir(out_dir)
 out_fn = out_dir / 'ocean_his_0025.nc'
 

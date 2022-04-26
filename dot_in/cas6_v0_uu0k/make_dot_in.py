@@ -87,7 +87,7 @@ rst_interval = 10 # days between writing to the restart file (e.g. 5)
 # Find which forcings to look for (search the csv file in this directory).
 # We use the csv file because driver_roms_mox.py also uses it to copy forcing
 # without extra stuff.
-this_dir = ppth = Path(__file__).absolute().parent
+this_dir = Path(__file__).absolute().parent
 with open(this_dir / 'forcing_list.csv', 'r') as f:
     for line in f:
         which_force, force_choice = line.strip().split(',')
