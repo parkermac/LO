@@ -174,9 +174,9 @@ for vn in ['river_salt', 'river_temp']:
     ds[vn].attrs['long_name'] = vinfo['long_name']
     ds[vn].attrs['units'] = vinfo['units']
     
-# Add biology
-bvn_list = ['NO3', 'NH4', 'Phyt', 'Zoop', 'LDeN', 'SDeN', 'Chlo', 'LDeC', 'SDeC', 'RDeC',
-        'TIC', 'alkalinity', 'Oxyg']
+# Add biology (see the lineup near the end of fennel_var.h)
+bvn_list = ['NO3', 'NH4', 'Phyt', 'Zoop', 'LDeN', 'SDeN', 'Chlo',
+        'TIC', 'TAlk', 'LDeC', 'SDeC', 'Oxyg']
 for bvn in bvn_list:
     vn = 'river_' + bvn
     vinfo = zrfun.get_varinfo(vn)

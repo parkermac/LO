@@ -25,12 +25,17 @@ def get_ic(TR):
         latvec = np.linspace(48.2, 48.4, 20)
         pcs_vec = np.array([0])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
-    
+        
     if exp_name == 'ai0': # Mid-Admiralty Inlet
         lonvec = np.array([-122.6])
         latvec = np.array([48])
-        # These are: (Slope off JdF, Middle of JdF, Whidbey Basin)
         pcs_vec = np.linspace(-1,-0.9,num=1000)
+        plon00, plat00, pcs00 = ic_from_list(lonvec, latvec, pcs_vec)
+        
+    if exp_name == 'aiN': # North Admiralty Inlet
+        lonvec = np.array([-122.67])
+        latvec = np.array([48.125])
+        pcs_vec = np.linspace(-1,-0.9,num=100)
         plon00, plat00, pcs00 = ic_from_list(lonvec, latvec, pcs_vec)
         
     elif exp_name == 'vmix': # three vertical profiles to test mixing

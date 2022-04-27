@@ -74,8 +74,8 @@ parser = argparse.ArgumentParser()
 # Set the experiment name
 # (details set in experiments.py, or, if it exists, user_experiments.py)
 
-parser.add_argument('-gtx', '--gtagex', default='cas6_v3_lo8b', type=str)
-parser.add_argument('-ro', '--roms_out_num', default=2, type=int)
+parser.add_argument('-gtx', '--gtagex', default='cas6_v0_live', type=str)
+parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
 # 1 = Ldir['roms_out1'], etc.
 
 # this is the first starting day

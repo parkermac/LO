@@ -64,7 +64,7 @@ lat[~ib_mask] = np.nan
 
 # PLOTTING
 plt.close('all')
-pfun.start_plot(figsize=(16,10))
+pfun.start_plot(figsize=(14,8))
 fig = plt.figure()
 
 # MAP
@@ -96,7 +96,7 @@ ax.plot(lon[-1,:], lat[-1,:], 'or', alpha=.3)
 
 # time series
 td = (ot_vec - ot_vec[0])/86400
-tv_list = ['z', 'salt', 'temp', 'oxygen']
+tv_list = ['z', 'salt', 'temp']
 #tv_list = ['u', 'v', 'lon', 'lat']
 ntv = len(tv_list)
 for ii in range(ntv):
