@@ -39,6 +39,8 @@ for vn in ds.data_vars:
 vn2_list = ['zeta']
 if 'Pair' in VN_list:
     vn2_list += ['shflux', 'swrad']
+if 'ubar' in VN_list:
+    vn2_list += ['ubar', 'vbar']
 vn3_list = []
 if 'salt' in VN_list:
     vn3_list += ['salt', 'temp']
