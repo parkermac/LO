@@ -79,6 +79,65 @@ def P_basic(in_dict):
     else:
         plt.show()
         
+def P_Fb(in_dict):
+    # START
+    ds = xr.open_dataset(in_dict['fn'])
+    # find aspect ratio of the map
+    aa = pfun.get_aa(ds)
+    # AR is the aspect ratio of the map: Vertical/Horizontal
+    AR = (aa[3] - aa[2]) / (np.sin(np.pi*aa[2]/180)*(aa[1] - aa[0]))
+    fs = 14
+    hgt = 10
+    pfun.start_plot(fs=fs, figsize=(int(hgt*2.5/AR),int(hgt)))
+    fig = plt.figure()
+    # PLOT CODE
+    vn_list = ['salt', 'Fb']
+    ii = 1
+    for vn in vn_list:
+        if in_dict['auto_vlims']:
+            pinfo.vlims_dict[vn] = ()
+        ax = fig.add_subplot(1, len(vn_list), ii)
+        if vn == 'salt':
+            cs = pfun.add_map_field(ax, ds, vn, pinfo.vlims_dict,
+                    cmap=pinfo.cmap_dict[vn], fac=pinfo.fac_dict[vn],
+                    vlims_fac=pinfo.range_dict[vn])
+            ax.set_title('Surface %s %s' % (pinfo.tstr_dict[vn],pinfo.units_dict[vn]),
+                    fontsize=1.2*fs)
+        elif vn == 'Fb':
+            # plot vertically integrateed buoyancy flux
+            # calculate potential density
+            import seawater as sw
+            rho = sw.dens0(ds.salt.values.squeeze(), ds.temp.values.squeeze())
+            # calculate vertically-integrated buoyancy flux
+            Fb = -9.8 * np.sum(ds.AKs[0,1:-1,:,:].squeeze() * np.diff(rho, axis=0), axis=0).values
+            Fb[ds.mask_rho.values==0] = np.nan
+            plon, plat = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
+            cs = ax.pcolormesh(plon,plat, Fb, vmin=0, vmax=.1, cmap='YlOrRd')
+            ax.set_title('Vertically Integrated Fb')
+        fig.colorbar(cs)
+        pfun.add_coast(ax)
+        ax.axis(pfun.get_aa(ds))
+        pfun.dar(ax)
+        ax.set_xlabel('Longitude')
+        if ii == 1:
+            ax.set_ylabel('Latitude')
+            pfun.add_info(ax, in_dict['fn'])
+            #pfun.add_windstress_flower(ax, ds)
+            pfun.add_bathy_contours(ax, ds, txt=True)
+            pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
+        elif ii == 2:
+            ax.set_yticklabels([])
+        ii += 1
+    #fig.tight_layout()
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+        
 def P_fancy(in_dict):
     # START
     ds = xr.open_dataset(in_dict['fn'])

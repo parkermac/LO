@@ -14,7 +14,7 @@ import numpy as np
 from datetime import datetime, timedelta
 import pytz
 
-if '_mac' in Ldir['lo_env']: # mac version
+if ('_mac' in Ldir['lo_env']) or ('_pc' in Ldir['lo_env']): # mac or pc version
     #print('mac version') # debugging
     pass
 else: # remote/linux version
