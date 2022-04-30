@@ -16,25 +16,27 @@ Check out today's model output at [LiveOcean](http://faculty.washington.edu/pmac
 
 ## Why would you clone this repo?
 
-The main users of this repo are people who are in some way collaborating with me and want to use any of my forcing-generation, model-running, or post-processing tools.
+The main users of this repo are people who are in some way collaborating with me and want to use any of my forcing-generation, model-running, or post-processing tools. You don't need this repo to work with the LiveOcean ROMS output files, but some of the tools here may be useful.
 
 ---
 
 ## Installation - four steps
 
-*All the instructions assume you are working from the linux (bash) command line. When I say "go to" I mean navigate to that place, and "do" means enter that command from the linux command line and hit return.*
+All the instructions assume you are working from the linux (bash) command line. When I say "go to" I mean navigate to that place, and "do" means enter that command from the linux command line and hit return.
 
-For mac users you already have the linux operating system and a terminal. To help with cross-platform compatibility we will used the bash shell (instead of the new mac default zsh), so you should issue this command in your terminal window: `chsh -s /bin/bash`
+For mac users you already have the linux operating system and a terminal. To help with cross-platform compatibility we will used the bash shell (instead of the new mac default zsh), so you should issue this command in your terminal window `chsh -s /bin/bash` to set your default shell to bash.
 
-Windows users need to download Ubuntu and get it configured. Here is a [LINK](https://ubuntu.com/download/desktop) to the download. Here is [INFO](https://docs.microsoft.com/en-us/windows/wsl/install) about the best practice to get this set up before installing miniconda. WSL is basically configuring linux within windows for ubuntu to use.  Then just work from a terminal window using ubuntu as your version of linux. _Thanks to Marissa Leatherman for these tips._
+Windows users need to download Ubuntu and get it configured. Here is a [LINK](https://ubuntu.com/download/desktop) to the download. After downloading, follow these [DIRECTIONS](https://docs.microsoft.com/en-us/windows/wsl/install) about the best practice to get this set up before installing miniconda. WSL is basically configuring linux within windows for ubuntu to use.  Then just work from a terminal window using ubuntu as your version of linux. _Thanks to Marissa Leatherman for these tips._
 
-#### (1) Install miniconda on your machine and then create the "loenv" environment.
+To use the LO system effectively as a member of MacCready's research group, you will likely be setting up your own python installation on both your laptop and on one or more of our group servers (e.g. apogee and perigee).  You will also probably be working on the UW supercomputer cluster called hyak, but you don't need to install python there.
+
+#### (1) Install miniconda on your laptop and then create the "loenv" environment.
 
 Anaconda is a great way to get python. We will use a minimal installation of python3 called "miniconda" and then create a conda "environment" and add required packages to it ourselves.  This keeps things lightweight and less likely to suffer from package conflicts.
 
-Go to this miniconda webpage to find the link for the "latest" installer for your platform: [INSTALLERS](https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links).  The "latest" is the table at the top of the page.  For example, for linux it is currently: https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh.
+Go to this miniconda webpage to find the link for the "latest" installer for your platform: [INSTALLERS](https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links).  The "latest" is the table at the top of the page.  The bash versions are shell scripts, and the pkg versions are graphical installers.  These directions assume you are using the bash shellscript.
 
-On a Mac click on the link to download the installer or copy the link address and from the command line do:
+On a Mac click on the link to download the installer, or copy the link address and then from the command line do:
 ```
 curl -O [address]
 ```
@@ -54,21 +56,23 @@ Next run the installer:
 ```
 bash [installer.sh]
 ```
-and answer yes to everything, especially "initialization".  For one of my linux installations I chose to put it in /data1/parker/miniconda3, or on my Mac I put it in /Applications/miniconda3.  It doesn't matter what folder you put it in.  The initialization adds some lines to your ~/.bashrc or ~/.bash_profile (mac). After you "source" this you should have (base) appended to your bash prompt, and this tells you that you are in the (base) conda environment so you can run python - but not much else, yet.
+and answer yes to everything, especially "initialization".  For one of my linux installations I chose to put it in /data1/parker/miniconda3, or on my mac I put it in /Applications/miniconda3.  It doesn't matter what folder you put it in.  The initialization adds some lines to your ~/.bashrc or ~/.bash_profile (mac). After you "source" this you should have (base) appended to your bash prompt, and this tells you that you are in the (base) conda environment so you can run python - but not much else, yet.
 
 Then for good measure do:
 ```
 conda update conda
 ```
 
-You will also need git, which you may or may not have.  You can install it easily by doing:
+You will also need git, which you may or may not have.  To find out if you have it, type `which git` in the terminal and see if it finds anything.  If you need to get it you can install it easily by doing:
 ```
 conda install -c anaconda git
 ```
 
 #### (2) Get the LO code
 
-On your machine, go to wherever you want the LO repo to end up, and do:
+The main pile of programs that you will use are in a GitHub repo called LO, maintained by MacCready.  You will clone this to all the machines you are working on, and should not have to make any changes to it, except for updating occasionally.
+
+On your machine, first go to wherever you want the LO repo to end up.  On my mac I go to Documents.  On one of our linux machines you might put it in /data1/[username] which is the working directory we made for you.  On the linux mashines don't put it in your home (~) folder because there is not much disk space there. When you are at whatever place you have decided on do:
 ```
 git clone https://github.com/parkermac/LO.git
 ```
@@ -99,19 +103,35 @@ conda env update -f loenv.yml
 ```
 which only took a minute or two the last time I tried it.  This is also what you do after you make any change to your .yml file, like adding a package.  There are more complete instructions for working with conda environments [HERE](https://www.earthdatascience.org/courses/intro-to-earth-data-science/python-code-fundamentals/use-python-packages/use-conda-environments-and-install-packages/).
 
-#### (4) Fork LO_user
+#### (4) Create your own LO_user and make it a GitHub repo
 
-Go to parkermac in GitHub and fork the LO_user repo.  You now own this as your own repo and can edit and clone it as needed.  LO_user is a place where the LO code looks for user versions of things, like particle tracking experiment initial conditions.  Most importantly, it is where user- and machine-specific paths are defined in `get_lo_info.py`.
+For this you will be working on your laptop and creating your own GitHub repo.  I can't stress enough how useful it is to keep all your code in git. It saves your code to the cloud. It allows you to see changes you have made. It makes it easy to share code with others.  Finally it makes it easy to maintain your code on other machines.
 
-Here is some great [INFO](https://docs.github.com/en/get-started/quickstart/fork-a-repo) from GitHub about forking.
+Here are some [INSTRUCTIONS](http://faculty.washington.edu/pmacc/Classes/EffCom_2020/lectures/GitHub%20Intro.pdf) for how to get started using Git and making your own repo.  These are for using the GitHub desktop app.  You can also accomplish all the same things using command line statements following these [INSTRUCTIONS](https://docs.github.com/en/get-started/importing-your-projects-to-github/importing-source-code-to-github/adding-locally-hosted-code-to-github).
 
-Background: Here are some [INSTRUCTIONS](http://faculty.washington.edu/pmacc/Classes/EffCom_2020/lectures/GitHub%20Intro.pdf) for how to get started using Git and making your own repo.
+**In either case, you will need to create your own account on GitHub.**
 
-**Clone your LO_user to your own machine and then edit the paths in `LO_user/get_lo_info.py`.**
+LO_user is a place where the LO code looks for user versions of things, like particle tracking experiment initial conditions.  Most importantly, it is where user- and machine-specific paths are defined in `get_lo_info.py`.
 
-Check that things are working as you expect by executing `LO/lo_tools/lo_tools/Lfun.py`.  Although this is a module that you usually import, when you run it as a program it shows the contents of Ldir as screen output.  Check out the end of that code to see how this works - it is a great way to add tests to a module.
+First: at the same level as LO on your laptop, create the directory LO_user.
 
-LO_user will change gradually, for example as I add my own job definitions to `LO_user/extract/box/job_definitions.py`.  But the intent of this code is that it is relatively static (my personal analysis code has all been moved to the LPM repo).
+Second: using either GitHub Desktop or the command line, make LO_user into a git repo on you laptop (initialize and commit).  Then publish to your account on GitHub in the cloud.
+
+Third: Copy get_lo_info.py from LO to LO_user, and make a couple of edits to these lines:
+```
+if str(HOME) == '/Users/pm8':
+    lo_env = 'pm_mac'
+```
+- change `/Users/pm8` to whatever you get by doing `echo $HOME` from your linux command line.
+- change `pm_mac` to some string that is [your initials or whatever]_[mac or pc].  The mac or pc part is important because there is a place in the LO plotting code where it looks for these and makes a decision about the graphical backend.
+
+Check that things are working as you expect by going to LO/driver and doing:
+```
+python test_loenv.py
+```
+You should get some screen output of the contents of the python dict called Ldir.  If this does not work, email Parker for help.
+
+If everything is working, go ahead and push this to your git repo in the cloud.
 
 ---
 
@@ -122,15 +142,13 @@ These four directories are assumed to be somewhere, all at the same level in the
 - LO: is this repo.
 - LO_user: is a required separate folder for information and programs specific to a given user.
 - LO_data: contains large binaries that change infrequently, especially for making grids or forcing files.  I maintain these by hand on my laptop and on my remote linux machines. It may be advantageous for a user on those remote machines to just point to my LO_data (see `get_lo_info.py`) instead of copying to make their own.  Of course on their personal laptop they will need to make their own LO_data.
-- LO_output: is where most output from the LO code ends up, e.g. model forcing files, mooring extractions, plots, etc. It is expected that the contents will change frequently and that they are specific to a given user or machine.
+- LO_output: is where most output from the LO code ends up, e.g. model forcing files, mooring extractions, plots, etc. It is expected that the contents will change frequently and that they are specific to a given user or machine. LO_output is typically made, if needed, by the code that writes to it.
 
-LO_output is typically made, if needed, by the code that writes to it. LO_user has to be made by hand (more on that below).
-
-A lot of the code makes use of a dictionary "Ldir" that contains Path objects about where things are. This is created in a somewhat complicated way:
+A lot of the code makes use of a dictionary "Ldir" that contains user- and machine-specific Path objects about where things are. This is created in a somewhat complicated way:
 - It is initially specified in `LO_user/get_lo_info.py`
 - You don't run `get_lo_info.py` itself, but instead it is run every time you run the method `lo_tools/lo_tools/Lfun.Lstart()` which adds a few more application-specific entries to Ldir.
 
-`get_lo_info.py` is designed to be the one place where you set machine-dependent choices.  It looks to see what machine you are working on.  It allows you to set several paths to model output, for example: Ldir['roms_out'], Ldir['roms_out1'], and so on.
+`get_lo_info.py` is designed to be the **one place** where you set machine-dependent choices.  It looks to see what machine you are working on.  It allows you to set several paths to model output, for example: Ldir['roms_out'], Ldir['roms_out1'], and so on.
 
 ---
 
@@ -141,10 +159,10 @@ A lot of the code makes use of a dictionary "Ldir" that contains Path objects ab
 Things that I type in [ ] below mean that they would be replaced by specific strings, for example when using them as command line arguments.
 
 - [gridname] is the name of the grid (e.g. cas6)
-- [tag] is a name to identify a collection of forcing files (e.g. v3)
-- [ex_name] is the name of the ROMS executable (e.g. lo8b)
+- [tag] is a name to identify a collection of forcing files (e.g. v0)
+- [ex_name] is the name of the ROMS executable (e.g. u0kb)
 - [fstring] is a date string of the form fYYYY.MM.DD (e.g. f2021.07.04).
-- [frc] is the name of one of the forcings (e.g. ocn0).
+- [frc] is the name of one of the model forcings (e.g. ocn0).
 
 Grids are just identified by [gridname].
 
@@ -154,6 +172,8 @@ A specific run is identified by [gridname]\_[tag]\_[ex_name] which is also refer
 
 NOTE: some of the code will parse a gtagex into it constituent gridname, tag, and ex_name.  To do so it assumes these are separated by an underscore "_", so don't use underscores in any of your gridnames, tags, or ex_names.
 
+Here is some info on the various folders in LO, and how they relate to the naming of things that end up in LO_output.  Many of these have their own README files.
+
 | LO | LO_output |
 | --- | --- |
 | lo_tools/lo_tools: place for shared modules | |
@@ -162,4 +182,8 @@ NOTE: some of the code will parse a gtagex into it constituent gridname, tag, an
 | forcing: the code for making each of the separate types of forcing | forcing/[gtag]/[fstring]/[frc]/... |
 | dot_in: code (one folder for each [gtagex]) for making the .in file for a ROMS run for a given day |
 | post: code for automated post-processing of the daily forecast, e.g. for the movies that are sent to the LiveOcean website | post/[gtagex]/layers, etc. |
-| extract: code for various types of extractions, plotting, particle tracking, and so on | extract/[gtagex]/cast, etc. |
+| extract: code for various types of extractions | extract/[gtagex]/cast, etc. |
+| pgrid: code for making ROMS grids   |   |
+| tracker: particle tracking code   |   |
+| daymovie: code to make the daily forecast movies for the website   |   |
+| notes: README's on various topics   |   |
