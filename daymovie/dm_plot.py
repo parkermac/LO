@@ -29,8 +29,8 @@ plt.close('all')
 
 parser = argparse.ArgumentParser()
 # standard arguments
-parser.add_argument('-gtx', '--gtagex', type=str, default='cas6_v3_lo8b')
-parser.add_argument('-ro', '--roms_out_num', type=int, default=2)
+parser.add_argument('-gtx', '--gtagex', type=str, default='cas6_v0_live')
+parser.add_argument('-ro', '--roms_out_num', type=int, default=0)
 parser.add_argument('-ds0', type=str, default='2019.07.04')
 parser.add_argument('-ds1', type=str, default='')
 # arguments that allow you to bypass the interactive choices

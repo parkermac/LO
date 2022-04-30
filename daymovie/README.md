@@ -1,10 +1,10 @@
 # README for daymovie
 
-### This is highly specialized plotting code designed to make the daily forecast movies that are pushed to the LiveOcean website.  It replaces the plot5 folder from LiveOcean.
+### This is highly specialized plotting code designed to make the daily forecast movies that are pushed to the LiveOcean website.
 
 ---
 
-`dm_plot.py` is the main program for making a plot/movie. It is designed to be run completely using command line arguments, because its main role is to be called repeatedly by `post/daymovies/post_main.py` (which itself is called by `driver/post_driver.py`).
+`dm_plot.py` is the main program for making a plot/movie. It is designed to be run completely using command line arguments, because its main role is to be called repeatedly by `post/daymovies/post_main.py` (which itself is called by `driver/driver_post1.py`).
 
 Many of the command line arguments end up encoded in the resulting filename, which is structured as:
 
@@ -31,3 +31,7 @@ One important method is `get_ax_limits()` which is where that spatial extend of 
 ---
 
 `pinfo.py` is a module that defines several dicts with things like scaling factors, colormaps, long names, and colormap limits.
+
+---
+
+`ephem_functions.py` is a module of functions that make use of the ephem package, for things like knowing when sunrise and sunset are.
