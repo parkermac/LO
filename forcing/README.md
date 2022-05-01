@@ -13,4 +13,4 @@
 - [frc]1 is me testing some improvement to frc[0] such as using more up-to-date time coordinate names
 - [frc]N# is for nested runs, meaning it gets its values by interpolating from ROMS history files
 - [frc]A# is for analytical runs
-- [frc]## (repeated number, like ocn00) is for use with the updated ROMS, including the banas-fennel biogeochemical model
+- [frc]## (repeated number, like ocn00) is for use with the updated ROMS, including automated coordinate naming using varinfo.yaml, and the banas-fennel biogeochemical model.

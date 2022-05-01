@@ -16,6 +16,8 @@ We keep forcing_list.csv as a separate file because it is also used by `driver_r
 
 This contains the scripts and templates for making the sbatch scripts, e.g. for running mpirun on hyak.
 
+**OBSOLETE: replaced by `LO/driver/batch`.**
+
 ---
 
 ### Notes on specific [gtagex] cases:

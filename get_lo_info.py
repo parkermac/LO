@@ -54,28 +54,16 @@ except KeyError:
 if str(HOME) == '/Users/pm8':
     lo_env = 'pm_mac'
     which_matlab = '/Applications/MATLAB_R2020a.app/bin/matlab'
-    roms_out2 = parent / 'LiveOcean_roms' / 'output'    # LiveOcean past I
-    roms_out3 = parent / 'LiveOcean_roms' / 'output'    # LiveOcean past II (same as I)
-
-elif (str(HOME) == '/home/parker') & ('boiler' in HOSTNAME):
-    lo_env = 'pm_boiler'
-    roms_out1 = Path('/data1/parker/LiveOcean_roms/output')     # LiveOcean current
-    roms_out2 = Path('/pgdat1/parker/LiveOcean_roms/output')    # LiveOcean past I
-    roms_out3 = Path('/pgdat2/parker/LiveOcean_roms/output')    # LiveOcean past II
 
 elif (str(HOME) == '/home/parker') & ('perigee' in HOSTNAME):
     lo_env = 'pm_perigee'
-    roms_out1 = Path('/boildat1/parker/LiveOcean_roms/output')  # LiveOcean current
-    roms_out2 = Path('/data1/parker/LiveOcean_roms/output')     # LiveOcean past I
-    roms_out3 = Path('/data2/parker/LiveOcean_roms/output')     # LiveOcean past II
-    roms_out4 = Path('/boildat1/parker/LO_roms')                # LO boiler
+    roms_out1 = Path('/agdat1/parker/LO_roms')
+    roms_out2 = Path('/agdat2/parker/LO_roms')
 
 elif (str(HOME) == '/home/parker') & ('apogee' in HOSTNAME):
     lo_env = 'pm_apogee'
-    roms_out1 = Path('/boildat/parker/LiveOcean_roms/output')  # LiveOcean current
-    roms_out2 = Path('/pgdat1/parker/LiveOcean_roms/output')     # LiveOcean past I
-    roms_out3 = Path('/pgdat2/parker/LiveOcean_roms/output')     # LiveOcean past II
-    roms_out4 = Path('/boildat/parker/LO_roms')                # LO boiler
+    roms_out1 = Path('/pgdat1/parker/LO_roms')
+    roms_out2 = Path('/pgdat2/parker/LO_roms')
 
 elif (str(HOME) == '/usr/lusers/pmacc'):
     lo_env = 'pm_mox'

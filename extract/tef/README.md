@@ -17,6 +17,8 @@ In order to get to where you can run `flux_salt_budget.py` you need to go throug
 
 Then you can run `tracer_budget.py`
 
+**NOTE: this has not yet been updated to use xarray instead of netCDF4.**
+
 ---
 #### PREAMBLE
 

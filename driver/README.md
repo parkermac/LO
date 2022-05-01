@@ -29,6 +29,15 @@ This is much improved from the LiveOcean version:
 
 ---
 
+#### `driver_roms2.py`
+
+Updated version of driver_roms1.py.
+- fixed a bug in handling of "new" start type
+- streamlined screen output
+- only works with updated ROMS (LO_roms_source)
+
+---
+
 #### `driver_post1.py`
 
 This is for running all the post-processing jobs.  It is mainly aimed at the daily forecast.  It checks to see that all expected history files are in place before beginning.
@@ -40,6 +49,8 @@ It is designed to work with a forecast that shows up as three separate days, as 
 `timestep_record.py` is a utility to make a pandas Series from the timesteps used in a model run over an arbitrary time span.
 
 `test_Ldir.py` is a tool to test what is in Ldir. It avoids the use of the lo_tools package so it can run on the hyak clusters (mox and klone), and cron.
+
+`test_loenv.py` also tests what is in Ldir, but using the lo_tools package.
 
 ---
 
