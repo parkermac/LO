@@ -24,7 +24,15 @@ Gr =gfun.gstart()
 # select grid file
 in_fn = gfun.select_file(Gr)
 
-import gfun_user # to get s_dict (path added by gfun.gstart())
+# import gfun_user, to get s_dict
+pth = Ldir['LO'] / 'pgrid'
+upth = Ldir['LOu'] / 'pgrid'
+if (upth / 'gfun_user.py').is_file():
+    print('Importing gfun_user from LO_user')
+    gfun_user = Lfun.module_from_file('gfun_user', upth / 'gfun_user.py')
+else:
+    print('Importing gfun_user from LO')
+    gfun_user = Lfun.module_from_file('gfun_user', pth / 'gfun_user.py')
 
 # load the default choices
 dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))

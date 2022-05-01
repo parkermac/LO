@@ -17,7 +17,16 @@ from lo_tools import Lfun
 import gfun
 import gfun_utility as gfu
 Gr =gfun.gstart()
-import gfun_user # path added by gfun.gstart()
+
+# get the gfun_user module, looking first in LO_user
+pth = Ldir['LO'] / 'pgrid'
+upth = Ldir['LOu'] / 'pgrid'
+if (upth / 'gfun_user.py').is_file():
+    print('Importing gfun_user from LO_user')
+    gfun_user = Lfun.module_from_file('gfun_user', upth / 'gfun_user.py')
+else:
+    print('Importing gfun_user from LO')
+    gfun_user = Lfun.module_from_file('gfun_user', pth / 'gfun_user.py')
 from importlib import reload
 reload(gfun_user)
 
