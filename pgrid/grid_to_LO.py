@@ -25,6 +25,7 @@ Gr =gfun.gstart()
 in_fn = gfun.select_file(Gr)
 
 # import gfun_user, to get s_dict
+Ldir = Lfun.Lstart()
 pth = Ldir['LO'] / 'pgrid'
 upth = Ldir['LOu'] / 'pgrid'
 if (upth / 'gfun_user.py').is_file():

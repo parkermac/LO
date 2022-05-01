@@ -19,6 +19,7 @@ import gfun_utility as gfu
 Gr =gfun.gstart()
 
 # get the gfun_user module, looking first in LO_user
+Ldir = Lfun.Lstart()
 pth = Ldir['LO'] / 'pgrid'
 upth = Ldir['LOu'] / 'pgrid'
 if (upth / 'gfun_user.py').is_file():
@@ -27,8 +28,6 @@ if (upth / 'gfun_user.py').is_file():
 else:
     print('Importing gfun_user from LO')
     gfun_user = Lfun.module_from_file('gfun_user', pth / 'gfun_user.py')
-from importlib import reload
-reload(gfun_user)
 
 if Gr['gdir'].is_dir():
     ans = input('Grid ' + Gr['gridname'] + ' exists.  Overwrite? (y/n)')
