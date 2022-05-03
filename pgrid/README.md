@@ -9,6 +9,10 @@ To see what variables ROMS expects to find in a grid file, have a look in `LO_ro
 ---
 #### Suggested order to run the code
 
+NOTE: There is a streamlined set of these instructions in `LO/notes/analytical_runs.md` that are specific to getting an analytical run going.  You might want to follow them the first time, and then refer to these instructions when you get deeper into making your own grids.
+
+(0) Start by making your own LO_user repo (see `LO/README.md`) and then adding a sub-folder "pgrid", and then copying `LO/pgrid/gfun_user.py` into it.
+
 (1) You have to edit the gridname and definition in `LO_user/gfun_user.py`.
 
 There are a number of choices you can set as parameters.  You can see these in the module `gfun.default_choices()`.  They end up in a dict called dch ("default choices") that gets saved and reopened at each step.  You can override any of the defaults in your `gfun_user.py` entry.
@@ -89,4 +93,4 @@ run plot_grid.py -g sal0
 
 #### Development Notes
 
-Throughout this code I use xr.open_dataset() and then the update method to store changed variables before saving to a new file.  I am not totally clear about this.  Maybe I should be using load_dataset(), or maybe it all works fine because I am saving to a new NetCDF file anytime there are changes.
+Throughout this code I use xr.open_dataset() and then the .update method to store changed variables before saving to a new file.  This works because I am saving to a new NetCDF file anytime there are changes. In xarray if you are changing data in a file and saving to the same name you have to use the more memory-intensive xr.load_dataset().

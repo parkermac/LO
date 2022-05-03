@@ -121,10 +121,10 @@ LO_user is a place where the LO code looks for user versions of things, like par
 
 **First**: at the same level as LO on your laptop, create the directory LO_user.
 
-**Second**: using either GitHub Desktop or the command line, make LO_user into a git repo on you laptop (initialize and commit).  Then publish to your account on GitHub in the cloud.
+**Second**: using either GitHub Desktop or the command line, make LO_user into a git repo on you laptop (initialize and commit).  I usually start a repo in GitHub Desktop by choosing the "python" .gitignore from the defaults, along with the MIT license, and making the repo public.  Then publish to your account on GitHub in the cloud.
 
 PRO TIP: If you are working on a mac you will find that the .DS_Store file clutters up your repo (it is just saving folder view choice information).  To de-clutter this:
-- Add .DS_Store to your .gitignore.  I usually start a repo in GitHub Desktop by choosing the "python" .gitignore from the defaults, along with the MIT license, and making the repo public.
+- Add .DS_Store to your .gitignore.
 - If you have instances of .DS_Store already in your repo, you can clean them out from the command line by going to the repo and doing:
 ```
 find . -name .DS_Store -print0 | xargs -0 git rm --ignore-unmatch -f
@@ -145,6 +145,23 @@ python test_loenv.py
 You should get some screen output of the contents of the python dict called Ldir.  If this does not work, email Parker for help.
 
 If everything is working, go ahead and push this to your git repo in the cloud.
+
+---
+
+#### Hooks connecting LO and L0_user
+
+The user version of `get_lo_info.py` that you created above in LO_user is an example of a "hook" built into the LO code.  In this case the `lo_tools/Lfun.Lstart()` method that is called at the top of most LO code looks first to see if `LO_user/get_lo_info.py` exists, and if so it uses it to fill to fill out the Ldir dict.  Otherwise it uses the default (Parker's) `LO/get_lo_info.py`.
+
+Similar hooks are built into other parts of the LO system where we expect that users will want to use the LO code but have it access customized versions of some parts.  Here is the list of current hooks that it looks for:
+- `LO_user/get_lo_info.py`
+- `LO_user/pgrid/gfun_user.py`
+- `LO_user/forcing/[frc]` (used by `LO/driver_forcing.py`)
+- `LO_user/dot_in/[gtagex]` (used by `LO/driver_roms2.py`)
+- `LO_user/tracker/experiments.py` and `LO_user/tracker/trackfun.py`
+
+Not yet implemented:
+- `LO_user/plotting/roms_plots.py`
+- Ask for what you want to see!
 
 ---
 
