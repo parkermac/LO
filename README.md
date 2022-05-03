@@ -119,11 +119,18 @@ Here are some [INSTRUCTIONS](http://faculty.washington.edu/pmacc/Classes/EffCom_
 
 LO_user is a place where the LO code looks for user versions of things, like particle tracking experiment initial conditions.  Most importantly, it is where user- and machine-specific paths are defined in `get_lo_info.py`.
 
-First: at the same level as LO on your laptop, create the directory LO_user.
+**First**: at the same level as LO on your laptop, create the directory LO_user.
 
-Second: using either GitHub Desktop or the command line, make LO_user into a git repo on you laptop (initialize and commit).  Then publish to your account on GitHub in the cloud.
+**Second**: using either GitHub Desktop or the command line, make LO_user into a git repo on you laptop (initialize and commit).  Then publish to your account on GitHub in the cloud.
 
-Third: Copy get_lo_info.py from LO to LO_user, and make a couple of edits to these lines:
+PRO TIP: If you are working on a mac you will find that the .DS_Store file clutters up your repo (it is just saving folder view choice information).  To de-clutter this:
+- Add .DS_Store to your .gitignore.  I usually start a repo in GitHub Desktop by choosing the "python" .gitignore from the defaults, along with the MIT license, and making the repo public.
+- If you have instances of .DS_Store already in your repo, you can clean them out from the command line by going to the repo and doing:
+```
+find . -name .DS_Store -print0 | xargs -0 git rm --ignore-unmatch -f
+```
+
+**Third**: Copy `get_lo_info.py` from LO to LO_user, and make a couple of edits to these lines:
 ```
 if str(HOME) == '/Users/pm8':
     lo_env = 'pm_mac'
