@@ -20,7 +20,7 @@ but providing the tags appropriate for your run.  This takes a few minutes and c
 
 To create the initial positions of your release you make new entries in:
 
-- get_ic() where you define the lon, lat, and fractional depth vectors for the initial conditions associated with an experiemnt name.  The examples like "jdf0" are the simplest ones to copy from as they just involve making a regular lon, lat grid of points near the surface (particles on land will be trimmed automatically later).  A more complex example like "HC3d" shows how to have particles evenly distributed in depth.
+- get_ic() where you define the lon, lat, and fractional depth vectors for the initial conditions associated with an experiemnt name.  The examples like "jdf0" are the simplest ones to copy from as they just involve making a regular lon, lat grid of points near the surface (particles on land will be trimmed automatically later).
 
 ---
 
@@ -34,7 +34,7 @@ Look at the code near the top of `tracker.py` to see all possible arguments and 
 
 The output appears as NetCDF files in, for example:
 
-LO_output/tracks/fast0_ndiv12_3d/
+LO_output/tracks/jdf0_3d/
 - exp_info.csv (a record of the experiment choices)
 - grid.nc (bathy info, used for plotting)
 - release_2019.07.04.nc (there would be more than one of these if you used more start days)
@@ -59,7 +59,7 @@ NOTE: In the code I set a parameter npmax=300 which subsamples the full set of t
 
 `trackfun.py` is the real heart of the program.  It is a module of functions that does all steps of an experiment, typically in one-day chunks as orchestrated by the calling code `tracker.py`.
 
-**NOTE: `tracker.py` will automatically look first for "LO_user/tracker/user_trackfun.py" which is a placeholder name in case you want to make your own edited version of the functions to do something exotic like adding diurnal cycling behavior to particles.**
+**NOTE: `tracker.py` will automatically look first for "LO_user/tracker/trackfun.py" which is a hook in case you want to make your own edited version of the functions to do something exotic like adding diurnal cycling behavior to particles.**
 
 LIMITATIONS: Currently the code is hardwired to only save time series of particle positions, velocity, salinity and temperature.  I will need to do a bit more work to simplify adding more tracers.
 
