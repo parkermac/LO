@@ -148,7 +148,7 @@ If everything is working, go ahead and push this to your git repo in the cloud.
 
 ---
 
-#### Hooks connecting LO and L0_user
+#### Hooks connecting LO and LO_user
 
 The user version of `get_lo_info.py` that you created above in LO_user is an example of a "hook" built into the LO code.  In this case the `lo_tools/Lfun.Lstart()` method that is called at the top of most LO code looks first to see if `LO_user/get_lo_info.py` exists, and if so it uses it to fill to fill out the Ldir dict.  Otherwise it uses the default (Parker's) `LO/get_lo_info.py`.
 
@@ -158,8 +158,10 @@ Similar hooks are built into other parts of the LO system where we expect that u
 - `LO_user/forcing/[frc]` (used by `LO/driver_forcing.py`)
 - `LO_user/dot_in/[gtagex]` (used by `LO/driver_roms2.py`)
 - `LO_user/tracker/experiments.py` and `LO_user/tracker/trackfun.py`
+- `LO_user/extract/box/job_definitions.py` (used by `LO/extract/box/extract_box.py` and `extract_box_chunks.py`)
+- `LO_user/extract/moor/job_lists.py` (used by `LO/extract/moor/multi_mooring_driver.py`)
 
-Not yet implemented:
+Not yet implemented, but should be:
 - `LO_user/plotting/roms_plots.py`
 - Ask for what you want to see!
 
