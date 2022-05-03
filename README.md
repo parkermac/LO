@@ -164,8 +164,7 @@ Most of the sub-folders of LO have their own README files, but a few are useful 
 
 - LO/README.md (this file) Initial python installation, cloning of the LO code, and creation of your LO_user repo.
 - LO/notes/analytical_runs.md Step-by-step instructions for making and running your own analytical (idealized) ROMS run. This covers grid generation on your laptop using LO/pgrid. and the creation of forcing files on one of our servers using various bits in LO/forcing.  Then it covers installing ROMS on hyak, testing that it works, and compiling it and running it for your analytical grid.
-- LO/notes/klone_and_mox.md Notes about how to set up your environment on any of the hyak supercomputers (e.g. klone and mox).
-- LO_roms_user/README.md Notes about setting up your environment on hyak, installing ROMS, and running the upwelling test case.  It also gives a listing of LiveOcean compiler configurations.
+- LO_roms_user/README.md Notes about setting up your environment on hyak, installing ROMS, and running the upwelling test case.  It also gives a listing of LO compiler configurations.
 
 ---
 
