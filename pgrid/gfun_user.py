@@ -176,10 +176,14 @@ def make_initial_info(gridname=gridname):
         track_fn = track_dir / 'creek0.p'
         track_df = pd.DataFrame()
         NTR = 100
-        track_df['lon'] = np.linspace(0,4,NTR) # OK to go past edge of domain
-        track_df['lat'] = 45*np.ones(NTR)
+        if True:
+            track_df['lon'] = np.linspace(0,4,NTR) # OK to go past edge of domain
+            track_df['lat'] = 45*np.ones(NTR)
+        else: # Debugging with N/S river channel
+            track_df['lon'] = 0.25*np.ones(NTR)
+            track_df['lat'] = np.linspace(45,44,NTR) # South to North river
         track_df.to_pickle(track_fn)
-        # NOTE: tracks go from ocean to land
+        # *** NOTE: TRACKS MUST GO FROM OCEAN TO LAND ***
         
     else:
         print('Error from make_initial_info: unsupported gridname')

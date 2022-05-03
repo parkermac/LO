@@ -28,7 +28,7 @@ def add_river_tracks(Gr, ds, ax):
     rri_df = pd.read_csv(rri_fn, index_col='rname')
 
     for rn in rri_df.index:
-        # these are indices (python, zero-based) into either the
+        # These are indices (python, zero-based) into either the
         # u or v grids.
         ii = int(rri_df.loc[rn,'col_py'])
         jj = int(rri_df.loc[rn,'row_py'])
@@ -47,11 +47,11 @@ def add_river_tracks(Gr, ds, ax):
             ax.plot(lon[jj,ii], lat[jj,ii],'oc')
         if uv == 'v' and isign == 1:
             # River source on S side of rho cell
-            ax.plot(lon_v[jj-1,ii], lat_v[jj-1,ii],'^b')
-            ax.plot(lon[jj,ii], lat[jj,ii],'oc')
+            ax.plot(lon_v[jj,ii], lat_v[jj,ii],'^b')
+            ax.plot(lon[jj+1,ii], lat[jj+1,ii],'oc')
         if uv == 'v' and isign == -1:
             # River source on N side of rho cell
-            ax.plot(lon_u[jj,ii], lat_u[jj,ii],'vb')
+            ax.plot(lon_v[jj,ii], lat_v[jj,ii],'vb')
             ax.plot(lon[jj,ii], lat[jj,ii],'oc')
             
         fn_tr = Gr['ri_dir'] / 'tracks' / (rn + '.p')

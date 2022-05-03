@@ -1,7 +1,6 @@
 # PM Additions
-*.DS_Store
-*/.DS_Store
-*/*.log
+.DS_Store
+*.log
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
