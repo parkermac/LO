@@ -20,6 +20,12 @@ The main users of this repo are people who are in some way collaborating with me
 
 ---
 
+## Getting up to speed with linux, python, and git
+
+To work with the LO system, ROMS, and generally to be able to do modern numerical modeling, it is important that you have reasonable skill with linux, python, and git.  If you need a refresher or a starting place with any of these you could look at the lectures from my [Effective Computing Class](http://faculty.washington.edu/pmacc/Classes/EffCom_2020/index.html).  Ignore the first lectures about installing linux and python.  They are superseded by the notes here.  But the lectures starting with [Linux 1](http://faculty.washington.edu/pmacc/Classes/EffCom_2020/lectures/Linux%201.pdf) and continuing through those on python and GitHub will be relevant.
+
+---
+
 ## Installation - four steps
 
 All the instructions assume you are working from the linux (bash) command line. When I say "go to" I mean navigate to that place, and "do" means enter that command from the linux command line and hit return.
@@ -149,6 +155,41 @@ A lot of the code makes use of a dictionary "Ldir" that contains user- and machi
 - You don't run `get_lo_info.py` itself, but instead it is run every time you run the method `lo_tools/lo_tools/Lfun.Lstart()` which adds a few more application-specific entries to Ldir.
 
 `get_lo_info.py` is designed to be the **one place** where you set machine-dependent choices.  It looks to see what machine you are working on.  It allows you to set several paths to model output, for example: Ldir['roms_out'], Ldir['roms_out1'], and so on.
+
+---
+
+## Guide to the various READMEs
+
+Most of the sub-folders of LO have their own README files, but a few are useful to be aware of from the very start:
+
+- LO/README.md (this file) Initial python installation, cloning of the LO code, and creation of your LO_user repo.
+- LO/notes/analytical_runs.md Step-by-step instructions for making and running your own analytical (idealized) ROMS run. This covers grid generation on your laptop using LO/pgrid. and the creation of forcing files on one of our servers using various bits in LO/forcing.  Then it covers installing ROMS on hyak, testing that it works, and compiling it and running it for your analytical grid.
+- LO/notes/klone_and_mox.md Notes about how to set up your environment on any of the hyak supercomputers (e.g. klone and mox).
+- LO_roms_user/README.md Notes about setting up your environment on hyak, installing ROMS, and running the upwelling test case.  It also gives a listing of LiveOcean compiler configurations.
+
+---
+
+## What to put where?
+
+Running the LO code on our model output or running ROMS yourself require that you work across two or three computers (laptop : perigee/apogee : mox/klone) it is useful to know what things you need to put on which machines.  Here is an outline:
+
+First, do the miniconda/loenv python installation on both your laptop and on perigee/apogee. You do not need to do this on mox/klone because python is already installed there and we don't require extra packages.
+
+In the fields below:
+- 1 = your laptop
+- 2 = perigee or apogee
+- 3 = mox or klone
+
+| Folder | How created | Put where | Purpose |
+| --- | --- | --- | --- |
+| LO   | Clone from parkermac | 1,2  | Primary tools for LiveOcean  |
+| LO_user   | Create your own repo on 1 and clone to 2,3, then copy in bits from LO and edit them.  | 1,2,3  | User versions of LO code  |
+| LO_data   | Create your own folder on 1 and copy to 2,3  | 1,2,3  | Data files like grids and coastlines. Not a repo.  |
+| LO_output   | Created automatically  | Will appear on 1,2,3  | LO output, like forcing files. Not a repo.  |
+| LO_roms   | Created automatically  | Will appear on 2,3 and you can copy to 1  | ROMS output. Not a repo.  |
+| LO_roms_source   | Clone using svn from ROMS site.   | 1,3  | ROMS source code. Good to have on 1 for reference, even though you only compile on 3  |
+| LO_roms_source_alt   | Clone from parkermac  | 1,2,3  | Our customized bits of the ROMS source code, especially the biology routines.  Also an edited version of varinfo.yaml  |
+| LO_roms_user   | Create your own repo on 1 and copy in bits from the verion on parkermac. Then clone to 3.  | 1,3  | Files for configuring specific ROMS versions that are defined by lists of compiler flags.  |
 
 ---
 
