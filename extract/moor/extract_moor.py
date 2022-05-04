@@ -108,7 +108,7 @@ lon = Ldir['lon']
 lat = Ldir['lat']
 G, S, T = zrfun.get_basic_info(in_dir0 / ('f' + Ldir['ds0']) / 'ocean_his_0001.nc')
 Lon = G['lon_rho'][0,:]
-Lat = G['lat_rho'][:,0]    
+Lat = G['lat_rho'][:,0]
 # error checking
 if (lon < Lon[0]) or (lon > Lon[-1]):
     print('ERROR: lon out of bounds ' + moor_fn.name)
@@ -119,18 +119,41 @@ if (lat < Lat[0]) or (lat > Lat[-1]):
 # get indices
 ilon = zfun.find_nearest_ind(Lon, lon)
 ilat = zfun.find_nearest_ind(Lat, lat)
+
 # more error checking
-if G['mask_rho'][ilat,ilon] == 0:
-    print('ERROR: rho point on land mask ' + moor_fn.name)
-    sys.exit()
+
+def find_good(ilat, ilon, mask):
+    if mask == 'rho':
+        # look on all four sides
+        jig_list = [[0,0],[1,0],[-1,0],[0,1],[0,-1]]
+    elif mask == 'u':
+        # just look to west
+        jig_list = [[0,0],[0,-1]]
+    elif mask == 'v':
+        # just look to south
+        jig_list = [[0,0],[-1,0]]
+    count = 0
+    found_good = False
+    while count < len(jig_list):
+        jig = jig_list[count]
+        Ilat = ilat + jig[0]
+        Ilon = ilon + jig[1]
+        if G['mask_'+mask][Ilat,Ilon] == 1:
+            print('   - %s: (%d, %d) => (%d, %d), jig = [%d, %d]' %
+                (mask, ilat, ilon, Ilat, Ilon, jig[0], jig[1]))
+            return Ilat, Ilon
+            found_good = True
+            break
+        count += 1
+    if found_good == False:
+        print('ERROR: no good nearby point found on mask for ' + mask)
+        sys.exit()
+
+ilat_rho, ilon_rho = find_good(ilat, ilon, 'rho')
 if Ldir['get_vel'] or Ldir['get_surfbot']:
-    if G['mask_u'][ilat,ilon] == 0:
-        print('ERROR: u point on land mask ' + moor_fn.name)
-        sys.exit()
-    if G['mask_v'][ilat,ilon] == 0:
-        print('ERROR: v point on land mask ' + moor_fn.name)
-        sys.exit()
-        
+    ilat_u, ilon_u = find_good(ilat_rho, ilon_rho, 'u')
+    ilat_v, ilon_v = find_good(ilat_rho, ilon_rho, 'v')
+    
 fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
 
 vn_list = 'h,zeta'
@@ -158,9 +181,9 @@ for ii in range(N):
     out_fn = temp_dir / ('moor_temp_' + count_str + '.nc')
     cmd_list1 = ['ncks',
         '-v', vn_list,
-        '-d', 'xi_rho,'+str(ilon), '-d', 'eta_rho,'+str(ilat),
-        '-d', 'xi_u,'+str(ilon), '-d', 'eta_u,'+str(ilat),
-        '-d', 'xi_v,'+str(ilon), '-d', 'eta_v,'+str(ilat)]
+        '-d', 'xi_rho,'+str(ilon_rho), '-d', 'eta_rho,'+str(ilat_rho),
+        '-d', 'xi_u,'+str(ilon_u), '-d', 'eta_u,'+str(ilat_u),
+        '-d', 'xi_v,'+str(ilon_v), '-d', 'eta_v,'+str(ilat_v)]
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)

@@ -68,11 +68,11 @@ for a in argsd.keys():
         Ldir[a] = argsd[a]
 # testing
 if Ldir['testing']:
-    Ldir['roms_out_num'] = 2
+    Ldir['roms_out_num'] = 0
     Ldir['ds0'] = '2019.07.04'
     Ldir['ds1'] = '2019.07.06'
-    Ldir['list_type'] = 'hourly'
-    Ldir['job'] = 'mickett_2'
+    Ldir['list_type'] = 'daily'
+    Ldir['job'] = 'scoot'
     Ldir['get_all'] = True
 # set where to look for model output
 if Ldir['roms_out_num'] == 0:
@@ -98,6 +98,12 @@ else:
 
 # Get job dict:
 sta_dict = job_lists.get_sta_dict(Ldir['job'])
+
+# if Ldir['testing']:
+#     new_sta_dict = dict()
+#     for sn in list(sta_dict.keys())[-5:]:#['F_006_NEW', 'E_006_RIV']:
+#         new_sta_dict[sn] = sta_dict[sn]
+#     sta_dict = new_sta_dict
 
 # make place for log files
 log_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'moor' / 'logs'
@@ -128,6 +134,14 @@ for sn in sta_dict.keys():
         '-get_pressure', str(Ldir['get_pressure'])]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
+    
+    if Ldir['testing']:
+        if len(stdout) > 0:
+            print(stdout.decode())
+        if len(stderr) > 0:
+            print(stderr.decode())
+        sys.stdout.flush()
+        
     
     # copy or move the results to a folder named for the job
     moor_fn = out_dir / (sn + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')
