@@ -112,8 +112,8 @@ def P_Fb(in_dict):
             Fb = -9.8 * np.sum(ds.AKs[0,1:-1,:,:].squeeze() * np.diff(rho, axis=0), axis=0).values
             Fb[ds.mask_rho.values==0] = np.nan
             plon, plat = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
-            cs = ax.pcolormesh(plon,plat, Fb, vmin=0, vmax=.1, cmap='YlOrRd')
-            ax.set_title('Vertically Integrated Fb')
+            cs = ax.pcolormesh(plon,plat, Fb, vmin=0, vmax=.5, cmap='YlOrRd')
+            ax.set_title('Vertically Integrated Fb [W/m2]')
         fig.colorbar(cs)
         pfun.add_coast(ax)
         ax.axis(pfun.get_aa(ds))
@@ -124,7 +124,7 @@ def P_Fb(in_dict):
             pfun.add_info(ax, in_dict['fn'])
             #pfun.add_windstress_flower(ax, ds)
             pfun.add_bathy_contours(ax, ds, txt=True)
-            pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
+            #pfun.add_velocity_vectors(ax, ds, in_dict['fn'])
         elif ii == 2:
             ax.set_yticklabels([])
         ii += 1
