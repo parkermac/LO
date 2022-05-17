@@ -70,7 +70,7 @@ There is no need to install python on klone.  It already exists in a basic state
 
 #### Directions are incomplete from this point on...
 
-Get a ROMS user account, and then use svn to put a copy of the ROMS source code onto klone in (*)/LO_roms_source.  See [HERE](https://github.com/parkermac/LO_roms_user/blob/main/README.md s) for more detailed info on getting ROMS working on klone.
+Get a ROMS user account, and then use svn to put a copy of the ROMS source code onto klone in (*)/LO_roms_source.  See [HERE](https://github.com/parkermac/LO_roms_user/blob/main/README.md) for more detailed info on getting ROMS working on klone.
 
 See if you can run the upwelling case.
 
