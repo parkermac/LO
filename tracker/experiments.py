@@ -25,6 +25,26 @@ def get_ic(TR):
         latvec = np.linspace(48.2, 48.4, 20)
         pcs_vec = np.array([0])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
+
+    elif exp_name == 'nina_jdfw': # For Nina Bednarsek, mouth of JdF
+        
+        earth_r = 6371 # average earth radius [km]
+        # radius of the circle km
+        circle_r = 3
+        # center of the circle (x, y)
+        circle_x = -124.71
+        circle_y = 48.5
+
+        N = 1000 # number of particles
+        
+        # random angle
+        alpha = 2 * np.pi * np.random.rand(N)
+        # random radius
+        r = (circle_r/earth_r) * (180/np.pi) * np.sqrt(np.random.rand(N))
+        # calculating coordinates
+        plon00 = r * np.cos(alpha) / np.cos(circle_y*np.pi/180) + circle_x
+        plat00 = r * np.sin(alpha) + circle_y
+        pcs00 = -0.5 * np.ones(N)
         
     if exp_name == 'ai0': # Mid-Admiralty Inlet
         lonvec = np.array([-122.6])
