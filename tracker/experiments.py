@@ -26,24 +26,29 @@ def get_ic(TR):
         pcs_vec = np.array([0])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
 
-    elif exp_name == 'nina_jdfw': # For Nina Bednarsek, mouth of JdF
-        
-        earth_r = 6371 # average earth radius [km]
-        # radius of the circle km
-        circle_r = 3
-        # center of the circle (x, y)
-        circle_x = -124.71
-        circle_y = 48.5
 
+    elif exp_name == 'nina_jdfw': # For Nina Bednarsek, mouth of JdF
+        lon0 = -124.71; lat0 = 48.5 # center of the circle 
+        radius_km = 3 # radius of the circle km
         N = 1000 # number of particles
+        # make random scattering of points in a circle
+        plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
+        pcs00 = -0.5 * np.ones(N)
         
-        # random angle
-        alpha = 2 * np.pi * np.random.rand(N)
-        # random radius
-        r = (circle_r/earth_r) * (180/np.pi) * np.sqrt(np.random.rand(N))
-        # calculating coordinates
-        plon00 = r * np.cos(alpha) / np.cos(circle_y*np.pi/180) + circle_x
-        plat00 = r * np.sin(alpha) + circle_y
+    elif exp_name == 'nina_jdfe': # For Nina Bednarsek, eastern JdF
+        lon0 = -123; lat0 = 48.3 # center of the circle 
+        radius_km = 3 # radius of the circle km
+        N = 1000 # number of particles
+        # make random scattering of points in a circle
+        plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
+        pcs00 = -0.5 * np.ones(N)
+        
+    elif exp_name == 'nina_aih': # For Nina Bednarsek, AI near Hood Canal
+        lon0 = -122.64; lat0 = 47.97 # center of the circle 
+        radius_km = 3 # radius of the circle km
+        N = 1000 # number of particles
+        # make random scattering of points in a circle
+        plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
         pcs00 = -0.5 * np.ones(N)
         
     if exp_name == 'ai0': # Mid-Admiralty Inlet
@@ -142,6 +147,27 @@ def ic_from_list(lonvec, latvec, pcs_vec):
     plat00 = plat_arr.flatten()
     pcs00 = pcs_arr.flatten()
     return plon00, plat00, pcs00
+    
+def ic_random_in_circle(lon0, lat0, radius_km, npoints):
+    # Makes lon and lat of npoints scattered randomly in a circle.
+    # I think the np.sqrt() used in calculating the radius makes these
+    # venely distributed over the whole circle.
+    earth_r = 6371 # average earth radius [km]
+    # radius of the circle km
+    circle_r = radius_km
+    # center of the circle (x, y)
+    circle_x = lon0
+    circle_y = lat0
+    N = npoints # number of particles
+    # random angle
+    alpha = 2 * np.pi * np.random.rand(N)
+    # random radius
+    r = (circle_r/earth_r) * (180/np.pi) * np.sqrt(np.random.rand(N))
+    # calculating coordinates
+    plon00 = r * np.cos(alpha) / np.cos(circle_y*np.pi/180) + circle_x
+    plat00 = r * np.sin(alpha) + circle_y
+    # we leave it to the user to make pcs00
+    return plon00, plat00
     
 def ic_from_TEFsegs(fn00, gridname, seg_list, DZ, NPmax=10000):
     import pickle

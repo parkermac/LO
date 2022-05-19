@@ -2,7 +2,7 @@
 Functions for particle tracking.
 
 Relies on the existence of experiment-specific info in
-LiveOcean_output/tracks/exp_info.csv.
+LO_output/tracks/exp_info.csv.
 
 """
 # setup (assume path to alpha set by calling code)
@@ -18,7 +18,7 @@ import sys
 verbose = False
 
 # this is the full list of tracers we want to find on the track and write to output
-tracer_list_full = ['salt', 'temp', 'oxygen']
+tracer_list_full = ['salt', 'temp']#, 'oxygen']
 # we trim the list below so that it only includes tracers that are present
 # in the history files
 
@@ -339,10 +339,22 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     Vwind3 = np.zeros((NP,3))
                 # add sinking speed
                 if TR['sink'] != 0:
-                    Vsink3 = -TR['sink'] * np.ones((NP,3)) / 86400
+                    Vsink3 = np.zeros((NP,3))
+                    Vsink3[:,2] = -TR['sink'] / 86400
                 else:
                     Vsink3 = np.zeros((NP,3))
-                plon, plat, pcs = update_position(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3,
+                
+                # stay close to a set z position TR['stay']
+                if TR['stay'] != 0:
+                    stay_H = ZH1.sum(axis=1)
+                    stay_z = stay_H*pcs2 + ZH1[:,0]
+                    stay_dz = stay_z - TR['stay']
+                    Vstay3 = np.zeros((NP,3))
+                    Vstay3[:,2] = - stay_dz / (2 * delt)
+                else:
+                    Vstay3 = np.zeros((NP,3))
+                
+                plon, plat, pcs = update_position(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3,
                                                   (ZH0 + 2*ZH1 + 2*ZH2 + ZH3)/6,
                                                   S, delt, plon, plat, pcs, surface)
                 

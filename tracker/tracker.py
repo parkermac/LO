@@ -17,13 +17,14 @@ This program is a driver where you specify:
 - a release or set of releases within that experiment (start day, etc.)
 
 The main argument you provide is -exp, which is the experiment name, and
-is used by experiments.get_exp_info() and .get_ic() to get the gtagex and initial particle
+is used by experiments..get_ic() to get the initial particle
 locations.  Other possible commmand line arguments and their defaults
 are explained in the argparse section below.
 
 NOTE: To improve usefulness for people other than me, this driver will
 first look for:
-- LiveOcean_user/tracker/user_trackfun.py
+- LO_user/tracker/experiments.py and
+- LO_user/tracker/trackfun.py
 before loading my versions.
 
 This allows you to create your own modifications to the tracking
@@ -38,7 +39,7 @@ python tracker.py -clb True
 
 the same command, with all the argmuents typed, instead of getting the as defaults:
 
-python tracker.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -exp jdf0 -clb True
+python tracker.py -gtx cas6_v0_live -ro 0 -d 2019.07.04 -exp jdf0 -clb True
 
 """
 
@@ -95,6 +96,7 @@ parser.add_argument('-3d', default=False, type=zfun.boolean_string) # do 3d trac
 parser.add_argument('-laminar', default=False, type=zfun.boolean_string) # no turbulence
 parser.add_argument('-no_advection', default=False, type=zfun.boolean_string) # no advection
 parser.add_argument('-sink', default=0, type=float) # particle sinking speed (m per day, e.g. 40)
+parser.add_argument('-stay', default=0, type=float) # z to try to stay at (m, e.g. -80)
 
 # windage = a small number: 0 <= windage << 1 (e.g. 0.03)
 # fraction of windspeed added to advection, only for 3d=False
@@ -142,7 +144,6 @@ if TR['laminar']:
 
 # get experiment info
 TR['gridname'], TR['tag'], TR['ex_name'] = TR['gtagex'].split('_')
-
 
 # pass some info to Ldir
 Ldir['gtagex'] = TR['gtagex']
