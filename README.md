@@ -207,7 +207,8 @@ In the fields below:
 
 | Folder | How created | Put where | Purpose |
 | --- | --- | --- | --- |
-| LO   | Clone from parkermac | 1,2  | Primary tools for LiveOcean  |
+| LO   | Clone from parkermac | 1,2,3  | Primary tools for LiveOcean  |
+| loenv   | See instructions above - each user creates their own from scratch  | 1,2  | python environment  |
 | LO_user   | Create your own repo on 1 and clone to 2,3, then copy in bits from LO and edit them.  | 1,2,3  | User versions of LO code  |
 | LO_data   | Create your own folder on 1 and copy to 2,3  | 1,2,3  | Data files like grids and coastlines. Not a repo.  |
 | LO_output   | Created automatically  | Will appear on 1,2,3  | LO output, like forcing files. Not a repo.  |
