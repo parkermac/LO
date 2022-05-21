@@ -15,8 +15,14 @@ Ldir = Lfun.Lstart()
 in_dir0 = Ldir['LOo'] / 'extract'
 gtagex = Lfun.choose_item(in_dir0, tag='', exclude_tag='', itext='** Choose gtagex from list **')
 in_dir = in_dir0 / gtagex / 'moor'
-moor_name = Lfun.choose_item(in_dir, tag='.nc', exclude_tag='', itext='** Choose mooring extraction from list **')
-moor_fn = in_dir / moor_name
+# you can choose either a file or a directory
+moor_name = Lfun.choose_item(in_dir, itext='** Choose mooring extraction or folder from list **')
+moor_item = in_dir / moor_name
+if moor_item.is_file() and moor_name[-3:]=='.nc':
+    moor_fn = moor_item
+elif moor_item.is_dir():
+    moor_name = Lfun.choose_item(moor_item, tag='.nc', itext='** Choose mooring extraction from list **')
+    moor_fn = moor_item / moor_name
 
 # load everything using xarray
 ds = xr.load_dataset(moor_fn)

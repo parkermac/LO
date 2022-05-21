@@ -105,7 +105,7 @@ for ii in range(ntv):
     ax = fig.add_subplot(ntv,NC, (ii+1)*NC)
     v = dsr[tv].values[:,::step]
     v[~ib_mask] = np.nan
-    ax.plot(td, v, lw=.5)
+    ax.plot(td, v, lw=.5, alpha=.2)
     ax.text(.05, .05, tv, fontweight='bold', transform=ax.transAxes)
     if ii == ntv-1:
         ax.set_xlabel('Time (days)')
