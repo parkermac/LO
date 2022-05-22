@@ -96,7 +96,7 @@ parser.add_argument('-3d', default=False, type=zfun.boolean_string) # do 3d trac
 parser.add_argument('-laminar', default=False, type=zfun.boolean_string) # no turbulence
 parser.add_argument('-no_advection', default=False, type=zfun.boolean_string) # no advection
 parser.add_argument('-sink', default=0, type=float) # particle sinking speed (m per day, e.g. 40)
-parser.add_argument('-stay', default=0, type=float) # z to try to stay at (m, e.g. -80)
+parser.add_argument('-stay', default=0, type=float) # depth to try to stay at (m, e.g. 80)
 
 # windage = a small number: 0 <= windage << 1 (e.g. 0.03)
 # fraction of windspeed added to advection, only for 3d=False
@@ -169,6 +169,12 @@ if TR['start_hour'] > 0:
     out_name += '_sh' + str(int(TR['start_hour']))
 if TR['sink'] > 0:
     out_name += '_sink' + str(int(TR['sink']))
+    # what would happen with negative sinking speed?
+if TR['stay'] > 0:
+    out_name += '_stay' + str(int(TR['stay']))
+if TR['stay'] < 0:
+    print('Error: negative stay depth not allowed')
+    sys.exit()
 if TR['no_advection'] == True:
     out_name += '_nadv'
 if TR['ndiv'] != 12: # only mention ndiv if it is NOT 12

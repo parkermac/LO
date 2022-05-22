@@ -332,11 +332,13 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                                                      plon, plat, pcs, surface)
                 V3 = get_vel(uf0,uf1,vf0,vf1,wf0,wf1, plon3, plat3, pcs3, fr1, surface)
                 ZH3 = get_zh(zf0,zf1,hf, plon3, plat3, fr1)
+                
                 # add windage, calculated from the middle time
                 if (surface == True) and (windage > 0):
                     Vwind3 = get_wind(Uwindf0, Uwindf1, Vwindf0, Vwindf1, plon, plat, frmid, windage)
                 else:
                     Vwind3 = np.zeros((NP,3))
+                
                 # add sinking speed
                 if TR['sink'] != 0:
                     Vsink3 = np.zeros((NP,3))
@@ -344,12 +346,20 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 else:
                     Vsink3 = np.zeros((NP,3))
                 
-                # stay close to a set z position TR['stay']
+                # stay close to a set depth TR['stay'] (or the bottom if it is shallower)
                 if TR['stay'] != 0:
                     stay_H = ZH1.sum(axis=1)
+                    stay_h = ZH1[:,1]
                     stay_z = stay_H*pcs2 + ZH1[:,0]
-                    stay_dz = stay_z - TR['stay']
+                    # head for the shallower of the target depth or the bottom
+                    stay_target_depth = np.minimum(stay_h, TR['stay'])
+                    stay_target_z = - stay_target_depth
+                    stay_dz = stay_z - stay_target_z
+                    # Note TR['stay'] is a depth, assumed positive down, so the
+                    # signs can be confusing because z is positive up. That is why we introduce
+                    # stay_target_z, which is positive up
                     Vstay3 = np.zeros((NP,3))
+                    # move halfway to the desired depth each timestep
                     Vstay3[:,2] = - stay_dz / (2 * delt)
                 else:
                     Vstay3 = np.zeros((NP,3))

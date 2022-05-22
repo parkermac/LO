@@ -26,7 +26,6 @@ def get_ic(TR):
         pcs_vec = np.array([0])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
 
-
     elif exp_name == 'nina_jdfw': # For Nina Bednarsek, mouth of JdF
         lon0 = -124.71; lat0 = 48.5 # center of the circle 
         radius_km = 3 # radius of the circle km
