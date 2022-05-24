@@ -19,7 +19,8 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-pth = Path(__file__).absolute().parent.parent.parent / 'lo_tools' / 'lo_tools'
+# This is designed to find lo_tools starting from either LO/dot_in or LO_user/dot_in
+pth = Path(__file__).absolute().parent.parent.parent.parent / 'LO' / 'lo_tools' / 'lo_tools'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import dot_in_argfun as dfun
