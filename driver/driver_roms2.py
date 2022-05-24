@@ -294,7 +294,7 @@ while dt <= dt1:
             with open(log_file, 'r') as ff:
                 found_line = False
                 for line in ff:
-                    if ('Blowing-up' in line) or ('BLOWUP' in line):
+                    if ('Blowing-up' in line) or ('BLOWUP' in line) or ('Blows up' in line):
                         print(' - Run blew up, blow ups = ' + str(blow_ups))
                         found_line = True
                         roms_worked = False
