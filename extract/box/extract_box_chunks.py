@@ -4,7 +4,7 @@ as a boundary contition.  In cases where it gets velocity in addition to
 the rho-grid variables the grid limits mimic the standard ROMS organization,
 with the outermost corners being on the rho-grid.
 
-Job definitions are in LO_user/extract/box/job_definitions.py
+Job definitions are in LO/extract/box/job_definitions.py
 
 This "chunks" version has a somewhat more complicated structure compared with
 the original extract_box.py.  It breaks a long job up into some number [12] of chunks
@@ -20,10 +20,10 @@ I consider this code a hack to solve a pressing problem, but in the long run I w
 be using more sophisticated tools like zarr and dask.
 
 Testing:
-run extract_box_chunks.py -gtx cas6_v3_lo8b -job byrd -surf True -uv_to_rho True -test True
+run extract_box_chunks.py -gtx cas6_v0_live -job byrd -surf True -uv_to_rho True -test True
 
 Production run:
-python extract_box_chunks.py -gtx cas6_v3_lo8b -ro 2 -lt hourly -0 2019.01.01 -1 2019.12.31 -job byrd -surf True -uv_to_rho True > byrd.log &
+python extract_box_chunks.py -gtx cas6_v0_live -ro 0 -lt hourly -0 2019.01.01 -1 2019.12.31 -job byrd -surf True -uv_to_rho True > byrd.log &
 
 """
 
@@ -81,7 +81,7 @@ for a in argsd.keys():
         
 # testing
 if Ldir['testing']:
-    Ldir['roms_out_num'] = 2
+    Ldir['roms_out_num'] = 0
     Ldir['ds0'] = '2019.07.04'
     Ldir['ds1'] = '2019.07.06'
     Ldir['list_type'] = 'hourly'
@@ -148,10 +148,12 @@ ilon1, ilat1 = check_bounds(lon1, lat1)
 # naming the final output file
 box_fn_final = out_dir / (Ldir['job'] + bb_str + dd_str + '.nc')
 
-## Start of month loop
+## Start of chunks loop
 tt00 = time()
 NFN = len(fn_list)
 cca = np.arange(NFN)
+# The number of "chunks" is the "12" in this call.  The function np.array_split() is a
+# really handy way to split a vectory into a number of approximatly equal-length sub vectors.
 ccas = np.array_split(cca, 12)
 
 counter = 0
