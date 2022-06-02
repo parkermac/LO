@@ -74,14 +74,14 @@ Get a ROMS user account, and then use svn to put a copy of the ROMS source code 
 
 See if you can run the upwelling case.
 
-Compile uu1k on klone.
+Compile uu1k on klone (on a compute node, just as you did for the upwelling case).
 
 Copy the grid file with a command like this:
 ```
 scp -r parker@apogee.ocean.washington.edu:/dat1/parker/LO_data/grids/ae0 .
 ```
 
-Run the analytical case with a command like this.
+Run the analytical case, from the head node, with a command like this.
 ```
 python3 driver_roms2.py -g ae0 -t v0 -x uu1k -r backfill -s new -0 2020.01.01 -1 2020.01.02 -np 40 -N 40 < /dev/null > ae.log &
 ```
