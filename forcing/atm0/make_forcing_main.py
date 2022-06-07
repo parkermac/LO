@@ -294,14 +294,16 @@ if planB == False:
             foo[vn][tt,:,:] = ovc_dict[vn]
             foo.close()
 
-elif planB == True:
+if planB == True:
+    # We make this an in instead of elif because planB might have been set to True
+    # in the if planB == True section above.  Not great coding but I'm not sure how to
+    # handle it more cleanly.
     result_dict['note'] = 'planB'
     print('**** Using planB ****')
     ds_today = Ldir['date_string']
     dt_today = datetime.strptime(ds_today, Lfun.ds_fmt)
     dt_yesterday = dt_today - timedelta(days=1)
     ds_yesterday = datetime.strftime(dt_yesterday, format=Lfun.ds_fmt)
-    
     
     LOogf_f_today = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
     LOogf_f_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + ds_yesterday) / Ldir['frc']
