@@ -241,7 +241,6 @@ if planB == False:
             print(' - missing ' + str(fn4))
             do_this_d4 = False
     
-    
         try:
             # On 2022.06.07 one of the d2 files showed up with a time index of length 0
             # (it should have been 1).  This is designed to respond to that specific error.
