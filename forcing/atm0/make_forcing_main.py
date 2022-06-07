@@ -241,7 +241,18 @@ if planB == False:
             print(' - missing ' + str(fn4))
             do_this_d4 = False
     
-        ov2_dict = afun.gather_and_process_fields(fn2, imax2, ca2, sa2, outvar_list)
+    
+        try:
+            # On 2022.06.07 one of the d2 files showed up with a time index of length 0
+            # (it should have been 1).  This is designed to respond to that specific error.
+            # I could wrap the whole job in a try-except but I like to keep it more specific.
+            ov2_dict = afun.gather_and_process_fields(fn2, imax2, ca2, sa2, outvar_list)
+        except Exception as e:
+            print('Error in gather and process d2 fields - going to Plan B')
+            print(e)
+            planB = True
+            break
+            
         ovi2_dict = afun.interp_to_roms(ov2_dict, outvar_list, IM2, NR, NC)
     
         if do_this_d3:
