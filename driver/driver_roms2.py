@@ -122,16 +122,17 @@ dt = dt0
 start_type = args.start_type
 while dt <= dt1:
     
-    # Don't run backfill at the same time of day as the expected forecast
-    dtnow = datetime.now()
-    iisleep = 1
-    while (dtnow.hour >= 3) and (dtnow.hour <= 6):
-        print('Ten-minute naps:')
-        print(str(iisleep), end=', ')
-        sys.stdout.flush()
-        sleep(600)
+    if args.run_type == 'backfill':
+        # Don't run backfill at the same time of day as the expected forecast
         dtnow = datetime.now()
-        iisleep += 1
+        iisleep = 1
+        while (dtnow.hour >= 3) and (dtnow.hour <= 6):
+            print('Ten-minute naps:')
+            print(str(iisleep), end=', ')
+            sys.stdout.flush()
+            sleep(600)
+            dtnow = datetime.now()
+            iisleep += 1
     
     # fix start_type bug
     if (dt != dt0) and (start_type == 'new'):
