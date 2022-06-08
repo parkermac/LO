@@ -270,6 +270,15 @@ while dt <= dt1:
                     print(' - lcount = %d' % (lcount))
                     sys.stdout.flush()
                 lcount += 1
+                
+                # trap for possible sbatch errors
+                if lcount >= 10:
+                    print(' - too long to write log.txt, assume there was some sbatch error')
+                    print(' - generating a fake log.txt file')
+                    with open(log_file,'w') as ff:
+                        ff.write('LO_RERUN')
+                    break # escape from the lcount while-loop
+                    
             # ...and that it is done being written to.
             llcount = 0
             log_done = False
@@ -282,9 +291,9 @@ while dt <= dt1:
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 if args.verbose:
-                    print(' - llcount = %d' % (lcount))
+                    print(' - llcount = %d' % (llcount))
                     sys.stdout.flush()
-                lcount += 1
+                llcount += 1
                 if str(log_file) not in stdout.decode():
                     if args.verbose:
                         print(' - log done and closed')
@@ -325,7 +334,14 @@ while dt <= dt1:
                         except Exception as e:
                             print(' - problem saving blow-up history file:')
                             print(e)
-                        
+                        break
+                    elif 'LO_RERUN' in line:
+                        print(' - LO_RERUN: Trying run again.')
+                        # This is not a perfect solution because it increments blow_ups,
+                        # which will slow things down, but at least it provides an end to the
+                        # attempted reruns.
+                        found_line = True
+                        roms_worked = False
                         break
                     elif 'ERROR' in line:
                         print(' - Run had an error. Check the log file.')
