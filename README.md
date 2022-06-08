@@ -165,7 +165,7 @@ Not yet implemented, but should be:
 - `LO_user/plotting/roms_plots.py`
 - Ask for what you want to see!
 
-NOTE: there is now a blog-like file `LO/misc/USER_NOTES.md` where I keep notes about changes to the code that users should be aware of.
+NOTE: there is now a [blog-like file](https://github.com/parkermac/LO/blob/main/misc/USER_NOTES.md) `LO/misc/USER_NOTES.md` where I keep notes about changes to the code that users should be aware of.
 
 ---
 
