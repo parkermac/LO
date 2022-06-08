@@ -75,6 +75,10 @@ else:
 dt = dt0
 while dt <= dt1:
     
+    # fix start_type bug
+    if (dt != dt0) and (args.start_type == 'new'):
+        args.start_type = 'continuation'
+    
     # make clean output directories
     out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + dt.strftime(Lfun.ds_fmt)) / args.frc
     Lfun.make_dir(out_dir, clean=True)
