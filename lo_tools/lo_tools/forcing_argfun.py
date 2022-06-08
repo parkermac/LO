@@ -13,7 +13,7 @@ def intro():
     parser.add_argument('-t', '--tag', type=str)        # e.g. v3
     parser.add_argument('-f', '--frc', type=str)        # e.g. tide
     parser.add_argument('-r', '--run_type', type=str)   # backfill or forecast
-    parser.add_argument('-s', '--start_type', type=str) # new or continuation
+    parser.add_argument('-s', '--start_type', type=str, default='continuation') # new or continuation
     parser.add_argument('-d', '--date_string', type=str) # e.g. 2019.07.04
     # optional arguments
     parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
