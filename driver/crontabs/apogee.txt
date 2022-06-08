@@ -2,8 +2,8 @@ LOd=/dat1/parker/LO/driver
 HOSTNAME=apogee
 # * * * * * source ~/.bashrc; python $LOd/test_Ldir.py > ~/test.log
 # * * * * * date > ~/date.log
-00 02 * * * source ~/.bashrc; python $LOd/driver_forcing.py -g cas6 -t v0 -r forecast -s continuation -f tide0 > $LOd/tide0.log
-05 02 * * * source ~/.bashrc; python $LOd/driver_forcing.py -g cas6 -t v0 -r forecast -s continuation -f riv0 > $LOd/riv0.log
-20 01 * * * source ~/.bashrc; python $LOd/driver_forcing.py -g cas6 -t v0 -r forecast -s continuation -f ocn0 > $LOd/ocn0.log
-55 02 * * * source ~/.bashrc; python $LOd/driver_forcing.py -g cas6 -t v0 -r forecast -s continuation -f atm0 > $LOd/atm0.log
+00 02 * * * source ~/.bashrc; python $LOd/driver_forcing.py -g cas6 -t v0 -r forecast -f tide0 > $LOd/tide0.log
+05 02 * * * source ~/.bashrc; python $LOd/driver_forcing.py -g cas6 -t v0 -r forecast -f riv0 > $LOd/riv0.log
+20 01 * * * source ~/.bashrc; python $LOd/driver_forcing.py -g cas6 -t v0 -r forecast -f ocn0 > $LOd/ocn0.log
+55 02 * * * source ~/.bashrc; python $LOd/driver_forcing.py -g cas6 -t v0 -r forecast -f atm0 > $LOd/atm0.log
 00 05 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas6_v0_u0kb -ro 0 -r forecast < /dev/null > $LOd/post1.log
