@@ -25,7 +25,7 @@ def intro():
     argsd = args.__dict__
     for a in ['gtagex', 'roms_out_num', 'date_string', 'job']:
         if argsd[a] == None:
-            print('*** Missing required argument to forcing_argfun.intro(): ' + a)
+            print('*** Missing required argument to post_argfun.intro(): ' + a)
             sys.exit()
     gridname, tag, ex_name = args.gtagex.split('_')
     # get the dict Ldir

@@ -40,7 +40,7 @@ args = parser.parse_args()
 argsd = args.__dict__
 for a in ['gtagex']:
     if argsd[a] == None:
-        print('*** Missing required argument to forcing_argfun.intro(): ' + a)
+        print('*** Missing required argument: ' + a)
         sys.exit()
 
 gridname, tag, ex_name = args.gtagex.split('_')

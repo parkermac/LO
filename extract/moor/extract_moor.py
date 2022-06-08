@@ -28,7 +28,7 @@ from subprocess import PIPE as Pi
 import numpy as np
 import xarray as xr
 
-# commandd line arugments
+# command line arugments
 parser = argparse.ArgumentParser()
 # which run to use
 parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas6_v3_l08b
@@ -59,7 +59,7 @@ args = parser.parse_args()
 argsd = args.__dict__
 for a in ['gtagex']:
     if argsd[a] == None:
-        print('*** Missing required argument to forcing_argfun.intro(): ' + a)
+        print('*** Missing required argument: ' + a)
         sys.exit()
 gridname, tag, ex_name = args.gtagex.split('_')
 # get the dict Ldir

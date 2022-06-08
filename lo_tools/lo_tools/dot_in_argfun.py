@@ -33,7 +33,7 @@ def intro():
     for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'date_string',
                 'blow_ups', 'np_num']:
         if argsd[a] == None:
-            print('*** Missing required argument to forcing_argfun.intro(): ' + a)
+            print('*** Missing required argument to dot_in_argfun.intro(): ' + a)
             sys.exit()
         
     # get the dict Ldir
