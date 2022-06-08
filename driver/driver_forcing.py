@@ -4,11 +4,14 @@ This runs any of the forcing or post-processing jobs.
 It can be run for a single forecast or over a range of past days.
 
 - Test on mac from ipython:
-run driver_forcing -g cas6 -t v3 -r backfill -s continuation -0 2019.07.04 -test True -f [FRC]
+run driver_forcing -g cas6 -t v3 -r backfill -0 2019.07.04 -test True -f [FRC]
 where [FRC] = ztest0, tide0, etc.
 
 - Test on mac from command line:
-python ./driver_forcing.py -g cas6 -t v3 -r backfill -s continuation -0 2019.07.04 -test True -f [FRC]
+python ./driver_forcing.py -g cas6 -t v3 -r backfill -0 2019.07.04 -test True -f [FRC]
+
+As of 2022.06.08 the default start_type is continuation, which is by far the most common usage.
+So this is no longer needed in most cases.
 
 """
 
@@ -25,7 +28,7 @@ parser.add_argument('-g', '--gridname', type=str)   # e.g. cas2
 parser.add_argument('-t', '--tag', type=str)        # e.g. v3
 parser.add_argument('-f', '--frc', type=str)        # e.g. tide
 parser.add_argument('-r', '--run_type', type=str)   # forecast or backfill
-parser.add_argument('-s', '--start_type', type=str) # new or continuation
+parser.add_argument('-s', '--start_type', type=str, default='continuation') # new or continuation
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
 parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_string)
