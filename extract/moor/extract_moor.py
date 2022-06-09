@@ -122,7 +122,7 @@ ilat = zfun.find_nearest_ind(Lat, lat)
 
 # check to see if we are working with the old or new NPZDOC variables
 ds = xr.open_dataset(in_dir0 / ('f' + Ldir['ds0']) / 'ocean_his_0001.nc')
-if 'NH4' = ds.data_vars:
+if 'NH4' == ds.data_vars:
     # updated ROMS
     bio_list = ',NO3,NH4,phytoplankton,zooplankton,SdetritusN,LdetritusN,SdetritusC,LdetritusC,oxygen,alkalinity,TIC,rho'
 else:
