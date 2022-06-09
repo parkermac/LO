@@ -137,6 +137,12 @@ def get_sta_dict(job_name):
         'ORCA_Twanoh': (-123.0083, 47.375),
         'Head': (-122.893559, 47.411036)
         }
+        
+    elif job_name == 'ROMS_update':
+        sta_dict = {
+        'ORCA_Hoodsport': (-123.1126, 47.4218),
+        'CE02':(-124.304, 44.6393) # Oregon Shelf (80 m)
+        }
             
     else:
         print('Unsupported job name!')

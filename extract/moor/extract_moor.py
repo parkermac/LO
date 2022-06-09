@@ -120,6 +120,16 @@ if (lat < Lat[0]) or (lat > Lat[-1]):
 ilon = zfun.find_nearest_ind(Lon, lon)
 ilat = zfun.find_nearest_ind(Lat, lat)
 
+# check to see if we are working with the old or new NPZDOC variables
+ds = xr.open_dataset(in_dir0 / ('f' + Ldir['ds0']) / 'ocean_his_0001.nc')
+if 'NH4' = ds.data_vars:
+    # updated ROMS
+    bio_list = ',NO3,NH4,phytoplankton,zooplankton,SdetritusN,LdetritusN,SdetritusC,LdetritusC,oxygen,alkalinity,TIC,rho'
+else:
+    # original version
+    bio_list = ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,rho'
+ds.close()
+
 # more error checking
 
 def find_good(ilat, ilon, mask):
@@ -162,7 +172,7 @@ if Ldir['get_tsa']:
 if Ldir['get_vel']:
     vn_list += ',u,v,w,ubar,vbar'
 if Ldir['get_bio']:
-    vn_list += ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,rho'
+    vn_list += bio_list
 if Ldir['get_surfbot']:
     vn_list += ',Pair,Uwind,Vwind,shflux,ssflux,latent,sensible,lwrad,swrad,sustr,svstr,bustr,bvstr'
 # The choice below is a custom job that is not part of get_all.  It is problematic to add such jobs becasue
