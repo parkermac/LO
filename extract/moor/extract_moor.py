@@ -120,16 +120,6 @@ if (lat < Lat[0]) or (lat > Lat[-1]):
 ilon = zfun.find_nearest_ind(Lon, lon)
 ilat = zfun.find_nearest_ind(Lat, lat)
 
-# check to see if we are working with the old or new NPZDOC variables
-ds = xr.open_dataset(in_dir0 / ('f' + Ldir['ds0']) / 'ocean_his_0001.nc')
-if 'NH4' == ds.data_vars:
-    # updated ROMS
-    bio_list = ',NO3,NH4,phytoplankton,zooplankton,SdetritusN,LdetritusN,SdetritusC,LdetritusC,oxygen,alkalinity,TIC,rho'
-else:
-    # original version
-    bio_list = ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,rho'
-ds.close()
-
 # more error checking
 
 def find_good(ilat, ilon, mask):
@@ -165,6 +155,16 @@ if Ldir['get_vel'] or Ldir['get_surfbot']:
     ilat_v, ilon_v = find_good(ilat_rho, ilon_rho, 'v')
     
 fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
+
+# check to see if we are working with the old or new NPZDOC variables
+ds = xr.open_dataset(fn_list[0])
+if 'NH4' in ds.data_vars:
+    # updated ROMS
+    bio_list = ',NO3,NH4,phytoplankton,zooplankton,SdetritusN,LdetritusN,SdetritusC,LdetritusC,oxygen,alkalinity,TIC,rho'
+else:
+    # original version
+    bio_list = ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,rho'
+ds.close()
 
 vn_list = 'h,zeta'
 if Ldir['get_tsa']:
