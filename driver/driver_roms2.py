@@ -126,8 +126,9 @@ while dt <= dt1:
         # Don't run backfill at the same time of day as the expected forecast
         dtnow = datetime.now()
         iisleep = 1
+        if (dtnow.hour >= 2) and (dtnow.hour <= 6):
+            print('\nTen-minute naps:')
         while (dtnow.hour >= 2) and (dtnow.hour <= 6):
-            print('Ten-minute naps:')
             print(str(iisleep), end=', ')
             sys.stdout.flush()
             sleep(600)
