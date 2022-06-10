@@ -9,7 +9,7 @@ from lo_tools import zrfun
 from importlib import reload
 reload(zrfun)
 
-to_test = 'ocn_bry'
+to_test = 'atm'
 vartype='state'
 
 if to_test == 'atm':

@@ -13,7 +13,7 @@
 #SBATCH --time=02:00:00
 
 ## Memory per node
-#SBATCH --mem=100G
+#SBATCH --mem=192G
 
 module purge
 module load intel/oneAPI
