@@ -25,9 +25,6 @@ from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 
 from lo_tools import Lfun
-import roms_plots
-from importlib import reload
-reload(roms_plots)
 
 parser = argparse.ArgumentParser()
 
@@ -88,6 +85,16 @@ if Ldir['list_type'] == None:
         Ldir['list_type'] = lt_dict[int(my_nlt)]
 else:
     pass
+    
+# get the roms_plots module, looking first in LO_user
+pth = Ldir['LO'] / 'plotting'
+upth = Ldir['LOu'] / 'plotting'
+if (upth / 'roms_plots.py').is_file():
+    print('Importing roms_plots from LO_user')
+    roms_plots = Lfun.module_from_file('roms_plots', upth / 'roms_plots.py')
+else:
+    print('Importing roms_plots from LO')
+    roms_plots = Lfun.module_from_file('roms_plots', pth / 'roms_plots.py')
 
 # choose the type of plot to make
 if Ldir['plot_type'] == None:
