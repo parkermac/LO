@@ -160,9 +160,9 @@ Similar hooks are built into other parts of the LO system where we expect that u
 - `LO_user/tracker/experiments.py` and `LO_user/tracker/trackfun.py`
 - `LO_user/extract/box/job_definitions.py` (used by `LO/extract/box/extract_box.py` and `extract_box_chunks.py`)
 - `LO_user/extract/moor/job_lists.py` (used by `LO/extract/moor/multi_mooring_driver.py`)
+- `LO_user/plotting/roms_plots.py` (used by `LO/plotting/pan_plot.py`)
 
 Not yet implemented, but should be:
-- `LO_user/plotting/roms_plots.py`
 - Ask for what you want to see!
 
 NOTE: there is now a [blog-like file](https://github.com/parkermac/LO/blob/main/notes/USER_NOTES.md) `LO/notes/USER_NOTES.md` where I keep notes about changes to the code that users should be aware of.

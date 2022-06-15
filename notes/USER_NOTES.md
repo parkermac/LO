@@ -6,3 +6,5 @@
 - 2022.06.06 I changed the logic in `LO/driver/driver_roms2.py` for taking a nap during the forecast time period. Use git pull on klone to get these changes.
 - 2022.06.08 I edited `LO/driver/driver_roms2.py` to try to catch sbatch errors that resulted in no log file being written.  Now this treats this as a blowup, and should continue. Use git pull on klone to get these changes.
 - 2022.06.08 I edited `LO/driver/driver_forcing.py` to make "continuation" the default "start_type", hence unless you specifically need a "new" start type you can drop the "-s continuation" when you run this code from the command line. Use git pull on apogee or perigee to get these changes.
+- 2022.06.10 I changed the times in `LO/driver/driver_roms2.py` for taking a nap during the forecast time period. Use git pull on klone to get these changes.
+- 2022.06.15 I added an LO_user hook to `LO/plotting/pan_plot.py` to look for a user version of `roms_plots.py`.
