@@ -3,7 +3,7 @@ Stand-alone code to plot a user-specified mooring extraction.
 """
 from pathlib import Path
 moor_fn = Path('/Users/pm8/Documents/LO_output/extract/cas6_v3_lo8b/'
-    +'moor/North_Station_2021.09.24_2021.11.24.nc')
+    +'moor/ooi/CE02_2018.01.01_2018.12.31.nc')
 
 import xarray as xr
 import matplotlib.pyplot as plt
@@ -29,12 +29,12 @@ for vn in ds.data_vars:
     
 # populate lists of variables to plot
 vn2_list = ['zeta']
-if 'Pair' in VN_list:
+if 'shflux' in VN_list:
     vn2_list += ['shflux', 'swrad']
 vn3_list = []
 if 'salt' in VN_list:
     vn3_list += ['salt', 'temp']
-if 'NO3' in VN_list:
+if 'oxygen' in VN_list:
     vn3_list += ['oxygen']
 
 # plot time series using a pandas DataFrame
