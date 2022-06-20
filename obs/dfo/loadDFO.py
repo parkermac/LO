@@ -95,8 +95,8 @@ def loadDFO_CTD(basedir='.', dbname='DFO.sqlite',
                         StationTBL.Include==True,
                         ObsTBL.Include==True,
                         CalcsTBL.Include==True))
-    df1=pd.DataFrame(qry.all())
-    
+    df1 = pd.read_sql(qry.statement, engine)
+    # df1=pd.DataFrame(qry.all())
     df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
     session.close()
     engine.dispose()
@@ -195,8 +195,10 @@ def loadDFO_bottle(basedir='.', dbname='DFO.sqlite',
                         StationTBL.Lat<latlims[1],
                         StationTBL.Lon>=lonlims[0],
                         StationTBL.Lon<lonlims[1]))
-    df1=pd.DataFrame(qry.all())
-    df1['Z']=np.where(df1['Depth']>=0,df1['Depth'],-1.0*gsw.z_from_p(p=df1['Pressure'],lat=df1['Lat']))
+    df1 = pd.read_sql(qry.statement, engine)
+    df1['Z']=np.where(df1['Depth']>=0,df1['Depth'],gsw.z_from_p(p=df1['Pressure'].to_numpy(),lat=df1['Lat'].to_numpy()))
+    # df1=pd.DataFrame(qry.all())
+    # df1['Z']=np.where(df1['Depth']>=0,df1['Depth'],-1.0*gsw.z_from_p(p=df1['Pressure'],lat=df1['Lat']))
     df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
     session.close()
     engine.dispose()

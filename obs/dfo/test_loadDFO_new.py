@@ -11,15 +11,14 @@ reload(loadDFO)
 from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 
-basedir=str(Ldir['data'] / 'dfo')
-dbname='DFO.sqlite'
+basedir=str(Ldir['data'] / 'obs' / 'dfo')
 
-datelims=(datetime(2016,3,1),datetime(2016,4,1)),
-latlims=(49,49.4),
-lonlims=(-123.6,-123.2)
+datelims=[datetime(2016,3,1),datetime(2016,4,1)]
+latlims=[49,49.4]
+lonlims=[-123.6,-123.2]
 
 df_bot = loadDFO.loadDFO_bottle(basedir=basedir, dbname='DFO.sqlite',
     datelims=datelims,latlims=latlims,lonlims=lonlims)
 
 df_ctd = loadDFO.loadDFO_CTD(basedir=basedir, dbname='DFO.sqlite',
-    datelims=datelims)
+    datelims=datelims,latlims=latlims,lonlims=lonlims)
