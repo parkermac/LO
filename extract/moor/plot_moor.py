@@ -25,7 +25,7 @@ elif moor_item.is_dir():
     moor_fn = moor_item / moor_name
 
 # load everything using xarray
-ds = xr.load_dataset(moor_fn)
+ds = xr.open_dataset(moor_fn)
 ot = ds.ocean_time.values
 ot_dt = pd.to_datetime(ot)
 t = (ot_dt - ot_dt[0]).total_seconds().to_numpy()
@@ -54,6 +54,10 @@ if 'NO3' in VN_list:
     vn3_list += ['oxygen','NO3']
 # if 'u' in VN_list:
 #     vn3_list += ['u', 'v']
+
+# drop missing variables
+vn2_list = [item for item in vn2_list if item in ds.data_vars]
+vn3_list = [item for item in vn3_list if item in ds.data_vars]
 
 # plot time series using a pandas DataFrame
 df = pd.DataFrame(index=ot)

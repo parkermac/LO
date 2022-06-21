@@ -141,7 +141,6 @@ for sn in sta_dict.keys():
         if len(stderr) > 0:
             print(stderr.decode())
         sys.stdout.flush()
-        
     
     # copy or move the results to a folder named for the job
     moor_fn = out_dir / (sn + '_' + Ldir['ds0'] + '_' + Ldir['ds1'] + '.nc')

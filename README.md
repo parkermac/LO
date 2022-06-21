@@ -95,7 +95,7 @@ conda env create -f loenv.yml > env.log &
 ```
 This may take a half hour or so, which is why I added the `> env.log &` at the end of the command. You can look in the .yml file to see what is being installed.  It even adds the non-python nco toolbox and ffmpeg.  It also adds LO/lo_tools as a local "package" so that when you are in (loenv) you can access any of the modules in LO/lo_tools/lo_tools with a line in your python code like `from lo_tools import zfun`.  Instructions for a simple approach to making your own local packages can be found [HERE](https://pythonchb.github.io/PythonTopics/where_to_put_your_code.html).
 
-If you like you can make your own .yml and make your own environment, especially if you want to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package.
+If you like you can make your own .yml and make your own environment, especially if you want to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package. One question I have is, if you made your own `LO_user/loenv.yml` file, I assume you would have to set a path in the pip line that installs the lo_tools package. I haven't tried that yet.
 
 Then if you want to use this environment all the time add this line:
 ```
@@ -108,6 +108,11 @@ If you want to update the packages in the environment, go to LO where the loenv.
 conda env update -f loenv.yml
 ```
 which only took a minute or two the last time I tried it.  This is also what you do after you make any change to your .yml file, like adding a package.  There are more complete instructions for working with conda environments [HERE](https://www.earthdatascience.org/courses/intro-to-earth-data-science/python-code-fundamentals/use-python-packages/use-conda-environments-and-install-packages/).
+
+Note: it also can be useful with about the same frequency as you update loenv. To do this use this command (I assume you can do this within loenv but that it would still affect any environment):
+```
+conda update -n base -c defaults conda
+```
 
 #### (4) Create your own LO_user and make it a GitHub repo
 

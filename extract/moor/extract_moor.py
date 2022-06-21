@@ -2,10 +2,10 @@
 This is code for doing mooring extractions.
 
 Test on mac in ipython:
-run extract_moor -gtx cas6_v3_lo8b -test True
+run extract_moor -gtx cas6_v0_live -test True
 
 The same job would be run with flags as:
-python extract_moor.py -gtx cas6_v3_lo8b -ro 2 -0 2019.07.04 -1 2019.07.06 -lt hourly -sn TEST_0 -lon ' -125' -lat 47 -get_all True > em.log &
+python extract_moor.py -gtx cas6_v0_live -ro 0 -0 2019.07.04 -1 2019.07.06 -lt hourly -sn test -lon ' -125' -lat 47 -get_all True > test.log &
 NOTE: the quotes and space are required to feed it a negative longitude.
 
 The performance on this is excellent, taking about 24 minutes for a year of hourly records
@@ -70,13 +70,13 @@ for a in argsd.keys():
         Ldir[a] = argsd[a]
 # testing
 if Ldir['testing']:
-    Ldir['roms_out_num'] = 2
+    Ldir['roms_out_num'] = 0
     Ldir['ds0'] = '2019.07.04'
     Ldir['ds1'] = '2019.07.06'
     Ldir['list_type'] = 'hourly'
     Ldir['lon'] = -125
     Ldir['lat'] = 47
-    Ldir['sn'] = 'TEST_0'
+    Ldir['sn'] = 'test'
     Ldir['get_all'] = True
 # set where to look for model output
 if Ldir['roms_out_num'] == 0:
@@ -164,7 +164,6 @@ if 'NH4' in ds.data_vars:
 else:
     # original version
     bio_list = ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,rho'
-ds.close()
 
 vn_list = 'h,zeta'
 if Ldir['get_tsa']:
@@ -179,6 +178,10 @@ if Ldir['get_surfbot']:
 # you also have to add them to the args at the top of this code and the multi_mooring_driver.
 if Ldir['get_pressure']: # fields used for 1-D pressure analysis
     vn_list += ',salt,temp,u,v,Pair,Uwind,Vwind'
+
+# do a final check to drop missing variables from the list
+vn_list = (',').join([item for item in vn_list.split(',') if item in ds.data_vars])
+ds.close()
 
 tt_ncks = time()
 proc_list = []
