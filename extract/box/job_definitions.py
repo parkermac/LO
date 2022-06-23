@@ -62,6 +62,9 @@ def get_box(job, Lon, Lat):
     elif job == 'bass':
         aa = [-126.5, -124, 48.4, 49]
         vn_list = 'h,pm,pn,mask_rho,salt,temp,oxygen'
+    elif job == 'bass2':
+        aa = [-125.5, -122.1, 47, 49]
+        vn_list = 'h,pm,pn,mask_rho,salt,temp,oxygen'
     elif job == 'harcourt':
         aa = [-125.6, -124.2, 46.6, 47.2]
         vn_list = 'h,pm,pn,mask_rho,salt,temp,zeta,u,v,w,Uwind,Vwind'
