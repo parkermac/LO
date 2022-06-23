@@ -8,6 +8,76 @@ from sqlalchemy.orm import create_session
 from sqlalchemy.ext.automap import automap_base
 from sqlalchemy.sql import and_, or_, not_, func
 
+def loadDFOCTD(basedir='.', dbname='DFO_CTD.sqlite',
+        datelims=()):
+    """
+    load DFO CTD data stored in SQLite database (exclude most points outside Salish Sea)
+    basedir is location of database
+    dbname is database name
+    datelims, if provided, loads only data between first and second datetime in tuple
+    """
+    # if db does not exist, exit
+    dbpath=os.path.abspath(os.path.join(basedir,dbname))
+    if not os.path.isfile(dbpath):
+        raise Exception(f'ERROR: file {dbpath} not found')
+
+    # load database structure and start session
+    engine = create_engine('sqlite:///' + dbpath, echo = False)
+    Base = automap_base()
+    # reflect the tables in salish.sqlite:
+    Base.prepare(engine, reflect=True)
+    # mapped classes have been created
+    # existing tables:
+    StationTBL=Base.classes.StationTBL
+    ObsTBL=Base.classes.ObsTBL
+    CalcsTBL=Base.classes.CalcsTBL
+    session = create_session(bind = engine, autocommit = False, autoflush = True)
+    SA=case([(CalcsTBL.Salinity_T0_C0_SA!=None, CalcsTBL.Salinity_T0_C0_SA)], else_=
+             case([(CalcsTBL.Salinity_T1_C1_SA!=None, CalcsTBL.Salinity_T1_C1_SA)], else_=
+             case([(CalcsTBL.Salinity_SA!=None, CalcsTBL.Salinity_SA)], else_= None)))
+    CT=case([(CalcsTBL.Temperature_Primary_CT!=None, CalcsTBL.Temperature_Primary_CT)], else_=
+             case([(CalcsTBL.Temperature_Secondary_CT!=None, CalcsTBL.Temperature_Secondary_CT)], else_=CalcsTBL.Temperature_CT))
+    ZD=case([(ObsTBL.Depth!=None,ObsTBL.Depth)], else_= CalcsTBL.Z)
+    FL=case([(ObsTBL.Fluorescence_URU_Seapoint!=None,ObsTBL.Fluorescence_URU_Seapoint)], else_= ObsTBL.Fluorescence_URU_Wetlabs)
+    if len(datelims)<2:
+        qry=session.query(StationTBL.StartYear.label('Year'),StationTBL.StartMonth.label('Month'),
+                      StationTBL.StartDay.label('Day'),StationTBL.StartHour.label('Hour'),
+                      StationTBL.Lat,StationTBL.Lon,ZD.label('Z'),SA.label('SA'),CT.label('CT'),FL.label('Fluor'),
+                      ObsTBL.Oxygen_Dissolved_SBE.label('DO_mLL'),ObsTBL.Oxygen_Dissolved_SBE_1.label('DO_umolkg')).\
+                select_from(StationTBL).join(ObsTBL,ObsTBL.StationTBLID==StationTBL.ID).\
+                join(CalcsTBL,CalcsTBL.ObsTBLID==ObsTBL.ID).filter(and_(StationTBL.Lat>47-3/2.5*(StationTBL.Lon+123.5),
+                                                                    StationTBL.Lat<47-3/2.5*(StationTBL.Lon+121),
+                                                                    StationTBL.Include==True,ObsTBL.Include==True,CalcsTBL.Include==True))
+    else:
+        start_y=datelims[0].year
+        start_m=datelims[0].month
+        start_d=datelims[0].day
+        end_y=datelims[1].year
+        end_m=datelims[1].month
+        end_d=datelims[1].day
+        # qry=session.query(StationTBL.StartYear.label('Year'),StationTBL.StartMonth.label('Month'),
+        #               StationTBL.StartDay.label('Day'),StationTBL.StartHour.label('Hour'),
+        #               StationTBL.Lat,StationTBL.Lon,ZD.label('Z'),SA.label('SA'),CT.label('CT'),FL.label('Fluor')).\
+        qry=session.query(StationTBL.StartYear.label('Year'),StationTBL.StartMonth.label('Month'),
+                      StationTBL.StartDay.label('Day'),StationTBL.StartHour.label('Hour'),
+                      StationTBL.Lat,StationTBL.Lon,ZD.label('Z'),SA.label('SA'),CT.label('CT'),FL.label('Fluor'),
+                      ObsTBL.Oxygen_Dissolved_SBE.label('DO_mLL'),ObsTBL.Oxygen_Dissolved_SBE_1.label('DO_umolkg')).\
+                select_from(StationTBL).join(ObsTBL,ObsTBL.StationTBLID==StationTBL.ID).\
+                join(CalcsTBL,CalcsTBL.ObsTBLID==ObsTBL.ID).filter(and_(or_(StationTBL.StartYear>start_y,
+                         and_(StationTBL.StartYear==start_y, StationTBL.StartMonth>start_m),
+                         and_(StationTBL.StartYear==start_y, StationTBL.StartMonth==start_m, StationTBL.StartDay>=start_d)),
+                        or_(StationTBL.StartYear<end_y,
+                         and_(StationTBL.StartYear==end_y,StationTBL.StartMonth<end_m),
+                         and_(StationTBL.StartYear==end_y,StationTBL.StartMonth==end_m, StationTBL.StartDay<end_d)),
+                    StationTBL.Lat>47-3/2.5*(StationTBL.Lon+123.5),
+                    StationTBL.Lat<47-3/2.5*(StationTBL.Lon+121),
+                    StationTBL.Include==True,ObsTBL.Include==True,CalcsTBL.Include==True))
+    df1=pd.read_sql_query(qry.statement, engine)
+    df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
+    session.close()
+    engine.dispose()
+    return df1
+
 def loadDFO_CTD(basedir='.', dbname='DFO.sqlite',
         datelims=(),latlims=(),lonlims=()):
     """
@@ -195,6 +265,7 @@ def loadDFO_bottle(basedir='.', dbname='DFO.sqlite',
                         StationTBL.Lat>=latlims[0],
                         StationTBL.Lat<latlims[1],
                         StationTBL.Lon>=lonlims[0],
+                        
                         StationTBL.Lon<lonlims[1]))
     df1 = pd.read_sql(qry.statement, engine)
     df1['Z']=np.where(df1['Depth']>=0,df1['Depth'],gsw.z_from_p(p=df1['Pressure'].to_numpy(),lat=df1['Lat'].to_numpy()))
