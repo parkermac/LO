@@ -143,7 +143,13 @@ def get_sta_dict(job_name):
         'ORCA_Hoodsport': (-123.1126, 47.4218),
         'CE02':(-124.304, 44.6393) # Oregon Shelf (80 m)
         }
-            
+        
+    elif job_name == 'fatland1':
+        sta_dict = {
+        'Oregon_Offshore': (-124.95648, 44.37415),
+        'Oregon_Slope_Base': (-125.38966, 44.52897)
+        }
+        
     else:
         print('Unsupported job name!')
         a = dict()
