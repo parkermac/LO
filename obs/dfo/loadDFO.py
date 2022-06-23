@@ -46,8 +46,8 @@ def loadDFOCTD(basedir='.', dbname='DFO_CTD.sqlite',
                       ObsTBL.Oxygen_Dissolved_SBE.label('DO_mLL'),ObsTBL.Oxygen_Dissolved_SBE_1.label('DO_umolkg')).\
                 select_from(StationTBL).join(ObsTBL,ObsTBL.StationTBLID==StationTBL.ID).\
                 join(CalcsTBL,CalcsTBL.ObsTBLID==ObsTBL.ID).filter(and_(StationTBL.Lat>47-3/2.5*(StationTBL.Lon+123.5),
-                                                                    StationTBL.Lat<47-3/2.5*(StationTBL.Lon+121),
-                                                                    StationTBL.Include==True,ObsTBL.Include==True,CalcsTBL.Include==True))
+                    StationTBL.Lat<47-3/2.5*(StationTBL.Lon+121),
+                    StationTBL.Include==True,ObsTBL.Include==True,CalcsTBL.Include==True))
     else:
         start_y=datelims[0].year
         start_m=datelims[0].month
