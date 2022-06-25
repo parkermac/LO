@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
+from lo_tools import plotting_functions as pfun
 
 import loadDFO
 from importlib import reload
@@ -40,7 +41,7 @@ if False:
     ax.set_ylabel('Z (m)')
     ax.set_title('CTD 2016, \n Strait Of Georgia')
 
-if True:
+if False:
     # Bottle Data
     b_df = loadDFO.loadDFO_bottle(basedir=basedir, dbname='DFO.sqlite',
         datelims=datelims,latlims=latlims,lonlims=lonlims)
@@ -69,6 +70,27 @@ if True:
         ii += 1
         ax.set_xlabel(vn + ' [' + units + ']')
         ax.set_ylabel('Z [m]')
+        
+if True:
+    # Bottle Data, locations only
+    b_df = loadDFO.loadDFO_bottle(basedir=basedir, dbname='DFO.sqlite',
+        datelims=(),latlims=(),lonlims=(), xyt_only=True)
+    # plot
+    fig = plt.figure(figsize=(14,10))
+    ax = fig.add_subplot(111)
+    b_df.plot(x='Lon',y='Lat',style='.', ax=ax, legend=False)
+    pfun.dar(ax)
+    pfun.add_coast(ax)
+    ax.axis([-132,-122,46,53])
+    
+    # print number of casts in each year (the bottle data goes 1930-2019)
+    for year in range(1930,2020):
+        df = b_df[b_df.dtUTC.dt.year == year]
+        nsta = len(df.Station.unique())
+        if nsta>0:
+            print('%d: %d' % (year, nsta))
+    
+
 
 plt.show()
 

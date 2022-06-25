@@ -82,7 +82,7 @@ def loadDFO_CTD(basedir='', dbname='DFO_CTD.sqlite', datelims=()):
     return df1
 
 def loadDFO_bottle(basedir='.', dbname='DFO.sqlite',
-        datelims=(),latlims=(),lonlims=()):
+        datelims=(),latlims=(),lonlims=(), xyt_only=False):
     """
     This loads bottle data.
         
@@ -127,56 +127,76 @@ def loadDFO_bottle(basedir='.', dbname='DFO.sqlite',
     CalcsTBL=Base.classes.BOTCalcsTBL
     session = create_session(bind = engine, autocommit = False, autoflush = True)
 
-    # In some cases, it useful to merge data from various columns 
-    # (columns were created based on original field names to maintain consistency
-    # with ASCII format data set)
-    # TEOS-10 Absolute (technically Reference) Salinity (g/kg) previously calculated using
-    # gsw package and stored in database
-    SA=case([(CalcsTBL.Salinity_Bottle_SA!=None, CalcsTBL.Salinity_Bottle_SA)], else_=
-        case([(CalcsTBL.Salinity_T0_C0_SA!=None, CalcsTBL.Salinity_T0_C0_SA)], else_=
-        case([(CalcsTBL.Salinity_T1_C1_SA!=None, CalcsTBL.Salinity_T1_C1_SA)], else_=
-        case([(CalcsTBL.Salinity_SA!=None, CalcsTBL.Salinity_SA)], else_=
-        case([(CalcsTBL.Salinity__Unknown_SA!=None, CalcsTBL.Salinity__Unknown_SA)], 
-        else_=CalcsTBL.Salinity__Pre1978_SA)))))
-    CT=case([(CalcsTBL.Temperature_CT!=None, CalcsTBL.Temperature_CT)], else_=
-        case([(CalcsTBL.Temperature_Primary_CT!=None, CalcsTBL.Temperature_Primary_CT)], else_=
-        case([(CalcsTBL.Temperature_Secondary_CT!=None, CalcsTBL.Temperature_Secondary_CT)], 
-        else_=CalcsTBL.Temperature_Reversing_CT)))
-
-    # Define query to return desired data:
-    # Labels will determine column headings in eventual pandas DataFrame
-    #   - For columns from tables, format is tableVariable.ColumnName, and label is not required
-    #   - For case statements defined above, label is always required
-    # If data is to be returned from multiple tables, they must be joined (see lines containing select_from and join below)
-    # The 'Include' column was created for each table to flag rows with QC concerns; 
-    # any rows with Include=False are not returned
-    qry=session.query(StationTBL.ID.label('Station'),StationTBL.StartYear.label('Year'),
-        StationTBL.StartMonth.label('Month'),StationTBL.StartDay.label('Day'),StationTBL.StartHour.label('Hour'),
-        StationTBL.Lat,StationTBL.Lon,#ObsTBL.sourceFile,
-        ObsTBL.Pressure,ObsTBL.Depth,
-        ObsTBL.Chlorophyll_Extracted.label('Chl'),ObsTBL.Chlorophyll_Extracted_units.label('Chl_units'),
-        ObsTBL.Nitrate_plus_Nitrite.label('N'),ObsTBL.Nitrate_plus_Nitrite_units.label('N_units'),
-        ObsTBL.Silicate.label('Si'),ObsTBL.Silicate_units.label('Si_units'),
-        SA.label('SA'),CT.label('CT'),
-        ObsTBL.Oxygen_Dissolved.label('DO'),ObsTBL.Oxygen_Dissolved_units.label('DO_units')).\
-        select_from(StationTBL).join(ObsTBL,ObsTBL.StationTBLID==StationTBL.ID).\
-        join(CalcsTBL,CalcsTBL.ObsID==ObsTBL.ID).\
-        filter(and_(or_(StationTBL.StartYear>start_y,
-            and_(StationTBL.StartYear==start_y, StationTBL.StartMonth>start_m),
-            and_(StationTBL.StartYear==start_y, StationTBL.StartMonth==start_m, StationTBL.StartDay>=start_d)),
-            or_(StationTBL.StartYear<end_y,
-            and_(StationTBL.StartYear==end_y,StationTBL.StartMonth<end_m),
-            and_(StationTBL.StartYear==end_y,StationTBL.StartMonth==end_m, StationTBL.StartDay<end_d)),
-            StationTBL.Lat>=latlims[0],
-            StationTBL.Lat<latlims[1],
-            StationTBL.Lon>=lonlims[0],
-            StationTBL.Lon<lonlims[1]))
+    if xyt_only:
+        qry=session.query(StationTBL.ID.label('Station'),StationTBL.StartYear.label('Year'),
+            StationTBL.StartMonth.label('Month'),StationTBL.StartDay.label('Day'),StationTBL.StartHour.label('Hour'),
+            StationTBL.Lat,StationTBL.Lon).\
+            select_from(StationTBL).join(ObsTBL,ObsTBL.StationTBLID==StationTBL.ID).\
+            join(CalcsTBL,CalcsTBL.ObsID==ObsTBL.ID).\
+            filter(and_(or_(StationTBL.StartYear>start_y,
+                and_(StationTBL.StartYear==start_y, StationTBL.StartMonth>start_m),
+                and_(StationTBL.StartYear==start_y, StationTBL.StartMonth==start_m, StationTBL.StartDay>=start_d)),
+                or_(StationTBL.StartYear<end_y,
+                and_(StationTBL.StartYear==end_y,StationTBL.StartMonth<end_m),
+                and_(StationTBL.StartYear==end_y,StationTBL.StartMonth==end_m, StationTBL.StartDay<end_d)),
+                StationTBL.Lat>=latlims[0],
+                StationTBL.Lat<latlims[1],
+                StationTBL.Lon>=lonlims[0],
+                StationTBL.Lon<lonlims[1]))
+    else:
+        # In some cases, it useful to merge data from various columns 
+        # (columns were created based on original field names to maintain consistency
+        # with ASCII format data set)
+        # TEOS-10 Absolute (technically Reference) Salinity (g/kg) previously calculated using
+        # gsw package and stored in database
+        SA=case([(CalcsTBL.Salinity_Bottle_SA!=None, CalcsTBL.Salinity_Bottle_SA)], else_=
+            case([(CalcsTBL.Salinity_T0_C0_SA!=None, CalcsTBL.Salinity_T0_C0_SA)], else_=
+            case([(CalcsTBL.Salinity_T1_C1_SA!=None, CalcsTBL.Salinity_T1_C1_SA)], else_=
+            case([(CalcsTBL.Salinity_SA!=None, CalcsTBL.Salinity_SA)], else_=
+            case([(CalcsTBL.Salinity__Unknown_SA!=None, CalcsTBL.Salinity__Unknown_SA)], 
+            else_=CalcsTBL.Salinity__Pre1978_SA)))))
+        CT=case([(CalcsTBL.Temperature_CT!=None, CalcsTBL.Temperature_CT)], else_=
+            case([(CalcsTBL.Temperature_Primary_CT!=None, CalcsTBL.Temperature_Primary_CT)], else_=
+            case([(CalcsTBL.Temperature_Secondary_CT!=None, CalcsTBL.Temperature_Secondary_CT)], 
+            else_=CalcsTBL.Temperature_Reversing_CT)))
+        # Define query to return desired data:
+        # Labels will determine column headings in eventual pandas DataFrame
+        #   - For columns from tables, format is tableVariable.ColumnName, and label is not required
+        #   - For case statements defined above, label is always required
+        # If data is to be returned from multiple tables, they must be joined (see lines containing select_from and join below)
+        # The 'Include' column was created for each table to flag rows with QC concerns; 
+        # any rows with Include=False are not returned
+        qry=session.query(StationTBL.ID.label('Station'),StationTBL.StartYear.label('Year'),
+            StationTBL.StartMonth.label('Month'),StationTBL.StartDay.label('Day'),StationTBL.StartHour.label('Hour'),
+            StationTBL.Lat,StationTBL.Lon,#ObsTBL.sourceFile,
+            ObsTBL.Pressure,ObsTBL.Depth,
+            ObsTBL.Chlorophyll_Extracted.label('Chl'),ObsTBL.Chlorophyll_Extracted_units.label('Chl_units'),
+            ObsTBL.Nitrate_plus_Nitrite.label('N'),ObsTBL.Nitrate_plus_Nitrite_units.label('N_units'),
+            ObsTBL.Silicate.label('Si'),ObsTBL.Silicate_units.label('Si_units'),
+            SA.label('SA'),CT.label('CT'),
+            ObsTBL.Oxygen_Dissolved.label('DO'),ObsTBL.Oxygen_Dissolved_units.label('DO_units')).\
+            select_from(StationTBL).join(ObsTBL,ObsTBL.StationTBLID==StationTBL.ID).\
+            join(CalcsTBL,CalcsTBL.ObsID==ObsTBL.ID).\
+            filter(and_(or_(StationTBL.StartYear>start_y,
+                and_(StationTBL.StartYear==start_y, StationTBL.StartMonth>start_m),
+                and_(StationTBL.StartYear==start_y, StationTBL.StartMonth==start_m, StationTBL.StartDay>=start_d)),
+                or_(StationTBL.StartYear<end_y,
+                and_(StationTBL.StartYear==end_y,StationTBL.StartMonth<end_m),
+                and_(StationTBL.StartYear==end_y,StationTBL.StartMonth==end_m, StationTBL.StartDay<end_d)),
+                StationTBL.Lat>=latlims[0],
+                StationTBL.Lat<latlims[1],
+                StationTBL.Lon>=lonlims[0],
+                StationTBL.Lon<lonlims[1]))
 
     # write to pandas DataFrame
     df1 = pd.read_sql(qry.statement, engine)
-    df1['Z']=np.where(df1['Depth']>=0,df1['Depth'],gsw.z_from_p(p=df1['Pressure'].to_numpy(),lat=df1['Lat'].to_numpy()))
-    df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
-    df1 = df1.drop(['Pressure','Depth','Year','Month','Day','Hour'],axis=1)
+    if xyt_only:
+        df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
+        df1 = df1[['Station','Lon','Lat','dtUTC']]
+    else:
+        df1['Z']=np.where(df1['Depth']>=0,df1['Depth'],gsw.z_from_p(p=df1['Pressure'].to_numpy(),lat=df1['Lat'].to_numpy()))
+        df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
+        df1 = df1.drop(['Pressure','Depth','Year','Month','Day','Hour'],axis=1)
     session.close()
     engine.dispose()
     return df1
