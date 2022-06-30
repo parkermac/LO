@@ -5,33 +5,24 @@ grid file.
 
 Can be run im ipython with a user-specified grid file
 
-run grid_explore.py -g sal0
-
+run grid_explore.py -g ai0
 
 """
-
-import gfun
-from importlib import reload
-reload(gfun)
-Gr =gfun.gstart()
-# running gfun.gstart() sets the path to include pfun and zfun
-import gfun_utility as gfu
-reload(gfu)
-import gfun_plotting as gfp
-reload(gfp)
-import pfun
-import zfun
-reload(zfun)
-
 import numpy as np
-import netCDF4 as nc
+import xarray as xr
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
-import os
-import shutil
+import sys
+import pandas as pd
 import pickle
 
-import Lfun
+from lo_tools import Lfun, zfun
+from lo_tools import plotting_functions as pfun
+
+import gfun
+import gfun_utility as gfu
+
+Gr =gfun.gstart()
 Ldir = Lfun.Lstart()
 
 import argparse
@@ -43,28 +34,17 @@ if len(args.gridname) > 0:
     Gr = gfun.gstart(gridname=args.gridname)
 else:
     Gr = gfun.gstart()
-    
 # select grid file
-using_old_grid = False
-# Set this to True to look at grids we have already created,
-# e.g. ones currently in use for LiveOcean.
-# Set it to False when interacting with grids from pgrid_output.
-if using_old_grid==True:
-    fn = gfun.select_file(Gr, using_old_grid=True)
-    in_fn = fn
-elif using_old_grid==False:
-    fn = gfun.select_file(Gr)
-    in_fn = Gr['gdir'] + fn
+in_fn = gfun.select_file(Gr)
 
 # get fields
-ds = nc.Dataset(in_fn)
-H = ds.variables['h'][:]
-mask_rho = ds.variables['mask_rho'][:]
-plon = ds.variables['lon_psi_ex'][:]
-plat = ds.variables['lat_psi_ex'][:]
-lon = ds.variables['lon_rho'][:]
-lat = ds.variables['lat_rho'][:]
-DA = (1/ds['pm'][:]) * (1/ds['pn'][:])
+ds = xr.open_dataset(in_fn)
+H = ds.h.values
+lon = ds.lon_rho.values
+lat = ds.lat_rho.values
+mask_rho = ds.mask_rho.values
+plon, plat = pfun.get_plon_plat(lon,lat)
+DA = (1/ds.pm.values) * (1/ds.pn.values)
 DA[mask_rho==0] = np.nan
 H[mask_rho==0] = np.nan
 Hm = np.ma.masked_where(mask_rho==0, H)
@@ -82,7 +62,6 @@ ym = np.flipud(YM)
 m = np.flipud(mask_rho) # mask_rho: 1 = water, 0 = land
 lonvec = lon[0,:] # no need to flip
 latvec = np.flipud(lat[:,0])
-
 NR, NC = h.shape
 
 # PLOTTING
@@ -92,23 +71,26 @@ plt.close('all')
 fig = plt.figure(figsize=(22,12)) # (13,8) is good for my laptop
 ax1 = plt.subplot2grid((1,5), (0,0), colspan=2) # map
 ax2 = plt.subplot2grid((1,5), (0,2), colspan=1) # buttons
-ax3 = plt.subplot2grid((1,5), (0,3), colspan=2) # buttons
+ax3 = plt.subplot2grid((1,5), (0,3), colspan=2) # second map
 
 #%% initialize the data plot
-cmap1 = plt.get_cmap(name='rainbow_r') # terrain
-tvmin = -10
-tvmax = 40
+cmap1 = plt.get_cmap(name='terrain')
+tvmin = 0
+tvmax = 200
 cs = ax1.imshow(h, interpolation='nearest', vmin=tvmin, vmax=tvmax, cmap = cmap1)
 fig.colorbar(cs, ax=ax1, extend='both')
 aa = ax1.axis()
+# # add the coastline
+# clon, clat = pfun.get_coast()
+# cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:])
+# cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0])
+# ax1.plot(cx0 + cxf, NR - (cy0 + cyf) - 1, '-k')
+
 # add the coastline
 clon, clat = pfun.get_coast()
-cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:])
-cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0])
+cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:], show_warnings=False)
+cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0], show_warnings=False)
 ax1.plot(cx0 + cxf, NR - (cy0 + cyf) - 1, '-k')
-# add rivers
-gfp.edit_mask_river_tracks(Gr, NR, ax1)
-ax1.axis(aa)
 
 # create control buttons
 # list is organized from bottom to top
@@ -134,8 +116,6 @@ ax3.pcolormesh(plon, plat, Hm,
 pfun.add_coast(ax3)
 ax3.axis(aa0)
 pfun.dar(ax3)
-ax3.set_xlabel('Longitude')
-ax3.set_ylabel('Latitude')
 
 def addButtonLabel(ax, plon, plat, nb, lab, tcol='k'):
     # draw and label buttons
@@ -255,43 +235,42 @@ while flag_get_ginput:
             print('Volume inside polygon = %0.1f km3' % (vp/1e9) )
             print('Area inside polygon = %0.1f km2' % (ap/1e6) )
             print('Mean Depth inside polygon = %0.1f m' % (hp) )
-            #inp = input('Push Return to continue\n')
-            
-            # custom request 1/11/2019 area below 120 ft = 36.6 m
-            hm = h.copy()
-            dam = da.copy()
-            hm[h < 36.576] = np.nan
-            dam[h < 36.576] = np.nan
-            dap = dam[ji_rho_in[:,0], ji_rho_in[:,1]]
-            dvp = hm[ji_rho_in[:,0], ji_rho_in[:,1]] * da[ji_rho_in[:,0], ji_rho_in[:,1]]
-            ap = np.nansum(dap)
-            vp = np.nansum(dvp)
-            hp = vp/ap
-            print('')
-            print('CUSTOM: Values with h >= 36.576 m')
-            print('- all values are for unmasked area -')
-            print('Volume inside polygon = %0.1f km3' % (vp/1e9) )
-            print('Area inside polygon = %0.1f km2' % (ap/1e6) )
-            print('Mean Depth inside polygon = %0.1f m' % (hp) )
+            if False:
+                # custom request 1/11/2019 area below 120 ft = 36.6 m
+                hm = h.copy()
+                dam = da.copy()
+                hm[h < 36.576] = np.nan
+                dam[h < 36.576] = np.nan
+                dap = dam[ji_rho_in[:,0], ji_rho_in[:,1]]
+                dvp = hm[ji_rho_in[:,0], ji_rho_in[:,1]] * da[ji_rho_in[:,0], ji_rho_in[:,1]]
+                ap = np.nansum(dap)
+                vp = np.nansum(dvp)
+                hp = vp/ap
+                print('')
+                print('CUSTOM: Values with h >= 36.576 m')
+                print('- all values are for unmasked area -')
+                print('Volume inside polygon = %0.1f km3' % (vp/1e9) )
+                print('Area inside polygon = %0.1f km2' % (ap/1e6) )
+                print('Mean Depth inside polygon = %0.1f m' % (hp) )
             inp = input('Push Return to continue\n')
-            
             remove_poly()
             ax1.set_title('PAUSED')
         elif (bdict[nb]=='polySave') and not flag_start:
             flag_continue = False
             pname = input('Name for saved polygon or line: ')
-            poutdir = Ldir['parent'] + 'ptools_output/polygons/'
+            poutdir = Ldir['data'] / 'section_lines'
             Lfun.make_dir(poutdir)
             lon_poly = lonvec[plon_poly]
             lat_poly = latvec[plat_poly]
             pdict = {'lon_poly': lon_poly, 'lat_poly': lat_poly}
-            poutfn = poutdir + pname.replace(' ','') + '.p'
+            poutfn = poutdir / (pname.replace(' ','') + '.p')
             pickle.dump(pdict, open(poutfn, 'wb'))
-            print(' - saved to ' + poutfn)
+            print(' - saved to ' + str(poutfn))
             #remove_poly()
             ax1.set_title('PAUSED')
             ax3.plot(lon_poly, lat_poly, '-*k', linewidth=1)
-            ax3.text(np.array(lon_poly).mean(),np.array(lat_poly).mean(),pname)
+            ax3.text(np.array(lon_poly).mean(),np.array(lat_poly).mean(),
+                pname, ha='center',va='center')
         elif (bdict[nb]=='lineInfo') and not flag_start:
             flag_continue = False
             x = plon_poly
@@ -301,17 +280,6 @@ while flag_get_ginput:
                 dist += np.sqrt( (xm[y[ii+1],x[ii+1]]-xm[y[ii],x[ii]])**2
                     + (ym[y[ii+1],x[ii+1]]-ym[y[ii],x[ii]])**2 )
             print('Line length = %0.1f km' % (dist/1e3))
-            
-            # also find the sectional area under the line
-            # nseg = 100
-            # area = 0
-            # for ii in range(len(x)-1):
-            #     x0 = x[ii]; x1 = x[ii+1]
-            #     y0 = y[ii]; y1 = y[ii+1]
-            #     xx = np.linspace(x0, x1, nseg)
-            #     yy = np.linspace(y0, y1, nseg)
-            #     ix0, ix1, xfr = zfun.get_interpolant(xx, lon)
-                
             inp = input('Push Return to continue\n')
             remove_poly()
             ax1.set_title('PAUSED')
