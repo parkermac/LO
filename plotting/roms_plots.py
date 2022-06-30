@@ -78,7 +78,44 @@ def P_basic(in_dict):
         plt.close()
     else:
         plt.show()
-        
+
+def P_salt(in_dict):
+    """
+    Designed to explore the 3-D salt structure and exchange flow
+    at Admiralty Inlet.
+    """
+    # START
+    ds = xr.open_dataset(in_dict['fn'])
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(14,10))
+    fig = plt.figure()
+    # PLOT CODE
+    x, y = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
+    
+    ax = fig.add_subplot(121)
+    cs = ax.pcolormesh(x, y, ds.salt[0,-1,:,:].values, vmin=29, vmax=32, cmap='Accent')
+    # fig.colorbar(cs, ax=ax)
+    pfun.add_coast(ax)
+    ax.axis(pfun.get_aa(ds))
+    pfun.dar(ax)
+
+    ax = fig.add_subplot(122)
+    cs = ax.pcolormesh(x, y, ds.salt[0,0,:,:].values, vmin=29, vmax=32, cmap='Accent')
+    # fig.colorbar(cs, ax=ax)
+    pfun.add_coast(ax)
+    ax.axis(pfun.get_aa(ds))
+    pfun.dar(ax)
+    
+    fig.tight_layout()
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+
 def P_Fb(in_dict):
     # START
     ds = xr.open_dataset(in_dict['fn'])
