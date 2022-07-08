@@ -60,7 +60,7 @@ def loadDFO_CTD(basedir='', dbname='DFO_CTD.sqlite', datelims=()):
         end_y=datelims[1].year
         end_m=datelims[1].month
         end_d=datelims[1].day
-        qry=session.query(StationTBL.ID.label('CTDStationTBLID'),StationTBL.StartYear.label('Year'),StationTBL.StartMonth.label('Month'),
+        qry=session.query(StationTBL.ID.label('Station'),StationTBL.StartYear.label('Year'),StationTBL.StartMonth.label('Month'),
                       StationTBL.StartDay.label('Day'),StationTBL.StartHour.label('Hour'),
                       StationTBL.Lat,StationTBL.Lon,ZD.label('Z'),SA.label('SA'),CT.label('CT'),FL.label('Fluor'),
                       ObsTBL.Oxygen_Dissolved_SBE.label('DO_mLL'),ObsTBL.Oxygen_Dissolved_SBE_1.label('DO_umolkg')).\
@@ -77,6 +77,7 @@ def loadDFO_CTD(basedir='', dbname='DFO_CTD.sqlite', datelims=()):
     df1=pd.read_sql_query(qry.statement, engine)
     df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
     df1['Z'] = -df1['Z'] # fix sign of z to be positive up
+    df1 = df1.drop(['Year','Month','Day','Hour'],axis=1)
     session.close()
     engine.dispose()
     return df1
@@ -168,7 +169,7 @@ def loadDFO_bottle(basedir='.', dbname='DFO.sqlite',
         # any rows with Include=False are not returned
         qry=session.query(StationTBL.ID.label('Station'),StationTBL.StartYear.label('Year'),
             StationTBL.StartMonth.label('Month'),StationTBL.StartDay.label('Day'),StationTBL.StartHour.label('Hour'),
-            StationTBL.Lat,StationTBL.Lon,#ObsTBL.sourceFile,
+            StationTBL.Lat,StationTBL.Lon,
             ObsTBL.Pressure,ObsTBL.Depth,
             ObsTBL.Chlorophyll_Extracted.label('Chl'),ObsTBL.Chlorophyll_Extracted_units.label('Chl_units'),
             ObsTBL.Nitrate_plus_Nitrite.label('N'),ObsTBL.Nitrate_plus_Nitrite_units.label('N_units'),
@@ -194,7 +195,8 @@ def loadDFO_bottle(basedir='.', dbname='DFO.sqlite',
         df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
         df1 = df1[['Station','Lon','Lat','dtUTC']]
     else:
-        df1['Z']=np.where(df1['Depth']>=0,df1['Depth'],gsw.z_from_p(p=df1['Pressure'].to_numpy(),lat=df1['Lat'].to_numpy()))
+        # Z will be positive up
+        df1['Z']=np.where(df1['Depth']>=0,-df1['Depth'],gsw.z_from_p(p=df1['Pressure'].to_numpy(),lat=df1['Lat'].to_numpy()))
         df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
         df1 = df1.drop(['Pressure','Depth','Year','Month','Day','Hour'],axis=1)
     session.close()
