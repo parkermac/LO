@@ -79,7 +79,7 @@ def P_basic(in_dict):
     else:
         plt.show()
 
-def P_salt(in_dict):
+def P_admiralty(in_dict):
     """
     Designed to explore the 3-D salt structure and exchange flow
     at Admiralty Inlet.
@@ -87,24 +87,83 @@ def P_salt(in_dict):
     # START
     ds = xr.open_dataset(in_dict['fn'])
     fs = 14
-    pfun.start_plot(fs=fs, figsize=(14,10))
+    pfun.start_plot(fs=fs, figsize=(14,12))
     fig = plt.figure()
     # PLOT CODE
-    x, y = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
     
-    ax = fig.add_subplot(121)
-    cs = ax.pcolormesh(x, y, ds.salt[0,-1,:,:].values, vmin=29, vmax=32, cmap='Accent')
-    # fig.colorbar(cs, ax=ax)
+    vn = 'salt'
+    cmap = 'gist_ncar'
+    vmin = 29
+    vmax = 32
+    zdeep = -200
+    
+    xp, yp = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
+    
+    # CREATE THE SECTION
+    tracks_path = Ldir['data'] / 'section_lines'
+    track_fn = tracks_path / 'AI_thalweg.p'
+    # get the track to interpolate onto
+    pdict = pickle.load(open(track_fn, 'rb'))
+    xx = pdict['lon_poly']
+    yy = pdict['lat_poly']
+    for ii in range(len(xx)-1):
+        x0 = xx[ii]
+        x1 = xx[ii+1]
+        y0 = yy[ii]
+        y1 = yy[ii+1]
+        nn = 20
+        if ii == 0:
+            xt = np.linspace(x0, x1, nn)
+            yt = np.linspace(y0,y1, nn)
+        else:
+            xt = np.concatenate((xt, np.linspace(x0, x1, nn)[1:]))
+            yt = np.concatenate((yt, np.linspace(y0, y1, nn)[1:]))
+    v2, v3, dist, idist0 = pfun.get_section(ds, vn, xt, yt, in_dict)
+    
+    ax = fig.add_subplot(221)
+    cs = ax.pcolormesh(xp, yp, ds[vn][0,-1,:,:].values,
+        vmin=vmin, vmax=vmax, cmap=cmap)
     pfun.add_coast(ax)
     ax.axis(pfun.get_aa(ds))
     pfun.dar(ax)
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.text(.95,.9,'Surface ' + vn, transform=ax.transAxes, ha='right')
+    # add section track
+    ax.plot(xt, yt, '-k', linewidth=2)
+    ax.plot(xt[idist0], yt[idist0], 'or', markersize=5, markerfacecolor='w',
+        markeredgecolor='k', markeredgewidth=2)
 
-    ax = fig.add_subplot(122)
-    cs = ax.pcolormesh(x, y, ds.salt[0,0,:,:].values, vmin=29, vmax=32, cmap='Accent')
-    # fig.colorbar(cs, ax=ax)
+    ax = fig.add_subplot(222)
+    cs = ax.pcolormesh(xp, yp, ds[vn][0,0,:,:].values,
+        vmin=vmin, vmax=vmax, cmap=cmap)
     pfun.add_coast(ax)
     ax.axis(pfun.get_aa(ds))
     pfun.dar(ax)
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.text(.95,.9,'Bottom ' + vn, transform=ax.transAxes, ha='right')
+    # add section track
+    ax.plot(xt, yt, '-k', linewidth=2)
+    ax.plot(xt[idist0], yt[idist0], 'or', markersize=5, markerfacecolor='w',
+        markeredgecolor='k', markeredgewidth=2)
+    
+    # plot section
+    ax = fig.add_subplot(212)
+    ax.plot(dist, v2['zbot'], '-k', linewidth=2)
+    ax.plot(dist, v2['zeta'], '-b', linewidth=1)
+    ax.set_xlim(dist.min(), dist.max())
+    ax.set_ylim(zdeep, 5)
+    
+    # cs = ax.pcolormesh(v3['distf'], v3['zrf'], v3['sectvarf'],
+    #     vmin=vmin, vmax=vmax, cmap=cmap)
+        
+    ax.contourf(v3['distf'], v3['zrf'], v3['sectvarf'], np.arange(0,35,.2),# colors='k',
+         vmin=vmin, vmax=vmax, cmap=cmap)
+    ax.contour(v3['distf'], v3['zrf'], v3['sectvarf'], np.arange(0,35,.2), colors='k')
+    ax.set_xlabel('Distance (km)')
+    ax.set_ylabel('Z (m)')
+    pfun.add_info(ax, in_dict['fn'])
     
     fig.tight_layout()
     # FINISH

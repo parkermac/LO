@@ -1,11 +1,14 @@
-# -*- coding: utf-8 -*-
 """
 Tool for interactively exploring the bathymetry of a
 grid file.
 
-Can be run im ipython with a user-specified grid file
+Can be run in ipython with a user-specified grid file
 
 run grid_explore.py -g ai0
+
+NOTE: in order to look at an older grid file like cas6, just copy
+its grid.nc into LO_output/pgrid/[gridname], and then specify it with the
+-g flag when you run this program.
 
 """
 import numpy as np
@@ -73,7 +76,7 @@ ax1 = plt.subplot2grid((1,5), (0,0), colspan=2) # map
 ax2 = plt.subplot2grid((1,5), (0,2), colspan=1) # buttons
 ax3 = plt.subplot2grid((1,5), (0,3), colspan=2) # second map
 
-#%% initialize the data plot
+# initialize the data plot
 cmap1 = plt.get_cmap(name='terrain')
 tvmin = 0
 tvmax = 200
