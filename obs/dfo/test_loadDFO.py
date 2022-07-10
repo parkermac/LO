@@ -18,7 +18,7 @@ Ldir = Lfun.Lstart()
 basedir=str(Ldir['data'] / 'obs' / 'dfo')
 
 # make some choices about time and space range
-datelims=[datetime(2018,1,1),datetime(2018,12,31)]
+datelims=[datetime(2017,1,1),datetime(2019,12,31)]
 latlims=[48.9,49.5]
 lonlims=[-124.2,-123.2]
 
@@ -32,18 +32,45 @@ plt.close('all')
 colors = plt.cm.hsv(np.linspace(0,1,12))
 colors = np.roll(colors, 6, axis=0)
 
-if True:
+if False:
     # CTD Data
     c_df = loadDFO.loadDFO_CTD(basedir=basedir, dbname='DFO_CTD.sqlite',
-            datelims=datelims)
+            datelims=datelims,latlims=latlims,lonlims=lonlims)
     # plot
     fig = plt.figure(figsize=(10,10))
     ax = fig.add_subplot(111)
-    for icast in c_df['CTDStationTBLID'].unique():
-        ax.plot(c_df.loc[c_df.CTDStationTBLID==icast,['SA']],
-                   c_df.loc[c_df.CTDStationTBLID==icast,['Z']],'-')
-    ax.set_xlabel('Reference Salinity (g kg$^{-1}$)')
+    for icast in c_df['Station'].unique():
+        ax.plot(c_df.loc[c_df.Station==icast,['SA']],
+                   c_df.loc[c_df.Station==icast,['Z']],'-')
     ax.set_ylabel('Z (m)')
+
+if True:
+    # Bottle Data, locations only
+    c_df = loadDFO.loadDFO_CTD(basedir=basedir, dbname='DFO_CTD.sqlite',
+        datelims=(),latlims=(),lonlims=(), xyt_only=True)
+    # plot
+    fig = plt.figure(figsize=(14,10))
+    ax = fig.add_subplot(111)
+    c_df.plot(x='Lon',y='Lat',style='.', ax=ax, legend=False)
+    pfun.dar(ax)
+    pfun.add_coast(ax)
+    ax.axis([-132,-122,46,53])
+    
+    # Print number of casts in each year.
+    # RESULTS: There are only casts in these year:
+    # 2013: 1077
+    # 2014: 995
+    # 2015: 1216
+    # 2016: 1307
+    # 2017: 1128
+    # 2018: 593
+    # 2019: 1188
+    # 2020: 55
+    for year in range(1900,datetime.now().year+1):
+        df = c_df[c_df.dtUTC.dt.year == year]
+        nsta = len(df.Station.unique())
+        if nsta>0:
+            print('%d: %d' % (year, nsta))
 
 if False:
     # Bottle Data
@@ -92,12 +119,12 @@ if False:
     pfun.add_coast(ax)
     ax.axis([-132,-122,46,53])
     
-    # print number of casts in each year.
+    # Print number of casts in each year.
     # RESULTS: the bottle data goes 1930-2019).  Pretty solid after 2000, but
-    # 1932, -53, and -54 were pretty impressive as well.  There are stations
+    # 1932, -53, and -54 were pretty impressive as well. There are stations
     # in Puget Sound but they look like they have a longitude offset, often
     # sitting on land.
-    for year in range(1930,2020):
+    for year in range(1900,datetime.now().year+1):
         df = b_df[b_df.dtUTC.dt.year == year]
         nsta = len(df.Station.unique())
         if nsta>0:
