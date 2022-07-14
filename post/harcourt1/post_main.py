@@ -99,14 +99,15 @@ NT = len(ds.ocean_time.values)
 ds.close()
 for hh in range(NT):
     nstr = ('00'+str(hh))[-2:]
+    h_out_fn = str(out_dir / 'Data')+'/hour_'+nstr+'.nc'
     cmd_list = ['ncks','-d','ocean_time,%d,%d' % (hh,hh),str(out_fn),
-        '-O',str(out_dir / 'Data')+'/hour_'+nstr+'.nc']
+        '-O',h_out_fn]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     if len(stderr) > 0:
         print(stderr.decode())
     # copy the file to the server
-    post_argfun.copy_to_server(Ldir, out_fn, subdir = 'harcourt_hourly')
+    post_argfun.copy_to_server(Ldir, h_out_fn, subdir = 'harcourt_hourly')
     
 print('Time to split int0 hours = %0.2f sec' % (time()-tt0))
 
