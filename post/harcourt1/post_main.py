@@ -109,7 +109,7 @@ for hh in range(NT):
     # copy the file to the server
     post_argfun.copy_to_server(Ldir, h_out_fn, subdir = 'harcourt_hourly')
     
-print('Time to split int0 hours = %0.2f sec' % (time()-tt0))
+print('Time to split into hours = %0.2f sec' % (time()-tt0))
 
 # -------------------------------------------------------
 
