@@ -70,7 +70,7 @@ tt0 = time()
 cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'box' / 'extract_box.py'),
     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
     '-0', ds0, '-1', ds1, '-lt', 'hourly', '-job', box_job]
-# note that we don't pass the testing flag, becausee that would override the
+# note that we don't pass the testing flag, because that would override the
 # choices above
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
@@ -89,6 +89,26 @@ print('\nPath to file:\n%s' % (str(out_fn)))
 
 # copy the file to the server
 post_argfun.copy_to_server(Ldir, out_fn)
+
+# Extra task: split the file up into hour chunks to make it easier to download
+# from the ship.
+tt0 = time()
+import xarray as xr
+ds = xr.open_dataset(out_fn)
+NT = len(ds.ocean_time.values)
+ds.close()
+for hh in range(NT):
+    nstr = ('00'+str(hh))[-2:]
+    cmd_list = ['ncks','-d','ocean_time,%d,%d' % (hh,hh),str(out_fn),
+        '-O',str(out_dir / 'Data')+'/hour_'+nstr+'.nc']
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+    stdout, stderr = proc.communicate()
+    if len(stderr) > 0:
+        print(stderr.decode())
+    # copy the file to the server
+    post_argfun.copy_to_server(Ldir, out_fn, subdir = 'harcourt_hourly')
+    
+print('Time to split int0 hours = %0.2f sec' % (time()-tt0))
 
 # -------------------------------------------------------
 

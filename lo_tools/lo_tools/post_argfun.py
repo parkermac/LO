@@ -70,14 +70,20 @@ def finale(Ldir, result_dict):
     with open(out_dir / 'Info' / 'results.txt', 'w') as ffout:
         ffout.write(S)
         
-def copy_to_server(Ldir, out_fn):
+def copy_to_server(Ldir, out_fn, subdir=''):
     """
     Copy the  extraction file to the server and write a little "done" file.
+    
+    The optional "subdir" argument allows writing to a subdirectory. The first use of this
+    is for hourly files made by splitting up the harcourt extraction.
     """
     if 'apogee' in Ldir['lo_env']:
     
         share_user = 'parker@liveocean.apl.uw.edu'
-        share_dir = '/data/www/liveocean/output/' + 'f' + Ldir['date_string']
+        if len(subdir) == 0:
+            share_dir = '/data/www/liveocean/output/' + 'f' + Ldir['date_string']
+        else:
+            share_dir = '/data/www/liveocean/output/' + 'f' + Ldir['date_string'] + '/' + subdir
 
         # (i) make the output directory
         cmd_list = ['ssh', share_user, 'mkdir -p ' + share_dir]
@@ -115,4 +121,3 @@ def copy_to_server(Ldir, out_fn):
         print('** Did not copy output to server! **')
         print('Warning: copying extractions to server for sharing only works for parker from apogee.')
         
-    
