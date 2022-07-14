@@ -104,7 +104,7 @@ def copy_to_server(Ldir, out_fn, subdir=''):
             print('Problem moving file to server')
             print(e)
         
-        if is_done:
+        if is_done and (len(subdir) == 0):
             # (iii) then write a little text file to alert users
             share_name = out_fn.name.replace('.nc','')
             out_dir = out_fn.parent
