@@ -896,7 +896,7 @@ Dout(iTvdif) == T T     ! temp_vdiff, ...    vertical diffusion
 !   [2] Serial or Parallel I/O with Parallel-IO (PIO) library (MPI only)
 
      INP_LIB =  1
-     OUT_LIB =  1
+     OUT_LIB =  2
 
 ! PIO library methods for reading/writing NetCDF files:
 !
@@ -906,12 +906,12 @@ Dout(iTvdif) == T T     ! temp_vdiff, ...    vertical diffusion
 !   [3] parallel read and serial write of NetCDF4/HDF5
 !   [4] parallel read and write of NETCDF4/HDF5
 
-  PIO_METHOD =  2
+  PIO_METHOD =  4
 
 ! PIO library MPI processes set-up:
 
- PIO_IOTASKS =  1                 ! number of I/O tasks to define
-  PIO_STRIDE =  1                 ! stride in the MPI-ran between I/O tasks
+ PIO_IOTASKS =  5                 ! number of I/O tasks to define
+  PIO_STRIDE =  40                 ! stride in the MPI-ran between I/O tasks
     PIO_BASE =  0                 ! offset for the first I/O task
   PIO_AGGREG =  1                 ! number of MPI-aggregators to use
 
