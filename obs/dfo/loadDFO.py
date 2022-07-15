@@ -103,17 +103,20 @@ def loadDFO_CTD(basedir='', dbname='DFO_CTD.sqlite',
 
     # write to pandas DataFrame
     df1=pd.read_sql_query(qry.statement, engine)
-    if xyt_only:
-        df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in
-            zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
-        df1 = df1[['Station','Lon','Lat','dtUTC']]
+    if len(df1) == 0:
+        return None
     else:
-        df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
-        df1['Z'] = -df1['Z'] # fix sign of z to be positive up
-        df1 = df1.drop(['Year','Month','Day','Hour'],axis=1)
-    session.close()
-    engine.dispose()
-    return df1
+        if xyt_only:
+            df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in
+                zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
+            df1 = df1[['Station','Lon','Lat','dtUTC']]
+        else:
+            df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
+            df1['Z'] = -df1['Z'] # fix sign of z to be positive up
+            df1 = df1.drop(['Year','Month','Day','Hour'],axis=1)
+        session.close()
+        engine.dispose()
+        return df1
 
 def loadDFO_bottle(basedir='', dbname='DFO.sqlite',
         datelims=(),latlims=(),lonlims=(), xyt_only=False):
@@ -205,18 +208,30 @@ def loadDFO_bottle(basedir='', dbname='DFO.sqlite',
 
     # write to pandas DataFrame
     df1 = pd.read_sql(qry.statement, engine)
-    if xyt_only:
-        df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in
-            zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
-        df1 = df1[['Station','Lon','Lat','dtUTC']]
+    # print(df1.columns)
+    if (len(df1) == 0) or ('Depth' not in df1.columns):
+        return None
     else:
-        # Z will be positive up
-        df1['Z']=np.where(df1['Depth']>=0,-df1['Depth'],gsw.z_from_p(p=df1['Pressure'].to_numpy(),lat=df1['Lat'].to_numpy()))
-        df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in
-            zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
-        df1 = df1.drop(['Pressure','Depth','Year','Month','Day','Hour'],axis=1)
-    session.close()
-    engine.dispose()
-    return df1
+        if xyt_only:
+            df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in
+                zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
+            df1 = df1[['Station','Lon','Lat','dtUTC']]
+        else:
+            # Z will be positive up
+            df1.loc[df1.Depth.isnull(), 'Depth'] = np.nan
+            if 'Pressure' in df1.columns:
+                df1.loc[df1.Pressure.isnull(), 'Pressure'] = np.nan
+                df1['Z']=np.where(df1.Depth >= 0,-df1['Depth'],gsw.z_from_p(p=df1['Pressure'].to_numpy(),lat=df1['Lat'].to_numpy()))
+            else:
+                df1['Z'] = -df1['Depth']
+            df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in
+                zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
+            if df1.Z.isna().all():
+                df1 = None
+            else:
+                df1 = df1.drop(['Pressure','Depth','Year','Month','Day','Hour'],axis=1)
+        session.close()
+        engine.dispose()
+        return df1
     
 

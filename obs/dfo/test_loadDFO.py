@@ -6,6 +6,7 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 from lo_tools import plotting_functions as pfun
+import sys
 
 import loadDFO
 from importlib import reload
@@ -14,11 +15,12 @@ reload(loadDFO)
 from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 
-# this is where teh data files are stored
+# this is where the data files are stored
 basedir=str(Ldir['data'] / 'obs' / 'dfo')
 
 # make some choices about time and space range
-datelims=[datetime(2017,1,1),datetime(2019,12,31)]
+year = 1991
+datelims=[datetime(year,1,1),datetime(year,12,31)]
 latlims=[48.9,49.5]
 lonlims=[-124.2,-123.2]
 
@@ -44,8 +46,8 @@ if False:
                    c_df.loc[c_df.Station==icast,['Z']],'-')
     ax.set_ylabel('Z (m)')
 
-if True:
-    # Bottle Data, locations only
+if False:
+    # CTD Data, locations only
     c_df = loadDFO.loadDFO_CTD(basedir=basedir, dbname='DFO_CTD.sqlite',
         datelims=(),latlims=(),lonlims=(), xyt_only=True)
     # plot
@@ -72,10 +74,15 @@ if True:
         if nsta>0:
             print('%d: %d' % (year, nsta))
 
-if False:
+if True:
     # Bottle Data
+    # b_df = loadDFO.loadDFO_bottle(basedir=basedir, dbname='DFO.sqlite',
+    #     datelims=datelims,latlims=latlims,lonlims=lonlims)
     b_df = loadDFO.loadDFO_bottle(basedir=basedir, dbname='DFO.sqlite',
-        datelims=datelims,latlims=latlims,lonlims=lonlims)
+        datelims=datelims)
+    if b_df is None:
+        print('no data!')
+        sys.exit()
     # plot
     fig = plt.figure(figsize=(18,10))
     vn_list = ['SA','CT','N','DO', 'Chl', 'Si']
@@ -96,8 +103,11 @@ if False:
         ax = fig.add_subplot(2,3,ii)
         for mo in range(1,13):
             df = b_df[b_df['dtUTC'].dt.month==mo]
-            for icast in df['Station'].unique():
-                df[df.Station==icast].plot(x=vn,y='Z', ax=ax, style='*', color=colors[mo-1], legend=False)
+            if len(df) > 0:
+                for icast in df['Station'].unique():
+                    df[df.Station==icast].plot(x=vn,y='Z', ax=ax, style='*', color=colors[mo-1], legend=False)
+            else:
+                print('no data for month = ' + str(mo))
         # add month lables
         if ii == 1:
             for mo in range(1,13):
