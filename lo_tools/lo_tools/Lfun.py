@@ -165,7 +165,7 @@ def fn_list_utility(dt0, dt1, Ldir, hourmax=24):
 def get_fn_list(list_type, Ldir, ds0, ds1, his_num=1):
     """
     INPUT:
-    A function for getting list of history files.
+    A function for getting lists of history files.
     List items are Path objects
     """
     dt0 = datetime.strptime(ds0, ds_fmt)
