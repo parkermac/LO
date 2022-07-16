@@ -66,6 +66,7 @@ while this_dt <= dt1:
         out_name = fn.name.replace('_','-')
         container_name = Ldir['gtagex'].replace('_','-') + '-' + f_string.replace('.','-')
         print(' -- Copying: %s to %s' % (out_name, container_name))
+        sys.stdout.flush()
         
         tt0 = time()
         # get the blob_service
@@ -93,9 +94,11 @@ while this_dt <= dt1:
             az_url = ('https://pm2.blob.core.windows.net/' + container_name + '/' + out_name)
             print(' -- URL to access file: %s' % (az_url))
             print(' -- Took %0.2f sec' % (time()-tt0))
+            sys.stdout.flush()
         except Exception as e:
             print(' ** Copy failed: %s' % (str(e)))
             result = 'fail'
+            sys.stdout.flush()
 
     this_dt += timedelta(days=1)
 
