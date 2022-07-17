@@ -111,7 +111,7 @@ if Ldir['testing'] == True:
     #job_list = ['sequim1', 'ubc1', 'surface1']
     job_list = ['harcourt1']
 else:
-    job_list = ['surface1', 'layers1', 'ubc1', 'sequim1', 'harcourt1', 'critfc1', 'daymovie0', 'drifters0', 'archive0']
+    job_list = ['surface1', 'layers1', 'ubc1', 'sequim1', 'harcourt1', 'critfc1', 'daymovie0', 'drifters0', 'archive0', 'azure0']
 
 for job in job_list:
     
