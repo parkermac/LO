@@ -3,8 +3,7 @@ This is the main program for copying the daily forecast to Azure blob storage.
 It copies all three days of the forecast, overwriting existing days 1 and 2 from the
 previous forecast.
 
-I created this as a standalone program because it is a very niche task.  It is designed as
-a post job that runs with the forecast, but it can also run in backfill.
+It is designed as a post job that runs with the forecast, but it can also run in backfill.
 
 Test on mac or apogee:
 run post_main.py -gtx cas6_v0_live -ro 0 -d 2019.07.04 -r backfill -job azure0 -test True
@@ -35,9 +34,11 @@ result_dict['start_dt'] = datetime.now()
 # ****************** CASE-SPECIFIC CODE *****************
 
 from time import time
+import numpy as np
 from lo_tools import Lfun
-from azure.storage.blob import BlobServiceClient
-from azure.storage.blob import PublicAccess
+
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
 
 ds0 = Ldir['date_string']
 dt0 = datetime.strptime(ds0, Ldir['ds_fmt'])
@@ -51,6 +52,8 @@ elif Ldir['run_type'] == 'forecast':
 print(' copy_to_azure '.center(60,'='))
 print(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
 
+this_dir = Path(__file__).absolute().parent
+
 result = 'success'
 this_dt = dt0
 while this_dt <= dt1:
@@ -61,45 +64,46 @@ while this_dt <= dt1:
     if Ldir['testing'] == True:
         fn_list = [fn_list[0]]
         
-    for fn in fn_list:
+    # Nproc code
+    N = len(fn_list)
+    proc_list = []
+    tt0 = time()
+    print('Working on ' + Ldir['job'] + ' (' + str(N) + ' times)')
+
+    for ii in range(N):
+        fn = fn_list[ii]
         # AZURE
         out_name = fn.name.replace('_','-')
         container_name = Ldir['gtagex'].replace('_','-') + '-' + f_string.replace('.','-')
         print(' -- Copying: %s to %s' % (out_name, container_name))
         sys.stdout.flush()
-        
-        tt0 = time()
-        # get the blob_service
-        account_fn = Ldir['data'] / 'accounts' / 'azure_pm_2015.05.25.txt'
-        with account_fn.open() as aa:
-            # make sure to strip newline characters
-            account = aa.readline().strip()
-            key = aa.readline().strip()
-        connection_string = ('DefaultEndpointsProtocol=https' +
-            ';AccountName=' + account +
-            ';AccountKey=' + key + 
-            ';EndpointSuffix=core.windows.net')
-        blob_service = BlobServiceClient.from_connection_string(conn_str=connection_string)
-        try: # create the container if needed
-            blob_service.create_container(container_name, public_access=PublicAccess.Container)
-        except:
-            pass # assume error is because container exists
-        # write it to Azure
-        try:
-            from azure.storage.blob import BlobClient
-            blob = BlobClient.from_connection_string(conn_str=connection_string,
-                container_name=container_name, blob_name=out_name)
-            with fn.open('rb') as data:
-                blob.upload_blob(data, overwrite=True)
-            az_url = ('https://pm2.blob.core.windows.net/' + container_name + '/' + out_name)
-            print(' -- URL to access file: %s' % (az_url))
-            print(' -- Took %0.2f sec' % (time()-tt0))
-            sys.stdout.flush()
-        except Exception as e:
-            print(' ** Copy failed: %s' % (str(e)))
-            result = 'fail'
-            sys.stdout.flush()
 
+        cmd_list = ['python', str(this_dir) + '/forecast_to_azure.py', '-fn', str(fn),
+            '-out_name', out_name, '-container_name', container_name]
+        if Ldir['testing'] == True:
+            print(cmd_list)
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        proc_list.append(proc)
+        
+        # Nproc controls how many ncks subprocesses we allow to stack up
+        # before we require them all to finish.
+        # NOTE: we add the (ii > 0) because otherwise it starts by doing a single
+        # job, and in this case the jobs are long enough for that to be a significant
+        # slowdown.
+        if ((np.mod(ii,Ldir['Nproc']) == 0) and (ii > 0)) or (ii == N-1):
+            for proc in proc_list:
+                stdout, stderr = proc.communicate()
+                # make sure everyone is finished before continuing
+                if True:
+                    if len(stdout) > 0:
+                        print('\n'+stdout.decode())
+                    if len(stderr) > 0:
+                        print('\n'+stderr.decode())
+                        result = 'fail'
+            proc_list = []
+        ii += 1
+    print('Time to copy %d files = %0.2f sec' % (N,time()- tt0))
+    
     this_dt += timedelta(days=1)
 
 # -------------------------------------------------------
@@ -111,3 +115,6 @@ result_dict['result'] = result
 
 result_dict['end_dt'] = datetime.now()
 post_argfun.finale(Ldir, result_dict)
+
+if Ldir['testing'] == True:
+    print(result_dict)
