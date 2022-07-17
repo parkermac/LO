@@ -120,15 +120,28 @@ def P_admiralty(in_dict):
             yt = np.concatenate((yt, np.linspace(y0, y1, nn)[1:]))
     v2, v3, dist, idist0 = pfun.get_section(ds, vn, xt, yt, in_dict)
     
+    aa = [-123, -122.2, 47.7, 48.3]
+    
     ax = fig.add_subplot(221)
-    cs = ax.pcolormesh(xp, yp, ds[vn][0,-1,:,:].values,
-        vmin=vmin, vmax=vmax, cmap=cmap)
+    # plot thickness of water with salinity greater than some value
+    S = zrfun.get_basic_info(in_dict['fn'], only_S=True)
+    zw = zrfun.get_z(ds.h.values, ds.zeta[0,:,:].values, S, only_w=True)
+    dz = np.diff(zw, axis=0)
+    salt = ds.salt[0,:,:,:].values
+    salt_mask = salt > 31.5
+    dz[~salt_mask] = 0
+    thick = dz.sum(axis=0)
+    thick[ds.mask_rho.values==0] = np.nan
+    cs = ax.pcolormesh(xp, yp, thick,
+        vmin=0, vmax=50, cmap='PuRd')
+    fig.colorbar(cs, ax=ax)
     pfun.add_coast(ax)
-    ax.axis(pfun.get_aa(ds))
+    ax.axis(aa)
+    # ax.axis(pfun.get_aa(ds))
     pfun.dar(ax)
     ax.set_xticklabels([])
     ax.set_yticklabels([])
-    ax.text(.95,.9,'Surface ' + vn, transform=ax.transAxes, ha='right')
+    ax.text(.95,.9,'Thickness', transform=ax.transAxes, ha='right')
     # add section track
     ax.plot(xt, yt, '-k', linewidth=2)
     ax.plot(xt[idist0], yt[idist0], 'or', markersize=5, markerfacecolor='w',
@@ -137,8 +150,10 @@ def P_admiralty(in_dict):
     ax = fig.add_subplot(222)
     cs = ax.pcolormesh(xp, yp, ds[vn][0,0,:,:].values,
         vmin=vmin, vmax=vmax, cmap=cmap)
+    fig.colorbar(cs, ax=ax)
     pfun.add_coast(ax)
-    ax.axis(pfun.get_aa(ds))
+    ax.axis(aa)
+    # ax.axis(pfun.get_aa(ds))
     pfun.dar(ax)
     ax.set_xticklabels([])
     ax.set_yticklabels([])
@@ -158,7 +173,7 @@ def P_admiralty(in_dict):
     # cs = ax.pcolormesh(v3['distf'], v3['zrf'], v3['sectvarf'],
     #     vmin=vmin, vmax=vmax, cmap=cmap)
         
-    ax.contourf(v3['distf'], v3['zrf'], v3['sectvarf'], np.arange(0,35,.2),# colors='k',
+    cs = ax.contourf(v3['distf'], v3['zrf'], v3['sectvarf'], np.arange(0,35,.2),# colors='k',
          vmin=vmin, vmax=vmax, cmap=cmap)
     ax.contour(v3['distf'], v3['zrf'], v3['sectvarf'], np.arange(0,35,.2), colors='k')
     ax.set_xlabel('Distance (km)')
@@ -1000,7 +1015,6 @@ def P_sect_soundspeed(in_dict):
     else:
         plt.show()
     
-
 def P_splash(in_dict):
     """
     This makes a fancy plot suitable for the landing page of the LiveOcean
