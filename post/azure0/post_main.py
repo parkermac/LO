@@ -73,8 +73,10 @@ while this_dt <= dt1:
     for ii in range(N):
         fn = fn_list[ii]
         # AZURE
-        out_name = fn.name.replace('_','-')
-        container_name = Ldir['gtagex'].replace('_','-') + '-' + f_string.replace('.','-')
+        # out_name = fn.name.replace('_','-')
+        # container_name = Ldir['gtagex'].replace('_','-') + '_' + f_string.replace('.','-')
+        out_name = f_string.replace('.','-') + '/' + fn.name.replace('_','-')
+        container_name = Ldir['gtagex'].replace('_','-')
         print(' -- Copying: %s to %s' % (out_name, container_name))
         sys.stdout.flush()
 
