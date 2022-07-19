@@ -620,7 +620,7 @@ Hout(idEmPf) == T       ! EminusP            E-P flux
 Hout(idevap) == T       ! evaporation        evaporation rate
 Hout(idrain) == T       ! rain               precipitation rate
 
-Hout(idDano) == T       ! rho                density anomaly
+Hout(idDano) == F       ! rho                density anomaly
 Hout(idVvis) == T       ! AKv                vertical viscosity
 Hout(idTdif) == F       ! AKt                vertical T-diffusion
 Hout(idSdif) == T       ! AKs                vertical Salinity diffusion
