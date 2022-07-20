@@ -910,8 +910,8 @@ Dout(iTvdif) == T T     ! temp_vdiff, ...    vertical diffusion
 
 ! PIO library MPI processes set-up:
 
- PIO_IOTASKS =  5                 ! number of I/O tasks to define
-  PIO_STRIDE =  40                 ! stride in the MPI-ran between I/O tasks
+ PIO_IOTASKS =  4                 ! number of I/O tasks to define
+  PIO_STRIDE =  1                 ! stride in the MPI-ran between I/O tasks
     PIO_BASE =  0                 ! offset for the first I/O task
   PIO_AGGREG =  1                 ! number of MPI-aggregators to use
 
