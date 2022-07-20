@@ -895,7 +895,7 @@ Dout(iTvdif) == T T     ! temp_vdiff, ...    vertical diffusion
 !   [1] Standard NetCDF-3 or NetCDF-4 library
 !   [2] Serial or Parallel I/O with Parallel-IO (PIO) library (MPI only)
 
-     INP_LIB =  1
+     INP_LIB =  2
      OUT_LIB =  2
 
 ! PIO library methods for reading/writing NetCDF files:
