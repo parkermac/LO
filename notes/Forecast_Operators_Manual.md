@@ -6,7 +6,6 @@
 
 ## Morning Ritual
 
-
 The LiveOcean forecast has been running continuously since late 2015. Its results are used by a half-dozen stakeholders who rely on it for anything from public shellfish safety decisions to open boundary conditions for other forecast models. In all this time we have only fully missed a few forecast days, and forecasts have only been significantly late a few dozen times. Maintaining a reliable forecast is essential. We continuously improve the reliability of the system, and we check on the forecast every morning.
 
 _**Here are the typical daily steps:**_
@@ -81,6 +80,11 @@ These are from the four times `driver_forcing.py` was run in the early morning b
  - `python driver_post1.py -gtx cas6_v0_u0kb -r forecast -ro 0 < /dev/null > post_rerun_[YYYY.MM.DD].log &`
  - If the primary forecast failed but the **backup** worked you can first kill any running instance of driver_post1 on apogee, and then run the post_processing on the backup using a command like:
  - `python driver_post1.py -gtx cas6_v0_u0mb -r forecast -ro 0 < /dev/null > post_rerun_[YYYY.MM.DD].log &`
+ - Note that the only difference is that you are pointing at u0mb instead of u0kb.
+ - In the event that the forecast will be later than about Noon local time, send a brief email with an expected forecast time to this list (just paste this text string into the "To" section of the email):
+ ```
+ adioso@uw.edu;evan@scootscience.com;djlatornell@gmail.com;Zhaoqing.Yang@pnnl.gov;harcourt@uw.edu;cseaton@critfc.org;ryan.mccabe@noaa.gov;harpers@uw.edu;p.maccready@gmail.com
+ ```
 
 _**These steps will deal with about 95% of all error modes!**_
 

@@ -13,13 +13,7 @@ and you can look in LO/post/[job name] to see how the processing is handled.  Th
 
 There is also a small text file [jobname]_done.txt generated and sent to the server when each file is finished being written.  For example, on the day I wrote this, the surface_done.txt file contains the string "2022.01.11 05:47:34" (local time when it was written).  Users could look for this file before downloading their extraction.
 
-#### Many of the jobs have people who are expecting the results, and who should be contacted when a forecast is significantly late (a bulk email is fine). Below is the lineup, the users if any, and other info.
-
-In the event that the forecast will be later than about Noon local time, send a brief email with an expected forecast time to this list (just paste this text string into the "To" section of the email):
-
-```
-adioso@uw.edu;evan@scootscience.com;djlatornell@gmail.com;Zhaoqing.Yang@pnnl.gov;harcourt@uw.edu;cseaton@critfc.org;ryan.mccabe@noaa.gov;harpers@uw.edu;p.maccready@gmail.com
-```
+#### Many of the jobs have people who are expecting the results. Below is the lineup, the users if any, and other info.
 
 ---
 
