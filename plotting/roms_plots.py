@@ -79,117 +79,6 @@ def P_basic(in_dict):
     else:
         plt.show()
 
-def P_admiralty(in_dict):
-    """
-    Designed to explore the 3-D salt structure and exchange flow
-    at Admiralty Inlet.
-    """
-    # START
-    ds = xr.open_dataset(in_dict['fn'])
-    fs = 14
-    pfun.start_plot(fs=fs, figsize=(14,12))
-    fig = plt.figure()
-    # PLOT CODE
-    
-    vn = 'salt'
-    cmap = 'gist_ncar'
-    vmin = 29
-    vmax = 32
-    zdeep = -200
-    
-    xp, yp = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
-    
-    # CREATE THE SECTION
-    tracks_path = Ldir['data'] / 'section_lines'
-    track_fn = tracks_path / 'AI_thalweg.p'
-    # get the track to interpolate onto
-    pdict = pickle.load(open(track_fn, 'rb'))
-    xx = pdict['lon_poly']
-    yy = pdict['lat_poly']
-    for ii in range(len(xx)-1):
-        x0 = xx[ii]
-        x1 = xx[ii+1]
-        y0 = yy[ii]
-        y1 = yy[ii+1]
-        nn = 20
-        if ii == 0:
-            xt = np.linspace(x0, x1, nn)
-            yt = np.linspace(y0,y1, nn)
-        else:
-            xt = np.concatenate((xt, np.linspace(x0, x1, nn)[1:]))
-            yt = np.concatenate((yt, np.linspace(y0, y1, nn)[1:]))
-    v2, v3, dist, idist0 = pfun.get_section(ds, vn, xt, yt, in_dict)
-    
-    aa = [-123, -122.2, 47.7, 48.3]
-    
-    ax = fig.add_subplot(221)
-    # plot thickness of water with salinity greater than some value
-    S = zrfun.get_basic_info(in_dict['fn'], only_S=True)
-    zw = zrfun.get_z(ds.h.values, ds.zeta[0,:,:].values, S, only_w=True)
-    dz = np.diff(zw, axis=0)
-    salt = ds.salt[0,:,:,:].values
-    salt_mask = salt > 31.5
-    dz[~salt_mask] = 0
-    thick = dz.sum(axis=0)
-    thick[ds.mask_rho.values==0] = np.nan
-    cs = ax.pcolormesh(xp, yp, thick,
-        vmin=0, vmax=50, cmap='PuRd')
-    fig.colorbar(cs, ax=ax)
-    pfun.add_coast(ax)
-    ax.axis(aa)
-    # ax.axis(pfun.get_aa(ds))
-    pfun.dar(ax)
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.text(.95,.9,'Thickness', transform=ax.transAxes, ha='right')
-    # add section track
-    ax.plot(xt, yt, '-k', linewidth=2)
-    ax.plot(xt[idist0], yt[idist0], 'or', markersize=5, markerfacecolor='w',
-        markeredgecolor='k', markeredgewidth=2)
-
-    ax = fig.add_subplot(222)
-    cs = ax.pcolormesh(xp, yp, ds[vn][0,0,:,:].values,
-        vmin=vmin, vmax=vmax, cmap=cmap)
-    fig.colorbar(cs, ax=ax)
-    pfun.add_coast(ax)
-    ax.axis(aa)
-    # ax.axis(pfun.get_aa(ds))
-    pfun.dar(ax)
-    ax.set_xticklabels([])
-    ax.set_yticklabels([])
-    ax.text(.95,.9,'Bottom ' + vn, transform=ax.transAxes, ha='right')
-    # add section track
-    ax.plot(xt, yt, '-k', linewidth=2)
-    ax.plot(xt[idist0], yt[idist0], 'or', markersize=5, markerfacecolor='w',
-        markeredgecolor='k', markeredgewidth=2)
-    
-    # plot section
-    ax = fig.add_subplot(212)
-    ax.plot(dist, v2['zbot'], '-k', linewidth=2)
-    ax.plot(dist, v2['zeta'], '-b', linewidth=1)
-    ax.set_xlim(dist.min(), dist.max())
-    ax.set_ylim(zdeep, 5)
-    
-    # cs = ax.pcolormesh(v3['distf'], v3['zrf'], v3['sectvarf'],
-    #     vmin=vmin, vmax=vmax, cmap=cmap)
-        
-    cs = ax.contourf(v3['distf'], v3['zrf'], v3['sectvarf'], np.arange(0,35,.2),# colors='k',
-         vmin=vmin, vmax=vmax, cmap=cmap)
-    ax.contour(v3['distf'], v3['zrf'], v3['sectvarf'], np.arange(0,35,.2), colors='k')
-    ax.set_xlabel('Distance (km)')
-    ax.set_ylabel('Z (m)')
-    pfun.add_info(ax, in_dict['fn'])
-    
-    fig.tight_layout()
-    # FINISH
-    ds.close()
-    pfun.end_plot()
-    if len(str(in_dict['fn_out'])) > 0:
-        plt.savefig(in_dict['fn_out'])
-        plt.close()
-    else:
-        plt.show()
-
 def P_Fb(in_dict):
     # START
     ds = xr.open_dataset(in_dict['fn'])
@@ -1479,6 +1368,141 @@ def P_splash4(in_dict):
 
     #fig.tight_layout()
     
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+
+def P_admiralty(in_dict):
+    """
+    Designed to explore the TEF salt flux at Admiralty Inlet.
+    
+    This is quite task-specific code, like the "superplots" and
+    only works if you have a tef section already extracted.
+    """
+    # START
+    ds = xr.open_dataset(in_dict['fn'])
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(14,12))
+    fig = plt.figure()
+    
+    # PLOT CODE
+    
+    # load a TEF time series
+    import sys
+    pth = str(Ldir['LO'] / 'extract' /'tef')
+    if pth not in sys.path:
+        sys.path.append(pth)
+    import flux_fun
+    year_str = in_dict['fn'].parent.name.split('.')[0][1:]
+    gtagex = 'cas6_v3_lo8b' #in_dict['fn'].parent.parent.name
+    dates_str = '_' + year_str + '.01.01_' + year_str + '.12.31'
+    tef_dir = Ldir['LOo'] / 'extract' / gtagex / 'tef' / ('bulk' + dates_str)
+    gridname = gtagex.split('_')[0]
+    df, in_sign, _, _ = flux_fun.get_two_layer(tef_dir, 'ai2', gridname)
+    Qin = df['Qin']/1000
+    Qout = df['Qout']/1000
+    Qprism = (df['qabs']/2)/1000
+    Sin = df['salt_in']
+    Sout = df['salt_out']
+    DS = Sin - Sout
+    tef_day = df.index.dayofyear
+    
+    # get this time
+    ot = ds.ocean_time.values[0]
+    tpd = pd.Timestamp(ot)
+    dd = tpd.dayofyear + tpd.hour/24
+    idd = zfun.find_nearest_ind(tef_day,dd)
+    
+    sin = Sin[idd]
+    sout = Sout[idd]
+    
+    # plot TEF things
+    ax = fig.add_subplot(413)
+    ax.plot(tef_day, Sin, '-r',tef_day, Sout, '-b', linewidth=3)
+    ax.plot(dd, sin, 'or',dd, sout, 'ob', markersize=10)
+    ax.set_xlim(0,365)
+    ax.set_xticklabels([])
+    ax.axvline(dd)
+    ax.text(.05,.8,'$S_{in}$', c='r',fontweight='bold',
+        transform=ax.transAxes, fontsize= 24,
+        bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
+    ax.text(.05,.1,'$S_{out}$', c='b',fontweight='bold',
+        transform=ax.transAxes, fontsize= 24,
+        bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
+    
+    ax = fig.add_subplot(414)
+    ax.plot(tef_day, Qprism, '-g', linewidth=3)
+    ax.set_xlim(0,365)
+    ax.set_xlabel('Yearday ' + year_str)
+    ax.axvline(dd)
+    ax.text(.05,.8,'$Q_{prism}\ [10^{3}m^{3}s^{-1}]$', c='g',fontweight='bold',
+        transform=ax.transAxes, fontsize= 24,
+        bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
+    
+    # Thickness maps
+    
+    # to speed things up we will clip the region of interest
+    aa = [-123, -122.2, 47.7, 48.3]
+    x0, x1, y0, y1 = aa
+    Lon = ds.lon_rho[0,:].values
+    Lat = ds.lat_rho[:,0].values
+    i0 = zfun.find_nearest_ind(Lon, x0)
+    i1 = zfun.find_nearest_ind(Lon, x1)
+    j0 = zfun.find_nearest_ind(Lat, y0)
+    j1 = zfun.find_nearest_ind(Lat, y1)
+    lon = ds.lon_rho[j0:j1,i0:i1].values
+    lat = ds.lat_rho[j0:j1,i0:i1].values
+    h = ds.h[j0:j1,i0:i1].values
+    mask = ds.mask_rho[j0:j1,i0:i1].values
+    xp, yp = pfun.get_plon_plat(lon,lat)
+    
+    salt = ds.salt[0,:,j0:j1,i0:i1].values
+    S = zrfun.get_basic_info(in_dict['fn'], only_S=True)
+    zw = zrfun.get_z(h, 0*h, S, only_w=True)
+    dz = np.diff(zw, axis=0)
+    
+    # plot thickness of water with salinity greater than some value
+    salt_mask = salt > sin
+    dzc = dz.copy()
+    dzc[~salt_mask] = 0
+    thick = dzc.sum(axis=0)
+    thick[mask==0] = np.nan
+    ax = fig.add_subplot(221)
+    cs = ax.pcolormesh(xp, yp, thick, vmin=0, vmax=50, cmap='PuRd')
+    fig.colorbar(cs, ax=ax)
+    pfun.add_coast(ax)
+    ax.axis(aa)
+    pfun.dar(ax)
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.text(.95,.85,'Thickness\nS >=%0.1f' % (sin),
+        transform=ax.transAxes, ha='right',
+        bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
+    
+    # plot thickness of water with salinity less than some value
+    salt_mask = salt < sout
+    dzc = dz.copy()
+    dzc[~salt_mask] = 0
+    thick = dzc.sum(axis=0)
+    thick[mask==0] = np.nan
+    ax = fig.add_subplot(222)
+    cs = ax.pcolormesh(xp, yp, thick, vmin=0, vmax=50, cmap='YlGnBu')
+    fig.colorbar(cs, ax=ax)
+    pfun.add_coast(ax)
+    ax.axis(aa)
+    pfun.dar(ax)
+    ax.set_xticklabels([])
+    ax.set_yticklabels([])
+    ax.text(.95,.85,'Thickness\nS <=%0.1f' % (sout),
+        transform=ax.transAxes, ha='right',
+        bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
+    
+    # fig.tight_layout()
     # FINISH
     ds.close()
     pfun.end_plot()
