@@ -172,6 +172,8 @@ Not yet implemented, but should be:
 
 NOTE: there is now a [blog-like file](https://github.com/parkermac/LO/blob/main/notes/USER_NOTES.md) `LO/notes/USER_NOTES.md` where I keep notes about changes to the code that users should be aware of.
 
+NOTE: The hooks are meant to allow a user to change a single part of the LO system (like having their own lists of mooring locations) while still making use of the generic and well-tested LO machinery (like for mooring extraction). But for other types of analysis the user may be better off just copying a whole directory of code into LO and then editing it to do what they need. For example, the `LO/extract/tef` code is probably too closely tied to the TEF sections and segments from the MacCready et al. (2021, JGR) paper. If you do make a copy of an LO code folder and put it in LO_user, I suggest that you maintain the LO directory structure.  In the example this would mean putting the code in `LO_user/extract/tef`. Most LO code is designed to load modules either from lo_tools (which you always have access to if you are in the loenv python environment) or from modules in the current working directory. For output, unless you change things it will probably go to LO_output, just like the things from LO. I think this is probably fine - no need to create a separate LO_user_output.
+
 ---
 
 ## Top-level organization
