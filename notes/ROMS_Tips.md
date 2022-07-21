@@ -80,4 +80,12 @@ For almost all our work we need to define ANA_BSFLUX and ANA_BTFLUX so that no h
 
 _**Surface fluxes, ANA_S...**_
 
-Only define these if you need to. They will override any surface forcing you provide with NetCDF forcing files. Once I accidentally defined ANA_SRFLUX and quite soon all my phytoplankton died and the surface water got very cold! Typically I define ANA_SSFLUX, but this is because our runs have not had EMINUSP, so I'll know more about this soon.
+Only define these if you need to. They will override any surface forcing you provide with NetCDF forcing files. Once I accidentally defined ANA_SRFLUX and quite soon all my phytoplankton died and the surface water got very cold!
+
+For simple idealized runs, like the upwelling example or analytical estuaries with river and tide but no wind, it is standard to define ANA_S[M,T,S]FLUX.
+
+Typically I define ANA_SSFLUX, but this is because our runs have not had EMINUSP. When you do define EMINUSP you should undef or omit ANA_SSFLUX in your cppdefs.
+
+_**Passive tracers, ANA_BP/SP...**_
+
+This relates to passive inert tracers, so I assume it does not affect the bio variables (e.g. oxygen and CO2 clearly must have a surface flux). These seem to be defined in the cppdefs of bio code examples I have looked at, but I am not sure if they are needed. I suspect they would only be needed in runs with dye (passive tracers).
