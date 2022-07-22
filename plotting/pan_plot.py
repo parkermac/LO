@@ -17,6 +17,10 @@ Use -avl False to have color limits all set to match those set by pinfo.vlims_di
 
 Using -test True will create the object "ds", an xarray Dataset of the most recent history file.
 
+The new "mtag" flag allows you to append an optional tag to the end of a movie folder name,
+which may be convenient when making the same movie for different time periods. Similarly
+the new "mname" tag allows you to have a custom movie name.
+
 """
 import os, sys
 import argparse
@@ -49,6 +53,8 @@ parser.add_argument('-mov', '--make_movie', default=False, type=Lfun.boolean_str
 parser.add_argument('-avl', '--auto_vlims', default=True, type=Lfun.boolean_string)
 parser.add_argument('-save', '--save_plot', default=False, type=Lfun.boolean_string)
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+parser.add_argument('-mtag', '--movie_tag', default='', type=str)
+parser.add_argument('-mname', '--movie_name', default='movie', type=str)
 
 # do things with the arguments
 args = parser.parse_args()
@@ -153,7 +159,11 @@ if len(fn_list) == 1:
     
 elif len(fn_list) > 1:
     # prepare a directory for results
-    outdir = outdir0 / (Ldir['list_type'] + '_' + Ldir['plot_type'] + '_' + Ldir['gtagex'])
+    if len(Ldir['movie_tag']) > 0:
+        outdir = outdir0 / (Ldir['list_type'] + '_' + Ldir['plot_type'] +
+            '_' + Ldir['gtagex'] + '_' + Ldir['movie_tag'])
+    else:
+        outdir = outdir0 / (Ldir['list_type'] + '_' + Ldir['plot_type'] + '_' + Ldir['gtagex'])
     Lfun.make_dir(outdir, clean=True)
     # plot to a folder of files
     jj = 0
@@ -172,7 +182,7 @@ elif len(fn_list) > 1:
     # and make a movie
     if Ldir['make_movie']:
         cmd_list = ['ffmpeg','-r','8','-i', str(outdir)+'/plot_%04d.png', '-vcodec', 'libx264',
-            '-pix_fmt', 'yuv420p', '-crf', '25', str(outdir)+'/movie.mp4']
+            '-pix_fmt', 'yuv420p', '-crf', '25', str(outdir)+'/' + Ldir['movie_name'] + '.mp4']
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
         if len(stdout) > 0:

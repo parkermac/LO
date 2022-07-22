@@ -1398,12 +1398,17 @@ def P_admiralty(in_dict):
     if pth not in sys.path:
         sys.path.append(pth)
     import flux_fun
+    import tef_fun
     year_str = in_dict['fn'].parent.name.split('.')[0][1:]
     gtagex = 'cas6_v3_lo8b' #in_dict['fn'].parent.parent.name
     dates_str = '_' + year_str + '.01.01_' + year_str + '.12.31'
     tef_dir = Ldir['LOo'] / 'extract' / gtagex / 'tef' / ('bulk' + dates_str)
     gridname = gtagex.split('_')[0]
-    df, in_sign, _, _ = flux_fun.get_two_layer(tef_dir, 'ai2', gridname)
+    sect_name = 'ai4'
+    df, in_sign, _, _ = flux_fun.get_two_layer(tef_dir, sect_name, gridname)
+    sect_df = tef_fun.get_sect_df(gridname)
+    xs0, xs1, ys0, ys1 = sect_df.loc[sect_name,:]
+    
     Qin = df['Qin']/1000
     Qout = df['Qout']/1000
     Qprism = (df['qabs']/2)/1000
@@ -1480,9 +1485,13 @@ def P_admiralty(in_dict):
     pfun.dar(ax)
     ax.set_xticklabels([])
     ax.set_yticklabels([])
-    ax.text(.95,.85,'Thickness\nS >=%0.1f' % (sin),
+    ax.text(.95,.85,'Thickness [m]\n$S >\ S_{in}$',
         transform=ax.transAxes, ha='right',
         bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
+    # add section
+    ax.plot([xs0, xs1], [ys0,ys1],'-g', linewidth=3)
+    # add info
+    pfun.add_info(ax, in_dict['fn'])
     
     # plot thickness of water with salinity less than some value
     salt_mask = salt < sout
@@ -1498,9 +1507,11 @@ def P_admiralty(in_dict):
     pfun.dar(ax)
     ax.set_xticklabels([])
     ax.set_yticklabels([])
-    ax.text(.95,.85,'Thickness\nS <=%0.1f' % (sout),
+    ax.text(.95,.85,'Thickness [m]\n$S <\ S_{out}$',
         transform=ax.transAxes, ha='right',
         bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
+    # add section
+    ax.plot([xs0, xs1], [ys0,ys1],'-g', linewidth=3)
     
     # fig.tight_layout()
     # FINISH
