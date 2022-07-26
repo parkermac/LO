@@ -19,7 +19,7 @@ Ldir = Lfun.Lstart()
 basedir=str(Ldir['data'] / 'obs' / 'dfo')
 
 # make some choices about time and space range
-year = 1991
+year = 2017
 datelims=[datetime(year,1,1),datetime(year,12,31)]
 latlims=[48.9,49.5]
 lonlims=[-124.2,-123.2]
@@ -78,8 +78,14 @@ if True:
     # Bottle Data
     # b_df = loadDFO.loadDFO_bottle(basedir=basedir, dbname='DFO.sqlite',
     #     datelims=datelims,latlims=latlims,lonlims=lonlims)
+    
+    year = 2017
+    datelims=[datetime(year,1,1),datetime(year,12,31)]
+    latlims=[48.8,50.0]
+    lonlims=[-125,-122.5]
+    
     b_df = loadDFO.loadDFO_bottle(basedir=basedir, dbname='DFO.sqlite',
-        datelims=datelims)
+        datelims=datelims, lonlims=lonlims, latlims=latlims)
     if b_df is None:
         print('no data!')
         sys.exit()
@@ -116,6 +122,7 @@ if True:
         ii += 1
         ax.set_xlabel(vn + ' [' + units + ']')
         ax.set_ylabel('Z [m]')
+        
         
 if False:
     # Bottle Data, locations only
