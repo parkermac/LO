@@ -25,6 +25,15 @@ else: # remote/linux version
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 
+# some handy dictionaries
+month_name_dict = dict(zip(range(1,13), ['January', 'February', 'March',
+    'April', 'May', 'June', 'July', 'August', 'September', 'October',
+    'November', 'December']))
+month_color_dict = dict(zip(range(1,13),
+    ['mediumblue', 'royalblue', 'cadetblue', 'aquamarine',
+    'lightgreen', 'greenyellow', 'gold', 'orange',
+    'lightsalmon', 'mediumorchid', 'slateblue', 'purple']))
+
 def start_plot(fs=14, figsize=(14,10)):
     plt.rc('font', size=fs)
     plt.rc('figure', figsize=figsize)
@@ -548,3 +557,4 @@ def draw_box(ax, aa, linestyle='-', color='k', alpha=1, linewidth=.5, inset=0):
     aa = [aa[0]+inset, aa[1]-inset, aa[2]+inset, aa[3]-inset]
     ax.plot([aa[0], aa[1], aa[1], aa[0], aa[0]], [aa[2], aa[2], aa[3], aa[3], aa[2]],
         linestyle=linestyle, color=color, alpha=alpha, linewidth=linewidth)
+        
