@@ -12,7 +12,7 @@
 3. Check that the movie http://faculty.washington.edu/pmacc/LO/p5_Phab_full_salt_top.html has today's timestamp on it, anytime after about 8 AM.
 4. If anything looks amiss, contact David Darr at darrd@uw.edu.
 
-#### Longer vaerion
+#### Longer version
 
 The LiveOcean forecast has been running continuously since late 2015. Its results are used by a half-dozen stakeholders who rely on it for anything from public shellfish safety decisions to open boundary conditions for other forecast models. In all this time we have only fully missed a few forecast days, and forecasts have only been significantly late a few dozen times. Maintaining a reliable forecast is essential. We continuously improve the reliability of the system, and we check on the forecast every morning.
 
