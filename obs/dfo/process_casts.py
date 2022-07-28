@@ -1,12 +1,15 @@
 """
 Code to process DFO cast data.
 
+Took about 7 minutes to run.
+
 """
 from datetime import datetime, timedelta
 import numpy as np
 import gsw
 import sys
 import pandas as pd
+from time import time
 
 import loadDFO
 from importlib import reload
@@ -26,10 +29,12 @@ if testing:
 else:
     year_list = list(range(2013, datetime.now().year + 1))
 
+tt0 = time()
 for year in year_list:
     print(year)
     datelims = (datetime(year,1,1), datetime(year,12,31))
     out_fn = out_dir / ('casts_' + str(year) + '.p')
+    info_out_fn = out_dir / ('casts_info_' + str(year) + '.p')
     
     df = loadDFO.loadDFO_CTD(basedir=str(in_dir), datelims=datelims)
     """
@@ -44,23 +49,23 @@ for year in year_list:
     else:
         df = df.dropna(axis=1, how='all') # drop empty rows
         if len(df) > 0:
-            df = df.rename({'Station':'sta', 'Lon':'lon', 'Lat':'lat', 'dtUTC':'time',
+            df = df.rename({'Station':'cid', 'Lon':'lon', 'Lat':'lat', 'dtUTC':'time',
                 'SA':'salt (SA g kg-1)', 'CT':'temp (CT degC)', 'Z':'z'}, axis=1)
-            for sta in df.sta.unique():
+            for cid in df.cid.unique():
                 
                 # Check that there are not two different casts associated with the same Station
                 # by looking for large time differences.
-                time_diff = df[df.sta==sta].time.values[-1] - df[df.sta==sta].time.values[0]
+                time_diff = df[df.cid==cid].time.values[-1] - df[df.cid==cid].time.values[0]
                 time_diff = pd.to_timedelta(time_diff)
                 if time_diff.days > 1 or time_diff.days < -1:
-                    print('Station %d has time diff of %d days' % (sta, time_diff.days))
+                    print('Station %d has time diff of %d days' % (cid, time_diff.days))
                 # RESULT: the time_diffs are all zero, so it appears that in this database
                 # the Station field is a unique cast identifier. ??
 
                 # Force certain fields to be the same throughout the cast.
-                df.loc[df.sta==sta,'lon'] = df[df.sta==sta].lon.values[0]
-                df.loc[df.sta==sta,'lat'] = df[df.sta==sta].lat.values[0]
-                df.loc[df.sta==sta,'time'] = df[df.sta==sta].time.values[0]
+                df.loc[df.cid==cid,'lon'] = df[df.cid==cid].lon.values[0]
+                df.loc[df.cid==cid,'lat'] = df[df.cid==cid].lat.values[0]
+                df.loc[df.cid==cid,'time'] = df[df.cid==cid].time.values[0]
             
             # Check for outliers in the units.
             if 'DO_units' in df.columns:
@@ -87,9 +92,20 @@ for year in year_list:
             #         (df['DO (uM)'].isnull().sum(), df['DO (uM) alt'].isnull().sum()))
         
             # clean up columns
-            df = df[['sta', 'lon', 'lat', 'time', 'z',
+            df = df[['cid', 'lon', 'lat', 'time', 'z',
                 'salt (SA g kg-1)', 'temp (CT degC)',
                 'DO (uM)', 'Fluor']]
+            df['name'] = None
             
             # save
             df.to_pickle(out_fn)
+            
+            # # Also pull out a dateframe with station info to use for model cast extractions.
+            ind = df.cid.unique()
+            info_df = pd.DataFrame(index=ind, columns=['lon','lat','time','name'])
+            for cid in df.cid.unique():
+                info_df.loc[cid,:] = df.loc[df.cid==cid,['lon','lat','time']].iloc[0,:]
+            info_df.name = None
+            info_df.index.name = 'cid'
+            info_df.to_pickle(info_out_fn)
+print('Elapsed time = %0.1f sec' % (time()-tt0))
