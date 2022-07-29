@@ -94,6 +94,11 @@ if args.run_type == 'forecast':
     dt1 = dt0 + timedelta(days = (float(Ldir['forecast_days']) - 1))
     ds1 = dt1.strftime(Lfun.ds_fmt)
     
+    # override for testing
+    if args.short_roms == True:
+        ds1 = ds0
+        dt1 = dt0
+    
 elif args.run_type == 'backfill': # you have to provide at least ds0 for backfill
     
     ds0 = args.ds0
