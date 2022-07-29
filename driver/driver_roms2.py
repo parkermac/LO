@@ -418,7 +418,7 @@ while dt <= dt1:
             print(' ** skipped moving history files')
             
         # Write a "done" file so that we know not to run the forecast again.
-        if dt == dt1:
+        if (dt == dt1) and (args.run_type == 'forecast'):
             done_fn.unlink(missing_ok=True) # do we need this?
             with open(done_fn, 'w') as ffout:
                 ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
