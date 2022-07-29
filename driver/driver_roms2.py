@@ -89,18 +89,20 @@ local_user = Ldir['local_user']
 if args.run_type == 'forecast':
     ds0 = datetime.now().strftime(Lfun.ds_fmt)
     dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
-    
     # NOTE: to run as separate days we need Ldir['forecast_days'] to be an integer
     dt1 = dt0 + timedelta(days = (float(Ldir['forecast_days']) - 1))
     ds1 = dt1.strftime(Lfun.ds_fmt)
-    
-    # override for testing
+    # override for short_roms
     if args.short_roms == True:
         ds1 = ds0
         dt1 = dt0
-    
+    # Check to see if the forecast has already been run, and if so, exit!
+    done_fn = Ldir['LO'] / 'driver' / ('forecast_done_' + ds0 + '.txt')
+    if done_fn.is_file():
+        print('Forecast has already run successfully - exiting')
+        print(str(done_fn))
+        sys.exit()
 elif args.run_type == 'backfill': # you have to provide at least ds0 for backfill
-    
     ds0 = args.ds0
     if len(args.ds1) == 0:
         ds1 = ds0
@@ -414,6 +416,13 @@ while dt <= dt1:
             sys.stdout.flush()
         else:
             print(' ** skipped moving history files')
+            
+        # Write a "done" file so that we know not to run the forecast again.
+        if dt == dt1:
+            done_fn.unlink(missing_ok=True) # do we need this?
+            with open(done_fn, 'w') as ffout:
+                ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
+            
         dt += timedelta(days=1)
     else:
         print(' - ROMS FAIL for ' + dt.strftime(Lfun.ds_fmt))
