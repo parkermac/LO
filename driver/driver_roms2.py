@@ -1,7 +1,7 @@
 """
 This runs ROMS for one or more days, allowing for either a forecast or backfill.
 
-Like driver_roms1.py this code:
+This code:
 - runs forecast as three separate days
 - saves blowup log and last history files
 - other improvements to stdout
@@ -10,7 +10,7 @@ Like driver_roms1.py this code:
 NEW compared to driver_roms1.py:
 - make less verbose unless there are errors
 - fixed --start_type new bug
-- assume we are using LO_roms_user (only works for new ROMS)
+- assume we are using LO_roms_user (use --old_roms True for old version)
 - backfill sleeps during expected forecast time of day
 
 Run analytical model on klone:
@@ -18,6 +18,11 @@ python3 driver_roms2.py -g ae0 -t v0 -x uu1k -r backfill -s new -0 2020.01.01 -1
 
 For testing/debugging these flags can be very useful:
 -v True --get_forcing False --short_roms True --move_his False
+
+Test to see if old_roms works on mox:
+(first move today's day1 putput folder to an _ORIG version)
+python3 driver_roms2.py -g cas6 -t v0 -x u0mb -r forecast -np 196 -N 28 -v True --get_forcing False --short_roms True --move_his False --old_roms True < /dev/null > old_roms_test.log &
+
 """
 
 import sys, os
@@ -54,6 +59,8 @@ parser.add_argument('--short_roms', default=False, type=Lfun.boolean_string)
 parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
 parser.add_argument('--run_roms', default=True, type=Lfun.boolean_string)
 parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
+# flag to allow use of the old ROMS (like for cas6_v0_u0kb)
+parser.add_argument('--old_roms', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 # check for required arguments
@@ -112,7 +119,7 @@ def messages(stdout, stderr, mtitle, verbose):
             print(stdout.decode())
     if len(stderr) > 0:
         print((' ' + mtitle + ' ').center(Ncenter,'='))
-        # always pring errors
+        # always print errors
         print(' stderr '.center(Ncenter,'-'))
         print(stderr.decode())
     sys.stdout.flush()
@@ -157,10 +164,15 @@ while dt <= dt1:
     if user_dot_in_dir.is_dir():
         dot_in_dir = user_dot_in_dir
     
-    # Decide where to look for executable.  Assumes we are using the
-    # updated ROMS.
-    roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
-    roms_ex_name = 'romsM'
+    # Decide where to look for executable.
+    if args.old_roms == True:
+        # use old ROMS
+        roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
+        roms_ex_name = 'oceanM'
+    else:
+        # use updated ROMS
+        roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
+        roms_ex_name = 'romsM'
     
     print(' - roms_out_dir: ' + str(roms_out_dir))
     if args.verbose:
