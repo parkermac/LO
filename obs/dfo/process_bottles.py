@@ -26,7 +26,7 @@ out_dir = Ldir['LOo'] / 'obs' / 'dfo'
 Lfun.make_dir(out_dir)
 
 if testing:
-    year_list = [2017]
+    year_list = [2019]
 else:
     year_list = list(range(1930, datetime.now().year + 1))
 
@@ -149,9 +149,10 @@ for year in year_list:
             ind = df.cid.unique()
             info_df = pd.DataFrame(index=ind, columns=['lon','lat','time','name'])
             for cid in df.cid.unique():
-                info_df.loc[cid,:] = df.loc[df.cid==cid,['lon','lat','time']].iloc[0,:]
+                info_df.loc[cid,['lon','lat','time']] = df.loc[df.cid==cid,['lon','lat','time']].iloc[0,:]
             info_df.name = None
             info_df.index.name = 'cid'
+            info_df['time'] = pd.to_datetime(info_df['time'])
             info_df.to_pickle(info_out_fn)
     
 

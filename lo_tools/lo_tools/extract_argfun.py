@@ -17,7 +17,8 @@ def intro():
     parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
     parser.add_argument('-Nproc', type=int, default=10) # number of subprocesses to use
     # arguments used by extract/cast
-    parser.add_argument('-cruises', type=str, default='test_cruises')
+    parser.add_argument('-source', type=str)
+    parser.add_argument('-year', type=int)
     # arguments used by extract/tef
     parser.add_argument('-sect_name', type=str, default='ai1')
     parser.add_argument('-get_bio', type=Lfun.boolean_string, default=False)
