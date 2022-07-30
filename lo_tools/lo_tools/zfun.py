@@ -427,6 +427,39 @@ def get_stairstep(x0, x1, y0, y1):
         print('Error in result endpoints!')
         
     return XX, YY
+    
+def linefit(x,y):
+    """
+    Gives best fit line to vectors x and y, with statistics.
+    """
+    # do least-squares best fit to a line
+    from scipy import stats
+    BB = np.polyfit(x,y,1, full=True)[0]
+    slope = BB[0] # slope
+    y0 = BB[1] # y-intercept
+    
+    # fit line yfit(x)
+    yfit = slope*x + y0
+    
+    # correlation coefficient
+    r = np.corrcoef(x,y)[0,1]
+    
+    # Calculate the 95% confidence interval for the mean and trend
+    # NOTE the call to the inverse cumulative Student's t-distribution:
+    # stats.t.ppf(1-.025,100) which is identical to MATLAB tinv(1-.025,100).
+    ci_pct = 95 # Confidence interval %
+    ci_fac = (1 - ci_pct/100)/2 # = 0.025 for ci_pct = 95
+    N = len(x)
+    s_eps = np.sqrt(((y-yfit)**2).sum()/(N-2)) # standard error of the estimate
+    s_x = x.std(ddof=1)
+    s_y = y.std(ddof=1)
+    # Condidence interval on mean: Emery and Thomson (3.8.6)
+    ci_mean = s_y * stats.t.ppf(1-ci_fac,N-1) / np.sqrt(N)
+    # Confidence interval on slope: Emery and Thomson (3.15.12b) w/typo corrected
+    ci_trend = s_eps * stats.t.ppf(1-ci_fac,N-2) / np.sqrt((N-1)*s_x*s_x)
+    
+    return slope, y0, r, ci_mean, ci_trend
+    
 
 
 
