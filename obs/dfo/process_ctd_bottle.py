@@ -1,6 +1,8 @@
 """
 Code to process DFO ctd and bottle data.
 
+Runs in about 3 minutes.
+
 """
 from datetime import datetime, timedelta
 import numpy as np
@@ -17,7 +19,7 @@ from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 in_dir = Ldir['data'] / 'obs' / 'dfo'
 
-testing = True
+testing = False
 
 # ===== First: ctd data =============================================
 

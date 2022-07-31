@@ -4,6 +4,10 @@
 
 ---
 
+`process_ctd_bottle.py` is the main code to run to do the complete processing.
+
 `loadDFO.py` is a module of functions for reading in selected parts of the sqlite databases in LO_data/obs/dfo.
 
 `test_loadDFO.py` is some code to test the parts of `loadDFO.py`, and to start simple explorations of the data.
+
+`test_process_[ctd,bottle].py` is code used to further develop the and test the two parts of the processing.
