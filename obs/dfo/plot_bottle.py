@@ -1,5 +1,5 @@
 """
-Code to look at the output of process_bottles.py.
+Code to look at the output of the bottle processing.
 """
 
 import matplotlib.pyplot as plt
@@ -14,7 +14,7 @@ year = 2017
 aa = [-125.2,-122.5, 48.5,50.0]
 x0, x1, y0, y1 = aa
 
-df = pd.read_pickle(Ldir['LOo'] / 'obs' / 'dfo' / ('bottles_' + str(year) + '.p'))
+df = pd.read_pickle(Ldir['LOo'] / 'obs' / 'dfo' / 'bottle' / (str(year) + '.p'))
 # ['cid', 'lon', 'lat', 'time', 'z', 'salt (SA g kg-1)', 'temp (CT degC)',
 #       'DO (uM)', 'NO3 (uM)', 'Si (uM)', 'Chl (mg m-3)', 'name']
 
