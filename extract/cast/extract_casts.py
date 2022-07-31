@@ -23,10 +23,10 @@ Ldir = exfun.intro() # this handles the argument passing
 year_str = str(Ldir['year'])
 
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'cast' / (Ldir['source'] + '_' + year_str)
-Lfun.make_dir(out_dir, clean=True)
+Lfun.make_dir(out_dir)
 
 #for type in ['casts', 'bottles']:
-for type in ['bottles']:
+for type in ['casts']:
     info_fn = Ldir['LOo'] / 'obs' / Ldir['source'] / (type + '_info_' + year_str + '.p')
     if info_fn.is_file():
         info_df = pd.read_pickle(info_fn)

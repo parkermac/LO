@@ -1,5 +1,5 @@
 """
-These functions read bottle data from DFO.sqlite, whic has CTD and bottle data
+These functions read bottle data from DFO.sqlite, which has CTD and bottle data
 but there is no oxygen data for the CTD.
 
 They also read in CTD data that does have oxygen from DFO_CTD.sqlite.
@@ -39,7 +39,6 @@ def loadDFO_CTD(basedir='', dbname='DFO_CTD.sqlite',
     latlims, if provided, loads only data in range latlims[0]<=lat<latlims[1]
     lonlims, if provided, loads only data in range latlims[0]<=lat<latlims[1]
     """
-    
     ymd0, ymd1, latlims, lonlims = get_lims(datelims, latlims, lonlims)
     
     # if db does not exist, exit
@@ -77,12 +76,14 @@ def loadDFO_CTD(basedir='', dbname='DFO_CTD.sqlite',
                 StationTBL.Include==True,ObsTBL.Include==True,CalcsTBL.Include==True))
     else:
         SA=case([(CalcsTBL.Salinity_T0_C0_SA!=None, CalcsTBL.Salinity_T0_C0_SA)], else_=
-                 case([(CalcsTBL.Salinity_T1_C1_SA!=None, CalcsTBL.Salinity_T1_C1_SA)], else_=
-                 case([(CalcsTBL.Salinity_SA!=None, CalcsTBL.Salinity_SA)], else_= None)))
+            case([(CalcsTBL.Salinity_T1_C1_SA!=None, CalcsTBL.Salinity_T1_C1_SA)], else_=
+            case([(CalcsTBL.Salinity_SA!=None, CalcsTBL.Salinity_SA)], else_= None)))
         CT=case([(CalcsTBL.Temperature_Primary_CT!=None, CalcsTBL.Temperature_Primary_CT)], else_=
-                 case([(CalcsTBL.Temperature_Secondary_CT!=None, CalcsTBL.Temperature_Secondary_CT)], else_=CalcsTBL.Temperature_CT))
+            case([(CalcsTBL.Temperature_Secondary_CT!=None, CalcsTBL.Temperature_Secondary_CT)], else_=
+            CalcsTBL.Temperature_CT))
         ZD=case([(ObsTBL.Depth!=None,ObsTBL.Depth)], else_= CalcsTBL.Z)
-        FL=case([(ObsTBL.Fluorescence_URU_Seapoint!=None,ObsTBL.Fluorescence_URU_Seapoint)], else_= ObsTBL.Fluorescence_URU_Wetlabs)
+        FL=case([(ObsTBL.Fluorescence_URU_Seapoint!=None,ObsTBL.Fluorescence_URU_Seapoint)], else_=
+            ObsTBL.Fluorescence_URU_Wetlabs)
         
         qry=session.query(StationTBL.ID.label('Station'),
             StationTBL.StartYear.label('Year'),StationTBL.StartMonth.label('Month'),
@@ -111,7 +112,8 @@ def loadDFO_CTD(basedir='', dbname='DFO_CTD.sqlite',
                 zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
             df1 = df1[['Station','Lon','Lat','dtUTC']]
         else:
-            df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h) for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
+            df1['dtUTC']=[dt.datetime(int(y),int(m),int(d))+dt.timedelta(hours=h)
+                for y,m,d,h in zip(df1['Year'],df1['Month'],df1['Day'],df1['Hour'])]
             df1['Z'] = -df1['Z'] # fix sign of z to be positive up
             df1 = df1.drop(['Year','Month','Day','Hour'],axis=1)
         session.close()
@@ -130,7 +132,6 @@ def loadDFO_bottle(basedir='', dbname='DFO.sqlite',
     latlims, if provided, loads only data in range latlims[0]<=lat<latlims[1]
     lonlims, if provided, loads only data in range latlims[0]<=lat<latlims[1]
     """
-
     ymd0, ymd1, latlims, lonlims = get_lims(datelims, latlims, lonlims)
 
     # if db does not exist, exit
@@ -184,7 +185,8 @@ def loadDFO_bottle(basedir='', dbname='DFO.sqlite',
         # Labels will determine column headings in eventual pandas DataFrame
         #   - For columns from tables, format is tableVariable.ColumnName, and label is not required
         #   - For case statements defined above, label is always required
-        # If data is to be returned from multiple tables, they must be joined (see lines containing select_from and join below)
+        # If data is to be returned from multiple tables, they must be joined
+        # (see lines containing select_from and join below)
         # The 'Include' column was created for each table to flag rows with QC concerns; 
         # any rows with Include=False are not returned
         qry=session.query(StationTBL.ID.label('Station'),StationTBL.StartYear.label('Year'),

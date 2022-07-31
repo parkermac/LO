@@ -1,5 +1,5 @@
 """
-Code to process DFO cast data.
+Code to TEST the processing of DFO cast data.
 
 Takes 3-7 minutes to run.
 
@@ -18,11 +18,11 @@ reload(loadDFO)
 from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 
-testing = False
+testing = True
 
 in_dir = Ldir['data'] / 'obs' / 'dfo'
-out_dir = Ldir['LOo'] / 'obs' / 'dfo'
-Lfun.make_dir(out_dir)
+# out_dir = Ldir['LOo'] / 'obs' / 'dfo'
+# Lfun.make_dir(out_dir)
 
 if testing:
     year_list = [2019]
@@ -33,8 +33,8 @@ tt0 = time()
 for year in year_list:
     print(year)
     datelims = (datetime(year,1,1), datetime(year,12,31))
-    out_fn = out_dir / ('casts_' + str(year) + '.p')
-    info_out_fn = out_dir / ('casts_info_' + str(year) + '.p')
+    # out_fn = out_dir / ('casts_' + str(year) + '.p')
+    # info_out_fn = out_dir / ('casts_info_' + str(year) + '.p')
     
     df = loadDFO.loadDFO_CTD(basedir=str(in_dir), datelims=datelims)
     """
@@ -98,7 +98,7 @@ for year in year_list:
             df['name'] = None
             
             # save
-            df.to_pickle(out_fn)
+            # df.to_pickle(out_fn)
             
             # # Also pull out a dateframe with station info to use for model cast extractions.
             ind = df.cid.unique()
@@ -108,5 +108,6 @@ for year in year_list:
             info_df.name = None
             info_df.index.name = 'cid'
             info_df['time'] = pd.to_datetime(info_df['time'])
-            info_df.to_pickle(info_out_fn)
+            # info_df.to_pickle(info_out_fn)
+            
 print('Elapsed time = %0.1f sec' % (time()-tt0))
