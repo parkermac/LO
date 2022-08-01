@@ -4,7 +4,7 @@ This is code for doing cast extractions.
 Refactored 2022_07 to conform to the new cast data format.
 
 Test on mac in ipython:
-run extract_casts -gtx cas6_v0_live -source dfo -year 2019
+run extract_casts -gtx cas6_v0_live -source dfo -otype ctd -year 2019 -test True
 
 """
 
@@ -22,26 +22,29 @@ Ldir = exfun.intro() # this handles the argument passing
 
 year_str = str(Ldir['year'])
 
-out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'cast' / (Ldir['source'] + '_' + year_str)
-Lfun.make_dir(out_dir)
+out_dir = (Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'cast' /
+    (Ldir['source'] + '_' + Ldir['otype'] + '_' + year_str))
+Lfun.make_dir(out_dir, clean=True)
 
-#for type in ['casts', 'bottles']:
-for type in ['casts']:
-    info_fn = Ldir['LOo'] / 'obs' / Ldir['source'] / (type + '_info_' + year_str + '.p')
-    if info_fn.is_file():
-        info_df = pd.read_pickle(info_fn)
-        for cid in info_df.index:
-            lon = info_df.loc[cid,'lon']
-            lat = info_df.loc[cid,'lat']
-            dt = info_df.loc[cid,'time']
-            out_fn = out_dir / (type + '_' + str(cid) + '.nc')
-            fn = cfun.get_his_fn_from_dt(Ldir, dt)
-            if fn.is_file():
-                print('Get ' + out_fn.name)
-                sys.stdout.flush()
-                cfun.get_cast(out_fn, fn, lon, lat)
-            else:
-                pass
+info_fn = Ldir['LOo'] / 'obs' / Ldir['source'] / Ldir['otype'] / ('info_' + year_str + '.p')
+if info_fn.is_file():
+    ii = 0
+    info_df = pd.read_pickle(info_fn)
+    for cid in info_df.index:
+        lon = info_df.loc[cid,'lon']
+        lat = info_df.loc[cid,'lat']
+        dt = info_df.loc[cid,'time']
+        out_fn = out_dir / (str(cid) + '.nc')
+        fn = cfun.get_his_fn_from_dt(Ldir, dt)
+        if fn.is_file():
+            print('Get ' + out_fn.name)
+            sys.stdout.flush()
+            cfun.get_cast(out_fn, fn, lon, lat)
+            ii += 1
+            if Ldir['testing'] and (ii > 3):
+                break
+        else:
+            pass
 
 
 

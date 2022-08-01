@@ -109,7 +109,7 @@ conda env update -f loenv.yml
 ```
 which only took a minute or two the last time I tried it.  This is also what you do after you make any change to your .yml file, like adding a package.  There are more complete instructions for working with conda environments [HERE](https://www.earthdatascience.org/courses/intro-to-earth-data-science/python-code-fundamentals/use-python-packages/use-conda-environments-and-install-packages/).
 
-Note: it also can be useful with about the same frequency as you update loenv. To do this use this command (I assume you can do this within loenv but that it would still affect any environment):
+Note: it also can be useful to update conda with about the same frequency as you update loenv. To do this use this command (I assume you can do this within loenv but that it would still affect any environment):
 ```
 conda update -n base -c defaults conda
 ```

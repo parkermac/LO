@@ -7,15 +7,15 @@
 ## Organization
 
 #### Naming Notes
-- [source], e.g. 'dfo', which is some string identifier of the database, which is then further identified by
-- [type], e.g. 'ctd' or 'bottle', and finally by
-- [year], e.g. 2017.
+- [source] is some string identifier of the database, e.g. 'dfo', which is then further identified by
+- [otype] observation type, e.g. 'ctd' or 'bottle', and finally by
+- [year] e.g. 2017.
 
 
 #### Input/Output file naming conventions
 - Input: LO_data/obs/[source]/.csv, .xls, etc.
 - Code: LO/obs/[source]/process_ctd_bottle.py or whatever is called for
-- Output: LO_output/obs/[source]/[type]/[year].p and info_[year].p or whatever is called for
+- Output: LO_output/obs/[source]/[otype]/[year].p and info_[year].p or whatever is called for
 
 ---
 
