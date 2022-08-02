@@ -12,7 +12,7 @@ Note that because of how xarray handles the time axis, it converts **ocean_time*
 
 `extract_moor.py` does the extractions. It uses `ncks` to get an extraction as a NetCDF file for each hour (or day), keeping them in a temporary folder and then concatenates them using `ncrcat`.  It is fast because it runs many ncks subprocesses at once (use the optional -Nproc flag to control this).  My mac and perigee can handle 100 fine although it may slow other operations.  Boiler seemed to choke on 100 but ran fine with 10.
 
-`multi_mooring_driver.py` is a driver to run extract_moor.py for multiple moorings. It looks in `LO_user/moor/job_lists.py` for a dict of station names and (lon,lat) tuples. If that `job_lists.py` file does not exist, then it uses the one in this directory.
+`multi_mooring_driver.py` is a driver to run extract_moor.py for multiple moorings. It looks in `LO_user/extract/moor/job_lists.py` for a dict of station names and (lon,lat) tuples. If that `job_lists.py` file does not exist, then it uses the one in this directory.
 
 See the codes for details on the required command line arguments. Basically you need to tell it which run to use, and the time limits and frequency. For `extract_moor.py` you also pass a station name, longitude, and latitude, whereas for `multi_mooring_driver.py` you instead pass a job name.
 
