@@ -129,11 +129,30 @@ The numbers at the start of each line are MM HH (minute and hour), so you can se
 
 #### ROMS
 
-_Under construction..._
+Look in LO/driver/crontabs at klone.txt or mox1.txt to see what the current crontab commands look like.
 
-One issue we need to deal with is what non-Parker users have to do to run the forecast.
+If I have made some changes and want to check that the forecast will still run, here is what I do:
+- First move today's files out of the way by going to LO_roms/[gtagex] (where in this example [gtagex] is cas6_v0_u0kb) and then move today's fYYYY.MM.DD folder to fYYYY.MM.DD_ORIG.
+- You will also have to delete the `forecast_done[].txt` file for today in LO/driver because if this is there the driver will exit immediately.
+- Then go to LO/driver and execute a command like this:
+```
+python3 driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 200 -N 40 -v True --get_forcing False --short_roms True --move_his False --old_roms True < /dev/null > old_roms_test.log
+```
+- This is similar to the command in the crontab but it has a few extra flags that make it better for testing:
+- `--get_forcing False` skips getting the forcing (saves about a minute)
+- `--short_roms True` makes the run just go a few time steps and then end (saves a lot of time)
+- `--move_his False` skips copying the output to apogee
+- It should finish in a few minutes with a result of SUCCESS in the log file. If it does not work then look for clues in the driver log file, the ROMS log file, and the slurm.out file.
+- **Finally, don't forget to move the folder fYYYY.MM.DD_ORIG back to fYYYY.MM.DD!**
 
 NOTE: the hyak system has scheduled maintenance on the second Tuesday of every month. They will stop or kill jobs that have scheduled run times that go beyond 9 AM. We have worked hard to make sure that, even when there are multiple blow-ups, the last forecast day will still start before 7 AM. Then because `#SBATCH --time=02:00:00` in its `LO/driver/batch/[klone,mox]1_batch_BLANK.sh` it will finish before they shut it is down. One of the more aggravating issues is when a forecast fails on a maintenance day. Then you have to wait until the late afternoon before you can rerun ROMS by hand.
+
+NOTES: 2022.08.10 One issue we are working on is what non-Parker users have to do to run the forecast. Working with David to allow him to run the forecast in my absence, I went to /gscratch/macc/parker and issued these two commands:
+```
+chown -R :macc *;            # make everything owned by macc group
+chmod -R g=u   *;            # make group permissions match user permissions for each file
+```
+The first command is probably redundant.
 
 ---
 
