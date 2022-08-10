@@ -19,7 +19,7 @@ The LiveOcean forecast has been running continuously since late 2015. Its result
 _**Here are the typical daily steps:**_
 
 - First, open a browser and look at https://liveocean.apl.uw.edu/output/. Anytime after about 6 AM you should see a folder at the bottom of the list named after the current day f[YYYY.MM.DD] (e.g. f2022.07.12). This is the public server where we make daily forecast post-processing files available to users. **If the folder is there, everything probably worked fine and if you are in a hurry you can stop here.**
-- At 6:30 AM official operators should get two emails. One, titled "LOcean results", is the screen output of driver_roms1.py from the primary forecast run by Parker on klone. The other, titled "LO_mox", is from the backup forecast run by Parker on mox. These give information on each of the three forecast days. For example, the lower third of "LOcean results" today has info about day three of the forecast:
+- At 6:30 AM official operators should get two emails. One, titled "LO forecst klone", is the screen output of driver_roms2.py from the primary forecast run by Parker on klone. The other, titled "LO forecast mox", is from the backup forecast run by Parker on mox. These give information on each of the three forecast days. For example, the lower third of "LO forecast klone" today has info about day three of the forecast:
 ```
 OOOOOOOOOOOOOOOOOOOOOOO f2022.07.14 OOOOOOOOOOOOOOOOOOOOOOOO
  > started at 2022.07.12 04:52:14
@@ -161,7 +161,7 @@ The first command is probably redundant.
 This is orchestrated by the last line in the crontab above by `driver_post1.py`. This makes all the files that end up on the LiveOcean server at APL https://liveocean.apl.uw.edu/output/. It also makes movies that are pushed to Parker's LiveOcean website http://faculty.washington.edu/pmacc/LO/LiveOcean.html.
 
 Issues to deal with will be:
-- Do other users have permission to scp files to the APL server?
-- Do other users have permission to scp files to homer (where Parker's website files are)?
+- Do other users have permission to scp files to the APL server? Yes they do.
+- Do other users have permission to scp files to homer (where Parker's website files are)? David can.
 
-If you have to rerun ROMS late in the day, you can run `driver_post1.py` on apogee at the same time - it will keep looking for 8 hours, and only start when the last of the history files shows up.
+If you have to rerun ROMS late in the day, you can run `driver_post1.py` on apogee at the same time - it will keep looking for 15 hours (until 8 PM), and only start when the last of the history files shows up.
