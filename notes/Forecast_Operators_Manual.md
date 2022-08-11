@@ -20,44 +20,57 @@ _**Here are the typical daily steps:**_
 
 - First, open a browser and look at https://liveocean.apl.uw.edu/output/. Anytime after about 6 AM you should see a folder at the bottom of the list named after the current day f[YYYY.MM.DD] (e.g. f2022.07.12). This is the public server where we make daily forecast post-processing files available to users. **If the folder is there, everything probably worked fine and if you are in a hurry you can stop here.**
 - At 6:30 AM official operators should get two emails. One, titled "LO forecst klone", is the screen output of driver_roms2.py from the primary forecast run by Parker on klone. The other, titled "LO forecast mox", is from the backup forecast run by Parker on mox. These give information on each of the three forecast days. For example, the lower third of "LO forecast klone" today has info about day three of the forecast:
+
 ```
-OOOOOOOOOOOOOOOOOOOOOOO f2022.07.14 OOOOOOOOOOOOOOOOOOOOOOOO
- > started at 2022.07.12 04:52:14
- - force_dir:    /gscratch/macc/parker/LO_output/forcing/cas6_v0/f2022.07.14
+======== f2022.08.13 =========
+ > started at 2022.08.11 04:50:37
+ - roms_out_dir: /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.08.13
+ - force_dir:    /gscratch/macc/parker/LO_output/forcing/cas6_v0/f2022.08.13
  - dot_in_dir:   /gscratch/macc/parker/LO/dot_in/cas6_v0_u0kb
- - dot_in_shared_dir: /gscratch/macc/parker/LO/dot_in/shared
- - roms_out_dir: /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.07.14
- - log_file:     /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.07.14/log.txt
+ - log_file:     /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.08.13/log.txt
  - roms_ex_dir:  /gscratch/macc/parker/LiveOcean_roms/makefiles/u0kb
-==================== Copy forcing atm0 =====================
-==================== Copy forcing ocn0 =====================
-==================== Copy forcing riv0 =====================
-==================== Copy forcing tide0 ====================
- - time to get forcing = 58 sec
+===== Copy forcing atm0 ======
+===== Copy forcing ocn0 ======
+===== Copy forcing riv0 ======
+===== Copy forcing tide0 =====
+ - time to get forcing = 83 sec
  - Blow-ups = 0
-======================= Make dot in ========================
-=================== Create batch script ====================
-========================= Run ROMS =========================
- - time to run ROMS = 170 sec
+======== Make dot in =========
+----------- sdtout -----------
+ --- making dot_in for 2022.08.13
+
+==== Create batch script =====
+========== Run ROMS ==========
+----------- sdtout -----------
+Submitted batch job 5854842
+
+ - time to run ROMS = 171 sec
  - llcount = 0
  - log done and closed
  - Run blew up, blow ups = 0
- - blew up at 2022.07.12 04:56:07
- - log.txt file saved to /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.07.14_blowup
- - ocean_his_0001.nc saved to /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.07.14_blowup
+ - blew up at 2022.08.11 04:54:59
+ - log.txt file saved to /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.08.13_blowup
+ - ocean_his_0001.nc saved to /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.08.13_blowup
  - Blow-ups = 1
-======================= Make dot in ========================
-=================== Create batch script ====================
-========================= Run ROMS =========================
- - time to run ROMS = 2541 sec
+======== Make dot in =========
+----------- sdtout -----------
+ --- making dot_in for 2022.08.13
+
+==== Create batch script =====
+========== Run ROMS ==========
+----------- sdtout -----------
+Submitted batch job 5854843
+
+ - time to run ROMS = 2539 sec
  - llcount = 0
  - log done and closed
  - ROMS SUCCESS
-=== Make output directory on apogee.ocean.washington.edu ===
-===== Copy ROMS output to apogee.ocean.washington.edu ======
- - time to move history files and clean up = 187 sec
- > finished at 2022.07.12 05:41:39
+ Make output directory on apogee.ocean.washington.edu
+ Copy ROMS output to apogee.ocean.washington.edu
+ - time to move history files and clean up = 152 sec
+ > finished at 2022.08.11 05:39:57
 ```
+
 This is from a strong spring tide day, and the model often blows up once or even twice during springs. Things I watch for are excessive "time to get forcing" (e.g. over 300 sec) which may indicate that klone is having some problem. If there is a problem, send an email describing it to help@uw.edu with "hyak" in the subject line.
 - To be thorough, I also check on the forcing to see if any "planB" actions were taken. To do this, logon to apogee and go to `/dat1/parker/LO/driver` and do `cat *0.log` which will produce something like:
 ```
@@ -129,11 +142,15 @@ The numbers at the start of each line are MM HH (minute and hour), so you can se
 
 #### ROMS
 
-Look in LO/driver/crontabs at klone.txt or mox1.txt to see what the current crontab commands look like.
+Look in `LO/driver/crontabs/klone.txt` or `mox1.txt` to see what the current crontab commands look like.
+
+NOTE: As a backup I have the forecasts set to run at around 3 AM and again at 10 AM. The 10 AM job only runs if the driver does not find the file LO/driver/forecast_done_[date].txt
+
+**Testing:**
 
 If I have made some changes and want to check that the forecast will still run, here is what I do:
-- First move today's files out of the way by going to LO_roms/[gtagex] (where in this example [gtagex] is cas6_v0_u0kb) and then move today's fYYYY.MM.DD folder to fYYYY.MM.DD_ORIG.
-- You will also have to delete the `forecast_done[].txt` file for today in LO/driver because if this is there the driver will exit immediately.
+- First move today's files out of the way by going to LO_roms/[gtagex] (where in this example [gtagex] is cas6_v0_u0kb) and then move today's f[date] folder to f[date]_ORIG.
+- You will also have to delete the `forecast_done_[date].txt` file for today in LO/driver because if this is there the driver will exit immediately.
 - Then go to LO/driver and execute a command like this:
 ```
 python3 driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 200 -N 40 -v True --get_forcing False --short_roms True --move_his False --old_roms True < /dev/null > old_roms_test.log
@@ -143,11 +160,11 @@ python3 driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 200 -N 40 -v True 
 - `--short_roms True` makes the run just go a few time steps and then end (saves a lot of time)
 - `--move_his False` skips copying the output to apogee
 - It should finish in a few minutes with a result of SUCCESS in the log file. If it does not work then look for clues in the driver log file, the ROMS log file, and the slurm.out file.
-- **Finally, don't forget to move the folder fYYYY.MM.DD_ORIG back to fYYYY.MM.DD!**
+- **Finally, don't forget to move the folder f[date]_ORIG back to f[date]!**
 
 NOTE: the hyak system has scheduled maintenance on the second Tuesday of every month. They will stop or kill jobs that have scheduled run times that go beyond 9 AM. We have worked hard to make sure that, even when there are multiple blow-ups, the last forecast day will still start before 7 AM. Then because `#SBATCH --time=02:00:00` in its `LO/driver/batch/[klone,mox]1_batch_BLANK.sh` it will finish before they shut it is down. One of the more aggravating issues is when a forecast fails on a maintenance day. Then you have to wait until the late afternoon before you can rerun ROMS by hand.
 
-NOTES: 2022.08.10 One issue we are working on is what non-Parker users have to do to run the forecast. Working with David to allow him to run the forecast in my absence, I went to /gscratch/macc/parker and issued these two commands:
+NOTE: 2022.08.10 One issue we are working on is what non-Parker users have to do to run the forecast. Working with David to allow him to run the forecast in my absence, I went to `/gscratch/macc/parker` and issued these two commands:
 ```
 chown -R :macc *;            # make everything owned by macc group
 chmod -R g=u   *;            # make group permissions match user permissions for each file
@@ -160,8 +177,8 @@ The first command is probably redundant.
 
 This is orchestrated by the last line in the crontab above by `driver_post1.py`. This makes all the files that end up on the LiveOcean server at APL https://liveocean.apl.uw.edu/output/. It also makes movies that are pushed to Parker's LiveOcean website http://faculty.washington.edu/pmacc/LO/LiveOcean.html.
 
-Issues to deal with will be:
+Issues to deal with:
 - Do other users have permission to scp files to the APL server? Yes they do.
 - Do other users have permission to scp files to homer (where Parker's website files are)? David can.
 
-If you have to rerun ROMS late in the day, you can run `driver_post1.py` on apogee at the same time - it will keep looking for 15 hours (until 8 PM), and only start when the last of the history files shows up.
+If you have to rerun ROMS late in the day, you can run `driver_post1.py` on apogee at the same time - it will keep looking for 15 hours (until 8 PM if started at 5 AM), and only start when the last of the history files shows up.
