@@ -239,8 +239,9 @@ Things that I type in [ ] below mean that they would be replaced by specific str
 - [gridname] is the name of the grid (e.g. cas6)
 - [tag] is a name to identify a collection of forcing files (e.g. v0)
 - [ex_name] is the name of the ROMS executable (e.g. u0kb)
-- [fstring] is a date string of the form fYYYY.MM.DD (e.g. f2021.07.04).
-- [frc] is the name of one of the model forcings (e.g. ocn0).
+- [fstring] is a date string of the form fYYYY.MM.DD (e.g. f2021.07.04)
+- [date_string] is a date string of the form YYYY.MM.DD (e.g. 2021.07.04)
+- [frc] is the name of one of the model forcings (e.g. ocn0)
 
 Grids are just identified by [gridname].
 

@@ -18,7 +18,7 @@ The LiveOcean forecast has been running continuously since late 2015. Its result
 
 _**Here are the typical daily steps:**_
 
-- First, open a browser and look at https://liveocean.apl.uw.edu/output/. Anytime after about 6 AM you should see a folder at the bottom of the list named after the current day f[YYYY.MM.DD] (e.g. f2022.07.12). This is the public server where we make daily forecast post-processing files available to users. **If the folder is there, everything probably worked fine and if you are in a hurry you can stop here.**
+- First, open a browser and look at https://liveocean.apl.uw.edu/output/. Anytime after about 6 AM you should see a folder at the bottom of the list named after the current day f[date_string] where [date_string] is of the form YYYY.MM.DD, e.g. f2022.07.12. This is the public server where we make daily forecast post-processing files available to users. **If the folder is there, everything probably worked fine and if you are in a hurry you can stop here.**
 - At 6:30 AM official operators should get two emails. One, titled "LO forecst klone", is the screen output of driver_roms2.py from the primary forecast run by Parker on klone. The other, titled "LO forecast mox", is from the backup forecast run by Parker on mox. These give information on each of the three forecast days. For example, the lower third of "LO forecast klone" today has info about day three of the forecast:
 
 ```
@@ -114,13 +114,13 @@ _**These steps will deal with about 95% of all error modes!**_
 ## Background info on how the forecast system works
 
 Every morning a series of cron jobs run on apogee, klone, and mox in Parker's account that make the LiveOcean three-day forecast.  This spans today, tomorrow, and the day after, and like all LO ROMS runs, it is done in three separate one-day jobs on hyak. The system consists of three categories:
-- Preprocessing
-- ROMS
-- Post-processing
+1. Preprocessing
+2. ROMS
+3. Post-processing
 
 ---
 
-#### Preprocessing
+#### 1. Preprocessing
 
 This is creating the forcing for the run.  The current lineup is tide0, riv0, ocn0, and atm0, and these are run in Parker's account on apogee by the `driver_forcing.py` lines in his crontab:
 
@@ -140,17 +140,30 @@ The numbers at the start of each line are MM HH (minute and hour), so you can se
 
 ---
 
-#### ROMS
+#### 2. ROMS
 
 Look in `LO/driver/crontabs/klone.txt` or `mox1.txt` to see what the current crontab commands look like.
 
-NOTE: As a backup I have the forecasts set to run at around 3 AM and again at 10 AM. The 10 AM job only runs if the driver does not find the file LO/driver/forecast_done_[date].txt
+NOTE: I generally create and edit my crontabs on my laptop (they are in the LO repo) and then pull them to klone or mox. Then to install them I go to `LO/driver/crontabs` and issue a command like:
+```
+crontab klone.txt
+```
+
+**NOTE: As a backup I have the forecasts set to run at around 3 AM and again around 10 AM and 2 PM. The later jobs only run if the driver does not find the file `LO/driver/forecast_done_[date_string].txt`**
+
+If you (likely David Darr) were to want to run the forecast by hand, you would issue these commands (or something like them; see the crontab to look for the latest version):
+```
+LOdnew="/gscratch/macc/parker/LO/driver"
+source /mmfs1/home/pmacc/.bashrc
+python3 $LOdnew/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True < /dev/null > $LOdnew/ak_cron.log &
+```
+Still need to test these...
 
 **Testing:**
 
 If I have made some changes and want to check that the forecast will still run, here is what I do:
-- First move today's files out of the way by going to LO_roms/[gtagex] (where in this example [gtagex] is cas6_v0_u0kb) and then move today's f[date] folder to f[date]_ORIG.
-- You will also have to delete the `forecast_done_[date].txt` file for today in LO/driver because if this is there the driver will exit immediately.
+- First move today's files out of the way by going to LO_roms/[gtagex] (where in this example [gtagex] is cas6_v0_u0kb) and then move today's f[date_string] folder to f[date_string]_ORIG.
+- You will also have to delete the `forecast_done_[date_string].txt` file for today in LO/driver because if this is there the driver will exit immediately.
 - Then go to LO/driver and execute a command like this:
 ```
 python3 driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 200 -N 40 -v True --get_forcing False --short_roms True --move_his False --old_roms True < /dev/null > old_roms_test.log
@@ -160,7 +173,7 @@ python3 driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 200 -N 40 -v True 
 - `--short_roms True` makes the run just go a few time steps and then end (saves a lot of time)
 - `--move_his False` skips copying the output to apogee
 - It should finish in a few minutes with a result of SUCCESS in the log file. If it does not work then look for clues in the driver log file, the ROMS log file, and the slurm.out file.
-- **Finally, don't forget to move the folder f[date]_ORIG back to f[date]!**
+- **Finally, don't forget to move the folder f[date_string]_ORIG back to f[date_string]!**
 
 NOTE: the hyak system has scheduled maintenance on the second Tuesday of every month. They will stop or kill jobs that have scheduled run times that go beyond 9 AM. We have worked hard to make sure that, even when there are multiple blow-ups, the last forecast day will still start before 7 AM. Then because `#SBATCH --time=02:00:00` in its `LO/driver/batch/[klone,mox]1_batch_BLANK.sh` it will finish before they shut it is down. One of the more aggravating issues is when a forecast fails on a maintenance day. Then you have to wait until the late afternoon before you can rerun ROMS by hand.
 
@@ -173,7 +186,7 @@ The first command is probably redundant.
 
 ---
 
-#### Post-processing
+#### 3. Post-processing
 
 This is orchestrated by the last line in the crontab above by `driver_post1.py`. This makes all the files that end up on the LiveOcean server at APL https://liveocean.apl.uw.edu/output/. It also makes movies that are pushed to Parker's LiveOcean website http://faculty.washington.edu/pmacc/LO/LiveOcean.html.
 
