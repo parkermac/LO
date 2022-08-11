@@ -74,7 +74,7 @@ elif (str(HOME) == '/usr/lusers/pmacc'):
     remote_dir0 = '/dat1/parker'
     local_user = 'pmacc'
 
-elif (str(HOME) == '/mmfs1/home/pmacc'):
+elif ((str(HOME) == '/mmfs1/home/pmacc') or (str(HOME) == '/mmfs1/home/darrd')):
     lo_env = 'pm_klone'
     remote_user = 'parker'
     remote_machine = 'apogee.ocean.washington.edu'
