@@ -53,7 +53,7 @@ parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omit
 parser.add_argument('-np', '--np_num', type=int) # e.g. 200, number of cores
 parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone, 28 on mox
 # various flags to facilitate testing
-parser.add_argument('-v', '--verbose', default=True, type=Lfun.boolean_string)
+parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
 parser.add_argument('--short_roms', default=False, type=Lfun.boolean_string)
 parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
@@ -113,7 +113,7 @@ elif args.run_type == 'backfill': # you have to provide at least ds0 for backfil
 else:
     print('Error: Unknown run_type')
     sys.exit()
-print('Running ROMS %s %s-%s ' % (args.run_type, ds0, ds1))
+print('Running ROMS %s %s-%s' % (args.run_type, ds0, ds1))
 sys.stdout.flush()
 
 Ncenter = 30
@@ -181,7 +181,7 @@ while dt <= dt1:
         roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
         roms_ex_name = 'romsM'
     
-    print(' - roms_out_dir: ' + str(roms_out_dir))
+    print(str(roms_out_dir)) # always print this
     if args.verbose:
         print(' - force_dir:    ' + str(force_dir))
         print(' - dot_in_dir:   ' + str(dot_in_dir))
@@ -230,7 +230,7 @@ while dt <= dt1:
         blow_ups_max = 5
     roms_worked = False
     while blow_ups <= blow_ups_max:
-        print((' - Blow-ups = ' + str(blow_ups)))
+        # print((' - Blow-ups = ' + str(blow_ups)))
         sys.stdout.flush()
 
         if args.run_dot_in:
@@ -330,8 +330,7 @@ while dt <= dt1:
                         roms_worked = False
                         
                         # save some info if the run blew up
-                        if args.verbose:
-                            print(' - blew up at %s' % (datetime.now().strftime('%Y.%m.%d %H:%M:%S')))
+                        print(' - blew up at %s' % (datetime.now().strftime('%Y.%m.%d %H:%M:%S')))
                         roms_bu_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / (f_string + '_blowup')
                         Lfun.make_dir(roms_bu_out_dir, clean=True)
                         try:
@@ -411,8 +410,7 @@ while dt <= dt1:
             shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(roms_bu_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(force_dir_prev), ignore_errors=True)
-            if args.verbose:
-                print(' - time to move history files and clean up = %d sec' % (time()-tt0))
+            print(' - time to move history files and clean up = %d sec' % (time()-tt0))
             sys.stdout.flush()
         else:
             print(' ** skipped moving history files')
