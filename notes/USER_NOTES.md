@@ -8,3 +8,4 @@
 - 2022.06.08 I edited `LO/driver/driver_forcing.py` to make "continuation" the default "start_type", hence unless you specifically need a "new" start type you can drop the "-s continuation" when you run this code from the command line. Use git pull on apogee or perigee to get these changes.
 - 2022.06.10 I changed the times in `LO/driver/driver_roms2.py` for taking a nap during the forecast time period. Use git pull on klone to get these changes.
 - 2022.06.15 I added an LO_user hook to `LO/plotting/pan_plot.py` to look for a user version of `roms_plots.py`.
+- 2022.09.14 I made an edit to the klone batch script template to fix a bug introduced by the hyak maintenance yesterday. Just do `git pull` in LO to get this.
