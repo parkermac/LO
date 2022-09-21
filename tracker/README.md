@@ -20,7 +20,7 @@ but providing the tags appropriate for your run.  This takes a few minutes and c
 
 To create the initial positions of your release you make new entries in:
 
-- get_ic() where you define the lon, lat, and fractional depth vectors for the initial conditions associated with an experiemnt name.  The examples like "jdf0" are the simplest ones to copy from as they just involve making a regular lon, lat grid of points near the surface (particles on land will be trimmed automatically later).
+- get_ic() where you define the lon, lat, and fractional depth vectors for the initial conditions associated with an experiment name.  The examples like "jdf0" are the simplest ones to copy from as they just involve making a regular lon, lat grid of points near the surface. Particles on land are trimmed automatically by the tracker code.
 
 ---
 
