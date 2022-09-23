@@ -206,6 +206,7 @@ if Ldir['start_type'] == 'perfect':
 elif Ldir['start_type'] == 'continuation':
     nrrec = '0' # '0' for a history or ini file
     ininame = 'ocean_his_0025.nc' # restart from a history file
+    ini_fullname = out_dir_yesterday / ininame
 elif Ldir['start_type'] == 'new':
     nrrec = '0' # '0' for a history or ini file
     ininame = 'ocean_ini.nc' # start from ini file
