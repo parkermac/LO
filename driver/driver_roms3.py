@@ -419,7 +419,7 @@ while dt <= dt1:
             shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(roms_bu_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(force_dir_prev), ignore_errors=True)
-            print(' - time to move history files and clean up = %d sec' % (time()-tt0))
+            print(' - move history files & clean up = %d sec' % (time()-tt0))
             sys.stdout.flush()
         else:
             print(' ** skipped moving history files')
