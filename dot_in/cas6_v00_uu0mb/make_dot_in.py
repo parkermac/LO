@@ -200,15 +200,15 @@ out_dir_yesterday = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + date_string_yeste
 Lfun.make_dir(out_dir, clean=True) # make sure it exists and is empty
 
 if Ldir['start_type'] == 'perfect':
-    nrrec = '-1' # '-1' for a hot restart
-    ininame = 'ocean_rst.nc' # for a hot perfect restart
+    nrrec = '-1' # '-1' for a perfect restart
+    ininame = 'ocean_rst.nc' # start from restart file
     ini_fullname = out_dir_yesterday / ininame
 elif Ldir['start_type'] == 'continuation':
-    nrrec = '0' # '-1' for a hot restart
-    ininame = 'ocean_his_0025.nc' # for a hot restart
+    nrrec = '0' # '0' for a history or ini file
+    ininame = 'ocean_his_0025.nc' # restart from a history file
 elif Ldir['start_type'] == 'new':
     nrrec = '0' # '0' for a history or ini file
-    ininame = 'ocean_ini.nc' # could be an ini or history file
+    ininame = 'ocean_ini.nc' # start from ini file
     ini_fullname = force_dir / D['ocn'] / ininame
 D['nrrec'] = nrrec
 D['ini_fullname'] = ini_fullname

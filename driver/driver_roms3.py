@@ -13,15 +13,22 @@ NEW compared to driver_roms1.py:
 - assume we are using LO_roms_user (use --old_roms True for old version)
 - backfill sleeps during expected forecast time of day
 
-Run analytical model on klone:
-python3 driver_roms2.py -g ae0 -t v0 -x uu1k -r backfill -s new -0 2020.01.01 -1 2020.01.02 -np 40 -N 40 < /dev/null > ae.log &
+NEW compared to driver_roms2.py:
+- ** ASSUMES that PERFECT_RESTART is defined for the executable **
+- introduce a new start_type: "perfect" for perfect restart, and it defaults to this
+  after the first day
+- introduce flag to sleep during the forecast window (default is not to sleep)
 
 For testing/debugging these flags can be very useful:
 -v True --get_forcing False --short_roms True --move_his False
 
-Test to see if old_roms works on mox:
-(first move today's day1 putput folder to an _ORIG version)
-python3 driver_roms2.py -g cas6 -t v0 -x u0mb -r forecast -np 196 -N 28 -v True --get_forcing False --short_roms True --move_his False --old_roms True < /dev/null > old_roms_test.log &
+Example call on mox:
+
+testing:
+python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -r backfill -s continuation -0 2021.01.01 -1 2021.01.02 -np 196 -N 28 --short_roms True < /dev/null > uu0mb_test.log &
+
+production run:
+python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -r backfill -s continuation -0 2021.01.01 -1 2021.01.02 -np 196 -N 28 < /dev/null > uu0mb_a.log &
 
 """
 
@@ -46,7 +53,9 @@ parser.add_argument('-t', '--tag', type=str)        # e.g. v0
 parser.add_argument('-ta', '--tag_alt', type=str, default='') # used to make gtag in "remote_dir"
 parser.add_argument('-x', '--ex_name', type=str)    # e.g. u0k
 parser.add_argument('-r', '--run_type', type=str)   # forecast or backfill
-parser.add_argument('-s', '--start_type', type=str, default='continuation') # new or continuation
+parser.add_argument('-s', '--start_type', type=str, default='perfect') # new, perfect or continuation
+# flag to sleep during the forecast window, False means it will run continuously
+parser.add_argument('-sfw', '--sleep_forecast_window', default=False, type=Lfun.boolean_string)
 # -0 and -1 only required for -r backfill
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
@@ -136,7 +145,7 @@ dt = dt0
 start_type = args.start_type
 while dt <= dt1:
     
-    if args.run_type == 'backfill':
+    if (args.run_type == 'backfill') and args.sleep_forecast_window:
         # Don't run backfill at the same time of day as the expected forecast
         dtnow = datetime.now()
         iisleep = 1
@@ -149,9 +158,9 @@ while dt <= dt1:
             dtnow = datetime.now()
             iisleep += 1
     
-    # fix start_type bug
-    if (dt != dt0) and (start_type == 'new'):
-        start_type = 'continuation'
+    # update start_type after the first day
+    if (dt != dt0) and (start_type in ['new', 'continuation']):
+        start_type = 'perfect'
         
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
     f_string0 = 'f' + dt0.strftime(Lfun.ds_fmt) # used for forcing a forecast
