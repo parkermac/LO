@@ -293,9 +293,9 @@ while dt <= dt1:
             while (run_done == False) and (rrr < 10):
                 sleep(10)
                 if 'mox' in Ldir['lo_env']:
-                    cmd_list = ['squeue', '-p', local_user]
+                    cmd_list = ['squeue', '-p', 'macc']
                 elif 'mox' in Ldir['lo_env']:
-                    cmd_list = ['squeue', '-A', local_user]
+                    cmd_list = ['squeue', '-A', 'macc']
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 print(stdout.decode())
