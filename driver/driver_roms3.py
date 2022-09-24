@@ -292,8 +292,6 @@ while dt <= dt1:
                 cmd_list = ['squeue', '-p', 'macc']
             elif 'mox' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-A', 'macc']
-
-
             rrr = 0
             run_started = False
             while (run_started == False) and (rrr < 10):
@@ -302,7 +300,7 @@ while dt <= dt1:
                 stdout, stderr = proc.communicate()
                 print(stdout.decode())
                 sys.stdout.flush()
-                if str(pid) not in str(stdout.decode()):
+                if str(pid) not in list(stdout.decode()):
                     print('still waiting for run to start ' + str(rrr))
                     sys.stdout.flush()
                 elif str(pid) in str(stdout.decode()):
