@@ -272,7 +272,7 @@ while dt <= dt1:
             tt0 = time()
             # Run ROMS using the batch script.
             if 'klone' in Ldir['lo_env']:
-                cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc','--wait',
+                cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc',
                     str(roms_out_dir / 'klone1_batch.sh')]
             elif 'mox' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
@@ -280,8 +280,7 @@ while dt <= dt1:
             # The --wait flag will cause the subprocess to not return until the job has terminated.
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Run ROMS', True)
-            print(' - time to run ROMS = %d sec' % (time()-tt0))
+            messages(stdout, stderr, 'Run ROMS', args.verbose)
             sys.stdout.flush()
             
             # now we need code to wait until the run has completed
@@ -292,15 +291,15 @@ while dt <= dt1:
                 cmd_list = ['squeue', '-p', 'macc']
             elif 'klone' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-A', 'macc']
-                
+            # first figure out if it has started
             rrr = 0
             run_started = False
             while (run_started == False) and (rrr < 10):
-                sleep(10)
+                sleep(60)
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
-                print(stdout.decode())
-                sys.stdout.flush()
+                # print(stdout.decode())
+                # sys.stdout.flush()
                 if pid not in stdout.decode():
                     print('still waiting for run to start ' + str(rrr))
                     sys.stdout.flush()
@@ -309,21 +308,23 @@ while dt <= dt1:
                     run_started = True
                     sys.stdout.flush()
                 rrr += 1
-                
+            # and then if it has finished
             rrr = 0
             run_done = False
-            while (run_done == False) and (rrr < 100):
-                sleep(10)
+            while (run_done == False) and (rrr < 60):
+                sleep(120)
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
-                print(stdout.decode())
-                sys.stdout.flush()
+                # print(stdout.decode())
+                # sys.stdout.flush()
                 if pid in stdout.decode():
-                    print('still waiting ' + str(rrr))
-                    sys.stdout.flush()
+                    pass
+                    # print('still waiting ' + str(rrr))
+                    # sys.stdout.flush()
                 elif pid not in stdout.decode():
                     print('run done ' + str(rrr))
                     run_done = True
+                    print(' - time to run ROMS = %d sec' % (time()-tt0))
                     sys.stdout.flush()
                 rrr += 1
     
