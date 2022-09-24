@@ -298,6 +298,8 @@ while dt <= dt1:
                     cmd_list = ['squeue', '-A', local_user]
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
+                print(stdout.decode())
+                sys.stdout.flush()
                 if str(pid) in stdout.decode():
                     print('still waiting ' + str(rrr))
                     sys.stdout.flush()
