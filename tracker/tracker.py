@@ -37,7 +37,7 @@ Examples:
 
 python tracker.py -clb True
 
-the same command, with all the argmuents typed, instead of getting the as defaults:
+the same command, with all the arguments typed, instead of getting them as defaults:
 
 python tracker.py -gtx cas6_v0_live -ro 0 -d 2019.07.04 -exp jdf0 -clb True
 
