@@ -288,14 +288,33 @@ while dt <= dt1:
             pid = stdout.decode().split(' ')[-1]
             print(pid)
             sys.stdout.flush()
-            run_done = False
+            if 'mox' in Ldir['lo_env']:
+                cmd_list = ['squeue', '-p', 'macc']
+            elif 'mox' in Ldir['lo_env']:
+                cmd_list = ['squeue', '-A', 'macc']
+
+
             rrr = 0
+            run_started = False
+            while (run_started == False) and (rrr < 10):
+                sleep(10)
+                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                print(stdout.decode())
+                sys.stdout.flush()
+                if str(pid) not in stdout.decode():
+                    print('still waiting for run to start' + str(rrr))
+                    sys.stdout.flush()
+                elif str(pid) in stdout.decode():
+                    print('run started ' + str(rrr))
+                    run_started = True
+                    sys.stdout.flush()
+                rrr += 1
+                
+            rrr = 0
+            run_done = False
             while (run_done == False) and (rrr < 10):
                 sleep(10)
-                if 'mox' in Ldir['lo_env']:
-                    cmd_list = ['squeue', '-p', 'macc']
-                elif 'mox' in Ldir['lo_env']:
-                    cmd_list = ['squeue', '-A', 'macc']
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 print(stdout.decode())
@@ -303,7 +322,7 @@ while dt <= dt1:
                 if str(pid) in stdout.decode():
                     print('still waiting ' + str(rrr))
                     sys.stdout.flush()
-                else:
+                elif str(pid) not in stdout.decode():
                     print('run done ' + str(rrr))
                     run_done = True
                     sys.stdout.flush()
