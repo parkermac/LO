@@ -289,7 +289,7 @@ while dt <= dt1:
             print(pid)
             sys.stdout.flush()
             if 'mox' in Ldir['lo_env']:
-                cmd_list = ['squeue', '-p', 'macc']
+                cmd_list = ['squeue', '-p', 'macc','|','grep','macc']
             elif 'mox' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-A', 'macc']
 
@@ -303,7 +303,7 @@ while dt <= dt1:
                 print(stdout.decode())
                 sys.stdout.flush()
                 if str(pid) not in stdout.decode():
-                    print('still waiting for run to start' + str(rrr))
+                    print('still waiting for run to start ' + str(rrr))
                     sys.stdout.flush()
                 elif str(pid) in stdout.decode():
                     print('run started ' + str(rrr))
