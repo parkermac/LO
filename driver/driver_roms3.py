@@ -294,7 +294,7 @@ while dt <= dt1:
                 cmd_list = ['squeue', '-A', 'macc']
             rrr = 0
             run_started = False
-            while (run_started == False) and (rrr < 10):
+            while (run_started == False) or (rrr > 10):
                 sleep(10)
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
@@ -311,16 +311,16 @@ while dt <= dt1:
                 
             rrr = 0
             run_done = False
-            while (run_done == False) and (rrr < 10):
+            while (run_done == False) or (rrr > 10):
                 sleep(10)
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 print(stdout.decode())
                 sys.stdout.flush()
-                if str(pid) in str(stdout.decode()):
+                if str(pid) in stdout.decode():
                     print('still waiting ' + str(rrr))
                     sys.stdout.flush()
-                elif str(pid) not in str(stdout.decode()):
+                elif str(pid) not in stdout.decode():
                     print('run done ' + str(rrr))
                     run_done = True
                     sys.stdout.flush()
