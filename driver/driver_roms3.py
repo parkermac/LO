@@ -300,10 +300,10 @@ while dt <= dt1:
                 stdout, stderr = proc.communicate()
                 print(stdout.decode())
                 sys.stdout.flush()
-                if str(pid) not in list(stdout.decode()):
+                if str(pid) not in stdout.decode():
                     print('still waiting for run to start ' + str(rrr))
                     sys.stdout.flush()
-                elif str(pid) in str(stdout.decode()):
+                elif str(pid) in stdout.decode():
                     print('run started ' + str(rrr))
                     run_started = True
                     sys.stdout.flush()
