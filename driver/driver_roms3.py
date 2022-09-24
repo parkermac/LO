@@ -286,10 +286,7 @@ while dt <= dt1:
             
             # now we need code to wait until the run has completed
             pid = stdout.decode().split(' ')[-1].strip('\n')
-            print(pid)
-            print(type(pid))
-            print(len(pid))
-            print(list(pid))
+            print('pid = ' + pid)
             sys.stdout.flush()
             if 'mox' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-p', 'macc']
@@ -298,21 +295,16 @@ while dt <= dt1:
                 
             rrr = 0
             run_started = False
-            while (run_started == False) and (rrr < 2):
+            while (run_started == False) and (rrr < 10):
                 sleep(10)
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
-                sdc = stdout.decode()
-                print(sdc)
+                print(stdout.decode())
                 sys.stdout.flush()
-                if 'JOBID' in sdc:
-                    print('found JOBID')
-                if 'macc' in sdc:
-                    print('found macc')
-                if str(pid) not in sdc:
+                if pid not in stdout.decode():
                     print('still waiting for run to start ' + str(rrr))
                     sys.stdout.flush()
-                elif str(pid) in sdc:
+                elif pid in stdout.decode():
                     print('run started ' + str(rrr))
                     run_started = True
                     sys.stdout.flush()
@@ -320,16 +312,16 @@ while dt <= dt1:
                 
             rrr = 0
             run_done = False
-            while (run_done == False) and (rrr < 2):
+            while (run_done == False) and (rrr < 100):
                 sleep(10)
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 print(stdout.decode())
                 sys.stdout.flush()
-                if str(pid) in stdout.decode():
+                if pid in stdout.decode():
                     print('still waiting ' + str(rrr))
                     sys.stdout.flush()
-                elif str(pid) not in stdout.decode():
+                elif pid not in stdout.decode():
                     print('run done ' + str(rrr))
                     run_done = True
                     sys.stdout.flush()
