@@ -277,16 +277,24 @@ while dt <= dt1:
             elif 'mox' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
                     str(roms_out_dir / 'mox1_batch.sh')]
-            # The --wait flag will cause the subprocess to not return until the job has terminated.
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Run ROMS', args.verbose)
-            sys.stdout.flush()
+
+            got_pid = False
+            rrr = 0
+            while (got_pid == False) and (rrr < 10):
+                stdout, stderr = proc.communicate()
+                messages(stdout, stderr, 'Run ROMS', args.verbose)
+                sys.stdout.flush()
+                if len(stderr) > 0:
+                    sleep(60)
+                    rrr += 1 # try again
+                else:
+                    pid = stdout.decode().split(' ')[-1].strip('\n')
+                    print('pid = ' + pid)
+                    sys.stdout.flush()
+                    got_pid = True
             
             # now we need code to wait until the run has completed
-            pid = stdout.decode().split(' ')[-1].strip('\n')
-            print('pid = ' + pid)
-            sys.stdout.flush()
             if 'mox' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-p', 'macc']
             elif 'klone' in Ldir['lo_env']:
