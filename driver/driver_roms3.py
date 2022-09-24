@@ -287,6 +287,8 @@ while dt <= dt1:
             # now we need code to wait until the run has completed
             pid = stdout.decode().split(' ')[-1]
             print(pid)
+            print(type(pid))
+            print(len(pid))
             sys.stdout.flush()
             if 'mox' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-p', 'macc']
@@ -306,10 +308,10 @@ while dt <= dt1:
                     print('found JOBID')
                 if 'macc' in sdc:
                     print('found macc')
-                if pid not in sdc:
+                if str(pid) not in sdc:
                     print('still waiting for run to start ' + str(rrr))
                     sys.stdout.flush()
-                elif pid in sdc:
+                elif str(pid) in sdc:
                     print('run started ' + str(rrr))
                     run_started = True
                     sys.stdout.flush()
