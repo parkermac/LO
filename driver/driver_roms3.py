@@ -10,7 +10,6 @@ This code:
 NEW compared to driver_roms1.py:
 - make less verbose unless there are errors
 - fixed --start_type new bug
-- assume we are using LO_roms_user (use --old_roms True for old version)
 - backfill sleeps during expected forecast time of day
 
 NEW compared to driver_roms2.py:
@@ -69,8 +68,6 @@ parser.add_argument('--short_roms', default=False, type=Lfun.boolean_string)
 parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
 parser.add_argument('--run_roms', default=True, type=Lfun.boolean_string)
 parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
-# flag to allow use of the old ROMS (like for cas6_v0_u0kb)
-parser.add_argument('--old_roms', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 # check for required arguments
@@ -182,14 +179,9 @@ while dt <= dt1:
         dot_in_dir = user_dot_in_dir
     
     # Decide where to look for executable.
-    if args.old_roms == True:
-        # use old ROMS
-        roms_ex_dir = Ldir['roms_code'] / 'makefiles' / Ldir['ex_name']
-        roms_ex_name = 'oceanM'
-    else:
-        # use updated ROMS
-        roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
-        roms_ex_name = 'romsM'
+    # use updated ROMS
+    roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
+    roms_ex_name = 'romsM'
     
     print(str(roms_out_dir)) # always print this
     if args.verbose:
@@ -283,12 +275,12 @@ while dt <= dt1:
                 cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc','--wait',
                     str(roms_out_dir / 'klone1_batch.sh')]
             elif 'mox' in Ldir['lo_env']:
-                cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc','--wait',
+                cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
                     str(roms_out_dir / 'mox1_batch.sh')]
             # The --wait flag will cause the subprocess to not return until the job has terminated.
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Run ROMS', args.verbose)
+            messages(stdout, stderr, 'Run ROMS', True)
             print(' - time to run ROMS = %d sec' % (time()-tt0))
             sys.stdout.flush()
     
