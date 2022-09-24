@@ -285,7 +285,7 @@ while dt <= dt1:
             sys.stdout.flush()
             
             # now we need code to wait until the run has completed
-            pid = stdout.decode().split(' ')[-1]
+            pid = stdout.decode().split(' ')[-1].strip('\n')
             print(pid)
             print(type(pid))
             print(len(pid))
