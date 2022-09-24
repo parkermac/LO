@@ -292,18 +292,20 @@ while dt <= dt1:
                 cmd_list = ['squeue', '-p', 'macc']
             elif 'mox' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-A', 'macc']
+                
             rrr = 0
             run_started = False
-            while (run_started == False) or (rrr > 10):
+            while (run_started == False) and (rrr < 10):
                 sleep(10)
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
-                print(stdout.decode())
+                sdc = stdout.decode()
+                print(sdc)
                 sys.stdout.flush()
-                if str(pid) not in stdout.decode():
+                if str(pid) not in sdc:
                     print('still waiting for run to start ' + str(rrr))
                     sys.stdout.flush()
-                elif str(pid) in stdout.decode():
+                elif str(pid) in sdc:
                     print('run started ' + str(rrr))
                     run_started = True
                     sys.stdout.flush()
@@ -311,7 +313,7 @@ while dt <= dt1:
                 
             rrr = 0
             run_done = False
-            while (run_done == False) or (rrr > 10):
+            while (run_done == False) and (rrr < 10):
                 sleep(10)
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
