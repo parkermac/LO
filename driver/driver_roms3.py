@@ -283,6 +283,29 @@ while dt <= dt1:
             messages(stdout, stderr, 'Run ROMS', True)
             print(' - time to run ROMS = %d sec' % (time()-tt0))
             sys.stdout.flush()
+            
+            # now we need code to wait until the run has completed
+            pid = stdout.decode().split(' ')[-1]
+            print(pid)
+            sys.stdout.flush()
+            run_done = False
+            rrr = 0
+            while (run_done == False) and (rrr < 10):
+                sleep(10)
+                if 'mox' in Ldir['lo_env']:
+                    cmd_list = ['squeue', '-p', local_user]
+                elif 'mox' in Ldir['lo_env']:
+                    cmd_list = ['squeue', '-A', local_user]
+                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                if str(pid) in stdout.decode():
+                    print('still waiting ' + str(rrr))
+                    sys.stdout.flush()
+                else:
+                    print('run done ' + str(rrr))
+                    run_done = True
+                    sys.stdout.flush()
+                rrr += 1
     
             # A bit of checking to make sure that the log file exists...
             lcount = 0
