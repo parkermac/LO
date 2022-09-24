@@ -289,6 +289,7 @@ while dt <= dt1:
             print(pid)
             print(type(pid))
             print(len(pid))
+            print(list(pid))
             sys.stdout.flush()
             if 'mox' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-p', 'macc']
