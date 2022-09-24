@@ -1,7 +1,7 @@
 LANG=en-US.UTF-8
 LOdnew="/gscratch/macc/parker/LO/driver"
 20 03 * * * source ~/.bashrc; python3 $LOdnew/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOdnew/ak_cron.log
-10 10 * * * source ~/.bashrc; python3 $LOdnew/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOdnew/ak_cron_2.log
+10 08 * * * source ~/.bashrc; python3 $LOdnew/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOdnew/ak_cron_2.log
 00 14 * * * source ~/.bashrc; python3 $LOdnew/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOdnew/ak_cron_3.log
 30 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' pmacc@uw.edu < $LOdnew/ak_cron.log
 31 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' darrd@uw.edu < $LOdnew/ak_cron.log
