@@ -302,7 +302,9 @@ while dt <= dt1:
                 sdc = stdout.decode()
                 print(sdc)
                 sys.stdout.flush()
-                if 'JOBID' not in sdc:
+                if 'JOBID' in sdc:
+                    print('found JOBID')
+                if str(pid) not in sdc:
                     print('still waiting for run to start ' + str(rrr))
                     sys.stdout.flush()
                 elif str(pid) in sdc:
