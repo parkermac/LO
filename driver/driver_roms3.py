@@ -304,6 +304,8 @@ while dt <= dt1:
                 sys.stdout.flush()
                 if 'JOBID' in sdc:
                     print('found JOBID')
+                if 'macc' in sdc:
+                    print('found macc')
                 if str(pid) not in sdc:
                     print('still waiting for run to start ' + str(rrr))
                     sys.stdout.flush()
