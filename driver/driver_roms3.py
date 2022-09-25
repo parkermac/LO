@@ -329,11 +329,13 @@ while dt <= dt1:
                     pass
                     # print('still waiting ' + str(rrr))
                     # sys.stdout.flush()
-                elif pid not in stdout.decode():
+                elif (pid not in stdout.decode()) and (len(stderr) == 0):
                     print('run done ' + str(rrr))
                     run_done = True
                     print(' - time to run ROMS = %d sec' % (time()-tt0))
                     sys.stdout.flush()
+                else:
+                    pass
                 rrr += 1
     
             # A bit of checking to make sure that the log file exists...
