@@ -340,6 +340,7 @@ while dt <= dt1:
                     print('run started ' + str(rrr))
                     run_started = True
                     sys.stdout.flush()
+                    break
                 rrr += 1
                 if rrr == 10:
                     print('Took too long for job to start: quitting')
@@ -362,6 +363,7 @@ while dt <= dt1:
                     run_done = True
                     print(' - time to run ROMS = %d sec' % (time()-tt0))
                     sys.stdout.flush()
+                    break
                 else:
                     pass
                 rrr += 1
