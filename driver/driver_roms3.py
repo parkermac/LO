@@ -328,46 +328,41 @@ while dt <= dt1:
                 cmd_list = ['squeue', '-A', 'macc']
 
             # first figure out if it has started
-            rrr = 0
-            run_started = False
-            while (run_started == False) and (rrr < 10):
+            for rrr in range(10):
+                if rrr == 9:
+                    print('Took too long for job to start: quitting')
+                    sys.exit()
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
                 if jobname not in stdout.decode():
-                    print('still waiting for run to start ' + str(rrr))
-                    sys.stdout.flush()
+                    if args.verbose:
+                        print('still waiting for run to start ' + str(rrr))
+                        sys.stdout.flush()
                 elif jobname in stdout.decode():
-                    print('run started ' + str(rrr))
-                    run_started = True
-                    sys.stdout.flush()
+                    if args.verbose:
+                        print('run started ' + str(rrr))
+                        sys.stdout.flush()
                     break
-                rrr += 1
-                if rrr == 10:
-                    print('Took too long for job to start: quitting')
-                    sys.exit()
                 sleep(60)
 
             # and then if it has finished
-            rrr = 0
-            run_done = False
-            while (run_done == False) and (rrr < 60):
+            for rrr in range(60):
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
-                messages(stdout, stderr, 'Finished?', True)
+                messages(stdout, stderr, 'Finished?', args.verbose)
                 if jobname in stdout.decode():
-                    pass
-                    print('still waiting ' + str(rrr))
-                    sys.stdout.flush()
+                    if args.verbose:
+                        print('still waiting ' + str(rrr))
+                        sys.stdout.flush()
+                    else:
+                        pass
                 elif (jobname not in stdout.decode()) and (len(stderr) == 0):
-                    print('run done ' + str(rrr))
-                    run_done = True
                     print(' - time to run ROMS = %d sec' % (time()-tt0))
                     sys.stdout.flush()
                     break
                 else:
                     pass
-                rrr += 1
-                sleep(30)
+                sleep(120)
     
             # A bit of checking to make sure that the log file exists...
             lcount = 0
@@ -497,7 +492,7 @@ while dt <= dt1:
             shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(roms_bu_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(force_dir_prev), ignore_errors=True)
-            print(' - move history files & clean up = %d sec' % (time()-tt0))
+            print(' - copy & clean up = %d sec' % (time()-tt0))
             sys.stdout.flush()
         else:
             print(' ** skipped moving history files')
