@@ -22,6 +22,7 @@ parser.add_argument('-rod', '--roms_out_dir', type=str, help="path to ROMS outpu
 parser.add_argument('-np', '--np_num', type=int, help="number of cores to use")
 parser.add_argument('-N', '--cores_per_node', type=int, help="cores per node")
 parser.add_argument('-x', '--ex_name', type=str, help="executable name")
+parser.add_argument('-j', '--jobname', type=str, help="jobname")
 
 args = parser.parse_args()
 in_dict = args.__dict__

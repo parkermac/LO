@@ -23,7 +23,10 @@ For testing/debugging these flags can be very useful:
 
 Example call on mox:
 
-testing:
+testing on mac:
+python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -r backfill -s continuation -0 2021.01.01 -np 196 -N 28 --get_forcing False --run_roms False --move_his False
+
+testing on hyak:
 python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -r backfill -s continuation -0 2021.01.01 -np 196 -N 28 --short_roms True < /dev/null > uu0mb_test.log &
 
 production run:
@@ -39,6 +42,8 @@ from datetime import datetime, timedelta
 from pathlib import Path
 import subprocess
 from time import time, sleep
+import random
+import string
 
 # add the path by hand so that it will run on klone or mox (outside of loenv)
 pth = Path(__file__).absolute().parent.parent / 'lo_tools' / 'lo_tools'
@@ -250,17 +255,37 @@ while dt <= dt1:
             # Create batch script
             if 'klone' in Ldir['lo_env']:
                 batch_name = 'klone1_make_batch.py'
+                cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
+                    '-xd', str(roms_ex_dir),
+                    '-rxn', roms_ex_name,
+                    '-rod', str(roms_out_dir),
+                    '-np', str(args.np_num),
+                    '-N', str(args.cores_per_node),
+                    '-x', Ldir['ex_name']]
             elif 'mox' in Ldir['lo_env']:
                 batch_name = 'mox1_make_batch.py'
+                # generate a jobname
+                jobname = ''.join(random.choices(string.ascii_lowercase, k=5))
+                cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
+                    '-xd', str(roms_ex_dir),
+                    '-rxn', roms_ex_name,
+                    '-rod', str(roms_out_dir),
+                    '-np', str(args.np_num),
+                    '-N', str(args.cores_per_node),
+                    '-x', Ldir['ex_name'],
+                    '-j', jobname]
             else: # for testing
-                batch_name = 'klone1_make_batch.py'
-            cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
-                '-xd', str(roms_ex_dir),
-                '-rxn', roms_ex_name,
-                '-rod', str(roms_out_dir),
-                '-np', str(args.np_num),
-                '-N', str(args.cores_per_node),
-                '-x', Ldir['ex_name']]
+                batch_name = 'mox1_make_batch.py'
+                # generate a jobname
+                jobname = ''.join(random.choices(string.ascii_lowercase, k=5))
+                cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
+                    '-xd', str(roms_ex_dir),
+                    '-rxn', roms_ex_name,
+                    '-rod', str(roms_out_dir),
+                    '-np', str(args.np_num),
+                    '-N', str(args.cores_per_node),
+                    '-x', Ldir['ex_name'],
+                    '-j', jobname]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Create batch script', args.verbose)
@@ -279,57 +304,59 @@ while dt <= dt1:
                     str(roms_out_dir / 'mox1_batch.sh')]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
 
-            got_pid = False
-            rrr = 0
-            while (got_pid == False) and (rrr < 10):
-                stdout, stderr = proc.communicate()
-                messages(stdout, stderr, 'Run ROMS', args.verbose)
-                sys.stdout.flush()
-                if len(stderr) > 0:
-                    sleep(60)
-                    rrr += 1 # try again
-                else:
-                    pid = stdout.decode().split(' ')[-1].strip('\n')
-                    print('pid = ' + pid)
-                    sys.stdout.flush()
-                    got_pid = True
+            # Skip this: it proved to be unreliable on mox, so instead we are generating a
+            # random jobname and then watching for it in squeue.
+            # got_pid = False
+            # rrr = 0
+            # while (got_pid == False) and (rrr < 10):
+            #     stdout, stderr = proc.communicate()
+            #     messages(stdout, stderr, 'Run ROMS', args.verbose)
+            #     sys.stdout.flush()
+            #     if len(stderr) > 0:
+            #         sleep(60)
+            #         rrr += 1 # try again
+            #     else:
+            #         pid = stdout.decode().split(' ')[-1].strip('\n')
+            #         print('pid = ' + pid)
+            #         sys.stdout.flush()
+            #         got_pid = True
             
             # now we need code to wait until the run has completed
             if 'mox' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-p', 'macc']
             elif 'klone' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-A', 'macc']
+
             # first figure out if it has started
             rrr = 0
             run_started = False
             while (run_started == False) and (rrr < 10):
-                sleep(60)
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
-                # print(stdout.decode())
-                # sys.stdout.flush()
-                if pid not in stdout.decode():
+                if jobname not in stdout.decode():
                     print('still waiting for run to start ' + str(rrr))
                     sys.stdout.flush()
-                elif pid in stdout.decode():
+                elif jobname in stdout.decode():
                     print('run started ' + str(rrr))
                     run_started = True
                     sys.stdout.flush()
                 rrr += 1
+                if rrr == 10:
+                    print('Took too long for job to start: quitting')
+                    sys.exit()
+                sleep(60)
+
             # and then if it has finished
             rrr = 0
             run_done = False
             while (run_done == False) and (rrr < 60):
-                sleep(120)
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
-                # print(stdout.decode())
-                # sys.stdout.flush()
-                if pid in stdout.decode():
+                if jobname in stdout.decode():
                     pass
-                    # print('still waiting ' + str(rrr))
-                    # sys.stdout.flush()
-                elif (pid not in stdout.decode()) and (len(stderr) == 0):
+                    print('still waiting ' + str(rrr))
+                    sys.stdout.flush()
+                elif (jobname not in stdout.decode()) and (len(stderr) == 0):
                     print('run done ' + str(rrr))
                     run_done = True
                     print(' - time to run ROMS = %d sec' % (time()-tt0))
@@ -337,6 +364,7 @@ while dt <= dt1:
                 else:
                     pass
                 rrr += 1
+                sleep(120)
     
             # A bit of checking to make sure that the log file exists...
             lcount = 0

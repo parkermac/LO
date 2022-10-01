@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Job Name
-#SBATCH --job-name=LiveOcean
+#SBATCH --job-name=$jobname$
 
 ## Resources
 ## Nodes
