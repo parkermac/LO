@@ -352,6 +352,7 @@ while dt <= dt1:
             while (run_done == False) and (rrr < 60):
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
+                messages(stdout, stderr, 'Finished?', True)
                 if jobname in stdout.decode():
                     pass
                     print('still waiting ' + str(rrr))
