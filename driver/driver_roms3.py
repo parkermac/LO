@@ -365,7 +365,7 @@ while dt <= dt1:
                 else:
                     pass
                 rrr += 1
-                sleep(120)
+                sleep(30)
     
             # A bit of checking to make sure that the log file exists...
             lcount = 0
