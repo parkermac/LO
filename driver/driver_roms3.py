@@ -204,28 +204,48 @@ while dt <= dt1:
             force_dict[which_force] = force_choice
     
     if args.get_forcing:
-        tt0 = time()
-        # Name the place where the forcing files will be copied from
-        remote_dir = remote_user + '@' + remote_machine + ':' + remote_dir0
-        Lfun.make_dir(force_dir, clean=True)
-        # Copy the forcing files, one folder at a time.
-        for force in force_dict.keys():
-            if force == 'open':
-                pass
+        for fff in range(10):
+            # We put this in a loop to allow it to try several times. This is prompted
+            # by intermittent ssh_exchange_identification errors, particularly on mox.
+            
+            got_forcing = True
+            
+            tt0 = time()
+            # Name the place where the forcing files will be copied from
+            remote_dir = remote_user + '@' + remote_machine + ':' + remote_dir0
+            Lfun.make_dir(force_dir, clean=True)
+            # Copy the forcing files, one folder at a time.
+            for force in force_dict.keys():
+                if force == 'open':
+                    pass
+                else:
+                    force_choice = force_dict[force]
+                    if args.run_type == 'backfill':
+                        F_string = f_string
+                    elif args.run_type == 'forecast':
+                        F_string = f_string0
+                    cmd_list = ['scp','-r',
+                        remote_dir + '/LO_output/forcing/' + Ldir['gtag_alt'] + '/' + F_string + '/' + force_choice,
+                        str(force_dir)]
+                    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                    stdout, stderr = proc.communicate()
+                    
+                    if len(stderr) > 0:
+                        got_forcing = False
+                        
+                    messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
+            print(' - time to get forcing = %d sec' % (time()-tt0))
+            sys.stdout.flush()
+            
+            if got_forcing == True:
+                break
             else:
-                force_choice = force_dict[force]
-                if args.run_type == 'backfill':
-                    F_string = f_string
-                elif args.run_type == 'forecast':
-                    F_string = f_string0
-                cmd_list = ['scp','-r',
-                    remote_dir + '/LO_output/forcing/' + Ldir['gtag_alt'] + '/' + F_string + '/' + force_choice,
-                    str(force_dir)]
-                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = proc.communicate()
-                messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
-        print(' - time to get forcing = %d sec' % (time()-tt0))
-        sys.stdout.flush()
+                sleep(60)
+                
+        if got_forcing == False:
+            print('Error getting forcing, fff = %d' % (fff))
+            sys.exit()
+            
     else:
         print(' ** skipped getting forcing')
         
