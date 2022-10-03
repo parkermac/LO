@@ -4,7 +4,16 @@ Driver to make tidally averaged files.
 Test on mac:
 run extract_lowpass -gtx cas6_v0_live -ro 0 -0 2019.07.04 -1 2019.07.05 -test True -Nproc 4
 run extract_lowpass -gtx cas6_v0_live -ro 0 -0 2019.07.04 -1 2019.07.04 -test False -Nproc 4
-RESULT: -Nproc 10 bogs down my 4-core mac. -Nproc 4 works well. 3-4 minutes per day.
+
+Performance:
+
+mac
+-Nproc 4 = 3-4 min per day: BEST CHOICE
+-Nproc 10 bogs down my 4-core mac.
+
+perigee
+-Nproc 20 = 2.5 min per day
+-Nproc 10 = 2.0 min per day: BEST CHOICE
 
 """
 
