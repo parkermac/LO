@@ -2,8 +2,9 @@
 Driver to make tidally averaged files.
 
 Test on mac:
+run extract_lowpass -gtx cas6_v0_live -ro 0 -0 2019.07.04 -1 2019.07.05 -test True -Nproc 4
 run extract_lowpass -gtx cas6_v0_live -ro 0 -0 2019.07.04 -1 2019.07.04 -test False -Nproc 4
-Result: -Nproc 10 bogs down my 4-core mac. -Nproc4 works well,
+RESULT: -Nproc 10 bogs down my 4-core mac. -Nproc 4 works well. 3-4 minutes per day.
 
 """
 
@@ -109,6 +110,11 @@ while dt00 <= dt1:
     out_fn.unlink(missing_ok=True)
     lp_full.to_netcdf(out_fn)
     lp_full.close()
+    
+    # tidying up
+    Lfun.make_dir(temp_out_dir, clean=True)
+    temp_out_dir.rmdir()
+    
     print(' - Time to make tidal average = %0.1f minutes' % ((time()-tt0)/60))
     
     dt00 = dt00 + timedelta(days=1)
