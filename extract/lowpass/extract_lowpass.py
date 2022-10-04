@@ -42,6 +42,8 @@ S_fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + ds0) / 'ocean_his_0002.nc'
 S = zrfun.get_basic_info(S_fn, only_S=True)
 S_ds = xr.open_dataset(S_fn)
 h = S_ds.h
+lon_psi = S_ds.lon_psi
+lat_psi = S_ds.lat_psi
 S_ds.close()
 
 # loop over all days
@@ -115,6 +117,8 @@ while dt00 <= dt1:
     z_rho, z_w = zrfun.get_z(hh, zeta, S)
     lp_full['z_rho'][0,:,:,:] = z_rho
     lp_full['z_w'][0,:,:,:] = z_w
+    lp_full.coords['lon_psi'] = (('eta_psi','xi_psi'), lon_psi.values)
+    lp_full.coords['lat_psi'] = (('eta_psi','xi_psi'), lat_psi.values)
     out_fn = out_dir / 'lowpassed.nc'
     out_fn.unlink(missing_ok=True)
     lp_full.to_netcdf(out_fn)

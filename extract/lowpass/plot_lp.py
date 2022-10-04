@@ -32,7 +32,7 @@ cs = ax.pcolormesh(plon,plat,lp_ds.salt[0,-1,:,:].values, cmap=cmap, vmin=vmin, 
 fig.colorbar(cs, ax=ax)
 pfun.dar(ax)
 pfun.add_coast(ax)
-ax.axis(pfun.get_aa(his_ds))
+ax.axis(pfun.get_aa(lp_ds))
 ax.set_title('lowpassed')
 
 ax = fig.add_subplot(122)
