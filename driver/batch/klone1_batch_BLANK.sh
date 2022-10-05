@@ -16,7 +16,7 @@
 #SBATCH --mem=128G
 
 ## bug fix 2022.09.14
-. /opt/ohpc/admin/lmod/lmod/init/profile
+##. /opt/ohpc/admin/lmod/lmod/init/profile
 
 module purge
 module load intel/oneAPI
