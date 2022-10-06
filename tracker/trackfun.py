@@ -185,6 +185,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     
                 if turb == True:
                     AKs0_temp = ds0['AKs'][0,:,:,:].values
+                    # modify top and bottom AKs to be non-negligible
                     AKs0_temp[0,:,:] = AKs0_temp[1,:,:]
                     AKs0_temp[-1,:,:] = AKs0_temp[-2,:,:]
                     AKs0 = AKs0_temp.copy()
@@ -192,6 +193,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     AKsf0 = AKs0[Maskw3]
                     #
                     AKs1_temp = ds1['AKs'][0,:,:,:].values
+                    # modify top and bottom AKs to be non-negligible
                     AKs1_temp[0,:,:] = AKs1_temp[1,:,:]
                     AKs1_temp[-1,:,:] = AKs1_temp[-2,:,:]
                     AKs1 = AKs1_temp.copy()
@@ -253,6 +255,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     AKsf0 = AKsf1.copy()
                     #
                     AKs1_temp = ds1['AKs'][0,:,:,:].values
+                    # modify top and bottom AKs to be non-negligible
                     AKs1_temp[0,:,:] = AKs1_temp[1,:,:]
                     AKs1_temp[-1,:,:] = AKs1_temp[-2,:,:]
                     AKs1 = AKs1_temp.copy()

@@ -67,6 +67,9 @@ LIMITATIONS: Currently the code is hardwired to only save time series of particl
 
 #### New Development Notes (most recent on top)
 
+2022.10.06:
+- added a new module called `customizations.py` that allows more complex behavior, such as switching to a different target depth after a certain number of days.
+
 2021.10.14:
 - added "tracer_list_full" near the top of `trackfun.py` to allow more tracers to be written to the output (and potentially used along the way).
 - entirely done in xarray

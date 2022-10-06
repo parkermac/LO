@@ -209,15 +209,23 @@ Lfun.dict_to_csv(TR, outdir0 / 'exp_info.csv')
 # and write the same info to outdir as part of the archived run output
 Lfun.dict_to_csv(TR, outdir / 'exp_info.csv')
 
-# get the trackfun module, looking first in LO_user
+# get the trackfun and customizations modules, looking first in LO_user
 pth = Ldir['LO'] / 'tracker'
 upth = Ldir['LOu'] / 'tracker'
+#
 if (upth / 'trackfun.py').is_file():
     print('Importing trackfun from LO_user')
     tfun = Lfun.module_from_file('trackfun', upth / 'trackfun.py')
 else:
     print('Importing trackfun from LO')
     tfun = Lfun.module_from_file('trackfun', pth / 'trackfun.py')
+#
+if (upth / 'customizations.py').is_file():
+    print('Importing customizations from LO_user')
+    cust = Lfun.module_from_file('customizations', upth / 'customizations.py')
+else:
+    print('Importing customizations from LO')
+    cust = Lfun.module_from_file('customizations', pth / 'customizations.py')
 
 # get the initial particle location vectors
 plon00, plat00, pcs00 = exp.get_ic(TR)
@@ -251,6 +259,11 @@ for idt0 in idt_list:
             g_outfile = outdir / 'grid.nc'
             tfnc.write_grid(g_infile, g_outfile)
             write_grid = False
+            
+        # apply customizations, if any
+        cust.update_TR(nd, TR)
+        # Note that because TR is a dictionary, changing it in the function
+        # changes it everywhere. No need to return it.
 
         # DO THE TRACKING
         if nd == 0: # first day
