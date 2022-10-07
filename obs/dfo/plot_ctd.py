@@ -17,7 +17,7 @@ aa = [-125.2,-122.5, 48.5,50.0]
 x0, x1, y0, y1 = aa
 
 df = pd.read_pickle(Ldir['LOo'] / 'obs' / 'dfo' / 'ctd' / (str(year) + '.p'))
-# ['sta', 'lon', 'lat', 'time', 'z', 'salt (SA g kg-1)', 'temp (CT degC)', 'DO (uM)', 'Fluor']
+# ['sta', 'lon', 'lat', 'time', 'z', 'SA', 'CT', 'DO (uM)', 'Fluor']
 
 # keep only data in a box
 df = df[(df['lon']>x0) & (df['lon']<x1) & (df['lat']>y0) & (df['lat']<y1)]
@@ -30,7 +30,7 @@ pfun.start_plot()
 
 fig = plt.figure(figsize=(22,12))
 
-vn_list = ['salt (SA g kg-1)', 'temp (CT degC)', 'DO (uM)', 'Fluor']
+vn_list = ['SA', 'CT', 'DO (uM)', 'Fluor']
 ax_list = [1,2,5,6]
 ax_dict = dict(zip(vn_list,ax_list))
 
@@ -44,7 +44,7 @@ for vn in vn_list:
         dfm = df[df['time'].dt.month==mo]
         if len(dfm) > 0:
             dfm.plot(x=vn,y='z', ax=ax, style='.', color=pfun.month_color_dict[mo], legend=False)
-            if vn == 'salt (SA g kg-1)':
+            if vn == 'SA':
                 dfm.plot(x='lon',y='lat', ax=axm, style='o',
                     color=pfun.month_color_dict[mo], legend=False,
                     markersize=26-2*mo)
