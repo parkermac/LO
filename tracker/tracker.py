@@ -230,10 +230,16 @@ else:
 # get the initial particle location vectors
 plon00, plat00, pcs00 = exp.get_ic(TR)
 
+# save this in case cust.update_TR() changes it.
+TR_orig = TR.copy()
+
 # step through the releases, one for each start day
 write_grid = True
 for idt0 in idt_list:
     tt0 = time() # monitor integration time
+    
+    # Start each release with original TR.
+    TR = TR_orig.copy()
     
     # name the release file by start day
     idt0_str = datetime.strftime(idt0,'%Y.%m.%d')
