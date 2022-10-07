@@ -66,7 +66,7 @@ for year in year_list:
         df = df.dropna(axis=1, how='all') # drop empty rows
         if len(df) > 0:
             df = df.rename({'Station':'cid', 'Lon':'lon', 'Lat':'lat', 'dtUTC':'time',
-                'SA':'salt (SA g kg-1)', 'CT':'temp (CT degC)', 'Z':'z'}, axis=1)
+                'Z':'z'}, axis=1)
             for cid in df.cid.unique():
                 
                 # Check that there are not two different casts associated with the same Station
@@ -117,7 +117,7 @@ for year in year_list:
                 if mask1.sum() > 0:
                     # calculate in situ density
                     p = gsw.p_from_z(df.z.values, df.lat.values)
-                    rho = gsw.rho(df['salt (SA g kg-1)'].values, df['temp (CT degC)'].values, p)
+                    rho = gsw.rho(df['SA'].values, df['CT'].values, p)
                     df['rho'] = rho
                     df.loc[mask1,'DO (uM)'] *= df.loc[mask1,'rho']/1000
                 if mask2.sum() > 0:
@@ -138,7 +138,7 @@ for year in year_list:
             
             # clean up columns
             df = df[['cid', 'lon', 'lat', 'time', 'z',
-                'salt (SA g kg-1)', 'temp (CT degC)',
+                'SA', 'CT',
                 'DO (uM)', 'NO3 (uM)', 'Si (uM)', 'Chl (mg m-3)']]
             df['name'] = None
 
