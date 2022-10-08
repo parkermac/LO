@@ -141,7 +141,8 @@ def get_sta_dict(job_name):
     elif job_name == 'ROMS_update':
         sta_dict = {
         'ORCA_Hoodsport': (-123.1126, 47.4218),
-        'CE02':(-124.304, 44.6393) # Oregon Shelf (80 m)
+        'CE02':(-124.304, 44.6393), # Oregon Shelf (80 m)
+        'JdF_west':(-124.675, 48.481)
         }
         
     elif job_name == 'fatland1':
