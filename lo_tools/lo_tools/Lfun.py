@@ -149,13 +149,25 @@ def fn_list_utility(dt0, dt1, Ldir, hourmax=24):
     dir0 = Ldir['roms_out'] / Ldir['gtagex']
     fn_list = []
     date_list = date_list_utility(dt0, dt1)
+    # for dl in date_list:
+    #     f_string = 'f' + dl
+    #     if dl == date_list[0]:
+    #         # hourmin = 0
+    #     else:
+    #         hourmin = 1
+    #         # skip hour zero on subsequent days because it is a repeat
+    #     for nhis in range(hourmin+1, hourmax+2):
+    #         nhiss = ('0000' + str(nhis))[-4:]
+    #         fn = dir0 / f_string / ('ocean_his_' + nhiss + '.nc')
+    #         fn_list.append(fn)
+    # return fn_list
+    
+    # new scheme 2022.10.09 to work with perfect restart
+    dt00 = (dt0 - timedelta(days=1))
+    fn_list.append(dir0 / ('f'+dt00.strftime(ds_fmt)) / 'ocean_his_0025.nc')
     for dl in date_list:
         f_string = 'f' + dl
-        if dl == date_list[0]:
-            hourmin = 0
-        else:
-            hourmin = 1
-            # skip hour zero on subsequent days because it is a repeat
+        hourmin = 1
         for nhis in range(hourmin+1, hourmax+2):
             nhiss = ('0000' + str(nhis))[-4:]
             fn = dir0 / f_string / ('ocean_his_' + nhiss + '.nc')
@@ -294,7 +306,7 @@ def module_from_file(module_name, file_path):
 if __name__ == '__main__':
     # TESTING: run Lfun will execute these
     
-    if True:
+    if False:
         print(' TESTING Lstart() '.center(60,'-'))
         Ldir = Lstart(gridname='cas6', tag='v3', ex_name='lo8b')
         print(' Ldir seen by make_forcing_main '.center(60,'+'))
@@ -324,10 +336,10 @@ if __name__ == '__main__':
             print('EXCEPTION')
             print(az_dict['exception'])
             
-    if False:
+    if True:
         print(' TESTING get_fn_list() '.center(60,'-'))
-        Ldir = Lstart(gridname='cas6', tag='v3', ex_name='lo8b')
-        Ldir['roms_out'] = Ldir['roms_out1']
+        Ldir = Lstart(gridname='cas6', tag='v0', ex_name='live')
+        # Ldir['roms_out'] = Ldir['roms_out']
         list_type = 'allhours'
         ds0 = '2019.07.04'
         ds1 = '2019.07.05'

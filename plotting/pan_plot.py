@@ -33,18 +33,18 @@ from lo_tools import Lfun
 parser = argparse.ArgumentParser()
 
 # which run to use
-parser.add_argument('-gtx', '--gtagex', default='cas6_v0_live', type=str)
+parser.add_argument('-gtx', '--gtagex', default='cas6_v00_uu0mb', type=str)
 parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
 # 2 = Ldir['roms_out2'], etc.
 
 # select time period and frequency
-parser.add_argument('-0', '--ds0', default='2019.07.04', type=str)
+parser.add_argument('-0', '--ds0', default='2021.07.04', type=str)
 parser.add_argument('-1', '--ds1', type=str)
 parser.add_argument('-lt', '--list_type', default='snapshot', type=str)
 # snapshot, hourly, or daily
 
 # arguments that allow you to bypass the interactive choices
-parser.add_argument('-hn', '--his_num', default=1, type=int)
+parser.add_argument('-hn', '--his_num', default=2, type=int)
 parser.add_argument('-pt', '--plot_type', type=str)
 
 # arguments that influence other behavior

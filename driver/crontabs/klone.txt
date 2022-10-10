@@ -8,4 +8,5 @@ LOdnew="/gscratch/macc/parker/LO/driver"
 32 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' ebroatch@uw.edu < $LOdnew/ak_cron.log
 33 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' auroral@uw.edu < $LOdnew/ak_cron.log
 34 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' kmhewett@uw.edu < $LOdnew/ak_cron.log
+36 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' jxiong7@uw.edu < $LOdnew/ak_cron.log
 00 12 * * * crontab <<< $(crontab -l)
