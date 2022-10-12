@@ -30,8 +30,9 @@ Ldir = Lfun.Lstart()
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('-g', '--gridname', nargs='?', default='',
-        type=str)
+parser.add_argument('-g', '--gridname', default='', type=str)
+parser.add_argument('-small', default=False, type=Lfun.boolean_string)
+# Set the "small" argument to True to work on a laptop
 args = parser.parse_args()
 if len(args.gridname) > 0:
     Gr = gfun.gstart(gridname=args.gridname)
@@ -71,7 +72,10 @@ NR, NC = h.shape
 
 # set up the axes
 plt.close('all')
-fig = plt.figure(figsize=(22,12)) # (13,8) is good for my laptop
+if args.small == True:
+    fig = plt.figure(figsize=(13,8))
+else:
+    fig = plt.figure(figsize=(22,12))
 ax1 = plt.subplot2grid((1,5), (0,0), colspan=2) # map
 ax2 = plt.subplot2grid((1,5), (0,2), colspan=1) # buttons
 ax3 = plt.subplot2grid((1,5), (0,3), colspan=2) # second map
@@ -83,11 +87,6 @@ tvmax = 200
 cs = ax1.imshow(h, interpolation='nearest', vmin=tvmin, vmax=tvmax, cmap = cmap1)
 fig.colorbar(cs, ax=ax1, extend='both')
 aa = ax1.axis()
-# # add the coastline
-# clon, clat = pfun.get_coast()
-# cx0, cx1, cxf = zfun.get_interpolant(clon, lon[0,:])
-# cy0, cy1, cyf = zfun.get_interpolant(clat, lat[:,0])
-# ax1.plot(cx0 + cxf, NR - (cy0 + cyf) - 1, '-k')
 
 # add the coastline
 clon, clat = pfun.get_coast()
@@ -97,12 +96,13 @@ ax1.plot(cx0 + cxf, NR - (cy0 + cyf) - 1, '-k')
 
 # create control buttons
 # list is organized from bottom to top
-blist = ['start', 'pause','polyInfo', 'lineInfo', 'startPoly',
-         'polySave', 'done']
+blist = ['start', 'pause','polyInfo', 'lineInfo',
+            'tefSave', 'lineSave',
+            'startLine', 'done']
 # nicer names
-Blist = ['Start', 'Pause','Polygon Info',
-         'Line Info', 'Start Polygon\nLine',
-         'Save Polygon\nLine', 'Done']
+Blist = ['Start', 'Pause','Polygon Info', 'Line Info',
+            'Save TEF\nSection', 'Save Line',
+            '* Start Line *', 'Done']
 NB = len(blist) # number of buttons
 ybc = np.arange(NB+1) - .5
 offset = 1e5 # kludgey way to distinguish buttons from topography
@@ -128,7 +128,7 @@ def addButtonLabel(ax, plon, plat, nb, lab, tcol='k'):
                       np.diff(plon)[-1]-2*pad, np.diff(plat)[-1]-2*pad,
                       fill=True, facecolor=inactive_color,
                       edgecolor='w'))
-    ax.text(plon.mean(),nb, lab, fontsize=15,
+    ax.text(plon.mean(),nb, lab, fontsize=12,
              horizontalalignment='center', verticalalignment='center',
              color=tcol)
 
@@ -187,6 +187,7 @@ flag_e = 'p' # 'p' for polygon routines
 pline = []
 plon_poly = []
 plat_poly = []
+tef_list = []
 
 while flag_get_ginput:
 
@@ -218,7 +219,7 @@ while flag_get_ginput:
         elif (bdict[nb]=='pause') and not flag_start:
             flag_continue = False
             ax1.set_title('PAUSED')
-        elif (bdict[nb]=='startPoly') and not flag_start:
+        elif (bdict[nb]=='startLine') and not flag_start:
             flag_continue = True
             flag_e = 'p'
             ax1.set_title('Click to Add Poly Points')
@@ -238,27 +239,10 @@ while flag_get_ginput:
             print('Volume inside polygon = %0.1f km3' % (vp/1e9) )
             print('Area inside polygon = %0.1f km2' % (ap/1e6) )
             print('Mean Depth inside polygon = %0.1f m' % (hp) )
-            if False:
-                # custom request 1/11/2019 area below 120 ft = 36.6 m
-                hm = h.copy()
-                dam = da.copy()
-                hm[h < 36.576] = np.nan
-                dam[h < 36.576] = np.nan
-                dap = dam[ji_rho_in[:,0], ji_rho_in[:,1]]
-                dvp = hm[ji_rho_in[:,0], ji_rho_in[:,1]] * da[ji_rho_in[:,0], ji_rho_in[:,1]]
-                ap = np.nansum(dap)
-                vp = np.nansum(dvp)
-                hp = vp/ap
-                print('')
-                print('CUSTOM: Values with h >= 36.576 m')
-                print('- all values are for unmasked area -')
-                print('Volume inside polygon = %0.1f km3' % (vp/1e9) )
-                print('Area inside polygon = %0.1f km2' % (ap/1e6) )
-                print('Mean Depth inside polygon = %0.1f m' % (hp) )
             inp = input('Push Return to continue\n')
             remove_poly()
             ax1.set_title('PAUSED')
-        elif (bdict[nb]=='polySave') and not flag_start:
+        elif (bdict[nb]=='lineSave') and not flag_start:
             flag_continue = False
             pname = input('Name for saved polygon or line: ')
             poutdir = Ldir['data'] / 'section_lines'
@@ -286,9 +270,36 @@ while flag_get_ginput:
             inp = input('Push Return to continue\n')
             remove_poly()
             ax1.set_title('PAUSED')
+        
+        elif (bdict[nb]=='tefSave') and not flag_start:
+            flag_continue = False
+            ax1.set_title('Name TEF section in terminal',
+                fontweight='bold', color='m')
+
+            pname = input('Name for saved section: ')
+            lon_poly = lonvec[plon_poly]
+            lat_poly = latvec[plat_poly]
+            ax3.plot(lon_poly, lat_poly, '-*k', linewidth=1)
+            ax3.text(np.array(lon_poly).mean(),np.array(lat_poly).mean(),pname)
+            
+            # Print output for use in tef2_fun.py. We will reformat this to
+            # allow for multi-part sections.
+            for jj in range(len(lon_poly)):
+                tef_list_item = ("sect_df.loc[%s,'lon','lat'] = [%8.3f, %8.3f]" %
+                    (pname, lon_poly[jj], lat_poly[jj]) )
+                tef_list.append(tef_list_item)
+                
+            ax1.set_title('PAUSED')
+        
         elif (bdict[nb]=='done') and not flag_start:
             flag_get_ginput = False
             ax1.set_title('DONE', fontweight='bold', color='b')
+            
+            print('\n*** Entries for tef2_fun.get_sect_df() **\n')
+            if len(tef_list) > 0:
+                for item in tef_list:
+                    print(item)
+                    
         else:
             pass
         plt.draw()

@@ -7,23 +7,19 @@ Can be run in ipython with a user-specified grid file
 
 run tef_section_maker.py -g sal0
 
+OBSOLETE: use grid_explore.py instead 2022.10.12
+
 """
 
 import gfun
-from importlib import reload
-reload(gfun)
 Gr =gfun.gstart()
 # running gfun.gstart() sets the path to include pfun and zfun
 import gfun_utility as gfu
-reload(gfu)
 import gfun_plotting as gfp
-reload(gfp)
 import pfun
-import zfun
-reload(zfun)
+from lo_tools import zfun
 
 import numpy as np
-import netCDF4 as nc
 import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 import os
@@ -56,7 +52,7 @@ elif using_old_grid==False:
     in_fn = Gr['gdir'] + fn
 
 # get fields
-ds = nc.Dataset(in_fn)
+ds = xr.open_dataset(in_fn)
 H = ds.variables['h'][:]
 mask_rho = ds.variables['mask_rho'][:]
 plon = ds.variables['lon_psi_ex'][:]
