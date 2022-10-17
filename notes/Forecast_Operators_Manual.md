@@ -22,53 +22,34 @@ _**Here are the typical daily steps:**_
 - At 6:30 AM official operators should get two emails. One, titled "LO forecst klone", is the screen output of driver_roms2.py from the primary forecast run by Parker on klone. The other, titled "LO forecast mox", is from the backup forecast run by Parker on mox. These give information on each of the three forecast days. For example, the lower third of "LO forecast klone" today has info about day three of the forecast:
 
 ```
-======== f2022.08.13 =========
- > started at 2022.08.11 04:50:37
- - roms_out_dir: /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.08.13
- - force_dir:    /gscratch/macc/parker/LO_output/forcing/cas6_v0/f2022.08.13
- - dot_in_dir:   /gscratch/macc/parker/LO/dot_in/cas6_v0_u0kb
- - log_file:     /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.08.13/log.txt
- - roms_ex_dir:  /gscratch/macc/parker/LiveOcean_roms/makefiles/u0kb
-===== Copy forcing atm0 ======
-===== Copy forcing ocn0 ======
-===== Copy forcing riv0 ======
-===== Copy forcing tide0 =====
- - time to get forcing = 83 sec
- - Blow-ups = 0
-======== Make dot in =========
------------ sdtout -----------
- --- making dot_in for 2022.08.13
+Running ROMS forecast 2022.10.14-2022.10.16
 
-==== Create batch script =====
-========== Run ROMS ==========
------------ sdtout -----------
-Submitted batch job 5854842
-
- - time to run ROMS = 171 sec
- - llcount = 0
- - log done and closed
- - Run blew up, blow ups = 0
- - blew up at 2022.08.11 04:54:59
- - log.txt file saved to /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.08.13_blowup
- - ocean_his_0001.nc saved to /gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.08.13_blowup
- - Blow-ups = 1
-======== Make dot in =========
------------ sdtout -----------
- --- making dot_in for 2022.08.13
-
-==== Create batch script =====
-========== Run ROMS ==========
------------ sdtout -----------
-Submitted batch job 5854843
-
- - time to run ROMS = 2539 sec
- - llcount = 0
- - log done and closed
+======== f2022.10.14 =========
+ > started at 2022.10.14 03:20:01
+/gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.10.14
+ - time to get forcing = 55 sec
+ - time to run ROMS = 2186 sec
  - ROMS SUCCESS
- Make output directory on apogee.ocean.washington.edu
- Copy ROMS output to apogee.ocean.washington.edu
- - time to move history files and clean up = 152 sec
- > finished at 2022.08.11 05:39:57
+ - time to move history files and clean up = 141 sec
+ > finished at 2022.10.14 03:59:49
+
+======== f2022.10.15 =========
+ > started at 2022.10.14 03:59:49
+/gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.10.15
+ - time to get forcing = 56 sec
+ - time to run ROMS = 2154 sec
+ - ROMS SUCCESS
+ - time to move history files and clean up = 141 sec
+ > finished at 2022.10.14 04:39:05
+
+======== f2022.10.16 =========
+ > started at 2022.10.14 04:39:05
+/gscratch/macc/parker/LO_roms/cas6_v0_u0kb/f2022.10.16
+ - time to get forcing = 55 sec
+ - time to run ROMS = 2157 sec
+ - ROMS SUCCESS
+ - time to move history files and clean up = 154 sec
+ > finished at 2022.10.14 05:18:36
 ```
 
 This is from a strong spring tide day, and the model often blows up once or even twice during springs. Things I watch for are excessive "time to get forcing" (e.g. over 300 sec) which may indicate that klone is having some problem. If there is a problem, send an email describing it to help@uw.edu with "hyak" in the subject line.
