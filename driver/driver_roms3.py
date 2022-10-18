@@ -57,9 +57,9 @@ import Lfun
 parser = argparse.ArgumentParser()
 # arguments without defaults are required
 parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
-parser.add_argument('-t', '--tag', type=str)        # e.g. v0
-parser.add_argument('-x', '--ex_name', type=str)    # e.g. u0k
-parser.add_argument('-r', '--run_type', type=str)   # forecast or backfill
+parser.add_argument('-t', '--tag', type=str)        # e.g. v00
+parser.add_argument('-x', '--ex_name', type=str)    # e.g. uu0mb
+parser.add_argument('-r', '--run_type', type=str, default='backfill')   # forecast or backfill
 parser.add_argument('-s', '--start_type', type=str, default='perfect') # new, perfect or continuation
 # -0 and -1 only required for -r backfill
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
