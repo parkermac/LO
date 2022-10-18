@@ -9,3 +9,17 @@
 - 2022.06.10 I changed the times in `LO/driver/driver_roms2.py` for taking a nap during the forecast time period. Use git pull on klone to get these changes.
 - 2022.06.15 I added an LO_user hook to `LO/plotting/pan_plot.py` to look for a user version of `roms_plots.py`.
 - 2022.09.14 I made an edit to the klone batch script template to fix a bug introduced by the hyak maintenance yesterday. Just do `git pull` in LO to get this.
+
+---
+
+2022.10.18 While testing Aurora's new traps00/rivers.nc file it occurred to me that a cleaner way to handle the forcing is to collect it by [gridname] instead of [gridname]_[tag]. Then use [tag] exclusively to indicate choices made by a dot_in instance. The reason this is helpful is that you don't have to mess around with renaming the forcing collection just to be consistent with a new tag. Much cleaner!
+- Result: all forcing ends up in, for example: LO_output/forcing/cas6/[frc]
+- Required changes:
+	- forcing code:
+		- edit all the "00" code to reflect the new output location.
+		- Also create lo_tools/forcing_argfun2.py so that the changes don't interfere with the current forecast. Note that the forcing code will no longer accept a tag argument.
+		- Also create driver/driver_forcing3.py to use the new system
+		- To do: implement similar changes for the Analytical and Nesting forcing and dot_in code.
+	- driver_roms3.py: change where it looks for (and where it puts) the forcing files, and remove tag_alt machinery. I also cleaned up the sbatch code, making "3" versions for both klone and mox.
+	- dot_in: change path to forcing, starting with cas6_v00_uu0mb
+	- On apogee, move LO_output/forcing/cas6_v00 to LO_output/forcing/cas6
