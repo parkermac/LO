@@ -27,14 +27,14 @@ For testing/debugging these flags can be very useful:
 Example call on mox:
 
 testing on mac:
-python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -r backfill -s continuation -0 2021.01.01 -np 196 -N 28 --get_forcing False --run_roms False --move_his False
+python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -s continuation -0 2021.01.01 -np 196 -N 28 --get_forcing False --run_roms False --move_his False
 
-testing on hyak:
-python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -r backfill -s continuation -0 2021.01.01 -np 196 -N 28 --short_roms True < /dev/null > uu0mb_test.log &
+testing on mox:
+python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -s continuation -0 2021.01.01 -np 196 -N 28 --short_roms True < /dev/null > uu0mb_test.log &
 
-production run:
-python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -r backfill -s continuation -0 2021.01.01 -1 2021.01.02 -np 196 -N 28 < /dev/null > uu0mb_a.log &
-python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -r backfill -s perfect -0 2021.01.03 -1 2021.12.31 -np 196 -N 28 < /dev/null > uu0mb_b.log &
+production run on mox:
+python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -s continuation -0 2021.01.01 -1 2021.01.02 -np 196 -N 28 < /dev/null > uu0mb_a.log &
+python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -0 2021.01.03 -1 2021.12.31 -np 196 -N 28 < /dev/null > uu0mb_b.log &
 
 """
 
