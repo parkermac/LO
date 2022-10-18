@@ -3,7 +3,7 @@ This is the main program for making the TIDE forcing file.
 
 Test on mac in ipython:
 
-run make_forcing_main.py -g cas6 -t v0 -r backfill -s continuation -d 2019.07.04 -f tide00 -test True
+run make_forcing_main.py -g cas6 -r backfill -d 2019.07.04 -f tide00 -test True
 
 """
 
@@ -11,7 +11,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-from lo_tools import forcing_argfun as ffun
+from lo_tools import forcing_argfun2 as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing
 result_dict = dict()
@@ -22,7 +22,7 @@ result_dict['start_dt'] = datetime.now()
 ad_hoc_adjustment = True
 
 date_string = Ldir['date_string']
-out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + date_string) / Ldir['frc']
+out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + date_string) / Ldir['frc']
 
 import xarray as xr
 import numpy as np

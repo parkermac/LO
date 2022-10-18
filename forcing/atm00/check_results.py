@@ -11,7 +11,7 @@ from lo_tools import Lfun
 Ldir = Lfun.Lstart(gridname='cas6', tag='v0')
 
 d0 = Ldir['LOo'] / 'forcing' / Ldir['gtag']/ 'f2019.07.04' / 'atm0'
-d00 = Ldir['LOo'] / 'forcing' / Ldir['gtag']/ 'f2019.07.04' / 'atm00'
+d00 = Ldir['LOo'] / 'forcing' / Ldir['gridname']/ 'f2019.07.04' / 'atm00'
 
 ovl = afun.outvar_list
 #ovl = [ovl[0]]

@@ -9,7 +9,7 @@ from lo_tools import Lfun
 Ldir = Lfun.Lstart(gridname='cas6', tag='v0')
 
 d0 = Ldir['LOo'] / 'forcing' / Ldir['gtag']/ 'f2019.07.04' / 'riv1'
-d00 = Ldir['LOo'] / 'forcing' / Ldir['gtag']/ 'f2019.07.04' / 'riv00'
+d00 = Ldir['LOo'] / 'forcing' / Ldir['gridname']/ 'f2019.07.04' / 'riv00'
 
 ds0 = xr.open_dataset(d0 / 'rivers.nc')
 ds00 = xr.open_dataset(d00 / 'rivers.nc')

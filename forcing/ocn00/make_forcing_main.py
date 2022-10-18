@@ -3,7 +3,7 @@ This makes the ocn forcing files for the updated ROMS, including the banas-fenne
 
 Testing:
 
-run make_forcing_main.py -g cas6 -t v0 -r backfill -s continuation -d 2019.07.04 -f ocn00 -test True
+run make_forcing_main.py -g cas6 -r backfill -d 2019.07.04 -f ocn00 -test True
 
 This is the first code that uses the new varinfo.yaml file and the associated method
 zrfun.get_varinfo() [around line 328].  The handling of time coordinate names proved to be
@@ -25,7 +25,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-from lo_tools import forcing_argfun as ffun
+from lo_tools import forcing_argfun2 as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing
 result_dict = dict()
@@ -72,7 +72,7 @@ testing_ncks = False
 testing_fmrc = False
 
 # This directory is created, along with Info and Data subdirectories, by ffun.intro()
-out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
+out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
 
 # Datetime of the day we are working on
 this_dt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
@@ -308,7 +308,7 @@ elif planC == True:
     dt_today = datetime.strptime(ds_today, Lfun.ds_fmt)
     dt_yesterday = dt_today - timedelta(days=1)
     ds_yesterday = datetime.strftime(dt_yesterday, format=Lfun.ds_fmt)
-    clm_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + ds_yesterday) / Ldir['frc'] / 'ocean_clm.nc'
+    clm_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + ds_yesterday) / Ldir['frc'] / 'ocean_clm.nc'
     clm_today = out_dir / 'ocean_clm.nc'
     
     # new cleaner method: use open_dataset, update, and save to a new name

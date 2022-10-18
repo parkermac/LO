@@ -4,13 +4,13 @@ This is the main program for making the ATM forcing file.
 Test on mac in ipython:
 
 short test:
-run make_forcing_main.py -g cas6 -t v0 -r backfill -s continuation -d 2019.07.04 -test True -f atm00
+run make_forcing_main.py -g cas6 -r backfill -d 2019.07.04 -test True -f atm00
 
 test a forecast:
-run make_forcing_main.py -g cas6 -t v3 -r forecast -s continuation -d 2019.07.04 -f atm0
+run make_forcing_main.py -g cas6 -r forecast -d 2019.07.04 -f atm0
 
 test a forecast that will go to planB:
-run make_forcing_main.py -g cas6 -t v3 -r forecast -s continuation -d 2019.07.05 -f atm0
+run make_forcing_main.py -g cas6 -r forecast -d 2019.07.05 -f atm0
 
 """
 
@@ -18,7 +18,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-from lo_tools import forcing_argfun as ffun
+from lo_tools import forcing_argfun2 as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing
 result_dict = dict()
@@ -43,7 +43,7 @@ if Ldir['testing']:
     reload(afun)
 
 # This directory is created, along with Info and Data subdirectories, by ffun.intro()
-out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
+out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
 
 # Set where are files located, and other situational choices.
 do_d3 = True
@@ -298,8 +298,8 @@ if planB == True:
     ds_yesterday = datetime.strftime(dt_yesterday, format=Lfun.ds_fmt)
     
     
-    LOogf_f_today = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
-    LOogf_f_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + ds_yesterday) / Ldir['frc']
+    LOogf_f_today = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
+    LOogf_f_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + ds_yesterday) / Ldir['frc']
     
     outvar_list = afun.outvar_list
     nc_out_dict = dict()

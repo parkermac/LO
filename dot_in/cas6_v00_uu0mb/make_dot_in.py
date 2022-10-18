@@ -176,7 +176,7 @@ D['dstart'] = int(Lfun.datetime_to_modtime(fdt) / 86400.)
 
 # Paths to forcing various file locations
 D['grid_dir'] = Ldir['grid']
-force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string'])
+force_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string'])
 D['force_dir'] = force_dir
 D['roms_varinfo_dir'] = Ldir['parent'] / 'LO_roms_source_alt' / 'varinfo'
 

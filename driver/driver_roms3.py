@@ -16,7 +16,10 @@ NEW compared to driver_roms2.py:
 - ** ASSUMES that PERFECT_RESTART is defined for the executable **
 - introduce a new start_type: "perfect" for perfect restart, and it defaults to this
   after the first day
-- introduce flag to sleep during the forecast window (default is not to sleep)
+- introduce flag to sleep during the forecast window (default is NOT to sleep)
+- uses klone3 or mox3 batch code, which relies on a randomly generated "jobname"
+- assumes forcing is in [gridname] folder, not [gtag]
+- drop the gtag_alt capability (all tag changes handled by the dot_in now)
 
 For testing/debugging these flags can be very useful:
 -v True --get_forcing False --short_roms True --move_his False
@@ -55,12 +58,9 @@ parser = argparse.ArgumentParser()
 # arguments without defaults are required
 parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
 parser.add_argument('-t', '--tag', type=str)        # e.g. v0
-parser.add_argument('-ta', '--tag_alt', type=str, default='') # used to make gtag in "remote_dir"
 parser.add_argument('-x', '--ex_name', type=str)    # e.g. u0k
 parser.add_argument('-r', '--run_type', type=str)   # forecast or backfill
 parser.add_argument('-s', '--start_type', type=str, default='perfect') # new, perfect or continuation
-# flag to sleep during the forecast window, False means it will run continuously
-parser.add_argument('-sfw', '--sleep_forecast_window', default=False, type=Lfun.boolean_string)
 # -0 and -1 only required for -r backfill
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
@@ -73,6 +73,8 @@ parser.add_argument('--short_roms', default=False, type=Lfun.boolean_string)
 parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
 parser.add_argument('--run_roms', default=True, type=Lfun.boolean_string)
 parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
+# flag to sleep during the forecast window, False means it will run continuously
+parser.add_argument('-sfw', '--sleep_forecast_window', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 # check for required arguments
@@ -81,14 +83,9 @@ for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'np_num', 'cor
     if argsd[a] == None:
         print('*** Missing required argument for driver_roms_klone.py: ' + a)
         sys.exit()
-        
-# set tag_alt to tag if it is not provided
-if len(args.tag_alt) == 0:
-    argsd['tag_alt'] = argsd['tag']
 
 # get Ldir
 Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
-Ldir['gtag_alt'] = Ldir['gridname'] + '_' + argsd['tag_alt']
 
 # Assign some variables related to the remote machine.  These are user-specific
 # and are specified in lo_tools/get_lo_info.py.
@@ -173,7 +170,7 @@ while dt <= dt1:
     sys.stdout.flush()
     
     # Set various paths.
-    force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string
+    force_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / f_string
     roms_out_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
     log_file = roms_out_dir / 'log.txt'
     
@@ -207,9 +204,7 @@ while dt <= dt1:
         for fff in range(10):
             # We put this in a loop to allow it to try several times. This is prompted
             # by intermittent ssh_exchange_identification errors, particularly on mox.
-            
             got_forcing = True
-            
             tt0 = time()
             # Name the place where the forcing files will be copied from
             remote_dir = remote_user + '@' + remote_machine + ':' + remote_dir0
@@ -225,27 +220,22 @@ while dt <= dt1:
                     elif args.run_type == 'forecast':
                         F_string = f_string0
                     cmd_list = ['scp','-r',
-                        remote_dir + '/LO_output/forcing/' + Ldir['gtag_alt'] + '/' + F_string + '/' + force_choice,
+                        remote_dir + '/LO_output/forcing/' + Ldir['gridname'] + '/' + F_string + '/' + force_choice,
                         str(force_dir)]
                     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                     stdout, stderr = proc.communicate()
-                    
                     if len(stderr) > 0:
                         got_forcing = False
-                        
                     messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
             print(' - time to get forcing = %d sec' % (time()-tt0))
             sys.stdout.flush()
-            
             if got_forcing == True:
                 break
             else:
                 sleep(60)
-                
         if got_forcing == False:
             print('Error getting forcing, fff = %d' % (fff))
             sys.exit()
-            
     else:
         print(' ** skipped getting forcing')
         
@@ -274,38 +264,21 @@ while dt <= dt1:
             
             # Create batch script
             if 'klone' in Ldir['lo_env']:
-                batch_name = 'klone1_make_batch.py'
-                cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
-                    '-xd', str(roms_ex_dir),
-                    '-rxn', roms_ex_name,
-                    '-rod', str(roms_out_dir),
-                    '-np', str(args.np_num),
-                    '-N', str(args.cores_per_node),
-                    '-x', Ldir['ex_name']]
+                batch_name = 'klone3_make_batch.py'
             elif 'mox' in Ldir['lo_env']:
-                batch_name = 'mox1_make_batch.py'
-                # generate a jobname
-                jobname = ''.join(random.choices(string.ascii_lowercase, k=5))
-                cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
-                    '-xd', str(roms_ex_dir),
-                    '-rxn', roms_ex_name,
-                    '-rod', str(roms_out_dir),
-                    '-np', str(args.np_num),
-                    '-N', str(args.cores_per_node),
-                    '-x', Ldir['ex_name'],
-                    '-j', jobname]
+                batch_name = 'mox3_make_batch.py'
             else: # for testing
-                batch_name = 'mox1_make_batch.py'
-                # generate a jobname
-                jobname = ''.join(random.choices(string.ascii_lowercase, k=5))
-                cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
-                    '-xd', str(roms_ex_dir),
-                    '-rxn', roms_ex_name,
-                    '-rod', str(roms_out_dir),
-                    '-np', str(args.np_num),
-                    '-N', str(args.cores_per_node),
-                    '-x', Ldir['ex_name'],
-                    '-j', jobname]
+                batch_name = 'mox3_make_batch.py'
+            # generate a random jobname
+            jobname = ''.join(random.choices(string.ascii_lowercase, k=5))
+            cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
+                '-xd', str(roms_ex_dir),
+                '-rxn', roms_ex_name,
+                '-rod', str(roms_out_dir),
+                '-np', str(args.np_num),
+                '-N', str(args.cores_per_node),
+                '-x', Ldir['ex_name'],
+                '-j', jobname]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Create batch script', args.verbose)
@@ -318,30 +291,15 @@ while dt <= dt1:
             # Run ROMS using the batch script.
             if 'klone' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc',
-                    str(roms_out_dir / 'klone1_batch.sh')]
+                    str(roms_out_dir / 'klone_batch.sh')]
             elif 'mox' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
-                    str(roms_out_dir / 'mox1_batch.sh')]
+                    str(roms_out_dir / 'mox_batch.sh')]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-
-            # Skip this: it proved to be unreliable on mox, so instead we are generating a
-            # random jobname and then watching for it in squeue.
-            # got_pid = False
-            # rrr = 0
-            # while (got_pid == False) and (rrr < 10):
-            #     stdout, stderr = proc.communicate()
-            #     messages(stdout, stderr, 'Run ROMS', args.verbose)
-            #     sys.stdout.flush()
-            #     if len(stderr) > 0:
-            #         sleep(60)
-            #         rrr += 1 # try again
-            #     else:
-            #         pid = stdout.decode().split(' ')[-1].strip('\n')
-            #         print('pid = ' + pid)
-            #         sys.stdout.flush()
-            #         got_pid = True
             
             # now we need code to wait until the run has completed
+            
+            # these are for checking on the run using squeue
             if 'mox' in Ldir['lo_env']:
                 cmd_list = ['squeue', '-p', 'macc']
             elif 'klone' in Ldir['lo_env']:
@@ -365,7 +323,7 @@ while dt <= dt1:
                     break
                 sleep(60)
 
-            # and then if it has finished
+            # and then figure out if it has finished
             for rrr in range(60):
                 proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
                 stdout, stderr = proc.communicate()
@@ -384,6 +342,8 @@ while dt <= dt1:
                     pass
                 sleep(120)
     
+            # The code here is a lot of claptrap to make sure there is a log file
+            
             # A bit of checking to make sure that the log file exists...
             lcount = 0
             while not log_file.is_file():
@@ -421,6 +381,7 @@ while dt <= dt1:
                         print(' - log done and closed')
                         sys.stdout.flush()
                     log_done = True
+                    
             # Look in the log file to see what happened, and decide what to do.
             roms_worked = False
             with open(log_file, 'r') as ff:
@@ -508,7 +469,7 @@ while dt <= dt1:
             f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
             roms_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / f_string_prev
             roms_bu_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / (f_string_prev + '_blowup')
-            force_dir_prev = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / f_string_prev
+            force_dir_prev = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / f_string_prev
             shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(roms_bu_out_dir_prev), ignore_errors=True)
             shutil.rmtree(str(force_dir_prev), ignore_errors=True)
