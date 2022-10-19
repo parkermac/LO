@@ -51,7 +51,7 @@ Also outputs a file log.txt with more compact info on success or failure.
 
 ---
 
-`print_dt_lists.py` is a convenience function to print all of the dt_info files in one place.  Here is typical output:
+`print_dt_info.py` is a convenience function to print all of the dt_info files in one place.  Here is typical output:
 
 ```
 Experiment = hy1

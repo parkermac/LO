@@ -10,6 +10,9 @@ NOTE: in order to look at an older grid file like cas6, just copy
 its grid.nc into LO_output/pgrid/[gridname], and then specify it with the
 -g flag when you run this program.
 
+New: This will ask if you want to append sections to an existing collection,
+or start a new one, or not save anything.
+
 """
 import numpy as np
 import xarray as xr
@@ -30,7 +33,8 @@ Ldir = Lfun.Lstart()
 
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('-g', '--gridname', default='', type=str)
+parser.add_argument('-g', '--gridname', default='cas6', type=str)
+parser.add_argument('-c', '--collection', default='pm_cas6', type=str)
 parser.add_argument('-small', default=False, type=Lfun.boolean_string)
 # Set the "small" argument to True to work on a laptop
 args = parser.parse_args()
@@ -40,6 +44,23 @@ else:
     Gr = gfun.gstart()
 # select grid file
 in_fn = gfun.select_file(Gr)
+
+# organize the collection to write to
+if len(args.collection) > 0:
+    use_collection = True
+    print('Saving sections to collection: ' + args.collection)
+    c_dir = Ldir['LOo'] / 'tef_section_collections'
+    Lfun.make_dir(c_dir)
+    c_fn = c_dir / (args.collection + '.p')
+    if c_fn.is_file():
+        print(' - adding to existing collection')
+        sect_df = pd.read_pickle(c_fn)
+    else:
+        print(' - creating new collection')
+        sect_df = pd.DataFrame(columns=['pname','lon','lat'])
+else:
+    use_collection = False
+    print('Not saving sections')
 
 # get fields
 ds = xr.open_dataset(in_fn)
@@ -76,9 +97,18 @@ if args.small == True:
     fig = plt.figure(figsize=(13,8))
 else:
     fig = plt.figure(figsize=(22,12))
-ax1 = plt.subplot2grid((1,5), (0,0), colspan=2) # map
-ax2 = plt.subplot2grid((1,5), (0,2), colspan=1) # buttons
-ax3 = plt.subplot2grid((1,5), (0,3), colspan=2) # second map
+    
+extra_map = False # set to True to see a second map on the right with
+# correct aspect ratio
+
+if extra_map == True:
+    ax1 = plt.subplot2grid((1,5), (0,0), colspan=2) # map
+    ax2 = plt.subplot2grid((1,5), (0,2), colspan=1) # buttons
+    ax3 = plt.subplot2grid((1,5), (0,3), colspan=2) # second map
+else:
+    ax1 = plt.subplot2grid((1,4), (0,0), colspan=3) # map
+    ax2 = plt.subplot2grid((1,4), (0,3), colspan=1) # buttons
+    
 
 # initialize the data plot
 cmap1 = plt.get_cmap(name='terrain')
@@ -113,12 +143,13 @@ cmap2 = plt.get_cmap(name='viridis')
 ax2.pcolormesh(XBC,YBC,ZB, vmin=0, vmax=NB, cmap = cmap2)
 ax2.set_axis_off()
 
-# initialize the lat,lon map plot
-ax3.pcolormesh(plon, plat, Hm,
-    vmin=tvmin, vmax=tvmax, cmap = cmap1)
-pfun.add_coast(ax3)
-ax3.axis(aa0)
-pfun.dar(ax3)
+if extra_map == True:
+    # initialize the lat,lon map plot
+    ax3.pcolormesh(plon, plat, Hm,
+        vmin=tvmin, vmax=tvmax, cmap = cmap1)
+    pfun.add_coast(ax3)
+    ax3.axis(aa0)
+    pfun.dar(ax3)
 
 def addButtonLabel(ax, plon, plat, nb, lab, tcol='k'):
     # draw and label buttons
@@ -255,9 +286,10 @@ while flag_get_ginput:
             print(' - saved to ' + str(poutfn))
             #remove_poly()
             ax1.set_title('PAUSED')
-            ax3.plot(lon_poly, lat_poly, '-*k', linewidth=1)
-            ax3.text(np.array(lon_poly).mean(),np.array(lat_poly).mean(),
-                pname, ha='center',va='center')
+            if extra_map == True:
+                ax3.plot(lon_poly, lat_poly, '-*k', linewidth=1)
+                ax3.text(np.array(lon_poly).mean(),np.array(lat_poly).mean(),
+                    pname, ha='center',va='center')
         elif (bdict[nb]=='lineInfo') and not flag_start:
             flag_continue = False
             x = plon_poly
@@ -271,34 +303,32 @@ while flag_get_ginput:
             remove_poly()
             ax1.set_title('PAUSED')
         
+        # ************************************************
         elif (bdict[nb]=='tefSave') and not flag_start:
             flag_continue = False
-            ax1.set_title('Name TEF section in terminal',
-                fontweight='bold', color='m')
-
+            ax1.set_title('Name TEF section in terminal', fontweight='bold', color='m')
+            plt.draw()
+            
             pname = input('Name for saved section: ')
+            
             lon_poly = lonvec[plon_poly]
             lat_poly = latvec[plat_poly]
-            ax3.plot(lon_poly, lat_poly, '-*k', linewidth=1)
-            ax3.text(np.array(lon_poly).mean(),np.array(lat_poly).mean(),pname)
             
-            # Print output for use in tef2_fun.py. We will reformat this to
-            # allow for multi-part sections.
+            if extra_map == True:
+                ax3.plot(lon_poly, lat_poly, '-*k', linewidth=1)
+                ax3.text(np.array(lon_poly).mean(),np.array(lat_poly).mean(),pname)
+            
             for jj in range(len(lon_poly)):
-                tef_list_item = ("sect_df.loc[%s,'lon','lat'] = [%8.3f, %8.3f]" %
-                    (pname, lon_poly[jj], lat_poly[jj]) )
-                tef_list.append(tef_list_item)
+                sect_df.loc[len(sect_df.index),:] = [pname, lon_poly[jj], lat_poly[jj]]
                 
             ax1.set_title('PAUSED')
+        # ************************************************
         
         elif (bdict[nb]=='done') and not flag_start:
             flag_get_ginput = False
             ax1.set_title('DONE', fontweight='bold', color='b')
             
-            print('\n*** Entries for tef2_fun.get_sect_df() **\n')
-            if len(tef_list) > 0:
-                for item in tef_list:
-                    print(item)
+            sect_df.to_pickle(c_fn)
                     
         else:
             pass
