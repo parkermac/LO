@@ -30,7 +30,7 @@ import matplotlib.path as mpath
 import sys
 import pandas as pd
 import pickle
-from matplotlib.widgets import TextBox
+from matplotlib.widgets import TextBox, Button
 
 from lo_tools import Lfun, zfun
 from lo_tools import plotting_functions as pfun
@@ -84,25 +84,11 @@ H = ds.h.values
 lon = ds.lon_rho.values
 lat = ds.lat_rho.values
 mask_rho = ds.mask_rho.values
-plon, plat = pfun.get_plon_plat(lon,lat)
-DA = (1/ds.pm.values) * (1/ds.pn.values)
-DA[mask_rho==0] = np.nan
 H[mask_rho==0] = np.nan
-Hm = np.ma.masked_where(mask_rho==0, H)
-aa0 = pfun.get_aa(ds)
 ds.close()
-
-# get distances
-XM, YM = zfun.ll2xy(lon, lat, np.mean(lon[0,:]), np.mean(lat[:,0]))
 
 # flip to work with imshow
 h = np.flipud(H)
-da = np.flipud(DA)
-xm = np.flipud(XM)
-ym = np.flipud(YM)
-m = np.flipud(mask_rho) # mask_rho: 1 = water, 0 = land
-lonvec = lon[0,:] # no need to flip
-latvec = np.flipud(lat[:,0])
 NR, NC = h.shape
 
 # PLOTTING
@@ -115,11 +101,13 @@ else:
     fig = plt.figure(figsize=(22,12))
     
 ax1 = plt.subplot2grid((1,4), (0,0), colspan=3) # map
-ax2 = plt.subplot2grid((8,4), (0,3), rowspan=6, colspan=1) # buttons
+ax2 = plt.subplot2grid((8,4), (0,3), rowspan=3, colspan=1) # buttons
 # box to type strings into
+start_ax = plt.subplot2grid((8,4), (5,3))
 tb_name_ax = plt.subplot2grid((8,4), (6,3), rowspan=1, colspan=1)
 tb_remove_ax = plt.subplot2grid((8,4), (7,3), rowspan=1, colspan=1)
-# the TextBox widget
+# the widgets
+start_button = Button(start_ax, 'Start', image=None, color='0.85', hovercolor='0.95')
 tb_name = TextBox(tb_name_ax, 'Name\nSection', initial='', color='.95',
     hovercolor='1', label_pad=0.03)
 tb_remove = TextBox(tb_remove_ax, 'Remove\nSection', initial='', color='.95',
@@ -151,6 +139,23 @@ def draw_sections(fn):
         line_dict[sn] = ax1.plot(ilon_vec, ilat_vec, '-*b', linewidth=1)
         text_dict[sn] = ax1.text(ilon_vec[0], ilat_vec[0],sn,color='b')
     return line_dict, text_dict
+
+
+W = dict()
+W['flag_get_ginput'] = True # Make False to exit the ginput loop
+W['flag_continue'] = False # need to push START to make this True
+W['flag_start'] = True # to ensure we only push the start button once
+W['flag_e'] = 'p' # 'p' for polygon routines
+# pline = []
+# ilon_vec = []
+# ilat_vec = []
+
+def on_start(junk):
+    W['flag_start'] = False
+    W['flag_continue'] = False
+    cs.set_data(h)
+    ax1.set_title('PAUSED')
+start_button.on_clicked(on_start)
     
 def name_section(sect_name):
     temp_df = pd.DataFrame(columns=['ilon','ilat'])
@@ -318,10 +323,37 @@ while flag_get_ginput:
             aa = ax1.axis()
             pline = ax1.plot(ilon_vec, ilat_vec,'*-r')
             ax1.axis(aa)
-            ax1.set_title('Adding to Polygon')
+            ax1.set_title('Adding Points (Return to Stop)')
         plt.draw()
         
 # SPARE CODE that may be useful in the future
+
+# # get fields
+# ds = xr.open_dataset(in_fn)
+# H = ds.h.values
+# lon = ds.lon_rho.values
+# lat = ds.lat_rho.values
+# mask_rho = ds.mask_rho.values
+# plon, plat = pfun.get_plon_plat(lon,lat)
+# DA = (1/ds.pm.values) * (1/ds.pn.values)
+# DA[mask_rho==0] = np.nan
+# H[mask_rho==0] = np.nan
+# Hm = np.ma.masked_where(mask_rho==0, H)
+# aa0 = pfun.get_aa(ds)
+# ds.close()
+#
+# # get distances
+# XM, YM = zfun.ll2xy(lon, lat, np.mean(lon[0,:]), np.mean(lat[:,0]))
+#
+# # flip to work with imshow
+# h = np.flipud(H)
+# da = np.flipud(DA)
+# xm = np.flipud(XM)
+# ym = np.flipud(YM)
+# m = np.flipud(mask_rho) # mask_rho: 1 = water, 0 = land
+# lonvec = lon[0,:] # no need to flip
+# latvec = np.flipud(lat[:,0])
+# NR, NC = h.shape
 
 # polygon functions
 # def get_indices_in_polygon(ilon_vec, ilat_vec, NR, NC):
