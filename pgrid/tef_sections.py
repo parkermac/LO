@@ -115,11 +115,14 @@ else:
     fig = plt.figure(figsize=(22,12))
     
 ax1 = plt.subplot2grid((1,4), (0,0), colspan=3) # map
-ax2 = plt.subplot2grid((8,4), (0,3), rowspan=7, colspan=1) # buttons
+ax2 = plt.subplot2grid((8,4), (0,3), rowspan=6, colspan=1) # buttons
 # box to type strings into
-tb_ax = plt.subplot2grid((8,4), (7,3), rowspan=1, colspan=1)
+tb_name_ax = plt.subplot2grid((8,4), (6,3), rowspan=1, colspan=1)
+tb_remove_ax = plt.subplot2grid((8,4), (7,3), rowspan=1, colspan=1)
 # the TextBox widget
-tb = TextBox(tb_ax, 'Section\nName', initial='', color='.95',
+tb_name = TextBox(tb_name_ax, 'Name\nSection', initial='', color='.95',
+    hovercolor='1', label_pad=0.03)
+tb_remove = TextBox(tb_remove_ax, 'Remove\nSection', initial='', color='.95',
     hovercolor='1', label_pad=0.03)
     
 # initialize the data plot
@@ -148,6 +151,36 @@ def draw_sections(fn):
         line_dict[sn] = ax1.plot(ilon_vec, ilat_vec, '-*b', linewidth=1)
         text_dict[sn] = ax1.text(ilon_vec[0], ilat_vec[0],sn,color='b')
     return line_dict, text_dict
+    
+def name_section(sect_name):
+    temp_df = pd.DataFrame(columns=['ilon','ilat'])
+    temp_df.loc[:,'ilon'] = ilon_vec
+    temp_df.loc[:,'ilat'] = ilat_vec
+    if len(sect_name) > 0:
+        temp_df.to_pickle(temp_dir / (sect_name + '.p'))
+    remove_poly(pline)
+    ax1.plot(ilon_vec, ilat_vec, '-*k', linewidth=1)
+    ax1.text(ilon_vec[0], ilat_vec[0], sect_name)
+    tb_name.set_val('')
+    ax1.set_title('PAUSED', color='g')
+    plt.draw()
+tb_name.on_submit(name_section)
+
+def remove_section(x_sect_name):
+    dfr = pd.read_pickle(c_fn)
+    xx = dfr.sn==x_sect_name
+    dfr = dfr.drop(index=dfr.index[xx], axis=1)
+    # df = df.reset_index()
+    dfr.to_pickle(c_fn)
+    try:
+        remove_poly(line_dict[x_sect_name])
+        text_dict[x_sect_name].remove()
+    except:
+        pass
+    tb_remove.set_val('')
+    ax1.set_title('PAUSED', color='g')
+    plt.draw()
+tb_remove.on_submit(remove_section)
 
 # add existing sections
 if use_collection and c_fn.is_file():
@@ -155,10 +188,9 @@ if use_collection and c_fn.is_file():
 
 # create control buttons
 # list is organized from bottom to top
-blist = ['start', 'pause', 'tefRemove','tefSave', 'startLine', 'done']
+blist = ['start', 'startLine', 'done']
 # nicer names
-Blist = ['Start', 'Pause', 'Remove TEF\nSection','Save TEF\nSection',
-            '* Start Line *', 'Done']
+Blist = ['Start', '* Start Line *', 'Done']
 NB = len(blist) # number of buttons
 ybc = np.arange(NB+1) - .5
 offset = 1e5 # kludgey way to distinguish buttons from topography
@@ -208,19 +240,23 @@ flag_e = 'p' # 'p' for polygon routines
 pline = []
 ilon_vec = []
 ilat_vec = []
-tef_list = []
 
 while flag_get_ginput:
 
     # get ginput, note that you can click with any key
     a = plt.ginput(n=1, timeout=0)
     # returns a list of tuples - of length 1
-    b = np.array(a)
-    b = np.round(b).astype(int)
-    if b.shape != (1,2):
-        b = np.array([[-1000, -1000]])
-    ix = b[0, 0]
-    iy = b[0, 1]
+    if len(a) == 0:
+        # use return to exit line generation
+        flag_continue = False
+        ax1.set_title('Name TEF section', fontweight='bold', color='m')
+        plt.draw()
+        
+    else:
+        b = a[0]
+        ix = np.round(b[0]).astype(int)
+        iy = np.round(b[1]).astype(int)
+    
 
     # this code deals with button input
     if (ix >= offset):
@@ -239,64 +275,15 @@ while flag_get_ginput:
                 else:
                     addButtonLabel(ax2, xbc, ybc, bnum, Bdict[bnum],
                         tcol=active_color)
-        elif (bdict[nb]=='pause') and not flag_start:
-            flag_continue = False
-            ax1.set_title('PAUSED')
+                        
         elif (bdict[nb]=='startLine') and not flag_start:
             flag_continue = True
             flag_e = 'p'
-            ax1.set_title('Click to Add Poly Points')
-            #remove_poly()
+            ax1.set_title('Click to Add Points (Return to Stop)')
             pline = []
             ilon_vec = []
             ilat_vec = []
         
-        # *********** TextBox widget *********************
-        elif (bdict[nb]=='tefSave') and not flag_start:
-            flag_continue = False
-            ax1.set_title('Name TEF section',
-                        fontweight='bold', color='m')
-            plt.draw()
-            def name_section(sect_name):
-                temp_df = pd.DataFrame(columns=['ilon','ilat'])
-                temp_df.loc[:,'ilon'] = ilon_vec
-                temp_df.loc[:,'ilat'] = ilat_vec
-                if len(sect_name) > 0:
-                    temp_df.to_pickle(temp_dir / (sect_name + '.p'))
-                remove_poly(pline)
-                ax1.plot(ilon_vec, ilat_vec, '-*k', linewidth=1)
-                ax1.text(ilon_vec[0], ilat_vec[0], sect_name)
-                tb.set_val('')
-                ax1.set_title('PAUSED', color='g')
-                plt.draw()
-            tb.on_submit(name_section)
-        # ************************************************
-        
-        # *********** TextBox widget *********************
-        
-        # issue: this puts a file in the temp_dir!
-        elif (bdict[nb]=='tefRemove') and not flag_start:
-            flag_continue = False
-            ax1.set_title('Name TEF section to REMOVE',
-                        fontweight='bold', color='b')
-            plt.draw()
-            def remove_section(x_sect_name):
-                dfr = pd.read_pickle(c_fn)
-                xx = dfr.sn==x_sect_name
-                dfr = dfr.drop(index=dfr.index[xx], axis=1)
-                # df = df.reset_index()
-                dfr.to_pickle(c_fn)
-                try:
-                    remove_poly(line_dict[x_sect_name])
-                    text_dict[x_sect_name].remove()
-                except:
-                    pass
-                tb.set_val('')
-                ax1.set_title('PAUSED', color='g')
-                plt.draw()
-            tb.on_submit(remove_section)
-        # ************************************************
-                
         elif (bdict[nb]=='done') and not flag_start:
             flag_get_ginput = False
             ax1.set_title('DONE', fontweight='bold', color='b')
