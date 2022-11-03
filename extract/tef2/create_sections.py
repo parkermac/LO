@@ -34,7 +34,7 @@ parser.add_argument('-ctag','--collection_tag', default='test', type=str)
 # set clobber to True to start a new collection even if it exists
 parser.add_argument('-c','--clobber', default=False, type=Lfun.boolean_string)
 # set small to True to work on a laptop
-parser.add_argument('-small', default=True, type=Lfun.boolean_string)
+parser.add_argument('-small', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 # input and output locations
@@ -64,8 +64,8 @@ ax = fig.add_subplot(111)
 ax.pcolormesh(plon,plat,h, vmin=-30, vmax=200, cmap=cm.deep)
 pfun.dar(ax)
 ax.set_title('Use keyboard to create or remove sections')
-ax.text(.05,.95,args.gridname,transform=ax.transAxes,
-    fontweight='bold')
+ax.text(.05,.95,out_name,transform=ax.transAxes,
+    fontweight='bold',bbox=pfun.bbox)
 plt.show()
 
 # dicts to keep line and text handles
@@ -76,8 +76,7 @@ def plot_line(sn):
     x = df.x.to_numpy()
     y = df.y.to_numpy()
     ld[sn] = ax.plot(x,y,'-or', lw=2)
-    nudge = (aa[3] - aa[2]) / 100
-    td[sn] = ax.text(x[0],y[0]-nudge,sn,c='r',ha='center',va='top',
+    td[sn] = ax.text(x[0],y[0],'\n'+sn,c='r',ha='center',va='top',
         fontweight='bold')
     plt.draw()
 

@@ -33,6 +33,7 @@ month_color_dict = dict(zip(range(1,13),
     ['mediumblue', 'royalblue', 'cadetblue', 'aquamarine',
     'lightgreen', 'greenyellow', 'gold', 'orange',
     'lightsalmon', 'mediumorchid', 'slateblue', 'purple']))
+bbox = dict(facecolor='w', edgecolor='None',alpha=.5)
 
 def start_plot(fs=14, figsize=(14,10)):
     plt.rc('font', size=fs)
