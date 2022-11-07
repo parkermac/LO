@@ -1,2 +1,2 @@
 LOd="/gscratch/macc/parker/LO/driver"
-30 11 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t v00 -x uu0mb -r forecast -np 196 -N 28 > $LOd/uu0mb_forecast.log
+30 12 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t v00 -x uu0mb -r forecast -np 196 -N 28 > $LOd/uu0mb_forecast.log
