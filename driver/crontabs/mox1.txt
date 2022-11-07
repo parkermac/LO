@@ -1,8 +1,2 @@
-LOdnew="/gscratch/macc/parker/LO/driver"
-# 10 03 * * * source ~/.bashrc; python3 $LOdnew/driver_roms2.py -g cas6 -t v0 -x u0mb -r forecast -np 196 -N 28 --old_roms True > $LOdnew/am_cron.log
-# 00 10 * * * source ~/.bashrc; python3 $LOdnew/driver_roms2.py -g cas6 -t v0 -x u0mb -r forecast -np 196 -N 28 --old_roms True > $LOdnew/am_cron_2.log
-# 30 06 * * * source ~/.bashrc; mail -s 'LO forecast mox' pmacc@uw.edu < $LOdnew/am_cron.log
-# 31 06 * * * source ~/.bashrc; mail -s 'LO forecast mox' darrd@uw.edu < $LOdnew/am_cron.log
-# 32 06 * * * source ~/.bashrc; mail -s 'LO forecast mox' kmhewett@uw.edu < $LOdnew/am_cron.log
-# 33 06 * * * source ~/.bashrc; mail -s 'LO forecast mox' ebroatch@uw.edu < $LOdnew/am_cron.log
-# 34 06 * * * source ~/.bashrc; mail -s 'LO forecast mox' auroral@uw.edu < $LOdnew/am_cron.log
+LOd="/gscratch/macc/parker/LO/driver"
+30 11 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t v00 -x uu0mb -r forecast -np 196 -N 28 > $LOd/uu0mb_forecast.log
