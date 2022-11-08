@@ -34,7 +34,7 @@ parser.add_argument('-ro', '--roms_out_num', type=int, default=0)
 parser.add_argument('-ds0', type=str, default='2019.07.04')
 parser.add_argument('-ds1', type=str, default='')
 # arguments that allow you to bypass the interactive choices
-parser.add_argument('-hn', type=int, default=1) # history file number
+parser.add_argument('-hn', type=int, default=2) # history file number
 parser.add_argument('-lt', type=str, default='snapshot')
 parser.add_argument('-pt', type=str, default='P1')
 parser.add_argument('-vn', type=str, default='salt')

@@ -149,19 +149,6 @@ def fn_list_utility(dt0, dt1, Ldir, hourmax=24):
     dir0 = Ldir['roms_out'] / Ldir['gtagex']
     fn_list = []
     date_list = date_list_utility(dt0, dt1)
-    # for dl in date_list:
-    #     f_string = 'f' + dl
-    #     if dl == date_list[0]:
-    #         # hourmin = 0
-    #     else:
-    #         hourmin = 1
-    #         # skip hour zero on subsequent days because it is a repeat
-    #     for nhis in range(hourmin+1, hourmax+2):
-    #         nhiss = ('0000' + str(nhis))[-4:]
-    #         fn = dir0 / f_string / ('ocean_his_' + nhiss + '.nc')
-    #         fn_list.append(fn)
-    # return fn_list
-    
     # new scheme 2022.10.09 to work with perfect restart
     dt00 = (dt0 - timedelta(days=1))
     fn_list.append(dir0 / ('f'+dt00.strftime(ds_fmt)) / 'ocean_his_0025.nc')
@@ -174,7 +161,7 @@ def fn_list_utility(dt0, dt1, Ldir, hourmax=24):
             fn_list.append(fn)
     return fn_list
     
-def get_fn_list(list_type, Ldir, ds0, ds1, his_num=1):
+def get_fn_list(list_type, Ldir, ds0, ds1, his_num=2):
     """
     INPUT:
     A function for getting lists of history files.

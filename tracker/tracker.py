@@ -150,7 +150,7 @@ Ldir['gtagex'] = TR['gtagex']
 Ldir['roms_out'] = TR['roms_out']
 
 # get the full path to a valid history file
-fn00 = Ldir['roms_out'] / TR['gtagex'] / ('f' + TR['date_string']) / 'ocean_his_0001.nc'
+fn00 = Ldir['roms_out'] / TR['gtagex'] / ('f' + TR['date_string']) / 'ocean_his_0002.nc'
 TR['fn00'] = fn00
 
 # set the name of the output folder

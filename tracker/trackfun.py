@@ -603,12 +603,9 @@ def get_turb(dAKs, AKsf0, AKsf1, delta_t, plon, plat, pcs, frac):
     return V
 
 def get_fn_list(idt, Ldir):
-    # LiveOcean version, for 1 day only.
-    # Assumes we have history files 1-25, corresponding to hours 0-24.
-    fn_list = []
-    dd = idt.strftime('%Y.%m.%d')
-    indir = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + dd)
-    for hh in range(1,26):
-        hhhh = ('0000' + str(hh))[-4:]
-        fn_list.append(indir / ('ocean_his_' + hhhh + '.nc'))
+    # Gets history files for 1 day only:
+    # ocean_his_0025.nc from the day before through ocean_his_0025.nc of this day.
+    ds0 = idt.strftime(Lfun.ds_fmt)
+    fn_list = Lfun.get_fn_list('hourly', Ldir, ds0, ds0)
     return fn_list
+    

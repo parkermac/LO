@@ -6,7 +6,7 @@ Testing on mac:
 
 run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -job drifters0 -test True
 
-Run for real on apogee (assumes split0 has been run if this is a forecast day):
+Run for real on apogee:
 
 run post_main.py -gtx cas6_v0_u0kb -ro 0 -d ['today's datestring] -job drifters0
 
@@ -47,6 +47,7 @@ procs = []
 exp_list = ['full', 'PS']
 for exp in exp_list:
         sleep(1) # cludge: needed so that calls to Lstart() don't collide while writing lo_info.csv
+        # BUT this is obsolete since we no longer write lo_info.csv 2022.11.08.
         cmd = ['python', str(Ldir['LO']) + '/tracker/tracker.py',
             '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
             '-d', dsr, '-dtt', str(dtt),
