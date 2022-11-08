@@ -106,7 +106,7 @@ print(moor_fn)
 in_dir0 = Ldir['roms_out'] / Ldir['gtagex']
 lon = Ldir['lon']
 lat = Ldir['lat']
-G, S, T = zrfun.get_basic_info(in_dir0 / ('f' + Ldir['ds0']) / 'ocean_his_0001.nc')
+G, S, T = zrfun.get_basic_info(in_dir0 / ('f' + Ldir['ds0']) / 'ocean_his_0002.nc')
 Lon = G['lon_rho'][0,:]
 Lat = G['lat_rho'][:,0]
 # error checking
