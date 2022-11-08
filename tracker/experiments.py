@@ -25,6 +25,11 @@ def get_ic(TR):
         latvec = np.linspace(48.2, 48.4, 20)
         pcs_vec = np.array([0])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
+        
+    elif exp_name == 'sect_ai2':
+        lons = [-122.808, -122.584]
+        lats = [48.083, 48.083]
+        plon00, plat00, pcs00 = ic_sect(fn00, lons, lats)
 
     elif exp_name == 'nina_jdfw': # For Nina Bednarsek, mouth of JdF
         lon0 = -124.71; lat0 = 48.5 # center of the circle 
@@ -150,7 +155,7 @@ def ic_from_list(lonvec, latvec, pcs_vec):
 def ic_random_in_circle(lon0, lat0, radius_km, npoints):
     # Makes lon and lat of npoints scattered randomly in a circle.
     # I think the np.sqrt() used in calculating the radius makes these
-    # venely distributed over the whole circle.
+    # evenly distributed over the whole circle.
     earth_r = 6371 # average earth radius [km]
     # radius of the circle km
     circle_r = radius_km
@@ -219,5 +224,64 @@ def ic_from_TEFsegs(fn00, gridname, seg_list, DZ, NPmax=10000):
     pcs00 = pcs00[::nstep]
     print(len(plon00))
     sys.stdout.flush()
+    return plon00, plat00, pcs00
+    
+def ic_sect(fn00, lons, lats, NPmax=10000):
+    """
+    This distributes NPmax particles evenly on a section defined by endpoints
+    (lon0, lat0) - (lon1, lat1).
+    
+    For simplicity we force the section to be NS or EW, we put particles
+    only on rho points.
+    """
+    from lo_tools import Lfun, zfun, zrfun
+
+    Ldir = Lfun.Lstart()
+
+    G = zrfun.get_basic_info(fn00, only_G=True)
+    h = G['h']
+    m = G['mask_rho']
+    xr = G['lon_rho']
+    yr = G['lat_rho']
+    X = xr[0,:]
+    Y = yr[:,0]
+
+    lon0 = lons[0]; lon1 = lons[1]
+    lat0 = lats[0]; lat1 = lats[1]
+
+    ix0 = zfun.find_nearest_ind(X, lon0)
+    ix1 = zfun.find_nearest_ind(X, lon1)
+    iy0 = zfun.find_nearest_ind(Y, lat0)
+    iy1 = zfun.find_nearest_ind(Y, lat1)
+
+    # adjust indices to make it perfectly zonal or meridional
+    dix = np.abs(ix1 - ix0)
+    diy = np.abs(iy1 - iy0)
+    if dix > diy: # EW section
+        iy1 = iy0
+    elif diy > dix: # NS section
+        ix1 = ix0
+    
+    hvec = h[iy0:iy1+1, ix0:ix1+1].squeeze()
+    mvec = m[iy0:iy1+1, ix0:ix1+1].squeeze()
+    xvec = xr[iy0:iy1+1, ix0:ix1+1].squeeze()
+    yvec = yr[iy0:iy1+1, ix0:ix1+1].squeeze()
+
+    # add up total depth of water
+    hnet = 0
+    for ii in range(len(hvec)):
+        if mvec[ii] == 1:
+            hnet += hvec[ii]
+    p_per_meter = NPmax/hnet
+        
+    # initialize result arrays
+    plon00 = np.array([]); plat00 = np.array([]); pcs00 = np.array([])
+    for ii in range(len(hvec)):
+        if mvec[ii] == 1:
+            this_h = hvec[ii]
+            this_np = int(np.floor(p_per_meter * this_h))
+            plon00 = np.concatenate((plon00,xvec[ii]*np.ones(this_np)))
+            plat00 = np.concatenate((plat00,yvec[ii]*np.ones(this_np)))
+            pcs00 = np.concatenate((pcs00,np.linspace(-1,0,this_np)))
     return plon00, plat00, pcs00
     
