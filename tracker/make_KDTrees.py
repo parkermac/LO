@@ -47,7 +47,7 @@ if Ldir['roms_out_num'] == 0:
 elif Ldir['roms_out_num'] > 0:
     Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
 
-fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string']) / 'ocean_his_0001.nc'
+fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string']) / 'ocean_his_0002.nc'
 outdir = Ldir['LOo'] / 'tracker_trees' / Ldir['gridname']
 Lfun.make_dir(outdir, clean=True)
 

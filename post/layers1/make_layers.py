@@ -23,7 +23,7 @@ from lo_tools import plotting_functions as pfun
 from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 in_fn = (Ldir['parent'] / 'LiveOcean_roms' / 'output' /
-    'cas6_v3_lo8b' / 'f2019.07.04' / 'ocean_his_0001.nc')
+    'cas6_v3_lo8b' / 'f2019.07.04' / 'ocean_his_0002.nc')
 out_fn = (Ldir['parent'] / 'LO_output' / 'post' /
     'cas6_v3_lo8b' / 'f2019.07.04' / 'layers0' / 'tempfiles' / 'layers_000000.nc')
 # make sure output directory exists

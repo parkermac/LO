@@ -51,7 +51,7 @@ out_dir = Ldir['LOo'] / 'post' / Ldir['gtagex'] / ('f' + Ldir['date_string']) / 
 
 # critfc code inputs
 rundate = Ldir['date_string'].replace('.','-')
-depthfile = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string']) / 'ocean_his_0001.nc'
+depthfile = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string']) / 'ocean_his_0002.nc'
 hgrid = Ldir['data'] / 'critfc' / 'hgrid.ll'
 vgrid = Ldir['LO'] / 'post' / Ldir['job'] / 'vgrid.in'
 basedir = Ldir['roms_out'] / Ldir['gtagex']
