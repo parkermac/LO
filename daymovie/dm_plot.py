@@ -9,6 +9,10 @@ python dm_plot.py -vn speed -dom PS -mov True -lt hourly < /dev/null > test.log 
 
 run dm_plot -tracks True -mov True -lt hourly
 
+This call tests a new run with perfect restart file numbering. Using "temp" as the
+variable name means it will not overwrite a forecast output file.
+run dm_plot -tracks True -mov True -lt hourly -ds0 2021.07.04 -gtx cas6_v00_uu0mb -vn temp
+
 """
 
 import argparse
