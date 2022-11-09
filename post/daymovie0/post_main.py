@@ -29,13 +29,13 @@ print((' Creating daymovies for ' + Ldir['date_string'] + ' ').center(60,'='))
 ds00 = Ldir['date_string']
 dt00 = datetime.strptime(ds00,'%Y.%m.%d')
 
-if Ldir['testing'] == True:
-    moviename_list = ['P1_full_oxygen_bot']
-else:
-    moviename_list = ['P1_full_salt_top', 'P1_full_oxygen_bot', 'P1_nshelf_oxygen_bot',
-                        'P1_PS_temp_top', 'P1_PS_speed_top',
-                        'P1_willapa_ARAG_top', 'P1_willapa_ARAG_bot',
-                        'Phab_full_salt_top']
+# if Ldir['testing'] == True:
+#     moviename_list = ['P1_full_oxygen_bot']
+# else:
+moviename_list = ['P1_full_salt_top', 'P1_full_oxygen_bot', 'P1_nshelf_oxygen_bot',
+                    'P1_PS_temp_top', 'P1_PS_speed_top',
+                    'P1_willapa_ARAG_top', 'P1_willapa_ARAG_bot',
+                    'Phab_full_salt_top']
 
 tt0 = time()
 result = 'success'
