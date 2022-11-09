@@ -113,26 +113,29 @@ for moviename in moviename_list:
     input_filename = Ldir['LOo'] / 'daymovie' / Ldir['gtagex'] / moviename / 'movie.mp4'
     output_filename = moviename + '.mp4'
 
-    # send file to homer (only works from boiler)
-    print(' - copying '+output_filename+' to homer')
-    sys.stdout.flush()
-    
-    try:
-        cmd_list = ['scp',input_filename,
-            'pmacc@homer.u.washington.edu:/hw00/d47/pmacc/LO/Figs_active_forecast/'+output_filename]
-        proc = Po(cmd_list,stdout=Pi, stderr=Pi)
-        stdout, stderr = proc.communicate()
-        if len(stdout) > 0:
-            print(' sdtout '.center(60,'-'))
-            print(stdout.decode())
-        if len(stderr) > 0:
-            print(' stderr '.center(60,'-'))
-            print(stderr.decode())
+    if Ldir['testing'] == False:
+        # send file to homer (only works from apogee)
+        print(' - copying '+output_filename+' to homer')
         sys.stdout.flush()
-    except Exception as e:
-        print(' error saving movie to homer')
-        print(e)
-        result = 'fail'
+    
+        try:
+            cmd_list = ['scp',input_filename,
+                'pmacc@homer.u.washington.edu:/hw00/d47/pmacc/LO/Figs_active_forecast/'+output_filename]
+            proc = Po(cmd_list,stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            if len(stdout) > 0:
+                print(' sdtout '.center(60,'-'))
+                print(stdout.decode())
+            if len(stderr) > 0:
+                print(' stderr '.center(60,'-'))
+                print(stderr.decode())
+            sys.stdout.flush()
+        except Exception as e:
+            print(' error saving movie to homer')
+            print(e)
+            result = 'fail'
+    else:
+        print(' - testing: did not cpoy files to homer')
 
     # and save a local copy
     try:

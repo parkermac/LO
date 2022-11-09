@@ -77,7 +77,7 @@ def copy_to_server(Ldir, out_fn, subdir=''):
     The optional "subdir" argument allows writing to a subdirectory. The first use of this
     is for hourly files made by splitting up the harcourt extraction.
     """
-    if 'apogee' in Ldir['lo_env']:
+    if ('apogee' in Ldir['lo_env']) and (Ldir['testing'] == False):
     
         share_user = 'parker@liveocean.apl.uw.edu'
         if len(subdir) == 0:
@@ -120,4 +120,5 @@ def copy_to_server(Ldir, out_fn, subdir=''):
     else:
         print('** Did not copy output to server! **')
         print('Warning: copying extractions to server for sharing only works for parker from apogee.')
+        print('Also it will not copy when testing is True.')
         
