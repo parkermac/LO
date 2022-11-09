@@ -26,9 +26,9 @@ def get_ic(TR):
         pcs_vec = np.array([0])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
         
-    elif exp_name == 'sect_ai2':
-        lons = [-122.808, -122.584]
-        lats = [48.083, 48.083]
+    elif exp_name == 'sect_AImid':
+        lons = [-122.7, -122.6]
+        lats = [48.075, 48.075]
         plon00, plat00, pcs00 = ic_sect(fn00, lons, lats)
 
     elif exp_name == 'nina_jdfw': # For Nina Bednarsek, mouth of JdF
