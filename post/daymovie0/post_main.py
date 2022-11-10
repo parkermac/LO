@@ -135,7 +135,7 @@ for moviename in moviename_list:
             print(e)
             result = 'fail'
     else:
-        print(' - testing: did not cpoy files to homer')
+        print(' - testing: did not copy files to homer')
 
     # and save a local copy
     try:

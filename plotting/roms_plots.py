@@ -917,7 +917,7 @@ def P_splash(in_dict):
     
     # PREPARING FIELDS
     from PyCO2SYS import CO2SYS
-    import seawater as sw
+    import gsw
     from mpl_toolkits.axes_grid1.inset_locator import inset_axes
     from warnings import filterwarnings
     filterwarnings('ignore') # skip a warning from PyCO2SYS
@@ -952,23 +952,28 @@ def P_splash(in_dict):
         j1 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[3]) + 2
         px = G['lon_psi'][j0:j1-1, i0:i1-1]
         py = G['lat_psi'][j0:j1-1, i0:i1-1]
-        lat = G['lat_rho'][j0:j1,i0:i1] # used in sw.pres
+        lon = G['lon_rho'][j0:j1,i0:i1] # used in gsw.SA_from_SP
+        lat = G['lat_rho'][j0:j1,i0:i1] # used in gsw.SA_from_SP
         # first extract needed fields and save in v_dict
         v_dict = {}
-        vn_in_list = ['temp', 'salt' , 'rho', 'alkalinity', 'TIC']
+        # This version calculates in situ density using the gsw toolbox.
+        # The results were identidacal to those using the roms rho and sw to within
+        # 4 decimal places in ARAG.
+        vn_in_list = ['temp', 'salt', 'alkalinity', 'TIC']
         for cvn in vn_in_list:
             L = ds[cvn][0,nlev,j0:j1,i0:i1].values
             v_dict[cvn] = L
         # ------------- the CO2SYS steps -------------------------
-        # create pressure
         Ld = G['h'][j0:j1,i0:i1]
-        Lpres = sw.pres(Ld, lat)
-        # get in situ temperature from potential temperature
-        Ltemp = sw.ptmp(v_dict['salt'], v_dict['temp'], 0, Lpres)
+        Lpres = gsw.p_from_z(-Ld, lat) # pressure [dbar]
+        SA = gsw.SA_from_SP(v_dict['salt'], Lpres, lon, lat)
+        CT = gsw.CT_from_pt(SA, v_dict['temp'])
+        rho = gsw.rho(SA, CT, Lpres) # in situ density
+        Ltemp = gsw.t_from_CT(SA, CT, Lpres) # in situ temperature
         # convert from umol/L to umol/kg using in situ dentity
-        Lalkalinity = 1000 * v_dict['alkalinity'] / (v_dict['rho'] + 1000)
+        Lalkalinity = 1000 * v_dict['alkalinity'] / rho
         Lalkalinity[Lalkalinity < 100] = np.nan
-        LTIC = 1000 * v_dict['TIC'] / (v_dict['rho'] + 1000)
+        LTIC = 1000 * v_dict['TIC'] / rho
         LTIC[LTIC < 100] = np.nan
         CO2dict = CO2SYS(Lalkalinity, LTIC, 1, 2, v_dict['salt'], Ltemp, Ltemp,
             Lpres, Lpres, 50, 2, 1, 10, 1, NH3=0.0, H2S=0.0)
@@ -977,6 +982,7 @@ def P_splash(in_dict):
         ARAG = CO2dict['OmegaARout']
         ARAG = ARAG.reshape((v_dict['salt'].shape))
         ARAG = ARAG[1:-1, 1:-1]
+        print(np.nanmax(ARAG))
         return px, py, ARAG
 
     # LARGE MAP
