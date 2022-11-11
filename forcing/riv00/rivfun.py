@@ -138,7 +138,7 @@ def get_bio_vec(vn, rn, yd_ind):
             vv = 5 * ovec
     elif vn == 'Oxyg':
         vv = 350 * ovec
-    elif vn in ['alkalinity', 'TIC']:
+    elif vn in ['TAlk', 'TIC']:
         if rn in ['columbia', 'deschutes', 'duwamish']:
             vv = 1000 * ovec
         else:
