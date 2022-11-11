@@ -22,10 +22,14 @@ from lo_tools import plotting_functions as pfun
 # defaults for testing
 from lo_tools import Lfun
 Ldir = Lfun.Lstart()
-in_fn = (Ldir['parent'] / 'LiveOcean_roms' / 'output' /
-    'cas6_v3_lo8b' / 'f2019.07.04' / 'ocean_his_0002.nc')
+in_fn = (Ldir['roms_out'] /
+    'cas6_v0_live' / 'f2019.07.04' / 'ocean_his_0002.nc')
 out_fn = (Ldir['parent'] / 'LO_output' / 'post' /
-    'cas6_v3_lo8b' / 'f2019.07.04' / 'layers0' / 'tempfiles' / 'layers_000000.nc')
+    'cas6_v0_live' / 'f2019.07.04' / 'layers0' / 'tempfiles' / 'layers_000000.nc')
+# in_fn = (Ldir['roms_out'] /
+#     'cas6_v00_uu0mb' / 'f2021.07.04' / 'ocean_his_0002.nc')
+# out_fn = (Ldir['parent'] / 'LO_output' / 'post' /
+#     'cas6_v00_uu0mb' / 'f2021.07.04' / 'layers0' / 'tempfiles' / 'layers_000000.nc')
 # make sure output directory exists
 Lfun.make_dir(out_fn.parent)
 
@@ -71,12 +75,13 @@ for depth in depth_list:
         tag_dict[depth] = ' at ' + depth + ' m depth'
 
 if testing:
-    vn_in_list = ['temp', 'salt']
-    vn_out_list = ['temp', 'salt']
-    # vn_in_list = ['temp', 'salt' , 'rho', 'alkalinity', 'TIC']
-    # vn_out_list = ['temp', 'salt' , 'PH', 'ARAG']
+    # vn_in_list = ['temp', 'salt']
+    # vn_out_list = ['temp', 'salt']
+    vn_in_list = ['temp', 'salt', 'alkalinity', 'TIC']
+    vn_out_list = ['temp', 'salt' , 'PH', 'ARAG']
 else:
-    vn_in_list = ['temp', 'salt', 'phytoplankton', 'NO3', 'oxygen', 'rho', 'alkalinity', 'TIC']
+    # vn_in_list = ['temp', 'salt', 'phytoplankton', 'NO3', 'oxygen', 'rho', 'alkalinity', 'TIC']
+    vn_in_list = ['temp', 'salt', 'phytoplankton', 'NO3', 'oxygen', 'alkalinity', 'TIC']
     vn_out_list = ['temp', 'salt', 'phytoplankton', 'NO3', 'oxygen', 'PH', 'ARAG']
 
 do_carbon = True
@@ -123,19 +128,40 @@ for depth in depth_list:
     if do_carbon:
         # ------------- the CO2SYS steps -------------------------
         tt0 = time()
-        Ld = get_Ld(depth, in_ds, in_mask_rho)
+        # ===============================================================
+        # OLD
+        # Ld = get_Ld(depth, in_ds, in_mask_rho)
+        # lat = in_ds.lat_rho.values
+        # # create pressure
+        # Lpres = sw.pres(Ld, lat)
+        # # get in situ temperature from potential temperature
+        # Ltemp = sw.ptmp(v_dict['salt'], v_dict['temp'], 0, Lpres)
+        # # convert from umol/L to umol/kg using in situ dentity
+        # Lalkalinity = 1000 * v_dict['alkalinity'] / (v_dict['rho'] + 1000)
+        # Lalkalinity[Lalkalinity < 100] = np.nan
+        # LTIC = 1000 * v_dict['TIC'] / (v_dict['rho'] + 1000)
+        # LTIC[LTIC < 100] = np.nan
+        # CO2dict = CO2SYS(Lalkalinity, LTIC, 1, 2, v_dict['salt'], Ltemp, Ltemp,
+        #     Lpres, Lpres, 50, 2, 1, 10, 1, NH3=0.0, H2S=0.0)
+        # ===============================================================
+        # NEW: using gsw to create in-situ density
+        import gsw
+        lon = in_ds.lon_rho.values
         lat = in_ds.lat_rho.values
-        # create pressure
-        Lpres = sw.pres(Ld, lat)
-        # get in situ temperature from potential temperature
-        Ltemp = sw.ptmp(v_dict['salt'], v_dict['temp'], 0, Lpres)
+        Ld = get_Ld(depth, in_ds, in_mask_rho)
+        Lpres = gsw.p_from_z(-Ld, lat) # pressure [dbar]
+        SA = gsw.SA_from_SP(v_dict['salt'], Lpres, lon, lat)
+        CT = gsw.CT_from_pt(SA, v_dict['temp'])
+        rho = gsw.rho(SA, CT, Lpres) # in situ density
+        Ltemp = gsw.t_from_CT(SA, CT, Lpres) # in situ temperature
         # convert from umol/L to umol/kg using in situ dentity
-        Lalkalinity = 1000 * v_dict['alkalinity'] / (v_dict['rho'] + 1000)
+        Lalkalinity = 1000 * v_dict['alkalinity'] / rho
         Lalkalinity[Lalkalinity < 100] = np.nan
-        LTIC = 1000 * v_dict['TIC'] / (v_dict['rho'] + 1000)
+        LTIC = 1000 * v_dict['TIC'] / rho
         LTIC[LTIC < 100] = np.nan
         CO2dict = CO2SYS(Lalkalinity, LTIC, 1, 2, v_dict['salt'], Ltemp, Ltemp,
             Lpres, Lpres, 50, 2, 1, 10, 1, NH3=0.0, H2S=0.0)
+        # ===============================================================
         # NOTE that the "in" and "out" versions of the returned variables will be
         # identical because we pass the same pressure and temperature for
         # input and output (in-situ in both cases)

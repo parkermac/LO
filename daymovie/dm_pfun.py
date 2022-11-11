@@ -68,7 +68,6 @@ def get_speed(ds, nlev):
 
 def get_arag(ds, Q, aa, nlev):
     from PyCO2SYS import CO2SYS
-    import seawater as sw
     G = zrfun.get_basic_info(Q['fn'], only_G=True)
     # find indices that encompass region aa
     i0 = zfun.find_nearest_ind(G['lon_rho'][0,:], aa[0]) - 1
@@ -76,23 +75,27 @@ def get_arag(ds, Q, aa, nlev):
     j0 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[2]) - 1
     j1 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[3]) + 2
     px, py = pfun.get_plon_plat(G['lon_rho'][j0:j1,i0:i1], G['lat_rho'][j0:j1,i0:i1])
-    lat = G['lat_rho'][j0:j1,i0:i1] # used in sw.pres
-    # first extract needed fields and save in v_dict
-    v_dict = {}
-    vn_in_list = ['temp', 'salt' , 'rho', 'alkalinity', 'TIC']
+    # NEW: using gsw to create in-situ density
+    import gsw
+    lon = G['lon_rho'][j0:j1,i0:i1]
+    lat = G['lat_rho'][j0:j1,i0:i1]
+    v_dict = dict()
+    vn_in_list = ['temp', 'salt', 'alkalinity', 'TIC']
     for cvn in vn_in_list:
         L = ds[cvn][0,nlev,j0:j1,i0:i1].values
         v_dict[cvn] = L
-    # ------------- the CO2SYS steps -------------------------
-    # create pressure
     Ld = G['h'][j0:j1,i0:i1]
-    Lpres = sw.pres(Ld, lat)
-    # get in situ temperature from potential temperature
-    Ltemp = sw.ptmp(v_dict['salt'], v_dict['temp'], 0, Lpres)
+    if nlev == -1: # make sure we use the correct z
+        Ld = 0 * Ld
+    Lpres = gsw.p_from_z(-Ld, lat) # pressure [dbar]
+    SA = gsw.SA_from_SP(v_dict['salt'], Lpres, lon, lat)
+    CT = gsw.CT_from_pt(SA, v_dict['temp'])
+    rho = gsw.rho(SA, CT, Lpres) # in situ density
+    Ltemp = gsw.t_from_CT(SA, CT, Lpres) # in situ temperature
     # convert from umol/L to umol/kg using in situ dentity
-    Lalkalinity = 1000 * v_dict['alkalinity'] / (v_dict['rho'] + 1000)
+    Lalkalinity = 1000 * v_dict['alkalinity'] / rho
     Lalkalinity[Lalkalinity < 100] = np.nan
-    LTIC = 1000 * v_dict['TIC'] / (v_dict['rho'] + 1000)
+    LTIC = 1000 * v_dict['TIC'] / rho
     LTIC[LTIC < 100] = np.nan
     Lpres = zfun.fillit(Lpres)
     Ltemp = zfun.fillit(Ltemp)

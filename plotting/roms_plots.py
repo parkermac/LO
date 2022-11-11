@@ -18,6 +18,7 @@ import pickle
 from datetime import datetime, timedelta
 import pandas as pd
 from cmocean import cm
+import sys
 
 from lo_tools import Lfun, zfun, zrfun
 from lo_tools import plotting_functions as pfun
@@ -745,7 +746,9 @@ def P_sect(in_dict):
     fig = plt.figure()
     ds = xr.open_dataset(in_dict['fn'])
     # PLOT CODE
-    vn = 'phytoplankton'
+    vn = 'salt'#'phytoplankton'
+    if vn == 'salt':
+        pinfo.cmap_dict[vn] = 'jet'
     # GET DATA
     G, S, T = zrfun.get_basic_info(in_dict['fn'])
     # CREATE THE SECTION
@@ -965,6 +968,13 @@ def P_splash(in_dict):
             v_dict[cvn] = L
         # ------------- the CO2SYS steps -------------------------
         Ld = G['h'][j0:j1,i0:i1]
+        if nlev == 0:
+            pass
+        elif nlev == -1:
+            Ld = 0 * Ld
+        else:
+            print('get_arag() error: nlev must be 0 or -1')
+            sys.exit()
         Lpres = gsw.p_from_z(-Ld, lat) # pressure [dbar]
         SA = gsw.SA_from_SP(v_dict['salt'], Lpres, lon, lat)
         CT = gsw.CT_from_pt(SA, v_dict['temp'])
@@ -982,7 +992,7 @@ def P_splash(in_dict):
         ARAG = CO2dict['OmegaARout']
         ARAG = ARAG.reshape((v_dict['salt'].shape))
         ARAG = ARAG[1:-1, 1:-1]
-        print(np.nanmax(ARAG))
+        # print(np.nanmax(ARAG))
         return px, py, ARAG
 
     # LARGE MAP
