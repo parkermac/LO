@@ -88,7 +88,7 @@ for vn in vn_list:
 tt = 0
 for mds in mds_list:
     this_dt = datetime.strptime(mds, Lfun.ds_fmt)
-    if this_dt < datetime(2021.10.31):
+    if this_dt < datetime(2021,10,31):
         fn = Path('/boildat').absolute() / 'parker' / 'LiveOcean_output' / 'cas6_v3' / ('f' + mds) / 'riv2' / 'rivers.nc'
     else:
         fn = Path('/dat1').absolute() / 'parker' / 'LO_output' / 'cas6_v0' / ('f' + mds) / 'riv0' / 'rivers.nc'
