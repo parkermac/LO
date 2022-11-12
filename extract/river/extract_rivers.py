@@ -88,10 +88,12 @@ for vn in vn_list:
 tt = 0
 for mds in mds_list:
     this_dt = datetime.strptime(mds, Lfun.ds_fmt)
+    if this_dt.day == 1 and this_dt.month == 1:
+        print(' Year = %d' % (this_dt.year))
     if this_dt < datetime(2021,10,31):
         fn = Path('/boildat').absolute() / 'parker' / 'LiveOcean_output' / 'cas6_v3' / ('f' + mds) / 'riv2' / 'rivers.nc'
     else:
-        fn = Path('/dat1').absolute() / 'parker' / 'LO_output' / 'cas6_v0' / ('f' + mds) / 'riv0' / 'rivers.nc'
+        fn = Path('/dat1').absolute() / 'parker' / 'LO_output' / 'forcing' / 'cas6_v0' / ('f' + mds) / 'riv0' / 'rivers.nc'
     ds = xr.open_dataset(fn)
     # The river transport is given at noon of a number of days surrounding the forcing date.
     # Here we find the index of the time for the day "mds".
