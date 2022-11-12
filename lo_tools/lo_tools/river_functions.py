@@ -327,7 +327,7 @@ if __name__ == '__main__':
         print(rs)
         print(qt)
         
-    if True:
+    if False:
         # test usgs standard case for a forecast time period
         rn = 'columbia'
         print('\n'+(' testing usgs ' + rn).center(60,'-'))
@@ -385,18 +385,19 @@ if __name__ == '__main__':
     if False:
         # test ec
         rn = 'fraser'
-        for year in range(2017,2022):
+        for year in range(2021,2023):
             print('\n'+(str(year) + ': testing ec ' + rn).center(60,'-'))
-            rs = df.loc[rn].copy()
-            days = (datetime(year,1,1), datetime(year,1,10))
-            rs, qt = get_ec_data(rs, days)
-            print(rs)
-            print(qt)
+            for mo in [1,3,5,7,9,11]:
+                rs = df.loc[rn].copy()
+                days = (datetime(year,mo,1), datetime(year,mo,10))
+                rs, qt = get_ec_data(rs, days)
+                print(rs)
+                print(qt)
     
     if False:
         # test ec temperature
         rn = 'fraser'
-        for year in range(2017,2022):
+        for year in range(2018,2022):
             print('\n'+(str(year) + ': testing ec temperature ' + rn).center(60,'-'))
             rs = df.loc[rn].copy()
             days = (datetime(year,1,1), datetime(year,1,10))
@@ -407,7 +408,7 @@ if __name__ == '__main__':
     if False:
         # test ec historical
         rn = 'fraser'
-        for year in range(2017,2022):
+        for year in range(2018,2022):
             print('\n'+(str(year) + ': testing ec historical ' + rn).center(60,'-'))
             rs = df.loc[rn].copy()
             rs, qt = get_ec_data_historical(rs, year)

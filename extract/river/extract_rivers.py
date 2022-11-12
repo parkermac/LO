@@ -1,23 +1,18 @@
 """
 
-Extract as-run river time series.
+Extract as-run river time series for the cas6_v0_live forecast.
 
-To test on mac:
-run extract_rivers -gtx cas6_v3_lo8b -0 2019.07.04 -1 2019.07.04
+To run on apogee:
+run extract_rivers -gtx cas6_v0_live -0 2017.01.01 -1 2021.12.31
 
-To run on perigee:
-run extract_rivers -gtx cas6_v3_lo8b -0 2018.01.01 -1 2018.01.10
-run extract_rivers -gtx cas6_v3_lo8b -0 2018.01.01 -1 2018.12.31
-
-Performance: takes 23 sec per year on perigee
+Performance: takes ## sec per year on apogee.
 
 Modified to include all NPZD tracers, and package the results as
 an xarray Dataset.
 
 ***
-NOTE: this is hard-coded to LiveOcean_output / [gtag] / riv2 so it
-pretty specific to the cas6_v3_lo8b run.  Also, it expects to find all
-the NPZDOC variables.
+NOTE: The forcing files are spread across two machines and different naming conventions
+with the change happening around October 2021, hence the hard-coded paths below.
 ***
 
 """
@@ -45,11 +40,11 @@ vn_list = ['transport', 'salt', 'temp', 'oxygen',
     'TIC', 'alkalinity']
 
 print(' Doing river extraction for '.center(60,'='))
-print(' gtag = ' + Ldir['gtag'])
+print(' gtag = cas6_v3 (hard coded)')
 outname = 'extraction_' + ds0 + '_' + ds1 + '.nc'
 
 # make sure the output directory exists
-out_dir = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_roms'
+out_dir = Ldir['LOo'] / 'pre' / 'river' / 'cas6_v3' / 'Data_roms'
 Lfun.make_dir(out_dir)
 
 out_fn = out_dir / outname
@@ -70,7 +65,7 @@ while mdt <= dt1:
 # (this is a bit titchy because of NetCDF 3 limitations on strings, forcing them
 # to be arrays of characters)
 mds = mds_list[0]
-fn = Path('/boildat1').absolute() / 'parker' / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
+fn = Path('/boildat').absolute() / 'parker' / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
 ds = xr.open_dataset(fn)
 rn = ds['river_name'].values
 NR = rn.shape[1]
@@ -92,12 +87,16 @@ for vn in vn_list:
     v_dict[vn] = nanmat.copy()
 tt = 0
 for mds in mds_list:
-    fn = Path('/boildat1').absolute() / 'parker' / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
+    this_dt = datetime.strptime(mds, Lfun.ds_fmt)
+    if this_dt < datetime(2021.10.31):
+        fn = Path('/boildat').absolute() / 'parker' / 'LiveOcean_output' / 'cas6_v3' / ('f' + mds) / 'riv2' / 'rivers.nc'
+    else:
+        fn = Path('/dat1').absolute() / 'parker' / 'LO_output' / 'cas6_v0' / ('f' + mds) / 'riv0' / 'rivers.nc'
     ds = xr.open_dataset(fn)
     # The river transport is given at noon of a number of days surrounding the forcing date.
     # Here we find the index of the time for the day "mds".
     RT = pd.to_datetime(ds['river_time'].values)
-    mdt = datetime.strptime(mds, Lfun.ds_fmt) + timedelta(hours=12)
+    mdt = this_dt + timedelta(hours=12)
     mask = RT == mdt
     for vn in vn_list:
         if vn == 'transport':
