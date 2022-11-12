@@ -39,16 +39,16 @@ vn_list = ['transport', 'salt', 'temp', 'oxygen',
     'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
     'TIC', 'alkalinity']
 
-print(' Doing river extraction for '.center(60,'='))
-print(' gtag = cas6_v3 (hard coded)')
-outname = 'extraction_' + ds0 + '_' + ds1 + '.nc'
 
 # make sure the output directory exists
 out_dir = Ldir['LOo'] / 'pre' / 'river' / 'cas6_v3' / 'Data_roms'
 Lfun.make_dir(out_dir)
-
+outname = 'extraction_' + ds0 + '_' + ds1 + '.nc'
 out_fn = out_dir / outname
 out_fn.unlink(missing_ok=True)
+
+print(' Doing river extraction to '.center(60,'='))
+print(str(out_fn))
 
 dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
 dt1 = datetime.strptime(ds1, Lfun.ds_fmt)
@@ -65,7 +65,7 @@ while mdt <= dt1:
 # (this is a bit titchy because of NetCDF 3 limitations on strings, forcing them
 # to be arrays of characters)
 mds = mds_list[0]
-fn = Path('/boildat').absolute() / 'parker' / 'LiveOcean_output' / Ldir['gtag'] / ('f' + mds) / 'riv2' / 'rivers.nc'
+fn = Path('/boildat').absolute() / 'parker' / 'LiveOcean_output' / 'cas6_v3' / ('f' + mds) / 'riv2' / 'rivers.nc'
 ds = xr.open_dataset(fn)
 rn = ds['river_name'].values
 NR = rn.shape[1]
