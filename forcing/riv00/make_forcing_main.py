@@ -67,11 +67,13 @@ ri_df = pd.read_csv(ri_fn, index_col='rname')
 
 # get historical and climatological data files
 year0 = 1980
-year1 = 2020
+year1 = 2021
+clim_temp_year0 = 1980
+clim_temp_year1 = 2020
 # historical and climatological data
 Ldir['Hflow_fn'] = ri_dir / 'Data_historical' / ('ALL_flow_' + str(year0) + '_' + str(year1) + '.p')
 Ldir['Cflow_fn'] = ri_dir / 'Data_historical' / ('CLIM_flow_' + str(year0) + '_' + str(year1) + '.p')
-Ldir['Ctemp_fn'] = ri_dir / 'Data_historical' / ('CLIM_temp_' + str(year0) + '_' + str(year1) + '.p')
+Ldir['Ctemp_fn'] = ri_dir / 'Data_historical' / ('CLIM_temp_' + str(clim_temp_year0) + '_' + str(clim_temp_year1) + '.p')
 
 # get the list of rivers and indices for this grid
 gri_fn = Ldir['grid'] / 'river_info.csv'

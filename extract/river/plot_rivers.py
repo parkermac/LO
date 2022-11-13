@@ -12,8 +12,7 @@ import matplotlib.pyplot as plt
 Ldir = Lfun.Lstart(gridname='cas6', tag='v3')
 
 # load extraction (an xarray Dataset)
-#fn = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_roms' / 'extraction_2018.01.01_2018.12.31.nc'
-fn = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_roms' / 'extraction_2017.01.01_2020.12.31.nc'
+fn = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_roms' / 'extraction_2017.01.01_2021.12.31.nc'
 x = xr.load_dataset(fn)
 
 # get climatology

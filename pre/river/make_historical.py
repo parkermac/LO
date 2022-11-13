@@ -8,6 +8,7 @@ from lo_tools import river_functions as rivf
 from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
+import xarray as xr
 
 Ldir = Lfun.Lstart()
 
@@ -17,13 +18,20 @@ gtag = 'cas6_v3'
 ri_fn = Ldir['LOo'] / 'pre' / 'river' / gtag / 'river_info.csv'
 ri_df = pd.read_csv(ri_fn, index_col='rname')
 
-if False:
-    # 2021.08.09 This is OBSOLETE.  The pickled DataFrame has been replaced by an
-    # xarray Dataset, so the file referred to below no longer exists.
+use_roms = True
+testing = False
+ec_gap_year = 2021 # the year with missing ec data
+
+# Use these to concatenate the results with previous ones
+add_to_previous = True
+prev_year0 = 1980
+prev_year1 = 2020
+
+if use_roms:
     
     # Load the as-run rivers from forcing files to fill in gaps in ec records
-    roms_fn = 'cas6_v3_2017.01.01_2020.12.31.p' # copied from LiveOcean_output/river
-    roms_qt = pd.read_pickle(Ldir['LOo'] / 'pre' / 'river' / gtag / 'Data_roms' / roms_fn)
+    roms_fn = 'extraction_2017.01.01_2021.12.31.nc' # copied from LiveOcean_output/river
+    roms_ds = xr.open_dataset(Ldir['LOo'] / 'pre' / 'river' / gtag / 'Data_roms' / roms_fn)
     # only needed if we expect a gap between ec_historical and ec current
 
 # location for output
@@ -31,15 +39,11 @@ out_dir = Ldir['LOo'] / 'pre' / 'river' / gtag / 'Data_historical'
 Lfun.make_dir(out_dir)
 
 # set time range
-year0 = 1980
-year1 = 2020
-
-testing = False
+year0 = 2021
+year1 = 2021
 
 if testing:
     ri_df = ri_df.loc[['skagit','fraser']]
-    year0 = 2019
-    year1 = 2020
         
 dt0 = datetime(year0,1,1)
 dt1 = datetime(year1,12,31)
@@ -67,24 +71,24 @@ for rn in ri_df.index:
     if pd.notnull(rs.ec):
         for year in range(dt0.year, dt1.year + 1):
             this_days = (datetime(year,1,1), datetime(year,12,31))
-            if year >= 2020:
+            if year > ec_gap_year:
                 print((' ' + str(year) + ' getting ec ' + rn).center(60,'-'))
                 rs, qt = rivf.get_ec_data(rs, this_days)
                 
             # This section can be used as needed to fill gaps.
-            # At this time 2021.04.09 there is no gap so we will omit.
-            elif False:
+            elif use_roms and (year == ec_gap_year):
                 try:
-                    qt = roms_qt.loc[this_days[0]:this_days[1], rn]
-                    qt.index = qt.index + timedelta(days=0.5)
-                    print((' ' + str(year) + ' getting ec from forcing ' + rn).center(60,'-'))
+                    qti = pd.date_range(start=dt0+timedelta(days=.5), end=dt1+timedelta(days=.5))
+                    qt = roms_ds.transport.sel(time=qti, riv=rn)
+                    qt = qt.to_series()
+                    print((' ' + str(year) + ' getting ec from ROMS forcing ' + rn).center(60,'-'))
                     rs['got_data'] = True
                 except Exception as e:
                     qt = ''
                     print(e)
                     rs['got_data'] = False
             
-            elif year <= 2019:
+            elif year < ec_gap_year:
                 print((' ' + str(year) + ' getting ec historical ' + rn).center(60,'-'))
                 rs, qt = rivf.get_ec_data_historical(rs, year)
                 
@@ -115,7 +119,16 @@ for rn in rn_list:
 mean_ser = all_df.mean()
 mean_ser = mean_ser.sort_values(ascending=False)
 all_df = all_df[mean_ser.index] # biggest rivers first
+new_fn = out_dir / ('ALL_flow_' + str(year0) + '_' + str(year1) + '.p')
 all_df.to_pickle(out_dir / ('ALL_flow_' + str(year0) + '_' + str(year1) + '.p'))
+
+# concatenate with previous historical data
+if add_to_previous:
+    prev_fn = out_dir / ('ALL_flow_' + str(prev_year0) + '_' + str(prev_year1) + '.p')
+    combined_fn = out_dir / ('ALL_flow_' + str(prev_year0) + '_' + str(year1) + '.p')
+    prev_df = pd.read_pickle(prev_fn)
+    combined_df = pd.concat([prev_df, all_df])
+    combined_df.to_pickle(combined_fn)
 
 # PLOTTING
 if testing:

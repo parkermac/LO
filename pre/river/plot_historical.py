@@ -13,7 +13,7 @@ Ldir = Lfun.Lstart()
 
 gtag = 'cas6_v3'
 year0 = 1980
-year1 = 2020
+year1 = 2021
 
 # location of historical data to plot
 riv_dir = Ldir['LOo'] / 'pre' / 'river' / gtag / 'Data_historical'

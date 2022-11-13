@@ -4,7 +4,14 @@
 
 ### It relies on functions in the module `LO/lo_tools/lo_tools/river_functions.py`, which go out and get data from external sources: USGS, NWS Forecasts, and Environment Canada websites.  The reason for putting these in lo_tools is that they are also used by the forecast system.
 
-#### _NOTE: This really needs to be rewritten to make it easier to update an archive for a given year without having to re-download 40 years of data._
+#### _NOTE: This was rewritten in November 2022 to make it easier to add one new year to the historical transport data. You have to edit things in make_historical.py each time you do this, and it has to match up with what you look for when making the forcing files, like with riv00._
+
+---
+
+#### CURRENT OUTPUT STATE, 2022.11.13
+cas6_v3 has:
+- historical flow and flow climatology for 1980-2021
+- historical temperature and temperature climatology for 1980-2020
 
 ---
 
@@ -31,11 +38,11 @@ OUTPUT:
 
 ---
 
-`make_historical.py` - the main tool for getting historical flow data.
+`make_historical.py` - the main tool for getting historical flow data. This was recoded in November 2022 to make it easier to just do one year at a time and then concatenate it with previous saved data. Much faster and more reliable, but requires you to edit the code each time, and to get up-to-date ROMS extractions first.
 
 INPUT:
 
-Raw data from XML (USGS), or scraped from html (EC), using the functions in river_functions.py.  For the USGS data you can simply hand it a date range and it will quickly return 40 years of daily flow data.  For EC data it is more complicated.  I think that it works like this: over a range in the last 18 months you can get data using a date range, just like for USGS.  Earlier than this you need to scrape the "historical" data from a table on a web page, a year at a time.  When I did this in April 2021, I was able to get historical data through 2019, and current data for 2020.  In previous work on this archive I sometimes encountered times (maybe later in the year) when there was a gap between the two data sources.  A workaround (currently commented out in the code) is to use as-run river extractions from LiveOcean forcing files.
+Raw data from XML (USGS), or scraped from html (EC), using the functions in river_functions.py.  For the USGS data you can simply hand it a date range and it will quickly return 40 years of daily flow data.  For EC data it is more complicated.  Typically over a range in the last 18 months you can get data using a date range, just like for USGS.  Earlier than this you need to scrape the "historical" data from a table on a web page, a year at a time, but these only exist up to two years ago, e.g. 2020 when it is 2022. If yo do this after mid-year there is a gap in the EC data, e.g. doing this in November 2022 there is a gap for the early months of 2021. A workaround is to use as-run river extractions from LiveOcean forcing files, which are created using code in LO/extract/river.
 
 OUTPUT:
 
@@ -93,7 +100,7 @@ OUTPUT
 
 ---
 
-`make_climatology.py` averages the flow and temperature historical records by yearday.  There are no missing values, so these can be used as a backup plan when there is missing data.  Note that only about a third of the rivers have enough temperature data to make climatologies, and that for EC rivers the data is just from the last year.
+`make_climatology.py` averages the flow (and temperature if you tell it to) historical records by yearday.  There are no missing values, so these can be used as a backup plan when there is missing data.  Note that only about a third of the rivers have enough temperature data to make climatologies, and that for EC rivers the data is just from the last year.
 
 INPUT:
 

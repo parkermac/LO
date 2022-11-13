@@ -28,7 +28,7 @@ Lfun.make_dir(out_dir)
 year0 = 1980
 year1 = 2020
 
-testing = False
+testing = True
 
 if testing:
     ri_df = ri_df.loc[['skagit','fraser']]
