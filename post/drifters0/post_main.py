@@ -103,7 +103,7 @@ for exp in exp_list:
     for iip in range(NP):
         i_newtime = 0
         for iit in iit_list:
-            rxy.append({'track':iip, 'point':i_newtime, 'x':x[iit,iip], 'y':y[iit,iip]})
+            rxy.append({'track':iip, 'point':i_newtime, 'x':round(x[iit,iip],3), 'y':round(y[iit,iip],3)})
             i_newtime += 1
     json.dump(rxy, open(out_restructured_json_dict[exp], 'w'))
     
