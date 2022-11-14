@@ -455,14 +455,24 @@ while dt <= dt1:
             # (i) make sure the output directory exists
             cmd_list = ['ssh', remote_user + '@' + remote_machine,
                 'mkdir -p ' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
-            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
+            for rrr in range(10):
+                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                if len(stderr) == 0: # it worked
+                    break
+                else:
+                    sleeep(20) # try again
             messages(stdout, stderr, 'Make output directory on ' + remote_machine, args.verbose)
             # (ii) move the contents of roms_out_dir
             cmd_list = ['scp','-r',str(roms_out_dir),
                 remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
-            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
+            for rrr in range(10):
+                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                stdout, stderr = proc.communicate()
+                if len(stderr) == 0: # it worked
+                    break
+                else:
+                    sleeep(20) # try again
             messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
             # (iii) delete roms_out_dir and forcing files from several days in the past
             dt_prev = dt - timedelta(days=4)
