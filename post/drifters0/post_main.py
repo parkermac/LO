@@ -67,9 +67,11 @@ for proc in procs:
 print ('Finished tracker runs in %0.1f sec' % (time() - tt0))
 out_fn_dict = {}
 out_json_dict = {}
+out_restructured_json_dict = {}
 for exp in exp_list:
     out_fn_dict[exp] = Ldir['LOo'] / 'tracks' / (exp + '_surf_forWeb') / ('release_' + dsr + '.nc')
     out_json_dict[exp] = Ldir['LOo'] / 'tracks' / (exp + '_surf_forWeb') / ('tracks_' + exp + '.json')
+    out_restructured_json_dict[exp] = Ldir['LOo'] / 'tracks' / (exp + '_surf_forWeb') / ('tracks_' + exp + '_restructured.json')
 result = 'success'
 for exp in exp_list:
     if not out_fn_dict[exp].is_file():
@@ -88,12 +90,26 @@ for exp in exp_list:
     x = ds['lon'].values
     y = ds['lat'].values
     NT, NP = x.shape
+    
+    # original json
     xy = []
     for pp in range(NP):
         xy.append({'x': list(x[::skp,pp]), 'y': list(y[::skp,pp])})
     json.dump(xy, open(out_json_dict[exp], 'w'))
+    
+    # restructured json
+    rxy = []
+    iit_list = list(range(NT))[::skp]
+    for iip in range(NP):
+        i_newtime = 0
+        for iit in iit_list:
+            rxy.append({'track':iip, 'point':i_newtime, 'x':x[iit,iip], 'y':y[iit,iip]})
+            i_newtime += 1
+    json.dump(rxy, open(out_restructured_json_dict[exp], 'w'))
+    
     if Ldir['testing']== False:
-        # send to homer
+        
+        # send original to homer
         cmd2 = ['scp',str(out_json_dict[exp]),
             'pmacc@homer.u.washington.edu:/hw00/d47/pmacc/LO/tracks/'+ out_json_dict[exp].name]
         proc = Po(cmd2,stdout=Pi, stderr=Pi)
@@ -102,10 +118,25 @@ for exp in exp_list:
             print(' sdtout '.center(60,'-'))
             print(stdout.decode())
         if len(stderr) > 0:
-            print('WARNING: problem moving json to homer ' + out_json_dict[exp].name)
+            print('WARNING: problem moving original json to homer ' + out_json_dict[exp].name)
             print(' stderr '.center(60,'-'))
             print(stderr.decode())
             result = 'fail'
+            
+        # send restructured to homer
+        cmd2 = ['scp',str(out_json_dict[exp]),
+            'pmacc@homer.u.washington.edu:/hw00/d47/pmacc/LO/tracks/'+ out_restructured_json_dict[exp].name]
+        proc = Po(cmd2,stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        if len(stdout) > 0:
+            print(' sdtout '.center(60,'-'))
+            print(stdout.decode())
+        if len(stderr) > 0:
+            print('WARNING: problem moving restructured json to homer ' + out_restructured_json_dict[exp].name)
+            print(' stderr '.center(60,'-'))
+            print(stderr.decode())
+            result = 'fail'
+        
     else:
         print('Skipped sending files to homer')
 # END CONVERT AND SCP
