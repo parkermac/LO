@@ -65,9 +65,11 @@ xyzT_w = pickle.load(open(tree_dir / 'xyzT_w.p', 'rb'))
 lonrf = G['lon_rho'][Maskr]
 latrf = G['lat_rho'][Maskr]
 
-# Get dz (with SSH = 0) for calculation of dAKs/dz
-zw = zrfun.get_z(G['h'], 0*G['h'], S, only_w=True)
-dz = np.diff(zw, axis = 0)
+old_dz = False
+if old_dz:
+    # Get dz (with SSH = 0) for calculation of dAKs/dz
+    zw = zrfun.get_z(G['h'], 0*G['h'], S, only_w=True)
+    dz = np.diff(zw, axis = 0)
 
 maskr = Maskr.flatten()
 # minimum grid sizes in degrees (assumes plaid lon,lat grid?)
@@ -200,10 +202,24 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     AKs1[1:-1,:,:] = 0.25*AKs1_temp[:-2,:,:] + 0.5*AKs1_temp[1:-1,:,:] + 0.25*AKs1_temp[2:,:,:]
                     AKsf1 = AKs1[Maskw3]
                     #
-                    dKdz0 = np.diff(AKs0, axis=0)/dz
-                    dKdz1 = np.diff(AKs1, axis=0)/dz
-                    dKdzf0 = dKdz0[Maskr3]
-                    dKdzf1 = dKdz1[Maskr3]
+                    if old_dz:
+                        dKdz0 = np.diff(AKs0, axis=0)/dz
+                        dKdz1 = np.diff(AKs1, axis=0)/dz
+                        dKdzf0 = dKdz0[Maskr3]
+                        dKdzf1 = dKdz1[Maskr3]
+                    else:
+                        # New 2022.11.14 use time-varying dz
+                        zeta0 = ds0['zeta'].values #jx
+                        zeta1 = ds1['zeta'].values #jx
+                        zw0 = zrfun.get_z(G['h'], zeta0, S, only_w=True) #jx
+                        zw1 = zrfun.get_z(G['h'], zeta1, S, only_w=True) #jx
+                        dz0 = np.diff(zw0, axis=0) #jx
+                        dz1 = np.diff(zw1, axis=0) #jx
+                        dKdz0 = np.diff(AKs0, axis=0)/dz0 #jx
+                        dKdz1 = np.diff(AKs1, axis=0)/dz1 #jx
+                        dKdzf0 = dKdz0[Maskr3]
+                        dKdzf1 = dKdz1[Maskr3]
+                    
                     
             z0 = ds0['zeta'][0,:,:].values
             z1 = ds1['zeta'][0,:,:].values
@@ -263,8 +279,17 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     AKsf1 = AKs1[Maskw3]
                     #
                     dKdzf0 = dKdzf1.copy()
-                    dKdz1 = np.diff(AKs1, axis=0)/dz
-                    dKdzf1 = dKdz1[Maskr3]
+                    if old_dz:
+                        dKdz1 = np.diff(AKs1, axis=0)/dz
+                        dKdzf1 = dKdz1[Maskr3]
+                    else:
+                        # new 2022.11.14 Use time-varying dz
+                        zeta1 = ds1['zeta'].values #jx
+                        zw1 = zrfun.get_z(G['h'], zeta1, S, only_w=True) #jx
+                        dz1 = np.diff(zw1, axis=0) #jx 
+                        dKdz1 = np.diff(AKs1, axis=0)/dz1
+                        dKdzf1 = dKdz1[Maskr3]
+                    
             z1 = ds1['zeta'][0,:,:].values
             zf0 = zf1.copy()
             zf1 = z1[Maskr]
