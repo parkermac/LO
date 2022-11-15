@@ -1,0 +1,55 @@
+name: lodev
+channels:
+  - conda-forge
+dependencies:
+  # from Rob Hetland
+  - cf_xarray
+  - dask
+  - jupyter
+  - jupyterlab
+  - netcdf4
+  - numba >= 0.49
+  - numpy
+  - xarray
+  - xgcm
+  - cartopy
+  - cmocean
+  - datashader
+  - geoviews
+  - holoviews
+  - hvplot
+  - matplotlib
+  - zarr
+  - nodejs
+  - dask-labextension
+  # new things from Rich Signell
+  - fsspec
+  - ujson
+  - kerchunk
+  - zstandard
+  - pyvista
+  - h5py
+  - zlib
+  - zlib-ng
+  # my additions
+  - seawater
+  - gsw
+  - ephem
+  - UTide
+  - beautifulsoup4
+  - lxml
+  - xlrd
+  - openpyxl
+  - pytide
+  - sqlalchemy
+  - git
+  - pip
+  - pip:
+    - -e lo_tools # package of local modules
+    - azure-storage-blob
+    - PyCO2SYS
+    # - nwm # to access the National Water Model
+    # - hydrotools # different access to National Water Model
+  # and some non-python tools
+  - ffmpeg
+  - nco
