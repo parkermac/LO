@@ -67,6 +67,9 @@ LIMITATIONS: Currently the code is hardwired to only save time series of particl
 
 #### New Development Notes (most recent on top)
 
+2022.11.16:
+- Based on experiments by Jilian Xiong we made two changes to the turbulent mixing in `trackfun.py`. (i) We modified the top and bottom AKs values to be the same as those one grid cell down (from the top) or up (from the bottom), so that the nearest neighbor did not get a near-zero AKs when it was near the boundaries. (ii) We modified the calculation of d(AKs)/dz to use the instantaneous (tidally varying) dz. Experiments showed that these made little difference, but performed slightly better in the "well-mixed" tests.
+
 2022.10.06:
 - added a new module called `customizations.py` that allows more complex behavior, such as switching to a different target depth after a certain number of days.
 
