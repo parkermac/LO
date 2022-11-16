@@ -29,7 +29,7 @@ def get_ic(TR):
     elif exp_name == 'sect_AImid':
         lons = [-122.7, -122.6]
         lats = [48.075, 48.075]
-        plon00, plat00, pcs00 = ic_sect(fn00, lons, lats)
+        plon00, plat00, pcs00 = ic_sect(fn00, lons, lats, NPmax=10000)
 
     elif exp_name == 'nina_jdfw': # For Nina Bednarsek, mouth of JdF
         lon0 = -124.71; lat0 = 48.5 # center of the circle 
