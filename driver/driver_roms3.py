@@ -461,7 +461,7 @@ while dt <= dt1:
                 if len(stderr) == 0: # it worked
                     break
                 else:
-                    sleeep(20) # try again
+                    sleep(20) # try again
             messages(stdout, stderr, 'Make output directory on ' + remote_machine, args.verbose)
             # (ii) move the contents of roms_out_dir
             cmd_list = ['scp','-r',str(roms_out_dir),
@@ -472,7 +472,7 @@ while dt <= dt1:
                 if len(stderr) == 0: # it worked
                     break
                 else:
-                    sleeep(20) # try again
+                    sleep(20) # try again
             messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
             # (iii) delete roms_out_dir and forcing files from several days in the past
             dt_prev = dt - timedelta(days=4)
