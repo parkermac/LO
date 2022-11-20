@@ -83,7 +83,7 @@ else:
 D['ndtfast'] = 20
     
 his_interval = 3600 # seconds to define and write to history files
-rst_interval = 10 # days between writing to the restart file (e.g. 5)
+rst_interval = 1 # days between writing to the restart file (e.g. 5)
 
 # Find which forcings to look for (search the csv file in this directory).
 # We use the csv file because driver_roms_mox.py also uses it to copy forcing
@@ -147,7 +147,7 @@ D['dstart'] = int(Lfun.datetime_to_modtime(fdt) / 86400.)
 
 # Paths to forcing various file locations
 D['grid_dir'] = Ldir['grid']
-force_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string'])
+force_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname '] / ('f' + Ldir['date_string'])
 D['force_dir'] = force_dir
 D['roms_varinfo_dir'] = Ldir['parent'] / 'LO_roms_source_alt' / 'varinfo'
 # get horizontal coordinate info
@@ -169,14 +169,17 @@ D['out_dir'] = out_dir
 out_dir_yesterday = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + date_string_yesterday)
 Lfun.make_dir(out_dir, clean=True) # make sure it exists and is empty
 
-if Ldir['start_type'] == 'continuation':
-    nrrec = '0' # '-1' for a hot restart
-    #ininame = 'ocean_rst.nc' # for a hot perfect restart
-    ininame = 'ocean_his_0025.nc' # for a hot restart
+if Ldir['start_type'] == 'perfect':
+    nrrec = '-1' # '-1' for a perfect restart
+    ininame = 'ocean_rst.nc' # start from restart file
+    ini_fullname = out_dir_yesterday / ininame
+elif Ldir['start_type'] == 'continuation':
+    nrrec = '0' # '0' for a history or ini file
+    ininame = 'ocean_his_0025.nc' # restart from a history file
     ini_fullname = out_dir_yesterday / ininame
 elif Ldir['start_type'] == 'new':
     nrrec = '0' # '0' for a history or ini file
-    ininame = 'ocean_ini.nc' # could be an ini or history file
+    ininame = 'ocean_ini.nc' # start from ini file
     ini_fullname = force_dir / D['ocn'] / ininame
 D['nrrec'] = nrrec
 D['ini_fullname'] = ini_fullname
@@ -190,7 +193,7 @@ for line in f:
     for var in D.keys():
         if '$'+var+'$' in line:
             line2 = line.replace('$'+var+'$', str(D[var]))
-            line = line2
+            line = line2 # needed because we loop over all "var" for line
         else:
             line2 = line
     f2.write(line2)

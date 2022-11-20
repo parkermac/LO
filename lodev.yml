@@ -28,6 +28,7 @@ dependencies:
   - kerchunk
   - zstandard
   - pyvista
+  - pythreejs
   - h5py
   - zlib
   - zlib-ng

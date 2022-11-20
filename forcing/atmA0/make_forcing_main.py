@@ -5,7 +5,7 @@ Designed to run only as backfill.
 
 Testing:
 
-run make_forcing_main.py -g ae0 -t v0 -r backfill -s continuation -d 2020.01.01 -f atmA0 -test True
+run make_forcing_main.py -g ae0 -r backfill -d 2020.01.01 -f atmA0 -test True
 
 """
 
@@ -13,7 +13,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-from lo_tools import forcing_argfun as ffun
+from lo_tools import forcing_argfun2 as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing
 result_dict = dict()
@@ -31,7 +31,7 @@ if Ldir['testing']:
     reload(zrfun)
 
 # This directory is created, along with Info and Data subdirectories, by ffun.intro()
-out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
+out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
 
 # get grid and S info, and some sizes
 G = zrfun.get_basic_info(Ldir['grid'] / 'grid.nc', only_G=True)

@@ -237,7 +237,7 @@ In the fields below:
 Things that I type in [ ] below mean that they would be replaced by specific strings, for example when using them as command line arguments.
 
 - [gridname] is the name of the grid (e.g. cas6)
-- [tag] is a name to identify a collection of forcing files (e.g. v0)
+- [tag] is a name to identify any of the things that are controlled by a "dot_in" instance (e.g. v00)
 - [ex_name] is the name of the ROMS executable (e.g. u0kb)
 - [fstring] is a date string of the form fYYYY.MM.DD (e.g. f2021.07.04)
 - [date_string] is a date string of the form YYYY.MM.DD (e.g. 2021.07.04)
@@ -245,9 +245,9 @@ Things that I type in [ ] below mean that they would be replaced by specific str
 
 Grids are just identified by [gridname].
 
-Collections of forcing files are identified by [gridname]\_[tag] which is also referred to as [gtag] or Ldir['gtag'].
+Collections of forcing files are identified by [gridname] since they are always created for a specific grid. Note that you can accumulate many different types of forcing inside a certain [gridname], e.g. ocn00, ocn01, etc. This naming logic was introduced with `driver_forcing3.py` and the associated `driver_roms3.py`.
 
-A specific run is identified by [gridname]\_[tag]\_[ex_name] which is also referred to as [gtagex] or Ldir['gtagex'].
+A specific run is identified by [gridname]\_[tag]\_[ex_name] which is also referred to as [gtagex] or Ldir['gtagex']. The [tag] is only introduced in the creation of a dot_in instance, which is in a folder named LO/dot_in/[gtagex]. The [tag] represents the specific set of forcing files and other dot_in choices that define a run.
 
 NOTE: some of the code will parse a gtagex into it constituent gridname, tag, and ex_name.  To do so it assumes these are separated by an underscore "_", so don't use underscores in any of your gridnames, tags, or ex_names.
 
@@ -256,9 +256,9 @@ Here is some info on the various folders in LO, and how they relate to the namin
 | LO | LO_output |
 | --- | --- |
 | lo_tools/lo_tools: place for shared modules | |
-| pre: pre-processing code, like for loading historical river records | pre/river/[gtag]/... |
+| pre: pre-processing code, like for loading historical river records | pre/river/cas6_v3/... |
 | driver: has a couple of drivers that can be used with command-line arguments to (i) create any of the forcing files, and (ii) run one or more ROMS days | |
-| forcing: the code for making each of the separate types of forcing | forcing/[gtag]/[fstring]/[frc]/... |
+| forcing: the code for making each of the separate types of forcing | forcing/[gridname]/[fstring]/[frc]/... |
 | dot_in: code (one folder for each [gtagex]) for making the .in file for a ROMS run for a given day |
 | post: code for automated post-processing of the daily forecast, e.g. for the movies that are sent to the LiveOcean website | post/[gtagex]/layers, etc. |
 | extract: code for various types of extractions | extract/[gtagex]/cast, etc. |

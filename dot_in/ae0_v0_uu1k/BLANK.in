@@ -295,7 +295,7 @@ ad_VolCons(north) ==  F                            ! northern boundary
 ! Harmonic/biharmonic horizontal diffusion of tracer for nonlinear model
 ! and adjoint-based algorithms: [1:NAT+NPT,Ngrids].
 
-        TNU2 == 2*2.0d0                         ! m2/s
+        TNU2 == 2*0.0d0                         ! m2/s
         TNU4 == 2*0.0d0                         ! m4/s
 
      ad_TNU2 == 0.0d0  0.0d0                    ! m2/s
@@ -620,7 +620,7 @@ Hout(idEmPf) == T       ! EminusP            E-P flux
 Hout(idevap) == T       ! evaporation        evaporation rate
 Hout(idrain) == T       ! rain               precipitation rate
 
-Hout(idDano) == T       ! rho                density anomaly
+Hout(idDano) == F       ! rho                density anomaly
 Hout(idVvis) == T       ! AKv                vertical viscosity
 Hout(idTdif) == F       ! AKt                vertical T-diffusion
 Hout(idSdif) == T       ! AKs                vertical Salinity diffusion
@@ -1080,8 +1080,8 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
      APARNAM =  ROMS/External/s4dvar.in
      SPOSNAM =  ROMS/External/stations.in
      FPOSNAM =  ROMS/External/floats.in
-     BPARNAM =  ROMS/External/bio_Fennel.in
-!    BPARNAM =  $out_dir$/npzd2o_Banas.in
+!     BPARNAM =  ROMS/External/bio_Fennel.in
+     BPARNAM =  $out_dir$/bio_Banas.in
      SPARNAM =  ROMS/External/sediment.in
      USRNAME =  ROMS/External/MyFile.dat
 
