@@ -104,14 +104,15 @@ ds.close()
 print('- Write clm file: %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
 
-# Write initial condition file
-tt0 = time()
-in_fn = out_dir / 'ocean_clm.nc'
-out_fn = out_dir / 'ocean_ini.nc'
-out_fn.unlink(missing_ok=True)
-Ofun_nc.make_ini_file(in_fn, out_fn)
-print('- Write ini file: %0.2f sec' % (time()-tt0))
-sys.stdout.flush()
+if Ldir['start_type'] == 'new':
+    # Write initial condition file
+    tt0 = time()
+    in_fn = out_dir / 'ocean_clm.nc'
+    out_fn = out_dir / 'ocean_ini.nc'
+    out_fn.unlink(missing_ok=True)
+    Ofun_nc.make_ini_file(in_fn, out_fn)
+    print('- Write ini file: %0.2f sec' % (time()-tt0))
+    sys.stdout.flush()
 
 # Write boundary file
 tt0 = time()
@@ -129,7 +130,10 @@ def print_info(fn):
     ds.close()
 
 # Check results
-nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
+if Ldir['start_type'] == 'new':
+    nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
+else:
+    nc_list = ['ocean_clm.nc', 'ocean_bry.nc']
 if Ldir['testing']:
     # print info about the files to the screen
     for fn in nc_list:
