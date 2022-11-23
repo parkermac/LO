@@ -103,16 +103,30 @@ conda activate loenv
 ```
 to your .bashrc or .bash_profile, and "source" it.  Now (loenv) will appear at the start of your bash prompt.
 
-If you want to update the packages in the environment, go to LO where the loenv.yml file is, make sure loenv is activated, and then do:
-```
-conda env update -f loenv.yml
-```
-which only took a minute or two the last time I tried it.  This is also what you do after you make any change to your .yml file, like adding a package.  There are more complete instructions for working with conda environments [HERE](https://www.earthdatascience.org/courses/intro-to-earth-data-science/python-code-fundamentals/use-python-packages/use-conda-environments-and-install-packages/).
+#### _Updating the environment_
 
-Note: it also can be useful to update conda with about the same frequency as you update loenv. To do this use this command (I assume you can do this within loenv but that it would still affect any environment):
+Generally whenever I am about to update a python environment, I first update conda, doing:
 ```
 conda update -n base -c defaults conda
 ```
+Then to update the loenv environment, go to LO where the loenv.yml file is and do:
+```
+conda env update -f loenv.yml
+```
+which only took a minute or two the last time I tried it. There are more complete instructions for working with conda environments [HERE](https://www.earthdatascience.org/courses/intro-to-earth-data-science/python-code-fundamentals/use-python-packages/use-conda-environments-and-install-packages/).
+
+#### _Creating your own environment! Highly recommended_
+
+One way to do this would be to:
+
+- copy `loenv.yml` to LO_user or any other repo that is yours
+- rename it, for example, to `myenv.yml`
+- edit it so that `name: myenv` is the first line
+- add or subtract any packages you like
+- if you are using the lo_tools local package, change the path for it in the yml to be `-e ../LO/lo_tools` (assuming that is the correct relative path)
+- then do: `conda env create -f myenv.yml > env.log &` and there you are!
+
+At any time you can do `conda info --envs` to find out what environments you have. And if you want to cleanly get rid of an environment, just make sure it is not active, then do `conda env remove -n myenv` or whatever name you are wanting to remove. This will not delete your yml file.
 
 #### (4) Create your own LO_user and make it a GitHub repo
 
