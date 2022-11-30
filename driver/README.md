@@ -3,13 +3,13 @@
 ### This code is the drivers for creating forcing, running ROMS, post-processing, and other jobs that require us to control complex, repetitive tasks, either for a single forecast or for a long series of days.
 
 ---
-#### `driver_forcing.py`
+#### `driver_forcing3.py`
 
-This runs any of the forcing jobs, for one or more days, for any [gtag].
+This runs any of the forcing jobs, for one or more days, for any [gridname].
 
 ---
 
-#### `driver_roms1.py`
+#### `driver_roms1.py` **OBSOLETE**
 
 This runs ROMS for a single forecast or for many days. It is organized to use the LO run naming system: [gtagex] = [gridname]\_[tag]\_[ex_name].
 
@@ -29,12 +29,21 @@ This is much improved from the LiveOcean version:
 
 ---
 
-#### `driver_roms2.py`
+#### `driver_roms2.py` **OBSOLETE**
 
 Updated version of driver_roms1.py.
 - fixed a bug in handling of "new" start type
 - streamlined screen output
 - only works with updated ROMS (LO_roms_source)
+
+---
+
+#### `driver_roms3.py` **USE THIS ONE**
+
+Updated version of driver_roms2.py.
+- Assumes forcing is in [gridname]
+- Better error checking on mox and klone. More reliable.
+- Works with perfect restart.
 
 ---
 

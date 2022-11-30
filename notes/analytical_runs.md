@@ -50,11 +50,11 @@ Then copy LO_data/grids/ae0 from your laptop to the remote machine.  You could u
 
 Working on the remote machine, go to `LO/driver` and execute these three commands from the linux command line (sequence doesn't matter):
 ```
-python driver_forcing.py -g ae0 -t v0 -r backfill -s new -0 2020.01.01 -1 2020.01.02 -f rivA0
-python driver_forcing.py -g ae0 -t v0 -r backfill -s new -0 2020.01.01 -1 2020.01.02 -f ocnA0
-python driver_forcing.py -g ae0 -t v0 -r backfill -s new -0 2020.01.01 -1 2020.01.02 -f tideA0
+python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f rivA0
+python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f ocnA0
+python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f tideA0
 ```
-These will make files in `LO_output/forcing/ae0_v0/f2020.01.01` and `f2020.01.02`. These are the NetCDF files ROMS will need to force the run for two days.
+These will make files in `LO_output/forcing/ae0/f2020.01.01` and `f2020.01.02`. These are the NetCDF files ROMS will need to force the run for two days.
 
 #### Run ROMS on klone
 
@@ -83,5 +83,5 @@ scp -r parker@apogee.ocean.washington.edu:/dat1/parker/LO_data/grids/ae0 .
 
 Run the analytical case, from the head node, with a command like this.
 ```
-python3 driver_roms2.py -g ae0 -t v0 -x uu1k -r backfill -s new -0 2020.01.01 -1 2020.01.02 -np 40 -N 40 < /dev/null > ae.log &
+python3 driver_roms3.py -g ae0 -t v0 -x uu1k -r backfill -s new -0 2020.01.01 -1 2020.01.02 -np 40 -N 40 < /dev/null > ae.log &
 ```

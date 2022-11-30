@@ -74,7 +74,7 @@ parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
 parser.add_argument('--run_roms', default=True, type=Lfun.boolean_string)
 parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
 # flag to sleep during the forecast window, False means it will run continuously
-parser.add_argument('-sfw', '--sleep_forecast_window', default=False, type=Lfun.boolean_string)
+parser.add_argument('-sfw', '--sleep_forecast_window', default=True, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 # check for required arguments
