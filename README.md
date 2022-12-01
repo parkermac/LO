@@ -86,6 +86,11 @@ and LO and all its sub-folders will appear. To get any changes I may make, go to
 ```
 git pull
 ```
+Sometimes the remote machines will complain about this. One solution is to issue this command while inside the repo on the remote machine:
+```
+git config pull.ff only
+```
+which (I think) means that your pull always does "fast forward" moving the local branch to the same state as the one in the cloud. This is appropriate if you are using the "one way" git workflow that I generally follow: only edit code on my laptop, push to the cloud, pull from the cloud to remote machines; **never edit on remote machines**.
 
 #### (3) Create the (loenv) environment
 
