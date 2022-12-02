@@ -13,7 +13,7 @@ in_dir0 = Path('/pgdat1/parker/LO_roms')
 
 in_fn = in_dir0 / 'cas6_v0_live' / 'f2020.12.31' / 'ocean_his_0025.nc'
 
-out_dir = Ldir['roms_out'] / 'cas6_v00_uu0kb' / 'f2020.12.31'
+out_dir = Ldir['roms_out'] / 'cas6_v00_uu0mb' / 'f2020.12.31'
 Lfun.make_dir(out_dir)
 out_fn = out_dir / 'ocean_his_0025.nc'
 
