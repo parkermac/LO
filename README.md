@@ -133,6 +133,13 @@ One way to do this would be to:
 
 At any time you can do `conda info --envs` to find out what environments you have. And if you want to cleanly get rid of an environment, just make sure it is not active, then do `conda env remove -n myenv` or whatever name you are wanting to remove. This will not delete your yml file.
 
+#### _NOTE for mac users_
+
+As of 2022.12.07 the conda-forge version of the nco operators does not have a version for the new M1 chip. So you will want to make your own environment yaml file, deleting nco from the list (and pytide as well, with is not used much). And then install nco using homebrew instead:
+- Instructions to install homebrew: https://brew.sh/
+- Install nco using homebrew: https://formulae.brew.sh/formula/nco#default
+- Both are one-liners. Easy!
+
 #### (4) Create your own LO_user and make it a GitHub repo
 
 For this you will be working on your laptop and creating your own GitHub repo.  I can't stress enough how useful it is to keep all your code in git. It saves your code to the cloud. It allows you to see changes you have made. It makes it easy to share code with others.  Finally it makes it easy to maintain your code on other machines.
