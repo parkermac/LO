@@ -34,9 +34,9 @@ def get_cast(out_fn, fn, lon, lat, npzd):
         
     v_list = 'AKs,salt,temp,h'
     if npzd == 'new':
-        v_list += ',phytoplankton,chlorophyll,zooplankton,SdetritusN,LdetritusN,oxygen,alkalinity,TIC'
+        v_list += ',phytoplankton,chlorophyll,zooplankton,SdetritusN,LdetritusN,oxygen,alkalinity,TIC,NO3,NH4'
     elif npzd == 'old':
-        v_list += ',phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC'
+        v_list += ',phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,NO3'
     elif npzd == 'none':
         pass
     else:
