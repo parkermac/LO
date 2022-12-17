@@ -34,7 +34,7 @@ if info_fn.is_file():
         lon = info_df.loc[cid,'lon']
         lat = info_df.loc[cid,'lat']
         dt = info_df.loc[cid,'time']
-        out_fn = out_dir / (str(cid) + '.nc')
+        out_fn = out_dir / (str(int(cid)) + '.nc')
         fn = cfun.get_his_fn_from_dt(Ldir, dt)
                 
         if fn.is_file(): # useful for testing
