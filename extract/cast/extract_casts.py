@@ -36,10 +36,23 @@ if info_fn.is_file():
         dt = info_df.loc[cid,'time']
         out_fn = out_dir / (str(cid) + '.nc')
         fn = cfun.get_his_fn_from_dt(Ldir, dt)
-        if fn.is_file():
+                
+        if fn.is_file(): # useful for testing
+            
+            # check on which bio variables to get
+            if ii == 0:
+                ds = xr.open_dataset(fn)
+                if 'NH4' in ds.data_vars:
+                    npzd = 'new'
+                elif 'NO3' in ds.data_vars
+                    npzd = 'old'
+                else:
+                    npzd = 'none'
+                ds.close()
+            
             print('Get ' + out_fn.name)
             sys.stdout.flush()
-            cfun.get_cast(out_fn, fn, lon, lat)
+            cfun.get_cast(out_fn, fn, lon, lat, npzd)
             ii += 1
             if Ldir['testing'] and (ii > 3):
                 break

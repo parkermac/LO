@@ -7,8 +7,9 @@ from lo_tools import zfun, zrfun
 import subprocess
 import xarray as xr
 import numpy as np
+from datetime import timedelta
 
-def get_cast(out_fn, fn, lon, lat):
+def get_cast(out_fn, fn, lon, lat, npzd):
     
     # This function does the cast extraction and saves it to a NetCDF file.
     G, S, T = zrfun.get_basic_info(fn)
@@ -31,10 +32,20 @@ def get_cast(out_fn, fn, lon, lat):
         print('ERROR: point on land mask ' + out_fn.name)
         return
         
+    v_list = 'AKs,salt,temp,h'
+    if npzd == 'new':
+        v_list += ',phytoplankton,chlorophyll,zooplankton,SdetritusN,LdetritusN,oxygen,alkalinity,TIC'
+    elif npzd == 'old':
+        v_list += ',phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC'
+    elif npzd == 'none':
+        pass
+    else:
+        print('Error: unrecognized npzd')
+        sys.exit()
+    
     # Run ncks to do the extraction, overwriting any existing file
     cmd_list = ['ncks', '-d', 'xi_rho,'+str(ix), '-d', 'eta_rho,'+str(iy),
-        '-v', 'AKs,salt,temp,NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,h',
-        '-O', str(fn), str(out_fn)]
+        '-v', v_list, '-O', str(fn), str(out_fn)]
     # Note: We get AKs so that the s_w dimension is retained
     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     # and check on the results
@@ -62,7 +73,12 @@ def get_cast(out_fn, fn, lon, lat):
         
 def get_his_fn_from_dt(Ldir, dt):
     # This creates the Path of a history file from its datetime
+    if dt.hour == 0:
+        # perfect restart does not write the 0001 file
+        dt = dt - timedelta(days=1)
+        his_num = '0025'
+    else:
+        his_num = ('0000' + str(dt.hour + 1))[-4:]
     date_string = dt.strftime(Ldir['ds_fmt'])
-    his_num = ('0000' + str(dt.hour + 1))[-4:]
     fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + date_string) / ('ocean_his_' + his_num + '.nc')
     return fn
