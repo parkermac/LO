@@ -145,7 +145,7 @@ for year in year_list:
                 # the Station field is a unique cast identifier.
 
                 # Force certain fields to be the same throughout the cast.
-                df.loc[df.cid==cid,'lon'] = df[df.cid==cid].lon.values[0]
+                df.loc[df.cid==cid,'lon'] = - df[df.cid==cid].lon.values[0] # also fix sign
                 df.loc[df.cid==cid,'lat'] = df[df.cid==cid].lat.values[0]
                 df.loc[df.cid==cid,'time'] = df[df.cid==cid].time.values[0]
                 
