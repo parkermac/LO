@@ -44,7 +44,7 @@ if info_fn.is_file():
                 ds = xr.open_dataset(fn)
                 if 'NH4' in ds.data_vars:
                     npzd = 'new'
-                elif 'NO3' in ds.data_vars
+                elif 'NO3' in ds.data_vars:
                     npzd = 'old'
                 else:
                     npzd = 'none'
