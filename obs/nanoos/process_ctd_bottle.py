@@ -4,9 +4,16 @@ Code for initial processing of ctd and bottle data from nanoos cruises.
 Hack notes:
 
 2021
-- has three cruises (April, July, September)
-- none have DIC or TA (sad)
+- has three cruises (April: RC0051, July: RC0058, September: RC0063)
+- none have DIC or TA, but samples were taken. They just were slow to be
+  processed by PMEL. I may get draft values from Anna Boyar.
+- the original September bottl file had a column alignment type to it
+  appeared to have near-zero nitrate. Anna fixed this and the copy I have
+  in LO_data is corrected. Not sure about the website.
+- decimal longitudes are positive (fixed with hack)
 - April has bad rows at the end of the xlsx with only lat, lon (fixed)
+- April bottle file has a typo for the latitude of station 5 (repeats that of 28)
+  (fixed with a hack)
 """
 
 from datetime import datetime, timedelta
@@ -90,7 +97,7 @@ for year in year_list:
         df = pd.read_excel(fn, usecols=cols, dtype={'DATE_UTC':str, 'TIME_UTC':str})
         # NOTE: this would have been a lot easier using
         # parse_dates={'time':['DATE_UTC', 'TIME_UTC']}) in the pd.read_excel() call,
-        # but there are some bad rows with missing data, so we slog through doing if
+        # but there are some bad rows with missing data, so we slog through doing it
         # from scratch.
         dstr = df.DATE_UTC
         tstr = df.TIME_UTC
@@ -128,14 +135,14 @@ for year in year_list:
             # of cruises in this year, even though a station may be repeated on all cruises.
             #
             # We will also save the field "cruise" as a convenient way to select a collection of
-            # casts.
+            # casts from a given month.
             df['cid'] = np.nan
             cid = cid0
             for name in df.name.unique():
                 df.loc[df.name==name,'cid'] = cid
                 cid += 1
             for cid in df.cid.unique():
-                # Check that there are not two different casts associated with the same Station
+                # Check that there are not two different casts associated with the same station
                 # by looking for large time differences. Pretty ad hoc.
                 time_diff = df[df.cid==cid].time.values[-1] - df[df.cid==cid].time.values[0]
                 time_diff = pd.to_timedelta(time_diff)
@@ -156,7 +163,8 @@ for year in year_list:
             SP = df.SP.to_numpy()
             pt = df.PT.to_numpy()
             p = df['P (dbar)'].to_numpy()
-            lon = df.lon.to_numpy()
+            lon = -(np.abs(df.lon.to_numpy())) # force sign to be negative
+            df['lon'] = lon
             lat = df.lat.to_numpy()
             # - do the conversions
             SA = gsw.SA_from_SP(SP, p, lon, lat)
@@ -183,9 +191,10 @@ for year in year_list:
             print(' - processed %d casts' % ( len(df.cid.unique()) ))
             cid0 = df.cid.max() + 1
             
-    # Sort the result by time
-    DF = DF.sort_values('time', ignore_index=True)
-    # and rework cid to also be increasing in time
+    # Sort the result by time, and sort each cast to be bottom to top
+    DF = DF.sort_values(['time','z'], ignore_index=True)
+        
+    # Rework cid to also be increasing in time
     a = DF[['time','cid']].copy()
     a['cid_alt'] = np.nan
     ii = 0
@@ -198,6 +207,12 @@ for year in year_list:
     a = DF['cruise'].to_list()
     aa = [item.strip() for item in a]
     DF['cruise'] = aa
+    
+    # reindex
+    #DF = DF.reindex()
+    
+    # Hack: fix a location typo
+    DF.loc[(DF.cruise=='RC0051') & (DF.name==5), 'lat'] = 47.883
 
     # save the data
     DF.to_pickle(out_fn)
