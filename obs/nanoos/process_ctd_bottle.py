@@ -28,7 +28,10 @@ Ldir = Lfun.Lstart()
 
 testing = False
 
-# BOTTLES
+# CTD
+# Not written yet
+
+# BOTTLE
 source = 'nanoos'
 otype = 'bottle'
 
@@ -207,21 +210,19 @@ for year in year_list:
     a = DF['cruise'].to_list()
     aa = [item.strip() for item in a]
     DF['cruise'] = aa
-    
-    # reindex
-    #DF = DF.reindex()
-    
+        
     # Hack: fix a location typo
     DF.loc[(DF.cruise=='RC0051') & (DF.name==5), 'lat'] = 47.883
 
-    # save the data
+    # Save the data
     DF.to_pickle(out_fn)
     
-    # # Also pull out a dateframe with station info to use for model cast extractions.
+    # Also pull out a dateframe with station info to use for model cast extractions.
     ind = DF.cid.unique()
-    info_df = pd.DataFrame(index=ind, columns=['lon','lat','time','name','cruise'])
+    col_list = ['lon','lat','time','name','cruise']
+    info_df = pd.DataFrame(index=ind, columns=col_list)
     for cid in DF.cid.unique():
-        info_df.loc[cid,['lon','lat','time','name','cruise']] = DF.loc[DF.cid==cid,['lon','lat','time','name','cruise']].iloc[0,:]
+        info_df.loc[cid,col_list] = DF.loc[DF.cid==cid,col_list].iloc[0,:]
     info_df.index.name = 'cid'
     info_df['time'] = pd.to_datetime(info_df['time'])
     info_df.to_pickle(info_out_fn)
