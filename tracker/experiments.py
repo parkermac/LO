@@ -110,6 +110,13 @@ def get_ic(TR):
         latvec = np.linspace(47, 49, 100)
         pcs_vec = np.array([0])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
+
+    elif exp_name == 'sneaker': # A surface release throughout the Salish Sea
+        # meant to be used with windage for a graphic for Nat Geo.
+        lonvec = np.linspace(-125.5, -122, 100)
+        latvec = np.linspace(46.5, 50.5, 200)
+        pcs_vec = np.array([0])
+        plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
         
     return plon00, plat00, pcs00
     
