@@ -1392,6 +1392,136 @@ def P_splash4(in_dict):
         plt.close()
     else:
         plt.show()
+        
+def P_splash_sneaker(in_dict):
+    """
+    This makes a fancy plot for a Nat Geo request, including some
+    drifter tracks with 0.03 windage from 2019.01.18.
+    """
+    # START
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(15,12))
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
+    
+    # PREPARING FIELDS
+    from mpl_toolkits.axes_grid1.inset_locator import inset_axes
+
+    Ldir = Lfun.Lstart()
+
+    do_topo = True
+    cmap = 'RdYlBu_r'
+    vn = 'temp'
+    vlims = (6,14)
+
+    # model output
+    fn = in_dict['fn']
+    T = zrfun.get_basic_info(fn, only_T=True)
+    x,y = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
+    salt = ds[vn][0,-1,:,:].values
+
+    if do_topo:
+        # topography
+        tfn = (Ldir['data'] / 'topo' / 'srtm15' / 'topo15.nc')
+        tds = xr.open_dataset(tfn)
+        step = 1
+        tx = tds['lon'][::step].values
+        ty = tds['lat'][::step].values
+        tz = tds['z'][::step,::step].values
+        tz[tz<0] = np.nan
+        
+    # get drifter tracks
+    dfn = Ldir['LOo'] / 'tracks' / 'sneaker_surf_wind3' / 'release_2019.01.18.nc'
+    dds = xr.open_dataset(dfn)
+    skp = 1
+    dx = dds.lon[:,::skp].values
+    dy = dds.lat[:,::skp].values
+
+    # LARGE MAP
+    ax = fig.add_subplot(121)
+    cs = ax.pcolormesh(x,y,salt, cmap=cmap, vmin=vlims[0], vmax=vlims[1])
+    # Inset colorbar
+    cbaxes = inset_axes(ax, width="5%", height="40%", loc='lower left')
+    fig.colorbar(cs, cax=cbaxes, orientation='vertical')
+    if do_topo:
+        cmapt = 'gist_earth'
+        cs = ax.pcolormesh(tx,ty,tz, cmap=cmapt, shading='nearest', vmin=-1000, vmax=2000)
+    pfun.add_coast(ax)
+    pfun.dar(ax)
+    ax.axis([-130, -122, 42, 52])
+    ax.set_xticks([-129, -127, -125, -123])
+    ax.set_yticks([42, 44, 46, 48, 50, 52])
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    tstr = T['dt'].strftime(Lfun.ds_fmt)
+    ax.text(.98,.99,'Initial release\nlocations', size=fs*1.5,
+         ha='right', va='top', weight='bold', transform=ax.transAxes,
+         bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
+    ax.text(.17,.05,'LiveOcean\nSurface water\nTemperature $[^{\circ}C]$\n\n'+tstr,
+         ha='left', va='bottom', weight='bold', transform=ax.transAxes,
+         bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
+
+    # box for drifter release
+    aa = [-125.8, -122.2, 46.3, 51]
+    nlev = 0
+    # draw box on the large map
+    pfun.draw_box(ax, aa, linestyle='-', color='b', alpha=1, linewidth=3, inset=0)
+    
+    fs2 = fs*.9
+    fs3 = fs*.8
+    
+    ax.text(-123.072,46.7866,'Washington', size=fs2,
+        style='italic',ha='center',va='center',rotation=-45)
+    ax.text(-122.996,44.5788,'Oregon', size=fs2,
+        style='italic',ha='center',va='center',rotation=-45)
+    
+    ah = ax.text(-125.3,49.4768,'Vancouver\nIsland', size=fs2,
+        style='italic',ha='center',va='center',rotation=-45)
+    ax.text(-126.3,50.2,'Johnstone\nStrait', size=.7*fs2,
+        style='italic',ha='center',va='center',rotation=-10)
+        
+    # add drifter tracks
+    ax.plot(dx[0,:],dy[0,:],'.k', ms=1, alpha=.5)
+    
+    
+
+    # SMALL MAP
+    
+    ax = fig.add_subplot(122)
+    cs = ax.pcolormesh(x,y,salt, cmap=cmap, vmin=vlims[0], vmax=vlims[1])
+    # Inset colorbar
+    # cbaxes = inset_axes(ax, width="5%", height="30%", loc='upper right', borderpad=2)
+    # fig.colorbar(cs, cax=cbaxes, orientation='vertical')
+    if do_topo:
+        cmapt = 'gist_earth'
+        cs = ax.pcolormesh(tx,ty,tz, cmap=cmapt, shading='nearest', vmin=-1000, vmax=2000)
+    pfun.add_coast(ax)
+    pfun.dar(ax)
+    ax.axis(aa)
+    ax.set_xticks([-125, -124, -123])
+    ax.set_yticks([47, 48, 49, 50])
+    ax.set_xlabel('Longitude')
+    ax.text(.98,.99,'Locations after\nthree days', size=fs*1.5, c='k',
+         ha='right', va='top', weight='bold', transform=ax.transAxes,
+         bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
+         
+    # add drifter tracks
+    # ax.plot(dx, dy, '-k', lw=.5, alpha=.5)
+    ax.plot(dx[-1,:],dy[-1,:],'.k')
+    
+    plt.setp(ax.spines.values(), linewidth=3, color='b')
+             
+
+    #fig.tight_layout()
+    
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
 
 def P_admiralty(in_dict):
     """
