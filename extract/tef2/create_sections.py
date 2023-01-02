@@ -24,6 +24,7 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from cmocean import cm
+import sys
 
 # get command line arguments
 import argparse
@@ -43,7 +44,14 @@ in_fn = Ldir['grid'] / 'grid.nc'
 out_name = args.gridname + '_' + args.collection_tag
 out_dir = Ldir['LOo'] / 'extract' / 'tef2' / out_name
 if args.clobber:
-    Lfun.make_dir(out_dir, clean=True)
+    inp = input('Do you really want to clobber? y/n: ')
+    if inp == 'y':
+        Lfun.make_dir(out_dir, clean=True)
+    else:
+        sys.exit()
+else:
+    # make out_dir in case it does not exist yet
+    Lfun.make_dir(out_dir)
     
 # get grid data
 ds = xr.open_dataset(in_fn)
@@ -118,6 +126,10 @@ while keep_going:
     elif len(ii) == 2:
         task = ii[0]
         sn = ii[1] # section name
+        sn_list = get_sn_list()
+        if sn in sn_list:
+            print('Oops, that name is already used. Please delete it first.')
+            task = 'junk'
     else:
         print('Error reading keyboard input, try again (q to quit).')
         task = 'junk'
