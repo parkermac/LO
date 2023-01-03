@@ -127,7 +127,7 @@ while keep_going:
         task = ii[0]
         sn = ii[1] # section name
         sn_list = get_sn_list()
-        if sn in sn_list:
+        if (sn in sn_list) and (task == 'c'):
             print('Oops, that name is already used. Please delete it first.')
             task = 'junk'
     else:
