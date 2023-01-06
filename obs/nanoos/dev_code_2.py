@@ -55,14 +55,14 @@ for year in year_list:
                 except:
                     tlist.append(np.nan)
             df0['time'] = tlist
-            df0 = df0.dropna(axis=0, how='all') # drop rows with no good data
-            df0 = df0[df0.time.notna()] # drop rows with bad time
-            df0 = df0.reset_index()
         else:
             try:
                 df0 = pd.read_excel(fn, parse_dates={'time':['DATE_UTC', 'TIME_UTC']})
             except ValueError:
                 df0 = pd.read_excel(fn, parse_dates={'time':['Date_UTC', 'Time_UTC']})
+        df0 = df0.dropna(axis=0, how='all') # drop rows with no good data
+        df0 = df0[df0.time.notna()] # drop rows with bad time
+        df0 = df0.reset_index()
         # Create a DataFrame with only known variables (those which have non-empty values
         # in bot_fun.v_dict).
         df = pd.DataFrame()
