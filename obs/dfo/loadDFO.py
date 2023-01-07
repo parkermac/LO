@@ -194,7 +194,8 @@ def loadDFO_bottle(basedir='', dbname='DFO.sqlite',
             StationTBL.Lat,StationTBL.Lon,ObsTBL.Pressure,ObsTBL.Depth,
             ObsTBL.Chlorophyll_Extracted.label('Chl'),ObsTBL.Chlorophyll_Extracted_units.label('Chl_units'),
             ObsTBL.Nitrate_plus_Nitrite.label('N'),ObsTBL.Nitrate_plus_Nitrite_units.label('N_units'),
-            ObsTBL.Silicate.label('Si'),ObsTBL.Silicate_units.label('Si_units'),
+            ObsTBL.Ammonium.label('NH4'),ObsTBL.Ammonium_units.label('NH4_units'),
+            ObsTBL.Silicate.label('SiO4'),ObsTBL.Silicate_units.label('SiO4_units'),
             SA.label('SA'),CT.label('CT'),
             ObsTBL.Oxygen_Dissolved.label('DO'),ObsTBL.Oxygen_Dissolved_units.label('DO_units')).\
             select_from(StationTBL).join(ObsTBL,ObsTBL.StationTBLID==StationTBL.ID).\

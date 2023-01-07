@@ -30,18 +30,19 @@
 - lat [degrees -90:90]
 - time [datetime UTC]
 - name [station name or None]
+- cruise [cruise name if available]
 
 #### [year].p is a pickled DataFrame with all the processed data for all the casts.
 
 **index** is just numbers, one for each depth
 
 **columns**:
-- 'cid', 'lon', 'lat', 'time', name are IDENTICAL for all rows of a given cast, and correspond to a single row in the info_[year].p DataFrame
+- 'cid', 'lon', 'lat', 'time', 'name', 'cruise' are IDENTICAL for all rows of a given cast, and correspond to a single row in the info_[year].p DataFrame
 - 'z' [z-position in meters, positive up, zero at free surface]
 - 'SA' [Absolute Salinity in g kg-1]
 - 'CT' [Conservative Temperature in degC]
 - 'DO (uM)' [dissolved oxygen in umol L-1]
-- and whatever other data columns there are...
+- and whatever other data columns there are,
 
 Note that we use a sort of cumbersome naming convention for the data columns, including the units explicitly so it is clear what we are dealing with in subsequent use. After we have done more processing I will create a master list of preferred and acceptable variable names.
 

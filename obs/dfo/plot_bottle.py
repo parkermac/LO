@@ -11,25 +11,24 @@ from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 
 year = 2017
-aa = [-125.2,-122.5, 48.5,50.0]
+# aa = [-125.2,-122.5, 48.5,50.0]
+aa = [-130, -122, 42, 52]
 x0, x1, y0, y1 = aa
 
 df = pd.read_pickle(Ldir['LOo'] / 'obs' / 'dfo' / 'bottle' / (str(year) + '.p'))
-# ['cid', 'lon', 'lat', 'time', 'z', 'SA', 'CT',
-#       'DO (uM)', 'NO3 (uM)', 'Si (uM)', 'Chl (mg m-3)', 'name']
 
 # keep only data in a box
 df = df[(df['lon']>x0) & (df['lon']<x1) & (df['lat']>y0) & (df['lat']<y1)]
 
 # trim ocean sections as well with a diagonal line
-df = df[df['lat'] > (-.8/1.2)*(df['lon']+125.2) + 49.4]
+# df = df[df['lat'] > (-.8/1.2)*(df['lon']+125.2) + 49.4]
 
 plt.close('all')
 pfun.start_plot()
 
 fig = plt.figure(figsize=(22,12))
 
-vn_list = ['SA', 'CT', 'DO (uM)', 'NO3 (uM)', 'Si (uM)', 'Chl (mg m-3)']
+vn_list = ['SA', 'CT', 'DO (uM)', 'NO3 (uM)', 'NH4 (uM)', 'SiO4 (uM)']
 ax_list = [1,2,5,6,9,10]
 ax_dict = dict(zip(vn_list,ax_list))
 
@@ -61,7 +60,7 @@ for vn in vn_list:
 pfun.add_coast(axm)
 pfun.dar(axm)
 axm.axis(aa)
-axm.set_title('DFO SoG Bottle Data ' + str(year))
+axm.set_title('DFO Bottle Data ' + str(year))
 axm.set_xlabel('Longitude')
 axm.set_ylabel('Latitude')
 

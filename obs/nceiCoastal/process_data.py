@@ -17,66 +17,24 @@ Ldir = Lfun.Lstart()
 source = 'nceiCoastal'
 otype = 'bottle'
 in_dir0 = Ldir['data'] / 'obs' / source
-year_list = [2017] #range(2008,2019)
+year_list = range(2008,2019)
 
 # output location
 out_dir = Ldir['LOo'] / 'obs' / source / otype
 Lfun.make_dir(out_dir)
 
 # This is a dict of all the columns after the initial reading.
-# We add values to a key for any variable we want to save
-# v_dict = {
-#     'time':'time',
-#     'record':'',
-#     'EXPOCODE':'',
-#     'CRUISE_ID':'cruise',
-#     'DATE_LOCAL':'',
-#     'TIME_LOCAL':'',
-#     'LONGITUDE_DEC':'lon',
-#     'LATITUDE_DEC':'lat',
-#     'STATION_NO':'name',
-#     'NISKIN_NO':'',
-#     'CTDPRS_DBAR':'P (dbar)',
-#     'CTDTMP_DEG_C_ITS90':'IT', # in situ temperature, deg C
-#     'CTDTMP_FLAG_W':'',
-#     'CTDSAL_PSS78':'SP',
-#     'CTDSAL_FLAG_W':'',
-#     'SIGMATHETA_KG_M3':'',
-#     'CTDOXY_UMOL_KG_ADJ':'DO (umol/kg)',
-#     'CTDOXY_UMOL_KG':'',
-#     'CTDOXY_MG_L_1':'',
-#     'CTDOXY_MG_L_2':'',
-#     'CTDOXY_FLAG_W':'',
-#     'OXYGEN_UMOL_KG':'',
-#     'OXYGEN_MG_L_1':'',
-#     'OXYGEN_MG_L_2':'',
-#     'OXYGEN_MG_L_3':'',
-#     'OXYGEN_FLAG_W':'',
-#     'TA_UMOL_KG':'TA (umol/kg)',
-#     'DIC_UMOL_KG':'DIC (umol/kg)',
-#     'TA_FLAG_W':'',
-#     'DIC_FLAG_W':'',
-#     'NITRATE_UMOL_KG':'',
-#     'NITRATE_UMOL_L':'NO3 (uM)',
-#     'NITRITE_UMOL_KG':'',
-#     'NITRITE_UMOL_L':'NO2 (uM)',
-#     'AMMONIA_UMOL_KG':'',
-#     'AMMONIUM_UMOL_L':'NH4 (uM)',
-#     'PHOSPHATE_UMOL_KG':'',
-#     'PHOSPHATE_UMOL_L':'PO4 (uM)',
-#     'SILICATE_UMOL_KG':'',
-#     'SILICATE_UMOL_L':'Si4 (uM)',
-#     'NUTRIENTS_FLAG_W':'',
-# }
-
+# We add values to a key for any variable we want to save. I looked
+# at units_dict (created below) to be sure about the units.
 v_dict = {
+    'time':'time',
     'Accession':'',
     'EXPOCODE':'',
     'Cruise_flag':'',
-    'Cruise_ID':'',
+    'Cruise_ID':'cruise',
     'Observation_type':'',
-    'Profile_number':'',
-    'Station_ID':'',
+    'Profile_number':'cid',
+    'Station_ID':'name',
     'Cast_number':'',
     'Niskin_ID':'',
     'Niskin_flag':'',
@@ -85,31 +43,31 @@ v_dict = {
     'Month_UTC':'',
     'Day_UTC':'',
     'Time_UTC':'',
-    'Latitude':'',
-    'Longitude':'',
+    'Latitude':'lat',
+    'Longitude':'lon',
     'Depth_bottom':'',
     'Max_sample_depth':'',
-    'CTDPRES':'',
+    'CTDPRES':'P (dbar)',
     'Depth':'',
-    'CTDTEMP_ITS90':'',
+    'CTDTEMP_ITS90':'IT',
     'CTDTEMP_flag':'',
     'CTDSAL_PSS78':'',
     'CTDSAL_flag':'',
     'Salinity_PSS78':'',
     'Salinity_flag':'',
-    'recommended_Salinity_PSS78':'',
+    'recommended_Salinity_PSS78':'SP',
     'recommended_Salinity_flag':'',
     'CTDOXY':'',
     'CTDOXY_flag':'',
     'Oxygen':'',
     'Oxygen_flag':'',
-    'recommended_Oxygen':'',
+    'recommended_Oxygen':'DO (umol/kg)',
     'recommended_Oxygen_flag':'',
     'AOU':'',
     'AOU_flag':'',
-    'DIC':'',
+    'DIC':'DIC (umol/kg)',
     'DIC_flag':'',
-    'TALK':'',
+    'TALK':'TA (umol/kg)',
     'TALK_flag':'',
     'pH_TS_measured':'',
     'TEMP_pH':'',
@@ -129,19 +87,19 @@ v_dict = {
     'Aragonite':'',
     'Calcite':'',
     'Revelle_Factor':'',
-    'Silicate':'',
+    'Silicate':'SiO4 (umol/kg)',
     'Silicate_flag':'',
-    'Phosphate':'',
+    'Phosphate':'PO4 (umol/kg)',
     'Phosphate_flag':'',
-    'Nitrate':'',
+    'Nitrate':'NO3 (umol/kg)',
     'Nitrate_flag':'',
-    'Nitrite':'',
+    'Nitrite':'NO2 (umol/kg)',
     'Nitrite_flag':'',
     'Nitrate_and_Nitrite':'',
     'Nitrate_and_Nitrite_flag':'',
     'recommended_Nitrate_and_Nitrite':'',
     'recommended_Nitrate_and_Nitrite_flag':'',
-    'Ammonium':'',
+    'Ammonium':'NH4 (umol/kg)',
     'Ammonium_flag':'',
 }
 
@@ -176,7 +134,8 @@ for year in year_list:
         # df0 = pd.read_excel(in_fn, skiprows=[1], nrows=10, parse_dates={'time':['Year_UTC','Month_UTC','Day_UTC','Time_UTC']})
         
         in_fn = in_dir0 / 'converted_from_excel.csv'
-        df0 = pd.read_csv(in_fn, low_memory=False, parse_dates={'time':['Year_UTC','Month_UTC','Day_UTC','Time_UTC']})
+        df0 = pd.read_csv(in_fn, low_memory=False,
+                parse_dates={'time':['Year_UTC','Month_UTC','Day_UTC','Time_UTC']})
         
         units_fn = in_dir0 / 'units_converted_from_excel.csv'
         units_df = pd.read_csv(units_fn)
@@ -185,9 +144,7 @@ for year in year_list:
         units_dict = { k:v for (k,v) in zip(keys, values)}
         
         load_data = False # only load the first time
-        
-    sys.exit()
-    
+            
     # select one year
     t = pd.DatetimeIndex(df0.time)
     df1 = df0.loc[t.year==year,:].copy()
@@ -207,46 +164,27 @@ for year in year_list:
     df = df[df.time.notna()] # drop rows with bad time
     df = df.reset_index(drop=True)
     
-    # Now proceed with the processing to get a single DataFrame for the year.
+    # for cid in df.cid.unique():
+    #     # Check that there are not two different casts associated with the same station
+    #     # by looking for large time differences. Pretty ad hoc, but it works.
+    #     time_diff = df[df.cid==cid].time.values[-1] - df[df.cid==cid].time.values[0]
+    #     time_diff = pd.to_timedelta(time_diff)
+    #     if time_diff.days > 1 or time_diff.days < -1:
+    #         cruise = df[df.cid==cid].cruise.values[0]
+    #         name = df[df.cid==cid].name.values[0]
+    #         print('Cruise: %s, Station %s has time diff of %d days' % (cruise, str(name), time_diff.days))
+    #     # Result: no large time differences, so we assume the cid's are unique.
     
-    # add the "cid" (cast ID) column
-    #
-    # Note that we will save the field "name" for station number, since this dataset has
-    # repeat stations which is helpful for plotting sections. Then we will generate our own
-    # cid, a unique one for each cast, being careful to keep them unique for the collection
-    # of cruises in this year, even though a station may be repeated on all cruises.
-    #
-    # We will also save the field "cruise" as a convenient way to select a collection of
-    # casts.
-    df['cid'] = np.nan
-    cid = 0
-    for cruise in df.cruise.unique():
-        for name in df.name.unique():
-            df.loc[(df.name==name) & (df.cruise==cruise),'cid'] = cid
-            cid += 1
+    # Force certain fields to be the same throughout the cast. This dataset already
+    # has unique numbers for each cast (Profile_number), which is convenient.
     for cid in df.cid.unique():
-        # Check that there are not two different casts associated with the same station
-        # by looking for large time differences. Pretty ad hoc, but it works.
-        time_diff = df[df.cid==cid].time.values[-1] - df[df.cid==cid].time.values[0]
-        time_diff = pd.to_timedelta(time_diff)
-        if time_diff.days > 1 or time_diff.days < -1:
-            cruise = df[df.cid==cid].cruise.values[0]
-            name = df[df.cid==cid].name.values[0]
-            print('Cruise: %s, Station %s has time diff of %d days' % (cruise, str(name), time_diff.days))
-            # copy in just the first cast at this repeated station
-            dff = df[df.cid==cid].copy()
-            dfft = dff.time.values
-            Dfft = pd.to_timedelta(dfft - dfft[0])
-            dff = dff[Dfft.days==0]
-            print('  - length of df before removing repeat cast at this station: %d' % (len(df)))
-            df = df[df.cid != cid]
-            df = pd.concat((df,dff))
-            print('  - length of df before removing repeat cast at this station: %d' % (len(df)))
-        # Force certain fields to be the same throughout the cast.
         df.loc[df.cid==cid,'lon'] = df[df.cid==cid].lon.values[0]
         df.loc[df.cid==cid,'lat'] = df[df.cid==cid].lat.values[0]
         df.loc[df.cid==cid,'time'] = df[df.cid==cid].time.values[0]
-                    
+    
+    # limit the geographical region to the model domain
+    df = df[(df.lon>-130) & (df.lon<-122) & (df.lat>42) & (df.lat<52)]
+    
     # Next make derived quantities and do unit conversions
 
     # (1) Create CT, SA, and z
@@ -267,9 +205,7 @@ for year in year_list:
     rho = gsw.rho(SA,CT,p)
 
     # (2) units
-    if 'DO (mg/L)' in df.columns:
-        df['DO (uM)'] = (1000/32) * df['DO (mg/L)']
-    for vn in ['DO','TA','DIC']:
+    for vn in ['DO','NO3', 'NO2', 'NH4', 'PO4', 'SIO4','TA','DIC']:
         if (vn+' (umol/kg)') in df.columns:
             df[vn+' (uM)'] = (rho/1000) * df[vn+' (umol/kg)']
         
@@ -296,15 +232,16 @@ for year in year_list:
         ii += 1
     df['cid'] = a['cid_alt'].copy()
     
-    # Save the data
-    df.to_pickle(out_fn)
+    if len(df) > 0:
+        # Save the data
+        df.to_pickle(out_fn)
 
-    # Also pull out a dateframe with station info to use for model cast extractions.
-    ind = df.cid.unique()
-    col_list = ['lon','lat','time','name','cruise']
-    info_df = pd.DataFrame(index=ind, columns=col_list)
-    for cid in df.cid.unique():
-        info_df.loc[cid,col_list] = df.loc[df.cid==cid,col_list].iloc[0,:]
-    info_df.index.name = 'cid'
-    info_df['time'] = pd.to_datetime(info_df['time'])
-    info_df.to_pickle(info_out_fn)
+        # Also pull out a dateframe with station info to use for model cast extractions.
+        ind = df.cid.unique()
+        col_list = ['lon','lat','time','name','cruise']
+        info_df = pd.DataFrame(index=ind, columns=col_list)
+        for cid in df.cid.unique():
+            info_df.loc[cid,col_list] = df.loc[df.cid==cid,col_list].iloc[0,:]
+        info_df.index.name = 'cid'
+        info_df['time'] = pd.to_datetime(info_df['time'])
+        info_df.to_pickle(info_out_fn)
