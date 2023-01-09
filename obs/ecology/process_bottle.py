@@ -1,7 +1,6 @@
 """
 Code to process the ecology bottle data.
 
-
 """
 
 import pandas as pd
@@ -46,7 +45,7 @@ v_dict = {
 'Sampling Depth':'d',
 'PO4(uM)D':'PO4 (uM)',
 'QC PO4_Lab':'',
-'SiOH4(uM)D':'SiOH4 (uM)',
+'SiOH4(uM)D':'SiO4 (uM)',
 'QC SiOH4_Lab':'',
 'NO3(uM)D':'NO3 (uM)',
 'QC NO3_Lab':'',
@@ -66,6 +65,17 @@ v_dict = {
 'Analysis Date':'',
 }
 
+# We need to associate lat and lon with each station. They are not stored in the bottle
+# file, but there are station names, with loccations here:
+sta_fn = in_dir0 / 'ParkerMacCreadyCoreStationInfoFeb2018.xlsx'
+sta_df = pd.read_excel(sta_fn, index_col='Station')
+xx = sta_df['Long_NAD83 (deg / dec_min)'].values
+yy = sta_df['Lat_NAD83 (deg / dec_min)'].values
+lon = [-(float(x.split()[0]) + float(x.split()[1])/60) for x in xx]
+lat = [(float(y.split()[0]) + float(y.split()[1])/60) for y in yy]
+sta_df['lon'] = lon
+sta_df['lat'] = lat
+
 load_data = True
 for year in year_list:
     ys = str(year)
@@ -83,7 +93,6 @@ for year in year_list:
     # for v in df0.columns:
     #     print("\'%s\':\'\'," % (v))
 
-    
     # select and rename variables
     df1 = pd.DataFrame()
     for v in df0.columns:
@@ -96,6 +105,17 @@ for year in year_list:
     df = df1.loc[t.year==year,:].copy()
     
     df['z'] = -df['d']
+    
+    # add lon and lat
+    df['lon'] = np.nan
+    df['lat'] = np.nan
+    for sn in sta_df.index:
+        df.loc[df.name==sn,'lon'] = sta_df.loc[sn,'lon']
+        df.loc[df.name==sn,'lat'] = sta_df.loc[sn,'lat']
+    # and drop stations without good lon, lat, or z
+    df = df[df.lon.notna()]
+    df = df[df.lat.notna()]
+    df = df[df.z.notna()]
     
     sys.exit()
                 
@@ -165,13 +185,6 @@ for year in year_list:
     df['CT'] = CT
     df['z'] = z
     rho = gsw.rho(SA,CT,p)
-
-    # (2) units
-    if 'DO (mg/L)' in df.columns:
-        df['DO (uM)'] = (1000/32) * df['DO (mg/L)']
-    for vn in ['DO','TA','DIC']:
-        if (vn+' (umol/kg)') in df.columns:
-            df[vn+' (uM)'] = (rho/1000) * df[vn+' (umol/kg)']
         
     # (3) retain only selected variables
     cols = ['cid', 'cruise', 'time', 'lat', 'lon', 'name', 'z',
