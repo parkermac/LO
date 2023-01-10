@@ -7,6 +7,7 @@ source and year.
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
+import sys
 
 from lo_tools import plotting_functions as pfun
 from lo_tools import Lfun
@@ -16,6 +17,7 @@ import argparse
 parser = argparse.ArgumentParser()
 
 parser.add_argument('-source', type=str, default='ecology') # e.g. dfo
+parser.add_argument('-otype', type=str, default='bottle') # observation type, e.g. ctd, bottle
 parser.add_argument('-year', type=int, default = 2017) # e.g. 2019
 
 args = parser.parse_args()
@@ -30,7 +32,7 @@ x0, x1, y0, y1 = aa
 
 otype = 'ctd'
 
-df = pd.read_pickle(Ldir['LOo'] / 'obs' / args.source / otype / (str(args.year) + '.p'))
+df = pd.read_pickle(Ldir['LOo'] / 'obs' / args.source / args.otype / (str(args.year) + '.p'))
 
 # keep only data in a box
 df = df[(df['lon']>x0) & (df['lon']<x1) & (df['lat']>y0) & (df['lat']<y1)]
@@ -41,24 +43,37 @@ pfun.start_plot()
 
 fig = plt.figure(figsize=(22,12))
 
-vn_list = ['SA', 'CT', 'DO (uM)']
-ax_list = [1,2,4]
+if args.otype == 'bottle':
+    vn_list = ['SA', 'CT', 'DO (uM)', 'NO3 (uM)', 'NH4 (uM)', 'DIC (uM)']
+    ax_list = [1,2,4,5,7,8]
+    nrows = 3
+    ncols = 3
+    markersize = 3
+elif args.otype == 'ctd':
+    vn_list = ['SA', 'CT', 'DO (uM)']
+    ax_list = [1,2,4]
+    nrows = 2
+    ncols = 3
+    markersize = 1
+else:
+    print('Unexpected otype: ' + args.otype)
+    sys.exit()
 ax_dict = dict(zip(vn_list,ax_list))
 
 # map axis
-axm = fig.add_subplot(133)
+axm = fig.add_subplot(1,ncols,ncols)
 
 for vn in vn_list:
     if vn in df.columns:
         ii = ax_dict[vn]
-        ax = fig.add_subplot(2,3,ii)
+        ax = fig.add_subplot(nrows,ncols,ii)
         for mo in range(1,13):
             dfm = df[df['time'].dt.month==mo]
             if len(dfm) > 0:
                     dfm.plot(x=vn,y='z', ax=ax, style='.',
                         color=pfun.month_color_dict[mo], legend=False,
-                        markersize=1)
-                    if vn == 'SA':
+                        markersize=markersize)
+                    if ii == 1:
                         dfm.plot(x='lon',y='lat', ax=axm, style='o',
                             color=pfun.month_color_dict[mo], legend=False,
                             markersize=26-2*mo)
@@ -78,7 +93,7 @@ for vn in vn_list:
 pfun.add_coast(axm)
 pfun.dar(axm)
 axm.axis(aa)
-axm.set_title('%s %s Data for %d' % (args.source, otype.upper(), args.year))
+axm.set_title('%s %s Data for %d' % (args.source, args.otype.upper(), args.year))
 axm.set_xlabel('Longitude')
 axm.set_ylabel('Latitude')
 
