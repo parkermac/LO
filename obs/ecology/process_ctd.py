@@ -19,10 +19,10 @@ source = 'ecology'
 otype = 'ctd'
 in_dir0 = Ldir['data'] / 'obs' / source
 
-testing = True
+testing = False
 
 if testing:
-    year_list = [2019]
+    year_list = [2017]
 else:
     year_list = range(2008,2020)
 

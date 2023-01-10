@@ -1,6 +1,8 @@
 """
 Code to process the ecology bottle data.
 
+Takes a couple of minutes to run.
+
 """
 
 import pandas as pd
@@ -8,7 +10,7 @@ import numpy as np
 import gsw
 import sys
 
-from lo_tools import Lfun
+from lo_tools import Lfun, zfun
 Ldir = Lfun.Lstart()
 
 # BOTTLE
@@ -16,12 +18,12 @@ source = 'ecology'
 otype = 'bottle'
 in_dir0 = Ldir['data'] / 'obs' / source
 
-testing = True
+testing = False
 
 if testing:
     year_list = [2017]
 else:
-    year_list = range(2008,2019)
+    year_list = range(2008,2018)
 
 # output location
 out_dir = Ldir['LOo'] / 'obs' / source / otype
@@ -51,7 +53,7 @@ v_dict = {
 'QC NO3_Lab':'',
 'NO2(uM)D':'NO2 (uM)',
 'QC NO2_Lab':'',
-'NH4(uM)D':'NH4(uM)',
+'NH4(uM)D':'NH4 (uM)',
 'QC NH4_Lab':'',
 'CTD Cast Rep':'',
 'Type':'',
@@ -85,20 +87,18 @@ for year in year_list:
     out_fn = out_dir / (ys + '.p')
     info_out_fn = out_dir / ('info_' + ys + '.p')
     
-    if year in range(2006,2018):
+    if (year in range(2006,2018)) and load_data:
         in_fn =  in_dir0 / 'Parker_2006-2017_Nutrients.xlsx'
         df0 = pd.read_excel(in_fn, sheet_name='2006-2017')
+        # for v in df0.columns:
+        #     print("\'%s\':\'\'," % (v))
+        # select and rename variables
+        df1 = pd.DataFrame()
+        for v in df0.columns:
+            if v in v_dict.keys():
+                if len(v_dict[v]) > 0:
+                    df1[v_dict[v]] = df0[v]
         load_data = False # only load the first time
-        
-    # for v in df0.columns:
-    #     print("\'%s\':\'\'," % (v))
-
-    # select and rename variables
-    df1 = pd.DataFrame()
-    for v in df0.columns:
-        if v in v_dict.keys():
-            if len(v_dict[v]) > 0:
-                df1[v_dict[v]] = df0[v]
                 
     # select one year
     t = pd.DatetimeIndex(df1.time)
@@ -116,9 +116,7 @@ for year in year_list:
     df = df[df.lon.notna()]
     df = df[df.lat.notna()]
     df = df[df.z.notna()]
-    
-    sys.exit()
-                
+                    
     # missing data is -999
     df[df==-999] = np.nan
     
@@ -126,66 +124,48 @@ for year in year_list:
     df = df.dropna(axis=0, how='all') # drop rows with no good data
     df = df[df.time.notna()] # drop rows with bad time
     df = df.reset_index(drop=True)
-    
-    # Now proceed with the processing to get a single DataFrame for the year.
-    
-    # add the "cid" (cast ID) column
-    #
-    # Note that we will save the field "name" for station number, since this dataset has
-    # repeat stations which is helpful for plotting sections. Then we will generate our own
-    # cid, a unique one for each cast, being careful to keep them unique for the collection
-    # of cruises in this year, even though a station may be repeated on all cruises.
-    #
-    # We will also save the field "cruise" as a convenient way to select a collection of
-    # casts.
-    df['cid'] = np.nan
-    cid = 0
-    for cruise in df.cruise.unique():
-        for name in df.name.unique():
-            df.loc[(df.name==name) & (df.cruise==cruise),'cid'] = cid
-            cid += 1
-    for cid in df.cid.unique():
-        # Check that there are not two different casts associated with the same station
-        # by looking for large time differences. Pretty ad hoc, but it works.
-        time_diff = df[df.cid==cid].time.values[-1] - df[df.cid==cid].time.values[0]
-        time_diff = pd.to_timedelta(time_diff)
-        if time_diff.days > 1 or time_diff.days < -1:
-            cruise = df[df.cid==cid].cruise.values[0]
-            name = df[df.cid==cid].name.values[0]
-            print('Cruise: %s, Station %s has time diff of %d days' % (cruise, str(name), time_diff.days))
-            # copy in just the first cast at this repeated station
-            dff = df[df.cid==cid].copy()
-            dfft = dff.time.values
-            Dfft = pd.to_timedelta(dfft - dfft[0])
-            dff = dff[Dfft.days==0]
-            print('  - length of df before removing repeat cast at this station: %d' % (len(df)))
-            df = df[df.cid != cid]
-            df = pd.concat((df,dff))
-            print('  - length of df before removing repeat cast at this station: %d' % (len(df)))
-        # Force certain fields to be the same throughout the cast.
-        df.loc[df.cid==cid,'lon'] = df[df.cid==cid].lon.values[0]
-        df.loc[df.cid==cid,'lat'] = df[df.cid==cid].lat.values[0]
-        df.loc[df.cid==cid,'time'] = df[df.cid==cid].time.values[0]
-                    
-    # Next make derived quantities and do unit conversions
-
-    # (1) Create CT, SA, and z
-    # - pull out variables
-    SP = df.SP.to_numpy()
-    IT = df.IT.to_numpy()
-    p = df['P (dbar)'].to_numpy()
-    lon = df.lon.to_numpy()
-    lat = df.lat.to_numpy()
-    # - do the conversions
-    SA = gsw.SA_from_SP(SP, p, lon, lat)
-    CT = gsw.CT_from_t(SA, IT, p)
-    z = gsw.z_from_p(p, lat)
-    # - add the results to the DataFrame
-    df['SA'] = SA
-    df['CT'] = CT
-    df['z'] = z
-    rho = gsw.rho(SA,CT,p)
         
+    # Generate the cid (cast ID) field.
+    df['cid'] = np.nan
+    # This assume that a cast can be identified by (i) happening on a unique day,
+    # combined with (ii) having a unique name (station name).
+    cid = 0
+    for time in df.time.unique():
+        for name in df.name.unique():
+            df.loc[(df.name==name) & (df.time==time),'cid'] = cid
+            cid += 1
+            
+    # Rework cid to also be increasing from zero in steps of one.
+    a = df.cid.values
+    au = df.cid.unique() # returns uniques in order
+    u_dict = dict(zip(au, np.arange(len(au))))
+    b = np.nan * np.ones(len(a))
+    for ii in u_dict.keys():
+        b[a==ii] = u_dict[ii]
+    df['cid'] = b
+    
+    # Go to the processed cast file to get SA and CT, and DO
+    df['SA'] = np.nan
+    df['CT'] = np.nan
+    df['DO (uM)'] = np.nan
+    ctd_dir = Ldir['LOo'] / 'obs' / source / 'ctd'
+    ctd_fn = ctd_dir / (ys + '.p')
+    cdf = pd.read_pickle(ctd_fn)
+    for time in df.time.unique():
+        for name in df.name.unique():
+            cz = cdf.loc[(cdf.name==name) & (cdf.time==time),'z'].to_numpy()
+            cSA = cdf.loc[(cdf.name==name) & (cdf.time==time),'SA'].to_numpy()
+            cCT = cdf.loc[(cdf.name==name) & (cdf.time==time),'CT'].to_numpy()
+            cDO = cdf.loc[(cdf.name==name) & (cdf.time==time),'DO (uM)'].to_numpy()
+            bz = df.loc[(df.name==name) & (df.time==time),'z'].to_numpy()
+            iz_list = []
+            if (len(cz) > 0) and (len(bz) > 0):
+                for zz in bz:
+                    iz_list.append(zfun.find_nearest_ind(cz,zz))
+                df.loc[(df.name==name) & (df.time==time),'SA'] = cSA[iz_list]
+                df.loc[(df.name==name) & (df.time==time),'CT'] = cCT[iz_list]
+                df.loc[(df.name==name) & (df.time==time),'DO (uM)'] = cDO[iz_list]
+            
     # (3) retain only selected variables
     cols = ['cid', 'cruise', 'time', 'lat', 'lon', 'name', 'z',
         'CT', 'SA', 'DO (uM)',
@@ -195,19 +175,8 @@ for year in year_list:
     df = df[this_cols]
         
     print(' - processed %d casts' % ( len(df.cid.unique()) ))
-    cid0 = df.cid.max() + 1
-        
-    # Sort the result by time, and sort each cast to be bottom to top
-    df = df.sort_values(['time','z'], ignore_index=True)
-    
-    # Rework cid to also be increasing in time
-    a = df[['time','cid']].copy()
-    a['cid_alt'] = np.nan
-    ii = 0
-    for t in a.time.unique():
-        a.loc[a.time==t,'cid_alt'] = ii
-        ii += 1
-    df['cid'] = a['cid_alt'].copy()
+
+    df['cruise'] = None
     
     if len(df) > 0:
         # Save the data
