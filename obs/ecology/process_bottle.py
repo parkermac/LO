@@ -10,7 +10,7 @@ import numpy as np
 import gsw
 import sys
 
-from lo_tools import Lfun, zfun
+from lo_tools import Lfun, zfun, obs_functions
 Ldir = Lfun.Lstart()
 
 # BOTTLE
@@ -18,7 +18,7 @@ source = 'ecology'
 otype = 'bottle'
 in_dir0 = Ldir['data'] / 'obs' / source
 
-testing = False
+testing = True
 
 if testing:
     year_list = [2017]
@@ -135,14 +135,16 @@ for year in year_list:
             df.loc[(df.name==name) & (df.time==time),'cid'] = cid
             cid += 1
             
-    # Rework cid to also be increasing from zero in steps of one.
-    a = df.cid.values
-    au = df.cid.unique() # returns uniques in order
-    u_dict = dict(zip(au, np.arange(len(au))))
-    b = np.nan * np.ones(len(a))
-    for ii in u_dict.keys():
-        b[a==ii] = u_dict[ii]
-    df['cid'] = b
+    # # Rework cid to also be increasing from zero in steps of one.
+    # a = df.cid.values
+    # au = df.cid.unique() # returns uniques in order
+    # u_dict = dict(zip(au, np.arange(len(au))))
+    # b = np.nan * np.ones(len(a))
+    # for ii in u_dict.keys():
+    #     b[a==ii] = u_dict[ii]
+    # df['cid'] = b
+    
+    df = obs_functions.renumber_cid(df)
     
     # Go to the processed cast file to get SA and CT, and DO
     df['SA'] = np.nan
