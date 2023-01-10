@@ -162,14 +162,8 @@ for year in year_list:
             df.loc[(df.name==name) & (df.time==time),'cid'] = cid
             cid += 1
             
-    # Rework cid to also be increasing from zero in steps of one.
-    a = df.cid.values
-    au = df.cid.unique() # returns uniques in order
-    u_dict = dict(zip(au, np.arange(len(au))))
-    b = np.nan * np.ones(len(a))
-    for ii in u_dict.keys():
-        b[a==ii] = u_dict[ii]
-    df['cid'] = b
+    # # Renumber cid to be increasing from zero in steps of one.
+    df = obs_functions.renumber_cid(df)
     
     # Note, the result has casts packed top-to-bottom
         
