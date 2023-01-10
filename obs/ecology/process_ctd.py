@@ -1,8 +1,9 @@
 """
 Code to process the ecology ctd data.
 
-Takes a couple minutes to run for 2008-2019. Perhaps I could speed it up
-by making the first, large, multi-year excel file into a csv.
+Takes a 1.5 minutes to run for 2008-2019 after converting input files to csv.
+
+Note: I have not carefully checked QC codes in these.
 
 """
 
@@ -10,6 +11,7 @@ import pandas as pd
 import numpy as np
 import gsw
 import sys
+from time import time as Time
 
 from lo_tools import Lfun
 Ldir = Lfun.Lstart()
@@ -32,8 +34,10 @@ Lfun.make_dir(out_dir)
 
 # We need to associate lat and lon with each station. They are not stored in the bottle
 # file, but there are station names, with loccations here:
-sta_fn = in_dir0 / 'ParkerMacCreadyCoreStationInfoFeb2018.xlsx'
-sta_df = pd.read_excel(sta_fn, index_col='Station')
+# sta_fn = in_dir0 / 'ParkerMacCreadyCoreStationInfoFeb2018.xlsx'
+# sta_df = pd.read_excel(sta_fn, index_col='Station')
+sta_fn = in_dir0 / 'sta_df.csv'
+sta_df = pd.read_csv(sta_fn, index_col='Station')
 xx = sta_df['Long_NAD83 (deg / dec_min)'].values
 yy = sta_df['Lat_NAD83 (deg / dec_min)'].values
 lon = [-(float(x.split()[0]) + float(x.split()[1])/60) for x in xx]
@@ -41,6 +45,7 @@ lat = [(float(y.split()[0]) + float(y.split()[1])/60) for y in yy]
 sta_df['lon'] = lon
 sta_df['lat'] = lat
 
+tt0 = Time()
 load_data = True
 for year in year_list:
     ys = str(year)
@@ -50,22 +55,33 @@ for year in year_list:
     out_fn = out_dir / (ys + '.p')
     info_out_fn = out_dir / ('info_' + ys + '.p')
     
+    # if year == 2017:
+    #     load_data = True
+    #     ctd_fn = in_dir0 / 'ParkerMacCready2017CTDDataFeb2018.xlsx'
+    #     sheet_name = '2017Provisional_CTDResults'
+    # elif year == 2018:
+    #     load_data = True
+    #     #ctd_fn = dir0 + 'raw/Parker_2018.xlsx'
+    #     ctd_fn = in_dir0 / 'ParkerMacCready2018CTDDOMar2020.xlsx'
+    #     sheet_name = '2018_CTDDOResults'
+    # elif year == 2019:
+    #     load_data = True
+    #     ctd_fn = in_dir0 / 'ParkerMacCready2019CTDDataFeb2020.xlsx'
+    #     sheet_name = '2019Provisional_CTDResults'
+    # else:
+    #     ctd_fn = in_dir0 / 'ParkerMacCready1999-2016CTDDataMay2018.xlsx'
+    #     sheet_name = '1999-2016Finalized_CTDResults'
     if year == 2017:
         load_data = True
-        ctd_fn = in_dir0 / 'ParkerMacCready2017CTDDataFeb2018.xlsx'
-        sheet_name = '2017Provisional_CTDResults'
+        ctd_fn = in_dir0 / 'ctd_2017.csv'
     elif year == 2018:
         load_data = True
-        #ctd_fn = dir0 + 'raw/Parker_2018.xlsx'
-        ctd_fn = in_dir0 / 'ParkerMacCready2018CTDDOMar2020.xlsx'
-        sheet_name = '2018_CTDDOResults'
+        ctd_fn = in_dir0 / 'ctd_2018.csv'
     elif year == 2019:
         load_data = True
-        ctd_fn = in_dir0 / 'ParkerMacCready2019CTDDataFeb2020.xlsx'
-        sheet_name = '2019Provisional_CTDResults'
+        ctd_fn = in_dir0 / 'ctd_2019.csv'
     else:
-        ctd_fn = in_dir0 / 'ParkerMacCready1999-2016CTDDataMay2018.xlsx'
-        sheet_name = '1999-2016Finalized_CTDResults'
+        ctd_fn = in_dir0 / 'ctd_1999_2016.csv'
     
     # DEFAULTS
     date_col_name = 'Date'
@@ -80,8 +96,9 @@ for year in year_list:
     
     # read in the data (all stations, all casts)
     if load_data:
-        df0 = pd.read_excel(ctd_fn, sheet_name=sheet_name,
-            parse_dates = [date_col_name])
+        # df0 = pd.read_excel(ctd_fn, sheet_name=sheet_name,
+        #     parse_dates = [date_col_name])
+        df0 = pd.read_csv(ctd_fn, parse_dates = [date_col_name], low_memory=False)
         load_data = False
         
     # add z
@@ -173,7 +190,9 @@ for year in year_list:
             info_df.loc[cid,col_list] = df.loc[df.cid==cid,col_list].iloc[0,:]
         info_df.index.name = 'cid'
         info_df['time'] = pd.to_datetime(info_df['time'])
-        info_df.to_pickle(info_out_fn)           
+        info_df.to_pickle(info_out_fn)
+        
+print('Total time = %d sec' % (int(Time()-tt0)))
     
     
     

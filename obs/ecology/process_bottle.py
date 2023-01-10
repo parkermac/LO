@@ -1,7 +1,11 @@
 """
 Code to process the ecology bottle data.
 
-Takes a couple of minutes to run.
+Takes 3.5 minutes to run using csv files.
+
+Note: a spot check of QC flags showed there were very few (for NO3)
+and the data had been replaced by Nan. They were just empty in the original
+spreadsheet.
 
 """
 
@@ -9,6 +13,7 @@ import pandas as pd
 import numpy as np
 import gsw
 import sys
+from time import time as Time
 
 from lo_tools import Lfun, zfun, obs_functions
 Ldir = Lfun.Lstart()
@@ -18,7 +23,7 @@ source = 'ecology'
 otype = 'bottle'
 in_dir0 = Ldir['data'] / 'obs' / source
 
-testing = True
+testing = False
 
 if testing:
     year_list = [2017]
@@ -69,8 +74,10 @@ v_dict = {
 
 # We need to associate lat and lon with each station. They are not stored in the bottle
 # file, but there are station names, with loccations here:
-sta_fn = in_dir0 / 'ParkerMacCreadyCoreStationInfoFeb2018.xlsx'
-sta_df = pd.read_excel(sta_fn, index_col='Station')
+# sta_fn = in_dir0 / 'ParkerMacCreadyCoreStationInfoFeb2018.xlsx'
+# sta_df = pd.read_excel(sta_fn, index_col='Station')
+sta_fn = in_dir0 / 'sta_df.csv'
+sta_df = pd.read_csv(sta_fn, index_col='Station')
 xx = sta_df['Long_NAD83 (deg / dec_min)'].values
 yy = sta_df['Lat_NAD83 (deg / dec_min)'].values
 lon = [-(float(x.split()[0]) + float(x.split()[1])/60) for x in xx]
@@ -78,6 +85,7 @@ lat = [(float(y.split()[0]) + float(y.split()[1])/60) for y in yy]
 sta_df['lon'] = lon
 sta_df['lat'] = lat
 
+tt0 = Time()
 load_data = True
 for year in year_list:
     ys = str(year)
@@ -88,8 +96,10 @@ for year in year_list:
     info_out_fn = out_dir / ('info_' + ys + '.p')
     
     if (year in range(2006,2018)) and load_data:
-        in_fn =  in_dir0 / 'Parker_2006-2017_Nutrients.xlsx'
-        df0 = pd.read_excel(in_fn, sheet_name='2006-2017')
+        # in_fn =  in_dir0 / 'Parker_2006-2017_Nutrients.xlsx'
+        # df0 = pd.read_excel(in_fn, sheet_name='2006-2017')
+        in_fn =  in_dir0 / 'bottle_2006_2017.csv'
+        df0 = pd.read_csv(in_fn)
         # for v in df0.columns:
         #     print("\'%s\':\'\'," % (v))
         # select and rename variables
@@ -102,6 +112,7 @@ for year in year_list:
                 
     # select one year
     t = pd.DatetimeIndex(df1.time)
+    df1['time'] = t
     df = df1.loc[t.year==year,:].copy()
     
     df['z'] = -df['d']
@@ -193,3 +204,6 @@ for year in year_list:
         info_df.index.name = 'cid'
         info_df['time'] = pd.to_datetime(info_df['time'])
         info_df.to_pickle(info_out_fn)
+        
+print('Total time = %d sec' % (int(Time()-tt0)))
+
