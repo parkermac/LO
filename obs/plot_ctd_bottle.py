@@ -38,7 +38,7 @@ df = pd.read_pickle(Ldir['LOo'] / 'obs' / args.source / args.otype / (str(args.y
 df = df[(df['lon']>x0) & (df['lon']<x1) & (df['lat']>y0) & (df['lat']<y1)]
 zbot = df.z.min()
 
-plt.close('all')
+# plt.close('all')
 pfun.start_plot()
 
 fig = plt.figure(figsize=(22,12))
@@ -48,7 +48,7 @@ if args.otype == 'bottle':
     ax_list = [1,2,4,5,7,8]
     nrows = 3
     ncols = 3
-    markersize = 3
+    markersize = 5
 elif args.otype == 'ctd':
     vn_list = ['SA', 'CT', 'DO (uM)']
     ax_list = [1,2,4]
