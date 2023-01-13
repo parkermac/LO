@@ -10,7 +10,7 @@ import numpy as np
 import gsw
 import sys
 
-from lo_tools import Lfun
+from lo_tools import Lfun, obs_functions
 Ldir = Lfun.Lstart()
 
 # BOTTLE
@@ -177,30 +177,12 @@ for year in year_list:
     df = df[this_cols]
         
     print(' - processed %d casts' % ( len(df.cid.unique()) ))
-    cid0 = df.cid.max() + 1
         
-    # Sort the result by time, and sort each cast to be bottom to top
-    df = df.sort_values(['time','z'], ignore_index=True)
-    
-    # Rework cid to also be increasing in time
-    a = df[['time','cid']].copy()
-    a['cid_alt'] = np.nan
-    ii = 0
-    for t in a.time.unique():
-        a.loc[a.time==t,'cid_alt'] = ii
-        ii += 1
-    df['cid'] = a['cid_alt'].copy()
+    # Renumber cid to be increasing from zero in steps of one.
+    df = obs_functions.renumber_cid(df)
     
     if len(df) > 0:
         # Save the data
         df.to_pickle(out_fn)
-
-        # Also pull out a dateframe with station info to use for model cast extractions.
-        ind = df.cid.unique()
-        col_list = ['lon','lat','time','name','cruise']
-        info_df = pd.DataFrame(index=ind, columns=col_list)
-        for cid in df.cid.unique():
-            info_df.loc[cid,col_list] = df.loc[df.cid==cid,col_list].iloc[0,:]
-        info_df.index.name = 'cid'
-        info_df['time'] = pd.to_datetime(info_df['time'])
+        info_df = obs_functions.make_info_df(df)
         info_df.to_pickle(info_out_fn)

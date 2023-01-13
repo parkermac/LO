@@ -10,7 +10,7 @@ import numpy as np
 import gsw
 import sys
 
-from lo_tools import Lfun
+from lo_tools import Lfun, obs_functions
 Ldir = Lfun.Lstart()
 
 # BOTTLE
@@ -126,12 +126,6 @@ for year in year_list:
         dfu = pd.read_excel(in_fn, nrows=1)
         dfu.to_csv(in_dir0 / 'units_converted_from_excel.csv')
         """
-        # in_fn =  in_dir0 / 'CODAP_NA_v2021.xlsx'
-        # units_df = pd.read_excel(in_fn, nrows=1
-        # keys = list(units_df.columns)
-        # values = list(units_df.loc[0,])
-        # units_dict = { k:v for (k,v) in zip(keys, values)}
-        # df0 = pd.read_excel(in_fn, skiprows=[1], nrows=10, parse_dates={'time':['Year_UTC','Month_UTC','Day_UTC','Time_UTC']})
         
         in_fn = in_dir0 / 'converted_from_excel.csv'
         df0 = pd.read_csv(in_fn, low_memory=False,
@@ -163,18 +157,7 @@ for year in year_list:
     df = df.dropna(axis=0, how='all') # drop rows with no good data
     df = df[df.time.notna()] # drop rows with bad time
     df = df.reset_index(drop=True)
-    
-    # for cid in df.cid.unique():
-    #     # Check that there are not two different casts associated with the same station
-    #     # by looking for large time differences. Pretty ad hoc, but it works.
-    #     time_diff = df[df.cid==cid].time.values[-1] - df[df.cid==cid].time.values[0]
-    #     time_diff = pd.to_timedelta(time_diff)
-    #     if time_diff.days > 1 or time_diff.days < -1:
-    #         cruise = df[df.cid==cid].cruise.values[0]
-    #         name = df[df.cid==cid].name.values[0]
-    #         print('Cruise: %s, Station %s has time diff of %d days' % (cruise, str(name), time_diff.days))
-    #     # Result: no large time differences, so we assume the cid's are unique.
-    
+        
     # Force certain fields to be the same throughout the cast. This dataset already
     # has unique numbers for each cast (Profile_number), which is convenient.
     for cid in df.cid.unique():
@@ -218,30 +201,12 @@ for year in year_list:
     df = df[this_cols]
         
     print(' - processed %d casts' % ( len(df.cid.unique()) ))
-    cid0 = df.cid.max() + 1
-        
-    # Sort the result by time, and sort each cast to be bottom to top
-    df = df.sort_values(['time','z'], ignore_index=True)
     
-    # Rework cid to also be increasing in time
-    a = df[['time','cid']].copy()
-    a['cid_alt'] = np.nan
-    ii = 0
-    for t in a.time.unique():
-        a.loc[a.time==t,'cid_alt'] = ii
-        ii += 1
-    df['cid'] = a['cid_alt'].copy()
+    # Renumber cid to be increasing from zero in steps of one.
+    df = obs_functions.renumber_cid(df)
     
     if len(df) > 0:
         # Save the data
         df.to_pickle(out_fn)
-
-        # Also pull out a dateframe with station info to use for model cast extractions.
-        ind = df.cid.unique()
-        col_list = ['lon','lat','time','name','cruise']
-        info_df = pd.DataFrame(index=ind, columns=col_list)
-        for cid in df.cid.unique():
-            info_df.loc[cid,col_list] = df.loc[df.cid==cid,col_list].iloc[0,:]
-        info_df.index.name = 'cid'
-        info_df['time'] = pd.to_datetime(info_df['time'])
+        info_df = obs_functions.make_info_df(df)
         info_df.to_pickle(info_out_fn)

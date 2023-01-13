@@ -1,6 +1,6 @@
 """
-Utility code to convert excel files to csv, in order to speed up
-processing.
+Utility code to convert excel files to pandas DataFrames, in order to speed up
+processing (?).
 
 """
 
@@ -15,28 +15,28 @@ in_dir0 = Ldir['data'] / 'obs' / source
 for fn in list(in_dir0.glob('*.xlsx')):
 
     if fn.name == 'ParkerMacCreadyCoreStationInfoFeb2018.xlsx':
-        df = pd.read_excel(fn)
-        df.to_csv(in_dir0 / 'sta_df.csv')
+        df = pd.read_excel(fn, index_col='Station')
+        df.to_pickle(in_dir0 / 'sta_df.p')
 
     if fn.name == 'Parker_2006-2017_Nutrients.xlsx':
-        df = pd.read_excel(fn, sheet_name='2006-2017')
-        df.to_csv(in_dir0 / 'bottle_2006_2017.csv')
+        df = pd.read_excel(fn, sheet_name='2006-2017', parse_dates = ['Date'])
+        df.to_pickle(in_dir0 / 'bottle_2006_2017.p')
 
     if fn.name == 'ParkerMacCready1999-2016CTDDataMay2018.xlsx':
-        df = pd.read_excel(fn, sheet_name='1999-2016Finalized_CTDResults')
-        df.to_csv(in_dir0 / 'ctd_1999_2016.csv')
+        df = pd.read_excel(fn, sheet_name='1999-2016Finalized_CTDResults', parse_dates = ['Date'])
+        df.to_pickle(in_dir0 / 'ctd_1999_2016.p')
 
     if fn.name == 'ParkerMacCready2017CTDDataFeb2018.xlsx':
-        df = pd.read_excel(fn, sheet_name='2017Provisional_CTDResults')
-        df.to_csv(in_dir0 / 'ctd_2017.csv')
+        df = pd.read_excel(fn, sheet_name='2017Provisional_CTDResults', parse_dates = ['Date'])
+        df.to_pickle(in_dir0 / 'ctd_2017.p')
 
     if fn.name == 'ParkerMacCready2018CTDDOMar2020.xlsx':
-        df = pd.read_excel(fn, sheet_name='2018_CTDDOResults')
-        df.to_csv(in_dir0 / 'ctd_2018.csv')
+        df = pd.read_excel(fn, sheet_name='2018_CTDDOResults', parse_dates = ['Date'])
+        df.to_pickle(in_dir0 / 'ctd_2018.p')
 
     if fn.name == 'ParkerMacCready2019CTDDataFeb2020.xlsx':
-        df = pd.read_excel(fn, sheet_name='2019Provisional_CTDResults')
-        df.to_csv(in_dir0 / 'ctd_2019.csv')
+        df = pd.read_excel(fn, sheet_name='2019Provisional_CTDResults', parse_dates = ['Date'])
+        df.to_pickle(in_dir0 / 'ctd_2019.p')
         
     print('\n'+fn.name)
     print(df.columns)

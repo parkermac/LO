@@ -1,11 +1,7 @@
 """
 Code to process the ecology bottle data.
 
-Takes 3.5 minutes to run using csv files.
-
-Note: a spot check of QC flags showed there were very few (for NO3)
-and the data had been replaced by Nan. They were just empty in the original
-spreadsheet.
+Takes 3 minutes to run.
 
 """
 
@@ -35,7 +31,7 @@ out_dir = Ldir['LOo'] / 'obs' / source / otype
 Lfun.make_dir(out_dir)
 
 # This is a dict of all the columns after the initial reading.
-# We add values to a key for any variable we want to save
+# We add a value to a key for any variable we want to save
 v_dict = {
 'ResultID':'',
 'Project':'',
@@ -73,11 +69,9 @@ v_dict = {
 }
 
 # We need to associate lat and lon with each station. They are not stored in the bottle
-# file, but there are station names, with loccations here:
-# sta_fn = in_dir0 / 'ParkerMacCreadyCoreStationInfoFeb2018.xlsx'
-# sta_df = pd.read_excel(sta_fn, index_col='Station')
-sta_fn = in_dir0 / 'sta_df.csv'
-sta_df = pd.read_csv(sta_fn, index_col='Station')
+# file, but there are station names, with locations here:
+sta_fn = in_dir0 / 'sta_df_fixed.p'
+sta_df = pd.read_pickle(sta_fn)
 xx = sta_df['Long_NAD83 (deg / dec_min)'].values
 yy = sta_df['Lat_NAD83 (deg / dec_min)'].values
 lon = [-(float(x.split()[0]) + float(x.split()[1])/60) for x in xx]
@@ -96,12 +90,12 @@ for year in year_list:
     info_out_fn = out_dir / ('info_' + ys + '.p')
     
     if (year in range(2006,2018)) and load_data:
-        # in_fn =  in_dir0 / 'Parker_2006-2017_Nutrients.xlsx'
-        # df0 = pd.read_excel(in_fn, sheet_name='2006-2017')
-        in_fn =  in_dir0 / 'bottle_2006_2017.csv'
-        df0 = pd.read_csv(in_fn)
-        # for v in df0.columns:
-        #     print("\'%s\':\'\'," % (v))
+        in_fn =  in_dir0 / 'bottle_2006_2017_fixed.p'
+        df0 = pd.read_pickle(in_fn)
+        # This code was used to generate the text used in v_dict above.
+        if False:
+            for v in df0.columns:
+                print("\'%s\':\'\'," % (v))
         # select and rename variables
         df1 = pd.DataFrame()
         for v in df0.columns:
@@ -112,7 +106,7 @@ for year in year_list:
                 
     # select one year
     t = pd.DatetimeIndex(df1.time)
-    df1['time'] = t
+    # df1['time'] = t
     df = df1.loc[t.year==year,:].copy()
     
     df['z'] = -df['d']
@@ -127,10 +121,7 @@ for year in year_list:
     df = df[df.lon.notna()]
     df = df[df.lat.notna()]
     df = df[df.z.notna()]
-                    
-    # missing data is -999
-    df[df==-999] = np.nan
-    
+                        
     # a little more cleaning up
     df = df.dropna(axis=0, how='all') # drop rows with no good data
     df = df[df.time.notna()] # drop rows with bad time
@@ -146,16 +137,18 @@ for year in year_list:
             df.loc[(df.name==name) & (df.time==time),'cid'] = cid
             cid += 1
             
-    # # Renumber cid to be increasing from zero in steps of one.
+    # Renumber cid to be increasing from zero in steps of one.
     df = obs_functions.renumber_cid(df)
     
-    # Go to the processed cast file to get SA and CT, and DO
+    # Go to the processed cast file to get SA and CT, and DO. This is by far
+    # the most time-consuming part of the processing, but it is required.
     df['SA'] = np.nan
     df['CT'] = np.nan
     df['DO (uM)'] = np.nan
     ctd_dir = Ldir['LOo'] / 'obs' / source / 'ctd'
     ctd_fn = ctd_dir / (ys + '.p')
     cdf = pd.read_pickle(ctd_fn)
+    # Assume that having the same time and cast name means these are the same cast.
     for time in df.time.unique():
         for name in df.name.unique():
             cz = cdf.loc[(cdf.name==name) & (cdf.time==time),'z'].to_numpy()
@@ -186,15 +179,7 @@ for year in year_list:
     if len(df) > 0:
         # Save the data
         df.to_pickle(out_fn)
-
-        # Also pull out a dateframe with station info to use for model cast extractions.
-        ind = df.cid.unique()
-        col_list = ['lon','lat','time','name','cruise']
-        info_df = pd.DataFrame(index=ind, columns=col_list)
-        for cid in df.cid.unique():
-            info_df.loc[cid,col_list] = df.loc[df.cid==cid,col_list].iloc[0,:]
-        info_df.index.name = 'cid'
-        info_df['time'] = pd.to_datetime(info_df['time'])
+        info_df = obs_functions.make_info_df(df)
         info_df.to_pickle(info_out_fn)
         
 print('Total time = %d sec' % (int(Time()-tt0)))

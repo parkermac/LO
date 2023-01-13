@@ -15,7 +15,7 @@ import loadDFO
 from importlib import reload
 reload(loadDFO)
 
-from lo_tools import Lfun
+from lo_tools import Lfun, obs_functions
 Ldir = Lfun.Lstart()
 in_dir = Ldir['data'] / 'obs' / 'dfo'
 
@@ -105,7 +105,8 @@ for year in year_list:
                 SiO4_units = {item for item in df.SiO4_units.unique() if item != None}
                 if not SiO4_units.issubset({'umol/L','mmol/m**3'}):
                     print(' SiO4 units problem: %s' % (SiO4_units))
-            # RESULT: there are no outliers beyond out lists, except for 1975.
+            # RESULT: there are no outliers beyond our lists, except for 1975, and SiO4
+            # issue mentioned below.
         
             # fix N naming
             df['NO3 (uM)'] = np.nan
@@ -153,33 +154,13 @@ for year in year_list:
             df['name'] = None
             df['cruise'] = None
             
-        
-            # Sort the result by time, and sort each cast to be bottom to top
-            df = df.sort_values(['time','z'], ignore_index=True)
-    
-            # Rework cid to also be increasing in time
-            a = df[['time','cid']].copy()
-            a['cid_alt'] = np.nan
-            ii = 0
-            for t in a.time.unique():
-                a.loc[a.time==t,'cid_alt'] = ii
-                ii += 1
-            df['cid'] = a['cid_alt'].copy()
+            # Renumber cid to be increasing from zero in steps of one.
+            df = obs_functions.renumber_cid(df)
     
             if len(df) > 0:
                 # Save the data
                 df.to_pickle(out_fn)
-                
-                print(' - processed %d casts' % ( len(df.cid.unique()) ))
-
-                # Also pull out a dateframe with station info to use for model cast extractions.
-                ind = df.cid.unique()
-                col_list = ['lon','lat','time','name','cruise']
-                info_df = pd.DataFrame(index=ind, columns=col_list)
-                for cid in df.cid.unique():
-                    info_df.loc[cid,col_list] = df.loc[df.cid==cid,col_list].iloc[0,:]
-                info_df.index.name = 'cid'
-                info_df['time'] = pd.to_datetime(info_df['time'])
+                info_df = obs_functions.make_info_df(df)
                 info_df.to_pickle(info_out_fn)
        
 print('Elapsed time for bottle = %0.1f sec' % (time()-tt0))

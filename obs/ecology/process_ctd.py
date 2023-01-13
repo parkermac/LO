@@ -1,9 +1,7 @@
 """
 Code to process the ecology ctd data.
 
-Takes a 1.5 minutes to run for 2008-2019 after converting input files to csv.
-
-Note: I have not carefully checked QC codes in these.
+Takes a 2 minutes to run for 2008-2019.
 
 """
 
@@ -13,7 +11,7 @@ import gsw
 import sys
 from time import time as Time
 
-from lo_tools import Lfun
+from lo_tools import Lfun, obs_functions
 Ldir = Lfun.Lstart()
 
 # BOTTLE
@@ -33,11 +31,9 @@ out_dir = Ldir['LOo'] / 'obs' / source / otype
 Lfun.make_dir(out_dir)
 
 # We need to associate lat and lon with each station. They are not stored in the bottle
-# file, but there are station names, with loccations here:
-# sta_fn = in_dir0 / 'ParkerMacCreadyCoreStationInfoFeb2018.xlsx'
-# sta_df = pd.read_excel(sta_fn, index_col='Station')
-sta_fn = in_dir0 / 'sta_df.csv'
-sta_df = pd.read_csv(sta_fn, index_col='Station')
+# file, but there are station names, with locations here:
+sta_fn = in_dir0 / 'sta_df_fixed.p'
+sta_df = pd.read_pickle(sta_fn)
 xx = sta_df['Long_NAD83 (deg / dec_min)'].values
 yy = sta_df['Lat_NAD83 (deg / dec_min)'].values
 lon = [-(float(x.split()[0]) + float(x.split()[1])/60) for x in xx]
@@ -55,39 +51,20 @@ for year in year_list:
     out_fn = out_dir / (ys + '.p')
     info_out_fn = out_dir / ('info_' + ys + '.p')
     
-    # if year == 2017:
-    #     load_data = True
-    #     ctd_fn = in_dir0 / 'ParkerMacCready2017CTDDataFeb2018.xlsx'
-    #     sheet_name = '2017Provisional_CTDResults'
-    # elif year == 2018:
-    #     load_data = True
-    #     #ctd_fn = dir0 + 'raw/Parker_2018.xlsx'
-    #     ctd_fn = in_dir0 / 'ParkerMacCready2018CTDDOMar2020.xlsx'
-    #     sheet_name = '2018_CTDDOResults'
-    # elif year == 2019:
-    #     load_data = True
-    #     ctd_fn = in_dir0 / 'ParkerMacCready2019CTDDataFeb2020.xlsx'
-    #     sheet_name = '2019Provisional_CTDResults'
-    # else:
-    #     ctd_fn = in_dir0 / 'ParkerMacCready1999-2016CTDDataMay2018.xlsx'
-    #     sheet_name = '1999-2016Finalized_CTDResults'
     if year == 2017:
         load_data = True
-        ctd_fn = in_dir0 / 'ctd_2017.csv'
+        ctd_fn = in_dir0 / 'ctd_2017_fixed.p'
     elif year == 2018:
         load_data = True
-        ctd_fn = in_dir0 / 'ctd_2018.csv'
+        ctd_fn = in_dir0 / 'ctd_2018_fixed.p'
     elif year == 2019:
         load_data = True
-        ctd_fn = in_dir0 / 'ctd_2019.csv'
+        ctd_fn = in_dir0 / 'ctd_2019_fixed.p'
     else:
-        ctd_fn = in_dir0 / 'ctd_1999_2016.csv'
+        ctd_fn = in_dir0 / 'ctd_1999_2016_fixed.p'
     
     # DEFAULTS
-    date_col_name = 'Date'
-    station_col_name = 'Station'
-    depth_col_name = 'Depth'
-    data_new_names = ['SP', 'IT', 'DO (mg/L)', 'z']
+    data_new_names = ['SP', 'IT', 'DO (mg/L)']
     
     if year in [2017, 2019]:
         data_original_names = ['Salinity', 'Temp', 'DO_raw']
@@ -96,13 +73,11 @@ for year in year_list:
     
     # read in the data (all stations, all casts)
     if load_data:
-        # df0 = pd.read_excel(ctd_fn, sheet_name=sheet_name,
-        #     parse_dates = [date_col_name])
-        df0 = pd.read_csv(ctd_fn, parse_dates = [date_col_name], low_memory=False)
+        df0 = pd.read_pickle(ctd_fn)
         load_data = False
         
     # add z
-    df0['z'] = -df0[depth_col_name]
+    df0['z'] = -df0['Depth']
         
     # select and rename variables
     v_dict = dict(zip(data_original_names, data_new_names))
@@ -162,11 +137,23 @@ for year in year_list:
             df.loc[(df.name==name) & (df.time==time),'cid'] = cid
             cid += 1
             
-    # # Renumber cid to be increasing from zero in steps of one.
-    df = obs_functions.renumber_cid(df)
+    # Remove one cast that had obviously bad salinity
+    if year == 2017:
+        for c in df.cid.unique():
+            cdf = df[(df.cid==c)]
+            if cdf.loc[(cdf.z<-100),'SA'].mean() <23:
+                df = df[df.cid != c]
+                break
     
-    # Note, the result has casts packed top-to-bottom
-        
+    # Renumber cid to be increasing from zero in steps of one.
+    df = obs_functions.renumber_cid(df)
+
+    # check that z is monotonic (top to bottom)
+    for c in df.cid.unique():
+        if not df.loc[(df.cid==c),'z'].is_monotonic_decreasing:
+            print('z problem for ' + str(c))
+    # result: they are all monotonic, hooray!
+            
     print(' - processed %d casts' % ( len(df.cid.unique()) ))
     
     # add a cruise column
@@ -175,15 +162,7 @@ for year in year_list:
     if len(df) > 0:
         # Save the data
         df.to_pickle(out_fn)
-
-        # Also pull out a dateframe with station info to use for model cast extractions.
-        ind = df.cid.unique()
-        col_list = ['lon','lat','time','name','cruise']
-        info_df = pd.DataFrame(index=ind, columns=col_list)
-        for cid in df.cid.unique():
-            info_df.loc[cid,col_list] = df.loc[df.cid==cid,col_list].iloc[0,:]
-        info_df.index.name = 'cid'
-        info_df['time'] = pd.to_datetime(info_df['time'])
+        info_df = obs_functions.make_info_df(df)
         info_df.to_pickle(info_out_fn)
         
 print('Total time = %d sec' % (int(Time()-tt0)))
