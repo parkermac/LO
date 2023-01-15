@@ -10,5 +10,5 @@ year=2017
 
 for source in ecology dfo nceiCoastal nceiSalish
 do
- python ./extract_casts.py -gtx $1 -source $source -otype $otype -year $year > $source.log &
+ python ./extract_casts_fast.py -gtx $1 -source $source -otype $otype -year $year > $source.log &
 done
