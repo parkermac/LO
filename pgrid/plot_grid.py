@@ -32,7 +32,11 @@ if testing:
 in_fn = gfun.select_file(Gr)
 
 # load the default choices
-dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))
+try:
+    dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))
+except FileNotFoundError:
+    # you could fill this in by hand if you wanted
+    dch = {'analytical': False} # hack to make cas6 work
 
 # get river info if it exists
 do_riv = False
@@ -65,6 +69,7 @@ pfun.start_plot(figsize=(12,12))
 fig = plt.figure()
 ax = fig.add_subplot(111)
 cs = ax.pcolormesh(plon, plat, zm, vmin=-20, vmax=-4, cmap='Spectral_r')
+# cs = ax.pcolormesh(plon, plat, zm, vmin=-120, vmax=-100, cmap='Spectral_r')
 fig.colorbar(cs, ax=ax)
 if dch['analytical'] == True:
     pass
