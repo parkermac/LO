@@ -86,13 +86,14 @@ if Ldir['testing'] == True:
     
 # initialize plot
 plt.close('all')
-if True:
+if False:
     fig = plt.figure(figsize=(8,8)) # laptop size
 else:
     fig = plt.figure(figsize=(12,12)) # external monitor size
 ax = fig.add_subplot(111)
 ax.pcolormesh(plon,plat,h, vmin=-30, vmax=200, cmap=cm.deep)
 pfun.dar(ax)
+ax.axis([-127.5,-122,46.5,51])
 ax.text(.05,.95,Ldir['gridname'],transform=ax.transAxes,
     fontweight='bold')
 plt.show()
@@ -167,15 +168,15 @@ def plot_line(sn):
 # Fill a DataFrame with info to make the TEF extractions
 df = pd.DataFrame()
 # and plot the stairsteps along the way
-s_list = []
-i_list = []
-j_list = []
+s_list = [] # section name
+i_list = [] # column index of u or v
+j_list = [] # row index of u or v
 ir0_list = []
 ir1_list = []
 jr0_list = []
 jr1_list = []
-uv_list = []
-pm_list = []
+uv_list = [] # u or v
+pm_list = [] # 1 or -1 using right hand rule along section
 for sn in sn_list:
     plot_line(sn)
     ix, iy = get_stairstep(sn)
