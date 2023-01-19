@@ -143,7 +143,8 @@ def get_sta_dict(job_name):
         'ORCA_Hoodsport': (-123.1126, 47.4218),
         'CE02':(-124.304, 44.6393), # Oregon Shelf (80 m)
         'JdF_west':(-124.675, 48.481),
-        'Willapa':(-123.97,46.55)
+        'Willapa':(-123.97,46.55),
+        'dabob':(-122.8098,47.7948)
         }
         
     elif job_name == 'fatland1':
