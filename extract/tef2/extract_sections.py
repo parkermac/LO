@@ -6,7 +6,7 @@ The new capabililty here is that the sections can be diagonal
 and even made of multiple segments.
 
 Example call:
-run extract_sections -gtx cas6_v00_uu0mb -0 2021.07.04 -1 2021.07.06 -ctag test -test True
+run extract_sections -gtx cas6_v00_uu0mb -0 2021.07.04 -1 2021.07.06 -ctag c0 -test True
 
 """
 
@@ -43,8 +43,9 @@ out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef2' / outname
 Lfun.make_dir(out_dir, clean=True)
 
 # make the scratch directory for holding temporary files
-temp_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / ('tef2_temp_' + ds0 + '_' + ds1)
-Lfun.make_dir(temp_dir, clean=True)
+# temp_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / ('tef2_temp_' + ds0 + '_' + ds1)
+# Lfun.make_dir(temp_dir, clean=True)
+# Do we use this for anything?
 
 # input and output locations
 grid_fn = Ldir['grid'] / 'grid.nc'
@@ -60,10 +61,14 @@ h[m==0] = np.nan
 plon, plat = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
 aa = pfun.get_aa(ds)
 # coordinates for stairstep generation
-lon_psi = ds.lon_psi.values
-lat_psi = ds.lat_psi.values
-lop = lon_psi[0,:]
-lap = lat_psi[:,0]
+lop = ds.lon_psi[0,:].values
+lap = ds.lat_psi[:,0].values
+lor = ds.lon_rho[0,:].values
+lar = ds.lat_rho[:,0].values
+lou = ds.lon_u[0,:].values
+lau = ds.lat_u[:,0].values
+lov = ds.lon_v[0,:].values
+lav = ds.lat_v[:,0].values
 ds.close
 
 # The code below will eventually get wrapped into a tef2 version of 
@@ -77,11 +82,11 @@ def get_sn_list():
 sn_list = get_sn_list()
 
 if Ldir['testing'] == True:
-    sn_list = ['a5']
+    sn_list = ['mb8','mb9']
     
 # initialize plot
 plt.close('all')
-if False:
+if True:
     fig = plt.figure(figsize=(8,8)) # laptop size
 else:
     fig = plt.figure(figsize=(12,12)) # external monitor size
@@ -159,6 +164,18 @@ def plot_line(sn):
         fontweight='bold')
     plt.draw()
     
+# Fill a DataFrame with info to make the TEF extractions
+df = pd.DataFrame()
+# and plot the stairsteps along the way
+s_list = []
+i_list = []
+j_list = []
+ir0_list = []
+ir1_list = []
+jr0_list = []
+jr1_list = []
+uv_list = []
+pm_list = []
 for sn in sn_list:
     plot_line(sn)
     ix, iy = get_stairstep(sn)
@@ -176,6 +193,63 @@ for sn in sn_list:
     NP = len(ix)
     for ii in range(NP-1):
         ax.plot([lop[ix[ii]],lop[ix[ii+1]]], [lap[iy[ii]],lap[iy[ii+1]]],'-sr',alpha=.5)
+        i0 = ix[ii]; i1 = ix[ii+1]
+        j0 = iy[ii]; j1 = iy[ii+1]
+        if (i0 == i1) and (j1 == j0 + 1): # S to N segment
+            if m[j1,i1] + m[j1,i1+1] == 2: # there is ocean on both sides
+                i_list.append(i1); j_list.append(j1)
+                ir0_list.append(i1); ir1_list.append(i1+1)
+                jr0_list.append(j1); jr1_list.append(j1)
+                uv_list.append('u')
+                pm_list.append(-1)
+                s_list.append(sn)
+        elif (i0 == i1) and (j1 == j0 - 1): # N to S segment
+            if m[j0,i0] + m[j0,i0+1] == 2: # there is ocean on both sides
+                i_list.append(i0); j_list.append(j0)
+                ir0_list.append(i0); ir1_list.append(i0+1)
+                jr0_list.append(j0); jr1_list.append(j0)
+                uv_list.append('u')
+                pm_list.append(1)
+                s_list.append(sn)
+        elif (j0 == j1) and (i1 == i0 + 1): # W to E segment
+            if m[j1,i1] + m[j1+1,i1] == 2: # there is ocean on both sides
+                i_list.append(i1); j_list.append(j1)
+                ir0_list.append(i1); ir1_list.append(i1)
+                jr0_list.append(j1); jr1_list.append(j1+1)
+                uv_list.append('v')
+                pm_list.append(1)
+                s_list.append(sn)
+        elif (j0 == j1) and (i1 == i0 - 1): # E to W segment
+            if m[j0,i0] + m[j0+1,i0] == 2: # there is ocean on both sides
+                i_list.append(i0); j_list.append(j0)
+                ir0_list.append(i0); ir1_list.append(i0)
+                jr0_list.append(j0); jr1_list.append(j0+1)
+                uv_list.append('v')
+                pm_list.append(-1)
+                s_list.append(sn)
+                
+df['sn'] = s_list
+df['i'] = i_list
+df['j'] = j_list
+df['ir0'] = ir0_list
+df['jr0'] = jr0_list
+df['ir1'] = ir1_list
+df['jr1'] = jr1_list
+df['uv'] = uv_list
+df['pm'] = pm_list
+
+ax.plot(lor[ir0_list],lar[jr0_list],'ob')
+ax.plot(lor[ir1_list],lar[jr1_list],'ob')
+
+ax.plot(lou[df.loc[(df.uv=='u') & (df.pm==1),'i'].to_numpy()],
+    lau[df.loc[(df.uv=='u') & (df.pm==1),'j'].to_numpy()],'>y')
+ax.plot(lou[df.loc[(df.uv=='u') & (df.pm==-1),'i'].to_numpy()],
+    lau[df.loc[(df.uv=='u') & (df.pm==-1),'j'].to_numpy()],'<y')
+ax.plot(lov[df.loc[(df.uv=='v') & (df.pm==1),'i'].to_numpy()],
+    lav[df.loc[(df.uv=='v') & (df.pm==1),'j'].to_numpy()],'^y')
+ax.plot(lov[df.loc[(df.uv=='v') & (df.pm==-1),'i'].to_numpy()],
+    lav[df.loc[(df.uv=='v') & (df.pm==-1),'j'].to_numpy()],'vy')
+    
 plt.draw()
     
     

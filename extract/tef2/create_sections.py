@@ -33,7 +33,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-g','--gridname', default='ae0', type=str)
 parser.add_argument('-ctag','--collection_tag', default='test', type=str)
 # set clobber to True to start a new collection even if it exists
-parser.add_argument('-c','--clobber', default=False, type=Lfun.boolean_string)
+parser.add_argument('-clobber', default=False, type=Lfun.boolean_string)
 # set small to True to work on a laptop
 parser.add_argument('-small', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
