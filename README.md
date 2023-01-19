@@ -120,6 +120,12 @@ conda env update -f loenv.yml
 ```
 which only took a minute or two the last time I tried it. There are more complete instructions for working with conda environments [HERE](https://www.earthdatascience.org/courses/intro-to-earth-data-science/python-code-fundamentals/use-python-packages/use-conda-environments-and-install-packages/).
 
+NOTE: on 2023.01.13 I encountered a problem where pickled pandas DataFrames created with pandas 1.2 and earlier could not be opened with pandas 1.3 and higher. For some reason when I updated everything on perigee the pandas version remained at 1.2, even though it was 1.3 on apogee and my mac. To solve this I did a hand install on perigee:
+```
+pip install --upgrade pandas=1.3.3
+```
+and this fixed the problem without breaking anything that I noticed. Hopefully this is a temporary inconsistency.
+
 #### _Creating your own environment! Highly recommended_
 
 One way to do this would be to:
