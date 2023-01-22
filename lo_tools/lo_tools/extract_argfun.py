@@ -20,7 +20,7 @@ def intro():
     parser.add_argument('-source', type=str) # e.g. dfo
     parser.add_argument('-otype', type=str) # observation type, e.g. ctd, bottle, etc.
     parser.add_argument('-year', type=int) # e.g. 2019
-    # arguments used by extract/tef
+    # arguments used by extract/tef and tef2
     parser.add_argument('-sect_name', type=str, default='ai1')
     parser.add_argument('-get_bio', type=Lfun.boolean_string, default=False)
     # arguments used by extract/tef2

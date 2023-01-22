@@ -7,8 +7,9 @@ Command line arguments:
 
 -g, --gridname: which grid.nc to use
 -ctag, --collection_tag: save collection in the folder
-    LO_output/extract/tef2/[gridname]_[collection_tag]
--c, --clobber: True to start clean collection folder
+    LO_output/extract/tef2/sections_[gctag]
+    where [gctag] = [gridname]_[collection_tag]
+-clobber: True to start clean collection folder
 -small: True to work on a laptop
 
 Example:
@@ -41,7 +42,7 @@ args = parser.parse_args()
 # input and output locations
 Ldir = Lfun.Lstart(gridname=args.gridname)
 in_fn = Ldir['grid'] / 'grid.nc'
-out_name = args.gridname + '_' + args.collection_tag
+out_name = 'sections_' + args.gridname + '_' + args.collection_tag
 out_dir = Ldir['LOo'] / 'extract' / 'tef2' / out_name
 if args.clobber:
     inp = input('Do you really want to clobber? y/n: ')
