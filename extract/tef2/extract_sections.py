@@ -168,13 +168,17 @@ def plot_line(sn):
 # Fill a DataFrame with info to make the TEF extractions
 df = pd.DataFrame()
 # and plot the stairsteps along the way
+
+# initialize lists
 s_list = [] # section name
 i_list = [] # column index of u or v
 j_list = [] # row index of u or v
-ir0_list = []
-ir1_list = []
-jr0_list = []
-jr1_list = []
+
+# lists of row and colums indices on the rho grid, with "p" and "m" indicating +/-
+irp_list = [] 
+irm_list = []
+jrp_list = []
+jrm_list = []
 uv_list = [] # u or v
 pm_list = [] # 1 or -1 using right hand rule along section
 for sn in sn_list:
@@ -199,32 +203,32 @@ for sn in sn_list:
         if (i0 == i1) and (j1 == j0 + 1): # S to N segment
             if m[j1,i1] + m[j1,i1+1] == 2: # there is ocean on both sides
                 i_list.append(i1); j_list.append(j1)
-                ir0_list.append(i1); ir1_list.append(i1+1)
-                jr0_list.append(j1); jr1_list.append(j1)
+                irp_list.append(i1); irm_list.append(i1+1)
+                jrp_list.append(j1); jrm_list.append(j1)
                 uv_list.append('u')
                 pm_list.append(-1)
                 s_list.append(sn)
         elif (i0 == i1) and (j1 == j0 - 1): # N to S segment
             if m[j0,i0] + m[j0,i0+1] == 2: # there is ocean on both sides
                 i_list.append(i0); j_list.append(j0)
-                ir0_list.append(i0); ir1_list.append(i0+1)
-                jr0_list.append(j0); jr1_list.append(j0)
+                irm_list.append(i0); irp_list.append(i0+1)
+                jrm_list.append(j0); jrp_list.append(j0)
                 uv_list.append('u')
                 pm_list.append(1)
                 s_list.append(sn)
         elif (j0 == j1) and (i1 == i0 + 1): # W to E segment
             if m[j1,i1] + m[j1+1,i1] == 2: # there is ocean on both sides
                 i_list.append(i1); j_list.append(j1)
-                ir0_list.append(i1); ir1_list.append(i1)
-                jr0_list.append(j1); jr1_list.append(j1+1)
+                irm_list.append(i1); irp_list.append(i1)
+                jrm_list.append(j1); jrp_list.append(j1+1)
                 uv_list.append('v')
                 pm_list.append(1)
                 s_list.append(sn)
         elif (j0 == j1) and (i1 == i0 - 1): # E to W segment
             if m[j0,i0] + m[j0+1,i0] == 2: # there is ocean on both sides
                 i_list.append(i0); j_list.append(j0)
-                ir0_list.append(i0); ir1_list.append(i0)
-                jr0_list.append(j0); jr1_list.append(j0+1)
+                irp_list.append(i0); irm_list.append(i0)
+                jrp_list.append(j0); jrm_list.append(j0+1)
                 uv_list.append('v')
                 pm_list.append(-1)
                 s_list.append(sn)
@@ -232,15 +236,15 @@ for sn in sn_list:
 df['sn'] = s_list
 df['i'] = i_list
 df['j'] = j_list
-df['ir0'] = ir0_list
-df['jr0'] = jr0_list
-df['ir1'] = ir1_list
-df['jr1'] = jr1_list
+df['irp'] = irp_list
+df['jrp'] = jrp_list
+df['irm'] = irm_list
+df['jrm'] = jrm_list
 df['uv'] = uv_list
 df['pm'] = pm_list
 
-ax.plot(lor[ir0_list],lar[jr0_list],'ob')
-ax.plot(lor[ir1_list],lar[jr1_list],'ob')
+ax.plot(lor[irp_list],lar[jrp_list],'or')
+ax.plot(lor[irm_list],lar[jrm_list],'ob')
 
 ax.plot(lou[df.loc[(df.uv=='u') & (df.pm==1),'i'].to_numpy()],
     lau[df.loc[(df.uv=='u') & (df.pm==1),'j'].to_numpy()],'>y')
