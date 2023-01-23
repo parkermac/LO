@@ -16,6 +16,7 @@ from time import time
 import sys
 import pandas as pd
 import xarray as xr
+import numpy as np
 
 gctag = Ldir['gridname'] + '_' + Ldir['collection_tag']
 tef2_dir = Ldir['LOo'] / 'extract' / 'tef2'
@@ -30,48 +31,64 @@ Lfun.make_dir(out_dir, clean=True)
 Lfun.make_dir(temp_dir, clean=True)
 
 if Ldir['testing']:
-    sect_df = sect_df.loc[sect_df.sn == 'mb9',:].copy()
-sn_list = list(sect_df.sn.unique())
+    sect_df = sect_df.loc[(sect_df.sn == 'mb8') | (sect_df.sn == 'mb9'),:].copy()
+    sect_df = sect_df.reset_index(drop=True)
+# sn_list = list(sect_df.sn.unique())
     
 vn_list = ['salt']
 
-if Ldir['testing']:
+if True:#Ldir['testing']:
     fn_list = [fn_list[0]]
+
+# grid info
+fn = fn_list[0]
+S = zrfun.get_basic_info(fn, only_S=True)
+ds = xr.open_dataset(fn)
+DX = 1/ds.pm.values
+DY = 1/ds.pn.values
+dxu = DX[:,:-1] + np.diff(DX,axis=1)/2
+dyv = DY[:-1,:] + np.diff(DY,axis=0)/2
     
 out_df = pd.DataFrame()
 
 u_df = sect_df[sect_df.uv == 'u']
 v_df = sect_df[sect_df.uv == 'v']
 
+# Fields that do not change with time
+C = dict()
+CC = dict()
+h = ds.h.values
+CC['h'] = (h[sect_df.jrp, sect_df.irp]  + h[sect_df.jrm, sect_df.irm])/2
+dxuu = dxu[u_df.j, u_df.i]
+dyvv = dyv[v_df.j, v_df.i]
+dd = np.nan * np.ones(CC['h'].shape)
+dd[u_df.index] = dxuu
+dd[v_df.index] = dyvv
+
 tt0 = time()
 for fn in fn_list:
     # eventually this will be handled as simultaneous subprocess jobs
     ds = xr.open_dataset(fn)
-    u = ds.u.values.squeeze()
-    v = ds.v.values.squeeze()
-    C = dict()
-    CC = dict()
+    print(fn.name)
+    
+    # First: tracers and zeta
     for vn in vn_list:
         C[vn] = ds[vn].values.squeeze()
-    C['h'] = ds.h.values
     C['zeta'] = ds.zeta.values.squeeze()
-        
-    uu = u[:, u_df.j, u_df.i]
-    vv = v[:, v_df.j, v_df.i]
-    # also need to get DX or DY
-    
-    # then merge these back into one
-    vel = np.nan * np.ones(CC['salt'].shape)
-    for sn in sn_list:
-        iu = u_df[u_df.sn==sn].index.to_numpy()
-        iv = v_df[v_df.sn==sn].index.to_numpy()
-        # vel[:,iu] = uu[:,??]
-        
-    
     for vn in vn_list:
         CC[vn] = (C[vn][:, sect_df.jrp, sect_df.irp]  + C[vn][:, sect_df.jrm, sect_df.irm])/2
-    CC['h'] = (C['h'][sect_df.jrp, sect_df.irp]  + C['h'][sect_df.jrm, sect_df.irm])/2
     CC['zeta'] = (C['zeta'][sect_df.jrp, sect_df.irp]  + C['zeta'][sect_df.jrm, sect_df.irm])/2
+    
+    # Then: velocity
+    u = ds.u.values.squeeze()
+    v = ds.v.values.squeeze()
+    uu = u[:, u_df.j, u_df.i] * u_df.pm.to_numpy().reshape(1,-1)
+    vv = v[:, v_df.j, v_df.i] * v_df.pm.to_numpy().reshape(1,-1)
+    # then merge these back into one
+    vel = np.nan * np.ones(CC['salt'].shape)
+    # I love fancy indexing!
+    vel[:,u_df.index] = uu
+    vel[:,v_df.index] = vv
     
 print('elapsed time = %0.1f sec' % (time()-tt0))
 
