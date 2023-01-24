@@ -5,7 +5,7 @@ Extract as-run river time series for the cas6_v0_live forecast.
 To run on apogee:
 run extract_rivers -gtx cas6_v0_live -0 2017.01.01 -1 2021.12.31
 
-Performance: takes ## sec per year on apogee.
+Performance: takes 25 sec per year on apogee.
 
 Modified to include all NPZD tracers, and package the results as
 an xarray Dataset.
@@ -38,7 +38,6 @@ tt0 = time()
 vn_list = ['transport', 'salt', 'temp', 'oxygen',
     'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
     'TIC', 'alkalinity']
-
 
 # make sure the output directory exists
 out_dir = Ldir['LOo'] / 'pre' / 'river' / 'cas6_v3' / 'Data_roms'
