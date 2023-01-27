@@ -103,17 +103,47 @@ for sn in sect_df.sn.unique():
     
 plt.draw()
 
-# start of routine to find all rho-grid within a segment
+# start of routine to find all rho-grid points within a segment
 
-def update_mm(ji, mm, this_ji_list, full_ji_list, next_ji_list, df_not):
+def update_mm(sn, pm, m, sect_df):
+    
+    # initialize some lists
+    full_ji_list = [] # full list of indices of good rho points inside the volume
+    this_ji_list = [] # current list of indices of good rho points inside the volume
+    next_ji_list = [] # next list of indices of good rho points inside the volume
+    sns_list = [] # list of bounding sections and signs of interior
+    
+    if pm == 1:
+        pm_str = 'p'
+    elif pm == -1:
+        pm_str = 'm'
+    print('\nSection %s, %s side' % (sn, pm_str))
+    
+    sns_list.append(sn + '_' + pm_str)
+    
+    df = sect_df.loc[sect_df.sn==sn,:]
+    
+    df_not = sect_df.loc[sect_df.sn!=sn,:]
+    
+    # initialize a mask
+    mm = m == 1 # boolean array, True over water
+    if pm == 1:
+        mm[df.jrm,df.irm] = False
+        ji = (df.loc[df.index[0],'jrp'],df.loc[df.index[0],'irp'])
+    elif pm == -1:
+        mm[df.jrp,df.irp] = False
+        ji = (df.loc[df.index[0],'jrm'],df.loc[df.index[0],'irm'])
+    
+    
     if mm[ji] == True:
         this_ji_list.append(ji)
         full_ji_list.append(ji)
     for ji in this_ji_list:
         mm[ji] = False
+    
     counter = 0
     while len(this_ji_list) > 0:
-        print('iteration ' + str(counter))
+        # print('iteration ' + str(counter))
         for ji in this_ji_list:
             JI = (ji[0]+1, ji[1]) # North
             if mm[JI] == True:
@@ -150,41 +180,57 @@ def update_mm(ji, mm, this_ji_list, full_ji_list, next_ji_list, df_not):
             if len(p) > 0:
                 snx = p.sn.values[0]
                 print('hit ' + snx + ' on plus side')
-                dfx = sect_df.loc[sect_df.sn==snx,:].copy()
+                dfx = sect_df.loc[sect_df.sn==snx,:]
                 mm[dfx.jrm,dfx.irm] = False
-                df_not = df_not.loc[df_not.sn!=snx,:].copy()
+                df_not = df_not.loc[df_not.sn!=snx,:]
+                sns_list.append(snx + '_p')
+                
             elif len(m) > 0:
                 snx = m.sn.values[0]
                 print('hit ' + snx + ' on minus side')
-                dfx = sect_df.loc[sect_df.sn==snx,:].copy()
+                dfx = sect_df.loc[sect_df.sn==snx,:]
                 mm[dfx.jrp,dfx.irp] = False
-                df_not = df_not.loc[df_not.sn!=snx,:].copy()
-        
+                df_not = df_not.loc[df_not.sn!=snx,:]
+                sns_list.append(snx + '_m')
+                
         next_ji_list = []
         counter += 1
-    return mm, this_ji_list, full_ji_list, next_ji_list
+    print('points = ' + str(len(full_ji_list)))
+    return full_ji_list, sns_list
 
-# initialize a mask
-mm = m == 1 # boolean array, True over water
-
-# initialize some lists
-full_ji_list = [] # full list of indices of good rho points inside the volume
-this_ji_list = [] # current list of indices of good rho points inside the volume
-next_ji_list = [] # next list of indices of good rho points inside the volume
+ji_dict = {}
 
 if testing:
-    sn = 'mb9'
-    pm = 1
-    df = sect_df.loc[sect_df.sn==sn,:].copy()
-    df_not = sect_df.loc[sect_df.sn!=sn,:].copy()
-    if pm == 1:
-        mm[df.jrm,df.irm] = False
-        ji = (df.loc[df.index[0],'jrp'],df.loc[df.index[0],'irp'])
-        mm0, this_ji_list0, full_ji_list0, next_ji_list0 = \
-            update_mm(ji, mm, this_ji_list, full_ji_list, next_ji_list, df_not)
-            
-jj = [item[0] for item in full_ji_list]
-ii = [item[1] for item in full_ji_list]
-
-ax.plot(lor[ii], lar[jj],'sw')
+    sn_list = ['mb8','mb9']
+else:
+    sn_list = list(sect_df.sn.unique())
+    sn_list.remove('jdf1')
+    sn_list.remove('sog7')
+    
+for sn in sn_list:
+    for pm in [-1, 1]:
+        if pm == 1:
+            pm_str = 'p'
+        elif pm == -1:
+            pm_str = 'm'
+        sns = sn + '_' + pm_str
+        # only do this segment if it is not already done
+        done_list = []
+        for k in ji_dict.keys():
+            done_list += ji_dict[k]['sns_list']
+        if sns not in done_list:
+            full_ji_list, sns_list = update_mm(sn, pm, m, sect_df)
+            ji_dict[sns] = {'ji_list':full_ji_list, 'sns_list': sns_list}
+            # plotting to check
+            jj = [item[0] for item in full_ji_list]
+            ii = [item[1] for item in full_ji_list]
+            ax.plot(lor[ii], lar[jj],'sw')
+        else:
+            print('\nSkipping ' + sns)
+        
+#
+print(50*'=')
+for k in ji_dict.keys():
+    print('\n'+k)
+    print(ji_dict[k]['sns_list'])
    
