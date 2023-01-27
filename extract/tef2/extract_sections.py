@@ -33,7 +33,6 @@ Lfun.make_dir(temp_dir, clean=True)
 if Ldir['testing']:
     sect_df = sect_df.loc[(sect_df.sn == 'mb8') | (sect_df.sn == 'mb9'),:].copy()
     sect_df = sect_df.reset_index(drop=True)
-# sn_list = list(sect_df.sn.unique())
     
 vn_list = ['salt']
 
@@ -46,8 +45,11 @@ S = zrfun.get_basic_info(fn, only_S=True)
 ds = xr.open_dataset(fn)
 DX = 1/ds.pm.values
 DY = 1/ds.pn.values
-dxu = DX[:,:-1] + np.diff(DX,axis=1)/2
-dyv = DY[:-1,:] + np.diff(DY,axis=0)/2
+# Get spacing on u and v grids
+# dxu = DX[:,:-1] + np.diff(DX,axis=1)/2
+# dyv = DY[:-1,:] + np.diff(DY,axis=0)/2
+dxv = DX[:-1,:] + np.diff(DX,axis=0)/2
+dyu = DY[:,:-1] + np.diff(DY,axis=1)/2
     
 out_df = pd.DataFrame()
 
@@ -59,11 +61,11 @@ C = dict()
 CC = dict()
 h = ds.h.values
 CC['h'] = (h[sect_df.jrp, sect_df.irp]  + h[sect_df.jrm, sect_df.irm])/2
-dxuu = dxu[u_df.j, u_df.i]
-dyvv = dyv[v_df.j, v_df.i]
+dxvv = dxv[v_df.j, v_df.i]
+dyuu = dyu[u_df.j, u_df.i]
 dd = np.nan * np.ones(CC['h'].shape)
-dd[u_df.index] = dxuu
-dd[v_df.index] = dyvv
+dd[v_df.index] = dxvv
+dd[u_df.index] = dyuu
 
 tt0 = time()
 for fn in fn_list:
