@@ -3,7 +3,19 @@ Code to extract tef2 sections.
 
 To test on mac:
 run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.06 -test True
-run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.04 -Nproc 40
+run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.04 -Nproc 10 -get_bio True
+
+Doing this with subprocesses (Nproc = 10, on my mac) was about 2x as fast as doing
+it sequentially within this program. The less-than-expected speedup may be because
+each job only takes about a second, and there is overhead to spinning up new python
+jobs because of imports.
+
+Also, this is a memory-intensive calculation, so be careful about using Nproc > 10
+(10 is the default in extract_argfun).
+
+Performance: took about 1-2 sec per history file (Nproc = 10, on my mac).
+- 58 sec per day with get_bio True (11 3-D variables)
+- 24 sec per day with get_bio False (only salt)
 
 """
 
@@ -18,6 +30,7 @@ import sys
 import pandas as pd
 import xarray as xr
 import numpy as np
+import pickle
 
 gctag = Ldir['gridname'] + '_' + Ldir['collection_tag']
 tef2_dir = Ldir['LOo'] / 'extract' / 'tef2'
@@ -35,33 +48,11 @@ Lfun.make_dir(temp_dir, clean=True)
 
 if Ldir['testing']:
     fn_list = [fn_list[0]]
-
-# vn_list_old = ['salt', 'temp', 'oxygen',
-#     'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
-#     'TIC', 'alkalinity']
-#
-# vn_list_new = ['salt', 'temp', 'oxygen',
-#     'NO3', 'NH4', 'phytoplankton', 'zooplankton', 'SdetritusN', 'LdetritusN',
-#     'TIC', 'alkalinity']
-
-# add custom dict fields
-# long_name_dict['q'] = 'transport'
-# units_dict['q'] = 'm3 s-1'
-# long_name_dict['lon'] = 'longitude'
-# units_dict['lon'] = 'degrees'
-# long_name_dict['lat'] = 'latitude'
-# units_dict['lat'] = 'degrees'
-# long_name_dict['h'] = 'depth'
-# units_dict['h'] = 'm'
-# long_name_dict['z0'] = 'z on rho-grid with zeta=0'
-# units_dict['z0'] = 'm'
-# long_name_dict['DA0'] = 'cell area on rho-grid with zeta=0'
-# units_dict['DA0'] = 'm2'
-# long_name_dict['DA'] = 'cell area on rho-grid'
-# units_dict['DA'] = 'm2'
-
-# Note: it was not faster to try to parallelize the job this way, but
-# maybe it will be more important on the linux machines.
+    
+if Ldir['get_bio']:
+    vn_type = 'bio'
+else:
+    vn_type = 'salt'
 
 # loop over all jobs
 tt0 = time()
@@ -72,15 +63,14 @@ for ii in range(N):
     fn = fn_list[ii]
     ii_str = ('0000' + str(ii))[-5:]
     out_fn = temp_dir / ('CC_' + ii_str + '.p')
-    cmd_list = ['python3', 'get_one_section.py',
+    # use subprocesses
+    cmd_list = ['python', 'get_one_section.py',
             '-sect_df_fn', str(sect_df_fn),
             '-in_fn',str(fn),
             '-out_fn', str(out_fn),
-            '-test', str(Ldir['testing'])]
-    
+            '-vn_type', vn_type]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
-    
     # If we have accumulated Nproc jobs, or are at the end of the
     # total number of jobs, then stop and make sure all the jobs
     # in proc_list have finished, using the communicate method.
@@ -97,7 +87,6 @@ for ii in range(N):
                 sys.stdout.flush()
         # Then initialize a new list.
         proc_list = []
-        
     # Print screen output about progress.
     if (np.mod(ii,10) == 0) and ii>0:
         print(str(ii), end=', ')
