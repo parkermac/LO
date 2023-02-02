@@ -3,6 +3,7 @@ Code to extract tef2 sections.
 
 To test on mac:
 run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.06 -test True
+run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.04 -Nproc 40
 
 """
 
@@ -20,7 +21,9 @@ import numpy as np
 
 gctag = Ldir['gridname'] + '_' + Ldir['collection_tag']
 tef2_dir = Ldir['LOo'] / 'extract' / 'tef2'
-sect_df = pd.read_pickle(tef2_dir / ('sect_df_' + gctag + '.p'))
+
+sect_df_fn = tef2_dir / ('sect_df_' + gctag + '.p')
+sect_df = pd.read_pickle(sect_df_fn)
 
 fn_list = Lfun.get_fn_list('hourly', Ldir, Ldir['ds0'], Ldir['ds1'])
 
@@ -31,68 +34,7 @@ Lfun.make_dir(out_dir, clean=True)
 Lfun.make_dir(temp_dir, clean=True)
 
 if Ldir['testing']:
-    sect_df = sect_df.loc[(sect_df.sn == 'mb8') | (sect_df.sn == 'mb9'),:].copy()
-    sect_df = sect_df.reset_index(drop=True)
-    
-vn_list = ['salt']
-
-if True:#Ldir['testing']:
     fn_list = [fn_list[0]]
-
-# grid info
-fn = fn_list[0]
-S = zrfun.get_basic_info(fn, only_S=True)
-ds = xr.open_dataset(fn)
-DX = 1/ds.pm.values
-DY = 1/ds.pn.values
-# Get spacing on u and v grids
-# dxu = DX[:,:-1] + np.diff(DX,axis=1)/2
-# dyv = DY[:-1,:] + np.diff(DY,axis=0)/2
-dxv = DX[:-1,:] + np.diff(DX,axis=0)/2
-dyu = DY[:,:-1] + np.diff(DY,axis=1)/2
-    
-out_df = pd.DataFrame()
-
-u_df = sect_df[sect_df.uv == 'u']
-v_df = sect_df[sect_df.uv == 'v']
-
-# Fields that do not change with time
-C = dict()
-CC = dict()
-h = ds.h.values
-CC['h'] = (h[sect_df.jrp, sect_df.irp]  + h[sect_df.jrm, sect_df.irm])/2
-dxvv = dxv[v_df.j, v_df.i]
-dyuu = dyu[u_df.j, u_df.i]
-dd = np.nan * np.ones(CC['h'].shape)
-dd[v_df.index] = dxvv
-dd[u_df.index] = dyuu
-
-tt0 = time()
-for fn in fn_list:
-    # eventually this will be handled as simultaneous subprocess jobs
-    ds = xr.open_dataset(fn)
-    print(fn.name)
-    
-    # First: tracers and zeta
-    for vn in vn_list:
-        C[vn] = ds[vn].values.squeeze()
-    C['zeta'] = ds.zeta.values.squeeze()
-    for vn in vn_list:
-        CC[vn] = (C[vn][:, sect_df.jrp, sect_df.irp]  + C[vn][:, sect_df.jrm, sect_df.irm])/2
-    CC['zeta'] = (C['zeta'][sect_df.jrp, sect_df.irp]  + C['zeta'][sect_df.jrm, sect_df.irm])/2
-    
-    # Then: velocity
-    u = ds.u.values.squeeze()
-    v = ds.v.values.squeeze()
-    uu = u[:, u_df.j, u_df.i] * u_df.pm.to_numpy().reshape(1,-1)
-    vv = v[:, v_df.j, v_df.i] * v_df.pm.to_numpy().reshape(1,-1)
-    # then merge these back into one
-    vel = np.nan * np.ones(CC['salt'].shape)
-    # I love fancy indexing!
-    vel[:,u_df.index] = uu
-    vel[:,v_df.index] = vv
-    
-print('elapsed time = %0.1f sec' % (time()-tt0))
 
 # vn_list_old = ['salt', 'temp', 'oxygen',
 #     'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
@@ -101,7 +43,7 @@ print('elapsed time = %0.1f sec' % (time()-tt0))
 # vn_list_new = ['salt', 'temp', 'oxygen',
 #     'NO3', 'NH4', 'phytoplankton', 'zooplankton', 'SdetritusN', 'LdetritusN',
 #     'TIC', 'alkalinity']
-    
+
 # add custom dict fields
 # long_name_dict['q'] = 'transport'
 # units_dict['q'] = 'm3 s-1'
@@ -118,37 +60,56 @@ print('elapsed time = %0.1f sec' % (time()-tt0))
 # long_name_dict['DA'] = 'cell area on rho-grid'
 # units_dict['DA'] = 'm2'
 
-sys.exit()
+# Note: it was not faster to try to parallelize the job this way, but
+# maybe it will be more important on the linux machines.
 
-print('Doing initial data extraction:')
-# We do extractions one hour at a time, as separate subprocess jobs.
-# Running Nproc (e.g. 20) of these in parallel makes the code much faster.
-# Files are saved to temp_dir.
-tt000 = time()
-proc_list = []
+# loop over all jobs
+tt0 = time()
 N = len(fn_list)
+proc_list = []
 for ii in range(N):
+    # Launch a job and add its process to a list.
     fn = fn_list[ii]
-    d = fn.parent.name.replace('f','')
-    nhis = int(fn.name.split('.')[0].split('_')[-1])
-    cmd_list = ['python3', 'extract_section_one_time.py',
-            '-pth', str(Ldir['roms_out']),
-            '-out_dir',str(temp_dir),
-            '-gtagex', Ldir['gtagex'],
-            '-d', d, '-nhis', str(nhis),
-            '-get_bio', str(Ldir['get_bio'])]
+    ii_str = ('0000' + str(ii))[-5:]
+    out_fn = temp_dir / ('CC_' + ii_str + '.p')
+    cmd_list = ['python3', 'get_one_section.py',
+            '-sect_df_fn', str(sect_df_fn),
+            '-in_fn',str(fn),
+            '-out_fn', str(out_fn),
+            '-test', str(Ldir['testing'])]
+    
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
     
-    Nproc = Ldir['Nproc']
-    if ((np.mod(ii,Nproc) == 0) and (ii > 0)) or (ii == N-1):
-        tt0 = time()
+    # If we have accumulated Nproc jobs, or are at the end of the
+    # total number of jobs, then stop and make sure all the jobs
+    # in proc_list have finished, using the communicate method.
+    if ((np.mod(ii,Ldir['Nproc']) == 0) and (ii > 0)) or (ii == N-1):
         for proc in proc_list:
-            proc.communicate()
-        print(' - %d out of %d: %d took %0.2f sec' % (ii, N, Nproc, time()-tt0))
-        sys.stdout.flush()
+            stdout, stderr = proc.communicate()
+            if len(stdout) > 0:
+                print('\nSTDOUT:')
+                print(stdout.decode())
+                sys.stdout.flush()
+            if len(stderr) > 0:
+                print('\nSTDERR:')
+                print(stderr.decode())
+                sys.stdout.flush()
+        # Then initialize a new list.
         proc_list = []
-print('Elapsed time = %0.2f sec' % (time()-tt000))
+        
+    # Print screen output about progress.
+    if (np.mod(ii,10) == 0) and ii>0:
+        print(str(ii), end=', ')
+        sys.stdout.flush()
+    if (np.mod(ii,50) == 0) and (ii > 0):
+        print('') # line feed
+        sys.stdout.flush()
+    if (ii == N-1):
+        print(str(ii))
+        sys.stdout.flush()
+    
+print('Total processing time = %0.2f sec' % (time()-tt0))
 
 
 
