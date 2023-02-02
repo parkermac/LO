@@ -64,7 +64,7 @@ for ii in range(N):
     ii_str = ('0000' + str(ii))[-5:]
     out_fn = temp_dir / ('CC_' + ii_str + '.p')
     # use subprocesses
-    cmd_list = ['python', 'get_one_section.py',
+    cmd_list = ['python3', 'get_one_section.py',
             '-sect_df_fn', str(sect_df_fn),
             '-in_fn',str(fn),
             '-out_fn', str(out_fn),
@@ -100,5 +100,42 @@ for ii in range(N):
     
 print('Total processing time = %0.2f sec' % (time()-tt0))
 
+"""
+Next we want to repackage these results into one NetCDF file per section, with all times.
 
+We will follow the structure of the output of LO/tef/extract_sections.py so that we can mostly
+recycle the subsequent processing code:
+
+Variables in the NetCDF files:
+- salt is hourly salinity in each cell (t, z, x-or-y) [same for all other variables]
+- q is hourly transport in each cell (t, z, x-or-y)
+- vel is velocity in each cell (t, z, x-or-y) positive to East or North
+- DA is the area of each cell (t, z, x-or-y) hence: q = vel * DA
+- z0 is the average z-position of cell centers (assumes SSH=0), useful for plotting
+- DA0 is the average cross-sectional area of each cell (assumes SSH=0)
+- h is depth on the section (x-or-y) positive down
+- zeta is SSH on the section (t, x-or-y) positive up
+- ocean_time is a vector of time in seconds since (typically) 1/1/1970.
+"""
+
+sect_list = list(sect_df.sn.unique())
+sect_list.sort()
+cc_list = list(temp_dir.glob('CC_*.p'))
+cc_list.sort()
+
+S = zrfun.get_basic_info(fn_list[0], only_S=True)
+NZ = S['N']
+NT = len(cc_list) # number of times
+for sn in ['mb9']: sect_list:
+    df = sect_df[sect_ds.sn==sn]
+    ii = df.index.to_numpy()
+    NX = len(ii)
+    
+    # initialize arrays
+    
+    # initialize DataSet
+    
+    # loop over all times to fill arrays
+    
+    # then add these to the DataSet and save to output.
 
