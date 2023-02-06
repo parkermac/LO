@@ -2,7 +2,7 @@
 Code to extract tef2 sections.
 
 To test on mac:
-run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.06 -test True
+run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.04 -test True
 run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.04 -Nproc 10 -get_bio True
 
 Doing this with subprocesses (Nproc = 10, on my mac) was about 2x as fast as doing
@@ -47,8 +47,7 @@ Lfun.make_dir(out_dir, clean=True)
 Lfun.make_dir(temp_dir, clean=True)
 
 if Ldir['testing']:
-    fn_list = [fn_list[0]]
-    
+    fn_list = fn_list[:3]
 if Ldir['get_bio']:
     vn_type = 'bio'
 else:
@@ -62,7 +61,7 @@ for ii in range(N):
     # Launch a job and add its process to a list.
     fn = fn_list[ii]
     ii_str = ('0000' + str(ii))[-5:]
-    out_fn = temp_dir / ('CC_' + ii_str + '.p')
+    out_fn = temp_dir / ('CC_' + ii_str + '.nc')
     # use subprocesses
     cmd_list = ['python3', 'get_one_section.py',
             '-sect_df_fn', str(sect_df_fn),
@@ -100,6 +99,23 @@ for ii in range(N):
     
 print('Total processing time = %0.2f sec' % (time()-tt0))
 
+# concatenate the records into one file
+# This bit of code is a nice example of how to replicate a bash pipe
+pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
+pp2 = Po(['grep','CC'], stdin=pp1.stdout, stdout=Pi)
+temp_fn = str(temp_dir)+'/all.nc'
+cmd_list = ['ncrcat','-p', str(temp_dir), '-O', temp_fn]
+proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
+stdout, stderr = proc.communicate()
+if len(stdout) > 0:
+    print('\nSTDOUT:')
+    print(stdout.decode())
+    sys.stdout.flush()
+if len(stderr) > 0:
+    print('\nSTDERR:')
+    print(stderr.decode())
+    sys.stdout.flush()
+        
 """
 Next we want to repackage these results into one NetCDF file per section, with all times.
 
@@ -116,26 +132,29 @@ Variables in the NetCDF files:
 - h is depth on the section (x-or-y) positive down
 - zeta is SSH on the section (t, x-or-y) positive up
 - ocean_time is a vector of time in seconds since (typically) 1/1/1970.
+    
+A useful tool is isel():
+a = ds.isel(p=np.arange(10,15))
 """
+
+ds1 = xr.open_dataset(temp_fn)
+S = zrfun.get_basic_info(fn_list[0], only_S=True)
+eta = ds1.zeta.values.squeeze() # packed (t, p)
+NT, NP = eta.shape
+hh = ds1.h.values.squeeze().reshape(1,NP) * np.ones((NT,1))
+zw = zrfun.get_z(hh, eta, S, only_w=True)
+dz = np.diff(zw, axis=0) # NOTE: this is packed (z,t,p)
+DZ = np.transpose(dz, (1,0,2)) # packed (t,z,p)
 
 sect_list = list(sect_df.sn.unique())
 sect_list.sort()
-cc_list = list(temp_dir.glob('CC_*.p'))
-cc_list.sort()
+for sn in sect_list:
+    ii = np.where(sect_df.sn == sn)[0]
+    this_ds = ds1.isel(p=ii)
+    # add DZ
+    this_DZ = DZ[:,:,ii]
+    this_ds['DZ'] = (('time','z','p'), this_DZ)
+    this_fn = out_dir / (sn + '.nc')
+    this_ds.to_netcdf(this_fn)
 
-S = zrfun.get_basic_info(fn_list[0], only_S=True)
-NZ = S['N']
-NT = len(cc_list) # number of times
-for sn in ['mb9']: sect_list:
-    df = sect_df[sect_ds.sn==sn]
-    ii = df.index.to_numpy()
-    NX = len(ii)
-    
-    # initialize arrays
-    
-    # initialize DataSet
-    
-    # loop over all times to fill arrays
-    
-    # then add these to the DataSet and save to output.
 

@@ -3,10 +3,10 @@ Function to do the extraction of all sections for a single history file.
 """
 
 from argparse import ArgumentParser
-from xarray import open_dataset
+from xarray import open_dataset, Dataset
 from numpy import nan, ones, diff
 from pickle import dump
-from pandas import read_pickle
+from pandas import read_pickle, to_datetime
 
 parser = ArgumentParser()
 parser.add_argument('-sect_df_fn', type=str) # path to sect_df
@@ -75,22 +75,18 @@ vel[:,u_df.index] = uu
 vel[:,v_df.index] = vv
 CC['vel'] = vel
 
-dump(CC, open(args.out_fn,'wb'))
+# put these in a Dataset
+NZ, NP = CC['vel'].shape
+ot = ds.ocean_time.values # an array with dtype='datetime64[ns]'
+dti = to_datetime(ot) # a pandas DatetimeIndex with dtype='datetime64[ns]'
+ds1 = Dataset()
+ds1['time'] = dti
+ds1['h'] = (('p'), CC['h'])
+ds1['dd'] = (('p'), CC['dd'])
+ds1['zeta'] = (('time','p'), CC['zeta'].reshape(1,NP))
+for vn in CC.keys():
+    if vn not in ['zeta', 'h', 'dd']:
+        vv = CC[vn] # packed (z,p)
+        ds1[vn] = (('time','z', 'p'), vv.reshape(1,NZ,NP))
+ds1.to_netcdf(args.out_fn, unlimited_dims='time')
 
-# add custom dict fields
-# long_name_dict = dict()
-# units_dict = dict()
-# long_name_dict['q'] = 'transport'
-# units_dict['q'] = 'm3 s-1'
-# long_name_dict['lon'] = 'longitude'
-# units_dict['lon'] = 'degrees'
-# long_name_dict['lat'] = 'latitude'
-# units_dict['lat'] = 'degrees'
-# long_name_dict['h'] = 'depth'
-# units_dict['h'] = 'm'
-# long_name_dict['z0'] = 'z on rho-grid with zeta=0'
-# units_dict['z0'] = 'm'
-# long_name_dict['DA0'] = 'cell area on rho-grid with zeta=0'
-# units_dict['DA0'] = 'm2'
-# long_name_dict['DA'] = 'cell area on rho-grid'
-# units_dict['DA'] = 'm2'
