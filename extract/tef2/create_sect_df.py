@@ -1,5 +1,5 @@
 """
-Create a DataFrame of all the section index and sign info required for estion extractions.
+Create a DataFrame of all the section index and sign info required for section extractions.
 
 Example call:
 run create_sect_df -gctag cas6_c0 -test True

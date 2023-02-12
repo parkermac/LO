@@ -70,7 +70,7 @@ Output: LO_output/extract/[gtagex]/tef/processed_[*]/[sect name].p
 These are packed in order [time, salinity bin]:
 - q is hourly transport in salinity bins (still positive East and North)
 - salt is hourly transport of salt in salinity bins
-- salt is hourly transport of salt-squared in salinity bins
+- salt2 is hourly transport of salt-squared in salinity bins
 - similar for all other variables that exist in both vn_list and the input file
 
 The salinity bin centers (typically 1000 of them) are:
