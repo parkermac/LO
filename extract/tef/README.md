@@ -90,7 +90,7 @@ Input: output of `process_sections.py`
 
 Output: LO_output/extract/[gtagex]/tef/bulk_[*]/[sect name].p
 
-These are pickled dicts with keys: ['salt', 'q', etc., 'ot', 'qnet', 'qabs' 'fnet', 'ssh'] and other variables, where 'salt', 'q', and etc. are matrices of shape (363, 30) meaning that it is one per day, at Noon UTC, after tidal-averaging, with nan-days on the ends cut off.  The 30 is the number of "bulk" bins, so many are be filled with nan's.
+These are pickled dicts with keys: ['salt', 'q', etc., 'ot', 'qnet', 'qabs' 'fnet', 'ssh'] and other variables, where 'salt', 'q', and etc. are matrices of shape (363, 30) meaning that it is one per day, at Noon UTC, after tidal-averaging, with nan-days on the ends cut off.  The 30 is the number of "bulk" bins, so many will be filled with nan's.
 
 Since we have done the tidal averaging **qnet** is now the mean total transport through the section, mostly representing river flow in simple cases, whereas the qnet from `process_section.py` retains tidal variability. We also introduce a new time series, **qabs**, which is the tidal average of the absolute value of qnet.  The amplitude of the tidal flow is Qt = (pi/2)*qabs, and that Qprism = qabs/2 (from Chen et al. 2012 JPO).
 

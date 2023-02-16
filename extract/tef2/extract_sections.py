@@ -119,22 +119,28 @@ if len(stderr) > 0:
 """
 Next we want to repackage these results into one NetCDF file per section, with all times.
 
-We will follow the structure of the output of LO/tef/extract_sections.py so that we can mostly
-recycle the subsequent processing code:
+We will mostly follow the structure of the output of LO/tef/extract_sections.py
+so that we can mostly recycle the subsequent processing code:
 
-Variables in the NetCDF files:
-- salt is hourly salinity in each cell (t, z, x-or-y) [same for all other variables]
-- q is hourly transport in each cell (t, z, x-or-y)
-- vel is velocity in each cell (t, z, x-or-y) positive to East or North
-- DA is the area of each cell (t, z, x-or-y) hence: q = vel * DA
-- z0 is the average z-position of cell centers (assumes SSH=0), useful for plotting
-- DA0 is the average cross-sectional area of each cell (assumes SSH=0)
-- h is depth on the section (x-or-y) positive down
-- zeta is SSH on the section (t, x-or-y) positive up
-- ocean_time is a vector of time in seconds since (typically) 1/1/1970.
+The result, looking for example at "this_ds" created below
+for one section while testing:
     
-A useful tool is isel():
-a = ds.isel(p=np.arange(10,15))
+<xarray.Dataset>
+Dimensions:  (time: 3, p: 8, z: 30)
+Coordinates:
+  * time     (time) datetime64[ns] 2021-07-04 ... 2021-07-04T02:00:00
+Dimensions without coordinates: p, z
+Data variables:
+    h        (p) float64 17.14 20.32 22.74 21.58 20.65 18.38 16.7 14.99
+    dd       (p) float64 ...
+    zeta     (time, p) float32 0.2535 0.2531 0.2528 ... 0.0301 0.03066 0.03053
+    salt     (time, z, p) float32 ...
+    vel      (time, z, p) float64 ...
+    DZ       (time, z, p) float64 0.7218 0.864 0.9729 ... 0.2256 0.217 0.2074
+
+The dimension "p" means a point on the stairstep section. "dd" is the point width [m],
+and "DZ" [m] is the vertical thickness of each cell.
+    
 """
 
 ds1 = xr.open_dataset(temp_fn)
@@ -149,6 +155,10 @@ DZ = np.transpose(dz, (1,0,2)) # packed (t,z,p)
 sect_list = list(sect_df.sn.unique())
 sect_list.sort()
 for sn in sect_list:
+    """
+    A useful tool for pulling out a section is np.where() combined with the
+    xr Dataset method isel(), as is done here.
+    """
     ii = np.where(sect_df.sn == sn)[0]
     this_ds = ds1.isel(p=ii)
     # add DZ
@@ -156,5 +166,7 @@ for sn in sect_list:
     this_ds['DZ'] = (('time','z','p'), this_DZ)
     this_fn = out_dir / (sn + '.nc')
     this_ds.to_netcdf(this_fn)
+    
+ds1.close()
 
 

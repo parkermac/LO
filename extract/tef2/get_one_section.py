@@ -16,7 +16,10 @@ parser.add_argument('-vn_type', type=str) # 'salt' or 'bio'
 args = parser.parse_args()
 
 sect_df = read_pickle(args.sect_df_fn)
-ds = open_dataset(args.in_fn)
+ds = open_dataset(args.in_fn, decode_times=False)
+# the decode_times=False part is important for correct treatment
+# of the time axis later when we concatenate things in the calling function
+# using ncrcat
 
 if args.vn_type == 'salt':
     vn_list = ['salt']
@@ -77,10 +80,13 @@ CC['vel'] = vel
 
 # put these in a Dataset
 NZ, NP = CC['vel'].shape
-ot = ds.ocean_time.values # an array with dtype='datetime64[ns]'
-dti = to_datetime(ot) # a pandas DatetimeIndex with dtype='datetime64[ns]'
+ot = ds.ocean_time.values
+attrs = {'units':ds.ocean_time.units}
 ds1 = Dataset()
-ds1['time'] = dti
+ds1['time'] = (('time'), ot, attrs)
+# alternate code to do the same thing:
+# ds1 = Dataset({'time': ('time', ot, attrs)})
+
 ds1['h'] = (('p'), CC['h'])
 ds1['dd'] = (('p'), CC['dd'])
 ds1['zeta'] = (('time','p'), CC['zeta'].reshape(1,NP))
