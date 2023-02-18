@@ -5,10 +5,17 @@ volume, salt, and other variables.
 Can be run by making interactive choices in the terminal, or using command line
 arguments (as when it is run by extract_sections.py).
 
-PERFORMANCE: ...
+PERFORMANCE: Using the new "binned_statistic" method this is significantly faster,
+about 5 minutes for 83 section for a year with only salt. Is this really faster?
 
 To test on mac:
-run process_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.04 -test True
+run process_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.06 -test True
+run process_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.06
+
+And for a full year:
+
+(this only has salt)
+run process_sections -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 -test True
 
 """
 
@@ -18,6 +25,7 @@ import numpy as np
 import pickle
 from time import time
 import pandas as pd
+from scipy.stats import binned_statistic
 
 from lo_tools import Lfun, zrfun, zfun
 from lo_tools import extract_argfun as exfun
@@ -36,26 +44,10 @@ in_dir = out_dir0 / ('extractions_' + Ldir['ds0'] + '_' + Ldir['ds1'])
 out_dir = out_dir0 / ('processed_' + Ldir['ds0'] + '_' + Ldir['ds1'])
 Lfun.make_dir(out_dir, clean=True)
 
-
-# in_dir00 = Ldir['LOo'] / 'extract'
-# if len(args.gtagex) == 0:
-#     gtagex = Lfun.choose_item(in_dir00)
-# else:
-#     gtagex = args.gtagex
-# in_dir0 = in_dir00 / gtagex / 'tef'
-# if (len(args.ds0)==0) or (len(args.ds1)==0):
-#     ext_name = Lfun.choose_item(in_dir0, tag='extractions')
-# else:
-#     ext_name = 'extractions_' + args.ds0 + '_' + args.ds1
-# in_dir = in_dir0 / ext_name
-
 sect_list = [item.name for item in in_dir.glob('*.nc')]
+if Ldir['testing']:
+    sect_list = ['jdf3.nc']
     
-# out_dir = in_dir0 / ext_name.replace('extractions', 'processed')
-# Lfun.make_dir(out_dir, clean=True)
-
-# vn_list = tef_fun.vn_list # only use extracted variables
-
 # make vn_list by inspecting the first section
 ds = xr.open_dataset(in_dir / sect_list[0])
 vn_list = [item for item in ds.data_vars \
@@ -64,9 +56,6 @@ ds.close()
 
 print('\nProcessing TEF extraction:')
 print(str(in_dir))
-
-if Ldir['testing']:
-    sect_list = ['mb1.nc']
 
 tt00 = time()
 
@@ -80,13 +69,9 @@ for ext_fn in sect_list:
     # load fields
     ds = xr.open_dataset(in_dir / ext_fn)
     V = dict()
-    ds_vn_list = [vn for vn in ds.data_vars]
     for vn in vn_list:
-        if vn in ds_vn_list:
-            V[vn] = ds[vn].to_numpy()
-        else:
-            print(' - variable %s not found' % (vn))
-    V['salt2'] = V['salt']*V['salt']
+        V[vn] = ds[vn].to_numpy()
+    # V['salt2'] = V['salt']*V['salt']
     q = ds['dd'].to_numpy() * ds['DZ'].to_numpy() * ds['vel'].to_numpy()
     V['q'] = q
     ot = ds['time'].to_numpy()
@@ -103,9 +88,14 @@ for ext_fn in sect_list:
     NT, NZ, NX = q.shape
     
     # define salinity bins
-    sedges = np.linspace(0, 36, 1001)
+    if Ldir['testing']:
+        NS = 36 # number of salinity bins
+    else:
+        NS = 1000 # number of salinity bins
+    S_low = 0
+    S_hi = 36
+    sedges = np.linspace(S_low, S_hi, NS+1)
     sbins = sedges[:-1] + np.diff(sedges)/2
-    NS = len(sbins) # number of salinity bins
 
     # TEF variables
     Omat = np.zeros((NT, NS))
@@ -120,31 +110,62 @@ for ext_fn in sect_list:
     g = 9.8
     rho = 1025
 
-    # process into salinity bins
+    # Process into salinity bins.
+    # NOTE: this seems like a lot of nested loops (section/time/variable/digitization indices)
+    # but it runs reasonably fast. Also we only have to run it once.
     for tt in range(NT):
             
-        si = V['salt'][tt,:,:].squeeze()
-        sf = zfun.fillit(si).flatten()
-        sf = sf[~np.isnan(sf)]
-        # sort into salinity bins
-        inds = np.digitize(sf, sedges, right=True)
-        indsf = inds.copy().flatten()
+        if False:
+            sf = V['salt'][tt,:,:].squeeze().flatten()
+            # sort into salinity bins
+            inds = np.digitize(sf, sedges, right=True)
+            indsf = inds.copy().flatten()
             
-        for vn in QV.keys():
-            XI = QV[vn][tt,:,:].squeeze()
-            XF = zfun.fillit(XI).flatten()
-            XF = XF[~np.isnan(XF)]
-            if vn == 'q':
-                # also keep track of volume transport
-                qnet[tt] = XF.sum()
-                # and tidal energy flux
-                zi = zeta[tt,:].squeeze()
-                ssh[tt] = np.nanmean(zfun.fillit(zi))
-                fnet[tt] = g * rho * ssh[tt] * qnet[tt]
-            counter = 0
-            for ii in indsf:
-                TEF[vn][tt, ii-1] += XF[counter]
-                counter += 1
+            for vn in QV.keys():
+                XI = QV[vn][tt,:,:].squeeze()
+                XF = zfun.fillit(XI).flatten()
+                XF = XF[~np.isnan(XF)]
+                if vn == 'q':
+                    # also keep track of volume transport
+                    qnet[tt] = XF.sum()
+                    # and tidal energy flux
+                    zi = zeta[tt,:].squeeze()
+                    ssh[tt] = zi.mean()
+                    fnet[tt] = g * rho * ssh[tt] * qnet[tt]
+                counter = 0
+                for ii in indsf:
+                    TEF[vn][tt, ii-1] += XF[counter]
+                    counter += 1
+                
+                
+                if Ldir['testing'] and (tt==10) and (vn=='salt'):
+                    print(TEF[vn][tt,:])
+                
+        else:
+            # alternate version
+            
+            sf = V['salt'][tt,:,:].squeeze().flatten()
+            
+            for vn in QV.keys():
+                XF = QV[vn][tt,:,:].squeeze().flatten()
+                if vn == 'q':
+                    # also keep track of volume transport
+                    qnet[tt] = XF.sum()
+                    # and tidal energy flux
+                    zi = zeta[tt,:].squeeze()
+                    ssh[tt] = zi.mean()
+                    fnet[tt] = g * rho * ssh[tt] * qnet[tt]
+                    
+                # scipy.stats.binned_statistic(x, values, statistic='mean', bins=10, range=None)
+                TEF[vn][tt,:] = binned_statistic(sf, XF, statistic='sum', bins=NS, range=(S_low,S_hi)).statistic
+                
+                # results are identical
+                
+                
+                if Ldir['testing'] and (tt==10) and (vn=='salt'):
+                    print(TEF[vn][tt,:])
+            
+        
     
     TEF['ot'] = ot
     TEF['sbins'] = sbins

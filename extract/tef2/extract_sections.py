@@ -3,7 +3,7 @@ Code to extract tef2 sections.
 
 To test on mac:
 run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.04 -test True
-run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.04 -Nproc 10 -get_bio True
+run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.06 -Nproc 10 -get_bio True
 
 Doing this with subprocesses (Nproc = 10, on my mac) was about 2x as fast as doing
 it sequentially within this program. The less-than-expected speedup may be because
@@ -16,6 +16,7 @@ Also, this is a memory-intensive calculation, so be careful about using Nproc > 
 Performance: took about 1-2 sec per history file (Nproc = 10, on my mac).
 - 58 sec per day with get_bio True (11 3-D variables)
 - 24 sec per day with get_bio False (only salt)
+- a bit over an hour per year on apogee (only salt)
 
 """
 
