@@ -3,7 +3,7 @@
 # Run multiple cast extraction jobs at once
 
 # Example run command:
-# ./multi_source_cast_extraction cas6_v0_live
+# ./multi_source_cast_extraction.sh cas6_v0_live
 
 otype=bottle
 year=2017
