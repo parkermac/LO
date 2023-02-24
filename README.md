@@ -100,7 +100,7 @@ conda env create -f loenv.yml > env.log &
 ```
 This may take a half hour or so, which is why I added the `> env.log &` at the end of the command. You can look in the .yml file to see what is being installed.  It even adds the non-python nco toolbox and ffmpeg.  It also adds LO/lo_tools as a local "package" so that when you are in (loenv) you can access any of the modules in LO/lo_tools/lo_tools with a line in your python code like `from lo_tools import zfun`.  Instructions for a simple approach to making your own local packages can be found [HERE](https://pythonchb.github.io/PythonTopics/where_to_put_your_code.html).
 
-If you like you can make your own .yml and make your own environment, especially if you want to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package. One question I have is, if you made your own `LO_user/loenv.yml` file, I assume you would have to set a path in the pip line that installs the lo_tools package. I haven't tried that yet.
+If you like you can make your own .yml and make your own environment, especially if you want to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package. One question I have is, if you made your own `LO_user/loenv.yml` file you need to set a path in the pip line that installs the lo_tools package (see instructions below, under: Creating your own environment).
 
 Then if you want to use this environment all the time add this line:
 ```
@@ -126,6 +126,8 @@ pip install --upgrade pandas=1.3.3
 ```
 and this fixed the problem without breaking anything that I noticed. Hopefully this is a temporary inconsistency.
 
+NOTE: 2023.02.24 Kate suggests that using pip3 in place of pip (including in the .yml file) may be more up-to-date (always uses python 3 version). I have not tested this yet.
+
 #### _Creating your own environment! Highly recommended_
 
 One way to do this would be to:
@@ -134,7 +136,7 @@ One way to do this would be to:
 - rename it, for example, to `myenv.yml`
 - edit it so that `name: myenv` is the first line
 - add or subtract any packages you like
-- if you are using the lo_tools local package, change the path for it in the yml to be `-e ../LO/lo_tools` (assuming that is the correct relative path)
+- if you are using the lo_tools local package, change the path for it in the yml to be `-e ../LO/lo_tools lo_tools` (assuming that is the correct relative path)
 - then do: `conda env create -f myenv.yml > env.log &` and there you are!
 
 At any time you can do `conda info --envs` to find out what environments you have. And if you want to cleanly get rid of an environment, just make sure it is not active, then do `conda env remove -n myenv` or whatever name you are wanting to remove. This will not delete your yml file.
@@ -145,6 +147,8 @@ As of 2022.12.07 the conda-forge version of the nco operators does not have a ve
 - Instructions to install homebrew: https://brew.sh/
 - Install nco using homebrew: https://formulae.brew.sh/formula/nco#default
 - Both are one-liners. Easy!
+
+After installing nco using homebrew, you can add -nco back to your myenv.yml and in terminal do: conda env update -f myenv.yml. A similar solution might exist for pytide, but I haven't tried it yet.
 
 #### (4) Create your own LO_user and make it a GitHub repo
 
