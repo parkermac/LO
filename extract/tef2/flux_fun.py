@@ -71,7 +71,6 @@ def get_two_layer(in_dir, sect_name):
             
 # colors to associate with each channel (the keys in channel_ and seg_dict)
 clist = ['blue', 'red', 'olive', 'orange']
-c_dict = dict(zip(channel_list, clist))
 
 def make_dist(x,y):
     NS = len(x)
