@@ -731,7 +731,7 @@ def P_bpress(in_dict):
     else:
         plt.show()
         
-def P_sect2(in_dict):
+def P_sect(in_dict):
     """
     This plots a map and a section (distance, z), and makes sure
     that the color limits are identical.  If the color limits are
