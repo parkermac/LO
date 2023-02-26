@@ -849,22 +849,23 @@ def P_sect_soundspeed(in_dict):
 
     ds = xr.open_dataset(in_dict['fn'])
     # create track by hand
-    x = np.linspace(-124.85,-124.2, 100) # shelf only
+    x_e = np.linspace(-124.85,-124.2, 100) # shelf only
     #x = np.linspace(-126,-124.2, 100) # shows SOFAR channel
-    y = 47 * np.ones(x.shape)
-    v2, v3, dist, idist0 = pfun.get_section(ds, 'salt', x, y, in_dict)
-    s = v3['sectvarf']
-    v2, v3, dist, idist0 = pfun.get_section(ds, 'temp', x, y, in_dict)
-    th = v3['sectvarf']
-
-    X = v3['distf']
-    Z = v3['zrf']
-    # adjust Z so surface is at 0
-    Z = Z - Z[-1,:]
+    y_e = 47 * np.ones(x_e.shape)
+    
+    x, y, dist, dist_e, zbot, ztop, dist_se, zw_se, s_s, lon, lat = \
+        pfun.get_sect(in_dict['fn'], 'salt', x_e, y_e)
+    x, y, dist, dist_e, zbot, ztop, dist_se, zw_se, th_s, lon, lat = \
+        pfun.get_sect(in_dict['fn'], 'temp', x_e, y_e)
+    
+    # make Z on section centers, with surface at 0
+    Z = zw_se - zw_se[-1,:]
+    Z = Z[:-1,:] + np.diff(Z, axis=0)/2
+    Z = Z[:,:-1] + np.diff(Z, axis=1)/2
 
     p = gsw.p_from_z(Z, 47)
-    SA = gsw.SA_from_SP(s, p, -125, 47)
-    CT = gsw.CT_from_pt(SA, th)
+    SA = gsw.SA_from_SP(s_s, p, -125, 47)
+    CT = gsw.CT_from_pt(SA, th_s)
     spd = gsw.sound_speed(SA, CT, p)
 
     # START
@@ -873,17 +874,17 @@ def P_sect_soundspeed(in_dict):
     fig, axes = plt.subplots(nrows=3, ncols=2)
 
     ax = axes[0,0]
-    cs = ax.pcolormesh(X, Z, SA, cmap='jet')
+    cs = ax.pcolormesh(dist_se, zw_se, SA, cmap='jet')
     fig.colorbar(cs, ax=ax)
     ax.text(.95, .05, 'Absolute Salinity', transform=ax.transAxes, ha='right')
 
     ax = axes[1,0]
-    cs = ax.pcolormesh(X, Z, CT, cmap='jet')
+    cs = ax.pcolormesh(dist_se, zw_se, CT, cmap='jet')
     fig.colorbar(cs, ax=ax)
     ax.text(.95, .05, 'Conservative Temperature', transform=ax.transAxes, ha='right')
 
     ax = axes[2,0]
-    cs = ax.pcolormesh(X, Z, spd, cmap='jet')
+    cs = ax.pcolormesh(dist_se, zw_se, spd, cmap='jet')
     fig.colorbar(cs, ax=ax)
     ax.text(.95, .05, 'Soundspeed [m/s]', transform=ax.transAxes, ha='right')
 
@@ -1720,8 +1721,11 @@ def P_superplot_salt(in_dict):
         else:
             x = np.concatenate((x, np.linspace(x0, x1, nn)[1:]))
             y = np.concatenate((y, np.linspace(y0, y1, nn)[1:]))
-    v2, v3, dist, idist0 = pfun.get_section(ds, vn, x, y, in_dict)
-
+    x_e = x
+    y_e = y
+    x, y, dist, dist_e, zbot, ztop, dist_se, zw_se, fld_s, lon, lat = \
+        pfun.get_sect(in_dict['fn'], vn, x_e, y_e)
+    
     # PLOTTING
     fig = plt.figure(figsize=(17,9))
     fs = 18 # fontsize
@@ -1775,25 +1779,23 @@ def P_superplot_salt(in_dict):
         markeredgecolor='k')
     ax.text(.93,.97,'S range\n'+ str(vlims2), transform=ax.transAxes,
         va='top', ha='right', c='orange', size=.6*fs, weight='bold')
-    
 
     # Section
     ax =  fig.add_subplot(433)
-    ax.plot(dist, v2['zeta']+5, linestyle='--', color='k', linewidth=2)
-    ax.plot(dist[n_ai], v2['zeta'][n_ai] + 5, marker='*', color=sect_color,
+    ax.plot(dist, ztop+5, linestyle='--', color='k', linewidth=2)
+    ax.plot(dist[n_ai], ztop[n_ai] + 5, marker='*', color=sect_color,
         markersize=14, markeredgecolor='k')
-    ax.plot(dist[n_tn], v2['zeta'][n_tn] + 5, marker='o', color=sect_color,
+    ax.plot(dist[n_tn], ztop[n_tn] + 5, marker='o', color=sect_color,
         markersize=10, markeredgecolor='k')
     ax.set_xlim(dist.min(), dist.max())
     ax.set_ylim(zdeep, 25)
-    sf = pinfo.fac_dict[vn] * v3['sectvarf']
+    sf = pinfo.fac_dict[vn] * fld_s
     # plot section
-    cs = ax.pcolormesh(v3['distf'], v3['zrf'], sf,
+    cs = ax.pcolormesh(dist_se, zw_se, fld_s,
                        vmin=vlims3[0], vmax=vlims3[1], cmap=cmap)
     ax.text(.99,.4,'S range\n'+ str(vlims3), transform=ax.transAxes,
         va='bottom', ha='right', c='orange', size=.6*fs, weight='bold')
                        
-    #fig.colorbar(cs)
     # labels
     ax.text(0, 0, 'SECTION\nPuget Sound', fontsize=fs, color='b',
         transform=ax.transAxes)
@@ -1955,7 +1957,10 @@ def P_superplot_oxygen(in_dict):
         else:
             x = np.concatenate((x, np.linspace(x0, x1, nn)[1:]))
             y = np.concatenate((y, np.linspace(y0, y1, nn)[1:]))
-    v2, v3, dist, idist0 = pfun.get_section(ds, vn, x, y, in_dict)
+    x_e = x
+    y_e = y
+    x, y, dist, dist_e, zbot, ztop, dist_se, zw_se, fld_s, lon, lat = \
+        pfun.get_sect(in_dict['fn'], vn, x_e, y_e)
 
     # PLOTTING
     fig = plt.figure(figsize=(17,9))
@@ -1990,8 +1995,6 @@ def P_superplot_oxygen(in_dict):
     cb = fig.colorbar(cs, cax=cbaxes, orientation='horizontal')
     cb.ax.tick_params(labelsize=.85*fs)
     ax.text(1, .85, r'$[mg\ L^{-1}]$', transform=ax.transAxes, fontsize=fs, ha='right')
-    # ax.text(.99,.97,'S range\n'+ str(vlims), transform=ax.transAxes,
-    #     va='top', ha='right', c='orange', size=.6*fs, weight='bold')
 
     # PS map
     ax = fig.add_subplot(132)
@@ -2018,21 +2021,17 @@ def P_superplot_oxygen(in_dict):
 
     # Section
     ax =  fig.add_subplot(433)
-    ax.plot(dist, v2['zeta']+5, linestyle='--', color='k', linewidth=2)
-    ax.plot(dist[n_ai], v2['zeta'][n_ai] + 5, marker='*', color=sect_color,
+    ax.plot(dist, ztop+5, linestyle='--', color='k', linewidth=2)
+    ax.plot(dist[n_ai], ztop[n_ai] + 5, marker='*', color=sect_color,
         markersize=14, markeredgecolor='k')
-    ax.plot(dist[n_tn], v2['zeta'][n_tn] + 5, marker='o', color=sect_color,
+    ax.plot(dist[n_tn], ztop[n_tn] + 5, marker='o', color=sect_color,
         markersize=10, markeredgecolor='k')
     ax.set_xlim(dist.min(), dist.max())
     ax.set_ylim(zdeep, 25)
-    sf = pinfo.fac_dict[vn] * v3['sectvarf']
+    sf = pinfo.fac_dict[vn] * fld_s
     # plot section
-    cs = ax.pcolormesh(v3['distf'], v3['zrf'], sf,
+    cs = ax.pcolormesh(dist_se, zw_se, fld_s,
                        vmin=vlims3[0], vmax=vlims3[1], cmap=cmap)
-    # ax.text(.99,.4,'S range\n'+ str(vlims3), transform=ax.transAxes,
-    #     va='bottom', ha='right', c='orange', size=.6*fs, weight='bold')
-                       
-    #fig.colorbar(cs)
     # labels
     ax.text(0, 0, 'SECTION\nHood Canal', fontsize=fs, color='b',
         transform=ax.transAxes)
@@ -2193,7 +2192,10 @@ def P_superplot_chl(in_dict):
         else:
             x = np.concatenate((x, np.linspace(x0, x1, nn)[1:]))
             y = np.concatenate((y, np.linspace(y0, y1, nn)[1:]))
-    v2, v3, dist, idist0 = pfun.get_section(ds, vn, x, y, in_dict)
+    x_e = x
+    y_e = y
+    x, y, dist, dist_e, zbot, ztop, dist_se, zw_se, fld_s, lon, lat = \
+        pfun.get_sect(in_dict['fn'], vn, x_e, y_e)
 
     # PLOTTING
     fig = plt.figure(figsize=(17,9))
@@ -2245,27 +2247,20 @@ def P_superplot_chl(in_dict):
         markeredgecolor='k')
     ax.plot(x[n_tn], y[n_tn], marker='o', color=sect_color, markersize=10,
         markeredgecolor='k')
-    # ax.text(.93,.97,'S range\n'+ str(vlims2), transform=ax.transAxes,
-    #     va='top', ha='right', c='orange', size=.6*fs, weight='bold')
-    
 
     # Section
     ax =  fig.add_subplot(433)
-    ax.plot(dist, v2['zeta']+5, linestyle='--', color='k', linewidth=2)
-    ax.plot(dist[n_ai], v2['zeta'][n_ai] + 5, marker='*', color=sect_color,
+    ax.plot(dist, ztop+5, linestyle='--', color='k', linewidth=2)
+    ax.plot(dist[n_ai], ztop[n_ai] + 5, marker='*', color=sect_color,
         markersize=14, markeredgecolor='k')
-    ax.plot(dist[n_tn], v2['zeta'][n_tn] + 5, marker='o', color=sect_color,
+    ax.plot(dist[n_tn], ztop[n_tn] + 5, marker='o', color=sect_color,
         markersize=10, markeredgecolor='k')
     ax.set_xlim(dist.min(), dist.max())
     ax.set_ylim(zdeep, 25)
-    sf = pinfo.fac_dict[vn] * v3['sectvarf']
+    sf = pinfo.fac_dict[vn] * fld_s
     # plot section
-    cs = ax.pcolormesh(v3['distf'], v3['zrf'], sf,
+    cs = ax.pcolormesh(dist_se, zw_se, fld_s,
                        vmin=vlims3[0], vmax=vlims3[1], cmap=cmap)
-    # ax.text(.99,.4,'S range\n'+ str(vlims3), transform=ax.transAxes,
-    #     va='bottom', ha='right', c='orange', size=.6*fs, weight='bold')
-                       
-    #fig.colorbar(cs)
     # labels
     ax.text(0, 0, 'SECTION\nPuget Sound', fontsize=fs, color='b',
         transform=ax.transAxes)
