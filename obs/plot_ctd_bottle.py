@@ -41,13 +41,13 @@ zbot = df.z.min()
 # plt.close('all')
 pfun.start_plot()
 
-# fig = plt.figure(figsize=(22,12))
-fig = plt.figure(figsize=(12,8))
+fig = plt.figure(figsize=(22,12))
+#fig = plt.figure(figsize=(12,8))
 
 if args.otype == 'bottle':
-    vn_list = ['SA', 'CT', 'DO (uM)', 'NO3 (uM)', 'NH4 (uM)', 'DIC (uM)']
-    ax_list = [1,2,4,5,7,8]
-    nrows = 3
+    vn_list = ['SA', 'CT', 'DO (uM)', 'Chl (mg m-3)', 'NO3 (uM)', 'NH4 (uM)', 'DIC (uM)', 'TA (uM)']
+    ax_list = [1,2,4,5,7,8,10,11]
+    nrows = 4
     ncols = 3
     markersize = 5
 elif args.otype == 'ctd':
