@@ -1,8 +1,10 @@
 """
-Plot bulk fluxes as a time series.
+An alternate version of bulk_plot.py. One capability it has is to combine two or more sections.
+
+NOTE: we need to to the two-section processing first!
 
 To test on mac:
-run bulk_plot -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 -test True
+run bulk_plot_2 -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 -test True
 
 
 """
@@ -31,12 +33,12 @@ sect_df = pd.read_pickle(sect_df_fn)
 
 out_dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef2'
 in_dir = out_dir0 / ('bulk_' + Ldir['ds0'] + '_' + Ldir['ds1'])
-out_dir = out_dir0 / ('bulk_plots_' + Ldir['ds0'] + '_' + Ldir['ds1'])
+out_dir = out_dir0 / ('bulk_plots_2_' + Ldir['ds0'] + '_' + Ldir['ds1'])
 Lfun.make_dir(out_dir, clean=True)
 
 sect_list = [item.name for item in in_dir.glob('*.p')]
 if Ldir['testing']:
-    sect_list = ['ss2.p']
+    sect_list = ['ai1.p', ('mb6.p','mb7.p')]
     
 # grid info
 g = xr.open_dataset(Ldir['grid'] / 'grid.nc')
