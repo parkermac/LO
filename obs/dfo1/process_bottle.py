@@ -1,7 +1,7 @@
 """
 Code to process DFO bottle data from the NetCDF version.
 
-Performance:
+Performance: Takes about 15 seconds for all the years (1930 and on)
 """
 from datetime import datetime, timedelta
 import numpy as np
@@ -39,7 +39,7 @@ RESULT (* = variables we will use):
 CNDCST01: Sea Water Electrical Conductivity [S/m]
 *CPHLFLP1: Concentration of chlorophyll-a per unit volume of the water body [mg/m^3]
 *DOXMZZ01: Oxygen concentration [umol/kg]
-DOXYZZ01: Oxygen concentration [mL/L]
+**DOXYZZ01: Oxygen concentration [mL/L]
 *NTRZAAZ1: Mole Concentration of Nitrate and Nitrite in Sea Water [umol/L]
 *PHOSAAZ1: Mole Concentration of Phosphate in Sea Water [umol/L]
 PRESPR01: Pressure [decibar]
@@ -74,9 +74,12 @@ scientist:  []
 *sea_water_practical_salinity: Sea Water Practical Salinity [PSS-78]
 sea_water_pressure: Pressure [dbar]
 *sea_water_temperature: Sea Water Temperature [degC]
-*time: Time []
+*time: Time [seconds since 1970-01-01T00:00:00Z]
 """
-col_dict = {'CPHLFLP1':'Chl (mg m-3)','DOXMZZ01': 'DO (umol kg-1)','NTRZAAZ1':'NO3 (uM)',
+col_dict = {'CPHLFLP1':'Chl (mg m-3)',
+    # 'DOXMZZ01': 'DO (umol kg-1)',
+    'DOXYZZ01': 'DO (ml L-1)',
+    'NTRZAAZ1':'NO3 (uM)',
     'PHOSAAZ1':'PO4 (uM)','SLCAAAZ1':'SiO4 (uM)',
     'depth':'depth','event_number':'cid','latitude':'lat','longitude':'lon',
     'sea_water_practical_salinity':'SP','sea_water_temperature':'TI','time':'tsec',
@@ -137,8 +140,13 @@ for year in year_list:
         p = gsw.p_from_z(df.z.to_numpy(), df.lat) # no clue why .to_numpy() is needed
         df['SA'] = gsw.SA_from_SP(df.SP, p, df.lon, df.lat)
         df['CT'] = gsw.CT_from_t(df.SA, df.TI, p)
-        rho = gsw.rho(df.SA, df.CT, p)
-        df['DO (uM)'] = df['DO (umol kg-1)'].to_numpy() * rho / 1000
+        # rho = gsw.rho(df.SA, df.CT, p)
+        # df['DO (uM) alt'] = df['DO (umol kg-1)'].to_numpy() * rho / 1000
+        df['DO (uM)'] = df['DO (ml L-1)'].to_numpy() * 1.42903 * 1000 / 32
+        # These two version differ by only around 0.05 uM, and there are a few
+        # more values if we use the second version, presumably because there are some
+        # nan rho values.
+            
         # NOTE: convenient ways to look for nans or out of range values are
         # df.isna().sum() and df.max(), df.min()
         tsec = df.tsec.to_numpy()
