@@ -50,7 +50,7 @@ Note that we use a sort of cumbersome naming convention for the data columns, in
 
 Note: After you download these to your laptop you can get a quick look at the data by running LO/obs/plot_ctd_bottle.py.
 
-Folders on perigee in `/data1/parker/LO_output/obs`:
+Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/parker/LO_output/obs`:
 
 - **dfo1** Canadian data from a large database created by Susan Allen's group. Covers 1930-2021 for bottle data and 1965-2021 for ctd, with some gaps. The original data came from: https://data.cioospacific.ca/erddap/index.html. This replaces the older "dfo" that was parsed from an SQL database.
 - **ecology** Department of Ecology monthly repeat station data. Covers 2008-2017 for bottles and 2008-2019 for ctd casts. 300-400 casts per year, monthly at 39 stations in Puget Sound and the coastal estuaries. Processing note: I added SA, CT, and DO (uM) to the processed bottle files using values interpolated from ctd casts.
