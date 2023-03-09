@@ -52,7 +52,7 @@ Note: After you download these to your laptop you can get a quick look at the da
 
 Folders on perigee in `/data1/parker/LO_output/obs`:
 
-- **dfo** Canadian data from a large SQL database created by Susan Allen's group. Covers 1930-2019, with some gaps. Currently only bottle data has been processed.
+- **dfo1** Canadian data from a large database created by Susan Allen's group. Covers 1930-2021 for bottle data and 1965-2021 for ctd, with some gaps. The original data came from: https://data.cioospacific.ca/erddap/index.html. This replaces the older "dfo" that was parsed from an SQL database.
 - **ecology** Department of Ecology monthly repeat station data. Covers 2008-2017 for bottles and 2008-2019 for ctd casts. 300-400 casts per year, monthly at 39 stations in Puget Sound and the coastal estuaries. Processing note: I added SA, CT, and DO (uM) to the processed bottle files using values interpolated from ctd casts.
 - **nceiSalish** Data from WOAC and other cruises, mainly in Puget sound and JdF, 2008-2018. 40-100 casts per year. The original data came from: https://www.ncei.noaa.gov/access/ocean-carbon-acidification-data-system/oceans/SalishCruise_DataPackage.html. Bottles only.
 - **nceiCoastal** Data from WCOA and other North American coastal cruises with carbon data. Covers 2011-2017 in the LO model domain, with some gaps, 41-56 casts per year. Good for carbon data on the WA/OR shelf. The original data came from: https://www.ncei.noaa.gov/data/oceans/ncei/ocads/metadata/0219960.html. Bottles only.

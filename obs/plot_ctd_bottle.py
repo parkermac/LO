@@ -41,8 +41,8 @@ zbot = df.z.min()
 # plt.close('all')
 pfun.start_plot()
 
-fig = plt.figure(figsize=(22,12))
-#fig = plt.figure(figsize=(12,8))
+#fig = plt.figure(figsize=(22,12))
+fig = plt.figure(figsize=(12,8))
 
 if args.otype == 'bottle':
     vn_list = ['SA', 'CT', 'DO (uM)', 'Chl (mg m-3)', 'NO3 (uM)', 'NH4 (uM)', 'DIC (uM)', 'TA (uM)']
