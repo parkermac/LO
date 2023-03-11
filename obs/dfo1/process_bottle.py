@@ -1,7 +1,7 @@
 """
 Code to process DFO bottle data from the NetCDF version.
 
-Performance: Takes about 15 seconds for all the years (1930-2021)
+Performance: Takes about 42 seconds for all the years (1930-2021)
 """
 from datetime import datetime, timedelta
 import numpy as np
@@ -35,14 +35,17 @@ col_dict = {'CPHLFLP1':'Chl (mg m-3)',
     'DOXYZZ01': 'DO (ml L-1)',
     'NTRZAAZ1':'NO3 (uM)',
     'PHOSAAZ1':'PO4 (uM)','SLCAAAZ1':'SiO4 (uM)',
-    'depth':'depth','event_number':'cid','latitude':'lat','longitude':'lon',
+    'depth':'depth','profile':'cid','latitude':'lat','longitude':'lon',
     'sea_water_practical_salinity':'SP','sea_water_temperature':'TI','time':'tsec',
     # 'sea_water_pressure':'pres',
     }
+# NOTE: the "profile" field contains values like '2017-001-0016' and it appears
+# to (mostly) uniquely identify casts, hance we assign it to cid. Previously I had used
+# event_number and this lumped several casts into one.
 
 # set which years to loop over
 if testing:
-    year_list = [2017]
+    year_list = [2020]
 else:
     year_list = list(range(1930, datetime.now().year + 1))
     
@@ -73,7 +76,27 @@ for year in year_list:
         for vn in col_dict.keys():
             df[vn] = ds[vn][mask]
         df = df.rename(col_dict, axis=1)
-    
+        
+        # Check that there are not two different casts associated with the same profile
+        # by looking for large time differences. See process_ctd.py for notes on this.
+        df = obs_functions.renumber_cid(df) # making the cid's into numbers speeds things up
+        cidu = df.cid.unique()
+        bad_list = []
+        cid_vec = df.cid.to_numpy()
+        tsec_vec = df.tsec.to_numpy()
+        for cid in cidu:
+            tvec = tsec_vec[cid_vec==cid]
+            time_diff = tvec[-1] - tvec[0]
+            if time_diff != 0:
+                # print(' - cid %s has time diff of %d sec' % (str(cid), time_diff))
+                bad_list.append(cid)
+        # Drop the bad instances
+        if len(bad_list) > 0:
+            print(' - Dropping %d casts with inconsistent time' % (len(bad_list)))
+            for item in bad_list:
+                df = df.loc[df.cid!=item,:]
+        # RESULT: Mostly the time_diffs are all zero, but we drop about 17 casts over 90 years.
+        
         # There were a few fields that had values like 1e37, and we will
         # set these to nan.
         for vn in ['depth','TI','SP']:
@@ -183,7 +206,7 @@ TEMPST01: Sea Water Temperature [degC]
 agency:  []
 country:  []
 *depth: Depth [m]
-*event_number:  []
+event_number:  []
 filename:  []
 geographic_area:  []
 instrument_model:  []
@@ -193,7 +216,7 @@ instrument_type:  []
 *longitude: Longitude [degrees_east]
 mission_id:  []
 platform:  []
-profile: Profile ID []
+*profile: Profile ID []
 project:  []
 scientist:  []
 *sea_water_practical_salinity: Sea Water Practical Salinity [PSS-78]

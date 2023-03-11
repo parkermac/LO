@@ -113,6 +113,8 @@ def get_ic(TR):
 
     elif exp_name == 'sneaker': # A surface release throughout the Salish Sea
         # meant to be used with windage for a graphic for Nat Geo.
+        # The exact run command was (on perigee, using cas6_v0_live, December 2022):
+        # python tracker.py -exp sneaker -wnd 0.03 -dtt 3 -d 2019.01.18 > sneaker.log &
         lonvec = np.linspace(-125.5, -122, 100)
         latvec = np.linspace(46.5, 50.5, 200)
         pcs_vec = np.array([0])

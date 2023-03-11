@@ -2,6 +2,9 @@
 General-purpose code to look at the output of the ctd processing for a given
 source and year.
 
+Example command to run in ipython:
+run plot_ctd_bottle -source nceiSalish -otype bottle -year 2017
+
 """
 
 import matplotlib.pyplot as plt
@@ -19,6 +22,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-source', type=str, default='ecology') # e.g. dfo
 parser.add_argument('-otype', type=str, default='bottle') # observation type, e.g. ctd, bottle
 parser.add_argument('-year', type=int, default = 2017) # e.g. 2019
+parser.add_argument('-small', type=Lfun.boolean_string, default = False) # True for laptop size
 
 args = parser.parse_args()
 
@@ -41,8 +45,10 @@ zbot = df.z.min()
 # plt.close('all')
 pfun.start_plot()
 
-#fig = plt.figure(figsize=(22,12))
-fig = plt.figure(figsize=(12,8))
+if args.small:
+    fig = plt.figure(figsize=(12,8)) # laptop size
+else:
+    fig = plt.figure(figsize=(22,12))
 
 if args.otype == 'bottle':
     vn_list = ['SA', 'CT', 'DO (uM)', 'Chl (mg m-3)', 'NO3 (uM)', 'NH4 (uM)', 'DIC (uM)', 'TA (uM)']
