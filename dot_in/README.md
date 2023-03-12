@@ -39,4 +39,4 @@ This contains the scripts and templates for making the sbatch scripts, e.g. for 
 - `cas6_v0_uu0kb` is like cas6_v0_uu0k but also uses the bio code (the Fennel code modified to closely resemble the Banas-Siedlecki-Davis equations).
 - `ae0_v0_uu1k` is an analytical run (idealized estary-shelf). This has no atm forcing.
 - `cas6_v00_uu0m` is a physics-only version of the updated model (new ROMS, perfect restart, EMINUSP, etc.) It was created as a one-off for Ramsey Harcourt
-- `cas6_v01_uu0m` is just like cas6_v00_uu0m except one parameter in BLANK.in relating to the turbulence closure has been changed.
+- `cas6_v01_uu0m` is just like cas6_v00_uu0m except one parameter in BLANK.in relating to the turbulence closure has been changed. (GLS_Kmin set to 1e-10)
