@@ -57,8 +57,8 @@ if args.otype == 'bottle':
     ncols = 3
     markersize = 5
 elif args.otype == 'ctd':
-    vn_list = ['SA', 'CT', 'DO (uM)']
-    ax_list = [1,2,4]
+    vn_list = ['SA', 'CT', 'DO (uM)', 'Chl (mg m-3)']
+    ax_list = [1,2,4,5]
     nrows = 2
     ncols = 3
     markersize = 1

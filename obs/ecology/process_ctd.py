@@ -64,12 +64,12 @@ for year in year_list:
         ctd_fn = in_dir0 / 'ctd_1999_2016_fixed.p'
     
     # DEFAULTS
-    data_new_names = ['SP', 'IT', 'DO (mg/L)']
+    data_new_names = ['SP', 'IT', 'DO (mg/L)', 'Chl (mg m-3)']
     
     if year in [2017, 2019]:
-        data_original_names = ['Salinity', 'Temp', 'DO_raw']
+        data_original_names = ['Salinity', 'Temp', 'DO_raw', 'Chla_adjusted']
     else:
-        data_original_names = ['Salinity', 'Temp', 'DO_adjusted']
+        data_original_names = ['Salinity', 'Temp', 'DO_adjusted', 'Chla_adjusted']
     
     # read in the data (all stations, all casts)
     if load_data:
@@ -123,7 +123,7 @@ for year in year_list:
     df['CT'] = CT
     
     # Keep only selected columns.
-    cols = ['time', 'lat', 'lon', 'name', 'z', 'CT', 'SA', 'DO (uM)']
+    cols = ['time', 'lat', 'lon', 'name', 'z', 'CT', 'SA', 'DO (uM)', 'Chl (mg m-3)']
     this_cols = [item for item in cols if item in df.columns]
     df = df[this_cols]
     
