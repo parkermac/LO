@@ -23,3 +23,7 @@
 	- driver_roms3.py: change where it looks for (and where it puts) the forcing files, and remove tag_alt machinery. I also cleaned up the sbatch code, making "3" versions for both klone and mox.
 	- dot_in: change path to forcing, starting with cas6_v00_uu0mb
 	- On apogee, move LO_output/forcing/cas6_v00 to LO_output/forcing/cas6
+
+---
+
+2023.03.14 I have done a lot of work on processing of observational cast data (bottle and ctd). You can see current notes in the README for LO/obs, and be sure to update your processed files using those currently in LO_output/obs on perigee or apogee. I have not yet updates the files in LO_data/obs that were orignally used to create these processed products. Currently the "official versions" are on my laptop. 
