@@ -219,6 +219,7 @@ for which_vol in vol_list:
 
     # text output
     with open(out_dir / ('Annual_Mean_' + which_vol.replace(' ','_') + '_' + year_str + '.txt'), 'w') as fout:
+        fout.write('%s: Mean Volume = %0.4f [km3]\n\n' % (which_vol, V/1e9))
         for vn in C.keys():
             tstr = ' ' + which_vol + ' ' + vn + ' Annual Mean [' + units_dict[vn] + '] '
             fout.write(tstr.center(51,'=') + '\n')

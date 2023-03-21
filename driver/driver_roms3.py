@@ -16,7 +16,7 @@ NEW compared to driver_roms2.py:
 - ** ASSUMES that PERFECT_RESTART is defined for the executable **
 - introduce a new start_type: "perfect" for perfect restart, and it defaults to this
   after the first day
-- introduce flag to sleep during the forecast window (default is NOT to sleep)
+- introduce flag to sleep during the forecast window (default is to sleep)
 - uses klone3 or mox3 batch code, which relies on a randomly generated "jobname"
 - assumes forcing is in [gridname] folder, not [gtag]
 - drop the gtag_alt capability (all tag changes handled by the dot_in now)
@@ -60,7 +60,7 @@ parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
 parser.add_argument('-t', '--tag', type=str)        # e.g. v00
 parser.add_argument('-x', '--ex_name', type=str)    # e.g. uu0mb
 parser.add_argument('-r', '--run_type', type=str, default='backfill')   # forecast or backfill
-parser.add_argument('-s', '--start_type', type=str, default='perfect') # new, perfect or continuation
+parser.add_argument('-s', '--start_type', type=str, default='perfect') # new, perfect, or continuation
 # -0 and -1 only required for -r backfill
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
