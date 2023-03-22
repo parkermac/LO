@@ -94,10 +94,17 @@ def P_basic_PS(in_dict):
     fig = plt.figure()
     # PLOT CODE
     vn_list = ['salt', 'temp']
+    pinfo.cmap_dict['salt'] = 'jet'
     ii = 1
     for vn in vn_list:
         if in_dict['auto_vlims']:
-            pinfo.vlims_dict[vn] = ()
+            i0 = zfun.find_nearest_ind(ds.lon_rho[0,:],aa[0])
+            i1 = zfun.find_nearest_ind(ds.lon_rho[0,:],aa[1])
+            j0 = zfun.find_nearest_ind(ds.lat_rho[:,0],aa[2])
+            j1 = zfun.find_nearest_ind(ds.lat_rho[:,0],aa[3])
+            fld = ds[vn][0,-1,j0:j1,i0:i1].values
+            vlims = pfun.auto_lims(fld)
+            pinfo.vlims_dict[vn] = vlims
         ax = fig.add_subplot(1, len(vn_list), ii)
         cs = pfun.add_map_field(ax, ds, vn, pinfo.vlims_dict,
                 cmap=pinfo.cmap_dict[vn], fac=pinfo.fac_dict[vn], vlims_fac=pinfo.range_dict[vn])
