@@ -98,6 +98,7 @@ def P_basic_PS(in_dict):
     ii = 1
     for vn in vn_list:
         if in_dict['auto_vlims']:
+            # this gets the color limits to be focused on the "aa" region
             i0 = zfun.find_nearest_ind(ds.lon_rho[0,:],aa[0])
             i1 = zfun.find_nearest_ind(ds.lon_rho[0,:],aa[1])
             j0 = zfun.find_nearest_ind(ds.lat_rho[:,0],aa[2])
