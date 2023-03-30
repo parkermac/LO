@@ -12,9 +12,14 @@ Command line arguments:
 -clobber: True to start clean collection folder
 -small: True to work on a laptop
 
-Example:
+Examples:
 
 run create_sections -g cas6
+This would start or append to a [gctag] called cas6_test.
+
+You can look at an existing [gctag] with (for me) a command like:
+run create_sections -g cas6 -ctag c0
+and then just do "q" to exit without changing anything
 
 """
 
