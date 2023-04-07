@@ -54,9 +54,6 @@ lov = ds.lon_v[0,:].values
 lav = ds.lat_v[:,0].values
 ds.close
 
-# The code below will eventually get wrapped into a tef2 version of 
-# extract_sections_one_time.py
-
 def get_sn_list():
     df_list = list(collection_dir.glob('*.p'))
     sn_list = [item.name.replace('.p','') for item in df_list]
