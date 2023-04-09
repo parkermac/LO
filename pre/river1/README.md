@@ -1,17 +1,17 @@
 # README for the pre/river1 code
 
-### This code is for gathering and processing river data, and one of the uses for the data is forcing ROMS hindcasts.
+### This code is for gathering and processing river data, and one of the uses for the data is forcing ROMS hindcasts. This replaces pre/river.
 
-### It relies on functions in the module `LO/lo_tools/lo_tools/river_functions.py`, which go out and get data from external sources: USGS, NWS Forecasts, and Environment Canada websites.  The reason for putting these in lo_tools is that they are also used by the forecast system.
+#### It relies on functions in the module `LO/lo_tools/lo_tools/river_functions.py`, which go out and get data from external sources: USGS, NWS Forecasts, and Environment Canada websites.  The reason for putting these in lo_tools is that they are also used by the forecast system.
 
 #### The folder was started 2023.04.09 based on pre/river. The main improvement is to simplify the process of updating the historical and climatological data every year. We also making the naming more generic, so that there are not hard-coded date ranges in the river forcing code, for example. Any river forcing code will have to be modified to make use of this new naming.
 
 ---
 
-#### CURRENT OUTPUT STATE, 2022.11.13 [Need to update when I am done with the refactoring.]
-cas6_v3 has:
-- historical flow and flow climatology for 1980-2021
-- historical temperature and temperature climatology for 1980-2020
+#### CURRENT OUTPUT STATE 2023.04.09
+Collection lo_base has:
+- historical flow [and soon flow climatology] for 1980-2022
+- [not yet] historical temperature and temperature climatology for 1980-2020
 
 ---
 
@@ -39,7 +39,7 @@ NOTE: Currently this is hard-coded to the reflect the collection of rivers in LO
 
 ---
 
-`make_historical.py` - the main tool for getting historical flow data. This was recoded in November 2022 to make it easier to just do one year at a time and then concatenate it with previous saved data. Much faster and more reliable, but requires you to edit the code each time, and to get up-to-date ROMS extractions first.
+`make_historical.py` - the main tool for getting historical flow data. It accepts command line arguments for the ctag and year range. The default behavior **with no arguments** is to add the most recent year (e.g. 2022 if run in 2023) to the existing ALL_flow.p, moving the old one to ALL_flow_prev.p. This is really useful because it means you can update the historical archive with one command, especially if you do it early in the year (say January-April) before we drift into the dreaded EC Data Gap. If you do it late in the year you may have to update the ROMS river forcing extraction and edit the code to use it.
 
 INPUT:
 
@@ -47,7 +47,7 @@ Raw data from XML (USGS), or scraped from html (EC), using the functions in rive
 
 OUTPUT:
 
-(++) = (*)/Data_historical/ALL_flow_[year0]_[year1].p - a pickled DataFrame of daily (at noon) flow [m3/s] over many years, e.g. 1980-2020, organized by mean size, with scaling factors applied, which looks like:
+(++) = (*)/Data_historical/ALL_flow.p - a pickled DataFrame of daily (at noon) flow [m3/s] over many years, e.g. 1980-2022, organized by mean size, with scaling factors applied, which looks like:
 
 ```
                         columbia     fraser    squamish  ...  deschutes  nf_skokomish    wilson
@@ -66,9 +66,7 @@ OUTPUT:
 
 ---
 
-`get_all_flow_df.py` a convenience function for loading the DataFrame (++) created by `make_historical.py`
-
----
+## [not refactored yet]
 
 `add_ec_historical.py` an interactive program for adding historical EC rivers, one year at a time, to the DataFrame (++) created by `make_historical.py`.  It exists because make_historical sometimes skips a year due to server timeouts, and it is quicker to fill in important rivers like the Fraser by hand than to run make_historical many times.
 
@@ -78,7 +76,11 @@ OUTPUT:
 
 OUTPUT:
 
-(*)/Data_historical/ALL_flow_plot_[1-6].png
+(*)/Data_historical_plots/ALL_flow_plot_[1-6].png
+
+---
+
+## [below here not refactored yet]
 
 ---
 

@@ -15,6 +15,8 @@ NOTE: The forcing files are spread across two machines and different naming conv
 with the change happening around October 2021, hence the hard-coded paths below.
 ***
 
+Edited 2023.04.09 to send the output to pre/river1/lo_base.
+
 """
 
 from lo_tools import Lfun, zrfun
@@ -40,7 +42,7 @@ vn_list = ['transport', 'salt', 'temp', 'oxygen',
     'TIC', 'alkalinity']
 
 # make sure the output directory exists
-out_dir = Ldir['LOo'] / 'pre' / 'river' / 'cas6_v3' / 'Data_roms'
+out_dir = Ldir['LOo'] / 'pre' / 'river1' / 'lo_base' / 'Data_roms'
 Lfun.make_dir(out_dir)
 outname = 'extraction_' + ds0 + '_' + ds1 + '.nc'
 out_fn = out_dir / outname

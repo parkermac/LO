@@ -1,26 +1,36 @@
 """
-Program to plot historical records for rivers.
+Program to plot historical records for rivers. Saves a sequence of png's.
 """
 
 import pandas as pd
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
-
 from lo_tools import Lfun
+import argparse
+
+parser = argparse.ArgumentParser()
+parser.add_argument('-ctag', type=str, default='lo_base')
+args = parser.parse_args()
+ctag = args.ctag
 
 Ldir = Lfun.Lstart()
 
-gtag = 'cas6_v3'
-year0 = 1980
-year1 = 2021
+ctag = 'lo_base'
 
 # location of historical data to plot
-riv_dir = Ldir['LOo'] / 'pre' / 'river' / gtag / 'Data_historical'
-all_df = pd.read_pickle(riv_dir / ('ALL_flow_' + str(year0) + '_' + str(year1) + '.p'))
+riv_dir0 = Ldir['LOo'] / 'pre' / 'river1' / ctag
+riv_dir = riv_dir0 / 'Data_historical'
+plot_dir = riv_dir0 / 'Data_historical_plots'
+Lfun.make_dir(plot_dir)
+all_df = pd.read_pickle(riv_dir / 'ALL_flow.p')
 
+tt = all_df.index
+year0 = tt.year[0]
+year1 = tt.year[-1]
 dt0 = datetime(year0,1,1)
 dt1 = datetime(year1,12,31)
+
 plt.close('all')
 ii = 0
 fig_num = 0
@@ -40,9 +50,9 @@ for rn in all_df.columns:
     jj += 1 # increment panel counter
     ii += 1 # increment figure counter
     if (np.mod(ii,9) == 0) or (rn == all_df.columns[-1]):
-        fig.savefig(riv_dir / ('ALL_flow_plot_' + str(fig_num) + '.png'))
+        fig.savefig(plot_dir / ('ALL_flow_plot_' + str(fig_num) + '.png'))
 
-plt.show()
+# plt.show()
 
 
 
