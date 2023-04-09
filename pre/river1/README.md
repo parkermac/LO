@@ -32,7 +32,10 @@ Information from Sarah Gidding, Ecology, and other places.
 OUTPUT:
 
 - (*)/river_info.csv - names, gauges, scaling factors
-- (*)/giddings_tracks/[river name].p - lon, lat tracks for carving river channels in a grid
+- (*)/river_info.p - pickled DataFrame version of river_info.csv
+- (*)/tracks/[river name].p - lon, lat tracks for carving river channels in a grid
+
+NOTE: Currently this is hard-coded to the reflect the collection of rivers in LO as of 2023.04.09 (without the TRAPS rivers - they are added later). This has **ctag = lo_base**.
 
 ---
 
