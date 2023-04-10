@@ -43,7 +43,7 @@ NOTE: Currently this is hard-coded to the reflect the collection of rivers in LO
 
 INPUT:
 
-Raw data from XML (USGS), or scraped from html (EC), using the functions in river_functions.py.  For the USGS data you can simply hand it a date range and it will quickly return 40 years of daily flow data.  For EC data it is more complicated.  Typically over a range in the last 18 months you can get data using a date range, just like for USGS.  Earlier than this you need to scrape the "historical" data from a table on a web page, a year at a time, but these only exist up to two years ago, e.g. 2020 when it is 2022. If yo do this after mid-year there is a gap in the EC data, e.g. doing this in November 2022 there is a gap for the early months of 2021. A workaround is to use as-run river extractions from LiveOcean forcing files, which are created using code in LO/extract/river.
+Raw data from XML (USGS), or scraped from html (EC), using the functions in river_functions.py.  For the USGS data you can simply hand it a date range and it will quickly return 40 years of daily flow data.  For EC data it is more complicated.  Typically over a range in the last 18 months you can get data using a date range, just like for USGS.  Earlier than this you need to scrape the "historical" data from a table on a web page, a year at a time, but these only exist up to two years ago, e.g. 2020 when it is 2022. If you do this after mid-year there is a gap in the EC data, e.g. doing this in November 2022 there is a gap for the early months of 2021. A workaround is to use as-run river extractions from LiveOcean forcing files, which are created using code in LO/extract/river.
 
 OUTPUT:
 
@@ -66,8 +66,6 @@ OUTPUT:
 
 ---
 
-## [not refactored yet]
-
 `add_ec_historical.py` an interactive program for adding historical EC rivers, one year at a time, to the DataFrame (++) created by `make_historical.py`.  It exists because make_historical sometimes skips a year due to server timeouts, and it is quicker to fill in important rivers like the Fraser by hand than to run make_historical many times.
 
 ---
@@ -80,17 +78,15 @@ OUTPUT:
 
 ---
 
-## [below here not refactored yet]
-
----
-
 `make_historical_temperature.py`  is much like make_historical, but for temperature.
 
-INPUT: like for make_historical, but for EC data we only query the last year.
+INPUT: like for make_historical, but for EC data we only query the last full year. (Is this because temperature is not available in the older tables?).
 
 OUTPUT:
 
-(++T) = (*)/Data_historical/ALL_temperature_[year0]_[year1].p
+(++T) = (*)/Data_historical/ALL_temperature.p
+
+**NOTE**: I refactored this to work in pre/river1 on 2023.04.10 and did a bit of testing, but for the output I just copied what we had from pre/river. The reason was that the Fraser temperature from 2022 looked crappy in the summer and I did not want to make it what we rely on in making our climatology (which is all we use for making forcing).
 
 ---
 
@@ -98,8 +94,8 @@ OUTPUT:
 
 OUTPUT
 
-- (*)/Data_historical/ALL_temperature_usgs_plot_1.png (currently 12 rivers)
-- (*)/Data_historical/ALL_temperature_ec_plot_1.png (currently 6 rivers)
+- (*)/Data_historical_plots/ALL_temperature_usgs_plot_1.png (currently 12 rivers, 1980-2020, v. gappy)
+- (*)/Data_historical_plots/ALL_temperature_ec_plot_1.png (currently 6 rivers, 2020 only, gappy)
 
 ---
 
@@ -111,13 +107,13 @@ INPUT:
 
 PLOT OUTPUT:
 
-- (*)/Data_historical/CLIM_flow_plot.png
-- (*)/Data_historical/CLIM_temp_plot.png
+- (*)/Data_historical_plots/CLIM_flow_plot.png
+- (*)/Data_historical_plots/CLIM_temp_plot.png
 
 OUTPUT:
 
-- (*)/Data_historical/CLIM_flow_[year0]_[year1].p
-- (*)/Data_historical/CLIM_temp_[year0]_[year1].p
+- (*)/Data_historical/CLIM_flow.p
+- (*)/Data_historical/CLIM_temp.p
 
 which are pickled Dataframes that look like:
 
@@ -135,3 +131,18 @@ which are pickled Dataframes that look like:
 365  7487.805624  1085.838498  163.153582  208.123746  ...  11.523762  22.732303      7.370944  0.467800
 366  7525.558068  1205.385382  115.413047  175.890028  ...  13.043897  26.937935     10.197154  0.425753
 ```
+
+---
+
+`plot_river_map.py` makes a nice plot of the river tracks, and colors the ones with temperature data red.
+
+INPUT:
+- (*)/river_info.p - pickled DataFrame of river_info
+- (*)/tracks/[river name].p - lon, lat tracks for carving river channels in a grid
+- (*)/Data_historical/CLIM_temp.p
+- Ldir['grid'] / 'river_info.csv'
+
+PLOT OUTPUT:
+- (*)/Data_historical_plots/river_map.png
+
+NOTE: You need to associate a [gridname] with a [ctag] for this to work.

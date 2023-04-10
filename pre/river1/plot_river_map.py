@@ -5,22 +5,35 @@ Program to plot a map of river tracks used in a specific ROMS grid.
 
 import pandas as pd
 import matplotlib.pyplot as plt
+import sys
 
 from lo_tools import Lfun
 from lo_tools import plotting_functions as pfun
 
-Ldir = Lfun.Lstart(gridname='cas6', tag='v3')
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('-ctag', type=str, default='lo_base')
+args = parser.parse_args()
+ctag = args.ctag
+
+if ctag == 'lo_base':
+    gridname = 'cas6'
+else:
+    print('You need to specify a gridname for this ctag.')
+    sys.exit()
+    
+Ldir = Lfun.Lstart(gridname=gridname)
 
 # get the list of rivers for this grid
 gri_fn = Ldir['grid'] / 'river_info.csv'
 gri_df = pd.read_csv(gri_fn, index_col='rname')
 
 # find out which rivers have temperature climatologies
-ri_dir = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag']
-year0 = 1980
-year1 = 2020
-Ctemp_df = pd.read_pickle(ri_dir / 'Data_historical' /
-    ('CLIM_temp_' + str(year0) + '_' + str(year1) + '.p'))
+riv_dir0 = Ldir['LOo'] / 'pre' / 'river1' / ctag
+riv_dir = riv_dir0 / 'Data_historical'
+plot_dir = riv_dir0 / 'Data_historical_plots'
+Lfun.make_dir(plot_dir)
+Ctemp_df = pd.read_pickle(riv_dir / 'CLIM_temp.p')
 
 # PLOTTING
 
@@ -39,7 +52,7 @@ ax.set_ylabel('Latitude')
 
 for rn in gri_df.index:
     try:
-        track_df = pd.read_pickle(ri_dir / 'tracks' / (rn + '.p'))
+        track_df = pd.read_pickle(riv_dir0 / 'tracks' / (rn + '.p'))
         x = track_df['lon'].to_numpy()
         y = track_df['lat'].to_numpy()
         ax.plot(x, y, '-c', linewidth=2)
@@ -62,10 +75,10 @@ for rn in gri_df.index:
         print('no track for ' + rn)
         pass
 
-ax.text(.03,.35,'LiveOcean Rivers', weight='bold', transform=ax.transAxes)
-ax.text(.03,.3, Ldir['gtag'], weight='bold', transform=ax.transAxes)
+ax.text(.03,.35,'Rivers for %s' % (gridname), weight='bold', transform=ax.transAxes)
+ax.text(.03,.3, 'ctag = %s' % (ctag), weight='bold', transform=ax.transAxes)
 ax.text(.03,.25,'RED have Temperature Data', color='r', weight='bold', transform=ax.transAxes)
 fig.tight_layout()
-fig.savefig(ri_dir / 'river_map.png')
+fig.savefig(plot_dir / 'river_map.png')
 plt.show()
 pfun.end_plot()

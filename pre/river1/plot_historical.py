@@ -7,16 +7,14 @@ from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import numpy as np
 from lo_tools import Lfun
-import argparse
 
+import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-ctag', type=str, default='lo_base')
 args = parser.parse_args()
 ctag = args.ctag
 
 Ldir = Lfun.Lstart()
-
-ctag = 'lo_base'
 
 # location of historical data to plot
 riv_dir0 = Ldir['LOo'] / 'pre' / 'river1' / ctag

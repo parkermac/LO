@@ -18,8 +18,9 @@ from datetime import datetime, timedelta
 import pandas as pd
 import numpy as np
 import xarray as xr
-import argparse
+import sys
 
+import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-ctag', type=str, default='lo_base')
 parser.add_argument('-y0', type=str, default='')
@@ -174,4 +175,7 @@ if have_old:
     combined_df = pd.concat([old_df, new_df])
     combined_df.to_pickle(out_fn)
 else:
-    new_df.to_pickle(out_fn)
+    if not testing:
+        new_df.to_pickle(out_fn)
+    else:
+        print('Testing: new_df not saved.')
