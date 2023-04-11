@@ -34,11 +34,6 @@ import numpy as np
 import pandas as pd
 import rivfun
 
-if Ldir['testing']:
-    from importlib import reload
-    reload(zrfun)
-    reload(rivfun)
-
 out_fn = out_dir / 'rivers.nc'
 out_fn.unlink(missing_ok=True)
 
