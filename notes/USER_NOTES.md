@@ -26,4 +26,8 @@
 
 ---
 
-2023.03.14 I have done a lot of work on processing of observational cast data (bottle and ctd). You can see current notes in the README for LO/obs, and be sure to update your processed files using those currently in LO_output/obs on perigee or apogee. I have not yet updates the files in LO_data/obs that were orignally used to create these processed products. Currently the "official versions" are on my laptop. 
+2023.03.14 I have done a lot of work on processing of observational cast data (bottle and ctd). You can see current notes in the README for LO/obs, and be sure to update your processed files using those currently in LO_output/obs on perigee or apogee. I have not yet updates the files in LO_data/obs that were orignally used to create these processed products. Currently the "official versions" are on my laptop.
+
+---
+
+2023.04.11 Over the weekend I started a new run on mox, and along the way made a change to how I organize the bio code that may be useful. In LO_roms_user/x1b I added the fennel.h code to the x1b folder, instead of leaving it in LO_roms_source_alt. Then I changed a line in build_roms.sh so that MY_ANALYTICAL_DIR points to x1b as well. The motivation is that it keeps any edits of fennel.h connected to a specific [ex_name].

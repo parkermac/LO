@@ -14,3 +14,9 @@
 - [frc]N# is for nested runs, meaning it gets its values by interpolating from ROMS history files
 - [frc]A# is for analytical runs
 - [frc]## (repeated number, like ocn00) is for use with the updated ROMS, including automated coordinate naming using varinfo.yaml, and the banas-fennel biogeochemical model.
+
+---
+
+#### Specific Notes
+
+**riv01** is like riv00 but it uses the new pre/river1 system, with more robust naming, for historical and climatological data.
