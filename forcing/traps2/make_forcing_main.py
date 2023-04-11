@@ -5,6 +5,8 @@ updated ROMS
 Test on pc in ipython:
 run make_forcing_main.py -g cas6 -r backfill -d 2021.01.01 -f traps2 -test True
 
+2023.04.11 Updated to work with pre/river1 data format.
+
 """
 
 from pathlib import Path
@@ -65,20 +67,20 @@ G = zrfun.get_basic_info(grid_fn, only_G=True)
 # LIVEOCEAN PRE-EXISTING RIVERS
 
 # Load a dataframe with info for rivers to get
-gtag = 'cas6_v3'
-ri_dir = Ldir['LOo'] / 'pre' / 'river' / gtag
-ri_fn = ri_dir / 'river_info.csv'
-ri_df = pd.read_csv(ri_fn, index_col='rname')
+if Ldir['gridname'] == 'cas6':
+    ctag = 'lo_base'
+else:
+    print('You need to specify a gridname for this ctag.')
+    sys.exit()
+
+ri_dir = Ldir['LOo'] / 'pre' / 'river1' / ctag
+ri_df_fn = ri_dir / 'river_info.p'
+ri_df = pd.read_pickle(ri_df_fn)
 
 # get historical and climatological data files
-year0 = 1980
-year1 = 2021
-clim_temp_year0 = 1980
-clim_temp_year1 = 2020
-# historical and climatological data
-Ldir['Hflow_fn'] = ri_dir / 'Data_historical' / ('ALL_flow_' + str(year0) + '_' + str(year1) + '.p')
-Ldir['Cflow_fn'] = ri_dir / 'Data_historical' / ('CLIM_flow_' + str(year0) + '_' + str(year1) + '.p')
-Ldir['Ctemp_fn'] = ri_dir / 'Data_historical' / ('CLIM_temp_' + str(clim_temp_year0) + '_' + str(clim_temp_year1) + '.p')
+Ldir['Hflow_fn'] = ri_dir / 'Data_historical' / ('ALL_flow.p')
+Ldir['Cflow_fn'] = ri_dir / 'Data_historical' / ('CLIM_flow.p')
+Ldir['Ctemp_fn'] = ri_dir / 'Data_historical' / ('CLIM_temp.p')
 
 # get biologeochem data for rivers for which Ecology has data
 LObio_dir = Ldir['LOo'] / 'pre' / 'traps' / 'LO_rivbio'
