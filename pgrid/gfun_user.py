@@ -16,7 +16,7 @@ import gfun_utility as gfu
 import gfun
 
 # This is the name of the grid that you are working on.
-gridname = 'ae0'
+gridname = 'so1'
 
 # default s-coordinate info (could override below)
 s_dict = {'THETA_S': 4, 'THETA_B': 2, 'TCLINE': 10, 'N': 30,
@@ -25,7 +25,7 @@ s_dict = {'THETA_S': 4, 'THETA_B': 2, 'TCLINE': 10, 'N': 30,
 # Set the gridname and tag to use when creating the Ldir paths.
 # They are used for accessing the river tracks, which may be developed for one
 # grid but reused in others.
-if gridname in ['ai0','hc0', 'sal0', 'so0']:
+if gridname in ['ai0','hc0', 'sal0', 'so0', 'so1']:
     # these cases reuse (all or some of) the LiveOcean cas6 model rivers
     base_gridname = 'cas6'
     base_tag = 'v3'
@@ -135,6 +135,40 @@ def make_initial_info(gridname=gridname):
             z[~np.isnan(z_part)] = z_part[~np.isnan(z_part)]
         if dch['use_z_offset']:
             z = z + dch['z_offset']
+            
+    elif gridname == 'so1':
+        # South Sound, new version, 2023.04.12
+        dch = gfun.default_choices()
+        dch['z_offset'] = -1.3 # NAVD88 is 1.3 m below MSL at Seattle
+        dch['excluded_rivers'] = ['skokomish']
+        aa = [-123.13, -122.76, 47, 47.42]
+        res = 100 # target resolution (m)
+        Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
+        dch['t_list'] = [dch['t_dir'] / 'srtm15' / 'topo15.nc',
+                    dch['t_dir'] / 'psdem_10m' / 'PS_30m.nc']
+        dch['nudging_edges'] = ['east']
+        dch['nudging_days'] = (0.1, 1.0)
+        
+        # by setting a small min_depth were are planning to use
+        # wetting and drying in ROMS, but maintaining positive depth
+        # for all water cells
+        dch['min_depth'] = 0.2 # meters (positive down)
+        
+        # Make the rho grid.
+        lon, lat = np.meshgrid(Lon_vec, Lat_vec)
+        # initialize the bathymetry array
+        z = np.nan * lon
+        # add bathymetry automatically from files
+        for t_fn in dch['t_list']:
+            print('\nOPENING BATHY FILE: ' + t_fn.name)
+            tlon_vec, tlat_vec, tz = gfu.load_bathy_nc(t_fn)
+            tlon, tlat = np.meshgrid(tlon_vec, tlat_vec)
+            z_part = zfun.interp2(lon, lat, tlon, tlat, tz)
+            # put good values of z_part in z
+            z[~np.isnan(z_part)] = z_part[~np.isnan(z_part)]
+        if dch['use_z_offset']:
+            z = z + dch['z_offset']
+    
             
     elif gridname == 'ae0':
         # analytical model estuary
