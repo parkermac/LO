@@ -19,7 +19,7 @@ import pickle
 dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))
 
 # get river info
-gri_fn = Gr['ri_dir'] / 'river_info.csv'
+gri_fn = Gr['ri_dir0'] / dch['ctag'] / 'river_info.csv'
 ri_df = pd.read_csv(gri_fn, index_col='rname')
 
 # select and increment grid file
@@ -57,7 +57,7 @@ for rn in ri_df.index:
     if rn not in dch['excluded_rivers']:
         depth = ri_df.loc[rn, 'depth']
         try:
-            fn_tr = Gr['ri_dir'] / 'tracks' / (rn + '.p')
+            fn_tr = Gr['ri_dir0'] / dch['ctag'] / 'tracks' / (rn + '.p')
             track_df = pd.read_pickle(fn_tr)
             # NOTE: tracks go from ocean to land
             x = track_df['lon'].to_numpy()

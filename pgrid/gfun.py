@@ -17,11 +17,9 @@ else:
 
 # get info from LO_user/pgrid/gfun_user.py
 gridname = gfun_user.gridname
-base_gridname = gfun_user.base_gridname
-base_tag = gfun_user.base_tag
 
 # remake Ldir
-Ldir = Lfun.Lstart(gridname=base_gridname, tag=base_tag)
+Ldir = Lfun.Lstart()
 
 def gstart(gridname=gridname):
     """
@@ -30,18 +28,13 @@ def gstart(gridname=gridname):
     """
     pgdir = Ldir['LOo'] / 'pgrid'
     gdir = pgdir / gridname # where grid.nc will end up
-    ri_dir = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag']
-    Gr ={'gridname': gridname,'pgdir': pgdir, 'gdir': gdir,'ri_dir': ri_dir}
+    ri_dir0 = Ldir['LOo'] / 'pre' / 'river1'
+    Gr ={'gridname': gridname,'pgdir': pgdir, 'gdir': gdir, 'ri_dir0': ri_dir0}
     return Gr
 
 def default_choices():
     # Default choices (can override in each case)
     dch = dict()
-
-    # Decide if the grid will allow wetting and drying.
-    # We do this first because it affects several subsequent choices
-    # dch['wet_dry'] = wet_dry
-    # deprecated 2021.11.15
 
     # GRID CREATION
     # Set analytical to true when we define the bathymetry analytically.
@@ -71,6 +64,16 @@ def default_choices():
     # Set remove_islands to True to automatically remove isolated patches of
     # land or ocean.
     dch['remove_islands'] = True
+    
+    # RIVERS
+    # ctag for river info, using the new LO/pre/river1 system
+    dch['ctag'] = 'lo_base'
+    # Sometimes for nests we mask out a partial basin, and this allows us to also
+    # exclude its rivers.  The downside is that you need to know what those rivers
+    # are in advance.  If you want to do this you should run carve_rivers.py and
+    # decide what to exclude, and then start again, before putting a lot of
+    # time in to edit_mask.py.
+    dch['excluded_rivers'] = []
 
     # SMOOTHING
     dch['use_min_depth'] = True
@@ -83,14 +86,6 @@ def default_choices():
     dch['nudging_edges'] = ['north', 'south', 'east', 'west']
     dch['nudging_days'] = (3.0, 60.0)
     
-    # RIVERS
-    # Sometimes for nests we mask out a partial basin, and this allows us to also
-    # exclude its rivers.  The downside is that you need to know what those rivers
-    # are in advance.  It you want to do this you might run carve_rivers.py and
-    # decide what to exclude, and then start again, before putting a lot of
-    # time in to edit_mask.py.
-    dch['excluded_rivers'] = []
-        
     return dch
 
 def select_file(Gr):

@@ -22,20 +22,6 @@ gridname = 'so1'
 s_dict = {'THETA_S': 4, 'THETA_B': 2, 'TCLINE': 10, 'N': 30,
         'VTRANSFORM': 2, 'VSTRETCHING': 4}
 
-# Set the gridname and tag to use when creating the Ldir paths.
-# They are used for accessing the river tracks, which may be developed for one
-# grid but reused in others.
-if gridname in ['ai0','hc0', 'sal0', 'so0', 'so1']:
-    # these cases reuse (all or some of) the LiveOcean cas6 model rivers
-    base_gridname = 'cas6'
-    base_tag = 'v3'
-elif gridname in ['ae0']:
-    # for analytical cases we create the river info and track in
-    # make_initial_info() below, but we still assign gridname and tag so
-    # that they get saved in the right places
-    base_gridname = 'ae0'
-    base_tag = 'v0'
-
 def make_initial_info(gridname=gridname):
     # Add an elif section for your grid.
 
@@ -168,7 +154,6 @@ def make_initial_info(gridname=gridname):
             z[~np.isnan(z_part)] = z_part[~np.isnan(z_part)]
         if dch['use_z_offset']:
             z = z + dch['z_offset']
-    
             
     elif gridname == 'ae0':
         # analytical model estuary
@@ -196,9 +181,10 @@ def make_initial_info(gridname=gridname):
         mask = zestuary < z
         z[mask] = zestuary[mask]
         
-        # create a river file
-        Ldir = Lfun.Lstart(gridname=base_gridname, tag=base_tag)
-        ri_dir = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag']
+        # create a river file by hand
+        Ldir = Lfun.Lstart()
+        dch['ctag'] = 'ae0_v0'
+        ri_dir = Ldir['LOo'] / 'pre' / 'river1' / dch['ctag']
         Lfun.make_dir(ri_dir)
         gri_fn = ri_dir / 'river_info.csv'
         with open(gri_fn, 'w') as rf:

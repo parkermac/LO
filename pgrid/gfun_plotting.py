@@ -3,6 +3,7 @@ Module of functions for plotting grids in pgrid.
 """
 import numpy as np
 import pandas as pd
+import pickle
 
     
 def get_grids(ds):
@@ -26,6 +27,9 @@ def add_river_tracks(Gr, ds, ax):
     
     rri_fn = Gr['gdir'] / 'roms_river_info.csv'
     rri_df = pd.read_csv(rri_fn, index_col='rname')
+    
+    # load the default choices
+    dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))
 
     for rn in rri_df.index:
         # These are indices (python, zero-based) into either the
@@ -54,15 +58,15 @@ def add_river_tracks(Gr, ds, ax):
             ax.plot(lon_v[jj,ii], lat_v[jj,ii],'vb')
             ax.plot(lon[jj,ii], lat[jj,ii],'oc')
             
-        fn_tr = Gr['ri_dir'] / 'tracks' / (rn + '.p')
-        try:
-            track_df = pd.read_pickle(fn_tr)
-        except FileNotFoundError:
-            return
-        x = track_df['lon'].to_numpy()
-        y = track_df['lat'].to_numpy()
-        ax.plot(x, y, '-r', linewidth=1, alpha=.3)
-        ax.plot(x[-1], y[-1], '*r', alpha=.3)
+        # fn_tr = Gr['ri_dir0'] / dch['ctag'] / 'tracks' / (rn + '.p')
+        # try:
+        #     track_df = pd.read_pickle(fn_tr)
+        # except FileNotFoundError:
+        #     return
+        # x = track_df['lon'].to_numpy()
+        # y = track_df['lat'].to_numpy()
+        # ax.plot(x, y, '-r', linewidth=1, alpha=.3)
+        # ax.plot(x[-1], y[-1], '*r', alpha=.3)
                     
 def show_z_info(zm, ax):
     # find the max value of z (DEBUGGING)

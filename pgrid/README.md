@@ -6,6 +6,8 @@ Throughout the steps we maintain and modify the arrays "h" and "mask_rho" to be 
 
 To see what variables ROMS expects to find in a grid file, have a look in `LO_roms_source/ROMS/Utility/get_grid.F`.
 
+NOTE: As of 2023.04.13 I have moved over to the new river data format in LO/pre/river1. This meant introducing a new dch['ctag'] which corresponds to the collection tag in river1. The current default is lo_base. We also replace Gr['ri_dir'] with Gr['ri_dir0'] which is the path to LO_output/pre/river1.
+
 ---
 #### Suggested order to run the code
 

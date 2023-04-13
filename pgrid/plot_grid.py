@@ -68,7 +68,7 @@ pfun.start_plot(figsize=(12,12))
 # bathymetry
 fig = plt.figure()
 ax = fig.add_subplot(111)
-cs = ax.pcolormesh(plon, plat, zm, vmin=-20, vmax=-4, cmap='Spectral_r')
+cs = ax.pcolormesh(plon, plat, zm, vmin=-20, vmax=0, cmap='Spectral_r')
 # cs = ax.pcolormesh(plon, plat, zm, vmin=-120, vmax=-100, cmap='Spectral_r')
 fig.colorbar(cs, ax=ax)
 if dch['analytical'] == True:
