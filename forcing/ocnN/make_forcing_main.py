@@ -41,7 +41,7 @@ if Ldir['testing']:
     reload(Ofun_nc_xarray)
 
 # this directory is created, along with Info and Data subdirectories, by ffun.intro()
-out_dir = Ldir['LOo'] / 'forcing' / Ldir['gtag'] / ('f' + Ldir['date_string']) / Ldir['frc']
+out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
 
 # where to find the files to interpolate from
 # NOTE: this should be made more general - perhaps handled by the command line arguments.
