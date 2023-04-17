@@ -542,6 +542,8 @@ def get_vel(uf0,uf1,vf0,vf1,wf0,wf1, plon, plat, pcs, frac, surface):
         V[:,0] = ui
         V[:,1] = vi
         V[:,2] = wi
+    # The line below is to account for wet-dry cells.
+    V[np.isnan(V)] = 0.0
     return V
     
 def get_zh(zf0,zf1,hf, plon, plat, frac):
