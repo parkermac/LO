@@ -120,6 +120,14 @@ def get_ic(TR):
         pcs_vec = np.array([0])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
         
+    elif exp_name == 'turn_pt_oil': # For Nina Bednarsek, mouth of JdF
+        lon0 = -123.2427; lat0 = 48.6906 # center of the circle 
+        radius_km = 1 # radius of the circle km
+        N = 10000 # number of particles
+        # make random scattering of points in a circle
+        plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
+        pcs00 = 0 * np.ones(N)
+        
     return plon00, plat00, pcs00
     
 def ic_from_meshgrid(lonvec, latvec, pcs_vec):
