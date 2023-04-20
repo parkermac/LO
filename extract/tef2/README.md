@@ -98,7 +98,7 @@ Except for testing you have to run this code on the remote computer where the RO
 
 Warning: if you look around line 90 you will see that this is hard-coded to use 1000 salinity bins between 0 and 36.
 
-By now you may have noticed that a jump around aimlessly, sometimes saving output in picked DataFrames, picked dicts, or NetCDF. Sorry. Often the choice is for convenience, or to smooth reuse of old code from LO/tef. It also is a result of the incredible speed advantaged offered by nco tools like ncrcat.
+By now you may have noticed that I jump around aimlessly, sometimes saving output in picked DataFrames, picked dicts, or NetCDF. Sorry. Often the choice is for convenience, or to smooth reuse of old code from LO/tef. It also is a result of the incredible speed advantages offered by nco tools like ncrcat.
 
 ---
 
