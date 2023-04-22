@@ -70,7 +70,7 @@ v_dict = {
 
 # We need to associate lat and lon with each station. They are not stored in the bottle
 # file, but there are station names, with locations here:
-sta_fn = in_dir0 / 'sta_df_fixed.p'
+sta_fn = in_dir0 / 'sta_df.p'
 sta_df = pd.read_pickle(sta_fn)
 xx = sta_df['Long_NAD83 (deg / dec_min)'].values
 yy = sta_df['Lat_NAD83 (deg / dec_min)'].values

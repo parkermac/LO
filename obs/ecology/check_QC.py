@@ -20,7 +20,11 @@ import sys
 source = 'ecology'
 in_dir0 = Ldir['data'] / 'obs' / source
 
-for fn in list(in_dir0.glob('*.p')):
+fn_list = list(in_dir0.glob('*.p'))
+fn_list = [item for item in fn_list if 'fixed' not in item.name]
+fn_list = [item for item in fn_list if 'sta_df' not in item.name]
+
+for fn in fn_list:
 
     df = pd.read_pickle(fn)
         
