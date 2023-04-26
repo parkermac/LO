@@ -8,9 +8,9 @@ For a complete description please see: MacCready, P. (2011). Calculating Estuari
 
 ---
 
-#### The code...
+#### Workflow Summary
 
-[need a summary of the workflow]
+[need to add this]
 
 ----
 
@@ -30,9 +30,13 @@ Sign convention: When we extract transport across a section we define the positi
 o-----
    -
 ```
-The output is organized using a gridname and a collection tag [ctag]. For example, my first meaningful collection of sections was had [ctag] = c0 and it was on the cas6 grid. This is identified with combination [gctag] = cas6_v0.
+The output is organized using a gridname and a collection tag [ctag]. For example, my first meaningful collection of sections had [ctag] = c0 and it was on the cas6 grid. This is identified with combination [gctag] = cas6_c0.
 
 The output ends up in a folder `LO_output/extract/tef2/sections_[gctag]` and each section is a pickled DataFrame named for the section.
+
+---
+
+`plot_collection.py` is a utility program to plot a [cgtag] collection of sections so you can look at what you have.
 
 ---
 
@@ -51,7 +55,7 @@ The output ends up in a folder `LO_output/extract/tef2/sections_[gctag]` and eac
 999   ss26  503   658  503   658  504   658  u  -1
 1000  ss26  503   658  503   658  503   659  v  -1
 ```
-There is one row for each point. Each point is on either the u- or v-grid. I think that the numbering here is the same in what we get using xarray to read a history file.
+There is one row for each point. Each point is on either the u- or v-grid. The numbering here is the same in what we get using xarray to read a history file.
 - sn tells you which section it is on
 - i,j are the indices (column,row) for the the velocity point
 - irp,jrp are the indices for the rho-grid point on the positive side
@@ -67,11 +71,17 @@ There is some useful graphical output from this program so you should run it on 
 
 ---
 
-`extract_sections.py` does the hard work of extracting transport and tracer values (interpolated from the rho-grid to the u- or v-grid) from a sequence of hourly history files from a ROMS run. Of course the run has to have the same grid that you specified when running `create_sect_df.py`. As usual in the LO system you use command line arguments to tell it which [gtagex], [ctag], time range, and whether or not to get bio veriables.
+`extract_sections.py` does the hard work of extracting transport and tracer values (interpolated from the rho-grid to the u- or v-grid) from a sequence of hourly history files from a ROMS run. Of course the run has to have the same grid that you specified when running `create_sect_df.py`. As usual in the LO system you use command line arguments to tell it which [gtagex], [ctag], time range, and whether or not to get bio variables.
 
 To speed things up this calls `get_one_section.py` with many simultaneous subprocess calls. This is the code to look at to see which bio variables are being extracted.
 
-The output ends up with the full raw extraction in a NetCDF file, one for each section and named for the section, e.g. 'ai1.nc'. The output folder is` LO_output/extract/[gtagex]/extractions_[date range]`.
+The output ends up with the full raw extraction in a NetCDF file, one for each section and named for the section, e.g. 'ai1.nc'. The output, and that of subsequent steps, goes into:
+
+**LO_output/extract/[gtagex]/tef2 = (+)**
+
+in a folder called
+
+**(+)/extractions_[date range]**
 
 Here is an example of how the results for one section are packed in the NetCDF file:
 ```
@@ -90,11 +100,15 @@ Data variables:
 ```
 The dimension "p" means a point on the stairstep section. "dd" is the point width [m], and "DZ" [m] is the vertical thickness of each cell.
 
-Except for testing you have to run this code on the remote computer where the ROMS history files are stored. Since you created your sect_df_[gctag].p on your laptop then you have to copy it by hand to the remote machine.
+Except when you are testing you have to run this code on the remote computer where the ROMS history files are stored. Since you created your sect_df_[gctag].p on your laptop then you have to copy it by hand to the remote machine.
 
 ---
 
-`process_sections.py` goes through all the extracted sections and does the salinity binning, saving the output in picked dicts of numpy arrays in the folder `LO_output/extract/[gtagex]/processed_[date range]`. This is fast enough to run on your laptop, after you have copied the results of `extract_sections.py`.
+`process_sections.py` goes through all the extracted sections and does the salinity binning, saving the output in picked dicts of numpy arrays in the folder
+
+**(+)/processed_[date range]**
+
+This is fast enough to run on your laptop, after you have copied the results of `extract_sections.py`.
 
 Warning: if you look around line 90 you will see that this is hard-coded to use 1000 salinity bins between 0 and 36.
 
@@ -102,7 +116,9 @@ By now you may have noticed that I jump around aimlessly, sometimes saving outpu
 
 ---
 
-`bulk_calc.py` boils down the results of process_sections.py into some number of 'in' and 'out' layers, using code from Marvin Lorenz. Each of these is a time series, tidally averaged and subsampled to daily at noon UTC of each day. The results end up in pickled dicts, one for each section in `LO_output/extract/[gtagex]/bulk_[date range]`.
+`bulk_calc.py` boils down the results of process_sections.py into some number of 'in' and 'out' layers, using code from Marvin Lorenz. Each of these is a time series, tidally averaged and subsampled to daily at noon UTC of each day. The results end up in pickled dicts, one for each section in
+
+**(+)/bulk_[date range]**
 
 There can be more than two layers!
 
@@ -110,4 +126,6 @@ There can be more than two layers!
 
 `bulk_plot.py` is for making plots of all the bulk fields, showing both the multi-layer results of `bulk_calc.py` and the results of pushing them into two layers.
 
-The results are a bunch of png's, one for each section in `LO_output/extract/[gtagex]/bulk_plots_[date range]`.
+The results are a bunch of png's, one for each section in
+
+**(+)/bulk_plots_[date range]**

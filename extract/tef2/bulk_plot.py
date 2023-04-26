@@ -17,8 +17,6 @@ import xarray as xr
 from lo_tools import Lfun, zfun
 from lo_tools import plotting_functions as pfun
 import flux_fun
-from importlib import reload
-reload(flux_fun)
 
 from lo_tools import extract_argfun as exfun
 Ldir = exfun.intro() # this handles the argument passing

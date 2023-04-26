@@ -1,8 +1,6 @@
 """
 An alternate version of bulk_plot.py. One capability it has is to combine two or more sections.
 
-NOTE: we need to to the two-section processing first!
-
 To test on mac:
 run bulk_plot_2 -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 -test True
 
@@ -19,8 +17,6 @@ import xarray as xr
 from lo_tools import Lfun, zfun
 from lo_tools import plotting_functions as pfun
 import flux_fun
-from importlib import reload
-reload(flux_fun)
 
 from lo_tools import extract_argfun as exfun
 Ldir = exfun.intro() # this handles the argument passing
@@ -33,12 +29,13 @@ sect_df = pd.read_pickle(sect_df_fn)
 
 out_dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef2'
 in_dir = out_dir0 / ('bulk_' + Ldir['ds0'] + '_' + Ldir['ds1'])
-out_dir = out_dir0 / ('bulk_plots_2_' + Ldir['ds0'] + '_' + Ldir['ds1'])
-Lfun.make_dir(out_dir, clean=True)
+if not Ldir['testing']:
+    out_dir = out_dir0 / ('bulk_plots_2_' + Ldir['ds0'] + '_' + Ldir['ds1'])
+    Lfun.make_dir(out_dir, clean=True)
 
 sect_list = [item.name for item in in_dir.glob('*.p')]
 if Ldir['testing']:
-    sect_list = ['ai1.p', ('mb6.p','mb7.p')]
+    sect_list = ['ai1.p']#, ('mb6.p','mb7.p')]
     
 # grid info
 g = xr.open_dataset(Ldir['grid'] / 'grid.nc')
@@ -59,9 +56,13 @@ pfun.start_plot(fs=fs, figsize=(21,10))
 
 for sect_name in sect_list:
     
-    bulk = pickle.load(open(in_dir / sect_name, 'rb'))
-
-    tef_df = flux_fun.get_two_layer(in_dir, sect_name)
+    if isinstance(sect_name,tuple):
+        for sn in sect_name:
+            bulk = pickle.load(open(in_dir / sect_name, 'rb'))
+            tef_df = flux_fun.get_two_layer(in_dir, sect_name)
+    else:
+        bulk = pickle.load(open(in_dir / sect_name, 'rb'))
+        tef_df = flux_fun.get_two_layer(in_dir, sect_name)
             
     # adjust units
     tef_df['Q_p'] = tef_df['q_p']/1000
