@@ -16,7 +16,7 @@ import gfun_utility as gfu
 import gfun
 
 # This is the name of the grid that you are working on.
-gridname = 'so1'
+gridname = 'wgh0'
 
 # default s-coordinate info (could override below)
 s_dict = {'THETA_S': 4, 'THETA_B': 2, 'TCLINE': 10, 'N': 30,
@@ -133,6 +133,38 @@ def make_initial_info(gridname=gridname):
         dch['t_list'] = [dch['t_dir'] / 'srtm15' / 'topo15.nc',
                     dch['t_dir'] / 'psdem_10m' / 'PS_30m.nc']
         dch['nudging_edges'] = ['east']
+        dch['nudging_days'] = (0.1, 1.0)
+        
+        # by setting a small min_depth were are planning to use
+        # wetting and drying in ROMS, but maintaining positive depth
+        # for all water cells
+        dch['min_depth'] = 0.2 # meters (positive down)
+        
+        # Make the rho grid.
+        lon, lat = np.meshgrid(Lon_vec, Lat_vec)
+        # initialize the bathymetry array
+        z = np.nan * lon
+        # add bathymetry automatically from files
+        for t_fn in dch['t_list']:
+            print('\nOPENING BATHY FILE: ' + t_fn.name)
+            tlon_vec, tlat_vec, tz = gfu.load_bathy_nc(t_fn)
+            tlon, tlat = np.meshgrid(tlon_vec, tlat_vec)
+            z_part = zfun.interp2(lon, lat, tlon, tlat, tz)
+            # put good values of z_part in z
+            z[~np.isnan(z_part)] = z_part[~np.isnan(z_part)]
+        if dch['use_z_offset']:
+            z = z + dch['z_offset']
+            
+    elif gridname == 'wgh0':
+        # Willapa Bay and Grays Harbor nest
+        dch = gfun.default_choices()
+        # dch['excluded_rivers'] = ['skokomish']
+        aa = [-124.4,-123.5,46.35,47.1]
+        res = 200 # target resolution (m)
+        Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
+        dch['t_list'] = [dch['t_dir'] / 'nw_pacific' / 'nw_pacific.nc']
+        dch['z_offset'] = 0 # The docs say the vertical datum is "sea level"
+        dch['nudging_edges'] = ['north', 'south', 'west']
         dch['nudging_days'] = (0.1, 1.0)
         
         # by setting a small min_depth were are planning to use
