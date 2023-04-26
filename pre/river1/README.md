@@ -10,8 +10,8 @@
 
 #### CURRENT OUTPUT STATE 2023.04.09
 Collection lo_base has:
-- historical flow [and soon flow climatology] for 1980-2022
-- [not yet] historical temperature and temperature climatology for 1980-2020
+- historical flow and  flow climatology for 1980-2022
+- historical temperature and temperature climatology for 1980-2020
 
 ---
 
