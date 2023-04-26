@@ -14,7 +14,7 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-from lo_tools import forcing_argfun as ffun
+from lo_tools import forcing_argfun2 as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing
 result_dict = dict()
