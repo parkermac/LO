@@ -42,17 +42,14 @@ out_fn = out_dir / out_name
 ds = xr.open_dataset(grid_fn)
 h = ds.h.values
 m = ds.mask_rho.values
+# depth for plotting
 h[m==0] = np.nan
 # coordinates for plotting
 plon, plat = pfun.get_plon_plat(ds.lon_rho.values, ds.lat_rho.values)
 aa = pfun.get_aa(ds)
 # coordinates for convenience in plotting
-lop = ds.lon_psi[0,:].values
-lap = ds.lat_psi[:,0].values
 lor = ds.lon_rho[0,:].values
 lar = ds.lat_rho[:,0].values
-# lon_rho = ds.lon_rho.values
-# lat_rho = ds.lat_rho.values
 lou = ds.lon_u[0,:].values
 lau = ds.lat_u[:,0].values
 lov = ds.lon_v[0,:].values
@@ -63,45 +60,54 @@ tef2_dir = Ldir['LOo'] / 'extract' / 'tef2'
 sect_df = pd.read_pickle(tef2_dir / ('sect_df_' + gctag + '.p'))
 
 if testing:
-    sect_df = sect_df.loc[(sect_df.sn == 'mb8') | (sect_df.sn == 'mb9'),:].copy()
+    sn_list = ['mb8']
+    sect_df = sect_df.loc[(sect_df.sn == 'mb7') | 
+                          (sect_df.sn == 'mb8') |
+                          (sect_df.sn == 'mb9'),:].copy()
     sect_df = sect_df.reset_index(drop=True)
-    
-# initialize plot
-plt.close('all')
-if args.small:
-    fig = plt.figure(figsize=(8,8)) # laptop size
+    # I think we get three sections so that we can find the axis limits for plotting.
+    # In this case the section we are testing is mb8, and this gives rise to
+    # two segments, on on either side, bounded by mb7 to the north and mb9 to the south.
 else:
-    fig = plt.figure(figsize=(12,12)) # external monitor size
-ax = fig.add_subplot(111)
-ax.pcolormesh(plon,plat,h, vmin=-30, vmax=200, cmap=cm.deep)
-pfun.dar(ax)
-ax.axis([lor[sect_df.irp.min()-5],lor[sect_df.irp.max()+5],
-    lar[sect_df.jrp.min()-5],lar[sect_df.jrp.max()+5]])
-ax.text(.05,.95,gridname,transform=ax.transAxes,
-    fontweight='bold')
-plt.show()
+    sn_list = list(sect_df.sn.unique())
+    sn_list.remove('jdf1')
+    sn_list.remove('sog7')
 
-ax.plot(lor[sect_df.irp],lar[sect_df.jrp],'or')
-ax.plot(lor[sect_df.irm],lar[sect_df.jrm],'ob')
-
-ax.plot(lou[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==1),'i']],
-    lau[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==1),'j']],'>y')
-ax.plot(lou[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==-1),'i']],
-    lau[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==-1),'j']],'<y')
-ax.plot(lov[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==1),'i']],
-    lav[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==1),'j']],'^y')
-ax.plot(lov[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==-1),'i']],
-    lav[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==-1),'j']],'vy')
-    
-for sn in sect_df.sn.unique():
-    df = sect_df.loc[sect_df.sn==sn,['i','j']].copy()
-    df = df.reset_index(drop=True)
-    i = df.loc[0,'i']
-    j = df.loc[0,'j']
-    ax.text(lor[i],lar[j],'\n'+sn,c='orange',ha='center',va='top',
+def initialize_plot():
+    # initialize plot
+    plt.close('all')
+    if args.small:
+        fig = plt.figure(figsize=(8,8)) # laptop size
+    else:
+        fig = plt.figure(figsize=(12,12)) # external monitor size
+    ax = fig.add_subplot(111)
+    ax.pcolormesh(plon,plat,h, vmin=-30, vmax=200, cmap=cm.deep)
+    pfun.dar(ax)
+    ax.axis([lor[sect_df.irp.min()-5],lor[sect_df.irp.max()+5],
+        lar[sect_df.jrp.min()-5],lar[sect_df.jrp.max()+5]])
+    ax.text(.05,.95,gridname,transform=ax.transAxes,
         fontweight='bold')
+
+    ax.plot(lor[sect_df.irp],lar[sect_df.jrp],'or')
+    ax.plot(lor[sect_df.irm],lar[sect_df.jrm],'ob')
+
+    ax.plot(lou[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==1),'i']],
+        lau[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==1),'j']],'>y')
+    ax.plot(lou[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==-1),'i']],
+        lau[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==-1),'j']],'<y')
+    ax.plot(lov[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==1),'i']],
+        lav[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==1),'j']],'^y')
+    ax.plot(lov[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==-1),'i']],
+        lav[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==-1),'j']],'vy')
     
-plt.draw()
+    for sn in sect_df.sn.unique():
+        df = sect_df.loc[sect_df.sn==sn,['i','j']].copy()
+        df = df.reset_index(drop=True)
+        i = df.loc[0,'i']
+        j = df.loc[0,'j']
+        ax.text(lor[i],lar[j],'\n'+sn,c='orange',ha='center',va='top',
+            fontweight='bold')
+    return ax
 
 # start of routine to find all rho-grid points within a segment
 
@@ -198,16 +204,11 @@ def update_mm(sn, pm, m, sect_df):
     print('points = ' + str(len(full_ji_list)))
     return full_ji_list, sns_list
 
-ji_dict = {}
-
-if testing:
-    sn_list = ['mb8','mb9']
-else:
-    sn_list = list(sect_df.sn.unique())
-    sn_list.remove('jdf1')
-    sn_list.remove('sog7')
-    
+ji_dict = {}    
 for sn in sn_list:
+    if testing and sn == sn_list[0]:
+        ax = initialize_plot()
+        
     for pm in [-1, 1]:
         if pm == 1:
             pm_str = 'p'
@@ -221,13 +222,15 @@ for sn in sn_list:
         if sns not in done_list:
             full_ji_list, sns_list = update_mm(sn, pm, m, sect_df)
             ji_dict[sns] = {'ji_list':full_ji_list, 'sns_list': sns_list}
-            # plotting to check
-            jj = [item[0] for item in full_ji_list]
-            ii = [item[1] for item in full_ji_list]
-            ax.plot(lor[ii], lar[jj],'sw')
+            if testing:
+                # plotting to check
+                jj = [item[0] for item in full_ji_list]
+                ii = [item[1] for item in full_ji_list]
+                ax.plot(lor[ii], lar[jj],'sw')
         else:
             print('\nSkipping ' + sns)
-        
+if testing:
+    plt.show()
 #
 print(50*'=')
 for k in ji_dict.keys():
