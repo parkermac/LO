@@ -48,6 +48,8 @@ Also [plon, plat] is just like [lon_psi, lat_psi] but extended by one on all dir
 
 You can set a list of rivers to exclude in `gfun_user.py`.
 
+There is a new tool called `create_river_tracks.py` which allows you to define, or redefine the river tracks.
+
 (6) `edit_mask.py` now can be run again for real this time, perhaps running many times. NOTE: you can use an optional command line argument -d ## to change "dval" the carving depth used for lines or points from its default value of 5 m.
 
 (7) `smooth_grid.py` smooths the grid.  This is required for numerical stability.
