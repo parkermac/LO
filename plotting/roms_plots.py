@@ -1455,6 +1455,9 @@ def P_splash_sneaker(in_dict):
     """
     This makes a fancy plot for a Nat Geo request, including some
     drifter tracks with 0.03 windage from 2019.01.18.
+    
+    Run as:
+    run pan_plot.py -0 2019.01.18 -gtx cas6_v0_live -pt P_splash_sneaker
     """
     # START
     fs = 14
