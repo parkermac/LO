@@ -12,6 +12,7 @@
 Collection lo_base has:
 - historical flow and  flow climatology for 1980-2022
 - historical temperature and temperature climatology for 1980-2020
+- On 2023.05.01 I used the new pgrid/create_river_tracks.py tool to define new tracks for the four rivers entering Willapa Bay and Grays Harbor: naselle, willapa, chehalis, and humptulips. These are saved in the collection "lo_new". I then saved the originals in lo_base with "_ORIG" appended and copied the new tracks into lo_base. These are just simpler tracks that will allow a better wgh0 grid.
 
 ---
 

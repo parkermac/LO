@@ -158,8 +158,7 @@ def make_initial_info(gridname=gridname):
     elif gridname == 'wgh0':
         # Willapa Bay and Grays Harbor nest
         dch = gfun.default_choices()
-        # dch['excluded_rivers'] = ['skokomish']
-        aa = [-124.4,-123.5,46.35,47.1]
+        aa = [-124.4,-123.7,46.35,47.1]
         res = 200 # target resolution (m)
         Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
         dch['t_list'] = [dch['t_dir'] / 'nw_pacific' / 'nw_pacific.nc']

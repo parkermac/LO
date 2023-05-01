@@ -87,12 +87,12 @@ if args.small == True:
 else:
     fig = plt.figure(figsize=(12,12)) # external monitor size
 ax = fig.add_subplot(111)
-ax.pcolormesh(plon,plat,h, vmin=-30, vmax=200, cmap=cm.deep)
+ax.pcolormesh(plon,plat,h, vmin=0, vmax=15, cmap=cm.deep)
 aa = ax.get_xlim() + ax.get_ylim()
 pfun.add_coast(ax)
 ax.axis(aa)
 pfun.dar(ax)
-ax.set_title('Use keyboard to create or remove sections')
+ax.set_title('Use keyboard to create or remove tracks')
 ax.text(.05,.95,ctag,transform=ax.transAxes,
     fontweight='bold',bbox=pfun.bbox)
 plt.show()
@@ -105,7 +105,7 @@ def plot_line(sn):
     x = df.lon.to_numpy()
     y = df.lat.to_numpy()
     ld[sn] = ax.plot(x,y,'-or', lw=2)
-    td[sn] = ax.text(x[0],y[0],'\n'+sn,c='r',ha='center',va='top',
+    td[sn] = ax.text(x[-1],y[-1],'\n'+sn,c='r',ha='left',va='bottom',
         fontweight='bold')
     plt.draw()
 
