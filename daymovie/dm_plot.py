@@ -91,21 +91,24 @@ if Q['tracks']:
 
 # PLOTTING
 
+if Q['bot'] == True:
+    bot_tag = 'bot'
+else:
+    bot_tag = 'top'
+
 if len(fn_list) == 1:
-    # plot a single image to screen
+    # plot a single image to a file
     fn = fn_list[0]
     Q['fn'] = fn
-    Q['fn_out'] = ''
+    plotname = ('daymovie_' + Q['gtagex'] + '_' + Q['pt'] + '_'
+        + Q['dom'] + '_' + Q['vn'] + '_' + bot_tag + '.png')
+    Q['fn_out'] = Ldir['LOo'] / 'plots' / plotname
     whichplot(Q, M)
     
 elif len(fn_list) > 1:
     # prepare a directory for results
     outdir0 = Ldir['LOo'] / 'daymovie' / Ldir['gtagex']
     Lfun.make_dir(outdir0)
-    if Q['bot'] == True:
-        bot_tag = 'bot'
-    else:
-        bot_tag = 'top'
     moviename = Q['pt'] + '_' + Q['dom'] + '_' + Q['vn'] + '_' + bot_tag
     outdir = outdir0 / moviename
     Lfun.make_dir(outdir, clean=True)

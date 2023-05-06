@@ -16,6 +16,8 @@ If you just make a snapshot the output is a plot on your screen, but if you are 
 
 along with all the png's that went into it.  Question: should I include a date string in the path?
 
+NOTE 2023.05.05: To plot with -dom willapa -vn ARAG you need to also do **-avl False** or else you will get an error from the auto vlims function.
+
 ---
 
 `plots.py` specifies the (very few) plot types that are called by `dm_plot.py`.
