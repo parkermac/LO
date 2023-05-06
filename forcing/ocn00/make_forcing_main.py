@@ -39,7 +39,6 @@ import numpy as np
 
 import shutil, os
 import pickle
-import netCDF4 as nc
 import pandas as pd
 
 from lo_tools import Lfun, zfun, zrfun, Ofun_nc

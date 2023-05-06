@@ -6,7 +6,7 @@ Designed to run only as backfill.
 
 Testing:
 
-run make_forcing_main.py -g hc0 -t v0 -r backfill -s continuation -d 2019.07.04 -f ocnN -test True
+run make_forcing_main.py -g hc0 -t v0 -r backfill -s continuation -d 2019.07.04 -f ocnN -gtx_nest cas6_traps2_x2b -ro_nest 0 -test True
 
 """
 
@@ -44,18 +44,15 @@ if Ldir['testing']:
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
 
 # where to find the files to interpolate from
-# NOTE: this should be made more general - perhaps handled by the command line arguments.
-if 'apogee' in Ldir['lo_env']:
-    in_dir = Ldir['roms_out2'] / 'cas6_v3_lo8b' / ('f' + Ldir['date_string'])
-    
-else:
-    in_dir = Ldir['parent'] / 'LiveOcean_roms' / 'output' / 'cas6_v3_lo8b' / ('f' + Ldir['date_string'])
+in_dir = Ldir['roms_out_nest'] / Ldir['gtagex_nest'] / ('f' + Ldir['date_string'])
 
 # datetime of the day we are working on
 this_dt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
 
 # list of history files from the original grid to work from (all Path objects)
 h_list = sorted(in_dir.glob('ocean_his_*'))
+# NEW
+h_list = Lfun.get_fn_list('hourly', Ldir, Ldir['date_string'], Ldir['date_string'])
 if Ldir['testing']:
     h_list = h_list[:2]
 
