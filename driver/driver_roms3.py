@@ -81,7 +81,7 @@ args = parser.parse_args()
 argsd = args.__dict__
 for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'np_num', 'cores_per_node']:
     if argsd[a] == None:
-        print('*** Missing required argument for driver_roms_klone.py: ' + a)
+        print('*** Missing required argument for driver_roms3.py: ' + a)
         sys.exit()
 
 # get Ldir
