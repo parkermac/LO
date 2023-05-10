@@ -103,7 +103,7 @@ while dt <= dt1:
                 '-g', args.gridname, '-f', args.frc,
                 '-r', args.run_type, '-s', args.start_type,
                 '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing),
-                '-gtx', args.gtagex, '-ro', args.roms_out_num]
+                '-gtx', args.gtagex, '-ro', str(args.roms_out_num)]
     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     with open(out_dir / 'Info' / 'screen_output.txt', 'w') as fout:
