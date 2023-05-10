@@ -12,13 +12,11 @@ RESULT: this works great with ROMS as long as we:
 import os
 import xarray as xr
 import numpy as np
-from lo_tools import Lfun
+from lo_tools import Lfun, zrfun
 import pickle
 
-enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
-# Using compression (zlib=True, complevel=1) results in files that are just 2% of the
-# uncompressed files (for hc0, which has a lot of nan's).
-# Using complevel=9 makes the files half as big as complevel=1, but takes much about 10x longer.
+# enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
+enc_dict = zrfun.enc_dict
 
 def make_clm_file(temp_out_fn_list, NT, out_fn):
     # associate variables with dimenstions

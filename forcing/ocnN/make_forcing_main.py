@@ -4,10 +4,12 @@ the fields from history files for another run.
 
 Designed to run only as backfill.
 
+NOTE: This does not yet do biogeochemical variables.
+
 Testing:
+run make_forcing_main.py -g wgh0 -gtx cas6_traps2_x2b -ro 0 -r backfill -s continuation -d 2017.07.04 -f ocnN -test True
 
-run make_forcing_main.py -g hc0 -t v0 -r backfill -s continuation -d 2019.07.04 -f ocnN -gtx_nest cas6_traps2_x2b -ro_nest 0 -test True
-
+Performance: 1 minute per day on mac with wgh0 grid (1.5 minutes for start_type = new)
 """
 
 from pathlib import Path
@@ -24,36 +26,30 @@ result_dict['start_dt'] = datetime.now()
 
 import xarray as xr
 from time import time
-from scipy.spatial import cKDTree
 import numpy as np
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
-import pickle
 
 from lo_tools import Lfun, zfun, zrfun
-
 import Ofun_nc_xarray
-# defaults
-verbose = True
-if Ldir['testing']:
-    # verbose = True
-    from importlib import reload
-    reload(Ofun_nc_xarray)
 
 # this directory is created, along with Info and Data subdirectories, by ffun.intro()
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
 
 # where to find the files to interpolate from
-in_dir = Ldir['roms_out_nest'] / Ldir['gtagex_nest'] / ('f' + Ldir['date_string'])
+in_dir = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string'])
 
 # datetime of the day we are working on
 this_dt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
 
 # list of history files from the original grid to work from (all Path objects)
-h_list = sorted(in_dir.glob('ocean_his_*'))
+# h_list = sorted(in_dir.glob('ocean_his_*'))
 # NEW
 h_list = Lfun.get_fn_list('hourly', Ldir, Ldir['date_string'], Ldir['date_string'])
+
+verbose = False
 if Ldir['testing']:
+    verbose = True
     h_list = h_list[:2]
 
 # +++++++++++ parallel subprocess +++++++++++++++++++++++++++++++++++
@@ -81,11 +77,10 @@ for ii in range(NT):
         for proc in proc_list:
             stdout, stderr = proc.communicate()
             # make sure everyone is finished before continuing
-            if True:
-                if len(stdout) > 0:
-                    print('\n'+stdout.decode())
-                if len(stderr) > 0:
-                    print('\n'+stderr.decode())
+            if verbose and (len(stdout) > 0):
+                print('\n'+stdout.decode())
+            if len(stderr) > 0:
+                print('\n'+stderr.decode())
         proc_list = []
     ii += 1
 print('Time to run all extractions = %0.1f sec' % (time()-tt0))
@@ -128,7 +123,7 @@ def print_info(fn):
 
 # check results
 nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
-if False:
+if verbose:
     # print info about the files to the screen
     for fn in nc_list:
         print_info(out_dir / fn)

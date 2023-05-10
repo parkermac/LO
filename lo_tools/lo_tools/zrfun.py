@@ -343,7 +343,7 @@ This is a dict to use for compression when saving an xarray Dataset, e.g. with l
     ds.to_netcdf(out_fn, encoding=Enc_dict)
 Using compression (zlib=True, complevel=1) results in files that are just 2% of the
 uncompressed files (for hc0, which has a lot of nan's).
-Using complevel=9 makes the files half as big as complevel=1, but takes much about 10x longer.
+Using complevel=9 makes the files half as big as complevel=1, but takes about 10x longer.
 """
 enc_dict = {'zlib':True, 'complevel':1, '_FillValue':1e20}
 

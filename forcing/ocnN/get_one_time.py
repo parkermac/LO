@@ -91,6 +91,7 @@ ds.close()
 # associate variables to process with grids
 vn_dict = {'salt':('rho',3), 'temp':('rho',3), 'zeta':('rho',2),
         'u':('u',3), 'v':('v',3), 'ubar':('u',2), 'vbar':('v',2)}
+# need to allow for bgc variables
 
 # create blank arrays for results
 data_dict = dict()
