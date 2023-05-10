@@ -45,6 +45,7 @@ tag_list = ['rho', 'u', 'v']
 
 # the new grid
 ds = xr.open_dataset(args.grid_fn)
+hh = ds.h.values
 
 xx = {}; yy = {}; mm = {}; xynew = {}
 for tag in tag_list:
@@ -112,9 +113,13 @@ for vn in vn_dict.keys():
     dm = vn_dict[vn][1]
     if dm == 2:
         vtrim = ds[vn][0,iy0[tag]:iy1[tag], ix0[tag]:ix1[tag]].values
-        vv = np.nan * np.ones(xx[tag].shape) 
+        vv = np.nan * np.ones(xx[tag].shape)
         vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
         # note that "workers" has replaced "n_jobs"
+        if vn == 'zeta':
+            # enforce a minimum depth
+            zmask = vv-hh <= 0.3
+            vv[zmask] = hh[zmask] + 0.3
         data_dict[vn][:, :] = vv
     elif dm == 3:
         for nn in range(N):
