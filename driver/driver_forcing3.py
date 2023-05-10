@@ -34,6 +34,11 @@ parser.add_argument('-s', '--start_type', type=str, default='perfect') # new, co
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
 parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_string)
+
+# optional arguments used only for ocnN, to determine what to nest inside
+parser.add_argument('-gtx', '--gtagex', default='cas6_traps2_x2b', type=str) # e.g. cas6_traps2_x2b
+parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
+
 args = parser.parse_args()
 
 # check for required arguments
@@ -97,7 +102,8 @@ while dt <= dt1:
     cmd_list = ['python3', str(f_fn),
                 '-g', args.gridname, '-f', args.frc,
                 '-r', args.run_type, '-s', args.start_type,
-                '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing)]
+                '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing),
+                '-gtx', args.gtagex, '-ro', args.roms_out_num]
     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     with open(out_dir / 'Info' / 'screen_output.txt', 'w') as fout:
