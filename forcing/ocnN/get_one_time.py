@@ -118,8 +118,8 @@ for vn in vn_dict.keys():
         # note that "workers" has replaced "n_jobs"
         if vn == 'zeta':
             # enforce a minimum depth
-            zmask = vv-hh <= 0.3
-            vv[zmask] = hh[zmask] + 0.3
+            zmask = vv+hh <= 0.3
+            vv[zmask] = -hh[zmask] + 0.3
         data_dict[vn][:, :] = vv
     elif dm == 3:
         for nn in range(N):
