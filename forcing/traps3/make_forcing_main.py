@@ -7,6 +7,9 @@ run make_forcing_main.py -g cas6 -r backfill -d 2021.01.01 -f traps2 -test True
 
 2023.04.11 Updated to work with pre/river1 data format.
 
+Created 2023.05.12 from traps2. The only difference is that we zero out the nitrate
+and ammonium from the WWTP sources ("MARINE POINT SOURCES"). Done around line 623.
+
 """
 
 from pathlib import Path
@@ -625,9 +628,22 @@ if enable_pointsources == True:
         wwtp_ds[vn] = (dims, TS_mat)
         wwtp_ds[vn].attrs['long_name'] = vinfo['long_name']
         wwtp_ds[vn].attrs['units'] = vinfo['units']
+        
+    # Zero Nitrate/Nitrite and Ammonium
+    for var in ['NO3', 'NH4']:
+        vn = 'river_' + var
+        vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+        dims = (vinfo['time'],) + ('s_rho', 'river')
+        B_mat = np.zeros((NT, N, NWWTP))
+        if np.isnan(TS_mat).any():
+            print('Error from traps: nans in tiny river bio!')
+            sys.exit()
+        wwtp_ds[vn] = (dims, B_mat)
+        wwtp_ds[vn].attrs['long_name'] = vinfo['long_name']
+        wwtp_ds[vn].attrs['units'] = vinfo['units']
 
     # Add biology that have existing climatology
-    for var in ['NO3', 'NH4', 'TIC', 'TAlk', 'Oxyg']:
+    for var in ['TIC', 'TAlk', 'Oxyg']:
         vn = 'river_' + var
         vinfo = zrfun.get_varinfo(vn, vartype='climatology')
         dims = (vinfo['time'],) + ('s_rho', 'river')
