@@ -55,7 +55,7 @@ for tag in tag_list:
     
 ds.close()
 
-if args.start_type == 'continuation':
+if args.start_type in ['continuation','perfect']:
     pad = 20
 elif args.start_type == 'new':
     pad = 0
@@ -117,9 +117,13 @@ for vn in vn_dict.keys():
         vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
         # note that "workers" has replaced "n_jobs"
         if vn == 'zeta':
+            # change sea level to match what was used in pgrid for z_offset.
+            z_offset = -1
+            vv = vv + z_offset
             # enforce a minimum depth
-            zmask = vv+hh <= 0.3
-            vv[zmask] = -hh[zmask] + 0.3
+            min_depth = 0.3
+            zmask = vv+hh <= min_depth
+            vv[zmask] = -hh[zmask] + min_depth
         data_dict[vn][:, :] = vv
     elif dm == 3:
         for nn in range(N):

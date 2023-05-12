@@ -127,6 +127,17 @@ if verbose:
     # print info about the files to the screen
     for fn in nc_list:
         print_info(out_dir / fn)
+    # check on min depth
+    print('')
+    ds = xr.open_dataset(out_dir / 'ocean_clm.nc', decode_times=False)
+    dsg = xr.open_dataset(grid_fn)
+    zz = ds.zeta[0,:,:].values.squeeze()
+    hh = dsg.h.values
+    print('Minimum Depth = %0.2f m' % (np.nanmin(zz+hh)))
+    print('Min zeta = %0.2f m' % (np.nanmin(zz)))
+    print('Max zeta = %0.2f m' % (np.nanmax(zz)))
+    ds.close()
+    dsg.close()
 result_dict['result'] = 'success'
 for fn in nc_list:
     if (out_dir / fn).is_file():

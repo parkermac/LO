@@ -146,6 +146,11 @@ def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1,
         v = ds[vn][0, slev,:,:].values
     v_scaled = fac*v
     
+    # account for WET_DRY
+    if (tag=='rho') and ('wetdry_mask_rho' in ds.data_vars):
+        mwd = ds.wetdry_mask_rho[0,:,:].values.squeeze()
+        v_scaled[mwd==0] = np.nan
+    
     # SETTING COLOR LIMITS
     # First see if they are already set. If so then we are done.
     vlims = vlims_dict[vn]
@@ -166,7 +171,9 @@ def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1,
         # dicts have essentially global scope, so setting it here sets it everywhere
                 
     if do_mask_edges:
-        v_scaled = mask_edges(v_scaled, x, y)  
+        v_scaled = mask_edges(v_scaled, x, y)
+    
+        
     
     cs = ax.pcolormesh(px, py, v_scaled, vmin=vlims[0], vmax=vlims[1], cmap=cmap, alpha=alpha)
     return cs
