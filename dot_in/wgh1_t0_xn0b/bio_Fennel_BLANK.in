@@ -258,7 +258,7 @@ LtracerSponge == 15*F
 ! Nudging/relaxation time scales, inverse scales will be computed
 ! internally: [1:NBT,Ngrids].
 
-       TNUDG == 15*0.0d0                        ! days
+       TNUDG == 15*0.1d0                        ! days
 
 ! Set horizontal and vertical advection schemes for biological tracers.
 ! A different advection scheme is allowed for each tracer. For example,
