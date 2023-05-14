@@ -3,7 +3,7 @@ Code to work with ocnN.  It gets the data_dict entries for one time and
 Saves the result.  Meant to work as a parallel subprocess
 """
 
-from lo_tools import zfun
+from lo_tools import zfun, Lfun
 import xarray as xr
 import numpy as np
 import sys
@@ -16,6 +16,7 @@ parser.add_argument('-grid_fn', type=str) # full path to nest grid.nc file
 parser.add_argument('-his_fn', type=str) # full path to history file to interpolate from
 parser.add_argument('-start_type', type=str) # continuation or new
 parser.add_argument('-out_fn', type=str) # full path to output pickle file
+parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars
 args = parser.parse_args()
 
 def get_bounds(x_big, y_big, x_small, y_small, pad=3):
@@ -92,7 +93,13 @@ ds.close()
 # associate variables to process with grids
 vn_dict = {'salt':('rho',3), 'temp':('rho',3), 'zeta':('rho',2),
         'u':('u',3), 'v':('v',3), 'ubar':('u',2), 'vbar':('v',2)}
-# need to allow for bgc variables
+if args.do_bio:
+    # Note: designed to work with updated ROMS 2023.05.14
+    bvn_list = ['NO3', 'NH4', 'chlorophyll', 'phytoplankton', 'zooplankton',
+            'LdetritusN', 'SdetritusN', 'LdetritusC', 'SdetritusC',
+            'TIC', 'alkalinity', 'oxygen']
+    for bvn in bvn_list:
+        vn_dict[bvn] = ('rho',3)
 
 # create blank arrays for results
 data_dict = dict()
@@ -116,7 +123,9 @@ for vn in vn_dict.keys():
         vv = np.nan * np.ones(xx[tag].shape)
         vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
         # note that "workers" has replaced "n_jobs"
+        
         if vn == 'zeta':
+            # NOTE: it would be better to automate this instead of hard-coding!
             # change sea level to match what was used in pgrid for z_offset.
             z_offset = -1
             vv = vv + z_offset
@@ -124,6 +133,7 @@ for vn in vn_dict.keys():
             min_depth = 0.3
             zmask = vv+hh <= min_depth
             vv[zmask] = -hh[zmask] + min_depth
+            
         data_dict[vn][:, :] = vv
     elif dm == 3:
         for nn in range(N):

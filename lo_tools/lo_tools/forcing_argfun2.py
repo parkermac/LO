@@ -20,6 +20,7 @@ def intro():
     # optional arguments used only for ocnN, to determine what to nest inside
     parser.add_argument('-gtx', '--gtagex', default='cas6_traps2_x2b', type=str) # e.g. cas6_traps2_x2b
     parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
+    parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocnN forcing
     
     # get the args
     args = parser.parse_args()
@@ -34,7 +35,7 @@ def intro():
     # get the dict Ldir
     Ldir = Lfun.Lstart(gridname=args.gridname)
     # add more entries to Ldir for use by make_forcing_main.py
-    for a in ['frc', 'run_type', 'start_type', 'date_string', 'testing','gtagex','roms_out_num']:
+    for a in ['frc', 'run_type', 'start_type', 'date_string', 'testing','gtagex','roms_out_num','do_bio']:
         Ldir[a] = argsd[a]
     # set where to look for model output
     if Ldir['roms_out_num'] == 0:

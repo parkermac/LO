@@ -426,11 +426,11 @@ LtracerSponge == F F                            ! temperature, salinity, inert
 
 ! Nudging/relaxation time scales, inverse scales will be computed
 ! internally, [1:Ngrids].
-
-       TNUDG == 3.0d0 3.0d0                ! days
-       ZNUDG == 3.0d0                      ! days
-      M2NUDG == 3.0d0                      ! days
-      M3NUDG == 3.0d0                      ! days
+      
+       TNUDG == 0.1d0 0.1d0                ! days
+       ZNUDG == 0.1d0                      ! days
+      M2NUDG == 0.1d0                      ! days
+      M3NUDG == 0.1d0                      ! days
 
 ! Factor between passive (outflow) and active (inflow) open boundary
 ! conditions, [1:Ngrids]. If OBCFAC > 1, nudging on inflow is stronger
