@@ -16,6 +16,8 @@ Not relevant in most cases. A start_type of "new" may be the only important use.
 NEW: this "3" version uses the new organizational system where the forcing goes to a [gridname]
 folder instead of [gtag].
 
+NEW: 2023.05.14 Added new optional arguments for ocnN capability.
+
 """
 
 import sys
@@ -38,6 +40,7 @@ parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_strin
 # optional arguments used only for ocnN, to determine what to nest inside
 parser.add_argument('-gtx', '--gtagex', default='cas6_traps2_x2b', type=str) # e.g. cas6_traps2_x2b
 parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
+parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocnN forcing
 
 args = parser.parse_args()
 
@@ -103,7 +106,7 @@ while dt <= dt1:
                 '-g', args.gridname, '-f', args.frc,
                 '-r', args.run_type, '-s', args.start_type,
                 '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing),
-                '-gtx', args.gtagex, '-ro', str(args.roms_out_num)]
+                '-gtx', args.gtagex, '-ro', str(args.roms_out_num), '-do_bio', str(args.do_bio)]
     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     stdout, stderr = proc.communicate()
     with open(out_dir / 'Info' / 'screen_output.txt', 'w') as fout:
