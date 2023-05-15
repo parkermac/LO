@@ -9,7 +9,7 @@ HOSTNAME=apogee
 00 05 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas6_v0_u0kb -ro 0 -r forecast < /dev/null > $LOd/post1.log
 
 00 10 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f tide00 > $LOd/tide00_new.log
-01 10 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f riv00 > $LOd/riv00_new.log
+01 10 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f traps2 > $LOd/traps2_new.log
 02 10 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f ocn00 > $LOd/ocn00_new.log
 03 10 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f atm00 > $LOd/atm00_new.log
 
