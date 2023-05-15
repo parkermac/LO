@@ -14,7 +14,7 @@ Ldir = Lfun.Lstart()
 
 in_dir0 = Path('/pgdat1/parker/LO_roms')
 
-f_str = 'f_2023.04.30'
+f_str = 'f2023.04.30'
 
 in_fn = in_dir0 / 'cas6_v0_live' / f_str / 'ocean_his_0025.nc'
 
