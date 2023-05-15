@@ -1,6 +1,9 @@
 """
 This is a one-off piece of code to create a 0025 history file for the
 updated ROMS, including bio variables, from an old ROMS file.
+
+This allows you to run the new ROMS, with bio, using "-start_type continuation"
+starting the day after f_str.
 """
 
 import xarray as xr
@@ -11,11 +14,11 @@ Ldir = Lfun.Lstart()
 
 in_dir0 = Path('/pgdat1/parker/LO_roms')
 
-year_str = '2016'
+f_str = 'f_2023.04.30'
 
-in_fn = in_dir0 / 'cas6_v0_live' / ('f' + year_str + '.12.31') / 'ocean_his_0025.nc'
+in_fn = in_dir0 / 'cas6_v0_live' / f_str / 'ocean_his_0025.nc'
 
-out_dir = Ldir['roms_out'] / 'cas6_v00_uu0mb' / ('f' + year_str + '.12.31')
+out_dir = Ldir['roms_out'] / 'cas6_traps2_x2b' / f_str
 Lfun.make_dir(out_dir)
 out_fn = out_dir / 'ocean_his_0025.nc'
 
