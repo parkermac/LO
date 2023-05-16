@@ -521,6 +521,46 @@ def P_Chl_DO(in_dict):
     else:
         plt.show()
         
+def P_bot_top_arag(in_dict):
+    # START
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(18,10))
+    fig = plt.figure()
+    fn = in_dict['fn']
+    ds = xr.open_dataset(fn)
+    arag_bot, arag_top, px, py = pfun.get_bot_top_arag(fn)
+    # PLOT CODE
+    fs = 14
+    for ii in [1,2]:
+        if ii == 1:
+            fld = arag_bot
+            stext = 'Bottom'
+        elif ii == 2:
+            fld = arag_top
+            stext = 'Surface'
+        ax = fig.add_subplot(1, 2, ii)
+        cs = ax.pcolormesh(px,py,fld, vmin=0, vmax=3, cmap='coolwarm_r')
+        fig.colorbar(cs)
+        pfun.add_coast(ax)
+        ax.axis(pfun.get_aa(ds))
+        pfun.dar(ax)
+        ax.set_title(r'%s $\Omega_{arag}$' % (stext), fontsize=1.2*fs)
+        ax.set_xlabel('Longitude')
+        pfun.add_bathy_contours(ax, ds, txt=True)
+        if ii == 1:
+            ax.set_ylabel('Latitude')
+            pfun.add_info(ax, in_dict['fn'])
+            pfun.add_windstress_flower(ax, ds)
+    fig.tight_layout()
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+        
 def P_DO_WA_shelf(in_dict):
     # Focus on bottom DO on the WA shelf
     aa = [-126.1, -123.7, 45.8, 48.8]

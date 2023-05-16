@@ -35,6 +35,75 @@ month_color_dict = dict(zip(range(1,13),
     'lightsalmon', 'mediumorchid', 'slateblue', 'purple']))
 bbox = dict(facecolor='w', edgecolor='None',alpha=.5)
 
+def get_bot_top_arag(fn, aa=[]):
+    """
+    Returns bottom and top Aragonite Saturation State fields for a given history file.
+    
+    You can also provide an optional list of axis limits, "aa".
+    
+    It also returns plon and plat for pcolormesh plotting.
+    """
+    import xarray as xr
+    from PyCO2SYS import CO2SYS
+    import gsw
+    G = zrfun.get_basic_info(fn, only_G=True)
+    ds = xr.open_dataset(fn)
+    if len(aa) == 4:
+        # find indices that encompass region aa
+        i0 = zfun.find_nearest_ind(G['lon_rho'][0,:], aa[0]) - 1
+        i1 = zfun.find_nearest_ind(G['lon_rho'][0,:], aa[1]) + 2
+        j0 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[2]) - 1
+        j1 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[3]) + 2
+    else:
+        nrows, ncols = G['lon_rho'].shape
+        i0 = 0; i1=ncols
+        j0 = 0; j1 = nrows
+    lon = G['lon_rho'][j0:j1,i0:i1]
+    lat = G['lat_rho'][j0:j1,i0:i1]
+    hh = G['h'][j0:j1,i0:i1]
+    px, py = get_plon_plat(lon, lat)
+    v_dict = dict()
+    vn_in_list = ['temp', 'salt', 'alkalinity', 'TIC']
+    for nlev in [0,-1]:
+        if nlev == 0:
+            zz = -hh
+        elif nlev == -1:
+            zz = 0 * hh
+        for cvn in vn_in_list:
+            v_dict[cvn] = ds[cvn][0,nlev,j0:j1,i0:i1].values.squeeze()
+            # # debugging
+            # print('%s %s' % (cvn, str(v_dict[cvn].shape)))
+            # sys.stdout.flush()
+        pres = gsw.p_from_z(zz, lat) # pressure [dbar]
+        SA = gsw.SA_from_SP(v_dict['salt'], pres, lon, lat)
+        CT = gsw.CT_from_pt(SA, v_dict['temp'])
+        rho = gsw.rho(SA, CT, pres) # in situ density
+        temp = gsw.t_from_CT(SA, CT, pres) # in situ temperature
+        # convert from umol/L to umol/kg using in situ dentity
+        alkalinity = 1000 * v_dict['alkalinity'] / rho
+        alkalinity[alkalinity < 100] = np.nan
+        TIC = 1000 * v_dict['TIC'] / rho
+        TIC[TIC < 100] = np.nan
+        # See LPM/co2sys_test/test0.py for info.
+        import PyCO2SYS as pyco2
+        CO2dict = pyco2.sys(par1=alkalinity, par2=TIC, par1_type=1, par2_type=2,
+            salinity=v_dict['salt'], temperature=temp, pressure=pres,
+            total_silicate=50, total_phosphate=2,
+            opt_pH_scale=1, opt_k_carbonic=10, opt_k_bisulfate=1)
+        ph = CO2dict['pH']
+        arag = CO2dict['saturation_aragonite']
+        ph = ph.reshape(pres.shape)
+        arag = arag.reshape(pres.shape)
+        # account for WET_DRY
+        if 'wetdry_mask_rho' in ds.data_vars:
+            mwd = ds.wetdry_mask_rho[0,j0:j1,i0:i1].values.squeeze()
+            arag[mwd==0] = np.nan
+        if nlev == 0:
+            arag_bot = arag
+        elif nlev == -1:
+            arag_top = arag
+    return arag_bot, arag_top, px, py
+
 def start_plot(fs=14, figsize=(14,10)):
     plt.rc('font', size=fs)
     plt.rc('figure', figsize=figsize)
@@ -671,3 +740,5 @@ def draw_box(ax, aa, linestyle='-', color='k', alpha=1, linewidth=.5, inset=0):
     ax.plot([aa[0], aa[1], aa[1], aa[0], aa[0]], [aa[2], aa[2], aa[3], aa[3], aa[2]],
         linestyle=linestyle, color=color, alpha=alpha, linewidth=linewidth)
         
+
+
