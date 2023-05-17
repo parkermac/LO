@@ -81,7 +81,7 @@ for year in year_list:
     if year in range(2008,2019):
         in_fn =  in_dir0 / 'SalishCruise_dataPackage_2008to2018_06-29-2021.csv'
         df0 = pd.read_csv(in_fn, parse_dates={'time':['DATE_UTC', 'TIME_UTC']})
-        load_data = False # only load the first time
+        load_data = False # only load the first time (not used?)
     
     # select one year
     t = pd.DatetimeIndex(df0.time)

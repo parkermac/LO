@@ -147,7 +147,7 @@ import matplotlib.pyplot as plt
 plt.close('all')
 
 if len(fn_list) == 1:
-    # plot a single image to screen
+    # plot a single image to screen, or to a file
     fn = fn_list[0]
     in_dict['fn'] = fn
     if Ldir['save_plot'] == True:

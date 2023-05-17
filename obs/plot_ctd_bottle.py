@@ -42,12 +42,11 @@ df = pd.read_pickle(Ldir['LOo'] / 'obs' / args.source / args.otype / (str(args.y
 df = df[(df['lon']>x0) & (df['lon']<x1) & (df['lat']>y0) & (df['lat']<y1)]
 zbot = df.z.min()
 
-# plt.close('all')
-pfun.start_plot()
-
 if args.small:
+    pfun.start_plot(fs=10)
     fig = plt.figure(figsize=(12,8)) # laptop size
 else:
+    pfun.start_plot()
     fig = plt.figure(figsize=(22,12))
 
 if args.otype == 'bottle':

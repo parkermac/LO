@@ -523,12 +523,13 @@ def P_Chl_DO(in_dict):
         
 def P_bot_top_arag(in_dict):
     # START
+    aa = [-124.4,-123.7,46.35,47.1]  # hard-coded for Willapa & Grays
     fs = 14
     pfun.start_plot(fs=fs, figsize=(18,10))
     fig = plt.figure()
     fn = in_dict['fn']
     ds = xr.open_dataset(fn)
-    arag_bot, arag_top, px, py = pfun.get_bot_top_arag(fn)
+    arag_bot, arag_top, px, py = pfun.get_bot_top_arag(fn, aa=aa)
     # PLOT CODE
     fs = 14
     for ii in [1,2]:
@@ -542,7 +543,7 @@ def P_bot_top_arag(in_dict):
         cs = ax.pcolormesh(px,py,fld, vmin=0, vmax=3, cmap='coolwarm_r')
         fig.colorbar(cs)
         pfun.add_coast(ax)
-        ax.axis(pfun.get_aa(ds))
+        ax.axis(aa)
         pfun.dar(ax)
         ax.set_title(r'%s $\Omega_{arag}$' % (stext), fontsize=1.2*fs)
         ax.set_xlabel('Longitude')

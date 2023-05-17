@@ -50,10 +50,13 @@ def get_bot_top_arag(fn, aa=[]):
     ds = xr.open_dataset(fn)
     if len(aa) == 4:
         # find indices that encompass region aa
-        i0 = zfun.find_nearest_ind(G['lon_rho'][0,:], aa[0]) - 1
-        i1 = zfun.find_nearest_ind(G['lon_rho'][0,:], aa[1]) + 2
-        j0 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[2]) - 1
-        j1 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[3]) + 2
+        i0 = zfun.find_nearest_ind(G['lon_rho'][0,:], aa[0])
+        i1 = zfun.find_nearest_ind(G['lon_rho'][0,:], aa[1])
+        j0 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[2])
+        j1 = zfun.find_nearest_ind(G['lat_rho'][:,0], aa[3])
+        # print('%d %d %d %d' % (i0, i1, j0, j1))
+        # print(str(G['lon_rho'].shape))
+        # print(str(G['lon_rho'][j0:j1,i0:i1].shape))
     else:
         nrows, ncols = G['lon_rho'].shape
         i0 = 0; i1=ncols
