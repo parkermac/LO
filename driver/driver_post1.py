@@ -91,6 +91,9 @@ while all_found == False:
     for his_fn in his_fn_list:
         if his_fn.is_file():
             all_found = True
+            print('All files found. Beginning post-processing.\n')
+            sys.stdout.flush()
+            
         elif not his_fn.is_file():
             all_found = False
             break
@@ -108,7 +111,8 @@ while all_found == False:
 tt0 = time()
 # loop over all jobs
 if Ldir['testing'] == True:
-    job_list = ['daymovie0', 'layers1']
+    #job_list = ['daymovie0', 'layers1']
+    job_list = ['surface1', 'layers1', 'ubc1', 'sequim1', 'critfc1', 'daymovie0', 'drifters0', 'archive0']
 else:
     job_list = ['surface1', 'layers1', 'ubc1', 'sequim1', 'critfc1', 'daymovie0', 'drifters0', 'archive0']
 
