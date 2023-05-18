@@ -12,5 +12,5 @@ LOd="/gscratch/macc/parker/LO/driver"
 36 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' jxiong7@uw.edu < $LOd/ak_cron.log
 00 12 * * * crontab <<< $(crontab -l)
 
-00 11 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/forecast_new.log &
+00 11 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/forecast_new.log
 

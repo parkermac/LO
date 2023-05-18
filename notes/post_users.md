@@ -74,7 +74,7 @@ Contacts:
 
 ---
 
-### harcourt
+### harcourt [not currently running 2023.05.18]
 
 This is an extraction of model fields off the WA coast for an experiment on sound speed being conducted by Ramsey Harcourt and colleagues at APL.
 
@@ -124,7 +124,7 @@ Contact:
 
 ---
 
-### azure
+### azure [not currently running 2023.05.18]
 
 This copies the forecast history files to blob storage on azure. Is is a custom job for Rich Signell to access during a coding event.
 
