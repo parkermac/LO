@@ -91,13 +91,13 @@ while all_found == False:
     for his_fn in his_fn_list:
         if his_fn.is_file():
             all_found = True
-            print('All files found. Beginning post-processing.\n')
-            sys.stdout.flush()
             
         elif not his_fn.is_file():
             all_found = False
             break
     if all_found:
+        print('All files found. Beginning post-processing.\n')
+        sys.stdout.flush()
         sleep(60) # make sure all copying is able to finish
         break
         
