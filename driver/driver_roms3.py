@@ -21,6 +21,9 @@ NEW compared to driver_roms2.py:
 - assumes forcing is in [gridname] folder, not [gtag]
 - drop the gtag_alt capability (all tag changes handled by the dot_in now)
 
+NEW 2023.05.18
+- sleep_forecast_window is deprecated by setting the default to False
+
 For testing/debugging these flags can be very useful:
 -v True --get_forcing False --short_roms True --move_his False
 
@@ -74,7 +77,7 @@ parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
 parser.add_argument('--run_roms', default=True, type=Lfun.boolean_string)
 parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
 # flag to sleep during the forecast window, False means it will run continuously
-parser.add_argument('-sfw', '--sleep_forecast_window', default=True, type=Lfun.boolean_string)
+parser.add_argument('-sfw', '--sleep_forecast_window', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 # check for required arguments
