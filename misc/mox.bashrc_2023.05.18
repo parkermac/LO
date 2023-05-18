@@ -29,11 +29,19 @@ export I_MPI_F90=ifort
 # export PATH="/gscratch/macc/anaconda3/bin:$PATH"
 
 # Aliases
-alias cdpm='cd /gscratch/macc/parker'
-alias cdlo='cd /gscratch/macc/parker/LiveOcean'
+alias pmsrun='srun -p macc -A macc --pty bash -l'
+alias buildit='./build_roms.sh -j 10 < /dev/null > bld.log &'
 alias cdLo='cd /gscratch/macc/parker/LO'
-alias cdLu='cd /gscratch/macc/parker/LO_user'
+alias cdLod='cd /gscratch/macc/parker/LO_data'
+alias cdLoo='cd /gscratch/macc/parker/LO_output'
 alias cdLor='cd /gscratch/macc/parker/LO_roms'
+alias cdLra='cd /gscratch/macc/parker/LO_roms_source_alt'
+alias cdLrs='cd /gscratch/macc/parker/LO_roms_source'
+alias cdLru='cd /gscratch/macc/parker/LO_roms_user'
+alias cdLu='cd /gscratch/macc/parker/LO_user'
+alias cdpm='cd /gscratch/macc/parker'
+
+alias cdlo='cd /gscratch/macc/parker/LiveOcean'
 alias cdloo='cd /gscratch/macc/parker/LiveOcean_output'
 alias cdlod='cd /gscratch/macc/parker/LiveOcean_data'
 alias cdlor='cd /gscratch/macc/parker/LiveOcean_roms'
