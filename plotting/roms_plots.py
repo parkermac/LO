@@ -2248,6 +2248,11 @@ def P_superplot_oxygen_coast(in_dict):
     # now just gets from the same mooring extraction it uses for wind.
     
     # 2023.05.19 Based on P_superplot_oxygen but focused on the coast
+    
+    # Here is the command I used to run it on parigee:
+    # run pan_plot.py -gtx cas6_v0_live -ro 0 -0 2019.01.01 -1 2019.12.31 -lt daily -pt P_superplot_oxygen_coast -mov True
+    # This takes awhile and would have been better done from the bash command line in background.
+    # I had to copy over a superplot mooring extraction for this gtagex from my laptop.
 
     vn = 'oxygen'
     vlims = (0, 10) # full map
