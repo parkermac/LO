@@ -77,8 +77,8 @@ for moviename in moviename_list:
     ds0 = dt0.strftime('%Y.%m.%d')
     ds1 = dt1.strftime('%Y.%m.%d')
     
-    if Ldir['testing']:
-        ds1 = ds0
+    # if Ldir['testing']:
+    #     ds1 = ds0
     #     lt = 'snapshot'
     #     mov = 'False'
         

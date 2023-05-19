@@ -3,7 +3,7 @@ Module of functions to create job definitions for a box extraction.
 """
 
 def get_box(job, Lon, Lat):
-    vn_list = 'h,f,pm,pn,mask_rho,salt,temp,rho,zeta,u,v,ubar,vbar' # default list
+    vn_list = 'h,f,pm,pn,mask_rho,salt,temp,zeta,u,v,ubar,vbar' # default list
     # specific jobs
     if job == 'sequim0':
         aa = [-123.15120787, -122.89090010, 48.07302111, 48.19978336]
@@ -36,8 +36,12 @@ def get_box(job, Lon, Lat):
         vn_list = 'h,pm,pn,mask_rho,salt,temp,sustr,svstr,zeta'
     elif job == 'ubc0':
         aa = [-125.016452048434, -124.494612925929, 48.312, 48.7515055163539]
-        vn_list = ('h,f,pm,pn,mask_rho,salt,temp,zeta,NO3,phytoplankton,'
-                + 'zooplankton,detritus,Ldetritus,oxygen,TIC,alkalinity,CaCO3,rho')
+        # old version
+        # vn_list = ('h,f,pm,pn,mask_rho,salt,temp,zeta,NO3,phytoplankton,'
+        #         + 'zooplankton,detritus,Ldetritus,oxygen,TIC,alkalinity')
+        # new version
+        vn_list = ('h,f,pm,pn,mask_rho,salt,temp,zeta,NO3,NH4,phytoplankton,'
+                + 'zooplankton,SdetritusN,LdetritusN,oxygen,TIC,alkalinity')
     elif job == 'cox':
         aa = [-123.204529, -122.728532, 48.393771, 48.726895]
         vn_list = 'h,pm,pn,mask_rho,salt,temp,phytoplankton'
