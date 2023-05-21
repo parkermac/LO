@@ -1,16 +1,20 @@
 LANG=en-US.UTF-8
 LOd="/gscratch/macc/parker/LO/driver"
-20 03 * * * source ~/.bashrc; python3 $LOd/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOd/ak_cron.log
-10 10 * * * source ~/.bashrc; python3 $LOd/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOd/ak_cron_2.log
-00 14 * * * source ~/.bashrc; python3 $LOd/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOd/ak_cron_3.log
+
+00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron.log
+00 10 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron_2.log
 
 30 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' pmacc@uw.edu < $LOd/ak_cron.log
 31 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' darrd@uw.edu < $LOd/ak_cron.log
 32 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' ebroatch@uw.edu < $LOd/ak_cron.log
 33 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' auroral@uw.edu < $LOd/ak_cron.log
 34 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' kmhewett@uw.edu < $LOd/ak_cron.log
-36 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' jxiong7@uw.edu < $LOd/ak_cron.log
+35 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' jxiong7@uw.edu < $LOd/ak_cron.log
+
 00 12 * * * crontab <<< $(crontab -l)
 
-00 11 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/forecast_new.log
+# 20 03 * * * source ~/.bashrc; python3 $LOd/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOd/ak_cron.log
+# 10 10 * * * source ~/.bashrc; python3 $LOd/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOd/ak_cron_2.log
+# 00 14 * * * source ~/.bashrc; python3 $LOd/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOd/ak_cron_3.log
+
 
