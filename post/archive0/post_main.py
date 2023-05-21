@@ -44,7 +44,7 @@ while this_dt <= dt1:
     print(' - archiving files for ' + this_ds)
     f_string = 'f' + this_ds
     in_dir = Ldir['roms_out'] / Ldir['gtagex'] / f_string
-    out_dir = Path('/pgdat1') / 'parker' / 'LO_roms' / 'cas6_v0_live'
+    out_dir = Path('/pgdat1') / 'parker' / 'LO_roms' / 'cas6_v1_live'
     if Ldir['testing'] == True:
         # For testing we just print the directories
         print('   in_dir: %s' % (str(in_dir)))
