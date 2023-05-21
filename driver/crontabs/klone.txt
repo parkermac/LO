@@ -2,7 +2,7 @@ LANG=en-US.UTF-8
 LOd="/gscratch/macc/parker/LO/driver"
 
 00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron.log
-00 10 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron_2.log
+00 14 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron_2.log
 
 30 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' pmacc@uw.edu < $LOd/ak_cron.log
 31 06 * * * source ~/.bashrc; mail -s 'LO forecast klone' darrd@uw.edu < $LOd/ak_cron.log
