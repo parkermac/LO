@@ -479,7 +479,7 @@ def P_ri(in_dict):
 def P_Chl_DO(in_dict):
     # START
     fs = 14
-    pfun.start_plot(fs=fs, figsize=(14,10))
+    pfun.start_plot(fs=fs, figsize=(18,10))
     fig = plt.figure()
     ds = xr.open_dataset(in_dict['fn'])
     # PLOT CODE
