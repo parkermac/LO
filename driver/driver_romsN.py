@@ -3,21 +3,17 @@ This runs ROMS for one or more days, allowing for either a forecast or backfill.
 
 This code:
 - is based on driver_roms3.py
+- it is designed for NESTED runs, with the main difference being that ocnN does not have
+  the same forecast logic as the other forcing types, in that it only really makes sense
+  as backfill, even though it is run for the trhee forecast days.
 
 For testing/debugging these flags can be very useful:
 -v True --get_forcing False --short_roms True --move_his False
 
-Example call on mox:
+Example call on klone:
 
 testing on mac:
-python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -s continuation -0 2021.01.01 -np 196 -N 28 --get_forcing False --run_roms False --move_his False
-
-testing on mox:
-python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -s continuation -0 2021.01.01 -np 196 -N 28 --short_roms True < /dev/null > uu0mb_test.log &
-
-production run on mox:
-python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -s continuation -0 2021.01.01 -1 2021.01.02 -np 196 -N 28 < /dev/null > uu0mb_a.log &
-python3 driver_roms3.py -g cas6 -t v00 -x uu0mb -0 2021.01.03 -1 2021.12.31 -np 196 -N 28 < /dev/null > uu0mb_b.log &
+python3 driver_romsN.py -g wgh1 -t t0 -x xn0b -s new -r forecast -np 200 -N 40 < /dev/null > wgh1_test.log &
 
 """
 
@@ -198,7 +194,7 @@ while dt <= dt1:
                     pass
                 else:
                     force_choice = force_dict[force]
-                    if args.run_type == 'backfill':
+                    if (args.run_type == 'backfill') or (force_choice == 'ocnN'):
                         F_string = f_string
                     elif args.run_type == 'forecast':
                         F_string = f_string0
