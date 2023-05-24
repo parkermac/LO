@@ -5,7 +5,6 @@ Functions for adding CTD data to an extrapolation.
 import os
 import sys
 import pickle
-import netCDF4 as nc
 import numpy as np
 import pandas as pd
 from scipy.spatial import cKDTree

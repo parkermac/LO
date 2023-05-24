@@ -2,44 +2,12 @@
 Functions to add biogeochemical fields to a clm file.
 """
 
-import netCDF4 as nc
 import numpy as np
 import matplotlib.path as mpath
 from lo_tools import zfun
 
 verbose = False
 
-def add_bio(nc_dir, G, add_CTD=False):
-    # This method is obsolete 2022.03.19
-    print('-Writing bio variables to ocean_clm.nc')
-    # name output file
-    clm_fn = nc_dir / 'ocean_clm.nc'
-    foo = nc.Dataset(clm_fn)
-    vn_dict =  {'NO3':'MicroMolar',
-               'phytoplankton':'MicroMolar N',
-               'zooplankton':'MicroMolar N',
-               'detritus':'MicroMolar N',
-               'Ldetritus':'MicroMolar N',
-               'CaCO3':'MicroMolar C',
-               'oxygen':'MicroMolar O',
-               'alkalinity':'MicroMolar',
-               'TIC':'MicroMolar C'}
-
-    salt = foo['salt'][:]
-    foo.close()
-    for vn in vn_dict.keys():
-        foo = nc.Dataset(clm_fn, 'a')
-        vv = foo.createVariable(vn, float, ('salt_time', 's_rho', 'eta_rho', 'xi_rho'), zlib=True)
-        vv.long_name = vn + ' climatology'
-        vv.units = vn_dict[vn]
-        vv.time = 'salt_time'
-        V = create_bio_var(salt, vn)
-        if verbose:
-            print(str(V.shape))
-        if add_CTD:
-            V = salish_fields(V, vn, G)
-        vv[:] = V
-        foo.close()
         
 def salish_fields(V, vn, G):
     """

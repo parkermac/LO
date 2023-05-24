@@ -11,7 +11,7 @@ relative to 1/1/1992, the reference time for the tpxo9 fields.  I also
 use them to calculate the nodal corrections to phase and amplitude for a given
 model day, and to calculate the ellipse parameters.
 
-I have the results in a limited way:
+I have checked the results in a limited way:
 * I checked to phase and amplitide numbers for M2 - they were identical.
 * The calculated field patterns compared well with the cas6_v0/f2019.07.04/tide1 results.
 The testing was done with LPM/tpxo/test1.py.
