@@ -13,7 +13,7 @@ run post_main.py -gtx cas6_traps2_x2b -d 2019.07.04 -r backfill -job nest_wgh
 - works for atm00 but fails for ocnN
 
 Run for real on apogee:
-python post_main.py -gtx cas6_traps2_x2b -d [today's date string] -r forecast -job nest_wgh
+python post_main.py -gtx cas6_traps2_x2b -d [today's date string] -r forecast -job nest_wgh > nest_test.log &
 
 """
 
