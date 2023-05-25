@@ -5,7 +5,12 @@ daily forecast.
 This is specific to the wgh (Willapa Bay - Grays Harbor) grid.
 
 Testing on mac:
+
 run post_main.py -gtx cas6_traps2_x2b -d 2017.07.04 -r backfill -job nest_wgh
+- works for ocnN but fails for atm00
+
+run post_main.py -gtx cas6_traps2_x2b -d 2019.07.04 -r backfill -job nest_wgh
+- works for atm00 but fails for ocnN
 
 Run for real on apogee:
 python post_main.py -gtx cas6_traps2_x2b -d [today's date string] -r forecast -job nest_wgh
