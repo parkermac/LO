@@ -107,11 +107,20 @@ pfun.dar(ax)
 
 ax.plot(lor[df.irho.to_numpy(dtype=int)], lar[df.jrho.to_numpy(dtype=int)],'ok')
 
-dfu = df[df.dir==0]
-ax.plot(lou[dfu.iu.to_numpy(dtype=int)], lar[dfu.ju.to_numpy(dtype=int)],'+k')
+dfup = df[(df.dir==0) & (df.sgn==1)]
+ax.plot(lou[dfup.iu.to_numpy(dtype=int)], lau[dfup.ju.to_numpy(dtype=int)],'>k')
+dfum = df[(df.dir==0) & (df.sgn==-1)]
+ax.plot(lou[dfum.iu.to_numpy(dtype=int)], lau[dfum.ju.to_numpy(dtype=int)],'<k')
 
-dfv = df[df.dir==1]
-ax.plot(lov[dfv.iv.to_numpy(dtype=int)], lav[dfv.jv.to_numpy(dtype=int)],'+k')
+dfvp = df[(df.dir==1) & (df.sgn==1)]
+ax.plot(lov[dfvp.iv.to_numpy(dtype=int)], lav[dfvp.jv.to_numpy(dtype=int)],'^k')
+dfvm = df[(df.dir==1) & (df.sgn==-1)]
+ax.plot(lov[dfvm.iv.to_numpy(dtype=int)], lav[dfvm.jv.to_numpy(dtype=int)],'vk')
+
+dfrp = df[(df.dir==2) & (df.sgn==1)]
+ax.plot(lor[dfrp.irho.to_numpy(dtype=int)], lar[dfrp.jrho.to_numpy(dtype=int)],'or')
+dfrm = df[(df.dir==2) & (df.sgn==-1)] # should not exist
+ax.plot(lor[dfrm.irho.to_numpy(dtype=int)], lar[dfrm.jrho.to_numpy(dtype=int)],'og')
 
 plt.show()
 
