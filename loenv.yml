@@ -23,6 +23,7 @@ dependencies:
   - nodejs
   - dask-labextension
   # my additions
+  - cmcrameri
   - seawater
   - gsw
   - ephem
