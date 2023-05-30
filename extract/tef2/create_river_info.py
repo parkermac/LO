@@ -20,7 +20,7 @@ parser = argparse.ArgumentParser()
 # info to find a rivers.nc file
 parser.add_argument('-gridname', default='cas6', type=str)
 parser.add_argument('-frc', default='traps2', type=str)
-parser.add_argument('-dstr',default='2017.07.04', type=str)
+parser.add_argument('-dstr',default='2021.01.01', type=str)
 
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
