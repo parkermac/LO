@@ -96,6 +96,23 @@ df.loc[(df.dir==1) & (df.sgn==1), 'jrho'] = df.loc[(df.dir==1) & (df.sgn==1), 'j
 df.loc[(df.dir==1) & (df.sgn==-1), 'irho'] = df.loc[(df.dir==1) & (df.sgn==-1), 'iv']
 df.loc[(df.dir==1) & (df.sgn==-1), 'jrho'] = df.loc[(df.dir==1) & (df.sgn==-1), 'jv']
 
+# check results and save them if there are no bad points
+ir = df.irho.to_numpy(dtype=int)
+jr = df.jrho.to_numpy(dtype=int)
+xr = lor[ir]
+yr = lar[jr]
+source_mask = m[jr,ir]
+ngood = (source_mask==1).sum()
+nbad = (source_mask==0).sum()
+print('Number of good sources = %d' % (int(ngood)))
+print('Number of bad sources = %d' % (int(nbad)))
+
+if nbad == 0:
+    print('\nSaving DataFrame to:\n%s' % (str(out_fn)))
+    pd.to_pickle(df, out_fn)
+else:
+    print('\nNot saving results')
+
 # plotting
 plt.close('all')
 pfun.start_plot()
@@ -105,18 +122,24 @@ ax = fig.add_subplot(111)
 ax.pcolormesh(plon,plat,h, cmap='cool')
 pfun.dar(ax)
 
-ax.plot(lor[df.irho.to_numpy(dtype=int)], lar[df.jrho.to_numpy(dtype=int)],'ok')
+# plot locations of recipient rho cells
+ax.plot(xr,yr,'ok')
 
+# plot source locations and directions
+
+# u grid
 dfup = df[(df.dir==0) & (df.sgn==1)]
 ax.plot(lou[dfup.iu.to_numpy(dtype=int)], lau[dfup.ju.to_numpy(dtype=int)],'>k')
 dfum = df[(df.dir==0) & (df.sgn==-1)]
 ax.plot(lou[dfum.iu.to_numpy(dtype=int)], lau[dfum.ju.to_numpy(dtype=int)],'<k')
 
+# v grid
 dfvp = df[(df.dir==1) & (df.sgn==1)]
 ax.plot(lov[dfvp.iv.to_numpy(dtype=int)], lav[dfvp.jv.to_numpy(dtype=int)],'^k')
 dfvm = df[(df.dir==1) & (df.sgn==-1)]
 ax.plot(lov[dfvm.iv.to_numpy(dtype=int)], lav[dfvm.jv.to_numpy(dtype=int)],'vk')
 
+# rho grid
 dfrp = df[(df.dir==2) & (df.sgn==1)]
 ax.plot(lor[dfrp.irho.to_numpy(dtype=int)], lar[dfrp.jrho.to_numpy(dtype=int)],'or')
 dfrm = df[(df.dir==2) & (df.sgn==-1)] # should not exist
