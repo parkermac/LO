@@ -589,7 +589,7 @@ if enable_pointsources == True:
         else:
             qtbio_wwtp_df = qtbio_wwtp_df_dict[rn]
             flow = qtbio_wwtp_df['flow'].values
-        Q_mat[:,rr] = flow
+        Q_mat[:,rr] = flow * gri_df_no_ovrlp.loc[rn, 'isign']
         rr += 1
     wwtp_ds[vn] = (dims, Q_mat)
     wwtp_ds[vn].attrs['long_name'] = vinfo['long_name']
