@@ -205,16 +205,17 @@ def P_fancy(in_dict):
     pfun.start_plot(fs=fs, figsize=(int(hgt*2.5/AR),int(hgt)))
     fig = plt.figure()
     # PLOT CODE
+    import cmcrameri.cm as cmr
     vn_list = ['salt', 'temp']
     ii = 1
     for vn in vn_list:
         if in_dict['auto_vlims']:
             pinfo.vlims_dict[vn] = ()
         if vn == 'salt':
-            cmap = 'jet'
+            cmap = cmr.hawaii_r
             vlims_fac = .5
         elif vn == 'temp':
-            cmap = 'RdYlBu_r'
+            cmap = cmr.roma_r
             vlims_fac = 1
         ax = fig.add_subplot(1, len(vn_list), ii)
         cs = pfun.add_map_field(ax, ds, vn, pinfo.vlims_dict,
@@ -1889,7 +1890,7 @@ def P_superplot_salt(in_dict):
     ax.set_ylim(zdeep, 25)
     sf = pinfo.fac_dict[vn] * fld_s
     # plot section
-    cs = ax.pcolormesh(dist_se, zw_se, fld_s,
+    cs = ax.pcolormesh(dist_se, zw_se, sf,
                        vmin=vlims3[0], vmax=vlims3[1], cmap=cmap)
     ax.text(.99,.4,'S range\n'+ str(vlims3), transform=ax.transAxes,
         va='bottom', ha='right', c='orange', size=.6*fs, weight='bold')
@@ -2128,7 +2129,7 @@ def P_superplot_oxygen(in_dict):
     ax.set_ylim(zdeep, 25)
     sf = pinfo.fac_dict[vn] * fld_s
     # plot section
-    cs = ax.pcolormesh(dist_se, zw_se, fld_s,
+    cs = ax.pcolormesh(dist_se, zw_se, sf,
                        vmin=vlims3[0], vmax=vlims3[1], cmap=cmap)
     # labels
     ax.text(0, 0, 'SECTION\nHood Canal', fontsize=fs, color='b',
@@ -2595,7 +2596,7 @@ def P_superplot_chl(in_dict):
     ax.set_ylim(zdeep, 25)
     sf = pinfo.fac_dict[vn] * fld_s
     # plot section
-    cs = ax.pcolormesh(dist_se, zw_se, fld_s,
+    cs = ax.pcolormesh(dist_se, zw_se, sf,
                        vmin=vlims3[0], vmax=vlims3[1], cmap=cmap)
     # labels
     ax.text(0, 0, 'SECTION\nPuget Sound', fontsize=fs, color='b',
