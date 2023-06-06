@@ -6,6 +6,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--gridname', default='',
         type=str)
+parser.add_argument('-zmin', default=-5, type=int)
 args = parser.parse_args()
 
 import gfun
@@ -68,7 +69,7 @@ pfun.start_plot(figsize=(12,12))
 # bathymetry
 fig = plt.figure()
 ax = fig.add_subplot(111)
-cs = ax.pcolormesh(plon, plat, zm, vmin=-5, vmax=0, cmap='Spectral_r')
+cs = ax.pcolormesh(plon, plat, zm, vmin=args.zmin, vmax=0, cmap='Spectral_r')
 # cs = ax.pcolormesh(plon, plat, zm, vmin=-120, vmax=-100, cmap='Spectral_r')
 fig.colorbar(cs, ax=ax)
 if dch['analytical'] == True:
