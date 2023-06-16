@@ -266,7 +266,7 @@ def initialize_plot():
         i = df.loc[0,'i']
         j = df.loc[0,'j']
         ax.text(lor[i],lar[j],'\n'+sn,c='orange',ha='center',va='top',
-            fontweight='bold')
+            fontweight='bold',bbox=pfun.bbox)
     return ax
     
 if testing:

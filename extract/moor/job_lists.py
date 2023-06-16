@@ -245,6 +245,17 @@ def get_sta_dict(job_name):
             'ZIT': (-122.808021, 47.165366),
         }
         
+    elif job_name == 'orca_eb':
+        # ORCA mooring locations, from Erin Broatch 2023.06.16
+        sta_dict = {
+        'CI': (-122.7300, 47.2800),
+        'PW': (-122.3972, 47.7612),
+        'NB': (-122.6270, 47.9073),
+        'DB': (-122.8029, 47.8034),
+        'HP': (-123.1126, 47.4218),
+        'TW': (-123.0083, 47.3750)
+        }
+        
     else:
         print('Unsupported job name!')
         a = dict()
