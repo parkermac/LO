@@ -8,7 +8,7 @@
 
 #### Short version
 1. Look at https://liveocean.apl.uw.edu/output/ to see if a folder for today is there, after about 7 AM.
-2. Logon to apogee and go to `/dat1/parker/LO/driver` and do `cat *0.log`, anytime after 3 AM.
+2. Logon to apogee and go to `/dat1/parker/LO/driver` and do `cat *new.log`, anytime after 3 AM.
 3. Check that the movie http://faculty.washington.edu/pmacc/LO/p5_Phab_full_salt_top.html has today's timestamp on it, anytime after about 8 AM.
 4. If anything looks amiss, contact David Darr at darrd@uw.edu.
 
@@ -19,7 +19,7 @@ The LiveOcean forecast has been running continuously since late 2015. Its result
 _**Here are the typical daily steps:**_
 
 - First, open a browser and look at https://liveocean.apl.uw.edu/output/. Anytime after about 6 AM you should see a folder at the bottom of the list named after the current day f[date_string] where [date_string] is of the form YYYY.MM.DD, e.g. f2022.07.12. This is the public server where we make daily forecast post-processing files available to users. **If the folder is there, everything probably worked fine and if you are in a hurry you can stop here.**
-- At 6:30 AM official operators should get two emails. One, titled "LO forecst klone", is the screen output of driver_roms2.py from the primary forecast run by Parker on klone. The other, titled "LO forecast mox", is from the backup forecast run by Parker on mox. These give information on each of the three forecast days. For example, the lower third of "LO forecast klone" today has info about day three of the forecast:
+- At 6:30 AM or a few minutes later official operators should get two emails. One, titled "LO forecast klone", is the screen output of driver_roms2.py from the primary forecast run by Parker on klone. The other, titled "LO forecast mox", is from the backup forecast run by Parker on mox. These give information on each of the three forecast days. For example, the lower third of "LO forecast klone" today has info about day three of the forecast:
 
 ```
 Running ROMS forecast 2022.10.14-2022.10.16
