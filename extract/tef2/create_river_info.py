@@ -113,37 +113,39 @@ if nbad == 0:
 else:
     print('\nNot saving results')
 
-# plotting
-plt.close('all')
-pfun.start_plot()
-fig = plt.figure(figsize=(10,12))
-ax = fig.add_subplot(111)
+if testing == True:
+    
+    # plotting
+    plt.close('all')
+    pfun.start_plot()
+    fig = plt.figure(figsize=(10,12))
+    ax = fig.add_subplot(111)
 
-ax.pcolormesh(plon,plat,h, cmap='cool')
-pfun.dar(ax)
+    ax.pcolormesh(plon,plat,h, cmap='cool')
+    pfun.dar(ax)
 
-# plot locations of recipient rho cells
-ax.plot(xr,yr,'ok')
+    # plot locations of recipient rho cells
+    ax.plot(xr,yr,'ok')
 
-# plot source locations and directions
+    # plot source locations and directions
 
-# u grid
-dfup = df[(df.dir==0) & (df.sgn==1)]
-ax.plot(lou[dfup.iu.to_numpy(dtype=int)], lau[dfup.ju.to_numpy(dtype=int)],'>k')
-dfum = df[(df.dir==0) & (df.sgn==-1)]
-ax.plot(lou[dfum.iu.to_numpy(dtype=int)], lau[dfum.ju.to_numpy(dtype=int)],'<k')
+    # u grid
+    dfup = df[(df.dir==0) & (df.sgn==1)]
+    ax.plot(lou[dfup.iu.to_numpy(dtype=int)], lau[dfup.ju.to_numpy(dtype=int)],'>k')
+    dfum = df[(df.dir==0) & (df.sgn==-1)]
+    ax.plot(lou[dfum.iu.to_numpy(dtype=int)], lau[dfum.ju.to_numpy(dtype=int)],'<k')
 
-# v grid
-dfvp = df[(df.dir==1) & (df.sgn==1)]
-ax.plot(lov[dfvp.iv.to_numpy(dtype=int)], lav[dfvp.jv.to_numpy(dtype=int)],'^k')
-dfvm = df[(df.dir==1) & (df.sgn==-1)]
-ax.plot(lov[dfvm.iv.to_numpy(dtype=int)], lav[dfvm.jv.to_numpy(dtype=int)],'vk')
+    # v grid
+    dfvp = df[(df.dir==1) & (df.sgn==1)]
+    ax.plot(lov[dfvp.iv.to_numpy(dtype=int)], lav[dfvp.jv.to_numpy(dtype=int)],'^k')
+    dfvm = df[(df.dir==1) & (df.sgn==-1)]
+    ax.plot(lov[dfvm.iv.to_numpy(dtype=int)], lav[dfvm.jv.to_numpy(dtype=int)],'vk')
 
-# rho grid
-dfrp = df[(df.dir==2) & (df.sgn==1)]
-ax.plot(lor[dfrp.irho.to_numpy(dtype=int)], lar[dfrp.jrho.to_numpy(dtype=int)],'or')
-dfrm = df[(df.dir==2) & (df.sgn==-1)] # should not exist
-ax.plot(lor[dfrm.irho.to_numpy(dtype=int)], lar[dfrm.jrho.to_numpy(dtype=int)],'og')
+    # rho grid
+    dfrp = df[(df.dir==2) & (df.sgn==1)]
+    ax.plot(lor[dfrp.irho.to_numpy(dtype=int)], lar[dfrp.jrho.to_numpy(dtype=int)],'or')
+    dfrm = df[(df.dir==2) & (df.sgn==-1)] # -1 should not exist for vertical sources
+    ax.plot(lor[dfrm.irho.to_numpy(dtype=int)], lar[dfrm.jrho.to_numpy(dtype=int)],'og')
 
-plt.show()
+    plt.show()
 

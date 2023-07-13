@@ -36,7 +36,7 @@ The output ends up in a folder `LO_output/extract/tef2/sections_[gctag]` and eac
 
 ---
 
-`plot_collection.py` is a utility program to plot a [cgtag] collection of sections so you can look at what you have.
+`plot_collection.py` is a utility program to plot a [gctag] collection of sections so you can look at what you have.
 
 ---
 
@@ -129,3 +129,15 @@ There can be more than two layers!
 The results are a bunch of png's, one for each section in
 
 **(+)/bulk_plots_[date range]**
+
+---
+
+#### Next there are a series of steps to define and extract data for _segments_, which are the volumes between sections. These are essential to form the storage term in volume-integrated budgets.
+
+---
+
+create_river_info.py
+
+---
+
+create_seg_df.py
