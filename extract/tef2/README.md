@@ -140,4 +140,18 @@ create_river_info.py
 
 ---
 
-create_seg_df.py
+`create_seg_info_dict.py` is some rather involved (but useful) code to define tef2 segments. Mainly we get all the j,i indices on the rho grid for all the segments between sections. For each segment we also get a list of the bounding sections and the rivers.
+
+The results are paccked in a dict of dicts called seg_info_dict, and saved as a pickled dict in:
+
+**LO_output/extract/tef2/seg_info_dict_[gctag]_[riv].p**
+
+e.g. seg_info_dict_cas6_c0_traps2.p
+
+seg_info_dict has one key for each segment, e.g. 'mb8_m' which is a section name and a sign (plus or minus side - see the section sign convention above). Note that it is sort of random which section gets assigned to be the key defining the segment - it could be any of the bounding sections. One advantage of this system is that it is all done automatically, and so we don't have to
+
+Then seg_info_dict['mb8_m'] is a dict with three keys:
+['ji_list', 'sns_list', 'riv_list']
+- ji_list is a list of tuples (j,i) that are indices of points in the rho grid in the segment
+- sns_list is a list of all the bounding sections+signs (sns is short for section name + sign), including their signs. Note that the segment key is one member of this list
+- riv_list is a list of the rivers or point sources entering the segment

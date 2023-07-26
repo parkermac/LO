@@ -1,10 +1,27 @@
 """
 Code to define tef2 segments. Specifically we get all the j,i indices on
-the rho grid for all the regions between sections.
+the rho grid for all the regions between sections. for each segment we also
+get a list of the bounding sections and the rivers.
+
+The results are saved in a dict of dicts called "seg_info_dict":
+
+seg_info_dict has one key for each segment, e.g. 'mb8_m'
+then seg_info_dict['mb8_m'] is a dict with three keys:
+['ji_list', 'sns_list', 'riv_list']
+ - ji_list is a list of tuples (j,i) that are indices of points in the rho grid in the segment
+ - sns_list is a list of all the bounding sections, including their signs. Note that the segment
+   key is one member of this list
+ - riv_list is a list of the rivers or point sources entering the segment
 
 To test on mac:
-run create_seg_df -gctag cas6_c0 -riv traps2 -small True -test True
-run create_seg_df -gctag cas6_c0 -test True
+
+run create_seg_info_dict -gctag cas6_c0 -riv traps2 -small True -test True
+
+or just:
+
+run create_seg_info_dict (uses all defaults)
+
+Performance: takes a few minutes to run for real on cas6_c0_traps2.
 
 """
 
@@ -17,16 +34,17 @@ import xarray as xr
 import numpy as np
 import matplotlib.pyplot as plt
 from cmocean import cm
+import pickle
 
 # get command line arguments
 import argparse
 parser = argparse.ArgumentParser()
 # gridname and tag for collection folder
 parser.add_argument('-gctag', default='cas6_c0', type=str)
-parser.add_argument('-riv', default='', type=str)
+parser.add_argument('-riv', default='traps2', type=str)
 # set small to True to work on a laptop
-parser.add_argument('-small', default=False, type=Lfun.boolean_string)
-parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+parser.add_argument('-small', default=True, type=Lfun.boolean_string)
+parser.add_argument('-test', '--testing', default=True, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 # input and output locations
@@ -36,8 +54,12 @@ riv = args.riv
 testing = args.testing
 Ldir = Lfun.Lstart(gridname=gridname)
 grid_fn = Ldir['grid'] / 'grid.nc'
-out_name = 'seg_df_' + gctag + '.p'
+if len(riv) > 0:
+    out_name = 'seg_info_dict_' + gctag + '_' + riv + '.p'
+else:
+    out_name = 'seg_info_dict_' + gctag + '_noriv.p'
 out_dir = Ldir['LOo'] / 'extract' / 'tef2'
+Lfun.make_dir(out_dir)
 out_fn = out_dir / out_name
     
 # get grid data
@@ -71,26 +93,46 @@ if len(riv) > 0:
     riv_i = riv_df.irho.to_numpy(dtype = int)
     riv_j = riv_df.jrho.to_numpy(dtype = int)
     riv_ji = [(riv_j[ii], riv_i[ii]) for ii in range(len(riv_i))]
-    riv_ji_dict = dict(zip(riv_ji, riv_names))
-    riv_ji_dict2 = dict(zip(riv_names, riv_ji))
+    # make two dicts out of this info, just reversing the key-value order
+    riv_ji_dict = dict(zip(riv_ji, riv_names)) # used to search for river names from ji points
+    riv_ji_dict2 = dict(zip(riv_names, riv_ji)) # used to plot rivers from names
     do_riv = True
 else:
     print('Not using river info.')
     do_riv == False
 
 if testing:
-    sn_list = ['mb8','mb9']
-    sect_df = sect_df.loc[(sect_df.sn == 'mb7') | 
-                          (sect_df.sn == 'mb8') |
-                          (sect_df.sn == 'mb9') |
-                          (sect_df.sn == 'mb10') |
-                          (sect_df.sn == 'tn1'),:].copy()
+    if False:
+        sn_list = ['mb8','mb9']
+        sect_df = sect_df.loc[(sect_df.sn == 'mb7') | 
+                              (sect_df.sn == 'mb8') |
+                              (sect_df.sn == 'mb9') |
+                              (sect_df.sn == 'mb10') |
+                              (sect_df.sn == 'tn1'),:].copy()
+    else:
+        sn_list = ['jdf2']
+        sect_df = sect_df.loc[(sect_df.sn == 'jdf1') | 
+                              (sect_df.sn == 'jdf2') |
+                              (sect_df.sn == 'jdf3'),:].copy()
+        
     sect_df = sect_df.reset_index(drop=True)
     # We need to have all bounding sections in sect_df.
 else:
     sn_list = list(sect_df.sn.unique())
-    sn_list.remove('jdf1')
-    sn_list.remove('sog7')
+
+# NOTE: We have to remove the open boundary sections from the list
+# or else our algorithm will make a segment out of the ocean!
+# This is a problematic operation because relies on knowing these section names,
+# but they are specific to a gctag. This needs more thought.
+if gctag == 'cas6_c0':
+    for sn in ['jdf1', 'sog7']:
+        try:
+            sn_list.remove(sn)
+        except ValueError:
+            pass
+else:
+    print('WARNING, you need to remove open boundary sections! Exiting.')
+    sys.exit()
 
 # start of routine to find all rho-grid points within a segment
 
@@ -167,7 +209,7 @@ def update_mm(sn, pm, m, sect_df):
             m = df_not.loc[(df_not.irm==ji[1]) & (df_not.jrm==ji[0]),:]
             if len(p) > 0:
                 snx = p.sn.values[0]
-                print('hit ' + snx + ' on plus side')
+                print(' - hit ' + snx + ' on plus side')
                 dfx = sect_df.loc[sect_df.sn==snx,:]
                 mm[dfx.jrm,dfx.irm] = False
                 df_not = df_not.loc[df_not.sn!=snx,:]
@@ -175,7 +217,7 @@ def update_mm(sn, pm, m, sect_df):
                 
             elif len(m) > 0:
                 snx = m.sn.values[0]
-                print('hit ' + snx + ' on minus side')
+                print(' - hit ' + snx + ' on minus side')
                 dfx = sect_df.loc[sect_df.sn==snx,:]
                 mm[dfx.jrp,dfx.irp] = False
                 df_not = df_not.loc[df_not.sn!=snx,:]
@@ -183,7 +225,7 @@ def update_mm(sn, pm, m, sect_df):
                 
         next_ji_list = []
         counter += 1
-    print('points = ' + str(len(full_ji_list)))
+    print(' - points = ' + str(len(full_ji_list)))
     return full_ji_list, sns_list
     
 def find_riv_list(ji_list):
@@ -194,7 +236,9 @@ def find_riv_list(ji_list):
     return riv_list
 
 # this it the loop where we actually find the segment info
-ji_dict = {}
+tt0 = time()
+seg_info_dict = {}
+seg_key = 0
 for sn in sn_list:
         
     for pm in [-1, 1]:
@@ -206,31 +250,33 @@ for sn in sn_list:
         
         # only do this segment if it is not already done
         done_list = [] # we regenerate this list for each attempt
-        for k in ji_dict.keys():
-            done_list += ji_dict[k]['sns_list']
+        for k in seg_info_dict.keys():
+            done_list += seg_info_dict[k]['sns_list']
         if sns not in done_list:
             full_ji_list, sns_list = update_mm(sn, pm, m, sect_df)
-            ji_dict[sns] = {'ji_list':full_ji_list, 'sns_list': sns_list}
+            seg_info_dict[seg_key] = {'ji_list':full_ji_list, 'sns_list': sns_list}
             
             # find rivers in this segment
             riv_list = []
             if do_riv == True:
                 riv_list = find_riv_list(full_ji_list)
-            ji_dict[sns]['riv_list'] = riv_list
+            seg_info_dict[seg_key]['riv_list'] = riv_list
             
         else:
             print('\nSkipping ' + sns)
 if not testing:
-    pickle.dump(ji_dict, open(out_fn,'wb'))
+    pickle.dump(seg_info_dict, open(out_fn,'wb'))
+print('\nElapsed time = %0.1f seconds' % (time()-tt0))
+print('output file: %s' % (str(out_fn)))
 
 if testing:
     print('\n' + 50*'=')
-    for k in ji_dict.keys():
-        print('\nStarting section: '+k)
-        print(' - Bounding sections: ' + str(ji_dict[k]['sns_list']))
+    for k in seg_info_dict.keys():
+        print('\nSegment key: ' + str(k))
+        print(' - Bounding sections: ' + str(seg_info_dict[k]['sns_list']))
         if do_riv:
             print(' - Included rivers:')
-            this_riv_list = ji_dict[k]['riv_list']
+            this_riv_list = seg_info_dict[k]['riv_list']
             for rn in this_riv_list:
                 print('    ' + rn)
 
@@ -248,17 +294,18 @@ def initialize_plot():
     ax.text(.05,.9,gctag + '\n' + riv, transform=ax.transAxes,
         fontweight='bold')
 
-    ax.plot(lor[sect_df.irp],lar[sect_df.jrp],'or')
-    ax.plot(lor[sect_df.irm],lar[sect_df.jrm],'ob')
+    ms = 4
+    ax.plot(lor[sect_df.irp],lar[sect_df.jrp],'oc',markersize=ms)
+    ax.plot(lor[sect_df.irm],lar[sect_df.jrm],'or',markersize=ms)
 
     ax.plot(lou[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==1),'i']],
-        lau[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==1),'j']],'>y')
+        lau[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==1),'j']],'>y',markersize=ms)
     ax.plot(lou[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==-1),'i']],
-        lau[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==-1),'j']],'<y')
+        lau[sect_df.loc[(sect_df.uv=='u') & (sect_df.pm==-1),'j']],'<y',markersize=ms)
     ax.plot(lov[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==1),'i']],
         lav[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==1),'j']],'^y')
     ax.plot(lov[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==-1),'i']],
-        lav[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==-1),'j']],'vy')
+        lav[sect_df.loc[(sect_df.uv=='v') & (sect_df.pm==-1),'j']],'vy',markersize=ms)
     
     for sn in sect_df.sn.unique():
         df = sect_df.loc[sect_df.sn==sn,['i','j']].copy()
@@ -275,18 +322,18 @@ if testing:
     # plotting to check
     jjj = []
     iii = []
-    for sns in ji_dict.keys():
-        ji_list = ji_dict[sns]['ji_list']
+    for sns in seg_info_dict.keys():
+        ji_list = seg_info_dict[sns]['ji_list']
         jj = [item[0] for item in ji_list]
         ii = [item[1] for item in ji_list]
         jjj += jj
         iii += ii
-        ax.plot(lor[ii], lar[jj],'sw',markersize=2)
+        ax.plot(lor[ii], lar[jj],'sw',markersize=1)
 
 
         # add rivers
         if do_riv:
-            riv_list = ji_dict[sns]['riv_list']
+            riv_list = seg_info_dict[sns]['riv_list']
             for rn in riv_list:
                 rj, ri = riv_ji_dict2[rn]
                 ax.plot(lor[ri], lar[rj], 'om')
@@ -295,8 +342,6 @@ if testing:
     imax = np.max(np.array(iii))
     jmin = np.min(np.array(jjj))
     jmax = np.max(np.array(jjj))
-    # ax.axis([lor[sect_df.irp.min()-5],lor[sect_df.irp.max()+5],
-    #     lar[sect_df.jrp.min()-5],lar[sect_df.jrp.max()+5]])
     ax.axis([lor[imin-5],lor[imax+5],
         lar[jmin-5],lar[jmax+5]])
     
