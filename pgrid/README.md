@@ -35,12 +35,15 @@ Also [plon, plat] is just like [lon_psi, lat_psi] but extended by one on all dir
 - t_dir/t_list
 - use_z_offset/z_offset
 - excluded_rivers
+- trim_grid
 - any other of the default choices in `gfun.default_choices()`
 
 (3) `make_mask.py` makes a first pass at the mask.
 - z_land
 - unmask_coast
 - remove_islands
+- maskfile_list_to_interpolate
+- maskfile_to_copy
 
 (4) `edit_mask.py` allows you to fully experience the joy of hand editing a mask.  You run it the first time just to get rid of obvious issues like Lake Washington and river channels.
 

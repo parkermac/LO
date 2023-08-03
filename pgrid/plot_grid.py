@@ -2,12 +2,20 @@
 Plot grid to have a look at it. Accepts an optional command line argument
 to look at a grid other than the one set in gfun.py.
 """
+import pandas as pd
+import matplotlib.pyplot as plt
+import xarray as xr
+import numpy as np
+import pickle
+from lo_tools import Lfun
+
 import argparse
 parser = argparse.ArgumentParser()
-parser.add_argument('-g', '--gridname', default='',
-        type=str)
-parser.add_argument('-zmin', default=-5, type=int)
+parser.add_argument('-g', '--gridname', default='',type=str) # e.g. cas6
+parser.add_argument('-dmax', default=5, type=int) # max depth for colormap [m]
+parser.add_argument('-small', default=False, type=Lfun.boolean_string) # True for laptop size
 args = parser.parse_args()
+zmin = -args.dmax
 
 import gfun
 if len(args.gridname) > 0:
@@ -17,11 +25,6 @@ else:
 from lo_tools import plotting_functions as pfun
 import gfun_plotting as gfp
 
-import pandas as pd
-import matplotlib.pyplot as plt
-import xarray as xr
-import numpy as np
-import pickle
 
 testing = True
 if testing:
@@ -64,12 +67,16 @@ zm[mask_rho == 0] = np.nan
 
 # PLOTTING
 plt.close('all')
-pfun.start_plot(figsize=(12,12))
+if args.small:
+    figsize = (8,8)
+else:
+    figsize = (12,12)
+pfun.start_plot(figsize=figsize)
 
 # bathymetry
 fig = plt.figure()
 ax = fig.add_subplot(111)
-cs = ax.pcolormesh(plon, plat, zm, vmin=args.zmin, vmax=0, cmap='Spectral_r')
+cs = ax.pcolormesh(plon, plat, zm, vmin=zmin, vmax=0, cmap='Spectral_r')
 # cs = ax.pcolormesh(plon, plat, zm, vmin=-120, vmax=-100, cmap='Spectral_r')
 fig.colorbar(cs, ax=ax)
 if dch['analytical'] == True:
@@ -80,7 +87,7 @@ pfun.dar(ax)
 ax.axis(ax_lims)
 ax.set_title(in_fn.name)
 ax.text(.05, .95, Gr['gridname'], transform=ax.transAxes)
-ax.text(.95, .05, str(mask_rho.shape), ha='right', transform=ax.transAxes)
+ax.text(.95, .05, str(mask_rho.shape), ha='right', transform=ax.transAxes, bbox=pfun.bbox)
 if do_riv:
     gfp.add_river_tracks(Gr, ds, ax)
 

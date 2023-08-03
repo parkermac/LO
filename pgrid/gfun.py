@@ -39,6 +39,8 @@ def default_choices():
     # GRID CREATION
     # Set analytical to true when we define the bathymetry analytically.
     dch['analytical'] = False
+    # This flag True trims a column or row to make them an even number
+    dch['trim_grid'] = True
     
     # z_offset is an adjustment to zero of the bathymetry to account for
     # the fact that mean sea level is somewhat higher than NAVD88.
@@ -56,7 +58,10 @@ def default_choices():
  
     # MASKING
     # list of existing masks to work from
-    dch['maskfiles'] = []
+    dch['maskfile_list_to_interpolate'] = [] # list of Path objects
+    # or a grid file from which to just copy the mask (which must
+    # of course be the right size)
+    dch['maskfile_to_copy'] = None # a Path object
     # set z position of INITIAL dividing line (positive up)
     dch['z_land'] = 0
     # Set unmask_coast to True to unmask all cells crossed by the coastline.

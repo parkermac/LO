@@ -16,7 +16,7 @@ import gfun_utility as gfu
 import gfun
 
 # This is the name of the grid that you are working on.
-gridname = 'cas2k'
+gridname = 'cas7'
 
 # default s-coordinate info (could override below)
 s_dict = {'THETA_S': 4, 'THETA_B': 2, 'TCLINE': 10, 'N': 30,
@@ -247,6 +247,33 @@ def make_initial_info(gridname=gridname):
         if dch['use_z_offset']:
             z = z + dch['z_offset']
             
+    elif gridname == 'cas7':
+        # based completely on cas6 except we carve out Agate Pass and
+        # Swinomish Channel by hand.
+        dch = gfun.default_choices()
+        dch['nudging_edges'] = ['north', 'south', 'west']
+        dch['nudging_days'] = (3.0, 60.0)
+        Ldir = Lfun.Lstart()
+        fn = Ldir['parent'] / 'LO_output' / 'pgrid' / 'cas6' / 'grid.nc'
+        dch['maskfile_to_copy'] = fn
+        dch['remove_islands'] = False
+        dch['trim_grid'] = False
+
+        import xarray as xr
+        ds = xr.open_dataset(fn)
+        z = -ds.h.values
+        lon = ds.lon_rho.values
+        lat = ds.lat_rho.values
+        
+        # The plan is to only run:
+        # start_grid
+        # make_mask
+        # edit_mask
+        # (don't run carve_rivers - just copy the file from cas6)
+        # smooth_grid
+        # make_extras
+        # grid_to_LO
+            
     elif gridname == 'ae0':
         # analytical model estuary
         dch = gfun.default_choices()
@@ -301,18 +328,20 @@ def make_initial_info(gridname=gridname):
         print('Error from make_initial_info: unsupported gridname')
         return
         
-    # check for odd size of grid and trim if needed
-    NR, NC = lon.shape
-    if np.mod(NR,2) != 0:
-        print('- trimming row from grid')
-        lon = lon[:-1,:]
-        lat = lat[:-1,:]
-        z = z[:-1,:]
-    if np.mod(NC,2) != 0:
-        print('- trimming column from grid')
-        lon = lon[:,:-1]
-        lat = lat[:,:-1]
-        z = z[:,:-1]
+    if dch['trim_grid']:
+        # check for odd size of grid and trim if needed
+        NR, NC = lon.shape
+        if np.mod(NR,2) != 0:
+            print('- trimming row from grid')
+            lon = lon[:-1,:]
+            lat = lat[:-1,:]
+            z = z[:-1,:]
+        if np.mod(NC,2) != 0:
+            print('- trimming column from grid')
+            lon = lon[:,:-1]
+            lat = lat[:,:-1]
+            z = z[:,:-1]
+            
     return lon, lat, z, dch
     
 

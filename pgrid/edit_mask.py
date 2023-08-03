@@ -8,10 +8,13 @@ using pcolormesh().  E.g with an 800x500 grid it was still
 pleasant to use, whereas the old version was unworkable.
 
 """
+from lo_tools import Lfun, zfun
+from lo_tools import plotting_functions as pfun
 
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-d', '--dval', default=5, type=float)
+parser.add_argument('-small', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 import numpy as np
@@ -20,9 +23,6 @@ import matplotlib.pyplot as plt
 import matplotlib.path as mpath
 import sys
 import pandas as pd
-
-from lo_tools import Lfun, zfun
-from lo_tools import plotting_functions as pfun
 
 import gfun
 import gfun_utility as gfu
@@ -108,7 +108,11 @@ lat = latp.copy()
 
 # set up the axes
 plt.close('all')
-fig = plt.figure(figsize=(20,13)) # (13,8) is good for my laptop
+if args.small:
+    figsize = (13,8)
+else:
+    figsize = (20,13)
+fig = plt.figure(figsize=figsize)
 ax1 = plt.subplot2grid((1,3), (0,0), colspan=2) # map
 ax2 = plt.subplot2grid((1,3), (0,2), colspan=1) # buttons
 

@@ -31,17 +31,16 @@ lat_vec = lat[:,0]
 # load the default choices
 dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))
 
-def mask_from_existing(in_fn, maskfiles, pgdir):
+def mask_from_interpolation(in_fn, maskfile_list, pgdir):
+    # Warning: untested
     ds = xr.open_dataset(in_fn)
     lonr = ds['lon_rho'].values
     latr = ds['lat_rho'].values
     ds.close()
-    
     m10 = np.ones(lonr.shape)
-        
-    for mf in maskfiles:
-        print(' - using ' + pgdir + mf)
-        ds = xr.open_dataset(pgdir + mf)
+    for mf in maskfile_list:
+        print(' - using ' + str(mf))
+        ds = xr.open_dataset(mf)
         xx = ds['lon_rho'].values
         yy = ds['lat_rho'].values
         mm = ds['mask_rho'].values
@@ -58,19 +57,30 @@ def mask_from_existing(in_fn, maskfiles, pgdir):
 # following the numpy masked array convention.
 # Note that this is the opposite of the ROMS convention
 # where mask_rho = 1. over water, and 0. over land.
-if mask_rho_orig.all() == 1:    
+if mask_rho_orig.all() == 1:
     print('Original mask all ones')
-    if len(dch['maskfiles']) == 0:
+    
+    # Interpolate from a list of masks, if requested
+    if len(dch['maskfile_list_to_interpolate']) == 0:
         # set z position of initial dividing line (positive up)
         m = z >= dch['z_land']
     else:
-        print('using maskfiles')
-        m = mask_from_existing(in_fn, dch['maskfiles'], Gr['pgdir'])
+        print('using maskfile list')
+        m = mask_from_existing(in_fn, dch['maskfile_list_to_interpolate'])
         m[z >= dch['z_land']] = True
-        
         print(m.shape)
         print(np.sum(m))
         print(np.sum(~m))
+        
+    # Copy from an existing mask
+    # This will overwrite anything done by the interpolation above
+    # (not great coding)
+    if dch['maskfile_to_copy'] != None:
+        print('copying mask from file')
+        ds_m = xr.open_dataset(dch['maskfile_to_copy'])
+        mm = ds_m.mask_rho.values
+        m = mm == 0 # boolean array (False = water, True = land)
+        ds_m.close()
         
 # unmask the coast
 if dch['unmask_coast']:
