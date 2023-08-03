@@ -6,14 +6,20 @@ In all cases the output files are copied to the APL server [https://liveocean.ap
 
 The lineup of extraction jobs can be found in `LO/driver/driver_post1.py`.  Currently it is:
 ```
-job_list = ['surface1', 'layers1', 'ubc1', 'sequim1', 'harcourt1', 'critfc1',
-      'daymovie0', 'drifters0', 'archive0', 'azure0']
+job_list = ['nest_wgh', 'surface1', 'layers1', 'ubc1', 'sequim1', 'critfc1',
+    'daymovie0', 'drifters0', 'archive0']
 ```
 and you can look in LO/post/[job name] to see how the processing is handled.  The number in the job name refers to the version, and it may change as I update things, but on the APL server the output file name omits that number, and should remain stable.  For example, surface[whatever number] will always make `surface.nc`.
 
 There is also a small text file [jobname]_done.txt generated and sent to the server when each file is finished being written.  For example, on the day I wrote this, the surface_done.txt file contains the string "2022.01.11 05:47:34" (local time when it was written).  Users could look for this file before downloading their extraction.
 
 #### Many of the jobs have people who are expecting the results. Below is the lineup, the users if any, and other info.
+
+---
+
+### nest_wgh
+
+This generates the ocean forcing expected by our nested sub-model of Willapa Bay and Grays Harbor.
 
 ---
 
@@ -117,7 +123,7 @@ This runs the particle tracking runs using the tracker tool, and then sends them
 
 This copies the forecast history files to a standard place on perigee. Some users that have an account there use them, e.g. Harper Simmons who uses them to create boundary conditions for a nested forecast of Hood Canal.
 
-Output: on perigee in /data1/parker/LO_roms/cas6_v0_live
+Output: on perigee in /data1/parker/LO_roms/cas6_v1_live
 
 Contact:
 - Harper Simmons <harpers@uw.edu>
