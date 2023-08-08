@@ -51,10 +51,11 @@ def default_choices():
     t_dir = Ldir['data'] / 'topo'
     dch['t_dir'] = Ldir['data'] / 'topo'
     # list of topo files: coarsest to finest
-    dch['t_list'] = [t_dir / 'srtm15' / 'topo15.nc',
-              t_dir / 'cascadia' / 'cascadia_gridded.nc',
-             t_dir / 'psdem' / 'PS_183m.nc',
-             t_dir / 'ttp_patch' / 'TTP_Regional_27m_patch.nc']
+    dch['t_list'] = ['srtm15plus', 'cascadia','psdem','ttp_patch',]
+    # dch['t_list'] = [t_dir / 'srtm15' / 'topo15.nc',
+    #           t_dir / 'cascadia' / 'cascadia_gridded.nc',
+    #          t_dir / 'psdem' / 'PS_183m.nc',
+    #          t_dir / 'ttp_patch' / 'TTP_Regional_27m_patch.nc']
  
     # MASKING
     # list of existing masks to work from

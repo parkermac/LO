@@ -63,32 +63,29 @@ def stretched_grid(lon_list, x_res_list, lat_list, y_res_list):
         Lat_list.append(lat[0])
     return np.array(Lon_list), np.array(Lat_list)
 
+def combine_bathy_from_sources(lon, lat, dch):
+    # initialize the bathymetry array
+    z = np.nan * lon
+    # add bathymetry automatically from files
+    for source in dch['t_list']:
+        print('\nOPENING BATHY FILE: ' + source)
+        t_fn = dch['t_dir'] / source / 'topo.nc'
+        tlon_vec, tlat_vec, tz = load_bathy_nc(t_fn)
+        tlon, tlat = np.meshgrid(tlon_vec, tlat_vec)
+        z_part = zfun.interp2(lon, lat, tlon, tlat, tz)
+        # put good values of z_part in z
+        z[~np.isnan(z_part)] = z_part[~np.isnan(z_part)]
+    return z
+
 def load_bathy_nc(t_fn):
     ds = xr.open_dataset(t_fn)
-    tlon_vec = ds['lon'].values
-    tlat_vec = ds['lat'].values
-    tz = ds['z'].values
-    # There is a bug in xarray with these files: it does
-    # not set masked regions to nan.  So we do it by hand.
-    tz[tz>1e6] = np.nan
+    tlon_vec = ds.lon.values
+    tlat_vec = ds.lat.values
+    tz = ds.z.values
+    print('tz max = %0.2f' % (np.nanmax(tz)))
     ds.close()
     return tlon_vec, tlat_vec, tz
     
-def load_bathy2(t_fn, lon_vec, lat_vec):
-    # load a section of the new NetCDF Smith-Sandwell bathy
-    ds = xr.open_dataset(t_fn)
-    Lon = ds['lon'].values
-    Lat = ds['lat'].values
-    i0 = zfun.find_nearest_ind(Lon, lon_vec[0])
-    i1 = zfun.find_nearest_ind(Lon, lon_vec[-1])
-    j0 = zfun.find_nearest_ind(Lat, lat_vec[0])
-    j1 = zfun.find_nearest_ind(Lat, lat_vec[-1])
-    tlon_vec = Lon[i0-2:i1+3]
-    tlat_vec = Lat[j0-2:j1+3]
-    tz = ds['z'][j0-2:j1+3, i0-2:i1+3]
-    ds.close()
-    return tlon_vec, tlat_vec, tz
-
 def make_nc(out_fn, lon, lat, z, dch):
     """
     Initial creation of the NetCDF grid file.

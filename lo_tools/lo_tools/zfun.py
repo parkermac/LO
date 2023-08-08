@@ -11,7 +11,7 @@ def interp2(x, y, X, Y, U):
     """
     Interpolate field U(X,Y) to u(x,y).  All grids are required to be plaid and 2D
     """
-    if is_plaid(x) and is_plaid(y) and is_plaid(Y) and is_plaid(Y):
+    if is_plaid(x) and is_plaid(y) and is_plaid(X) and is_plaid(Y):
         # Much Faster than interp_scatttered_on_plaid()
         xi0, xi1, xf = get_interpolant(x[0,:], X[0,:])
         yi0, yi1, yf = get_interpolant(y[:,0], Y[:,0])
