@@ -16,7 +16,7 @@ import gfun_utility as gfu
 import gfun
 
 # This is the name of the grid that you are working on.
-gridname = 'test0'
+gridname = 'wgh2'
 
 # default s-coordinate info (could override below)
 s_dict = {'THETA_S': 4, 'THETA_B': 2, 'TCLINE': 10, 'N': 30,
@@ -48,7 +48,6 @@ def make_initial_info(gridname=gridname):
         aa = [-123.2, -122.537, 47.3, 47.9]
         res = 100 # target resolution (m)
         Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
-        dch['t_list'] = [dch['t_dir'] / 'psdem' / 'PS_27m.nc']
         dch['nudging_edges'] = ['north']
         dch['nudging_days'] = (0.1, 1.0)
         
@@ -56,8 +55,7 @@ def make_initial_info(gridname=gridname):
         lon, lat = np.meshgrid(Lon_vec, Lat_vec)
         
         # Initialize bathymetry
-        dch['t_list'] = ['srtm15plus','cascadia','nw_pacific','psdem',
-               'ttp_patch','grays_harbor','willapa_bay']
+        dch['t_list'] = ['psdem']
         z = gfu.combine_bathy_from_sources(lon, lat, dch)
                 
         if dch['use_z_offset']:
@@ -68,7 +66,6 @@ def make_initial_info(gridname=gridname):
         aa = [-122.82, -122.36, 47.758, 48.18]
         res = 100 # target resolution (m)
         Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
-        dch['t_list'] = [dch['t_dir'] / 'psdem_10m' / 'PS_30m.nc']
         dch['nudging_edges'] = ['north', 'south', 'east', 'west']
         dch['nudging_days'] = (0.1, 1.0)
         
@@ -76,31 +73,7 @@ def make_initial_info(gridname=gridname):
         lon, lat = np.meshgrid(Lon_vec, Lat_vec)
         
         # Initialize bathymetry
-        dch['t_list'] = ['srtm15plus','cascadia','nw_pacific','psdem',
-               'ttp_patch','grays_harbor','willapa_bay']
-        z = gfu.combine_bathy_from_sources(lon, lat, dch)
-                
-        if dch['use_z_offset']:
-            z = z + dch['z_offset']
-            
-    elif gridname == 'so0':
-        # South Sound
-        dch = gfun.default_choices()
-        dch['z_offset'] = -1.3 # NAVD88 is 1.3 m below MSL at Seattle
-        dch['excluded_rivers'] = ['skokomish']
-        aa = [-123.13, -122.76, 47, 47.42]
-        res = 50 # target resolution (m)
-        Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
-        dch['t_list'] = [dch['t_dir'] / 'srtm15' / 'topo15.nc',
-                    dch['t_dir'] / 'psdem_10m' / 'PS_30m.nc']
-        dch['nudging_edges'] = ['east']
-        dch['nudging_days'] = (0.1, 1.0)
-        # Make the rho grid.
-        lon, lat = np.meshgrid(Lon_vec, Lat_vec)
-        
-        # Initialize bathymetry
-        dch['t_list'] = ['srtm15plus','cascadia','nw_pacific','psdem',
-               'ttp_patch','grays_harbor','willapa_bay']
+        dch['t_list'] = ['psdem']
         z = gfu.combine_bathy_from_sources(lon, lat, dch)
                 
         if dch['use_z_offset']:
@@ -114,8 +87,6 @@ def make_initial_info(gridname=gridname):
         aa = [-123.13, -122.76, 47, 47.42]
         res = 100 # target resolution (m)
         Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
-        dch['t_list'] = [dch['t_dir'] / 'srtm15' / 'topo15.nc',
-                    dch['t_dir'] / 'psdem_10m' / 'PS_30m.nc']
         dch['nudging_edges'] = ['east']
         dch['nudging_days'] = (0.1, 1.0)
         
@@ -128,8 +99,7 @@ def make_initial_info(gridname=gridname):
         lon, lat = np.meshgrid(Lon_vec, Lat_vec)
         
         # Initialize bathymetry
-        dch['t_list'] = ['srtm15plus','cascadia','nw_pacific','psdem',
-               'ttp_patch','grays_harbor','willapa_bay']
+        dch['t_list'] = ['psdem']
         z = gfu.combine_bathy_from_sources(lon, lat, dch)
                 
         if dch['use_z_offset']:
@@ -141,7 +111,6 @@ def make_initial_info(gridname=gridname):
         aa = [-124.4,-123.7,46.35,47.1]
         res = 200 # target resolution (m)
         Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
-        dch['t_list'] = [dch['t_dir'] / 'nw_pacific' / 'nw_pacific.nc']
         dch['z_offset'] = -1
         # The docs for nw_pacific say the vertical datum is "sea level" so to match
         # this we would use z_offset = 0, but the intention here is to make the z=0
@@ -159,8 +128,38 @@ def make_initial_info(gridname=gridname):
         lon, lat = np.meshgrid(Lon_vec, Lat_vec)
         
         # Initialize bathymetry
-        dch['t_list'] = ['srtm15plus','cascadia','nw_pacific','psdem',
-               'ttp_patch','grays_harbor','willapa_bay']
+        dch['t_list'] = ['nw_pacific','grays_harbor','willapa_bay']
+        z = gfu.combine_bathy_from_sources(lon, lat, dch)
+                
+        if dch['use_z_offset']:
+            z = z + dch['z_offset']
+            
+    elif gridname == 'wgh2':
+        # Willapa Bay and Grays Harbor nest
+        dch = gfun.default_choices()
+        aa = [-124.4,-123.7,46.35,47.1]
+        res = 200 # target resolution (m)
+        Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
+        
+        dch['z_offset'] = -2
+        # The docs for nw_pacific say the vertical datum is "sea level" and for Willapa
+        # Bay and Grays Harbor it is MLLW so to match
+        # this we would use z_offset = 0 or -1, but the intention here is to make the z=0
+        # level be higher up, so that we catch more of the intertidal when using
+        # WET_DRY. This should be matched by a similar intervention to zeta in ocnN.
+        dch['nudging_edges'] = ['north', 'south', 'west']
+        dch['nudging_days'] = (0.1, 1.0)
+        
+        # by setting a small min_depth were are planning to use
+        # WET_DRY in ROMS, but maintaining positive depth
+        # for all water cells
+        dch['min_depth'] = 0.2 # meters (positive down)
+        
+        # Make the rho grid.
+        lon, lat = np.meshgrid(Lon_vec, Lat_vec)
+        
+        # Initialize bathymetry
+        dch['t_list'] = ['nw_pacific','grays_harbor','willapa_bay']
         z = gfu.combine_bathy_from_sources(lon, lat, dch)
                 
         if dch['use_z_offset']:
@@ -172,17 +171,13 @@ def make_initial_info(gridname=gridname):
         aa = [-130, -122, 42, 52]
         res = 2000 # target resolution (m)
         Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
-        dch['t_list'] = [dch['t_dir'] / 'srtm15' / 'topo15.nc',
-                  dch['t_dir'] / 'cascadia' / 'cascadia_gridded.nc',
-                 dch['t_dir'] / 'nw_pacific' / 'nw_pacific.nc']
         dch['nudging_edges'] = ['north', 'south', 'west']
         dch['nudging_days'] = (3.0, 60.0)
         # Make the rho grid.
         lon, lat = np.meshgrid(Lon_vec, Lat_vec)
         
         # Initialize bathymetry
-        dch['t_list'] = ['srtm15plus','cascadia','nw_pacific','psdem',
-               'ttp_patch','grays_harbor','willapa_bay']
+        dch['t_list'] = ['srtm15plus','cascadia','nw_pacific','psdem']
         z = gfu.combine_bathy_from_sources(lon, lat, dch)
                 
         if dch['use_z_offset']:
@@ -190,7 +185,8 @@ def make_initial_info(gridname=gridname):
             
     elif gridname == 'cas7':
         # based completely on cas6 except we carve out Agate Pass and
-        # Swinomish Channel by hand.
+        # Swinomish Channel by hand. This is an example of working from an
+        # existing grid.
         dch = gfun.default_choices()
         dch['nudging_edges'] = ['north', 'south', 'west']
         dch['nudging_days'] = (3.0, 60.0)

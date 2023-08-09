@@ -19,7 +19,7 @@ NOTE: There is a streamlined set of these instructions in `LO/notes/analytical_r
 
 There are a number of choices you can set as parameters.  You can see these in the module `gfun.default_choices()`.  They end up in a dict called dch ("default choices") that gets saved and reopened at each step.  You can override any of the defaults in your `gfun_user.py` entry.
 
-Note: you make your grid definition as an if-statement in `gfun_user.py` AND in the line near the top of that module "gridname = ".
+Note: you make your grid definition as an elif-statement in `gfun_user.py` AND in the line near the top of that module "gridname = ".
 
 The rest of the steps are just running the programs in the right order, with `edit_mask.py` requiring user interaction while running.  I would be tempted to make this more automated, but making the grid is a critical part of the model, and many  things can go wrong, so I leave it in individual steps which you can check on along the way using `plot_grid.py`.
 

@@ -39,7 +39,7 @@ def in_domain(x, y, X, Y):
     # Utility function to make sure that a point (x, y) is
     # in a domain specified by vectors X and Y.
     # We actually require the point to be 'pad' in from the edge.
-    pad = 1
+    pad = 8 # using 8 should keep us out of the nudging to climatology regions
     if x>=X[0+pad] and x<=X[-1-pad] and y>=Y[0+pad] and y<=Y[-1-pad]:
         return True
     else:
