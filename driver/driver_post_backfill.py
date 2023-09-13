@@ -8,7 +8,6 @@ to the APL server.
 
 Testing on mac:
 run driver_post_backfill.py -gtx cas6_v0_live -0 2019.07.04 -ro 0 -test True
-Performance: takes 355 sec per day on my mac for layers1.
 
 Test on apogee:
 python driver_post_backfill.py -gtx cas6_v0_live -ro 1 -0 2021.01.01 -test True < /dev/null > test_post_backfill.log &
@@ -16,6 +15,7 @@ python driver_post_backfill.py -gtx cas6_v0_live -ro 1 -0 2021.01.01 -test True 
 Run for real on apogee
 python driver_post_backfill.py -gtx cas6_v0_live -ro 1 -0 2021.01.01 -1 2021.01.02 < /dev/null > post_backfill.log &
 
+Performance: takes 5 minutes per day for layers1, both on my mac and on apogee, or 30 hours per year.
 
 """
 

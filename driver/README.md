@@ -9,7 +9,7 @@ This runs any of the forcing jobs, for one or more days, for any [gridname].
 
 ---
 
-#### `driver_roms1.py` **OBSOLETE**
+#### `OLD/driver_roms1.py` **OBSOLETE**
 
 This runs ROMS for a single forecast or for many days. It is organized to use the LO run naming system: [gtagex] = [gridname]\_[tag]\_[ex_name].
 
@@ -29,7 +29,7 @@ This is much improved from the LiveOcean version:
 
 ---
 
-#### `driver_roms2.py` **OBSOLETE**
+#### `OLD/driver_roms2.py` **OBSOLETE**
 
 Updated version of driver_roms1.py.
 - fixed a bug in handling of "new" start type
@@ -52,6 +52,12 @@ Updated version of driver_roms2.py.
 This is for running all the post-processing jobs.  It is mainly aimed at the daily forecast.  It checks to see that all expected history files are in place before beginning.
 
 It is designed to work with a forecast that shows up as three separate days, as would be produced by `driver_roms1.py`.
+
+---
+
+#### `driver_post_backfill.py`
+
+This runs post-processing jobs (currently only layers1) as multi-day backfill jobs.
 
 ---
 
