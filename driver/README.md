@@ -3,47 +3,16 @@
 ### This code is the drivers for creating forcing, running ROMS, post-processing, and other jobs that require us to control complex, repetitive tasks, either for a single forecast or for a long series of days.
 
 ---
-#### `driver_forcing3.py`
 
-This runs any of the forcing jobs, for one or more days, for any [gridname].
+#### `driver_roms3.py`
 
----
-
-#### `OLD/driver_roms1.py` **OBSOLETE**
-
-This runs ROMS for a single forecast or for many days. It is organized to use the LO run naming system: [gtagex] = [gridname]\_[tag]\_[ex_name].
-
-This is much improved from the LiveOcean version:
-- Being implemented in python instead of a shell script makes the code easier to follow.
-- There are a number of optional flags to allow testing of each of the elements.
-- The screen output is cleaned up, and there is a "verbose" mode.
-- We use Path objects.
-- It can run on both **klone** and **mox** in the hyak system.  You need to set specifics about each machine for each user in `LO_user/get_lo_info.py`.
-- There is a new [tag_alt] logic which allows you to add new forcing variations to some existing [gtag], but do all the ROMS writing to a different [gtag]. The [tag_alt] flag refers to the existing one where the forcing is read from.
-- Runs forecast as three separate days.
-- Saves blowup log and last history file (and cleans these up later).
-- Adds timestamp and history file number info to stdout when blowup happens.
-- This is the first use of the newly-reorganized batch files, kept in `LO/driver/batch`, and with numbers (e.g klone1_) corresponding to the driver.
-- This also works with the updated ROMS executables such as uu0k. It knows where to look for them by seeing if the first letter of the ex_name is repeated.
-- No longer requires the -s kwarg unless the start_type is new (because the default is continuation).
+This is the primary driver for running ROMS on both klone and mox. It can run both daily forecasts and long backfill runs. Read through the comments at the top of the code for more details and development notes. It has many loops built in to try an operation multiple times to make it more reliable.
 
 ---
 
-#### `OLD/driver_roms2.py` **OBSOLETE**
+#### `driver_romsN.py`
 
-Updated version of driver_roms1.py.
-- fixed a bug in handling of "new" start type
-- streamlined screen output
-- only works with updated ROMS (LO_roms_source)
-
----
-
-#### `driver_roms3.py` **USE THIS ONE**
-
-Updated version of driver_roms2.py.
-- Assumes forcing is in [gridname]
-- Better error checking on mox and klone. More reliable.
-- Works with perfect restart.
+This is nearly identical to driver_roms3.py but is customized to do nested runs. The differences are so minor I think it could be absorbed into driver_roms3.py without difficulty.
 
 ---
 
@@ -51,15 +20,17 @@ Updated version of driver_roms2.py.
 
 This is for running all the post-processing jobs.  It is mainly aimed at the daily forecast.  It checks to see that all expected history files are in place before beginning.
 
-It is designed to work with a forecast that shows up as three separate days, as would be produced by `driver_roms1.py`.
+It is designed to work with a forecast that shows up as three separate days, the current standard.
 
 ---
 
 #### `driver_post_backfill.py`
 
-This runs post-processing jobs (currently only layers1) as multi-day backfill jobs.
+This runs post-processing jobs (currently only layers1) as multi-day backfill jobs. It only exists as a convenience for generating extractions that some users wanted.
 
 ---
+
+#### Miscellany
 
 `timestep_record.py` is a utility to make a pandas Series from the timesteps used in a model run over an arbitrary time span.
 
@@ -71,12 +42,12 @@ This runs post-processing jobs (currently only layers1) as multi-day backfill jo
 
 #### batch
 
-This folder contains the files used to create the batch files used to run ROMS on klone or mox.  It is meant to replace the files in LO/dot_in/shared because the batch file naming only interacts with the driver_roms code, not with the dot_in_code.  Each case consists of 2 files, named for the cluster (klone or mox) and the driver number - e.g. these files go with `driver_roms1.py`:
+This folder contains the files used to create the batch files used to run ROMS on klone or mox.  It is meant to replace the files in LO/dot_in/shared because the batch file naming only interacts with the driver_roms code, not with the dot_in_code.  Each case consists of 2 files, named for the cluster (klone or mox) and the driver number - e.g. these files go with `driver_roms3.py`:
 
-- `klone1_batch_BLANK.sh` is the template
-- `klone1_make_batch.py` fills in the template (when called by `driver_roms1.py`)
+- `klone3_batch_BLANK.sh` is the template
+- `klone3_make_batch.py` fills in the template (when called by `driver_roms3.py`)
 
-and these produce `LO_roms/[gtagex]/[f_string]/klone1_batch.sh`
+and these produce `LO_roms/[gtagex]/[f_string]/klone_batch.sh`
 
 ---
 

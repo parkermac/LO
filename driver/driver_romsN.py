@@ -5,7 +5,7 @@ This code:
 - is based on driver_roms3.py
 - it is designed for NESTED runs, with the main difference being that ocnN does not have
   the same forecast logic as the other forcing types, in that it only really makes sense
-  as backfill, even though it is run for the trhee forecast days.
+  as backfill, even though it is run for the three forecast days.
 
 For testing/debugging these flags can be very useful:
 -v True --get_forcing False --short_roms True --move_his False
@@ -44,7 +44,7 @@ parser.add_argument('-s', '--start_type', type=str, default='perfect') # new, pe
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
 parser.add_argument('-np', '--np_num', type=int) # e.g. 200, number of cores
-parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone, 28 on mox
+parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone, 28 or 32 on mox
 # various flags to facilitate testing
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)

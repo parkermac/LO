@@ -68,7 +68,7 @@ parser.add_argument('-s', '--start_type', type=str, default='perfect') # new, pe
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
 parser.add_argument('-np', '--np_num', type=int) # e.g. 200, number of cores
-parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone, 28 on mox
+parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone, 28 or 32 on mox
 # various flags to facilitate testing
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
