@@ -107,6 +107,45 @@ def get_arag(ds, Q, aa, nlev):
     ARAG = ARAG.reshape((v_dict['salt'].shape))
     fld = ARAG
     return px, py, fld
+    
+def get_arag_full(ds, Q, nlev):
+    # a simpler version of get_arag where we use the full field
+    # as is appropriate for the wgh case
+    from PyCO2SYS import CO2SYS
+    G = zrfun.get_basic_info(Q['fn'], only_G=True)
+    px, py = pfun.get_plon_plat(G['lon_rho'], G['lat_rho'])
+    # NEW: using gsw to create in-situ density
+    import gsw
+    lon = G['lon_rho']
+    lat = G['lat_rho']
+    v_dict = dict()
+    vn_in_list = ['temp', 'salt', 'alkalinity', 'TIC']
+    for cvn in vn_in_list:
+        L = ds[cvn][0,nlev,:,:].values
+        v_dict[cvn] = L
+    Ld = G['h']
+    if nlev == -1: # make sure we use the correct z
+        Ld = 0 * Ld
+    Lpres = gsw.p_from_z(-Ld, lat) # pressure [dbar]
+    SA = gsw.SA_from_SP(v_dict['salt'], Lpres, lon, lat)
+    CT = gsw.CT_from_pt(SA, v_dict['temp'])
+    rho = gsw.rho(SA, CT, Lpres) # in situ density
+    Ltemp = gsw.t_from_CT(SA, CT, Lpres) # in situ temperature
+    # convert from umol/L to umol/kg using in situ dentity
+    Lalkalinity = 1000 * v_dict['alkalinity'] / rho
+    Lalkalinity[Lalkalinity < 100] = np.nan
+    LTIC = 1000 * v_dict['TIC'] / rho
+    LTIC[LTIC < 100] = np.nan
+    Lpres = zfun.fillit(Lpres)
+    Ltemp = zfun.fillit(Ltemp)
+    CO2dict = CO2SYS(Lalkalinity, LTIC, 1, 2, v_dict['salt'], Ltemp, Ltemp,
+        Lpres, Lpres, 50, 2, 1, 10, 1, NH3=0.0, H2S=0.0)
+    # PH = CO2dict['pHout']
+    # PH = zfun.fillit(PH.reshape((v_dict['salt'].shape)))
+    ARAG = CO2dict['OmegaARout']
+    ARAG = ARAG.reshape((v_dict['salt'].shape))
+    fld = ARAG
+    return fld
 
 def get_ax_limits(Q):
     # Set limits and ticklabels, and other info.
@@ -146,6 +185,12 @@ def get_ax_limits(Q):
         Q['xtl'] = [-128, -127, -126, -125]
         Q['ytl'] = [48, 49, 50, 51]
         Q['v_scl'] = 25
+    elif Q['dom'] == 'wgh':
+        Q['aa'] = [-124.4,-123.7,46.35,47.1]
+        # Q['aa'] = [-124.35,-123.75,46.4,47.05]
+        Q['xtl'] = [-124.2, -124, -123.8]
+        Q['ytl'] = [46.5, 47]
+        Q['v_scl'] = 25
         
 def get_moor_info(Q):
     # set mooring info
@@ -175,6 +220,12 @@ def get_moor_info(Q):
         M['lat'] = 49
         M['city'] = 'Westport'
         M['wscl'] = 20
+    elif Q['dom'] == 'wgh':
+        M['lon'] = -124.2
+        M['lat'] = 46.6
+        M['city'] = 'Westport'
+        M['wscl'] = 20
+
     
     return M
 

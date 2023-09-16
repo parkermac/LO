@@ -10,7 +10,7 @@ Many of the command line arguments end up encoded in the resulting filename, whi
 
 - [plot name]\_[domain]\_[variable name]\_[top or bottom] = (*)
 
-If you just make a snapshot the output is a plot on your screen, but if you are making a movie (the standard use case) then the output goes to:
+If you just make a snapshot the output is a png in LO_output/plots, but if you are making a movie (the standard use case) then the output goes to:
 
 - LO_output/daymovie/[gtagex]/(*)/movie.mp4
 

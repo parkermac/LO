@@ -47,9 +47,12 @@ def P1(Q, M):
     if vn == 'speed':
         fld = dm_pfun.get_speed(ds, nlev)
     elif vn == 'ARAG':
-        px, py, fld = dm_pfun.get_arag(ds, Q, aa, nlev)
-        # we get px, py because ARAG is automatically only calulated over
-        # a limited domain (aa)
+        if Q['dom'] == 'wgh':
+            fld = dm_pfun.get_arag_full(ds, Q, nlev)
+        else:
+            px, py, fld = dm_pfun.get_arag(ds, Q, aa, nlev)
+            # we get px, py because ARAG is automatically only calulated over
+            # a limited domain (aa)
     else:
         fld = ds[vn][0,nlev,:,:].values*pinfo.fac_dict[vn]
         
@@ -58,6 +61,13 @@ def P1(Q, M):
     if Q['avl']:
         # set vmax and vmin if needed
         dm_pfun.get_vlims(ds, fld, Q)
+        
+    # account for WET_DRY
+    # NOTE: I think this will fail for cases which have wet-dry, when we try to plot ARAG
+    # but do NOT use the dm_pfun.get_arag_full method. It works for dom = wgh.
+    if 'wetdry_mask_rho' in ds.data_vars:
+        mwd = ds.wetdry_mask_rho[0,:,:].values.squeeze()
+        fld[mwd==0] = np.nan
         
     # MAP FIELD
     ax = plt.subplot2grid((7,1), (0,0), rowspan=6)
