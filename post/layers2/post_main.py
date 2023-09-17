@@ -26,7 +26,7 @@ result_dict['start_dt'] = datetime.now()
 # ****************** CASE-SPECIFIC CODE *****************
 
 # This will be used for the file name that goes to the public server.
-share_name = 'layers'
+share_name = 'layers2'
 
 # ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
