@@ -21,6 +21,13 @@ This is nearly identical to driver_roms3.py but is customized to do nested runs.
 This is for running all the post-processing jobs.  It is mainly aimed at the daily forecast.  It checks to see that all expected history files are in place before beginning.
 
 It is designed to work with a forecast that shows up as three separate days, the current standard.
+---
+
+#### `driver_post2.py`
+
+This is for running more post-processing jobs.  It is mainly aimed at the daily forecast.  It checks to see that all expected history files are in place before beginning.
+
+This was created to have a different lineup of jobs, aimed at the nested forecast for Willapa Bay and Grays Harbor. Otherwise identical to `driver_post1.py`.
 
 ---
 
