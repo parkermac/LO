@@ -87,6 +87,9 @@ if 'TIC' not in vn_in_list:
 # create zfull to use with the pfun.get_laym() function
 zfull = pfun.get_zfull(in_ds, in_fn, 'rho')
 in_mask_rho = in_ds.mask_rho.values # 1 = water, 0 = land
+# account for WET_DRY
+if 'wetdry_mask_rho' in in_ds.data_vars:
+    in_mask_rho = in_ds.wetdry_mask_rho[0,:,:].values.squeeze()
 
 def get_layer(vn, depth, in_ds, zfull, in_mask_rho):
     if depth == 'surface':
@@ -95,6 +98,7 @@ def get_layer(vn, depth, in_ds, zfull, in_mask_rho):
         L = in_ds[vn][0,0,:,:].values
     else:
         L = pfun.get_laym(in_ds, zfull, in_mask_rho, vn, -float(depth))
+            
     return L
 
 def get_Ld(depth, in_ds, in_mask_rho):
@@ -123,22 +127,6 @@ for depth in depth_list:
     if do_carbon:
         # ------------- the CO2SYS steps -------------------------
         tt0 = time()
-        # ===============================================================
-        # OLD
-        # Ld = get_Ld(depth, in_ds, in_mask_rho)
-        # lat = in_ds.lat_rho.values
-        # # create pressure
-        # Lpres = sw.pres(Ld, lat)
-        # # get in situ temperature from potential temperature
-        # Ltemp = sw.ptmp(v_dict['salt'], v_dict['temp'], 0, Lpres)
-        # # convert from umol/L to umol/kg using in situ dentity
-        # Lalkalinity = 1000 * v_dict['alkalinity'] / (v_dict['rho'] + 1000)
-        # Lalkalinity[Lalkalinity < 100] = np.nan
-        # LTIC = 1000 * v_dict['TIC'] / (v_dict['rho'] + 1000)
-        # LTIC[LTIC < 100] = np.nan
-        # CO2dict = CO2SYS(Lalkalinity, LTIC, 1, 2, v_dict['salt'], Ltemp, Ltemp,
-        #     Lpres, Lpres, 50, 2, 1, 10, 1, NH3=0.0, H2S=0.0)
-        # ===============================================================
         # NEW: using gsw to create in-situ density
         import gsw
         lon = in_ds.lon_rho.values
