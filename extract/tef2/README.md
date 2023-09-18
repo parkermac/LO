@@ -4,6 +4,8 @@
 
 The basic idea of TEF is that you extract transport of volume, salt, and other tracers through a bunch of "sections" across an estuarine channel. These are then organized into salinity classes (or bins in a histogram) and the transport in each salinity bin is tidally averaged. So you have a time series of transports in each salinity bin. Then you can further condense the information by adding up all the transport of a given sign and calling these Qin and Qout. Similarly the transport-weighted salinity is called Sin and Sout. The result is that the whole complicated exchange flow through a section is expressed as four terms.
 
+This code also allows you to gather time series of tracer content in the segments between sections, and use these to create tracer budgets for different volumes.
+
 For a complete description please see: MacCready, P. (2011). Calculating Estuarine Exchange Flow Using Isohaline Coordinates. Journal of Physical Oceanography, 41, 1116-1124. doi:10.1175/2011JPO4517.1
 
 ---
@@ -30,7 +32,7 @@ Sign convention: When we extract transport across a section we define the positi
 o-----
    -
 ```
-The output is organized using a gridname and a collection tag [ctag]. For example, my first meaningful collection of sections had [ctag] = c0 and it was on the cas6 grid. This is identified with combination [gctag] = cas6_c0.
+The output is organized using a gridname and a collection tag [ctag]. For example, my first meaningful collection of sections had [ctag] = c0 and it was on the cas6 grid. This is identified with the combination [gctag] = cas6_c0.
 
 The output ends up in a folder `LO_output/extract/tef2/sections_[gctag]` and each section is a pickled DataFrame named for the section.
 
@@ -55,7 +57,7 @@ The output ends up in a folder `LO_output/extract/tef2/sections_[gctag]` and eac
 999   ss26  503   658  503   658  504   658  u  -1
 1000  ss26  503   658  503   658  503   659  v  -1
 ```
-There is one row for each point. Each point is on either the u- or v-grid. The numbering here is the same in what we get using xarray to read a history file.
+There is one row for each point. Each point is on either the u- or v-grid. The numbering here is the same as what we get using xarray to read a history file.
 - sn tells you which section it is on
 - i,j are the indices (column,row) for the the velocity point
 - irp,jrp are the indices for the rho-grid point on the positive side
@@ -122,6 +124,8 @@ By now you may have noticed that I jump around aimlessly, sometimes saving outpu
 
 There can be more than two layers!
 
+[NOTE: I think this is where I should add the Qprism time series as a convenience.]
+
 ---
 
 `bulk_plot.py` is for making plots of all the bulk fields, showing both the multi-layer results of `bulk_calc.py` and the results of pushing them into two layers.
@@ -136,19 +140,44 @@ The results are a bunch of png's, one for each section in
 
 ---
 
-create_river_info.py
+`create_river_info.py` processes a user-specified river forcing file to create and save a DataFrame that has info about each river. Here is what it looks like for a cas6 file for traps2:
+```
+               name     ii      jj  dir  sgn     iu      ju     iv     jv   irho    jrho
+0           clowhom  453.0  1169.0  0.0 -1.0  452.0  1169.0    NaN    NaN  452.0  1169.0
+1          squamish  484.0  1169.0  0.0  1.0  483.0  1169.0    NaN    NaN  484.0  1169.0
+2            fraser  641.0  1082.0  0.0 -1.0  640.0  1082.0    NaN    NaN  640.0  1082.0
+3            tsolum  250.0  1160.0  0.0 -1.0  249.0  1160.0    NaN    NaN  249.0  1160.0
+4            oyster  227.0  1179.0  0.0  1.0  226.0  1179.0    NaN    NaN  227.0  1179.0
+..              ...    ...     ...  ...  ...    ...     ...    ...    ...    ...     ...
+268       Hartstene  536.0   675.0  0.0  1.0  535.0   675.0    NaN    NaN  536.0   675.0
+269  Seashore Villa  529.0   631.0  1.0  1.0    NaN     NaN  529.0  630.0  529.0   631.0
+270            LOTT  528.0   622.0  1.0  1.0    NaN     NaN  528.0  621.0  528.0   622.0
+271      Rustlewood  525.0   671.0  0.0  1.0  524.0   671.0    NaN    NaN  525.0   671.0
+272         Shelton  503.0   655.0  1.0  1.0    NaN     NaN  503.0  654.0  503.0   655.0
+```
+The main job of this code is to generate a list of indices on the rho grid (jrho, irho) that each river flows INTO. It should work for sources on the u and v grids, and also for vertical sources on the rho grid, although I have not tested that yet.
+
+The rho-grid indices are then used in `create_seg_info_dict.py` when it is assembling a list of rivers in each segment.
+
+If you run the code with -test True it makes a useful map plot which you can use to see visually that all the sources look good.
+
+The DataFrame is pickled and saved as (for the example above):
+
+**LO_output/extract/tef2/riv_df_[gridname]_[river forcing name].p**
+
+e.g. riv_df_cas6_traps2.p
 
 ---
 
 `create_seg_info_dict.py` is some rather involved (but useful) code to define tef2 segments. Mainly we get all the j,i indices on the rho grid for all the segments between sections. For each segment we also get a list of the bounding sections and the rivers.
 
-The results are paccked in a dict of dicts called seg_info_dict, and saved as a pickled dict in:
+The results are packed in a dict of dicts called seg_info_dict, and saved as a pickled dict in:
 
 **LO_output/extract/tef2/seg_info_dict_[gctag]_[riv].p**
 
 e.g. seg_info_dict_cas6_c0_traps2.p
 
-seg_info_dict has one key for each segment, e.g. 'mb8_m' which is a section name and a sign (plus or minus side - see the section sign convention above). Note that it is sort of random which section gets assigned to be the key defining the segment - it could be any of the bounding sections. One advantage of this system is that it is all done automatically, and so we don't have to
+seg_info_dict has one key for each segment, e.g. 'mb8_m' which is a section name and a sign (plus or minus side - see the section sign convention above). Note that it is sort of random which section gets assigned to be the key defining the segment - it could be any of the bounding sections. One advantage of this system is that it is all done automatically, and so we don't have to make a custom list like in LO/tef.
 
 Then seg_info_dict['mb8_m'] is a dict with three keys:
 ['ji_list', 'sns_list', 'riv_list']
