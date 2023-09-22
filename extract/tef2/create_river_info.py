@@ -2,6 +2,12 @@
 Code to create the river info to associate with a set of segments.
 
 This will rely on a rivers.nc file from the LO forcing.
+
+To run for a riv00 case on my mac:
+run create_river_info -gridname cas6 -frc riv00 -dstr 2019.07.04
+
+Use -test True to see a useful plot of all the river source locations.
+
 """
 
 from lo_tools import Lfun, zrfun, zfun
@@ -19,8 +25,8 @@ import argparse
 parser = argparse.ArgumentParser()
 # info to find a rivers.nc file
 parser.add_argument('-gridname', default='cas6', type=str)
-parser.add_argument('-frc', default='traps2', type=str)
-parser.add_argument('-dstr',default='2021.01.01', type=str)
+parser.add_argument('-frc', default='riv00', type=str)
+parser.add_argument('-dstr',default='2019.07.04', type=str)
 
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()

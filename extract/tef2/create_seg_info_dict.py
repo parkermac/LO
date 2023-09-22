@@ -13,15 +13,20 @@ then seg_info_dict['mb8_m'] is a dict with three keys:
    key is one member of this list
  - riv_list is a list of the rivers or point sources entering the segment
 
+It also creates and saves a DataFrame with columns:
+['volume m3', 'area m2', 'lon', 'lat']
+which are the volume, surface area, and mean lon and lat of each segment.
+
 To test on mac:
 
-run create_seg_info_dict -gctag cas6_c0 -riv traps2 -small True -test True
+run create_seg_info_dict -gctag cas6_c0 -riv riv00 -small True -test True
 
 or just:
 
 run create_seg_info_dict (uses all defaults)
 
-Performance: takes a few minutes to run for real on cas6_c0_traps2.
+Performance: takes a few minutes to run for real on cas6_c0_traps2. Or just 30 sec
+for _riv00.
 
 """
 
@@ -41,10 +46,10 @@ import argparse
 parser = argparse.ArgumentParser()
 # gridname and tag for collection folder
 parser.add_argument('-gctag', default='cas6_c0', type=str)
-parser.add_argument('-riv', default='traps2', type=str)
+parser.add_argument('-riv', default='riv00', type=str)
 # set small to True to work on a laptop
-parser.add_argument('-small', default=True, type=Lfun.boolean_string)
-parser.add_argument('-test', '--testing', default=True, type=Lfun.boolean_string)
+parser.add_argument('-small', default=False, type=Lfun.boolean_string)
+parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 # input and output locations
@@ -66,6 +71,14 @@ out_fn = out_dir / out_name
 ds = xr.open_dataset(grid_fn)
 h = ds.h.values
 m = ds.mask_rho.values
+# these are used for making segment volumes
+H = h.copy()
+DX = 1/ds.pm.values
+DY = 1/ds.pn.values
+DA = DX * DY
+DV = H * DA
+lon_rho = ds.lon_rho.values
+lat_rho = ds.lat_rho.values
 # depth for plotting
 h[m==0] = np.nan
 # coordinates for plotting
@@ -80,14 +93,13 @@ lov = ds.lon_v[0,:].values
 lav = ds.lat_v[:,0].values
 ds.close
 
-tef2_dir = Ldir['LOo'] / 'extract' / 'tef2'
-sect_df = pd.read_pickle(tef2_dir / ('sect_df_' + gctag + '.p'))
+sect_df = pd.read_pickle(out_dir / ('sect_df_' + gctag + '.p'))
 
 # Get river info if there is any. This must have been created from a rivers.nc
 # file using create_river_info.py.
 if len(riv) > 0:
     riv_name = 'riv_df_' + gridname + '_' + riv + '.p'
-    riv_fn = Ldir['LOo'] / 'extract' / 'tef2' / riv_name
+    riv_fn = out_dir / riv_name
     riv_df = pd.read_pickle(riv_fn)
     riv_names = list(riv_df.name)
     riv_i = riv_df.irho.to_numpy(dtype = int)
@@ -116,23 +128,20 @@ if testing:
                               (sect_df.sn == 'jdf3'),:].copy()
         
     sect_df = sect_df.reset_index(drop=True)
-    # We need to have all bounding sections in sect_df.
+    # We need to have all neighboring sections in sect_df for plotting.
 else:
     sn_list = list(sect_df.sn.unique())
 
 # NOTE: We have to remove the open boundary sections from the list
 # or else our algorithm will make a segment out of the ocean!
-# This is a problematic operation because relies on knowing these section names,
-# but they are specific to a gctag. This needs more thought.
-if gctag == 'cas6_c0':
-    for sn in ['jdf1', 'sog7']:
-        try:
-            sn_list.remove(sn)
-        except ValueError:
-            pass
-else:
-    print('WARNING, you need to remove open boundary sections! Exiting.')
-    sys.exit()
+bounding_section_fn = out_dir / ('sections_' + gctag) / 'bounding_sections.txt'
+with open(bounding_section_fn,'r') as f:
+    bounding_section_list = f.read().split('\n')
+for sn in bounding_section_list:
+    try:
+        sn_list.remove(sn)
+    except ValueError:
+        pass
 
 # start of routine to find all rho-grid points within a segment
 
@@ -238,7 +247,6 @@ def find_riv_list(ji_list):
 # this it the loop where we actually find the segment info
 tt0 = time()
 seg_info_dict = {}
-seg_key = 0
 for sn in sn_list:
         
     for pm in [-1, 1]:
@@ -254,13 +262,13 @@ for sn in sn_list:
             done_list += seg_info_dict[k]['sns_list']
         if sns not in done_list:
             full_ji_list, sns_list = update_mm(sn, pm, m, sect_df)
-            seg_info_dict[seg_key] = {'ji_list':full_ji_list, 'sns_list': sns_list}
+            seg_info_dict[sns] = {'ji_list':full_ji_list, 'sns_list': sns_list}
             
             # find rivers in this segment
             riv_list = []
             if do_riv == True:
                 riv_list = find_riv_list(full_ji_list)
-            seg_info_dict[seg_key]['riv_list'] = riv_list
+            seg_info_dict[sns]['riv_list'] = riv_list
             
         else:
             print('\nSkipping ' + sns)
@@ -268,6 +276,29 @@ if not testing:
     pickle.dump(seg_info_dict, open(out_fn,'wb'))
 print('\nElapsed time = %0.1f seconds' % (time()-tt0))
 print('output file: %s' % (str(out_fn)))
+
+# calculate volumes, areas, and mean lon,lat of all segments
+# initialize a DataFrame to hold all volumes:
+sns_list = seg_info_dict.keys()
+vol_df = pd.DataFrame(index=sns_list, columns=['volume m3', 'area m2', 'lon', 'lat'])
+for sns in sns_list:
+    ji_list = seg_info_dict[sns]['ji_list']
+    # make index vectors for fancy indexing
+    jj = []; ii = []
+    for ji in ji_list:
+        jj.append(ji[0])
+        ii.append(ji[1])
+    JJ = np.array(jj,dtype=int)
+    II = np.array(ii,dtype=int)
+    volume = DV[JJ,II].sum()
+    area = DA[JJ,II].sum()
+    lon = lon_rho[JJ,II].mean()
+    lat = lat_rho[JJ,II].mean()
+    vol_df.loc[sns,'volume m3'] = volume
+    vol_df.loc[sns,'area m2'] = area
+    vol_df.loc[sns,'lon'] = lon
+    vol_df.loc[sns,'lat'] = lat
+vol_df.to_pickle(out_dir / ('vol_df_' + gctag + '.p'))
 
 if testing:
     print('\n' + 50*'=')

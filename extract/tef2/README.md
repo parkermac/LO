@@ -12,7 +12,7 @@ For a complete description please see: MacCready, P. (2011). Calculating Estuari
 
 #### Workflow Summary
 
-[need to add this]
+1. Create the sections using a GUI tool: create_sections.py. Also make a little text file with the open boundary sections.
 
 ----
 
@@ -36,6 +36,11 @@ The output is organized using a gridname and a collection tag [ctag]. For exampl
 
 The output ends up in a folder `LO_output/extract/tef2/sections_[gctag]` and each section is a pickled DataFrame named for the section.
 
+**IMPORTANT NOTE**: In order for the segment generation code below to work you need to specify a list of sections that form the open boundaries of your collection. You create this list by hand as a text file. For example, for cas6_c0 I have created `LO_output/extract/tef2/sections_cas6_c0/bounding_sections.txt` which contains:
+```
+sog7
+jdf1
+```
 ---
 
 `plot_collection.py` is a utility program to plot a [gctag] collection of sections so you can look at what you have.
@@ -118,13 +123,11 @@ By now you may have noticed that I jump around aimlessly, sometimes saving outpu
 
 ---
 
-`bulk_calc.py` boils down the results of process_sections.py into some number of 'in' and 'out' layers, using code from Marvin Lorenz. Each of these is a time series, tidally averaged and subsampled to daily at noon UTC of each day. The results end up in pickled dicts, one for each section in
+`bulk_calc.py` boils down the results of process_sections.py into some number of 'in' and 'out' layers, using code from Marvin Lorenz. Each of these is a time series, tidally averaged and subsampled to daily at noon UTC of each day. The results end up in pickled dicts, one for each section in the collection. As a convenience we now include 'qprism' as a time series [m3 s-1].
 
 **(+)/bulk_[date range]**
 
 There can be more than two layers!
-
-[NOTE: I think this is where I should add the Qprism time series as a convenience.]
 
 ---
 
@@ -133,6 +136,17 @@ There can be more than two layers!
 The results are a bunch of png's, one for each section in
 
 **(+)/bulk_plots_[date range]**
+
+---
+
+`bulk_plot_2.py` is like `bulk_calc.py` but with the capability to combine several sections into one.
+
+Unfortunately, because this job requires the hand inspection of the sections to decide
+a consistent sign for all of them, it has a hard-coded "sect_list" to work from, and this will be different for each user and for each section collection and grid. This is the kind of code you would want to copy, modify, and keep in your own repo.
+
+The results are a bunch of png's:
+
+**(+)/bulk_plots_2_[date range]**
 
 ---
 
@@ -184,3 +198,15 @@ Then seg_info_dict['mb8_m'] is a dict with three keys:
 - ji_list is a list of tuples (j,i) that are indices of points in the rho grid in the segment
 - sns_list is a list of all the bounding sections+signs (sns is short for section name + sign), including their signs. Note that the segment key is one member of this list
 - riv_list is a list of the rivers or point sources entering the segment
+
+It also creates and saves a pickled pandas DataFrame with columns:
+['volume m3', 'area m2', 'lon', 'lat']
+which are the volume, surface area, and mean lon and lat of each segment.
+
+**LO_output/extract/tef2/vol_df_[gctag].p**
+
+---
+
+extract_segments.py
+
+uses extract_segment_one_time.py

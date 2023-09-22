@@ -1,5 +1,10 @@
 """
-An alternate version of bulk_plot.py. One capability it has is to combine two or more sections.
+An alternate version of bulk_plot.py, with the capability to combine two or more sections.
+
+Unfortunately, because this job requires the hand inspection of the sections to decide
+a consistent sign for all of them, it has a hard-coded "sect_list" to work from, and this
+will be different for each user and for each section collection and grid. This is the kind of
+code you would want to copy, modify, and keep in your own repo.
 
 To test on mac:
 run bulk_plot_2 -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 -test True
@@ -33,12 +38,19 @@ if not Ldir['testing']:
     out_dir = out_dir0 / ('bulk_plots_2_' + Ldir['ds0'] + '_' + Ldir['ds1'])
     Lfun.make_dir(out_dir, clean=True)
 
-# sect_list = [item.name for item in in_dir.glob('*.p')]
 if Ldir['testing']:
     # sect_list = [(('ai4.p',-1),('ai3.p',-1))]
     # sect_list = [(('mb9.p',1),('mb10.p',1))]
     # sect_list = [(('ss4.p',-1),('ss2.p',-1),('ss7.p',-1))]
     sect_list = [(('sji1.p',1),('sji2.p',1),('sji3.p',1))]
+else:
+    # NOTE: since this code is really only for working with combined sections
+    # the default is a user specified list of tuples. If you want to look at
+    # all the individual sections, use bulk_plot.py.
+    sect_list = [(('ai4.p',-1),('ai3.p',-1)),
+        (('mb9.p',1),('mb10.p',1)),
+        (('ss4.p',-1),('ss2.p',-1),('ss7.p',-1)),
+        (('sji1.p',1),('sji2.p',1),('sji3.p',1))]
     
 # NOTE: We handle combining sections by putting them in a tuple, and
 # then each section is in its own tuple with a 1 or -1 to indicate the sign.
@@ -69,6 +81,7 @@ pfun.start_plot(fs=fs, figsize=(21,10))
 for sect_name in sect_list:
     
     if isinstance(sect_name,tuple):
+        out_name = '_'.join([item[0].replace('.p','') for item in sect_name])
         sign_dict = dict()
         tef_df_dict = dict()
         vn_list = ['salt'] # NOTE: this will need to be generalized to more tracers!
@@ -109,7 +122,7 @@ for sect_name in sect_list:
                         tef_df['q_m'] += -tef_df1['q_p']
                         tef_df[vn+'_q_p'] += -tef_df1['q_m'] * tef_df1[vn+'_m']
                         tef_df[vn+'_q_m'] += -tef_df1['q_p'] * tef_df1[vn+'_p']
-                for vn in ['qabs', 'qnet', 'fnet']:
+                for vn in ['qprism', 'qnet', 'fnet']:
                     tef_df[vn] += sgn * tef_df1[vn]
                 tef_df['ssh'] += tef_df1['ssh']/nsect
             ii+= 1
@@ -117,6 +130,7 @@ for sect_name in sect_list:
             tef_df[vn+'_p'] = tef_df[vn+'_q_p'] / tef_df['q_p']
             tef_df[vn+'_m'] = tef_df[vn+'_q_m'] / tef_df['q_m']
     else:
+        out_name = sect_name.replace('.p','')
         bulk = pickle.load(open(in_dir / sect_name, 'rb'))
         tef_df = flux_fun.get_two_layer(in_dir, sect_name)
             
@@ -141,25 +155,26 @@ for sect_name in sect_list:
     
     ax1.plot(ot,tef_df['Q_p'].to_numpy(), color=p_color, linewidth=lw)
     ax1.plot(ot,tef_df['Q_m'].to_numpy(), color=m_color, linewidth=lw)
-    
-    if Ldir['testing']:
-        if isinstance(sect_name,tuple):
-            sn = sect_name[0][0]
-            tef_df00 = tef_df_dict[sn].copy()
-            tef_df00['Q_p'] = tef_df00['q_p']/1000
-            tef_df00['Q_m'] = tef_df00['q_m']/1000
-            ax1.plot(ot,tef_df00['Q_p'].to_numpy(),'--', color=p_color, linewidth=lw)
-            ax1.plot(ot,tef_df00['Q_m'].to_numpy(),'--', color=m_color, linewidth=lw)
-        else:
-            pass
-            
     ax1.grid(True)    
     ax1.set_ylabel(ylab_dict['Q'])
+    ax1.set_xlim(ot[0],ot[-1])
+    # if Ldir['testing']:
+    #     if isinstance(sect_name,tuple):
+    #         # plots the first section in the tuple as dashed lines
+    #         sn = sect_name[0][0]
+    #         tef_df00 = tef_df_dict[sn].copy()
+    #         tef_df00['Q_p'] = tef_df00['q_p']/1000
+    #         tef_df00['Q_m'] = tef_df00['q_m']/1000
+    #         ax1.plot(ot,tef_df00['Q_p'].to_numpy(),'--', color=p_color, linewidth=lw)
+    #         ax1.plot(ot,tef_df00['Q_m'].to_numpy(),'--', color=m_color, linewidth=lw)
+    #     else:
+    #         pass
     
     ax2.plot(ot,tef_df['salt_p'].to_numpy(), color=p_color, linewidth=lw)
     ax2.plot(ot,tef_df['salt_m'].to_numpy(), color=m_color, linewidth=lw)
     ax2.grid(True)
     ax2.set_ylabel(ylab_dict['salt'])
+    ax1.set_xlim(ot[0],ot[-1])
     
     # map
     pfun.add_coast(ax3)
@@ -204,18 +219,18 @@ for sect_name in sect_list:
                 
             # accumulate limits
             if ii == 1:
-                Dx = dx
-                Dy = dy
-                Xmid = xmid/nsect
-                Ymid = ymid/nsect
+                xmin=min((x0,x1))
+                xmax=max((x0,x1))
+                ymin=min((y0,y1))
+                ymax=max((y0,y1))
             else:
-                Dx = np.max((dx,Dx))
-                Dy = np.max((dy,Dy))
-                Xmid += xmid/nsect
-                Ymid += ymid/nsect
+                xmin=min((xmin,min((x0,x1))))
+                xmax=max((xmax,max((x0,x1))))
+                ymin=min((ymin,min((y0,y1))))
+                ymax=max((ymax,max((y0,y1))))
             if ii == len(sect_name):
-                pad = np.max((np.sqrt(Dx**2 + Dy**2)*2,.1))
-                ax3.axis([Xmid-pad, Xmid+pad, Ymid-pad, Ymid+pad])
+                pad = .1
+                ax3.axis([xmin-pad,xmax+pad,ymin-pad,ymax+pad])
                 ax3.set_xlabel('Longitude [deg]')
                 ax3.set_ylabel('Latitude [deg]')
                 ax3.set_title(str(sect_name))
@@ -261,7 +276,7 @@ for sect_name in sect_list:
     if Ldir['testing']:
         plt.show()
     else:
-        plt.savefig(out_dir / (sect_name.replace('.p','') + '.png'))
+        plt.savefig(out_dir / (out_name + '.png'))
         plt.close()
 
 pfun.end_plot()

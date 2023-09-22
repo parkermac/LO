@@ -57,7 +57,7 @@ def get_two_layer(in_dir, sect_name):
     tef_df = pd.DataFrame(index=dti)
     tef_df['q_p']=Qp
     tef_df['q_m']=Qm
-    tef_df['qabs'] = bulk['qabs']
+    tef_df['qprism'] = bulk['qprism']
     tef_df['qnet'] = bulk['qnet']
     tef_df['fnet'] = bulk['fnet']
     tef_df['ssh'] = bulk['ssh']
