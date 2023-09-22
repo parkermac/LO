@@ -24,8 +24,8 @@ def intro():
     parser.add_argument('-sect_name', type=str, default='ai1')
     parser.add_argument('-get_bio', type=Lfun.boolean_string, default=False)
     # arguments used by extract/tef2
-    # NOTE: sect_name and get_bio are also used in tef2
     parser.add_argument('-ctag','--collection_tag', type=str)
+    parser.add_argument('-riv', type=str) # e.g. riv00
     
     # get the args and put into Ldir
     args = parser.parse_args()
