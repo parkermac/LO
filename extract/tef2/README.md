@@ -12,8 +12,47 @@ For a complete description please see: MacCready, P. (2011). Calculating Estuari
 
 #### Workflow Summary
 
-1. Create the sections using a GUI tool: create_sections.py. Also make a little text file with the open boundary sections.
+1. Use the GUI tool `create_sections.py` to define the sections.
+2. Make by hand `bounding_sections.txt`, a little text file with the names of the open boundary sections, and save it in the same directory that the section definitions went to.
+3. Use `plot_collection.py` to look at the results.
+4. Run `create_sect_df.py` to turn the section ends you just defined into exact indices on the u- and v-grids.
+5. Run `extract_sections.py` for a given model run and date range.
+6. Run `process_sections.py` on the output from extract_sections.py.
+7. Run `bulk_calc.py` on the output from process_sections.py.
+8. Run `bulk_plot.py` to make plots of the results for each section.
+9. Run `create_river_info.py` to save point source location information for a run.
+10. Run `create_seg_info_dict.py` to generate a dict of information about each of the segments, including all the j,i indices on the rho-grid in each segment.
+11. Run `extract_segments.py` on a given model run and date range to get volume-integrals vs. time for tracers in each segment.
 
+#### Example Commands for the Workflow ("run" implies running on mac)
+
+```
+run create_sections -g cas6 -ctag c0
+
+hand edit bounding_sections.txt to have names of the open boundary sections
+
+run plot_collection -gctag cas6_c0
+
+run create_sect_df -gctag cas6_c0
+
+python extract_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 20222.01.01 -1 2022.12.31 > extract.log &
+[1 hour/year on apogee, salt only]
+
+run process_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 20222.01.01 -1 2022.12.31 > process.log &
+[5 minutes/year on mac, salt only]
+
+run bulk_calc.py -gtx cas6_v00_uu0m -ctag c0 -0 20222.01.01 -1 2022.12.31 > bulk.log &
+[40 minutes/year on mac, salt only]
+
+run create_river_info -gridname cas6 -frc riv00 -dstr 2019.07.04 -test True
+[the flags point to a file of river forcing for the run you are working on]
+[-test True makes a nice plot of point sources]
+
+run create_seg_info_dict -gctag cas6_c0 -riv riv00
+
+python extract_segments.py -gtx cas6_v00_uu0m -ctag c0 -riv riv00 -0 20222.01.01 -1 2022.12.31 > seg_extract.log &
+[need to document performance on apogee]
+```
 ----
 
 `create_sections.py` is an interactive graphical tool for defining sections. A single section is saved as a pickled DataFrame with information like:
@@ -154,7 +193,7 @@ The results are a bunch of png's:
 
 ---
 
-`create_river_info.py` processes a user-specified river forcing file to create and save a DataFrame that has info about each river. Here is what it looks like for a cas6 file for traps2:
+`create_river_info.py` processes a user-specified river forcing file to create and save a DataFrame that has info about each river. Here is what it looks like for a cas6 file for [riv] = traps2:
 ```
                name     ii      jj  dir  sgn     iu      ju     iv     jv   irho    jrho
 0           clowhom  453.0  1169.0  0.0 -1.0  452.0  1169.0    NaN    NaN  452.0  1169.0
@@ -177,7 +216,7 @@ If you run the code with -test True it makes a useful map plot which you can use
 
 The DataFrame is pickled and saved as (for the example above):
 
-**LO_output/extract/tef2/riv_df_[gridname]_[river forcing name].p**
+**LO_output/extract/tef2/riv_df_[gridname]_[riv].p**
 
 e.g. riv_df_cas6_traps2.p
 
@@ -201,12 +240,14 @@ Then seg_info_dict['mb8_m'] is a dict with three keys:
 
 It also creates and saves a pickled pandas DataFrame with columns:
 ['volume m3', 'area m2', 'lon', 'lat']
-which are the volume, surface area, and mean lon and lat of each segment.
+which are the volume (with zeta = 0), surface area, and mean lon and lat of each segment.
 
 **LO_output/extract/tef2/vol_df_[gctag].p**
 
 ---
 
-extract_segments.py
+`extract_segments.py` extracts integrated tracer values as hourly time series for each of the segments. The results are saved in an xarray Dataset:
 
-uses extract_segment_one_time.py
+**(+)/segments_[date range]\_[gctag]\_[riv].nc**
+
+Uses extract_segment_one_time.py and subprocess to speed execution.
