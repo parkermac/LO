@@ -17,8 +17,8 @@ f_list = ['f'+ item.strftime(Lfun.ds_fmt) for item in date_range]
 
 for f in f_list:
     in_file = in_dir0 / f / 'riv2' / 'rivers.nc'
-    out_dir = out_dir0 / f / 'riv0'
+    out_file = out_dir0 / f / 'riv0' / 'rivers.nc'
     try:
-        shutil.copy(in_file,out_dir)
+        shutil.copy(in_file,out_file)
     except Exception as e:
         print(e)
