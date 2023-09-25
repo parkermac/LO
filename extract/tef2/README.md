@@ -6,7 +6,9 @@ The basic idea of TEF is that you extract transport of volume, salt, and other t
 
 This code also allows you to gather time series of tracer content in the segments between sections, and use these to create tracer budgets for different volumes.
 
-For a complete description please see: MacCready, P. (2011). Calculating Estuarine Exchange Flow Using Isohaline Coordinates. Journal of Physical Oceanography, 41, 1116-1124. doi:10.1175/2011JPO4517.1
+For a complete description of TEF and its calculation please see:
+- MacCready, P. (2011). Calculating Estuarine Exchange Flow Using Isohaline Coordinates. Journal of Physical Oceanography, 41, 1116-1124. doi:10.1175/2011JPO4517.1 [Describes the concept and its application to the Columbia River]
+- Lorenz, M., Klingbeil, K., MacCready, P., & Burchard, H. (2019). Numerical issues of the Total Exchange Flow (TEF) analysis framework for quantifying estuarine circulation. Ocean Science Discussions, 15, 601-614. doi:10.5194/os-2018-147 [Describes an important improvement to the calculation method, one that is implemented in this code.]
 
 ---
 
@@ -24,7 +26,7 @@ For a complete description please see: MacCready, P. (2011). Calculating Estuari
 10. Run `create_seg_info_dict.py` to generate a dict of information about each of the segments, including all the j,i indices on the rho-grid in each segment.
 11. Run `extract_segments.py` on a given model run and date range to get volume-integrals vs. time for tracers in each segment.
 
-#### Example Commands for the Workflow ("run" implies running on mac)
+#### Example Commands for the Workflow ("run" implies running on mac or pc in ipython)
 
 ```
 run create_sections -g cas6 -ctag c0
@@ -35,13 +37,14 @@ run plot_collection -gctag cas6_c0
 
 run create_sect_df -gctag cas6_c0
 
-python extract_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 20222.01.01 -1 2022.12.31 > extract.log &
+python extract_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > extract.log &
 [1 hour/year on apogee, salt only]
+[then you could transfer the results to your mac for further processing]
 
-run process_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 20222.01.01 -1 2022.12.31 > process.log &
+run process_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > process.log &
 [5 minutes/year on mac, salt only]
 
-run bulk_calc.py -gtx cas6_v00_uu0m -ctag c0 -0 20222.01.01 -1 2022.12.31 > bulk.log &
+run bulk_calc.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > bulk.log &
 [40 minutes/year on mac, salt only]
 
 run create_river_info -gridname cas6 -frc riv00 -dstr 2019.07.04 -test True
@@ -50,10 +53,15 @@ run create_river_info -gridname cas6 -frc riv00 -dstr 2019.07.04 -test True
 
 run create_seg_info_dict -gctag cas6_c0 -riv riv00
 
-python extract_segments.py -gtx cas6_v00_uu0m -ctag c0 -riv riv00 -0 20222.01.01 -1 2022.12.31 > seg_extract.log &
-[need to document performance on apogee]
+python extract_segments.py -gtx cas6_v00_uu0m -ctag c0 -riv riv00 -0 2022.01.01 -1 2022.12.31 > seg_extract.log &
+[need to first put LO_output/extract/tef2/seg_info_dict_cas6_c0_riv00.p onto apogee]
+[1 hour/year on apogee, salt only]
 ```
 ----
+
+## Program Descriptions
+
+---
 
 `create_sections.py` is an interactive graphical tool for defining sections. A single section is saved as a pickled DataFrame with information like:
 ```

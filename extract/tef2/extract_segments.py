@@ -5,6 +5,9 @@ for budgets in the segments.
 To test on mac:
 run extract_segments -gtx cas6_v0_live -ctag c0 -riv riv00 -0 2019.07.04 -1 2019.07.04 -test True
 
+Performance:
+Takes about 1 hour per year on apogee, salt only.
+
 """
 from lo_tools import Lfun, zrfun
 from lo_tools import extract_argfun as exfun
