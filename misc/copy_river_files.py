@@ -11,7 +11,7 @@ in_dir0 = Path('/boildat/parker/LiveOcean_output/cas6_v3')
 
 out_dir0 = Path('/dat1/parker/LO_output/forcing/cas6_v0')
 
-date_range = pd.date_range(start='2016-12-15', end='2016-12-16')#'2021-10-15')
+date_range = pd.date_range(start='2016-12-15', end='2021-10-15')
 
 f_list = ['f'+ item.strftime(Lfun.ds_fmt) for item in date_range]
 
