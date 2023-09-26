@@ -1,5 +1,6 @@
 """
-Plot as-run river time series.
+Plot selected as-run river time series for the cas6_v0_live forecast, which exists
+for the time range 2016.12.15 to 2023.05.21.
 
 """
 from lo_tools import Lfun
@@ -9,14 +10,15 @@ import xarray as xr
 import pandas as pd
 import matplotlib.pyplot as plt
 
-Ldir = Lfun.Lstart(gridname='cas6', tag='v3')
+Ldir = Lfun.Lstart()
 
 # load extraction (an xarray Dataset)
-fn = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_roms' / 'extraction_2017.01.01_2021.12.31.nc'
+ctag = 'lo_base'
+fn = Ldir['LOo'] / 'pre' / 'river1' / ctag / 'Data_roms' / 'extraction_2016.12.15_2023.05.21.nc'
 x = xr.load_dataset(fn)
 
 # get climatology
-clm_fn = Ldir['LOo'] / 'pre' / 'river' / Ldir['gtag'] / 'Data_historical' / 'CLIM_flow_1980_2020.p'
+clm_fn = Ldir['LOo'] / 'pre' / 'river' / ctag / 'Data_historical' / 'CLIM_flow.p'
 dfc = pd.read_pickle(clm_fn)
 
 # add the climatology, for practice

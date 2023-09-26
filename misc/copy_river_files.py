@@ -1,5 +1,8 @@
 """
 This is a program to copy river forcing files from boiler onto apogee.
+
+RESULT: I ran this on apogee on 2023.09.25 and it appeared to work.
+Hence I should be able to simplify the river extraction code.
 """
 
 from pathlib import Path
