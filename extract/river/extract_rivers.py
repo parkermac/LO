@@ -8,10 +8,7 @@ an xarray Dataset.
 It uses the gridname and the river forcing type to create a
 "collection tag" = [ctag], e.g. cas6_riv00
 
-Output: LO_output/pre/river1/[ctag]/extraction_2016.12.15_2023.05.21.nc
-
-This code ONLY works for this run, and assumes you are running on apogee, so
-we skip command line arguments and hard-code choices about the run.
+Output: LO_output/pre/river1/[ctag]/extraction_[date range].nc
 
 To test on mac:
 run extract_rivers -g cas6 -0 2019.07.04 -1 2019.07.04 -riv riv00
@@ -19,8 +16,7 @@ run extract_rivers -g cas6 -0 2019.07.04 -1 2019.07.04 -riv riv00
 To run on apogee:
 run extract_rivers -g cas6 -0 2022.01.01 -1 2022.12.31 -riv riv00
 
-Performance: ...
-
+Performance: 55 sec per year on apogee.
 
 """
 
