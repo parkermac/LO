@@ -18,7 +18,7 @@ fn = Ldir['LOo'] / 'pre' / 'river1' / ctag / 'Data_roms' / 'extraction_2016.12.1
 x = xr.load_dataset(fn)
 
 # get climatology
-clm_fn = Ldir['LOo'] / 'pre' / 'river' / ctag / 'Data_historical' / 'CLIM_flow.p'
+clm_fn = Ldir['LOo'] / 'pre' / 'river1' / ctag / 'Data_historical' / 'CLIM_flow.p'
 dfc = pd.read_pickle(clm_fn)
 
 # add the climatology, for practice

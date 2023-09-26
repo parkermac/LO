@@ -1,29 +1,26 @@
 """
-Extract as-run river time series for the cas6_v0_live forecast, which exists
-for the time range 2016.12.15 to 2023.05.21.
+
+Extract as-run river time series specific to a grid and a river forcing type.
 
 Includes all NPZD tracers, and package the results as
 an xarray Dataset.
 
-Output: LO_output/pre/river1/lo_base/extraction_2016.12.15_2023.05.21.nc
+It uses the gridname and the river forcing type to create a
+"collection tag" = [ctag], e.g. cas6_riv00
+
+Output: LO_output/pre/river1/[ctag]/extraction_2016.12.15_2023.05.21.nc
 
 This code ONLY works for this run, and assumes you are running on apogee, so
 we skip command line arguments and hard-code choices about the run.
 
+To test on mac:
+run extract_rivers -g cas6 -0 2019.07.04 -1 2019.07.04 -riv riv00
+
 To run on apogee:
-run extract_rivers_cas6_v0_live
+run extract_rivers -g cas6 -0 2022.01.01 -1 2022.12.31 -riv riv00
 
-Performance: takes 25 sec per year on apogee.
+Performance: ...
 
-NOTE: The forcing files were originally spread across two machines and different naming
-conventions with the change happening around October 2021.
-Because one of the machines, boiler, is being decommissioned, on 2023.09.25 I created
-LO/misc/copy_river_files.py and ran it on apogee. This copied
-all the rivers.nc files for 2016.12.15 to 2021.10.16
- - from /boildat/parker/LiveOcean_output/cas6_v3/f[]/riv2
- - to /dat1/parker/LO_output/cas6_v0/f[]/riv0
-so now there is a continuous river forcing record on apogee for the cas6_v0_live run
-for its entire length 2016.12.15 to 2023.05.21
 
 """
 
@@ -34,25 +31,32 @@ import numpy as np
 import pandas as pd
 import xarray as xr
 from pathlib import Path
-    
-Ldir = Lfun.Lstart(gridname='cas6',tag='v0',ex_name='live')
-Ldir['ds0'] = '2016.12.15'
-Ldir['ds1'] = '2023.05.21'
-ds0 = Ldir['ds0']
-ds1 = Ldir['ds1']
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
+parser.add_argument('-0', '--ds0', type=str) # e.g. 2022.01.01
+parser.add_argument('-1', '--ds1', type=str) # e.g. 2022.12.31
+parser.add_argument('-riv', type=str) # e.g. riv00
+args = parser.parse_args()
+argsd = args.__dict__
+for a in ['gridname','ds0','ds1','riv']:
+    if argsd[a] == None:
+        print('*** Missing required argument to extract_argfun.intro(): ' + a)
+        sys.exit()
+Ldir = Lfun.Lstart(gridname=args.gridname)
+ds0 = args.ds0
+ds1 = args.ds1
+ctag = Ldir['gridname'] + '_' + args.riv
 
 tt0 = time()
 
-# long list of variables to extract
-vn_list = ['transport', 'salt', 'temp', 'oxygen',
-    'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
-    'TIC', 'alkalinity']
 
 # input directory
-in_dir = Ldir['LOo'] / 'forcing' / 'cas6_v0'
+in_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname']
 
 # make sure the output directory exists
-out_dir = Ldir['LOo'] / 'pre' / 'river1' / 'lo_base' / 'Data_roms'
+out_dir = Ldir['LOo'] / 'pre' / 'river1' / ctag / 'Data_roms'
 Lfun.make_dir(out_dir)
 outname = 'extraction_' + ds0 + '_' + ds1 + '.nc'
 out_fn = out_dir / outname
@@ -72,22 +76,23 @@ while mdt <= dt1:
     mds_list.append(datetime.strftime(mdt, Lfun.ds_fmt))
     mdt = mdt + timedelta(days=1)
 
-# Get list of river names.
-# This is a bit titchy because of NetCDF 3 limitations on strings, forcing them
-# to be arrays of characters. This was the case for the start of this time series.
+# Get list of river names. Assumes this is not the old NetCDF3 version.
 mds = mds_list[0]
-fn = in_dir / ('f' + mds) / 'riv0' / 'rivers.nc'
+fn = in_dir / ('f' + mds) / args.riv / 'rivers.nc'
 ds = xr.open_dataset(fn)
-rn = ds['river_name'].values
-NR = rn.shape[1]
-riv_name_list = []
-for ii in range(NR):
-    a = rn[:,ii]
-    r = []
-    for l in a:
-        r.append(l.decode())
-    rr = ''.join(r)
-    riv_name_list.append(rr)
+
+# long list of variables to extract
+if 'river_NH4' in ds.data_vars:
+    vn_list = ['transport', 'salt', 'temp', 'Oxyg',
+        'NH4','NO3', 'Phyt', 'Zoop', 'SDeN', 'LDeN',
+        'TIC', 'TAlk']
+else: # old style
+    vn_list = ['transport', 'salt', 'temp', 'oxygen',
+        'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
+        'TIC', 'alkalinity']
+
+riv_name_list = list(ds['river_name'].values)
+NR = len(riv_name_list)
 ds.close()
 
 NT = len(mds_list)
@@ -98,12 +103,12 @@ for vn in vn_list:
     v_dict[vn] = nanmat.copy()
 tt = 0
 for mds in mds_list:
-    
+
     this_dt = datetime.strptime(mds, Lfun.ds_fmt)
     if this_dt.day == 1 and this_dt.month == 1:
         print(' Year = %d' % (this_dt.year))
-        
-    fn = in_dir / ('f' + mds) / 'riv0' / 'rivers.nc'
+
+    fn = in_dir / ('f' + mds) / args.riv / 'rivers.nc'
     ds = xr.open_dataset(fn)
     # The river transport is given at noon of a number of days surrounding the forcing date.
     # Here we find the index of the time for the day "mds".
@@ -132,7 +137,7 @@ x = xr.Dataset(coords={'time': times,'riv': riv_name_list})
 for vn in vn_list:
     v = v_dict[vn]
     x[vn] = (('time','riv'), v)
-    
+
 x.to_netcdf(out_fn)
 x.close()
 
