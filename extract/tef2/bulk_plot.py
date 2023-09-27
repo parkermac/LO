@@ -33,9 +33,9 @@ out_dir = out_dir0 / ('bulk_plots_' + Ldir['ds0'] + '_' + Ldir['ds1'])
 if Ldir['testing'] == False:
     Lfun.make_dir(out_dir, clean=True)
 
-sect_list = [item.name for item in in_dir.glob('*.p')]
+sect_list = [item.name.replace('.p','') for item in in_dir.glob('*.p')]
 if Ldir['testing']:
-    sect_list = ['ai7.p']
+    sect_list = ['ai7']
     
 # grid info
 g = xr.open_dataset(Ldir['grid'] / 'grid.nc')
@@ -68,7 +68,7 @@ def add_qprism(ax):
 
 for sect_name in sect_list:
     
-    bulk = pickle.load(open(in_dir / sect_name, 'rb'))
+    bulk = pd.read_pickle(in_dir / (sect_name + '.p'))
 
     tef_df = flux_fun.get_two_layer(in_dir, sect_name)
             

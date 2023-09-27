@@ -6,7 +6,6 @@ and for the flux code.
 import numpy as np
 from datetime import datetime, timedelta
 import pandas as pd
-import pickle
 
 from lo_tools import Lfun, zfun
 # import tef_fun
@@ -20,7 +19,7 @@ def get_two_layer(in_dir, sect_name):
     Form time series of 2-layer TEF quantities, from the multi-layer bulk values.
     """
     
-    bulk = pickle.load(open(in_dir / sect_name, 'rb'))
+    bulk = pd.read_pickle(in_dir / (sect_name + '.p'))
         
         
     QQ = bulk['q']

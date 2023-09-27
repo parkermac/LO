@@ -39,18 +39,18 @@ if not Ldir['testing']:
     Lfun.make_dir(out_dir, clean=True)
 
 if Ldir['testing']:
-    # sect_list = [(('ai4.p',-1),('ai3.p',-1))]
-    # sect_list = [(('mb9.p',1),('mb10.p',1))]
-    # sect_list = [(('ss4.p',-1),('ss2.p',-1),('ss7.p',-1))]
-    sect_list = [(('sji1.p',1),('sji2.p',1),('sji3.p',1))]
+    # sect_list = [(('ai4',-1),('ai3',-1))]
+    # sect_list = [(('mb9',1),('mb10',1))]
+    # sect_list = [(('ss4',-1),('ss2',-1),('ss7',-1))]
+    sect_list = [(('sji1',1),('sji2',1),('sji3',1))]
 else:
     # NOTE: since this code is really only for working with combined sections
     # the default is a user specified list of tuples. If you want to look at
-    # all the individual sections, use bulk_plot.py.
-    sect_list = [(('ai4.p',-1),('ai3.p',-1)),
-        (('mb9.p',1),('mb10.p',1)),
-        (('ss4.p',-1),('ss2.p',-1),('ss7.p',-1)),
-        (('sji1.p',1),('sji2.p',1),('sji3.p',1))]
+    # all the individual sections, use bulk_ploty.
+    sect_list = [(('ai4',-1),('ai3',-1)),
+        (('mb9',1),('mb10',1)),
+        (('ss4',-1),('ss2',-1),('ss7',-1)),
+        (('sji1',1),('sji2',1),('sji3',1))]
     
 # NOTE: We handle combining sections by putting them in a tuple, and
 # then each section is in its own tuple with a 1 or -1 to indicate the sign.
@@ -58,7 +58,7 @@ else:
 # how to combine the two.
 #
 # The columns returned in the DataFrame from flux_fun.get_two_layer are:
-# ['q_p', 'q_m', 'qabs', 'qnet', 'fnet', 'ssh', 'salt_p', 'salt_m']
+# ['q_p', 'q_m', 'qabs', 'qprism', 'qnet', 'fnet', 'ssh', 'salt_p', 'salt_m']
 #
     
 # grid info
@@ -81,14 +81,14 @@ pfun.start_plot(fs=fs, figsize=(21,10))
 for sect_name in sect_list:
     
     if isinstance(sect_name,tuple):
-        out_name = '_'.join([item[0].replace('.p','') for item in sect_name])
+        out_name = '_'.join([item[0] for item in sect_name])
         sign_dict = dict()
         tef_df_dict = dict()
         vn_list = ['salt'] # NOTE: this will need to be generalized to more tracers!
         for sn_tup in sect_name:
             sn = sn_tup[0]
             sign_dict[sn] = sn_tup[1]
-            bulk = pickle.load(open(in_dir / sn, 'rb'))
+            bulk = pd.read_pickle(in_dir / (sn + '.p'))
             tef_df_dict[sn] = flux_fun.get_two_layer(in_dir, sn)
         ii = 1
         nsect = len(sect_name)
@@ -130,7 +130,7 @@ for sect_name in sect_list:
             tef_df[vn+'_p'] = tef_df[vn+'_q_p'] / tef_df['q_p']
             tef_df[vn+'_m'] = tef_df[vn+'_q_m'] / tef_df['q_m']
     else:
-        out_name = sect_name.replace('.p','')
+        out_name = sect_name
         bulk = pickle.load(open(in_dir / sect_name, 'rb'))
         tef_df = flux_fun.get_two_layer(in_dir, sect_name)
             
@@ -158,17 +158,6 @@ for sect_name in sect_list:
     ax1.grid(True)    
     ax1.set_ylabel(ylab_dict['Q'])
     ax1.set_xlim(ot[0],ot[-1])
-    # if Ldir['testing']:
-    #     if isinstance(sect_name,tuple):
-    #         # plots the first section in the tuple as dashed lines
-    #         sn = sect_name[0][0]
-    #         tef_df00 = tef_df_dict[sn].copy()
-    #         tef_df00['Q_p'] = tef_df00['q_p']/1000
-    #         tef_df00['Q_m'] = tef_df00['q_m']/1000
-    #         ax1.plot(ot,tef_df00['Q_p'].to_numpy(),'--', color=p_color, linewidth=lw)
-    #         ax1.plot(ot,tef_df00['Q_m'].to_numpy(),'--', color=m_color, linewidth=lw)
-    #     else:
-    #         pass
     
     ax2.plot(ot,tef_df['salt_p'].to_numpy(), color=p_color, linewidth=lw)
     ax2.plot(ot,tef_df['salt_m'].to_numpy(), color=m_color, linewidth=lw)
@@ -186,7 +175,7 @@ for sect_name in sect_list:
         ii = 1
         nsect = len(sect_name)
         for sn_tup in sect_name:
-            sn = sn_tup[0].replace('.p','')
+            sn = sn_tup[0]
             sgn = sn_tup[1]
             sinfo = sect_df.loc[sect_df.sn==sn,:]
             i0 = sinfo.iloc[0,:].i
@@ -238,7 +227,7 @@ for sect_name in sect_list:
             ii += 1
             
     else:
-        sn = sect_name.replace('.p','')
+        sn = sect_name
         sinfo = sect_df.loc[sect_df.sn==sn,:]
         i0 = sinfo.iloc[0,:].i
         j0 = sinfo.iloc[0,:].j
