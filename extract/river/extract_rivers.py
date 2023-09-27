@@ -72,23 +72,28 @@ while mdt <= dt1:
     mds_list.append(datetime.strftime(mdt, Lfun.ds_fmt))
     mdt = mdt + timedelta(days=1)
 
-# Get list of river names. Assumes this is not the old NetCDF3 version.
+# Get list of river names and set variables to use.
+#
+# NOTE: This may not work with the old ROMS output, like the early years of
+# cas6_v0_live. For that case use the custom code:
+# extract_rivers_cas6_v0_live.py.
 mds = mds_list[0]
 fn = in_dir / ('f' + mds) / args.riv / 'rivers.nc'
 ds = xr.open_dataset(fn)
-
+riv_name_list = list(ds['river_name'].values)
+NR = len(riv_name_list)
 # long list of variables to extract
 if 'river_NH4' in ds.data_vars:
+    # new ROMS version
     vn_list = ['transport', 'salt', 'temp', 'Oxyg',
         'NH4','NO3', 'Phyt', 'Zoop', 'SDeN', 'LDeN',
         'TIC', 'TAlk']
-else: # old style
+else:
+    # old ROMS version (like cas6_v0_live)
+    # likely not needed, but retained to support legacy cases
     vn_list = ['transport', 'salt', 'temp', 'oxygen',
         'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
         'TIC', 'alkalinity']
-
-riv_name_list = list(ds['river_name'].values)
-NR = len(riv_name_list)
 ds.close()
 
 NT = len(mds_list)
@@ -96,7 +101,11 @@ NT = len(mds_list)
 nanmat = np.nan * np.ones((NT, NR))
 v_dict = dict()
 for vn in vn_list:
-    v_dict[vn] = nanmat.copy()
+    rvn = 'river_' + vn
+    if rvn in ds.data_vars:
+        v_dict[vn] = nanmat.copy()
+    else:
+        pass
 tt = 0
 for mds in mds_list:
 
@@ -115,9 +124,13 @@ for mds in mds_list:
         if vn == 'transport':
             v_dict[vn][tt,:] = ds['river_' + vn][mask,:]
         else:
-            # the rest of the variables allow for depth variation, but we
-            # don't use this, so, just use the bottom value
-            v_dict[vn][tt,:] = ds['river_' + vn][mask,0,:]
+            rvn = 'river_' + vn
+            if rvn in ds.data_vars:
+                # the rest of the variables allow for depth variation, but we
+                # don't use this, so, just use the bottom value
+                v_dict[vn][tt,:] = ds['river_' + vn][mask,0,:]
+            else:
+                pass
     ds.close()
     tt += 1
 
