@@ -131,7 +131,7 @@ def get_ic(TR):
     elif exp_name == 'dewey': # for Bill Dewey, missing barge 2023.09.28
         # 48°39'34.5"N 122°43'17.4"W at 3 PM PDT Tuesday 2023.09.26 (10 PM UTC)
         # The exact run command was (on perigee, using cas6_v0_live, December 2022):
-        # python tracker.py -exp dewey -wnd 0.03 -dtt 5 -d 2023.09.26 -sh 22 > dewey.log &
+        # python tracker.py -gtx cas6_v1_live -exp dewey -wnd 0.03 -dtt 5 -d 2023.09.26 -sh 22 > dewey.log &
         lon0 = -(122 + 43/60 + 17.4/3600)
         lat0 = 48 + 39/60 + 34.5/3600
         # center of the circle 
