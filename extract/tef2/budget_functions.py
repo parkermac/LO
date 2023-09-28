@@ -19,9 +19,10 @@ def get_sect_list(gctag, vol_name):
     """
     if gctag == 'cas6_c0':
         if vol_name == 'Puget Sound':
-            sect_list = [(('ai1',1),('dp',1))]
+            sect_list = [(('ai1',-1),('dp',-1))] # the sign is for inflow direction
+            bounding_sect_list = ['ai1_p','dp_p'] # exclude segments that have these
             seg_base_list = ['ai','wb','hc','mb','tn','ss']
-    return sect_list, seg_base_list
+    return sect_list, bounding_sect_list, seg_base_list
 
 def get_two_layer_from_list(bulk_dir, sect_list):
     """

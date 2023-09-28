@@ -259,3 +259,9 @@ which are the volume (with zeta = 0), surface area, and mean lon and lat of each
 **(+)/segments_[date range]\_[gctag]\_[riv].nc**
 
 Uses extract_segment_one_time.py and subprocess to speed execution.
+
+---
+
+`tracer_budget.py` forms volume-integrated budgets, combining section extractions, segment extracts, and river extractions.
+
+To use this for a case with rivers you need to have extracted river time series from the appropriate forcing files, using `LO/extract/river/extract_rivers.py`.

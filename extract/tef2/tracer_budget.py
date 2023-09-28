@@ -71,7 +71,7 @@ for which_vol in vol_list:
     seg_info_dict_fn = dir2 / ('seg_info_dict_' + sect_gctag + '_' + riv + '.p')
     
     # get the bounding sections and the letter-bases of the volume segments (like ai)
-    sect_list, seg_base_list = bfun.get_sect_list(sect_gctag, which_vol)
+    sect_list, bounding_sect_list, seg_base_list = bfun.get_sect_list(sect_gctag, which_vol)
     
     # get the segments of the volume that are keys in seg_info_dict
     seg_info_dict = pd.read_pickle(seg_info_dict_fn)
