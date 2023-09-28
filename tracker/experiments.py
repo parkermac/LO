@@ -128,6 +128,19 @@ def get_ic(TR):
         plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
         pcs00 = 0 * np.ones(N)
         
+    elif exp_name == 'dewey': # for Bill Dewey, missing barge 2023.09.28
+        # 48°39'34.5"N 122°43'17.4"W at 3 PM PDT Tuesday 2023.09.26 (10 PM UTC)
+        # The exact run command was (on perigee, using cas6_v0_live, December 2022):
+        # python tracker.py -exp dewey -wnd 0.03 -dtt 5 -d 2023.09.26 -sh 22 > sneaker.log &
+        lon0 = -(122 + 43/60 + 17.4/3600)
+        lat0 = 48 + 39/60 + 34.5/3600
+        # center of the circle 
+        radius_km = 1 # radius of the circle km
+        N = 1000 # number of particles
+        # make random scattering of points in a circle
+        plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
+        pcs00 = 0 * np.ones(N)
+        
     return plon00, plat00, pcs00
     
 def ic_from_meshgrid(lonvec, latvec, pcs_vec):
