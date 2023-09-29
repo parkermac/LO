@@ -9,6 +9,32 @@ import pandas as pd
 
 def get_sect_list(gctag, vol_name):
     """
+    The lists returned by this function give the information needed to:
+    (1) Specify the open boundary sections, and
+    (2) Specify all the segments landward of the open boundary.
+    
+    The open boundary can consist of one or more sections, since we often
+    have cases with this requirement, like needing Admiralty Inlet and
+    Deception Pass for a Puget Sound volume.
+    
+    In "sect_list" we give the open boundary as a list of tuples, each
+    with (section name, sign) where the sign tells you what to multiply
+    the transport by in order to get flow INTO the volume. To do this
+    right you have to know the sigen convention of each section, which
+    you could find by looking at the plot created by plot_collection.py.
+    So for the cas6_c0 collection, the ai1 section has positive out to
+    sea, so we put -1 as its sign. It is okay for sect_list to only have
+    one tuple, but it must be a list.
+    
+    In "sect_base_list" we list the first part of each of the sections that
+    will be part of the volume. So for example the "base" of ai1 and ai2 is
+    "ai". We will use these bases to auto-generate all the possible sections
+    that could be in teh volume.
+    
+    We also need to (I think) make a list of the sect + sign of the
+    OUTSIDE of the volume, so that we can exclude segments that have
+    these as part of their boundaries.
+    
     This has lists of sections that are the open boundaries to selected
     volumes.
     
@@ -19,9 +45,13 @@ def get_sect_list(gctag, vol_name):
     """
     if gctag == 'cas6_c0':
         if vol_name == 'Puget Sound':
+            
             sect_list = [(('ai1',-1),('dp',-1))] # the sign is for inflow direction
+            
+            sect_base_list = ['ai','wb','hc','mb','tn','ss']
+            
             bounding_sect_list = ['ai1_p','dp_p'] # exclude segments that have these
-            seg_base_list = ['ai','wb','hc','mb','tn','ss']
+            
     return sect_list, bounding_sect_list, seg_base_list
 
 def get_two_layer_from_list(bulk_dir, sect_list):
