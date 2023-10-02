@@ -1501,6 +1501,9 @@ def P_splash_sneaker(in_dict):
     Run as:
     run pan_plot.py -0 2019.01.18 -gtx cas6_v0_live -pt P_splash_sneaker
     """
+    
+    no_text = True # a flag to turn off all text additions, for the Japanese version
+    
     # START
     fs = 14
     pfun.start_plot(fs=fs, figsize=(15,12))
@@ -1525,7 +1528,7 @@ def P_splash_sneaker(in_dict):
 
     if do_topo:
         # topography
-        tfn = (Ldir['data'] / 'topo' / 'srtm15' / 'topo15.nc')
+        tfn = (Ldir['data'] / 'topo' / 'srtm15plus' / 'topo.nc')
         tds = xr.open_dataset(tfn)
         step = 1
         tx = tds['lon'][::step].values
@@ -1554,15 +1557,18 @@ def P_splash_sneaker(in_dict):
     ax.axis([-130, -122, 42, 52])
     ax.set_xticks([-129, -127, -125, -123])
     ax.set_yticks([42, 44, 46, 48, 50, 52])
-    ax.set_xlabel('Longitude')
-    ax.set_ylabel('Latitude')
-    tstr = T['dt'].strftime(Lfun.ds_fmt)
-    ax.text(.98,.99,'Initial release\nlocations', size=fs*1.5,
-         ha='right', va='top', weight='bold', transform=ax.transAxes,
-         bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
-    ax.text(.17,.05,'LiveOcean\nSurface water\nTemperature $[^{\circ}C]$\n\n'+tstr,
-         ha='left', va='bottom', weight='bold', transform=ax.transAxes,
-         bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
+    if no_text:
+        pass
+    else:
+        ax.set_xlabel('Longitude')
+        ax.set_ylabel('Latitude')
+        tstr = T['dt'].strftime(Lfun.ds_fmt)
+        ax.text(.98,.99,'Initial release\nlocations', size=fs*1.5,
+             ha='right', va='top', weight='bold', transform=ax.transAxes,
+             bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
+        ax.text(.17,.05,'LiveOcean\nSurface water\nTemperature $[^{\circ}C]$\n\n'+tstr,
+             ha='left', va='bottom', weight='bold', transform=ax.transAxes,
+             bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
 
     # box for drifter release
     aa = [-125.8, -122.2, 46.3, 51]
@@ -1573,15 +1579,18 @@ def P_splash_sneaker(in_dict):
     fs2 = fs*.9
     fs3 = fs*.8
     
-    ax.text(-123.072,46.7866,'Washington', size=fs2,
-        style='italic',ha='center',va='center',rotation=-45)
-    ax.text(-122.996,44.5788,'Oregon', size=fs2,
-        style='italic',ha='center',va='center',rotation=-45)
+    if no_text:
+        pass
+    else:
+        ax.text(-123.072,46.7866,'Washington', size=fs2,
+            style='italic',ha='center',va='center',rotation=-45)
+        ax.text(-122.996,44.5788,'Oregon', size=fs2,
+            style='italic',ha='center',va='center',rotation=-45)
     
-    ah = ax.text(-125.3,49.4768,'Vancouver\nIsland', size=fs2,
-        style='italic',ha='center',va='center',rotation=-45)
-    ax.text(-126.3,50.2,'Johnstone\nStrait', size=.7*fs2,
-        style='italic',ha='center',va='center',rotation=-10)
+        ah = ax.text(-125.3,49.4768,'Vancouver\nIsland', size=fs2,
+            style='italic',ha='center',va='center',rotation=-45)
+        ax.text(-126.3,50.2,'Johnstone\nStrait', size=.7*fs2,
+            style='italic',ha='center',va='center',rotation=-10)
         
     # add drifter tracks
     ax.plot(dx[0,:],dy[0,:],'.k', ms=1, alpha=.5)
@@ -1603,10 +1612,13 @@ def P_splash_sneaker(in_dict):
     ax.axis(aa)
     ax.set_xticks([-125, -124, -123])
     ax.set_yticks([47, 48, 49, 50])
-    ax.set_xlabel('Longitude')
-    ax.text(.98,.99,'Locations after\nthree days', size=fs*1.5, c='k',
-         ha='right', va='top', weight='bold', transform=ax.transAxes,
-         bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
+    if no_text:
+        pass
+    else:
+        ax.set_xlabel('Longitude')
+        ax.text(.98,.99,'Locations after\nthree days', size=fs*1.5, c='k',
+             ha='right', va='top', weight='bold', transform=ax.transAxes,
+             bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
          
     # add drifter tracks
     # ax.plot(dx, dy, '-k', lw=.5, alpha=.5)
