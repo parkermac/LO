@@ -29,9 +29,9 @@ def get_sect_list(gctag, vol_name):
     In "sect_base_list" we list the first part of each of the sections that
     will be part of the volume. So for example the "base" of ai1 and ai2 is
     "ai". We will use these bases to auto-generate all the possible sections
-    that could be in teh volume.
+    that could be in the volume.
     
-    We also need to (I think) make a list of the sect + sign of the
+    In outer_sns_list make a list of the sect + sign of the
     OUTSIDE of the volume, so that we can exclude segments that have
     these as part of their boundaries.
     
@@ -46,13 +46,13 @@ def get_sect_list(gctag, vol_name):
     if gctag == 'cas6_c0':
         if vol_name == 'Puget Sound':
             
-            sect_list = [(('ai1',-1),('dp',-1))] # the sign is for inflow direction
+            sect_list = [('ai1',-1),('dp',-1)] # the sign is for inflow direction
             
-            sect_base_list = ['ai','wb','hc','mb','tn','ss']
+            sect_base_list = ['ai','dp','wb','hc','mb','tn','ss']
             
-            bounding_sect_list = ['ai1_p','dp_p'] # exclude segments that have these
+            outer_sns_list = ['ai1_p','dp_p'] # exclude segments that have these
             
-    return sect_list, bounding_sect_list, seg_base_list
+    return sect_list, sect_base_list, outer_sns_list
 
 def get_two_layer_from_list(bulk_dir, sect_list):
     """

@@ -40,6 +40,10 @@ sect_gctag = Ldir['gridname'] + '_' + args.sect_ctag
 riv_gctag = Ldir['gridname'] + '_' + riv
 
 if testing:
+    from importlib import reload
+    reload(bfun)
+
+if testing:
     vol_list = ['Puget Sound']
 else:
     vol_list = ['Salish Sea', 'Puget Sound', 'Hood Canal']
@@ -61,20 +65,102 @@ for which_vol in vol_list:
     
     # we use the "segments" output to get the net tracer storage in the volume
     seg_ds_fn = dir0 / ('segments' + date_str + '_' + sect_gctag + '_' + riv + '.nc')
+    seg_ds = xr.open_dataset(seg_ds_fn)
     
     # we use the river extraction to get river contributions to the budget
     dir1 = Ldir['LOo'] / 'pre' / 'river1'
     riv_ds_fn = dir1 / riv_gctag / 'Data_roms' / ('extraction' + date_str + '.nc')
+    riv_ds = xr.open_dataset(riv_ds_fn)
     
-     # we need the sec_info_dict to figure out which rivers to include.
+     # we need the seg_info_dict to figure out which rivers to include, and which segments
     dir2 = Ldir['LOo'] / 'extract' / 'tef2'
     seg_info_dict_fn = dir2 / ('seg_info_dict_' + sect_gctag + '_' + riv + '.p')
+    seg_info_dict = pd.read_pickle(seg_info_dict_fn)
+    
+    # get the sect df to find all the valid section names
+    sect_df_fn = dir2 / ('sect_df_' + sect_gctag + '.p')
+    sect_df = pd.read_pickle(sect_df_fn)
+    sn_list = list(sect_df.sn)
     
     # get the bounding sections and the letter-bases of the volume segments (like ai)
-    sect_list, bounding_sect_list, seg_base_list = bfun.get_sect_list(sect_gctag, which_vol)
+    sect_list, sect_base_list, outer_sns_list = bfun.get_sect_list(sect_gctag, which_vol)
     
-    # get the segments of the volume that are keys in seg_info_dict
-    seg_info_dict = pd.read_pickle(seg_info_dict_fn)
+    # now let's figure out the keys of all the segments to include for this volume
+    #
+    # start by figuring out all valid sns
+    sns_list = []
+    for snb in sect_base_list:
+        for sn in sn_list:
+            if snb in sn:
+                for pm in ['_p','_m']:
+                    sns = sn + pm
+                    if (sns not in outer_sns_list) and (sns not in sns_list):
+                        sns_list.append(sns)
+                    else:
+                        pass
+                        # print(' - excluding ' + sns + ' from sns_list')
+    # then use the valid sns to include only valid segments
+    good_seg_key_list = []
+    for sk in seg_info_dict.keys():
+        this_sns_list = seg_info_dict[sk]['sns_list']
+        check_list = [item for item in this_sns_list if item == sk]
+        if len(check_list) == 1:
+            good_seg_key_list.append(sk)
+        elif len(check_list) == 0:
+            pass
+        else:
+            print(check_list) # checking for unexpected values in check_list
+    # and now that we have the segment keys we can also get the list of rivers
+    good_riv_list = []
+    for sk in good_seg_key_list:
+        good_riv_list += seg_info_dict[sk]['riv_list']
+        
+    # now start making volume budget things
+    
+    # Rivers
+    qr = riv_ds.sel(riv=good_riv_list).transport.sum(axis=1)
+    # an xr DataArray with a time series (noon daily) of net river flow
+    riv_ser = pd.Series(index=qr.time, data=qr.values)
+    
+    # Segment volume
+    vol_hourly = seg_ds.sel(seg=good_seg_key_list).volume.sum(axis=1)
+    vol_vec = vol_hourly.values
+    # an xr DataArray with a time series (hourly) of net volume
+    # do a little massaging of ot
+    dti = pd.to_datetime(vol_hourly.time) # a pandas DatetimeIndex with dtype='datetime64[ns]'
+    dt = dti.to_pydatetime() # an array of datetimes
+    otv = np.array([Lfun.datetime_to_modtime(item) for item in dt])
+    # tidal averaging, subsample, and cut off nans
+    pad = 36
+    # this pad is more than is required for the nans from the godin filter (35),
+    # but, when combined with the subsampling we end up with fields at Noon of
+    # each day (excluding the first and last days of the record)
+    vol_daily = zfun.lowpass(vol_vec, f='godin')[pad:-pad+1:24]
+    otv_daily = zfun.lowpass(otv, f='godin')[pad:-pad+1:24]
+    dtv = np.array([Lfun.modtime_to_datetime(item) for item in otv_daily])
+    vol_ser = pd.Series(index=dtv, data=otv_daily)
+    
+    # Transport (low-passed, daily at noon)
+    bulk_dir = dir0 / ('bulk' + date_str)
+    ii = 0
+    for tup in sect_list:
+        sn = tup[0]
+        sgn = tup[1]
+        bulk= pd.read_pickle(bulk_dir / (sn + '.p'))
+        qnet = bulk['qnet']
+        if ii == 0:
+            qnet_vec = qnet * sgn
+            otq = bulk['ot'] # list of datetimes
+        else:
+            qnet_vec += qnet * sgn
+        ii += 1
+    qnet_ser = pd.Series(index=otq, data=qnet_vec)
+        
+    # combine in a pandas DataFrame
+    vol_df = pd.DataFrame()
+    vol_df['riv'] = riv_ser
+    vol_df['vol'] = vol_ser
+    vol_df['qnet'] = qnet_ser
 
     # # Info specific to each volume
     # # The sign for each section indicates which direction is INTO the volume.
