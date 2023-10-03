@@ -153,7 +153,7 @@ for which_vol in vol_list:
         
     # combine in a pandas DataFrame
     vol_df = pd.DataFrame()
-    vol_df['riv'] = riv_ser
+    vol_df['riv'] = riv_ser # this has the longest time axis
     vol_df['vol'] = vol_ser
     vol_df['dvdt'] = dvdt_ser
     vol_df['qnet'] = qnet_ser
@@ -164,71 +164,6 @@ for which_vol in vol_list:
         vol_df.loc[:,['riv','dvdt','qnet','err']].plot()
         plt.show()
 
-    # # Info specific to each volume
-    # # The sign for each section indicates which direction is INTO the volume.
-    # if which_vol == 'Salish Sea':
-    #     seg_list = (flux_fun.ssA + flux_fun.ssM + flux_fun.ssT
-    #         + flux_fun.ssS + flux_fun.ssW + flux_fun.ssH
-    #         + flux_fun.ssJ + flux_fun.ssG)
-    #     sect_sign_dict = {'jdf1':1, 'sog5':-1}
-    # elif which_vol == 'Puget Sound':
-    #     seg_list = (flux_fun.ssA + flux_fun.ssM + flux_fun.ssT
-    #         + flux_fun.ssS + flux_fun.ssW + flux_fun.ssH)
-    #     sect_sign_dict = {'ai1':1, 'dp':1}
-    # elif which_vol == 'Hood Canal':
-    #     seg_list = flux_fun.ssH
-    #     sect_sign_dict = {'hc1':-1}
-    #
-    # # SECTION INFO
-    # sect_df = tef_fun.get_sect_df(Ldir['gridname'])
-    #
-    # # RIVERS
-    # """
-    # These are now stored in an xr.Dataset:
-    # time = daily, noon of each day
-    # riv = river names
-    # variable names: transport + all the tracers in tef_fun.vn_list
-    # """
-    # river_list = []
-    # for seg_name in seg_list:
-    #     seg = flux_fun.segs[seg_name]
-    #     river_list = river_list + seg['R']
-    # riv_ds = xr.load_dataset(riv_fn)
-    # riv_ds = riv_ds.sel(riv=river_list)
-    #
-    # # TEF at SECTIONS
-    # tef_df_dict = dict()
-    # sect_list = list(sect_sign_dict.keys())
-    # for sn in sect_list:
-    #     tef_df_dict[sn], in_sign, _, _ = flux_fun.get_two_layer(tef_dir, sn, Ldir['gridname'])
-    #     if in_sign != sect_sign_dict[sn]:
-    #         print('WARNING: potential sign error!!')
-    #
-    # # SEGMENT TIME SERIES
-    # """
-    # These are now stored in an xr.Dataset:
-    # time = hourly (so we lowpass, subsample, and clip the ends)
-    # seg = segment names
-    # variable names = volume + all the tracers in tef_fun.vn_list
-    # - note that the tracers are the average in each volume
-    # """
-    # pad = 36
-    #
-    # seg_ds = xr.load_dataset(seg_fn)
-    # seg_ds = seg_ds.sel(seg=seg_list)
-    #
-    # seg_NT = len(seg_ds.coords['time'])
-    # nanvec = np.nan * np.ones(seg_NT)
-    #
-    # # rate of change of volume
-    # vt = nanvec.copy()
-    # vt[1:-1] = (seg_ds.volume[2:].values - seg_ds.volume[:-2].values).sum(axis=1)/(2*3600)
-    # vt_lp = zfun.lowpass(vt, f='godin')[pad:-pad+1:24]
-    #
-    # # volume
-    # v = zfun.lowpass(seg_ds.volume.values, f='godin')[pad:-pad+1:24]
-    # vnet = v.sum(axis=1)
-    # V = vnet.mean() # average total volume
     #
     # # rate of change of volume-integrated tracer (sum(C*v)/sec)
     # cvt_lp_dict = {}

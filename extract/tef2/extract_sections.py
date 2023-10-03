@@ -64,7 +64,7 @@ for ii in range(N):
     ii_str = ('0000' + str(ii))[-5:]
     out_fn = temp_dir / ('CC_' + ii_str + '.nc')
     # use subprocesses
-    cmd_list = ['python3', 'get_one_section.py',
+    cmd_list = ['python3', 'extract_sections_one_time.py',
             '-sect_df_fn', str(sect_df_fn),
             '-in_fn',str(fn),
             '-out_fn', str(out_fn),

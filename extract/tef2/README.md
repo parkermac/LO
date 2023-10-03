@@ -127,7 +127,7 @@ There is some useful graphical output from this program so you should run it on 
 
 `extract_sections.py` does the hard work of extracting transport and tracer values (interpolated from the rho-grid to the u- or v-grid) from a sequence of hourly history files from a ROMS run. Of course the run has to have the same grid that you specified when running `create_sect_df.py`. As usual in the LO system you use command line arguments to tell it which [gtagex], [ctag], time range, and whether or not to get bio variables.
 
-To speed things up this calls `get_one_section.py` with many simultaneous subprocess calls. This is the code to look at to see which bio variables are being extracted.
+To speed things up this calls `extract_sections_one_time.py` with many simultaneous subprocess calls. This is the code to look at to see which bio variables are being extracted.
 
 The output ends up with the full raw extraction in a NetCDF file, one for each section and named for the section, e.g. 'ai1.nc'. The output, and that of subsequent steps, goes into:
 
@@ -258,7 +258,7 @@ which are the volume (with zeta = 0), surface area, and mean lon and lat of each
 
 **(+)/segments_[date range]\_[gctag]\_[riv].nc**
 
-Uses extract_segment_one_time.py and subprocess to speed execution.
+Uses `extract_segments_one_time.py` and subprocess to speed execution.
 
 ---
 
