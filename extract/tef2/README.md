@@ -41,10 +41,10 @@ python extract_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.
 [1 hour/year on apogee, salt only]
 [then you could transfer the results to your mac for further processing]
 
-run process_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > process.log &
-[5 minutes/year on mac, salt only]
+run process_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31
+[10 minutes/year on mac, salt only]
 
-run bulk_calc.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > bulk.log &
+python bulk_calc.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > bulk.log &
 [40 minutes/year on mac, salt only]
 
 run create_river_info -gridname cas6 -frc riv00 -dstr 2019.07.04 -test True
@@ -158,7 +158,7 @@ Except when you are testing you have to run this code on the remote computer whe
 
 ---
 
-`process_sections.py` goes through all the extracted sections and does the salinity binning, saving the output in picked dicts of numpy arrays in the folder
+`process_sections.py` goes through all the extracted sections and does the salinity binning, saving the output as NetCDF xarray Datasets (one for each section) in the folder
 
 **(+)/processed_[date range]**
 
@@ -166,7 +166,24 @@ This is fast enough to run on your laptop, after you have copied the results of 
 
 Warning: if you look around line 90 you will see that this is hard-coded to use 1000 salinity bins between 0 and 36.
 
-By now you may have noticed that I jump around aimlessly, sometimes saving output in picked DataFrames, picked dicts, or NetCDF. Sorry. Often the choice is for convenience, or to smooth reuse of old code from LO/tef. It also is a result of the incredible speed advantages offered by nco tools like ncrcat.
+It automatically figures out which data variables were extracted, and also processes salt-squared, for variance budgets.
+
+Here is an example of what is in the Datasets:
+```
+<xarray.Dataset>
+Dimensions:  (time: 8761, sbins: 36)
+Coordinates:
+  * time     (time) datetime64[ns] 2022-01-01 2022-01-01T01:00:00 ... 2023-01-01
+  * sbins    (sbins) float64 0.5 1.5 2.5 3.5 4.5 ... 31.5 32.5 33.5 34.5 35.5
+Data variables:
+    qnet     (time) float64 1.291e+06 2.207e+06 ... 2.059e+06 2.289e+06
+    fnet     (time) float64 -3.724e+09 -1.807e+10 ... -5.21e+09 -1.007e+10
+    ssh      (time) float64 -0.2873 -0.8149 -1.287 ... 0.05648 -0.2519 -0.4378
+    salt     (time, sbins) float64 0.0 0.0 0.0 0.0 0.0 ... 1.811e+07 0.0 0.0 0.0
+    q        (time, sbins) float64 0.0 0.0 0.0 0.0 0.0 ... 5.62e+05 0.0 0.0 0.0
+    salt2    (time, sbins) float64 0.0 0.0 0.0 0.0 0.0 ... 5.834e+08 0.0 0.0 0.0
+```
+This is from running with -test True, which decreases the number os salinity bins to 36, whereas in production runs we use 1000.
 
 ---
 
