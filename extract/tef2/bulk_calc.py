@@ -5,12 +5,11 @@ Based on his code, and modified by PM.
 PERFORMANCE: Took 38 minutes for a full year with cas6_c0, only salt.
 
 To test on mac:
-run bulk_calc -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.06 -test True
-
-And for a full year:
-
-(this only has salt)
 run bulk_calc -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 -test True
+
+Run for real on mac:
+run bulk_calc -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31
+(this only has salt)
 
 """
 
@@ -20,14 +19,13 @@ import numpy as np
 import pickle
 from time import time
 import pandas as pd
+import xarray as xr
 
 from lo_tools import Lfun, zfun
 import tef_fun_lorenz as tfl
 
 from lo_tools import extract_argfun as exfun
 Ldir = exfun.intro() # this handles the argument passing
-
-# import tef_fun
 
 gctag = Ldir['gridname'] + '_' + Ldir['collection_tag']
 tef2_dir = Ldir['LOo'] / 'extract' / 'tef2'
@@ -40,9 +38,9 @@ in_dir = out_dir0 / ('processed_' + Ldir['ds0'] + '_' + Ldir['ds1'])
 out_dir = out_dir0 / ('bulk_' + Ldir['ds0'] + '_' + Ldir['ds1'])
 Lfun.make_dir(out_dir, clean=True)
 
-sect_list = [item.name for item in in_dir.glob('*.p')]
+sect_list = [item.name for item in in_dir.glob('*.nc')]
 if Ldir['testing']:
-    sect_list = ['jdf3.p']
+    sect_list = ['jdf3.nc']
 
 # ---------
 
@@ -59,56 +57,45 @@ for snp in sect_list:
     sys.stdout.flush()
     out_fn = out_dir / snp
 
-    # load the data file
-    TEF = pickle.load(open(in_dir / snp, 'rb'))
+    # load the processed Dataset for this section
     
-    # Add the absolute value of the net transport (to make Qprism)
+    ds = xr.open_dataset(in_dir / snp)
+    
+    # Create the absolute value of the net transport (to make Qprism)
     # but first remove the low-passed transport (like Qr)
-    qnet_lp = zfun.lowpass(TEF['qnet'], f='godin',nanpad=False)
-    TEF['qabs'] = np.abs(TEF['qnet'].copy() - qnet_lp)
+    qnet_lp = zfun.lowpass(ds.qnet.values, f='godin',nanpad=False)
+    qabs = np.abs(ds.qnet.values - qnet_lp)
     
-    # vn_list is variables that are arrays [ot, sbins]
-    vn_list = [item for item in TEF.keys() if item not in ['sbins', 'ot', 'qnet', 'qabs', 'fnet', 'ssh']]
-    
-    # vec_list is time series [ot]
-    vec_list = ['qnet', 'qabs', 'fnet', 'ssh']
-    sbins = TEF['sbins']
-    ot = TEF['ot']
-    
-    # do a little massaging of ot
-    dti = pd.to_datetime(ot) # a pandas DatetimeIndex with dtype='datetime64[ns]'
-    dt = dti.to_pydatetime() # an array of datetimes
-    ot = np.array([Lfun.datetime_to_modtime(item) for item in dt])
-
-    # tidal averaging, subsample, and cut off nans
+    # Tidal averaging, subsample, and cut off nans
     pad = 36
     # this pad is more than is required for the nans from the godin filter (35),
     # but, when combined with the subsampling we end up with fields at Noon of
     # each day (excluding the first and last days of the record)
-    TEF_lp = dict()
-    for vn in vn_list:
-        TEF_lp[vn] = zfun.lowpass(TEF[vn], f='godin')[pad:-pad+1:24, :]
-    for vn in vec_list:
-        TEF_lp[vn] = zfun.lowpass(TEF[vn], f='godin')[pad:-pad+1:24]
-    ot = ot[pad:-pad+1:24]
-    
+    TEF_lp = dict() # temporary storage
+    vn_list = []
+    vec_list = []
+    for vn in ds.data_vars:
+        if ('time' in ds[vn].coords) and ('sbins' in ds[vn].coords):
+            TEF_lp[vn] = zfun.lowpass(ds[vn].values, f='godin')[pad:-pad+1:24, :]
+            vn_list.append(vn)
+        elif ('time' in ds[vn].coords) and ('sbins'  not in ds[vn].coords):
+            TEF_lp[vn] = zfun.lowpass(ds[vn].values, f='godin')[pad:-pad+1:24]
+            vec_list.append(vn)
+    time_lp = ds.time.values[pad:-pad+1:24]
+    sbins = ds.sbins.values
+    TEF_lp['qabs'] = zfun.lowpass(qabs, f='godin')[pad:-pad+1:24]
     # Add the qprism time series.
     # Conceptually, qprism is the maximum possible exchange flow if all
     # the flood tide made Qin and all the ebb tide made Qout.
     # If you go through the trigonometry you find that qprism = 1/2 <qabs>.
     TEF_lp['qprism'] = TEF_lp['qabs'].copy()/2
-    vec_list.append('qprism')
+    vec_list += ['qabs', 'qprism']
+    ds.close()
     
-    # also make an array of datetimes to save as the ot variable
-    otdt = np.array([Lfun.modtime_to_datetime(item) for item in ot])
-        
-    if Ldir['testing']:
-        print(Lfun.modtime_to_datetime(ot[0]))
-
     # get sizes and make sedges (the edges of sbins)
     DS=sbins[1]-sbins[0]
     sedges = np.concatenate((sbins,np.array([sbins[-1]] + DS))) - DS/2
-    NT = len(ot)
+    NT = len(time_lp)
     NS = len(sedges)
 
     # calculate all transports integrated over salinity, e.g. Q(s) = integral(q ds)
@@ -184,11 +171,21 @@ for snp in sect_list:
                 NL = len(ii)
                 MLO[vn][dd, :NL] = bulk_dict[vn]
                 
-    MLO['ot'] = otdt
     for vn in vec_list:
         MLO[vn] = TEF_lp[vn].copy()
-            
-    pickle.dump(MLO, open(out_fn, 'wb'))
+        
+    # Pack results in a Dataset and then save to NetCDF
+    ds = xr.Dataset(coords={'time': time_lp,'layer': np.arange(nlay)})
+    for vn in vn_list:
+        ds[vn] = (('time','layer'), MLO[vn])
+    for vn in vec_list:
+        ds[vn] = (('time'), MLO[vn])
+    # save it to NetCDF
+    ds.to_netcdf(out_dir / out_fn)
+    if Ldir['testing']:
+        pass
+    else:
+        ds.close()
     print('  elapsed time for section = %d seconds' % (time()-tt0))
     sys.stdout.flush()
     

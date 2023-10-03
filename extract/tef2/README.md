@@ -187,11 +187,29 @@ This is from running with -test True, which decreases the number os salinity bin
 
 ---
 
-`bulk_calc.py` boils down the results of process_sections.py into some number of 'in' and 'out' layers, using code from Marvin Lorenz. Each of these is a time series, tidally averaged and subsampled to daily at noon UTC of each day. The results end up in pickled dicts, one for each section in the collection. As a convenience we now include 'qprism' as a time series [m3 s-1].
+`bulk_calc.py` boils down the results of process_sections.py into some number of 'in' and 'out' layers, using code from Marvin Lorenz. Each of these is a time series, tidally averaged and subsampled to daily at noon UTC of each day. The results end up in xarray Datasets, saved as NetCDF, one for each section in the collection. As a convenience we now include 'qprism' as a time series [m3 s-1].
 
 **(+)/bulk_[date range]**
 
 There can be more than two layers!
+
+Here is what is in the Datasets:
+```
+<xarray.Dataset>
+Dimensions:  (time: 363, layer: 30)
+Coordinates:
+  * time     (time) datetime64[ns] 2022-01-02T12:00:00 ... 2022-12-30T12:00:00
+  * layer    (layer) int64 0 1 2 3 4 5 6 7 8 9 ... 20 21 22 23 24 25 26 27 28 29
+Data variables:
+    salt     (time, layer) float64 31.22 33.0 nan nan nan ... nan nan nan nan
+    q        (time, layer) float64 9.558e+04 -1.171e+05 nan nan ... nan nan nan
+    salt2    (time, layer) float64 974.8 1.089e+03 nan nan ... nan nan nan nan
+    qnet     (time) float64 -2.153e+04 -1.27e+04 ... 4.075e+03 5.496e+03
+    fnet     (time) float64 -1.019e+10 -1.064e+10 ... -4.705e+09 -3.847e+09
+    ssh      (time) float64 0.2146 0.2581 0.2727 0.2139 ... 0.2784 0.2749 0.2785
+    qabs     (time) float64 7.63e+05 1.493e+06 1.536e+06 ... 1.151e+06 5.106e+05
+    qprism   (time) float64 3.815e+05 7.466e+05 ... 5.756e+05 2.553e+05
+```
 
 ---
 

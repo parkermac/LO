@@ -129,7 +129,7 @@ for ext_fn in sect_list:
     TEF['fnet'] = fnet
     TEF['ssh'] = ssh
     
-    # save as xarray Dataset (.nc)
+    # Pack results in a Dataset and then save to NetCDF
     ds = xr.Dataset(coords={'time': ot,'sbins': sbins})
     for vn in ['qnet','fnet','ssh']:
         ds[vn] = (('time'), TEF[vn])
