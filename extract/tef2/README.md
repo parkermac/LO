@@ -45,7 +45,7 @@ run process_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31
 [10 minutes/year on mac, salt only]
 
 python bulk_calc.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > bulk.log &
-[40 minutes/year on mac, salt only]
+[10 minutes/year on mac, salt only]
 
 run create_river_info -gridname cas6 -frc riv00 -dstr 2019.07.04 -test True
 [the flags point to a file of river forcing for the run you are working on]

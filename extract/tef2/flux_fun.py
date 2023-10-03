@@ -6,9 +6,9 @@ and for the flux code.
 import numpy as np
 from datetime import datetime, timedelta
 import pandas as pd
+import xarray as xr
 
 from lo_tools import Lfun, zfun
-# import tef_fun
 
 from warnings import filterwarnings
 filterwarnings('ignore') # skip some warning messages
@@ -18,13 +18,15 @@ def get_two_layer(in_dir, sect_name):
     """
     Form time series of 2-layer TEF quantities, from the multi-layer bulk values.
     """
+    bulk = xr.open_dataset(in_dir / (sect_name + '.nc'))
+        
+        
+    # QQ = bulk['q']
+    # dt = bulk['ot'] # datetimes
+    # dti = pd.DatetimeIndex(dt)
     
-    bulk = pd.read_pickle(in_dir / (sect_name + '.p'))
-        
-        
-    QQ = bulk['q']
-    dt = bulk['ot'] # datetimes
-    dti = pd.DatetimeIndex(dt)
+    QQ = bulk.q.values
+    dti = bulk.time.values
     
     vn_list = ['salt'] # need to fix this so it handles all variables automatically
         
@@ -38,13 +40,13 @@ def get_two_layer(in_dir, sect_name):
     Qp = np.nansum(QQp, axis=1)
     Qm = np.nansum(QQm, axis=1)
     # mask out times when the transport is too small to use for tracer averaging
-    Qp[Qp<np.nanmean(Qp)/10] = np.nan
-    Qm[Qm>np.nanmean(Qm)/10] = np.nan
+    Qp[Qp<np.nanmean(Qp)/100] = np.nan
+    Qm[Qm>np.nanmean(Qm)/100] = np.nan
     QCp = dict()
     QCm = dict()
     for vn in vn_list:
-        QCp[vn] = np.nansum(QQp*(bulk[vn]), axis=1)
-        QCm[vn] = np.nansum(QQm*(bulk[vn]), axis=1)
+        QCp[vn] = np.nansum(QQp*(bulk[vn].values), axis=1)
+        QCm[vn] = np.nansum(QQm*(bulk[vn].values), axis=1)
     
     # form flux-weighted tracer concentrations
     Cp = dict()
@@ -56,10 +58,10 @@ def get_two_layer(in_dir, sect_name):
     tef_df = pd.DataFrame(index=dti)
     tef_df['q_p']=Qp
     tef_df['q_m']=Qm
-    tef_df['qprism'] = bulk['qprism']
-    tef_df['qnet'] = bulk['qnet']
-    tef_df['fnet'] = bulk['fnet']
-    tef_df['ssh'] = bulk['ssh']
+    tef_df['qprism'] = bulk['qprism'].values
+    tef_df['qnet'] = bulk['qnet'].values
+    tef_df['fnet'] = bulk['fnet'].values
+    tef_df['ssh'] = bulk['ssh'].values
     
     for vn in vn_list:
         tef_df[vn+'_p'] = Cp[vn]

@@ -33,7 +33,7 @@ out_dir = out_dir0 / ('bulk_plots_' + Ldir['ds0'] + '_' + Ldir['ds1'])
 if Ldir['testing'] == False:
     Lfun.make_dir(out_dir, clean=True)
 
-sect_list = [item.name.replace('.p','') for item in in_dir.glob('*.p')]
+sect_list = [item.name.replace('.nc','') for item in in_dir.glob('*.nc')]
 if Ldir['testing']:
     sect_list = ['ai7']
     
@@ -41,9 +41,9 @@ if Ldir['testing']:
 g = xr.open_dataset(Ldir['grid'] / 'grid.nc')
 h = g.h.values
 h[g.mask_rho.values==0] = np.nan
-xr = g.lon_rho.values
-yr = g.lat_rho.values
-xp, yp = pfun.get_plon_plat(xr,yr)
+xrho = g.lon_rho.values
+yrho = g.lat_rho.values
+xp, yp = pfun.get_plon_plat(xrho,yrho)
 xu = g.lon_u.values
 yu = g.lat_u.values
 xv = g.lon_v.values
@@ -68,7 +68,7 @@ def add_qprism(ax):
 
 for sect_name in sect_list:
     
-    bulk = pd.read_pickle(in_dir / (sect_name + '.p'))
+    bulk = xr.open_dataset(in_dir / (sect_name + '.nc'))
 
     tef_df = flux_fun.get_two_layer(in_dir, sect_name)
             
@@ -92,7 +92,7 @@ for sect_name in sect_list:
     ax3 = plt.subplot2grid((3,3), (2,0), colspan=2) # Qin*DS and Qprism
     axmap = plt.subplot2grid((1,3), (0,2)) # map
     
-    ot = bulk['ot'] # (same as tef_df.index)
+    ot = bulk.time.values
     
     ax1.plot(ot,tef_df['Q_p'].to_numpy(), color=p_color, linewidth=lw)
     ax1.plot(ot,tef_df['Q_m'].to_numpy(), color=m_color, linewidth=lw)
@@ -100,21 +100,21 @@ for sect_name in sect_list:
     ax1.set_ylabel(ylab_dict['Q'])
     ax1.set_xlim(ot[0],ot[-1])
     
-    qp = bulk['q'].copy()/1000
+    qp = bulk['q'].values/1000
     qp[qp<0] = np.nan
-    qm = bulk['q'].copy()/1000
+    qm = bulk['q'].values/1000
     qm[qm>0]=np.nan
-    sp = bulk['salt'].copy()
+    sp = bulk['salt'].values
     sp[np.isnan(qp)] = np.nan
-    sm = bulk['salt'].copy()
+    sm = bulk['salt'].values
     sm[np.isnan(qm)]=np.nan
     
     alpha=.3
-    ax1.plot(bulk['ot'],qp,'or',alpha=alpha)
-    ax1.plot(bulk['ot'],qm,'ob',alpha=alpha)
+    ax1.plot(ot,qp,'or',alpha=alpha)
+    ax1.plot(ot,qm,'ob',alpha=alpha)
     
-    ax2.plot(bulk['ot'],sp,'or',alpha=alpha)
-    ax2.plot(bulk['ot'],sm,'ob',alpha=alpha)
+    ax2.plot(ot,sp,'or',alpha=alpha)
+    ax2.plot(ot,sm,'ob',alpha=alpha)
     
     ax2.plot(ot,tef_df['salt_p'].to_numpy(), color=p_color, linewidth=lw)
     ax2.plot(ot,tef_df['salt_m'].to_numpy(), color=m_color, linewidth=lw)

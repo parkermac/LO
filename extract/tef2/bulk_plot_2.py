@@ -65,9 +65,9 @@ else:
 g = xr.open_dataset(Ldir['grid'] / 'grid.nc')
 h = g.h.values
 h[g.mask_rho.values==0] = np.nan
-xr = g.lon_rho.values
-yr = g.lat_rho.values
-xp, yp = pfun.get_plon_plat(xr,yr)
+xrho = g.lon_rho.values
+yrho = g.lat_rho.values
+xp, yp = pfun.get_plon_plat(xrho,yrho)
 xu = g.lon_u.values
 yu = g.lat_u.values
 xv = g.lon_v.values
@@ -80,59 +80,53 @@ pfun.start_plot(fs=fs, figsize=(21,10))
 
 for sect_name in sect_list:
     
-    if isinstance(sect_name,tuple):
-        out_name = '_'.join([item[0] for item in sect_name])
-        sign_dict = dict()
-        tef_df_dict = dict()
-        vn_list = ['salt'] # NOTE: this will need to be generalized to more tracers!
-        for sn_tup in sect_name:
-            sn = sn_tup[0]
-            sign_dict[sn] = sn_tup[1]
-            bulk = pd.read_pickle(in_dir / (sn + '.p'))
-            tef_df_dict[sn] = flux_fun.get_two_layer(in_dir, sn)
-        ii = 1
-        nsect = len(sect_name)
-        for sn in tef_df_dict.keys():
-            sgn = sign_dict[sn]
-            if ii == 1:
-                tef_df = tef_df_dict[sn].copy()
-                tef_df[pd.isnull(tef_df)] = 0
-                tef_df1 = tef_df.copy()
-                for vn in vn_list:
-                    if sgn == 1:
-                        tef_df[vn+'_q_p'] = tef_df1['q_p'] * tef_df1[vn+'_p']
-                        tef_df[vn+'_q_m'] = tef_df1['q_m'] * tef_df1[vn+'_m']
-                    elif sgn == -1:
-                        tef_df['q_p'] = -tef_df1['q_m']
-                        tef_df['q_m'] = -tef_df1['q_p']
-                        tef_df[vn+'_q_p'] = -tef_df1['q_m'] * tef_df1[vn+'_m']
-                        tef_df[vn+'_q_m'] = -tef_df1['q_p'] * tef_df1[vn+'_p']
-                tef_df['ssh'] *= 1/nsect
-            else:
-                tef_df1 = tef_df_dict[sn].copy()
-                tef_df1[pd.isnull(tef_df1)] = 0
-                for vn in vn_list:
-                    if sgn == 1:
-                        tef_df['q_p'] += tef_df1['q_p']
-                        tef_df['q_m'] += tef_df1['q_m']
-                        tef_df[vn+'_q_p'] += tef_df1['q_p'] * tef_df1[vn+'_p']
-                        tef_df[vn+'_q_m'] += tef_df1['q_m'] * tef_df1[vn+'_m']
-                    elif sgn == -1:
-                        tef_df['q_p'] += -tef_df1['q_m']
-                        tef_df['q_m'] += -tef_df1['q_p']
-                        tef_df[vn+'_q_p'] += -tef_df1['q_m'] * tef_df1[vn+'_m']
-                        tef_df[vn+'_q_m'] += -tef_df1['q_p'] * tef_df1[vn+'_p']
-                for vn in ['qprism', 'qnet', 'fnet']:
-                    tef_df[vn] += sgn * tef_df1[vn]
-                tef_df['ssh'] += tef_df1['ssh']/nsect
-            ii+= 1
-        for vn in vn_list:
-            tef_df[vn+'_p'] = tef_df[vn+'_q_p'] / tef_df['q_p']
-            tef_df[vn+'_m'] = tef_df[vn+'_q_m'] / tef_df['q_m']
-    else:
-        out_name = sect_name
-        bulk = pickle.load(open(in_dir / sect_name, 'rb'))
-        tef_df = flux_fun.get_two_layer(in_dir, sect_name)
+    out_name = '_'.join([item[0] for item in sect_name])
+    sign_dict = dict()
+    tef_df_dict = dict()
+    vn_list = ['salt'] # NOTE: this will need to be generalized to more tracers!
+    for sn_tup in sect_name:
+        sn = sn_tup[0]
+        sign_dict[sn] = sn_tup[1]
+        tef_df_dict[sn] = flux_fun.get_two_layer(in_dir, sn)
+    ii = 1
+    nsect = len(sect_name)
+    for sn in tef_df_dict.keys():
+        sgn = sign_dict[sn]
+        if ii == 1:
+            tef_df = tef_df_dict[sn].copy()
+            tef_df[pd.isnull(tef_df)] = 0
+            tef_df1 = tef_df.copy()
+            for vn in vn_list:
+                if sgn == 1:
+                    tef_df[vn+'_q_p'] = tef_df1['q_p'] * tef_df1[vn+'_p']
+                    tef_df[vn+'_q_m'] = tef_df1['q_m'] * tef_df1[vn+'_m']
+                elif sgn == -1:
+                    tef_df['q_p'] = -tef_df1['q_m']
+                    tef_df['q_m'] = -tef_df1['q_p']
+                    tef_df[vn+'_q_p'] = -tef_df1['q_m'] * tef_df1[vn+'_m']
+                    tef_df[vn+'_q_m'] = -tef_df1['q_p'] * tef_df1[vn+'_p']
+            tef_df['ssh'] *= 1/nsect
+        else:
+            tef_df1 = tef_df_dict[sn].copy()
+            tef_df1[pd.isnull(tef_df1)] = 0
+            for vn in vn_list:
+                if sgn == 1:
+                    tef_df['q_p'] += tef_df1['q_p']
+                    tef_df['q_m'] += tef_df1['q_m']
+                    tef_df[vn+'_q_p'] += tef_df1['q_p'] * tef_df1[vn+'_p']
+                    tef_df[vn+'_q_m'] += tef_df1['q_m'] * tef_df1[vn+'_m']
+                elif sgn == -1:
+                    tef_df['q_p'] += -tef_df1['q_m']
+                    tef_df['q_m'] += -tef_df1['q_p']
+                    tef_df[vn+'_q_p'] += -tef_df1['q_m'] * tef_df1[vn+'_m']
+                    tef_df[vn+'_q_m'] += -tef_df1['q_p'] * tef_df1[vn+'_p']
+            for vn in ['qprism', 'qnet', 'fnet']:
+                tef_df[vn] += sgn * tef_df1[vn]
+            tef_df['ssh'] += tef_df1['ssh']/nsect
+        ii+= 1
+    for vn in vn_list:
+        tef_df[vn+'_p'] = tef_df[vn+'_q_p'] / tef_df['q_p']
+        tef_df[vn+'_m'] = tef_df[vn+'_q_m'] / tef_df['q_m']
             
     # adjust units
     tef_df['Q_p'] = tef_df['q_p']/1000
@@ -151,7 +145,7 @@ for sect_name in sect_list:
     ax2 = plt.subplot2grid((2,3), (1,0), colspan=2) # Sin, Sout
     ax3 = plt.subplot2grid((1,3), (0,2)) # map
     
-    ot = bulk['ot'] # (same as tef_df.index)
+    ot = tef_df.index.to_numpy()
     
     ax1.plot(ot,tef_df['Q_p'].to_numpy(), color=p_color, linewidth=lw)
     ax1.plot(ot,tef_df['Q_m'].to_numpy(), color=m_color, linewidth=lw)
