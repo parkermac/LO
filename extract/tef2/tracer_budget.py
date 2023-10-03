@@ -59,6 +59,8 @@ for which_vol in vol_list:
     if testing == False:
         out_dir = dir0 / ('Budgets_' + vol_str + '_' + year_str)
         Lfun.make_dir(out_dir, clean=True)
+        
+    # GATHERING INPUT FILES
     
     # we use the "bulk" output to get transport through the open boundaries
     bulk_dir = dir0 / ('bulk' + date_str)
@@ -85,8 +87,8 @@ for which_vol in vol_list:
     # get the bounding sections and the letter-bases of the volume segments (like ai)
     sect_list, sect_base_list, outer_sns_list = bfun.get_sect_list(sect_gctag, which_vol)
     
-    # now let's figure out the keys of all the segments to include for this volume
-    #
+    # FIND WHICH SEGMENTS ARE PART OF THE VOLUME, AND WHICH RIVERS
+    
     # start by figuring out all valid sns
     sns_list = []
     for snb in sect_base_list:
@@ -103,47 +105,40 @@ for which_vol in vol_list:
     good_seg_key_list = []
     for sk in seg_info_dict.keys():
         this_sns_list = seg_info_dict[sk]['sns_list']
-        check_list = [item for item in this_sns_list if item == sk]
-        if len(check_list) == 1:
+        check_list = [item for item in this_sns_list if item in sns_list]
+        if len(check_list) >= 1:
             good_seg_key_list.append(sk)
         elif len(check_list) == 0:
             pass
-        else:
-            print(check_list) # checking for unexpected values in check_list
     # and now that we have the segment keys we can also get the list of rivers
     good_riv_list = []
     for sk in good_seg_key_list:
         good_riv_list += seg_info_dict[sk]['riv_list']
         
-    # now start making volume budget things
+    # ORGANIZE BUDGET TERMS INTO A SINGLE PANDAS DATAFRAME
     
     # Rivers
-    qr = riv_ds.sel(riv=good_riv_list).transport.sum(axis=1)
+    qr = riv_ds.sel(riv=good_riv_list).transport.sum('riv')
     # an xr DataArray with a time series (noon daily) of net river flow
-    riv_ser = pd.Series(index=qr.time, data=qr.values)
+    riv_ser = qr.to_series() # simple method for xr -> pd
     
-    # Segment volume
-    vol_hourly = seg_ds.sel(seg=good_seg_key_list).volume.sum(axis=1)
+    # Segment volume and dv/dt
+    vol_hourly = seg_ds.sel(seg=good_seg_key_list).volume.sum('seg') # a DataArray
     vol_vec = vol_hourly.values
-    # an xr DataArray with a time series (hourly) of net volume
-    # do a little massaging of ot
-    dti = pd.to_datetime(vol_hourly.time) # a pandas DatetimeIndex with dtype='datetime64[ns]'
-    dt = dti.to_pydatetime() # an array of datetimes
-    otv = np.array([Lfun.datetime_to_modtime(item) for item in dt])
-    # tidal averaging, subsample, and cut off nans
+    # rate of change of volume
+    dvdt_vec = np.nan * vol_vec
+    dvdt_vec[1:-1] = (vol_vec[2:] - vol_vec[:-2])/(2*3600)
     pad = 36
-    # this pad is more than is required for the nans from the godin filter (35),
-    # but, when combined with the subsampling we end up with fields at Noon of
-    # each day (excluding the first and last days of the record)
     vol_daily = zfun.lowpass(vol_vec, f='godin')[pad:-pad+1:24]
-    otv_daily = zfun.lowpass(otv, f='godin')[pad:-pad+1:24]
-    dtv = np.array([Lfun.modtime_to_datetime(item) for item in otv_daily])
-    vol_ser = pd.Series(index=dtv, data=otv_daily)
+    dvdt_daily = zfun.lowpass(dvdt_vec, f='godin')[pad:-pad+1:24]
+    vol_dt_daily = vol_hourly.time.values[pad:-pad+1:24]
+    vol_ser = pd.Series(index=vol_dt_daily, data=vol_daily)
+    dvdt_ser = pd.Series(index=vol_dt_daily, data=dvdt_daily)
     
     # Transport (low-passed, daily at noon)
     bulk_dir = dir0 / ('bulk' + date_str)
     ii = 0
-    for tup in sect_list:
+    for tup in sect_list: # add up contribution of all sections
         sn = tup[0]
         sgn = tup[1]
         bulk= pd.read_pickle(bulk_dir / (sn + '.p'))
@@ -160,7 +155,14 @@ for which_vol in vol_list:
     vol_df = pd.DataFrame()
     vol_df['riv'] = riv_ser
     vol_df['vol'] = vol_ser
+    vol_df['dvdt'] = dvdt_ser
     vol_df['qnet'] = qnet_ser
+    vol_df['err'] = vol_df.dvdt - vol_df.riv - vol_df.qnet
+    
+    if testing:
+        plt.close('all')
+        vol_df.loc[:,['riv','dvdt','qnet','err']].plot()
+        plt.show()
 
     # # Info specific to each volume
     # # The sign for each section indicates which direction is INTO the volume.
