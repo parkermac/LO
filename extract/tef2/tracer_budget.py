@@ -8,8 +8,7 @@ run tracer_budget -test True
 
 from lo_tools import Lfun, zfun
 from lo_tools import plotting_functions as pfun
-import flux_fun
-import budget_functions as bfun
+import tef_fun
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -38,6 +37,16 @@ Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
 
 sect_gctag = Ldir['gridname'] + '_' + args.sect_ctag
 riv_gctag = Ldir['gridname'] + '_' + riv
+
+# get the budget_functions module, looking first in LO_user
+pth = Ldir['LO'] / 'extract' / 'tef2'
+upth = Ldir['LOu'] / 'extract' / 'tef2'
+if (upth / 'experiments.py').is_file():
+    print('Importing budget_functions from LO_user')
+    bfun = Lfun.module_from_file('budget_functions', upth / 'budget_functions.py')
+else:
+    print('Importing budget_functions from LO')
+    bfun = Lfun.module_from_file('budget_functions', pth / 'budget_functions.py')
 
 if testing:
     from importlib import reload
@@ -84,8 +93,8 @@ for which_vol in vol_list:
     sect_df = pd.read_pickle(sect_df_fn)
     sn_list = list(sect_df.sn)
     
-    # get the bounding sections and the letter-bases of the volume segments (like ai)
-    sect_list, sect_base_list, outer_sns_list = bfun.get_sect_list(sect_gctag, which_vol)
+    # get info about bounding  and interior sections
+    sntup_list, sect_base_list, outer_sns_list = bfun.get_sntup_list(sect_gctag, which_vol)
     
     # FIND WHICH SEGMENTS ARE PART OF THE VOLUME, AND WHICH RIVERS
     
@@ -141,11 +150,11 @@ for which_vol in vol_list:
     for tup in sect_list: # add up contribution of all sections
         sn = tup[0]
         sgn = tup[1]
-        bulk= pd.read_pickle(bulk_dir / (sn + '.p'))
-        qnet = bulk['qnet']
+        bulk= xr.open_dataset(bulk_dir / (sn + '.nc'))
+        qnet = bulk['qnet'].values
         if ii == 0:
             qnet_vec = qnet * sgn
-            otq = bulk['ot'] # list of datetimes
+            otq = bulk['ot'].values # list of datetimes?
         else:
             qnet_vec += qnet * sgn
         ii += 1

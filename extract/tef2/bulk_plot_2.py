@@ -4,7 +4,8 @@ An alternate version of bulk_plot.py, with the capability to combine two or more
 Unfortunately, because this job requires the hand inspection of the sections to decide
 a consistent sign for all of them, it has a hard-coded "sect_list" to work from, and this
 will be different for each user and for each section collection and grid. This is the kind of
-code you would want to copy, modify, and keep in your own repo.
+code you would want to copy, modify, and keep in your own repo. Likely you would do
+this in budget_functions.py.
 
 To test on mac:
 run bulk_plot_2 -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 -test True
@@ -21,7 +22,7 @@ import xarray as xr
 
 from lo_tools import Lfun, zfun
 from lo_tools import plotting_functions as pfun
-import flux_fun
+import tef_fun
 
 from lo_tools import extract_argfun as exfun
 Ldir = exfun.intro() # this handles the argument passing
@@ -56,10 +57,6 @@ else:
 # then each section is in its own tuple with a 1 or -1 to indicate the sign.
 # The reason for the sign is that otherwise we have no way of knowing
 # how to combine the two.
-#
-# The columns returned in the DataFrame from flux_fun.get_two_layer are:
-# ['q_p', 'q_m', 'qabs', 'qprism', 'qnet', 'fnet', 'ssh', 'salt_p', 'salt_m']
-#
     
 # grid info
 g = xr.open_dataset(Ldir['grid'] / 'grid.nc')
@@ -87,7 +84,7 @@ for sect_name in sect_list:
     for sn_tup in sect_name:
         sn = sn_tup[0]
         sign_dict[sn] = sn_tup[1]
-        tef_df_dict[sn] = flux_fun.get_two_layer(in_dir, sn)
+        tef_df_dict[sn] = tef_fun.get_two_layer(in_dir, sn)
     ii = 1
     nsect = len(sect_name)
     for sn in tef_df_dict.keys():

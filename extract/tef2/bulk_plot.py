@@ -16,7 +16,7 @@ import xarray as xr
 
 from lo_tools import Lfun, zfun
 from lo_tools import plotting_functions as pfun
-import flux_fun
+import tef_fun
 
 from lo_tools import extract_argfun as exfun
 Ldir = exfun.intro() # this handles the argument passing
@@ -30,12 +30,16 @@ sect_df = pd.read_pickle(sect_df_fn)
 out_dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef2'
 in_dir = out_dir0 / ('bulk_' + Ldir['ds0'] + '_' + Ldir['ds1'])
 out_dir = out_dir0 / ('bulk_plots_' + Ldir['ds0'] + '_' + Ldir['ds1'])
+
 if Ldir['testing'] == False:
     Lfun.make_dir(out_dir, clean=True)
 
 sect_list = [item.name.replace('.nc','') for item in in_dir.glob('*.nc')]
+
 if Ldir['testing']:
     sect_list = ['ai7']
+    from importlib import reload
+    reload(tef_fun)
     
 # grid info
 g = xr.open_dataset(Ldir['grid'] / 'grid.nc')
@@ -52,7 +56,11 @@ yv = g.lat_v.values
 # PLOTTING
 fs = 12
 plt.close('all')
-pfun.start_plot(fs=fs, figsize=(21,12))
+if Ldir['testing']:
+    figsize = (12,8)
+else:
+    figsize = (21,12)
+pfun.start_plot(fs=fs, figsize=figsize)
 
 def add_qprism(ax):
     # add Qprism
@@ -70,7 +78,7 @@ for sect_name in sect_list:
     
     bulk = xr.open_dataset(in_dir / (sect_name + '.nc'))
 
-    tef_df = flux_fun.get_two_layer(in_dir, sect_name)
+    tef_df, vn_list, vec_list = tef_fun.get_two_layer(in_dir, sect_name)
             
     # adjust units
     tef_df['Q_p'] = tef_df['q_p']/1000
