@@ -221,17 +221,6 @@ The results are a bunch of png's, one for each section in
 
 ---
 
-`bulk_plot_2.py` is like `bulk_calc.py` but with the capability to combine several sections into one.
-
-Unfortunately, because this job requires the hand inspection of the sections to decide
-a consistent sign for all of them, it has a hard-coded "sect_list" to work from, and this will be different for each user and for each section collection and grid. This is the kind of code you would want to copy, modify, and keep in your own repo.
-
-The results are a bunch of png's:
-
-**(+)/bulk_plots_2_[date range]**
-
----
-
 #### Next there are a series of steps to define and extract data for _segments_, which are the volumes between sections. These are essential to form the storage term in volume-integrated budgets.
 
 ---

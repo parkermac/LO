@@ -41,16 +41,12 @@ riv_gctag = Ldir['gridname'] + '_' + riv
 # get the budget_functions module, looking first in LO_user
 pth = Ldir['LO'] / 'extract' / 'tef2'
 upth = Ldir['LOu'] / 'extract' / 'tef2'
-if (upth / 'experiments.py').is_file():
+if (upth / 'budget_functions.py').is_file():
     print('Importing budget_functions from LO_user')
     bfun = Lfun.module_from_file('budget_functions', upth / 'budget_functions.py')
 else:
     print('Importing budget_functions from LO')
     bfun = Lfun.module_from_file('budget_functions', pth / 'budget_functions.py')
-
-if testing:
-    from importlib import reload
-    reload(bfun)
 
 if testing:
     vol_list = ['Puget Sound']
@@ -147,14 +143,14 @@ for which_vol in vol_list:
     # Transport (low-passed, daily at noon)
     bulk_dir = dir0 / ('bulk' + date_str)
     ii = 0
-    for tup in sect_list: # add up contribution of all sections
+    for tup in sntup_list: # add up contribution of all sections
         sn = tup[0]
         sgn = tup[1]
         bulk= xr.open_dataset(bulk_dir / (sn + '.nc'))
-        qnet = bulk['qnet'].values
+        qnet = bulk.qnet.values
         if ii == 0:
             qnet_vec = qnet * sgn
-            otq = bulk['ot'].values # list of datetimes?
+            otq = bulk.time.values
         else:
             qnet_vec += qnet * sgn
         ii += 1

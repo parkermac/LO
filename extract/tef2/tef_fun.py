@@ -73,69 +73,6 @@ def get_two_layer(in_dir, sect_name):
     bulk.close()
             
     return tef_df, vn_list, vec_list
-    
-def get_two_layer_from_list(bulk_dir, sntup_list):
-    """
-    This combines the transport of several sections in a consistent way.
-    
-    Assumes sntup_list is a list of tuples, e.g. [('ai1',-1),('dp',-1)].
-    """
-    for sntup in sntup_list:
-        if not isinstance(sntup,tuple):
-            print('Error from tef_fun.get_two_layer_from_list()')
-            print('Need to pass a list of sns tulples.')
-            sys.exit()
-            
-        sign_dict = dict()
-        tef_df_dict = dict()
-        
-        vn_list = ['salt'] # NOTE: this will need to be generalized to more tracers!
-        for sn_tup in sect_name:
-            sn = sn_tup[0]
-            sign_dict[sn] = sn_tup[1]
-            tef_df_dict[sn], vn_list, vec_list = get_two_layer(bulk_dir, sn)
-            
-        ii = 1
-        nsect = len(sect_name)
-        for sn in tef_df_dict.keys():
-            sgn = sign_dict[sn]
-            if ii == 1:
-                tef_df = tef_df_dict[sn].copy()
-                tef_df[pd.isnull(tef_df)] = 0
-                tef_df1 = tef_df.copy()
-                for vn in vn_list:
-                    if sgn == 1:
-                        tef_df[vn+'_q_p'] = tef_df1['q_p'] * tef_df1[vn+'_p']
-                        tef_df[vn+'_q_m'] = tef_df1['q_m'] * tef_df1[vn+'_m']
-                    elif sgn == -1:
-                        tef_df['q_p'] = -tef_df1['q_m']
-                        tef_df['q_m'] = -tef_df1['q_p']
-                        tef_df[vn+'_q_p'] = -tef_df1['q_m'] * tef_df1[vn+'_m']
-                        tef_df[vn+'_q_m'] = -tef_df1['q_p'] * tef_df1[vn+'_p']
-                tef_df['ssh'] *= 1/nsect
-            else:
-                tef_df1 = tef_df_dict[sn].copy()
-                tef_df1[pd.isnull(tef_df1)] = 0
-                for vn in vn_list:
-                    if sgn == 1:
-                        tef_df['q_p'] += tef_df1['q_p']
-                        tef_df['q_m'] += tef_df1['q_m']
-                        tef_df[vn+'_q_p'] += tef_df1['q_p'] * tef_df1[vn+'_p']
-                        tef_df[vn+'_q_m'] += tef_df1['q_m'] * tef_df1[vn+'_m']
-                    elif sgn == -1:
-                        tef_df['q_p'] += -tef_df1['q_m']
-                        tef_df['q_m'] += -tef_df1['q_p']
-                        tef_df[vn+'_q_p'] += -tef_df1['q_m'] * tef_df1[vn+'_m']
-                        tef_df[vn+'_q_m'] += -tef_df1['q_p'] * tef_df1[vn+'_p']
-                for vn in ['qprism', 'qnet', 'fnet']:
-                    tef_df[vn] += sgn * tef_df1[vn]
-                tef_df['ssh'] += tef_df1['ssh']/nsect
-            ii+= 1
-        for vn in vn_list:
-            tef_df[vn+'_p'] = tef_df[vn+'_q_p'] / tef_df['q_p']
-            tef_df[vn+'_m'] = tef_df[vn+'_q_m'] / tef_df['q_m']
-            
-    return tef_df
 
 # colors to associate with each channel (the keys in channel_ and seg_dict)
 clist = ['blue', 'red', 'olive', 'orange']
