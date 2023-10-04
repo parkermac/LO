@@ -25,6 +25,7 @@ For a complete description of TEF and its calculation please see:
 9. Run `create_river_info.py` to save point source location information for a run.
 10. Run `create_seg_info_dict.py` to generate a dict of information about each of the segments, including all the j,i indices on the rho-grid in each segment.
 11. Run `extract_segments.py` on a given model run and date range to get volume-integrals vs. time for tracers in each segment.
+12. Run `tracer_budget.py` on a given model run and date range to see if all the extractions you did add up!
 
 #### Example Commands for the Workflow ("run" implies running on mac or pc in ipython)
 
@@ -56,6 +57,9 @@ run create_seg_info_dict -gctag cas6_c0 -riv riv00
 python extract_segments.py -gtx cas6_v00_uu0m -ctag c0 -riv riv00 -0 2022.01.01 -1 2022.12.31 > seg_extract.log &
 [need to first put LO_output/extract/tef2/seg_info_dict_cas6_c0_riv00.p onto apogee]
 [1 hour/year on apogee, salt only]
+
+Need to add more about tracer budget...
+
 ```
 ----
 
@@ -286,6 +290,10 @@ Uses `extract_segments_one_time.py` and subprocess to speed execution.
 
 ---
 
-`tracer_budget.py` forms volume-integrated budgets, combining section extractions, segment extracts, and river extractions.
+`tracer_budget.py` forms volume-integrated budgets, combining section, segment, and river extractions.
 
-To use this for a case with rivers you need to have extracted river time series from the appropriate forcing files, using `LO/extract/river/extract_rivers.py`.
+NOTE: To use this for a case with rivers you need to have extracted river time series from the appropriate forcing files, using `LO/extract/river/extract_rivers.py`. Also the time range of the river extraction has to match the time range of the section and segment extractions.
+
+UNDER CONSTRUCTION
+
+---

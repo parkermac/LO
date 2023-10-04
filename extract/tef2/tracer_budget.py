@@ -2,7 +2,7 @@
 Do volume and tracer budgets for user-specified volumes.
 
 Run with a command like:
-run tracer_budget -test True
+run tracer_budget -gtx cas6_v00_uu0m -ctag c0 -riv riv00 -0 2022.01.01 -1 2022.12.31 -test True
 
 """
 
@@ -14,29 +14,19 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import pandas as pd
-import argparse
 import xarray as xr
+from datetime import datetime, timedelta
 
 # debugging imports
 from time import time
 
-parser = argparse.ArgumentParser()
-parser.add_argument('-g', '--gridname', type=str, default='cas6')
-parser.add_argument('-t', '--tag', type=str, default='v00')
-parser.add_argument('-x', '--ex_name', type=str, default='uu0m')
-parser.add_argument('-yr', '--year', type=int, default=2022)
-parser.add_argument('-ctag', '--sect_ctag', type=str, default='c0')
-parser.add_argument('-riv', '--river_forcing', type=str, default='riv00')
-parser.add_argument('-test', '--testing', type=zfun.boolean_string, default=True)
-args = parser.parse_args()
-testing = args.testing
-year = args.year
-riv = args.river_forcing
+from lo_tools import extract_argfun as exfun
+Ldir = exfun.intro() # this handles the argument passing
 
-Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
-
-sect_gctag = Ldir['gridname'] + '_' + args.sect_ctag
-riv_gctag = Ldir['gridname'] + '_' + riv
+testing = Ldir['testing']
+sect_gctag = Ldir['gridname'] + '_' + Ldir['collection_tag']
+riv_gctag = Ldir['gridname'] + '_' + Ldir['riv']
+date_str = '_' + Ldir['ds0'] + '_' + Ldir['ds1']
 
 # get the budget_functions module, looking first in LO_user
 pth = Ldir['LO'] / 'extract' / 'tef2'
@@ -56,8 +46,7 @@ else:
 for which_vol in vol_list:
     vol_str = which_vol.replace(' ','_')
 
-    year_str = str(year)
-    date_str = '_' + year_str + '.01.01_' + year_str + '.12.31'
+    year_str = str(datetime.strptime(Ldir['ds0'],Lfun.ds_fmt).year)
 
     # location for output
     dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef2'
@@ -71,7 +60,7 @@ for which_vol in vol_list:
     bulk_dir = dir0 / ('bulk' + date_str)
     
     # we use the "segments" output to get the net tracer storage in the volume
-    seg_ds_fn = dir0 / ('segments' + date_str + '_' + sect_gctag + '_' + riv + '.nc')
+    seg_ds_fn = dir0 / ('segments' + date_str + '_' + sect_gctag + '_' + Ldir['riv'] + '.nc')
     seg_ds = xr.open_dataset(seg_ds_fn)
     
     # we use the river extraction to get river contributions to the budget
@@ -81,7 +70,7 @@ for which_vol in vol_list:
     
      # we need the seg_info_dict to figure out which rivers to include, and which segments
     dir2 = Ldir['LOo'] / 'extract' / 'tef2'
-    seg_info_dict_fn = dir2 / ('seg_info_dict_' + sect_gctag + '_' + riv + '.p')
+    seg_info_dict_fn = dir2 / ('seg_info_dict_' + sect_gctag + '_' + Ldir['riv'] + '.p')
     seg_info_dict = pd.read_pickle(seg_info_dict_fn)
     
     # get the sect df to find all the valid section names
@@ -169,35 +158,7 @@ for which_vol in vol_list:
         vol_df.loc[:,['riv','dvdt','qnet','err']].plot()
         plt.show()
 
-    #
-    # # rate of change of volume-integrated tracer (sum(C*v)/sec)
-    # cvt_lp_dict = {}
-    # for vn in tef_fun.vn_list:
-    #     cvt = nanvec.copy()
-    #     cvt[1:-1] = (seg_ds.volume[2:].values*seg_ds[vn][2:].values
-    #         - seg_ds.volume[:-2].values*seg_ds[vn][:-2].values).sum(axis=1)/(2*3600)
-    #     cvt_lp_dict[vn] = zfun.lowpass(cvt, f='godin')[pad:-pad+1:24]
-    #
-    # # volume- and time-averaged tracer
-    # vmean_dict = dict()
-    # for vn in tef_fun.vn_list:
-    #     vmean_dict[vn] = ((seg_ds.volume*seg_ds[vn]).sum(axis=1)/V).mean().values
-    #
-    # # BUDGETS
-    #
-    # # time index to use
-    # indall = tef_df_dict[sect_list[0]].index
-    #
-    # # Volume budget
-    # vol_df = pd.DataFrame(0, index=indall, columns=['Qin','Qout'])
-    # for sect_name in sect_list:
-    #     df = tef_df_dict[sect_name]
-    #     vol_df['Qin'] = vol_df['Qin'] + df['Qin']
-    #     vol_df['Qout'] = vol_df['Qout'] + df['Qout']
-    # vol_df['Qr'] = riv_ds.transport.sum(axis=1)[1:-1]
-    # vol_df.loc[:, 'dV_dt'] = vt_lp
-    # vol_df['Error'] = vol_df['dV_dt'] - vol_df.loc[:,'Qin'] - vol_df.loc[:,'Qout'] - vol_df.loc[:,'Qr']
-    # vol_rel_err = vol_df['Error'].mean()/vol_df['Qr'].mean()
+
     #
     # # Tracer budgets
     # # F is the "flux" of a tracer, with units [tracer units]*m3/s
