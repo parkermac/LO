@@ -2,8 +2,9 @@
 Code to extract tef2 sections.
 
 To test on mac:
-run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.04 -test True
-run extract_sections -gtx cas6_v00Stock_uu0mb -ctag c0 -0 2021.07.04 -1 2021.07.06 -Nproc 10 -get_bio True
+
+Run for real on perigee:
+python extract_sections.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -0 2017.01.01 -1 2017.01.02 > sect.log &
 
 Doing this with subprocesses (Nproc = 10, on my mac) was about 2x as fast as doing
 it sequentially within this program. The less-than-expected speedup may be because
@@ -13,10 +14,8 @@ jobs because of imports.
 Also, this is a memory-intensive calculation, so be careful about using Nproc > 10
 (10 is the default in extract_argfun).
 
-Performance: took about 1-2 sec per history file (Nproc = 10, on my mac).
-- 58 sec per day with get_bio True (11 3-D variables)
-- 24 sec per day with get_bio False (only salt)
-- a bit over an hour per year on apogee (only salt)
+Performance:
+- 2 minutes per day with get_bio True on perigee
 
 """
 

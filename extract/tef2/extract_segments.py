@@ -5,6 +5,10 @@ for budgets in the segments.
 To test on mac:
 run extract_segments -gtx cas6_v0_live -ctag c0 -riv riv00 -0 2019.07.04 -1 2019.07.04 -test True
 
+Run for ral on perigee
+python extract_segments.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -0 2017.01.01 -1 2017.01.02 > sect.log &
+
+
 Performance:
 Takes about 1 hour per year on apogee, salt only.
 
@@ -49,7 +53,7 @@ print(' out_dir0 = ' + str(out_dir0))
 print(' out_name = ' + out_name)
 print(' temp dir = ' + temp_dir.name)
 
-fn_list = Lfun.get_fn_list('hourly', Ldir, Ldir['ds0'], Ldir['ds1'])
+fn_list = Lfun.get_fn_list('hourly', Ldir, Ldir['ds0'], Ldir['ds1'], his_num=Ldir['his_num'])
 if Ldir['testing']:
     fn_list = fn_list[:3]
 

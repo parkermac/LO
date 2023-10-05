@@ -31,31 +31,44 @@ For a complete description of TEF and its calculation please see:
 
 ```
 run create_sections -g cas6 -ctag c0
+run create_sections -g cas7 -ctag c0
 
 hand edit bounding_sections.txt to have names of the open boundary sections
 
 run plot_collection -gctag cas6_c0
+run plot_collection -gctag cas7_c0
 
 run create_sect_df -gctag cas6_c0
+run create_sect_df -gctag cas7_c0
 
 python extract_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > extract.log &
+python extract_sections.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -0 2017.01.01 -1 2017.01.10 > trapsV00.log &
 [1 hour/year on apogee, salt only]
+[2 min/day on perigee with get_bio True, which would come to 12 hours per year]
 [then you could transfer the results to your mac for further processing]
 
 run process_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31
+run process_sections.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.01.10
 [10 minutes/year on mac, salt only]
+[15 minutes/10 days on mac with get_bio True]
 
 python bulk_calc.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > bulk.log &
+python bulk_calc.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.01.10 > bulk.log &
 [10 minutes/year on mac, salt only]
 
+
 run create_river_info -gridname cas6 -frc riv00 -dstr 2019.07.04 -test True
-[the flags point to a file of river forcing for the run you are working on]
+run create_river_info -gridname cas7 -frc trapsV00 -dstr 2017.07.04 -test True
+[the flags point to a file of river forcing for the run you have copied or created]
 [-test True makes a nice plot of point sources]
 
 run create_seg_info_dict -gctag cas6_c0 -riv riv00
+run create_seg_info_dict -gctag cas7_c0 -riv trapsV00
 
 python extract_segments.py -gtx cas6_v00_uu0m -ctag c0 -riv riv00 -0 2022.01.01 -1 2022.12.31 > seg_extract.log &
 [need to first put LO_output/extract/tef2/seg_info_dict_cas6_c0_riv00.p onto apogee]
+python extract_segments.py -gtx cas7_trapsV00_meV00 -ctag c0 -get_bio True -riv trapsV00 -0 2017.01.01 -1 2017.01.10 > seg_extract.log &
+[need to first put LO_output/extract/tef2/seg_info_dict_cas7_c0_trapsV00.p onto apogee]
 [1 hour/year on apogee, salt only]
 
 Need to add more about tracer budget...
