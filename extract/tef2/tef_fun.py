@@ -32,7 +32,7 @@ river_to_ocean_dict = {
     'TAlk':'alkalinity',
     'LDeC':'LdetritusC',
     'SDeC':'SdetritusC',
-    'Oxyg':'oxygen']
+    'Oxyg':'oxygen'
 }
 
 units_dict = {'salt':'g/kg',
