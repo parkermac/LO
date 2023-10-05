@@ -102,8 +102,9 @@ df.loc[(df.dir==1) & (df.sgn==1), 'jrho'] = df.loc[(df.dir==1) & (df.sgn==1), 'j
 df.loc[(df.dir==1) & (df.sgn==-1), 'irho'] = df.loc[(df.dir==1) & (df.sgn==-1), 'iv']
 df.loc[(df.dir==1) & (df.sgn==-1), 'jrho'] = df.loc[(df.dir==1) & (df.sgn==-1), 'jv']
 
-# I assume we don't have to do any translating of vertical sources, which have df.dir==2
-# and which are already on the rho grid.
+# Vertical sources, which have df.dir==2, are on the rho grid.
+df.loc[(df.dir==2), 'irho'] = df.loc[(df.dir==2), 'ii']
+df.loc[(df.dir==2), 'jrho'] = df.loc[(df.dir==2), 'jj']
 
 # check results and save them if there are no bad points
 ir = df.irho.to_numpy(dtype=int)

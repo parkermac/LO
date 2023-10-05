@@ -153,7 +153,7 @@ for which_vol in vol_list:
     VC_lp_dict['time'] = vol_dt_daily
     # Also get the net tracer in all the segments. Note that what extract_segments.py
     # saves is the hourly average tracer in each segment.
-    for vn in vn_dict:
+    for vn in vn_list:
         for sk in good_seg_key_list:
             pass
         

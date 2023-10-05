@@ -85,9 +85,14 @@ NR = len(riv_name_list)
 # long list of variables to extract
 if 'river_NH4' in ds.data_vars:
     # new ROMS version
-    vn_list = ['transport', 'salt', 'temp', 'Oxyg',
-        'NH4','NO3', 'Phyt', 'Zoop', 'SDeN', 'LDeN',
-        'TIC', 'TAlk']
+    bvn_list = ['NO3', 'NH4', 'Phyt', 'Zoop', 'LDeN', 'SDeN', 'Chlo',
+            'TIC', 'TAlk', 'LDeC', 'SDeC', 'Oxyg']
+    # Note 2023.10.05: bvn_list is copied directly from
+    # LO/forcing/riv00/make_forcing_main.py
+    vn_list = ['transport', 'salt', 'temp'] + bvn_list
+    # It would probably be better to automate this by inspecting
+    # coordinates or something, but this is probably good enough.
+    
 else:
     # old ROMS version (like cas6_v0_live)
     # likely not needed, but retained to support legacy cases

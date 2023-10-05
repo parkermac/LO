@@ -111,7 +111,7 @@ if len(riv) > 0:
     do_riv = True
 else:
     print('Not using river info.')
-    do_riv == False
+    do_riv = False
 
 if testing:
     if False:

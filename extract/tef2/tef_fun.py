@@ -77,6 +77,22 @@ def get_two_layer(in_dir, sect_name):
 # colors to associate with each channel (the keys in channel_ and seg_dict)
 clist = ['blue', 'red', 'olive', 'orange']
 
+# This associates tracer names in the river forcing with those in
+# the history files. Note that in the river forcing file they are all
+# called river_[variable name], e.g. river_TAlk.
+# t=This ONLY includes names that are DIFFERENT between river and history files.
+river_to_ocean_dict = {
+    'Phyt':'phytoplankton',
+    'Zoop':'zooplankton',
+    'LDeN':'LdetritusN',
+    'SDeN':'SdetritusN',
+    'Chlo':'chlorophyll',
+    'TAlk':'alkalinity',
+    'LDeC':'LdetritusC',
+    'SDeC':'SdetritusC',
+    'Oxyg':'oxygen']
+}
+
 units_dict = {'salt':'g/kg',
         'temp':'degC',
         'oxygen':'uM DO',
