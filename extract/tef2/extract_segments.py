@@ -6,8 +6,7 @@ To test on mac:
 run extract_segments -gtx cas6_v0_live -ctag c0 -riv riv00 -0 2019.07.04 -1 2019.07.04 -test True
 
 Run for ral on perigee
-python extract_segments.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -0 2017.01.01 -1 2017.01.02 > sect.log &
-
+python extract_segments.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -riv trapsV00 -0 2017.01.01 -1 2017.01.10 > seg_extract.log &
 
 Performance:
 Takes about 1 hour per year on apogee, salt only.
