@@ -63,6 +63,7 @@ for seg in seg_list:
 
 # set list of variables to extract
 if args.get_bio:
+    # NEED to deal with this!
     vn_list = 'junk'#tef_fun.vn_list
 else:
     vn_list = ['salt']
@@ -72,6 +73,8 @@ print(fn)
     
 ds = xr.open_dataset(fn)
 
+# This pre-loading seems like a bad idea when I am doing a lot of bio vars!
+# Also soon we will have to deal with other things like air-sea fluxes.
 vn_dict = {}
 for vn in vn_list:
     vn_dict[vn] = ds[vn][0,:,:,:].values

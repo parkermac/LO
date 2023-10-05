@@ -51,7 +51,7 @@ for which_vol in vol_list:
     # location for output
     dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef2'
     if testing == False:
-        out_dir = dir0 / ('Budgets_' + vol_str + '_' + year_str)
+        out_dir = dir0 / ('Budgets_' + vol_str + date_str)
         Lfun.make_dir(out_dir, clean=True)
         
     # GATHERING INPUT FILES
@@ -111,12 +111,28 @@ for which_vol in vol_list:
         
     # ORGANIZE BUDGET TERMS INTO A SINGLE PANDAS DATAFRAME
     
+    # Set up some places to store things:
+    # - from segments
+    VC_dict = dict() # volume integrals vs. time, including d/dt of each, hourly
+    VC_lp_dict = dict() # low-passed version of the items in VC_dict, daily
+    # - from rivers, open boundary sections, and surface/bottom fluxes
+    F_dict = dict()
+    F_lp_dict()
+    
+    # Use seg_ds to figure out which tracers we can process.
+    vn_list = []
+    for vn in seg_ds.data_vars:
+        if ('time' in seg_ds[vn].coords) and ('seg' in seg_ds[vn].coords):
+            vn_list.append(vn)
+    vn_list.remove('volume') # we treat this separately from the other tracers
+    
     # Rivers
     qr = riv_ds.sel(riv=good_riv_list).transport.sum('riv')
     # an xr DataArray with a time series (noon daily) of net river flow
-    riv_ser = qr.to_series() # simple method for xr -> pd
+    qr_ser = qr.to_series() # simple method for xr -> pd
     
-    # Segment volume and dv/dt
+    # Segment volume and dv/dt, and other tracers
+    #
     vol_hourly = seg_ds.sel(seg=good_seg_key_list).volume.sum('seg') # a DataArray
     vol_vec = vol_hourly.values
     # rate of change of volume
@@ -128,6 +144,20 @@ for which_vol in vol_list:
     vol_dt_daily = vol_hourly.time.values[pad:-pad+1:24]
     vol_ser = pd.Series(index=vol_dt_daily, data=vol_daily)
     dvdt_ser = pd.Series(index=vol_dt_daily, data=dvdt_daily)
+    # practice keeping things organized
+    VC_dict['volume'] = vol_vec
+    VC_dict['dvdt'] = dv_dt_vec
+    VC_dict['time'] = this_seg_ds.time.values
+    VC_lp_dict['volume'] = vol_daily
+    VC_lp_dict['dvdt'] = dvdt_daily
+    VC_lp_dict['time'] = vol_dt_daily
+    # Also get the net tracer in all the segments. Note that what extract_segments.py
+    # saves is the hourly average tracer in each segment.
+    for vn in vn_dict:
+        for sk in good_seg_key_list:
+            pass
+        
+    
     
     # Transport (low-passed, daily at noon)
     bulk_dir = dir0 / ('bulk' + date_str)
@@ -147,7 +177,7 @@ for which_vol in vol_list:
         
     # combine in a pandas DataFrame
     vol_df = pd.DataFrame()
-    vol_df['riv'] = riv_ser # this has the longest time axis
+    vol_df['riv'] = qr_ser # this has the longest time axis
     vol_df['vol'] = vol_ser
     vol_df['dvdt'] = dvdt_ser
     vol_df['qnet'] = qnet_ser

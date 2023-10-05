@@ -50,10 +50,10 @@ print(' temp dir = ' + temp_dir.name)
 fn_list = Lfun.get_fn_list('hourly', Ldir, Ldir['ds0'], Ldir['ds1'])
 if Ldir['testing']:
     fn_list = fn_list[:3]
-if Ldir['get_bio']:
-    vn_type = 'bio'
-else:
-    vn_type = 'salt'
+# if Ldir['get_bio']:
+#     vn_type = 'bio'
+# else:
+#     vn_type = 'salt'
 
 print('Doing initial data extraction:')
 # We do extractions one hour at a time, as separate subprocess jobs.
