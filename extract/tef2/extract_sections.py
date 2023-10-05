@@ -49,10 +49,6 @@ Lfun.make_dir(temp_dir, clean=True)
 
 if Ldir['testing']:
     fn_list = fn_list[:3]
-if Ldir['get_bio']:
-    vn_type = 'bio'
-else:
-    vn_type = 'salt'
 
 # loop over all jobs
 tt0 = time()
@@ -68,7 +64,7 @@ for ii in range(N):
             '-sect_df_fn', str(sect_df_fn),
             '-in_fn',str(fn),
             '-out_fn', str(out_fn),
-            '-vn_type', vn_type]
+            '-get_bio', str(Ldir['get_bio'])]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
     # If we have accumulated Nproc jobs, or are at the end of the

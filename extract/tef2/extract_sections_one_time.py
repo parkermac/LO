@@ -7,12 +7,14 @@ from xarray import open_dataset, Dataset
 from numpy import nan, ones, diff
 from pickle import dump
 from pandas import read_pickle, to_datetime
+from lo_tools import Lfun
+import tef_fun
 
 parser = ArgumentParser()
 parser.add_argument('-sect_df_fn', type=str) # path to sect_df
 parser.add_argument('-in_fn', type=str) # path to history file
 parser.add_argument('-out_fn', type=str) # path to outfile (temp directory)
-parser.add_argument('-vn_type', type=str) # 'salt' or 'bio'
+parser.add_argument('-get_bio', type=Lfun.boolean_string, default=False)
 args = parser.parse_args()
 
 sect_df = read_pickle(args.sect_df_fn)
@@ -21,17 +23,17 @@ ds = open_dataset(args.in_fn, decode_times=False)
 # of the time axis later when we concatenate things in the calling function
 # using ncrcat
 
-if args.vn_type == 'salt':
-    vn_list = ['salt']
-elif args.vn_type == 'bio':
+if args.get_bio:
     if 'NH4' in ds.data_vars:
-        vn_list = ['salt', 'temp', 'oxygen',
-            'NO3', 'NH4', 'phytoplankton', 'zooplankton', 'SdetritusN', 'LdetritusN',
-            'TIC', 'alkalinity']
-    else:    
+        vn_list = tef_fun.vn_list
+    else:
+        # old roms version
         vn_list = ['salt', 'temp', 'oxygen',
             'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
             'TIC', 'alkalinity']
+else:
+    vn_list = ['salt']
+    
 # grid info
 DX = 1/ds.pm.values
 DY = 1/ds.pn.values

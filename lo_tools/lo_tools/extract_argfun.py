@@ -26,6 +26,7 @@ def intro():
     # arguments used by extract/tef2
     parser.add_argument('-ctag','--collection_tag', type=str)
     parser.add_argument('-riv', type=str) # e.g. riv00
+    parser.add_argument('-his_num', type=int, default=2) # use 1 to start with ocean_his_0001.nc
     
     # get the args and put into Ldir
     args = parser.parse_args()

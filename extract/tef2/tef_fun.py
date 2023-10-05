@@ -14,6 +14,44 @@ from warnings import filterwarnings
 filterwarnings('ignore') # skip some warning messages
 # associated with lines like QQp[QQ<=0] = np.nan
 
+# Default list of tracers to get, for the new ROMS runs, as of 2023.
+vn_list = ['salt', 'temp', 'oxygen','chlorophyll',
+            'NO3', 'NH4', 'phytoplankton', 'zooplankton', 'SdetritusN', 'LdetritusN',
+            'TIC', 'alkalinity', 'SdetritusC', 'LdetritusC']
+            
+# Dict that associates tracer names in the river forcing with those in
+# the history files. Note that in the river forcing file they are all
+# called river_[variable name], e.g. river_TAlk.
+# This ONLY includes names that are DIFFERENT between river and history files.
+river_to_ocean_dict = {
+    'Phyt':'phytoplankton',
+    'Zoop':'zooplankton',
+    'LDeN':'LdetritusN',
+    'SDeN':'SdetritusN',
+    'Chlo':'chlorophyll',
+    'TAlk':'alkalinity',
+    'LDeC':'LdetritusC',
+    'SDeC':'SdetritusC',
+    'Oxyg':'oxygen']
+}
+
+units_dict = {'salt':'g/kg',
+        'temp':'degC',
+        'oxygen':'uM DO',
+        'NO3':'uM N',
+        'phytoplankton':'uM N',
+        'chlorophyll':'mg m-3',
+        'zooplankton':'uM N',
+        'SdetritusN':'uM N',
+        'LdetritusN':'uM N',
+        'SdetritusC':'uM C',
+        'LdetritusC':'uM C',
+        'Ntot':'uM N',
+        'TIC':'uM C',
+        'alkalinity':'uM Eq'}
+
+
+
 def get_two_layer(in_dir, sect_name):
     """
     Form time series of 2-layer TEF quantities, from the multi-layer bulk values.
@@ -76,34 +114,6 @@ def get_two_layer(in_dir, sect_name):
 
 # colors to associate with each channel (the keys in channel_ and seg_dict)
 clist = ['blue', 'red', 'olive', 'orange']
-
-# This associates tracer names in the river forcing with those in
-# the history files. Note that in the river forcing file they are all
-# called river_[variable name], e.g. river_TAlk.
-# t=This ONLY includes names that are DIFFERENT between river and history files.
-river_to_ocean_dict = {
-    'Phyt':'phytoplankton',
-    'Zoop':'zooplankton',
-    'LDeN':'LdetritusN',
-    'SDeN':'SdetritusN',
-    'Chlo':'chlorophyll',
-    'TAlk':'alkalinity',
-    'LDeC':'LdetritusC',
-    'SDeC':'SdetritusC',
-    'Oxyg':'oxygen']
-}
-
-units_dict = {'salt':'g/kg',
-        'temp':'degC',
-        'oxygen':'uM DO',
-        'NO3':'uM N',
-        'phytoplankton':'uM N',
-        'zooplankton':'uM N',
-        'detritus':'uM N',
-        'Ldetritus':'uM N',
-        'Ntot':'uM N',
-        'TIC':'uM C',
-        'alkalinity':'uM Eq'}
 
 def make_dist(x,y):
     NS = len(x)

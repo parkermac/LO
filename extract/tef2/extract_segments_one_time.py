@@ -15,7 +15,7 @@ from time import time
 import pandas as pd
 
 from lo_tools import Lfun, zfun, zrfun
-#import tef_fun
+import tef_fun
 
 # command line arguments
 parser = argparse.ArgumentParser()
@@ -61,44 +61,49 @@ for seg in seg_list:
     j_dict[seg] = JJ
     i_dict[seg] = II
 
-# set list of variables to extract
-if args.get_bio:
-    # NEED to deal with this!
-    vn_list = 'junk'#tef_fun.vn_list
-else:
-    vn_list = ['salt']
-
 tt0 = time()
 print(fn)
     
 ds = xr.open_dataset(fn)
-
-# This pre-loading seems like a bad idea when I am doing a lot of bio vars!
-# Also soon we will have to deal with other things like air-sea fluxes.
-vn_dict = {}
-for vn in vn_list:
-    vn_dict[vn] = ds[vn][0,:,:,:].values
 zeta = ds['zeta'][0,:,:].values
-ds.close()
+
+# set list of variables to extract
+if args.get_bio:
+    if 'NH4' in ds.data_vars:
+        vn_list = tef_fun.vn_list
+    else:
+        # old roms version
+        vn_list = ['salt', 'temp', 'oxygen',
+            'NO3', 'phytoplankton', 'zooplankton', 'detritus', 'Ldetritus',
+            'TIC', 'alkalinity']
+else:
+    vn_list = ['salt']
 
 # find the volume and other variables for each segment, at this time
 A = pd.DataFrame(index=seg_list)
 AA = dict()
 for seg in seg_list:
-    
     jjj = j_dict[seg]
     iii = i_dict[seg]
     z_w = zrfun.get_z(h[jjj,iii], zeta[jjj,iii], S, only_w=True)
     dz = np.diff(z_w, axis=0)
     DV = dz * DA3[0,jjj,iii]
     volume = DV.sum()
-    AA['volume'] = volume
-    
-    for vn in vn_list:
-        AA[vn] = (vn_dict[vn][:,jjj,iii] * DV).sum()/volume
     # store results
-    for vn in vn_list + ['volume']:
+    A.loc[seg, 'volume'] = volume
+for vn in vn_list:
+    fld = ds[vn][0,:,:,:].values
+    for seg in seg_list:
+        jjj = j_dict[seg]
+        iii = i_dict[seg]
+        z_w = zrfun.get_z(h[jjj,iii], zeta[jjj,iii], S, only_w=True)
+        dz = np.diff(z_w, axis=0)
+        DV = dz * DA3[0,jjj,iii]
+        volume = DV.sum()
+        AA[vn] = (fld[:,jjj,iii] * DV).sum()/volume
+        # store results
         A.loc[seg, vn] = AA[vn]
+ds.close()
             
 print('  ** took %0.1f sec' % (time()-tt0))
 sys.stdout.flush()

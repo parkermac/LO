@@ -140,7 +140,7 @@ def date_list_utility(dt0, dt1, daystep=1):
         dt = dt + timedelta(days=daystep)
     return date_list
 
-def fn_list_utility(dt0, dt1, Ldir, hourmax=24):
+def fn_list_utility(dt0, dt1, Ldir, hourmax=24, his_num=2):
     """
     INPUT: start and end datetimes
     OUTPUT: list of all history files expected to span the dates
@@ -149,16 +149,30 @@ def fn_list_utility(dt0, dt1, Ldir, hourmax=24):
     dir0 = Ldir['roms_out'] / Ldir['gtagex']
     fn_list = []
     date_list = date_list_utility(dt0, dt1)
-    # new scheme 2022.10.09 to work with perfect restart
-    dt00 = (dt0 - timedelta(days=1))
-    fn_list.append(dir0 / ('f'+dt00.strftime(ds_fmt)) / 'ocean_his_0025.nc')
-    for dl in date_list:
-        f_string = 'f' + dl
-        hourmin = 1
-        for nhis in range(hourmin+1, hourmax+2):
-            nhiss = ('0000' + str(nhis))[-4:]
-            fn = dir0 / f_string / ('ocean_his_' + nhiss + '.nc')
-            fn_list.append(fn)
+    if his_num == 1:
+        # New scheme 2023.10.05 to work with new or continuation start_type,
+        # by assuming we want to start with ocean_his_0001.nc of dt0
+        fn_list.append(dir0 / ('f'+dt0.strftime(ds_fmt)) / 'ocean_his_0001.nc')
+        for dl in date_list:
+            f_string = 'f' + dl
+            hourmin = 1
+            for nhis in range(hourmin+1, hourmax+2):
+                nhiss = ('0000' + str(nhis))[-4:]
+                fn = dir0 / f_string / ('ocean_his_' + nhiss + '.nc')
+                fn_list.append(fn)
+    else:
+        # For any other value of his_num we assume this is a perfect start_type
+        # and so there is no ocean_his_0001.nc on any day and we start with
+        # ocean_his_0025.nc of the day before.
+        dt00 = (dt0 - timedelta(days=1))
+        fn_list.append(dir0 / ('f'+dt00.strftime(ds_fmt)) / 'ocean_his_0025.nc')
+        for dl in date_list:
+            f_string = 'f' + dl
+            hourmin = 1
+            for nhis in range(hourmin+1, hourmax+2):
+                nhiss = ('0000' + str(nhis))[-4:]
+                fn = dir0 / f_string / ('ocean_his_' + nhiss + '.nc')
+                fn_list.append(fn)
     return fn_list
     
 def get_fn_list(list_type, Ldir, ds0, ds1, his_num=2):
@@ -166,6 +180,10 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=2):
     INPUT:
     A function for getting lists of history files.
     List items are Path objects
+    
+    NEW 2023.10.05: for list_type = 'hourly', if you pass his_num = 1
+    it will start with ocean_his_0001.nc on instead of the default which
+    is to start with ocean_his_0025.nc on the day before.
     """
     dt0 = datetime.strptime(ds0, ds_fmt)
     dt1 = datetime.strptime(ds1, ds_fmt)
@@ -176,7 +194,7 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=2):
         fn_list = [dir0 / ('f' + ds0) / ('ocean_his_' + his_string + '.nc')]
     elif list_type == 'hourly':
         # list of hourly files over a date range
-        fn_list = fn_list_utility(dt0,dt1,Ldir)
+        fn_list = fn_list_utility(dt0,dt1,Ldir,his_num=his_num)
     elif list_type == 'daily':
         # list of history file 21 (Noon PST) over a date range
         fn_list = []
@@ -291,7 +309,7 @@ def module_from_file(module_name, file_path):
     return module
 
 if __name__ == '__main__':
-    # TESTING: run Lfun will execute these
+    # TESTING: run Lfun will execute these (don't import Lfun first)
     
     if False:
         print(' TESTING Lstart() '.center(60,'-'))
@@ -326,13 +344,11 @@ if __name__ == '__main__':
     if True:
         print(' TESTING get_fn_list() '.center(60,'-'))
         Ldir = Lstart(gridname='cas6', tag='v0', ex_name='live')
-        # Ldir['roms_out'] = Ldir['roms_out']
-        list_type = 'allhours'
         ds0 = '2019.07.04'
         ds1 = '2019.07.05'
         for list_type in ['daily','snapshot', 'allhours', 'hourly']:
             print(list_type.center(60,'.'))
-            fn_list = get_fn_list(list_type, Ldir, ds0, ds1, his_num=7)
+            fn_list = get_fn_list(list_type, Ldir, ds0, ds1, his_num=1)
             for fn in fn_list:
                 print(fn)
                 

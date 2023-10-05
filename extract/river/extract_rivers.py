@@ -16,6 +16,9 @@ run extract_rivers -g cas6 -0 2019.07.04 -1 2019.07.04 -riv riv00
 To run on apogee:
 run extract_rivers -g cas6 -0 2022.01.01 -1 2022.12.31 -riv riv00
 
+Run on perigee and get output from a different user:
+run extract_rivers -g cas7 -0 2017.01.01 -1 2017.01.10 -riv trapsV00 -alt_output_dir /data1/auroral/LO_output
+
 Performance: 55 sec per year on apogee.
 
 """
@@ -34,6 +37,7 @@ parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
 parser.add_argument('-0', '--ds0', type=str) # e.g. 2022.01.01
 parser.add_argument('-1', '--ds1', type=str) # e.g. 2022.12.31
 parser.add_argument('-riv', type=str) # e.g. riv00
+parser.add_argument('-alt_output_dir', type=str, default='') # e.g. /data1/auroral/LO_output
 args = parser.parse_args()
 argsd = args.__dict__
 for a in ['gridname','ds0','ds1','riv']:
@@ -47,9 +51,11 @@ ctag = Ldir['gridname'] + '_' + args.riv
 
 tt0 = time()
 
-
 # input directory
-in_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname']
+if len(args.alt_output_dir) > 0:
+    in_dir = Path(args.alt_output_dir)  / 'forcing' / Ldir['gridname']
+else:
+    in_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname']
 
 # make sure the output directory exists
 out_dir = Ldir['LOo'] / 'pre' / 'river1' / ctag / 'Data_roms'

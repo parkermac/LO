@@ -58,7 +58,6 @@ for ext_fn in sect_list:
     print(ext_fn)
 
     # name output file
-    #out_fn = ext_fn.replace('.nc','.p')
     out_fn = ext_fn
 
     # load fields
