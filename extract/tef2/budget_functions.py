@@ -49,5 +49,10 @@ def get_sntup_list(gctag, vol_name):
             sntup_list = [('ai1',-1),('dp',-1)] # the sign is for inflow direction
             sect_base_list = ['ai','dp','wb','hc','mb','tn','ss']
             outer_sns_list = ['ai1_p','dp_p'] # exclude segments that have these
+    elif gctag == 'cas7_c0':
+        if vol_name == 'Puget Sound':
+            sntup_list = [('ai1',-1),('dp',-1),('swin',-1)] # the sign is for inflow direction
+            sect_base_list = ['ai','dp','wb','hc','mb','tn','ss','swin']
+            outer_sns_list = ['ai1_p','dp_p','swin_p'] # exclude segments that have these
             
     return sntup_list, sect_base_list, outer_sns_list

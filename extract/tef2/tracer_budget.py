@@ -3,6 +3,7 @@ Do volume and tracer budgets for user-specified volumes.
 
 Run with a command like:
 run tracer_budget -gtx cas6_v00_uu0m -ctag c0 -riv riv00 -0 2022.01.01 -1 2022.12.31 -test True
+run tracer_budget -gtx cas7_trapsV00_meV00 -ctag c0 -riv trapsV00 -0 2017.01.01 -1 2017.01.10 -test True
 
 """
 
@@ -117,7 +118,7 @@ for which_vol in vol_list:
     VC_lp_dict = dict() # low-passed version of the items in VC_dict, daily
     # - from rivers, open boundary sections, and surface/bottom fluxes
     F_dict = dict()
-    F_lp_dict()
+    F_lp_dict = dict()
     
     # Use seg_ds to figure out which tracers we can process.
     vn_list = []
@@ -146,8 +147,8 @@ for which_vol in vol_list:
     dvdt_ser = pd.Series(index=vol_dt_daily, data=dvdt_daily)
     # practice keeping things organized
     VC_dict['volume'] = vol_vec
-    VC_dict['dvdt'] = dv_dt_vec
-    VC_dict['time'] = this_seg_ds.time.values
+    VC_dict['dvdt'] = dvdt_vec
+    VC_dict['time'] = seg_ds.time.values
     VC_lp_dict['volume'] = vol_daily
     VC_lp_dict['dvdt'] = dvdt_daily
     VC_lp_dict['time'] = vol_dt_daily
@@ -156,8 +157,6 @@ for which_vol in vol_list:
     for vn in vn_list:
         for sk in good_seg_key_list:
             pass
-        
-    
     
     # Transport (low-passed, daily at noon)
     bulk_dir = dir0 / ('bulk' + date_str)
