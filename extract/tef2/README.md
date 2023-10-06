@@ -59,21 +59,29 @@ python bulk_calc.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > bu
 [10 minutes/year on mac, salt only]
 
 python bulk_calc.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.01.10 > bulk.log &
-
+[fast]
 
 run create_river_info -gridname cas6 -frc riv00 -dstr 2019.07.04 -test True
+
 run create_river_info -gridname cas7 -frc trapsV00 -dstr 2017.07.04 -test True
 [the flags point to a file of river forcing for the run you have copied or created]
 [-test True makes a nice plot of point sources]
 
 run create_seg_info_dict -gctag cas6_c0 -riv riv00
+
 run create_seg_info_dict -gctag cas7_c0 -riv trapsV00
 
 python extract_segments.py -gtx cas6_v00_uu0m -ctag c0 -riv riv00 -0 2022.01.01 -1 2022.12.31 > seg_extract.log &
 [need to first put LO_output/extract/tef2/seg_info_dict_cas6_c0_riv00.p onto apogee]
+[1 hour/year on apogee, salt only]
+
 python extract_segments.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -riv trapsV00 -0 2017.01.01 -1 2017.01.10 > seg_extract.log &
 [need to first put LO_output/extract/tef2/seg_info_dict_cas7_c0_trapsV00.p onto apogee]
-[1 hour/year on apogee, salt only]
+[12 minutes for 10 days on perigee]
+
+run extract_rivers -g cas7 -0 2017.01.01 -1 2017.01.10 -riv trapsV00 -alt_output_dir /data1/auroral/LO_output
+[fast]
+
 
 Need to add more about tracer budget...
 
