@@ -2,7 +2,7 @@
 Plot selected as-run river time series for an arbitrary extraction.
 
 To test on mac:
-run plot_rivers -g cas6 -0 2022.01.01 -1 2022.12.31 -riv riv00
+run plot_rivers -g cas7 -0 2017.01.01 -1 2017.12.31 -riv trapsV00
 
 
 """
@@ -12,6 +12,7 @@ from lo_tools import plotting_functions as pfun
 import xarray as xr
 import pandas as pd
 import matplotlib.pyplot as plt
+import sys
 
 import argparse
 parser = argparse.ArgumentParser()
@@ -62,7 +63,7 @@ fig = plt.figure()
 # for plotting time series we are better off using pandas
 df = pd.DataFrame(index=x.time.values)
 ii = 1
-for rn in ['fraser', 'columbia', 'skagit', 'deschutes']:
+for rn in ['fraser', 'columbia', 'skagit', 'Willamette R']:
     ax = fig.add_subplot(2,2,ii)
     df.loc[:,'Q'] = x.transport.sel(riv=rn).values
     df.loc[:,'Qclim'] = x.transport_clim.sel(riv=rn).values

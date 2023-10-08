@@ -3,15 +3,12 @@ A tool to extract hourly time series of volume and selected tracers and derived 
 for budgets in the segments.
 
 To test on mac:
-run extract_segments -gtx cas6_v0_live -ctag c0 -riv riv00 -0 2019.07.04 -1 2019.07.04 -test True
+run extract_segments.py -gtx cas7_trapsV00_meV00 -ctag c0 -get_bio True -riv trapsV00 -0 2017.07.04 -1 2017.07.06
 
-Run for ral on perigee
-python extract_segments.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -riv trapsV00 -0 2017.01.01 -1 2017.01.10 > seg_extract.log &
-
-Performance:
-Takes about 1 hour per year on apogee, salt only.
+Performance: 2.5 minutes for test
 
 Use -get_bio True to get all bio tracers
+Use -test True for more screen output and a shorter extraction
 
 """
 from lo_tools import Lfun, zrfun
@@ -83,10 +80,12 @@ for ii in range(N):
         tt0 = time()
         for proc in proc_list:
             stdout, stderr = proc.communicate()
-            # print(' sdtout '.center(60,'-'))
-            # print(stdout.decode())
-            # print(' stderr '.center(60,'-'))
-            # print(stderr.decode())
+            if Ldir['testing']:
+                print(' sdtout '.center(60,'-'))
+                print(stdout.decode())
+            if len(stderr) > 0:
+                print(' stderr '.center(60,'-'))
+                print(stderr.decode())
         print(' - %d out of %d: %d took %0.2f sec' % (ii, N, Nproc, time()-tt0))
         sys.stdout.flush()
         proc_list = []

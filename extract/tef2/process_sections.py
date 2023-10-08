@@ -2,14 +2,10 @@
 Process tef2 extractions, giving transport vs. salinity for:
 volume, salt, and other variables.
 
-PERFORMANCE: About 10 minutes for 83 section for a year with only salt.
+PERFORMANCE: 21 seconds for test.
 
 To test on mac:
-run process_sections -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 -test True
-
-And for a full year:
-run process_sections -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31
-(this only has salt)
+run process_sections.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.07.04 -1 2017.07.06
 
 """
 

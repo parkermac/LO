@@ -1,9 +1,12 @@
 """
 Do volume and tracer budgets for user-specified volumes.
 
-Run with a command like:
-run tracer_budget -gtx cas6_v00_uu0m -ctag c0 -riv riv00 -0 2022.01.01 -1 2022.12.31 -test True
-run tracer_budget -gtx cas7_trapsV00_meV00 -ctag c0 -riv trapsV00 -0 2017.01.01 -1 2017.01.10 -test True
+To test on mac:
+run tracer_budget -gtx cas7_trapsV00_meV00 -ctag c0 -riv trapsV00 -0 2017.07.04 -1 2017.07.06 -test True
+
+Run with -test True to make a plot, and avoid overwriting the output directory.
+
+Performance: fast.
 
 """
 
@@ -11,7 +14,6 @@ from lo_tools import Lfun, zfun
 from lo_tools import plotting_functions as pfun
 import tef_fun
 
-import matplotlib.pyplot as plt
 import numpy as np
 import pickle
 import pandas as pd
@@ -183,6 +185,7 @@ for which_vol in vol_list:
     vol_df['err'] = vol_df.dvdt - vol_df.riv - vol_df.qnet
     
     if testing:
+        import matplotlib.pyplot as plt
         plt.close('all')
         vol_df.loc[:,['riv','dvdt','qnet','err']].plot()
         plt.show()

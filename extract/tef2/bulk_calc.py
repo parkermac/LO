@@ -2,14 +2,10 @@
 Code to calculate a TEF time series using Marvin Lorenz' multi-layer code.
 Based on his code, and modified by PM.
 
-PERFORMANCE: Took 38 minutes for a full year with cas6_c0, only salt.
+PERFORMANCE: 9 sec for test.
 
 To test on mac:
-run bulk_calc -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 -test True
-
-Run for real on mac:
-run bulk_calc -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31
-(this only has salt)
+run bulk_calc.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.07.04 -1 2017.07.06
 
 """
 

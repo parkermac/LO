@@ -3,8 +3,8 @@ Code to create the river info to associate with a set of segments.
 
 This will rely on a rivers.nc file from the LO forcing.
 
-To run for a riv00 case on my mac:
-run create_river_info -gridname cas6 -frc riv00 -dstr 2019.07.04
+Example command:
+run create_river_info -gridname cas7 -frc trapsV00 -dstr 2017.07.04 -test True
 
 Use -test True to see a useful plot of all the river source locations.
 
@@ -24,11 +24,10 @@ from cmocean import cm
 import argparse
 parser = argparse.ArgumentParser()
 # info to find a rivers.nc file
-parser.add_argument('-gridname', default='cas6', type=str)
-parser.add_argument('-frc', default='riv00', type=str)
-parser.add_argument('-dstr',default='2019.07.04', type=str)
-
-parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+parser.add_argument('-gridname', default='cas7', type=str)
+parser.add_argument('-frc', default='trapsV00', type=str)
+parser.add_argument('-dstr',default='2017.07.04', type=str)
+parser.add_argument('-test', '--testing', default=True, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 gridname = args.gridname
@@ -156,6 +155,12 @@ if testing == True:
     ax.plot(lor[dfrp.irho.to_numpy(dtype=int)], lar[dfrp.jrho.to_numpy(dtype=int)],'or')
     dfrm = df[(df.dir==2) & (df.sgn==-1)] # -1 should not exist for vertical sources
     ax.plot(lor[dfrm.irho.to_numpy(dtype=int)], lar[dfrm.jrho.to_numpy(dtype=int)],'og')
+    
+    # add names
+    for II in df.index:
+        ax.text(lor[int(df.loc[II,'ii'])],
+                lar[int(df.loc[II,'jj'])],
+                df.loc[II,'name'])
 
     plt.show()
 

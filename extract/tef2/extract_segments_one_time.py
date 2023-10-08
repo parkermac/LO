@@ -1,9 +1,5 @@
 """
-This code extracts all needed segment data for one history file,
-looping over all variables and all segments.
-
-To test on mac:
-...
+This code is is the main worker for extract_segments.py.
 
 """
 from pathlib import Path
@@ -65,7 +61,32 @@ tt0 = time()
 print(fn)
     
 ds = xr.open_dataset(fn)
+# we get zeta for the DV calculation below
 zeta = ds['zeta'][0,:,:].values
+
+# Other 2-D quantities we will want for budgets:
+two_d = dict()
+
+# EminusP
+#
+# standard_name:   surface_upward_water_flux
+# long_name:       modeled surface net freshwater flux, (E-P)/rhow
+# units:           meter second-1
+# negative_value:  upward flux, freshening (net precipitation)
+# positive_value:  downward flux, salting (net evaporation)
+two_d['EminusP'] = ds.EminusP[0,:,:].values
+
+# Surface salinity, to use with EminusP
+two_d['salt_surf'] = ds.salt[0,-1,:,:].values
+
+# shflux
+#
+# standard_name:   surface_downward_heat_flux_in_sea_water
+# long_name:       surface net heat flux
+# units:           watt meter-2
+# negative_value:  upward flux, cooling
+# positive_value:  downward flux, heating
+two_d['shflux'] = ds.shflux[0,:,:].values
 
 # set list of variables to extract
 if args.get_bio:
@@ -89,8 +110,12 @@ for seg in seg_list:
     dz = np.diff(z_w, axis=0)
     DV = dz * DA3[0,jjj,iii]
     volume = DV.sum()
+    this_DA = DA[jjj,iii]
+    area = this_DA.sum()
     # store results
     A.loc[seg, 'volume'] = volume
+    A.loc[seg, 'area'] = area
+# 3-D tracers
 for vn in vn_list:
     fld = ds[vn][0,:,:,:].values
     for seg in seg_list:
@@ -101,6 +126,17 @@ for vn in vn_list:
         DV = dz * DA3[0,jjj,iii]
         volume = DV.sum()
         AA[vn] = (fld[:,jjj,iii] * DV).sum()/volume
+        # store results
+        A.loc[seg, vn] = AA[vn]
+# 2-D properties, e.g. for surface fluxes
+for vn in two_d.keys():
+    fld = two_d[vn]
+    for seg in seg_list:
+        jjj = j_dict[seg]
+        iii = i_dict[seg]
+        this_DA = DA[jjj,iii]
+        area = this_DA.sum()
+        AA[vn] = (fld[jjj,iii] * this_DA).sum()/area
         # store results
         A.loc[seg, vn] = AA[vn]
 ds.close()

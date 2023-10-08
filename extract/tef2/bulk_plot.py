@@ -2,7 +2,7 @@
 Plot bulk fluxes as a time series.
 
 To test on mac:
-run bulk_plot -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 -test True
+run bulk_plot -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.12.31 -test True
 
 
 """

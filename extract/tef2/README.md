@@ -48,6 +48,10 @@ python bulk_calc.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.12.3
 Performance:30 minutes per year on perigee, 117 MB.
 - Note: Download the results to your mac for plotting and budgets.
 
+run bulk_plot -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.12.31
+- This makes a folders of plots, one for each section, to explore bulk and two-layer transports vs. time. It is not required for the processing, but it is good practice to look at the sections one-by-one.
+- Use -test True to just plot one section to the screen.
+
 run create_river_info -gridname cas7 -frc trapsV00 -dstr 2017.07.04 -test True
 - Note: the flags point to a file of river forcing for the run you have copied or created.
 - Note: -test True makes a nice plot of point sources
