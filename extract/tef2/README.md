@@ -27,61 +27,42 @@ For a complete description of TEF and its calculation please see:
 11. Run `extract_segments.py` on a given model run and date range to get volume-integrals vs. time for tracers in each segment.
 12. Run `tracer_budget.py` on a given model run and date range to see if all the extractions you did add up!
 
-#### Example Commands for the Workflow ("run" implies running on mac or pc in ipython)
+#### Example Commands for the Workflow. "run" implies running on mac or pc in ipython, while "python"  implies running on the remote machine. These examples are for the real-world use case of the new cas7 2017 run done by Aurora in September 2023. This illustrates using the tef2 code to work on output in someone else's directory.
 
 ```
-run create_sections -g cas6 -ctag c0
 run create_sections -g cas7 -ctag c0
+- Note: Hand edit bounding_sections.txt to have names of the open boundary sections.
+- Note: run plot_collection -gctag cas7_c0 to look at results on mac.
+- Note: Upload LO_output/extract/tef2/sections_cas7_c0/ to perigee.
 
-hand edit bounding_sections.txt to have names of the open boundary sections
-
-run plot_collection -gctag cas6_c0
-run plot_collection -gctag cas7_c0
-
-run create_sect_df -gctag cas6_c0
 run create_sect_df -gctag cas7_c0
+- Note: Upload LO_output/extract/tef2/sect_df_cas7_c0.p to perigee.
 
-python extract_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > extract.log &
-[1 hour/year on apogee, salt only]
+python extract_sections.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -0 2017.01.01 -1 2017.12.31 > trapsV00_sect.log &
+- Performance: 5 hours per year on perigee, 19 GB.
 
-python extract_sections.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -0 2017.01.01 -1 2017.01.10 > trapsV00.log &
-[2 min/day on perigee with get_bio True, which would come to 12 hours per year]
+python process_sections.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.12.31 > trapsV00_proc.log &
+- Performance:1 hour per year on perigee, 89 GB.
 
-[then you could transfer the results to your mac for further processing]
-
-run process_sections.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31
-[10 minutes/year on mac, salt only]
-
-run process_sections.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.01.10
-[6 minutes/10 days on mac with get_bio True]
-
-python bulk_calc.py -gtx cas6_v00_uu0m -ctag c0 -0 2022.01.01 -1 2022.12.31 > bulk.log &
-[10 minutes/year on mac, salt only]
-
-python bulk_calc.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.01.10 > bulk.log &
-[fast]
-
-run create_river_info -gridname cas6 -frc riv00 -dstr 2019.07.04 -test True
+python bulk_calc.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.12.31 > trapsV00_bulk.log &
+Performance:30 minutes per year on perigee, 117 MB.
+- Note: Download the results to your mac for plotting and budgets.
 
 run create_river_info -gridname cas7 -frc trapsV00 -dstr 2017.07.04 -test True
-[the flags point to a file of river forcing for the run you have copied or created]
-[-test True makes a nice plot of point sources]
-
-run create_seg_info_dict -gctag cas6_c0 -riv riv00
+- Note: the flags point to a file of river forcing for the run you have copied or created.
+- Note: -test True makes a nice plot of point sources
 
 run create_seg_info_dict -gctag cas7_c0 -riv trapsV00
+- Note: Upload LO_output/extract/tef2/seg_info_dict_cas7_c0_trapsV00.p to perigee.
 
-python extract_segments.py -gtx cas6_v00_uu0m -ctag c0 -riv riv00 -0 2022.01.01 -1 2022.12.31 > seg_extract.log &
-[need to first put LO_output/extract/tef2/seg_info_dict_cas6_c0_riv00.p onto apogee]
-[1 hour/year on apogee, salt only]
+python extract_segments.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -riv trapsV00 -0 2017.01.01 -1 2017.12.31 > trapsV00_seg.log &
+Performance:[]
+- Note: Download the results to your mac for plotting and budgets.
 
-python extract_segments.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -riv trapsV00 -0 2017.01.01 -1 2017.01.10 > seg_extract.log &
-[need to first put LO_output/extract/tef2/seg_info_dict_cas7_c0_trapsV00.p onto apogee]
-[12 minutes for 10 days on perigee]
-
-run extract_rivers -g cas7 -0 2017.01.01 -1 2017.01.10 -riv trapsV00 -alt_output_dir /data1/auroral/LO_output
-[fast]
-
+python extract_rivers.py -g cas7 -0 2017.01.01 -1 2017.12.31 -riv trapsV00 -alt_output_dir /data1/auroral/LO_output > trapsV00.log &
+- Performance:1 minute on perigee.
+- Note: Download the results to your mac for plotting and budgets.
+- Note: File is LO_output/pre/river1/cas7_trapsV00/Data_roms/extraction_2017.01.01_2017.12.31.nc.
 
 Need to add more about tracer budget...
 

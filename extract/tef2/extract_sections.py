@@ -139,6 +139,7 @@ and "DZ" [m] is the vertical thickness of each cell.
     
 """
 
+# Get DZ for the full set of sections
 ds1 = xr.open_dataset(temp_fn)
 S = zrfun.get_basic_info(fn_list[0], only_S=True)
 eta = ds1.zeta.values.squeeze() # packed (t, p)
@@ -147,7 +148,7 @@ hh = ds1.h.values.squeeze().reshape(1,NP) * np.ones((NT,1))
 zw = zrfun.get_z(hh, eta, S, only_w=True)
 dz = np.diff(zw, axis=0) # NOTE: this is packed (z,t,p)
 DZ = np.transpose(dz, (1,0,2)) # packed (t,z,p)
-
+# then make a Dataset for each section, add DZ to it, and save to NetCDF
 sect_list = list(sect_df.sn.unique())
 sect_list.sort()
 for sn in sect_list:
@@ -162,7 +163,11 @@ for sn in sect_list:
     this_ds['DZ'] = (('time','z','p'), this_DZ)
     this_fn = out_dir / (sn + '.nc')
     this_ds.to_netcdf(this_fn)
-    
 ds1.close()
+
+# clean up the temp dir
+if not Ldir['testing']:
+    Lfun.make_dir(temp_dir, clean=True)
+    temp_dir.rmdir()
 
 
