@@ -3,6 +3,7 @@ Do volume and tracer budgets for user-specified volumes.
 
 To test on mac:
 run tracer_budget -gtx cas7_trapsV00_meV00 -ctag c0 -riv trapsV00 -0 2017.07.04 -1 2017.07.06 -test True
+run tracer_budget -gtx cas7_trapsV00_meV00 -ctag c0 -riv trapsV00 -0 2017.01.01 -1 2017.01.10 -test True
 
 Run with -test True to make a plot, and avoid overwriting the output directory.
 
