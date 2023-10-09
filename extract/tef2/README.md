@@ -45,7 +45,7 @@ python process_sections.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 20
 - Performance:1 hour per year on perigee, 89 GB.
 
 python bulk_calc.py -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.12.31 > trapsV00_bulk.log &
-Performance:30 minutes per year on perigee, 117 MB.
+Performance: 30 minutes per year on perigee, 117 MB.
 - Note: Download the results to your mac for plotting and budgets.
 
 run bulk_plot -gtx cas7_trapsV00_meV00 -ctag c0 -0 2017.01.01 -1 2017.12.31
@@ -60,7 +60,7 @@ run create_seg_info_dict -gctag cas7_c0 -riv trapsV00
 - Note: Upload LO_output/extract/tef2/seg_info_dict_cas7_c0_trapsV00.p to perigee.
 
 python extract_segments.py -gtx cas7_trapsV00_meV00 -ro 3 -his_num 1 -ctag c0 -get_bio True -riv trapsV00 -0 2017.01.01 -1 2017.12.31 > trapsV00_seg.log &
-Performance:[]
+Performance: 4 hours per year on perigee, 91 MB.
 - Note: Download the results to your mac for plotting and budgets.
 
 python extract_rivers.py -g cas7 -0 2017.01.01 -1 2017.12.31 -riv trapsV00 -alt_output_dir /data1/auroral/LO_output > trapsV00.log &

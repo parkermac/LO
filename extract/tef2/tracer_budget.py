@@ -4,6 +4,7 @@ Do volume and tracer budgets for user-specified volumes.
 To test on mac:
 run tracer_budget -gtx cas7_trapsV00_meV00 -ctag c0 -riv trapsV00 -0 2017.07.04 -1 2017.07.06 -test True
 run tracer_budget -gtx cas7_trapsV00_meV00 -ctag c0 -riv trapsV00 -0 2017.01.01 -1 2017.01.10 -test True
+run tracer_budget -gtx cas7_trapsV00_meV00 -ctag c0 -riv trapsV00 -0 2017.01.01 -1 2017.12.31 -test True
 
 Run with -test True to make a plot, and avoid overwriting the output directory.
 
@@ -46,6 +47,11 @@ if testing:
     vol_list = ['Puget Sound']
 else:
     vol_list = ['Salish Sea', 'Puget Sound', 'Hood Canal']
+    
+if testing:
+    import matplotlib.pyplot as plt
+    from lo_tools import plotting_functions as pfun
+    plt.close('all')
 
 for which_vol in vol_list:
     vol_str = which_vol.replace(' ','_')
@@ -136,11 +142,12 @@ for which_vol in vol_list:
     qr_ser = qr.to_series() # simple method for xr -> pd
     
     # Segment volume and dv/dt, and other tracers
-    #
+    zvec = np.zeros(len(seg_ds.time))
+    nanvec = np.nan * zvec
     vol_hourly = seg_ds.sel(seg=good_seg_key_list).volume.sum('seg') # a DataArray
     vol_vec = vol_hourly.values
     # rate of change of volume
-    dvdt_vec = np.nan * vol_vec
+    dvdt_vec = nanvec
     dvdt_vec[1:-1] = (vol_vec[2:] - vol_vec[:-2])/(2*3600)
     pad = 36
     vol_daily = zfun.lowpass(vol_vec, f='godin')[pad:-pad+1:24]
@@ -149,17 +156,25 @@ for which_vol in vol_list:
     vol_ser = pd.Series(index=vol_dt_daily, data=vol_daily)
     dvdt_ser = pd.Series(index=vol_dt_daily, data=dvdt_daily)
     # practice keeping things organized
-    VC_dict['volume'] = vol_vec
-    VC_dict['dvdt'] = dvdt_vec
-    VC_dict['time'] = seg_ds.time.values
-    VC_lp_dict['volume'] = vol_daily
-    VC_lp_dict['dvdt'] = dvdt_daily
-    VC_lp_dict['time'] = vol_dt_daily
+    # VC_dict['volume'] = vol_vec
+    # VC_dict['dvdt'] = dvdt_vec
+    # VC_dict['time'] = seg_ds.time.values
+    # VC_lp_dict['volume'] = vol_daily
+    # VC_lp_dict['dvdt'] = dvdt_daily
+    # VC_lp_dict['time'] = vol_dt_daily
+    
     # Also get the net tracer in all the segments. Note that what extract_segments.py
-    # saves is the hourly average tracer in each segment.
-    for vn in vn_list:
-        for sk in good_seg_key_list:
-            pass
+    # saves is the hourly segment-average tracer in each segment.
+    for vn in ['salt']:
+        if vn not in ['volume','area','EminusP','salt_surf','shflux']:
+            print(vn)
+            VC_dict[vn] = zvec
+            for sk in good_seg_key_list:
+                VC_dict[vn] += seg_ds[vn].sel(seg=sk).values * seg_ds['volume'].sel(seg=sk).values
+            VC_dict['d'+vn+'_dt'] = nanvec
+            VC_dict['d'+vn+'_dt'] = (VC_dict[vn][2:] - VC_dict[vn][:-2])/(2*3600)
+    for vn in VC_dict.keys():
+        VC_lp_dict[vn] = zfun.lowpass(VC_dict[vn], f='godin')[pad:-pad+1:24]
     
     # Transport (low-passed, daily at noon)
     bulk_dir = dir0 / ('bulk' + date_str)
@@ -187,9 +202,21 @@ for which_vol in vol_list:
     
     if testing:
         import matplotlib.pyplot as plt
+        from lo_tools import plotting_functions as pfun
+        
         plt.close('all')
-        vol_df.loc[:,['riv','dvdt','qnet','err']].plot()
+        pfun.start_plot()
+        
+        # volume budget
+        fig = plt.figure()
+        ax = fig.add_subplot(111)
+        vol_df.loc[:,['riv','dvdt','qnet','err']].plot(ax=ax, grid=True)
+        ax.set_xlim(vol_df.index[0],vol_df.index[-1])
+        ax.set_title('Volume Budget ' + which_vol)
+        ax.set_ylabel('m3 s-1')
         plt.show()
+        
+        pfun.end_plot()
 
 
     #
