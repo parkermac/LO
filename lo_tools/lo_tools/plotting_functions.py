@@ -584,7 +584,7 @@ def get_sect(fn, vn, x_e, y_e):
     dist_se = np.ones((N,1)) * dist_e.reshape((1,-1))
     # the -1 means infer size from the array
 
-    def get_sect(x, y, fld, lon, lat):
+    def get_sect_utility(x, y, fld, lon, lat):
         # Interpolate a 2-D or 3-D field along a 2-D track
         # defined by lon and lat vectors x and y.
         # We assume that the lon, lat arrays are plaid.
@@ -601,130 +601,16 @@ def get_sect(fn, vn, x_e, y_e):
         return fld_s
 
     # Do the section extractions for zw (edges) and sv (centers)
-    zw_se = get_sect(x_e, y_e, zw, lon, lat)
-    fld_s = get_sect(x, y, fld, lon, lat )
+    zw_se = get_sect_utility(x_e, y_e, zw, lon, lat)
+    fld_s = get_sect_utility(x, y, fld, lon, lat )
 
     # Also generate top and bottom lines, with appropriate masking
-    zbot = -get_sect(x, y, h, lon, lat )
-    ztop = get_sect(x, y, zeta, lon, lat )
+    zbot = -get_sect_utility(x, y, h, lon, lat )
+    ztop = get_sect_utility(x, y, zeta, lon, lat )
     zbot[np.isnan(fld_s[-1,:])] = 0
     ztop[np.isnan(fld_s[-1,:])] = 0
     
     return x, y, dist, dist_e, zbot, ztop, dist_se, zw_se, fld_s, lon, lat
-    
-def get_section(ds, vn, x, y, in_dict):
-    """
-    This is OBSOLETE, and has been replaced by the much cleaner get_sect() above.
-    """
-
-    # GET DATA
-    G, S, T = zrfun.get_basic_info(in_dict['fn'])
-    h = G['h']
-    zeta = ds['zeta'].values.squeeze()
-    zr = zrfun.get_z(h, zeta, S, only_rho=True)
-
-    sectvar = ds[vn].values.squeeze()
-
-    L = G['L']
-    M = G['M']
-    N = S['N']
-
-    lon = G['lon_rho']
-    lat = G['lat_rho']
-    mask = G['mask_rho']
-    maskr = mask.reshape(1, M, L).copy()
-    mask3 = np.tile(maskr, [N, 1, 1])
-    zbot = -h # don't need .copy() because of the minus operation
-
-    # make sure fields are masked
-    zeta[mask==0] = np.nan
-    zbot[mask==0] = np.nan
-    sectvar[mask3==0] = np.nan
-
-    # create dist
-    earth_rad = zfun.earth_rad(np.mean(lat[:,0])) # m
-    xrad = np.pi * x /180
-    yrad = np.pi * y / 180
-    dx = earth_rad * np.cos(yrad[1:]) * np.diff(xrad)
-    dy = earth_rad * np.diff(yrad)
-    ddist = np.sqrt(dx**2 + dy**2)
-    dist = np.zeros(len(x))
-    dist[1:] = ddist.cumsum()/1000 # km
-    # find the index of zero
-    i0, i1, fr = zfun.get_interpolant(np.zeros(1), dist)
-    idist0 = i0
-    distr = dist.reshape(1, len(dist)).copy()
-    dista = np.tile(distr, [N, 1]) # array
-    # pack fields to process in dicts
-    d2 = dict()
-    d2['zbot'] = zbot
-    d2['zeta'] = zeta
-    d2['lon'] = lon
-    d2['lat'] = lat
-    d3 = dict()
-    d3['zr'] = zr
-    d3['sectvar'] = sectvar
-    # get vectors describing the (plaid) grid
-    xx = lon[1,:]
-    yy = lat[:,1]
-    col0, col1, colf = zfun.get_interpolant(x, xx)
-    row0, row1, rowf = zfun.get_interpolant(y, yy)
-    # and prepare them to do the bilinear interpolation
-    colff = 1 - colf
-    rowff = 1 - rowf
-    # now actually do the interpolation
-    # 2-D fields
-    v2 = dict()
-    for fname in d2.keys():
-        fld = d2[fname]
-        fldi = (rowff*(colff*fld[row0, col0] + colf*fld[row0, col1])
-        + rowf*(colff*fld[row1, col0] + colf*fld[row1, col1]))
-        v2[fname] = fldi
-    # 3-D fields
-    v3 = dict()
-    for fname in d3.keys():
-        fld = d3[fname]
-        fldid = (rowff*(colff*fld[:, row0, col0] + colf*fld[:, row0, col1])
-        + rowf*(colff*fld[:, row1, col0] + colf*fld[:, row1, col1]))
-        v3[fname] = fldid
-    v3['dist'] = dista # distance in km
-    # make "full" fields by padding top and bottom
-    nana = np.nan * np.ones((N + 2, len(dist))) # blank array
-    v3['zrf'] = nana.copy()
-    v3['zrf'][0,:] = v2['zbot']
-    v3['zrf'][1:-1,:] = v3['zr']
-    v3['zrf'][-1,:] = v2['zeta']
-    #
-    v3['sectvarf'] = nana.copy()
-    v3['sectvarf'][0,:] = v3['sectvar'][0,:]
-    v3['sectvarf'][1:-1,:] = v3['sectvar']
-    v3['sectvarf'][-1,:] = v3['sectvar'][-1,:]
-    #
-    v3['distf'] = nana.copy()
-    v3['distf'][0,:] = v3['dist'][0,:]
-    v3['distf'][1:-1,:] = v3['dist']
-    v3['distf'][-1,:] = v3['dist'][-1,:]    
-    
-    # attempt to skip over nan's
-    v3.pop('zr')
-    v3.pop('sectvar')
-    v3.pop('dist')
-    mask3 = ~np.isnan(v3['sectvarf'][:])
-    #print(mask3.shape)
-    mask2 = mask3[-1,:]
-    dist = dist[mask2]
-    NC = len(dist)
-    NR = mask3.shape[0]
-    for k in v2.keys():
-        #print('v2 key: ' + k)
-        v2[k] = v2[k][mask2]
-    for k in v3.keys():
-        #print('v3 key: ' + k)
-        v3[k] = v3[k][mask3]
-        v3[k] = v3[k].reshape((NR, NC))
-        #print(v3[k].shape)
-    
-    return v2, v3, dist, idist0
     
 def maxmin(a):
     # find the value and location of the max and min of a 2D
