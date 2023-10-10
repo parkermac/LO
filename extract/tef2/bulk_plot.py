@@ -185,7 +185,10 @@ for sect_name in sect_list:
     axmap.set_xlabel('Longitude [deg]')
     axmap.set_ylabel('Latitude [deg]')
     axmap.set_title(sn)
-    axmap.text(xmid - np.max((dy,.05))/6, ymid + np.max((dx,.05))/6, '+', fontweight='bold', c='r', fontsize=20,
+    # indicate which direction is positive with a red plus
+    xpos = xmid - dy/2
+    ypos = ymid + dx/2
+    axmap.text(xpos, ypos, '+', fontweight='bold', c='r', fontsize=20,
         ha='center',va='center')
                 
     # fig.tight_layout()
