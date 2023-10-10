@@ -32,24 +32,26 @@ river_to_ocean_dict = {
     'TAlk':'alkalinity',
     'LDeC':'LdetritusC',
     'SDeC':'SdetritusC',
-    'Oxyg':'oxygen'
-}
+    'Oxyg':'oxygen'}
+# same dict reversing keys and values
+ocean_to_river_dict = {river_to_ocean_dict[k]:k for k in river_to_ocean_dict.keys()}
 
-units_dict = {'salt':'g/kg',
-        'temp':'degC',
-        'oxygen':'uM DO',
-        'NO3':'uM N',
-        'phytoplankton':'uM N',
-        'chlorophyll':'mg m-3',
-        'zooplankton':'uM N',
-        'SdetritusN':'uM N',
-        'LdetritusN':'uM N',
-        'SdetritusC':'uM C',
-        'LdetritusC':'uM C',
-        'Ntot':'uM N',
-        'TIC':'uM C',
-        'alkalinity':'uM Eq'}
-
+units_dict = {
+    'volume':'',
+    'salt':'g/kg',
+    'temp':'degC',
+    'oxygen':'uM DO',
+    'NO3':'uM N',
+    'phytoplankton':'uM N',
+    'chlorophyll':'mg m-3',
+    'zooplankton':'uM N',
+    'SdetritusN':'uM N',
+    'LdetritusN':'uM N',
+    'SdetritusC':'uM C',
+    'LdetritusC':'uM C',
+    'Ntot':'uM N',
+    'TIC':'uM C',
+    'alkalinity':'uM Eq'}
 
 
 def get_two_layer(in_dir, sect_name):

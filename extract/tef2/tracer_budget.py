@@ -58,11 +58,8 @@ for which_vol in vol_list:
 
     year_str = str(datetime.strptime(Ldir['ds0'],Lfun.ds_fmt).year)
 
-    # location for output
+    # base location for output
     dir0 = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tef2'
-    if testing == False:
-        out_dir = dir0 / ('Budgets_' + vol_str + date_str)
-        Lfun.make_dir(out_dir, clean=True)
         
     # GATHERING INPUT FILES
     
@@ -119,170 +116,127 @@ for which_vol in vol_list:
     for sk in good_seg_key_list:
         good_riv_list += seg_info_dict[sk]['riv_list']
         
-    # ORGANIZE BUDGET TERMS INTO A SINGLE PANDAS DATAFRAME
+    # ORGANIZE BUDGET TERMS
     
-    # Set up some places to store things:
-    # - from segments
-    VC_dict = dict() # volume integrals vs. time, including d/dt of each, hourly
-    VC_lp_dict = dict() # low-passed version of the items in VC_dict, daily
-    # - from rivers, open boundary sections, and surface/bottom fluxes
-    F_dict = dict()
-    F_lp_dict = dict()
-    
-    # Use seg_ds to figure out which tracers we can process.
-    vn_list = []
+    vn_list = tef_fun.vn_list # get the default list
+    seg_vn_list = [] # this will hold the ones we can make budgets for
     for vn in seg_ds.data_vars:
         if ('time' in seg_ds[vn].coords) and ('seg' in seg_ds[vn].coords):
-            vn_list.append(vn)
-    vn_list.remove('volume') # we treat this separately from the other tracers
-    
-    # Rivers
-    qr = riv_ds.sel(riv=good_riv_list).transport.sum('riv')
-    # an xr DataArray with a time series (noon daily) of net river flow
-    qr_ser = qr.to_series() # simple method for xr -> pd
-    
-    # Segment volume and dv/dt, and other tracers
-    zvec = np.zeros(len(seg_ds.time))
-    nanvec = np.nan * zvec
-    vol_hourly = seg_ds.sel(seg=good_seg_key_list).volume.sum('seg') # a DataArray
-    vol_vec = vol_hourly.values
-    # rate of change of volume
-    dvdt_vec = nanvec
-    dvdt_vec[1:-1] = (vol_vec[2:] - vol_vec[:-2])/(2*3600)
-    pad = 36
-    vol_daily = zfun.lowpass(vol_vec, f='godin')[pad:-pad+1:24]
-    dvdt_daily = zfun.lowpass(dvdt_vec, f='godin')[pad:-pad+1:24]
-    vol_dt_daily = vol_hourly.time.values[pad:-pad+1:24]
-    vol_ser = pd.Series(index=vol_dt_daily, data=vol_daily)
-    dvdt_ser = pd.Series(index=vol_dt_daily, data=dvdt_daily)
-    # practice keeping things organized
-    # VC_dict['volume'] = vol_vec
-    # VC_dict['dvdt'] = dvdt_vec
-    # VC_dict['time'] = seg_ds.time.values
-    # VC_lp_dict['volume'] = vol_daily
-    # VC_lp_dict['dvdt'] = dvdt_daily
-    # VC_lp_dict['time'] = vol_dt_daily
-    
-    # Also get the net tracer in all the segments. Note that what extract_segments.py
-    # saves is the hourly segment-average tracer in each segment.
-    for vn in ['salt']:
-        if vn not in ['volume','area','EminusP','salt_surf','shflux']:
-            print(vn)
-            VC_dict[vn] = zvec
-            for sk in good_seg_key_list:
-                VC_dict[vn] += seg_ds[vn].sel(seg=sk).values * seg_ds['volume'].sel(seg=sk).values
-            VC_dict['d'+vn+'_dt'] = nanvec
-            VC_dict['d'+vn+'_dt'] = (VC_dict[vn][2:] - VC_dict[vn][:-2])/(2*3600)
-    for vn in VC_dict.keys():
-        VC_lp_dict[vn] = zfun.lowpass(VC_dict[vn], f='godin')[pad:-pad+1:24]
-    
-    # Transport (low-passed, daily at noon)
-    bulk_dir = dir0 / ('bulk' + date_str)
-    ii = 0
-    for tup in sntup_list: # add up contribution of all sections
-        sn = tup[0]
-        sgn = tup[1]
-        bulk= xr.open_dataset(bulk_dir / (sn + '.nc'))
-        qnet = bulk.qnet.values
-        if ii == 0:
-            qnet_vec = qnet * sgn
-            otq = bulk.time.values
-        else:
-            qnet_vec += qnet * sgn
-        ii += 1
-    qnet_ser = pd.Series(index=otq, data=qnet_vec)
-        
-    # combine in a pandas DataFrame
-    vol_df = pd.DataFrame()
-    vol_df['riv'] = qr_ser # this has the longest time axis
-    vol_df['vol'] = vol_ser
-    vol_df['dvdt'] = dvdt_ser
-    vol_df['qnet'] = qnet_ser
-    vol_df['err'] = vol_df.dvdt - vol_df.riv - vol_df.qnet
-    
+            seg_vn_list.append(vn)
+    # trim vn_list
+    for vn in vn_list:
+        if vn not in seg_vn_list:
+            vn_list.remove(vn)
     if testing:
-        import matplotlib.pyplot as plt
-        from lo_tools import plotting_functions as pfun
+        # further trimming of vn_list
+        vn_list = ['salt','temp']
+    # add volume to vn_list
+    vn_list += ['volume']
+     
+    # Set up a place to store things, and some helpful arrays:
+    B_dict = dict() # a dict to hold separate budgets, each a DataFrame
+    pad = 36 # for removing ends after Godin filter
+    zvec_h = np.zeros(len(seg_ds.time)) # hourly
+    nanvec_h = np.nan * zvec_h
+    zvec_d = np.zeros(len(riv_ds.time)) # daily
+    nanvec_d = np.nan * zvec_d
+    # Note: we assume all the extractions cover the same time span, and that
+    # seg_ds has the full list of hours, while riv_ds has the full list of days
+    
+    # CALCULATE BUDGETS FOR EACH VARIABLE
+    
+    for vn in vn_list:
+        df = pd.DataFrame(0, index=riv_ds.time, columns=['net','d_dt','riv','ocn','surf','err'])
         
-        plt.close('all')
-        pfun.start_plot()
+        # Rivers
+        # These start as daily at noon, including the first and last days
+        riv = zvec_d.copy()
+        for rn in good_riv_list:
+            if vn == 'volume':
+                riv += riv_ds.sel(riv=rn).transport.values
+            else:
+                if vn in tef_fun.ocean_to_river_dict.keys():
+                    vnr = tef_fun.ocean_to_river_dict[vn]
+                else:
+                    vnr = vn
+                riv += riv_ds.sel(riv=rn).transport.values * riv_ds.sel(riv=rn)[vnr].values
+        df['riv'] = riv
+    
+        # Segments
+        # These start as hourly
+        net_h = zvec_h.copy()
+        surf_h = zvec_h.copy()
+        for sk in good_seg_key_list:
+            this_ds = seg_ds.sel(seg=sk)
+            if vn == 'volume':
+                net_h += this_ds.volume.values
+            else:
+                net_h += this_ds[vn].values * this_ds.volume.values
+                if vn == 'salt':
+                    # include EminusP
+                    surf_h += this_ds.salt_surf.values * this_ds.area.values * this_ds.EminusP.values
+                elif vn == 'temp':
+                    # include shflux
+                    rho = 1000 # approximate density [kg m-3]
+                    Cp = 3850 # approximate heat capacity [J kg-1 degK-1]
+                    surf_h += this_ds.area.values * this_ds.shflux.values / (rho * Cp)
+                    # Units of surf_sh are [degC m3 s-1]
+        d_dt_h= (net_h[2:] - net_h[:-2])/(2*3600)
+        d_dt_h_full = nanvec_h.copy()
+        d_dt_h_full[1:-1] = d_dt_h
+        d_dt = nanvec_d.copy()
+        d_dt[1:-1] = zfun.lowpass(d_dt_h_full, f='godin')[pad:-pad+1:24]
+        df['d_dt'] = d_dt
+        net = nanvec_d.copy()
+        net[1:-1] = zfun.lowpass(net_h, f='godin')[pad:-pad+1:24]
+        df['net'] = net
+        surf = nanvec_d.copy()
+        surf[1:-1] = zfun.lowpass(surf_h, f='godin')[pad:-pad+1:24]
+        df['surf'] = surf
         
-        # volume budget
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        vol_df.loc[:,['riv','dvdt','qnet','err']].plot(ax=ax, grid=True)
-        ax.set_xlim(vol_df.index[0],vol_df.index[-1])
-        ax.set_title('Volume Budget ' + which_vol)
-        ax.set_ylabel('m3 s-1')
+        # Ocean: transport through bounding sections
+        # These start as low-passed, daily at noon, missing the first and last days
+        ocn = zvec_d.copy()[1:-1]
+        for tup in sntup_list: # add up contribution of all sections
+            sn = tup[0]
+            sgn = tup[1]
+            bulk= xr.open_dataset(bulk_dir / (sn + '.nc'))
+            qnet = bulk.qnet.values
+            if vn == 'volume':
+                ocn += qnet * sgn
+            else:
+                ocn += sgn * np.nansum((bulk.q * bulk[vn]).values, axis=1)
+            bulk.close()
+        ocn_full = nanvec_d.copy()
+        ocn_full[1:-1] = ocn
+        df['ocn'] = ocn_full
+        
+        # Error, or non-conservation
+        df['err'] = df.d_dt - df.riv - df.ocn - df.surf
+        
+        # save the results for this variable to the output dict
+        B_dict[vn] = df.copy()
+        
+    if testing:
+        
+        pfun.start_plot(figsize=(12,8))
+        
+        for vn in vn_list:
+            fig = plt.figure()
+            ax = fig.add_subplot(111)
+            this_df = B_dict[vn]
+            this_df.loc[:,['d_dt','riv','ocn','surf','err']].plot(ax=ax, grid=True)
+            ax.set_xlim(this_df.index[0],this_df.index[-1])
+            ax.set_title(vn + ' budget: ' + which_vol)
+            ax.set_ylabel(tef_fun.units_dict[vn] + ' m3 s-1')
+            
         plt.show()
-        
         pfun.end_plot()
-
-
-    #
-    # # Tracer budgets
-    # # F is the "flux" of a tracer, with units [tracer units]*m3/s
-    # # Ftot, Fin, and Fout are at the ocen boundaries of the volume.  Fout is negative.
-    # C = dict()
-    # # The "normalized" budgets are averaged over a year, multiplied by a year of seconds,
-    # # and divided by the mean volume, so they have units [tracer units].  So Cnorm['NO3']['dFnet_dt']
-    # # is the change in total mean Nitrate over the year, and the other terms in Cnorm['NO3'] tell you where
-    # # that change came from.  I'm not sure this is the right normalization to use.
-    # Cnorm = dict()
-    # for vn in tef_fun.vn_list:
-    #     c_df = pd.DataFrame(0, index=indall, columns=['Ftot','Fin','Fout'])
-    #     for sect_name in sect_list:
-    #         df = tef_df_dict[sect_name]
-    #         c_df['Ftot'] = c_df['Ftot'] + df['Qin']*df[vn+'_in'] + df['Qout']*df[vn+'_out']
-    #         c_df['Fin'] = c_df['Fin'] + df['Qin']*df[vn+'_in']
-    #         c_df['Fout'] = c_df['Fout'] + df['Qout']*df[vn+'_out']
-    #     c_df['Fr'] = (riv_ds.transport * riv_ds[vn]).sum(axis=1)[1:-1]
-    #     c_df.loc[:, 'dFnet_dt'] = cvt_lp_dict[vn]
-    #     # the residual of the budget is assumed to be an unresolved Source or Sink (Sink is negative)
-    #     # e.g. due to air-sea gas transfer, denitrification, or internal conversion to another tracer.
-    #     c_df['Source/Sink'] = c_df['dFnet_dt'] - c_df['Ftot'] - c_df['Fr']
-    #     C[vn] = c_df.copy()
-    #     cn = c_df.mean()*(365*86400)/V
-    #     cn = cn.rename({'dFnet_dt':'Change in Concentration', 'Ftot':'Inflow+Outflow',
-    #         'Fin':'Inflow', 'Fout':'Outflow', 'Fr':'River'})
-    #     cn = cn[['Change in Concentration', 'Inflow', 'Outflow', 'Inflow+Outflow', 'River','Source/Sink']]
-    #     cn['Mean Concentration'] = vmean_dict[vn]
-    #     Cnorm[vn] = cn
-    #
-    # C['Ntot'] = C['NO3']+C['phytoplankton']+C['zooplankton']+C['detritus']+C['Ldetritus']
-    # Cnorm['Ntot'] = Cnorm['NO3']+Cnorm['phytoplankton']+Cnorm['zooplankton']+Cnorm['detritus']+Cnorm['Ldetritus']
-    #
-    # plt.close('all')
-    # pfun.start_plot()
-    #
-    # fig = plt.figure()
-    # ax = fig.add_subplot(111)
-    # tstr = which_vol + ' Volume Budget [m3/s]'
-    # vol_df.plot(ax=ax, grid=True, title=tstr)
-    # if testing:
-    #     plt.show()
-    # else:
-    #     fig.savefig(out_dir / 'volume.png')
-    #
-    # for vn in C.keys():
-    #     fig = plt.figure()
-    #     ax = fig.add_subplot(111)
-    #     tstr = which_vol + ' ' + vn + ' Budget [' + units_dict[vn] + ' m3/s]'
-    #     C[vn][['dFnet_dt','Ftot','Fr','Source/Sink']].plot(ax=ax, grid=True, title=tstr)
-    #     if testing:
-    #         pass
-    #         #plt.show()
-    #     else:
-    #         fig.savefig(out_dir / (vn + '.png'))
-    #
-    # # text output
-    # with open(out_dir / ('Annual_Mean_' + which_vol.replace(' ','_') + '_' + year_str + '.txt'), 'w') as fout:
-    #     fout.write('%s: Mean Volume = %0.4f [km3]\n\n' % (which_vol, V/1e9))
-    #     for vn in C.keys():
-    #         tstr = ' ' + which_vol + ' ' + vn + ' Annual Mean [' + units_dict[vn] + '] '
-    #         fout.write(tstr.center(51,'=') + '\n')
-    #         for k in Cnorm[vn].keys():
-    #             fout.write('%25s %25.3f\n' % (k, Cnorm[vn][k]))
-    #
-    # pfun.end_plot()
+        
+    else:
+        # save output as a pickled dict of DataFrames
+        out_dir = dir0 / ('Budgets_' + date_str)
+        Lfun.make_dir(out_dir, clean=True)
+        pd.to_pickle(B_dict, (out_dir / (vol_str + '.p')))
+        
 

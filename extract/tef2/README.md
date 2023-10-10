@@ -68,7 +68,7 @@ python extract_rivers.py -g cas7 -0 2017.01.01 -1 2017.12.31 -riv trapsV00 -alt_
 - Note: Download the results to your mac for plotting and budgets.
 - Note: File is LO_output/pre/river1/cas7_trapsV00/Data_roms/extraction_2017.01.01_2017.12.31.nc.
 
-Need to add more about tracer budget...
+run tracer_budget -gtx cas7_trapsV00_meV00 -ctag c0 -riv trapsV00 -0 2017.01.01 -1 2017.12.31 -test True
 
 ```
 ----
@@ -205,7 +205,11 @@ This is from running with -test True, which decreases the number os salinity bin
 
 **(+)/bulk_[date range]**
 
-There can be more than two layers!
+There can be more than two layers. The max number of layers that the code tries to fill is 30, although in practice if there are more than about 4 layers with significant transport than you should probably not be using TEF as a way of organizing transports.
+
+Note: Unfilled layers have nan values, so you have to use things like np.nansum() to add them up.
+
+Note: The index into layer dimension is made new at each time step, so you cannot assume that layer 0 is the same layer along the time axis.
 
 Here is what is in the Datasets:
 ```
@@ -303,7 +307,5 @@ Uses `extract_segments_one_time.py` and subprocess to speed execution.
 `tracer_budget.py` forms volume-integrated budgets, combining section, segment, and river extractions.
 
 NOTE: To use this for a case with rivers you need to have extracted river time series from the appropriate forcing files, using `LO/extract/river/extract_rivers.py`. Also the time range of the river extraction has to match the time range of the section and segment extractions.
-
-UNDER CONSTRUCTION
 
 ---
