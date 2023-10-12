@@ -178,7 +178,8 @@ for which_vol in vol_list:
                 elif vn == 'temp':
                     # include shflux
                     rho = 1025 # approximate density [kg m-3]
-                    Cp = 4000 # approximate heat capacity [J kg-1 degK-1]
+                    Cp = 3985 # approximate heat capacity [J kg-1 degK-1]
+                    # NOTE: In ROMS Cp is defined in Modules/mod_scalars.F
                     surf_h += this_ds.area.values * this_ds.shflux.values / (rho * Cp)
                     # Units of surf_sh are [degC m3 s-1]
                     # Note: this does not work very well. May need to do a proper
