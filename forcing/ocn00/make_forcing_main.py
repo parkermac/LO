@@ -16,8 +16,12 @@ the fields have times that break this rule (zeta, ubar, vbar, u, v) and they hav
 names that can be found in the Climatology section of varinfo.yaml.  For example ubar uses
 v2d_time
 
-The ini file uses state variables, and all of these have there time coordinate called
+The ini file uses state variables, and all of these have their time coordinate called
 ocean_time.
+
+2023.10.12 Running with -test True will just test planC, which has not been working.
+To use this you will want to temporarily put the good forcing for a given day in a
+temp directory.
 
 """
 
@@ -65,10 +69,15 @@ verbose = False
 
 if Ldir['testing']:
     verbose = True
-    #planC = True
 
 testing_ncks = False
 testing_fmrc = False
+
+# things to test planC
+testing_planC = False
+if Ldir['testing']
+    testing_planC = True
+    planC = True
 
 # This directory is created, along with Info and Data subdirectories, by ffun.intro()
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
@@ -90,7 +99,7 @@ h_out_dir = out_dir / 'Data'
 # which does.
 Lfun.make_dir(h_out_dir, clean=True)
 
-if Ldir['run_type'] == 'forecast':
+if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
     # this either gets new hycom files, or sets planB to True,
     # and planB may in turn set planC to True
     
@@ -310,17 +319,21 @@ elif planC == True:
     clm_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + ds_yesterday) / Ldir['frc'] / 'ocean_clm.nc'
     clm_today = out_dir / 'ocean_clm.nc'
     
-    # new cleaner method: use open_dataset, update, and save to a new name
-    ds = xr.open_dataset(clm_yesterday, decode_times=False)
-    tname_list = [item for item in ds.coords if 'time' in item]
-    for tname in tname_list:
-        ot_vec = ds[tname].values
-        ot_vec[-1] += 86400
-        ds.update({tname: (('ocean_time',), ot_vec)})
-        #ds[tname] = (('ocean_time',), ot_vec)
-        ds[tname].attrs['units'] = Lfun.roms_time_units
-    ds.to_netcdf(clm_today)
-    ds.close()
+    try:
+        # new cleaner method: use open_dataset, update, and save to a new name
+        ds = xr.open_dataset(clm_yesterday, decode_times=False)
+        tname_list = [item for item in ds.coords if 'time' in item]
+        for tname in tname_list:
+            ot_vec = ds[tname].values
+            ot_vec[-1] += 86400
+            ds.update({tname: (('ocean_time',), ot_vec)})
+            #ds[tname] = (('ocean_time',), ot_vec)
+            ds[tname].attrs['units'] = Lfun.roms_time_units
+        ds.to_netcdf(clm_today)
+        ds.close()
+    except Exception as e:
+        print(e)
+        
     # debugging
     # ds = xr.open_dataset(clm_today)
     # dst = xr.open_dataset(clm_today, decode_times=False)
@@ -380,11 +393,12 @@ if Ldir['start_type'] == 'new':
     nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
 else:
     nc_list = ['ocean_clm.nc', 'ocean_bry.nc']
+    
 if Ldir['testing']:
     # print info about the files to the screen
     # for fn in nc_list:
     #     print_info(out_dir / fn)
-    # open datasets to have a peek
+    # open datasets to have a peek manually
     dsc = xr.open_dataset(out_dir / 'ocean_clm.nc', decode_times=False)
     if Ldir['start_type'] == 'new':
         dsi = xr.open_dataset(out_dir / 'ocean_ini.nc', decode_times=False)
