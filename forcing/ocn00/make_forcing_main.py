@@ -75,7 +75,7 @@ testing_fmrc = False
 
 # things to test planC
 testing_planC = False
-if Ldir['testing']
+if Ldir['testing']:
     testing_planC = True
     planC = True
 
