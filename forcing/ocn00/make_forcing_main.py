@@ -308,6 +308,30 @@ if planC == False:
         salt = V['salt'].copy()
         for bvn in bvn_list:
             V[bvn] = Ofun_bio.create_bio_var(salt, bvn)
+            
+    # Write climatology file making use of zrfun.get_varinfo().
+    tt0 = time()
+    out_fn = out_dir / 'ocean_clm.nc'
+    out_fn.unlink(missing_ok=True)
+    ds = xr.Dataset()    
+    for vn in clm_data_vars:#V.keys():
+        # tt00 = time()
+        vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+        # print(' -- time to get varinfo: %0.2f sec' % (time()-tt00))
+        tname = vinfo['time_name']
+        dims = (vinfo['time_name'],) + vinfo['space_dims_tup']
+        ds[vn] = (dims, V[vn])
+        ds[vn].attrs['units'] = vinfo['units']
+        ds[vn].attrs['long_name'] = vinfo['long_name']
+        # time coordinate
+        ds[tname] = ((tname,), ot_vec)
+        ds[tname].attrs['units'] = Lfun.roms_time_units
+    # and save to NetCDF
+    Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
+    ds.to_netcdf(out_fn, encoding=Enc_dict)
+    ds.close()
+    print('- Write clm file: %0.2f sec' % (time()-tt0))
+    sys.stdout.flush()
 
 elif planC == True:
     print('**** Using planC ****')
@@ -327,41 +351,11 @@ elif planC == True:
             ot_vec = ds[tname].values
             ot_vec[-1] += 86400
             ds.update({tname: (('ocean_time',), ot_vec)})
-            #ds[tname] = (('ocean_time',), ot_vec)
             ds[tname].attrs['units'] = Lfun.roms_time_units
         ds.to_netcdf(clm_today)
         ds.close()
     except Exception as e:
         print(e)
-        
-    # debugging
-    # ds = xr.open_dataset(clm_today)
-    # dst = xr.open_dataset(clm_today, decode_times=False)
-    # sys.exit()
-    
-# Write climatology file making use of zrfun.get_varinfo().
-tt0 = time()
-out_fn = out_dir / 'ocean_clm.nc'
-out_fn.unlink(missing_ok=True)
-ds = xr.Dataset()
-for vn in V.keys():
-    # tt00 = time()
-    vinfo = zrfun.get_varinfo(vn, vartype='climatology')
-    # print(' -- time to get varinfo: %0.2f sec' % (time()-tt00))
-    tname = vinfo['time_name']
-    dims = (vinfo['time_name'],) + vinfo['space_dims_tup']
-    ds[vn] = (dims, V[vn])
-    ds[vn].attrs['units'] = vinfo['units']
-    ds[vn].attrs['long_name'] = vinfo['long_name']
-    # time coordinate
-    ds[tname] = ((tname,), ot_vec)
-    ds[tname].attrs['units'] = Lfun.roms_time_units
-# and save to NetCDF
-Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
-ds.to_netcdf(out_fn, encoding=Enc_dict)
-ds.close()
-print('- Write clm file: %0.2f sec' % (time()-tt0))
-sys.stdout.flush()
 
 if Ldir['start_type'] == 'new':
     # Write initial condition file if needed
@@ -395,9 +389,6 @@ else:
     nc_list = ['ocean_clm.nc', 'ocean_bry.nc']
     
 if Ldir['testing']:
-    # print info about the files to the screen
-    # for fn in nc_list:
-    #     print_info(out_dir / fn)
     # open datasets to have a peek manually
     dsc = xr.open_dataset(out_dir / 'ocean_clm.nc', decode_times=False)
     if Ldir['start_type'] == 'new':
