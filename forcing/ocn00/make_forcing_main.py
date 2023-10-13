@@ -314,7 +314,7 @@ if planC == False:
     out_fn = out_dir / 'ocean_clm.nc'
     out_fn.unlink(missing_ok=True)
     ds = xr.Dataset()    
-    for vn in clm_data_vars:#V.keys():
+    for vn in V.keys():
         # tt00 = time()
         vinfo = zrfun.get_varinfo(vn, vartype='climatology')
         # print(' -- time to get varinfo: %0.2f sec' % (time()-tt00))
