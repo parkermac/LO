@@ -34,7 +34,7 @@ Ldir = Lfun.Lstart()
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument('-preprocess', default=False, type=Lfun.boolean_string)
-parser.add_argument('-testing', default=False, type=Lfun.boolean_string)
+parser.add_argument('-test','--testing', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 testing = args.testing
 
@@ -52,8 +52,6 @@ cols = [
     'Location_ID',
     'Field_Collection_Start_Date_Time',
     'Field_Collection_Upper_Depth',
-    # 'Field_Collection_Depth_Units', # this is [m]
-    # 'Sample_ID',
     'Result_Parameter_Name',
     'Result_Value',
     'Result_Value_Units',
@@ -73,6 +71,16 @@ col_dict = {
     'Calculated_Longitude_Decimal_Degrees_NAD83HARN':'lon'
 }
 
+# dict for renaming data variables (only save this list)
+vn_dict = {
+    'Salinity': 'salt (ppt)',
+    'Nitrate': 'NO3 (mg/L)',
+    'Temperature, water': 'temp (degC)',
+    'Dissolved Oxygen': 'DO (mL/L)',
+    'Silicic acid (H4SiO4)': 'SiO4 (mg/L)',
+    'Nitrogen dioxide': 'NO2 (mg/L)'
+}
+
 if args.preprocess:
     fn = in_dir / 'EIMDiscreteResults_2023May17_456416.csv'
     df = pd.read_csv(fn, low_memory=False, usecols=cols,
@@ -89,72 +97,107 @@ else:
 # set index so we can loop over years
 df = df.set_index('time')
 
+# default lists
+year_list = range(1932,1976)
 sta_list = list(df.name.unique())
 
-# loop over years
 if testing:
+    print_info = True
     year_list = [1966]
-else:
-    year_list = range(1932,1976)
+    # sta_list = ['LCH551']
+    pd.set_option('display.max_rows', 500)
+    pd.set_option('display.max_columns', 500)
+    pd.options.display.width = 0 # auto-detect full display width
     
+# loop over years
 for year in year_list:
     
-    # initialize a DataFrame to hold all data for a year
-    ydf = df[df.index.year==year].copy()
+    # initialize cast ID
+    cid = 0
+    
+    # Initialize a DataFrame to hold all data for a year
     Ydf = pd.DataFrame()
+    
+    # pull out data for this year
+    ydf = df[df.index.year==year].copy()
     
     if len(ydf) == 0:
         print('No data in ' + str(year))
-        continue
+        continue # this handy command just skips to the next item in the for loop
     else:
         print('Working on ' + str(year))
 
     # loop over stations
     for sn in sta_list:
         
+        # Initialize a DataFrame to hold all data for this station
+        Sdf = pd.DataFrame()
+        
+        # pull out data for this station
         sdf = ydf[ydf.name==sn].copy()
         if len(sdf) == 0:
             continue
         
-        Sdf = pd.DataFrame()
-        
-        # We add time column because we drop the index (time) below.
+        # We add a duplicate time column because we swap to z for the index below.
         sdf['time'] = sdf.index.copy()
-        
-        # Initialize DataFrame that holds all cleaned casts at this station.
-        # Cleaned means no repeat depths
-        cdf = pd.DataFrame()
-        
-        print_info = True
+                
         ncast = 0
-        # loop over dates (meaning individual casts)
+        # Loop over dates
+        # NOTE: we are ASSUMING an individual date corresponds to an individual cast!
+        # How can we tell if this is true?
         for dd in sdf.index.unique(): # Note: the index is still time at this point
             sdft = sdf[sdf.index==dd].copy() # just data from this time
             if len(sdft) == 0:
                 continue
                 
             sdfz = sdft.set_index('z')
-            # drop repeated values (duplicate depths)
-            sdfzu = sdfz[~sdfz.index.duplicated()]
-            sdfzu = sdfzu.sort_index() # sort deepest to shallowest
-            if (len(sdfz) != len(sdfzu)) and print_info:
-                print('%s %s dropped %d repeat bottles' % (sn, str(dd), len(sdfz)-len(sdfzu)))
                 
-            if len(sdfzu) == 0:
-                continue
-            Sdf = pd.concat((Sdf,sdfzu)) # this has "z" as its index
-            ncast += 1
+            A = pd.DataFrame(index=sdfz.index.unique().sort_values())
+            for vn in vn_dict.keys():
+                # pull in each variable as a Series
+                aa = sdfz.loc[sdfz.vn==vn,'val'].copy()
+                if len(aa) > 0:
+                    aa = aa[~aa.index.duplicated()]
+                    aa = aa.sort_index()
+                    A[vn_dict[vn]] = aa
+                else:
+                    A[vn_dict[vn]] = np.nan
             
-        if print_info and (len(sdfzu)>0):
+            # Then add remaining columns
+            bb = sdfz.iloc[0,:]
+            for vn in ['name','time','lon','lat']:
+                A.loc[:,vn] = bb[vn]
+                
+            if len(A) == 0:
+                continue
+            else:
+                A['cid'] = cid
+                ncast += 1
+                Sdf = pd.concat((Sdf,A)) # this has "z" as its index
+                cid += 1
+            
+        if print_info and (len(A)>0):
             print('*** %s There were %d casts at this station ***\n' % (sn, ncast))
 
         Sdf['z'] = Sdf.index.copy() # save because we drop it in the concat below
+        
+        # Append this station's casts to the year DataFrame
         Ydf = pd.concat((Ydf, Sdf), ignore_index=True, sort=False)
         # The final DataFrame just has numbers for its index.
         
-    # save result
-    # Bottles.to_pickle(dir0 + 'Bottles_' + str(year) + '.p')
-
+    Ydf['cruise'] = None
+    
+    # still neet to fix units and generate CT and SA
+    
+    # if len(Ydf) > 0:
+    #     # Save the data
+    #     df.to_pickle(out_fn)
+    #     info_df = obs_functions.make_info_df(df)
+    #     info_df.to_pickle(info_out_fn)
+    #
+    #
+    # # save result
+    # Ydf.to_pickle(dir0 / ('Bottles_' + str(year) + '.p'))
 
 if False:
     
