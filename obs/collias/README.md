@@ -2,6 +2,12 @@
 
 ---
 
+Run `get_initial_file_info.py` to see info about the data: variable names, units, and spatial and temporal extent.
+
+Years with data are 1932 to 1975, with some gaps
+
+---
+
 Here are the unique values of 'Result_Parameter_Name' and 'Result_Value_Units':
 ```
                       Salinity [ppt]
@@ -14,10 +20,6 @@ Here are the unique values of 'Result_Parameter_Name' and 'Result_Value_Units':
               Nitrogen dioxide [mg/L]
                        Density [mg/L]
 ```
-
----
-
-Years with data are 1932 to 1975, with some gaps
 
 ---
 

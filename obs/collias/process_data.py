@@ -8,19 +8,6 @@ After that you can just do:
 run process_data
 (much faster)
 
-Here are the unique values of 'Result_Parameter_Name' and 'Result_Value_Units':
-                      Salinity [ppt]
-    Alkalinity, Total as CaCO3 [mg/L]
-               Ortho-Phosphate [mg/L]
-                       Nitrate [mg/L]
-            Temperature, water [deg C]
-              Dissolved Oxygen [mL/L]
-         Silicic acid (H4SiO4) [mg/L]
-              Nitrogen dioxide [mg/L]
-                       Density [mg/L]
-
-Years with data are 1932 to 1975, with some gaps
-
 """
 
 import pandas as pd
@@ -42,12 +29,12 @@ testing = args.testing
 source = 'collias'
 otype = 'bottle'
 in_dir = Ldir['data'] / 'obs' / source
-# year_list = range(2008,2019)
 
 # output location
 out_dir = Ldir['LOo'] / 'obs' / source / otype
 Lfun.make_dir(out_dir)
 
+# Columns to keep
 cols = [
     'Location_ID',
     'Field_Collection_Start_Date_Time',
@@ -81,6 +68,7 @@ vn_dict = {
     'Nitrogen dioxide': 'NO2 (mg/L)'
 }
 
+# Read in data
 if args.preprocess:
     fn = in_dir / 'EIMDiscreteResults_2023May17_456416.csv'
     df = pd.read_csv(fn, low_memory=False, usecols=cols,
@@ -109,7 +97,7 @@ if testing:
     pd.set_option('display.max_columns', 500)
     pd.options.display.width = 0 # auto-detect full display width
     
-# loop over years
+# Loop over years
 for year in year_list:
     
     # initialize cast ID
@@ -151,19 +139,24 @@ for year in year_list:
                 continue
                 
             sdfz = sdft.set_index('z')
-                
+            
+            # The initial file has all variables in one column. We use the DataFrame "A"
+            # to reorganize it so that each data variable has its own column, and
+            # all data at a given depth is on one row.
             A = pd.DataFrame(index=sdfz.index.unique().sort_values())
             for vn in vn_dict.keys():
-                # pull in each variable as a Series
+                # Pull in each variable as a Series
                 aa = sdfz.loc[sdfz.vn==vn,'val'].copy()
                 if len(aa) > 0:
+                    # Remove duplicate depths, and sort by z (deep to shallow)
                     aa = aa[~aa.index.duplicated()]
                     aa = aa.sort_index()
                     A[vn_dict[vn]] = aa
                 else:
                     A[vn_dict[vn]] = np.nan
             
-            # Then add remaining columns
+            # Then add remaining columns. This ensures that in the final product
+            # each cast has these values tha same for all depths.
             bb = sdfz.iloc[0,:]
             for vn in ['name','time','lon','lat']:
                 A.loc[:,vn] = bb[vn]
@@ -171,21 +164,25 @@ for year in year_list:
             if len(A) == 0:
                 continue
             else:
+                # Add a unique cast ID (cid) for each cast. This will only be unique
+                # within the year being processed.
                 A['cid'] = cid
+                Sdf = pd.concat((Sdf,A))
+                # Note: this has "z" as its index, with many repeats
                 ncast += 1
-                Sdf = pd.concat((Sdf,A)) # this has "z" as its index
                 cid += 1
             
-        if print_info and (len(A)>0):
+        if print_info and (len(Sdf)>0):
             print('*** %s There were %d casts at this station ***\n' % (sn, ncast))
 
-        Sdf['z'] = Sdf.index.copy() # save because we drop it in the concat below
+        Sdf['z'] = Sdf.index.copy()
+        # Duplicate z as a column because we drop it in the concat below
         
         # Append this station's casts to the year DataFrame
         Ydf = pd.concat((Ydf, Sdf), ignore_index=True, sort=False)
         # The final DataFrame just has numbers for its index.
         
-    Ydf['cruise'] = None
+    Ydf['cruise'] = None # no cruise info for this data
     
     # still neet to fix units and generate CT and SA
     
@@ -198,42 +195,4 @@ for year in year_list:
     #
     # # save result
     # Ydf.to_pickle(dir0 / ('Bottles_' + str(year) + '.p'))
-
-if False:
-    
-    # Check on data and units
-    rpn_set = set(df.vn.to_list())
-    for rpn in rpn_set:
-        unit_set = set(df.loc[df.vn==rpn,'units'].to_list())
-        for unit in unit_set:
-            print('%30s [%s]' % (rpn,unit))
-    
-    # Just look at one variable, trying to reconstruct things
-    vn = 'Temperature, water'
-    this_df = df.loc[df.vn==vn,:]
-
-    lon = this_df.lon.to_numpy()
-    lat = this_df.lat.to_numpy()
-    z = this_df.z.to_numpy()
-    t = this_df.index
-    # tu = t.sort_values().unique() # could this be used to define "casts"?
-    
-    # Plotting
-    import matplotlib.pyplot as plt
-    from lo_tools import plotting_functions as pfun
-    plt.close('all')
-    pfun.start_plot(figsize=(12,8))
-
-    fig = plt.figure()
-
-    ax = fig.add_subplot(211)
-    ax.plot(lon, lat,'.b')
-    pfun.add_coast(ax)
-    pfun.dar(ax)
-
-    ax.axis([-125, -122, 47, 49])
-    ax = fig.add_subplot(212)
-    ax.plot(t,z,'.b')
-
-    plt.show()
-    pfun.end_plot()
+ 
