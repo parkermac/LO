@@ -8,12 +8,14 @@ After that you can just do:
 run process_data
 (much faster)
 
+Performance: 5 minutes for all years.
+
 """
 
 import pandas as pd
 import numpy as np
 import gsw
-import sys
+from time import time
 
 from lo_tools import Lfun, obs_functions
 Ldir = Lfun.Lstart()
@@ -88,17 +90,20 @@ df = df.set_index('time')
 # default lists
 year_list = range(1932,1976)
 sta_list = list(df.name.unique())
+print_info = False
 
 if testing:
     print_info = True
-    year_list = [1966]
-    # sta_list = ['LCH551']
+    year_list = [1939]
+    sta_list = ['HCB548']
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.options.display.width = 0 # auto-detect full display width
     
 # Loop over years
+tt00 = time()
 for year in year_list:
+    tt0 = time()
     ys = str(year)
     print('\n'+ys)
     
@@ -116,10 +121,8 @@ for year in year_list:
     ydf = df[df.index.year==year].copy()
     
     if len(ydf) == 0:
-        print('No data in ' + str(year))
+        print('- No data in ' + str(year))
         continue # this handy command just skips to the next item in the for loop
-    else:
-        print('Working on ' + str(year))
 
     # loop over stations
     for sn in sta_list:
@@ -160,16 +163,26 @@ for year in year_list:
                     A[vn_dict[vn]] = aa
                 else:
                     A[vn_dict[vn]] = np.nan
-            
-            # Then add remaining columns. This ensures that in the final product
-            # each cast has these values tha same for all depths.
-            bb = sdfz.iloc[0,:]
-            for vn in ['name','time','lon','lat']:
-                A.loc[:,vn] = bb[vn]
-                
+                    
+            # remove rows with no data
+            A = A.dropna(axis=1,how='all')
             if len(A) == 0:
                 continue
             else:
+                # ==============================================================
+                # NOTE: Deal with an issue where in many years, at some stations
+                # (especially in Hood Canal)
+                # the DO column was mistakenly a reapeat of the salinity column
+                if ('salt (ppt)' in A.columns) and ('DO (mL/L)' in A.columns):
+                    mask = A['salt (ppt)'] == A['DO (mL/L)']
+                    A.loc[mask,'DO (mL/L)'] = np.nan
+                # ==============================================================
+                
+                # Then add remaining columns. This ensures that in the final product
+                # each cast has these values tha same for all depths.
+                bb = sdfz.iloc[0,:]
+                for vn in ['name','time','lon','lat']:
+                    A.loc[:,vn] = bb[vn]
                 # Add a unique cast ID (cid) for each cast. This will only be unique
                 # within the year being processed.
                 A['cid'] = cid
@@ -179,7 +192,7 @@ for year in year_list:
                 cid += 1
             
         if print_info and (len(Sdf)>0):
-            print('*** %s There were %d casts at this station ***\n' % (sn, ncast))
+            print('*** %s There were %d casts at this station ***' % (sn, ncast))
 
         Sdf['z'] = Sdf.index.copy()
         # Duplicate z as a column because we drop it in the concat below
@@ -205,10 +218,23 @@ for year in year_list:
     Ydf['SA'] = SA
     Ydf['CT'] = CT
     # Other variables
-    Ydf['DO (uM)'] = Ydf['DO (mL/L)'].to_numpy() * 1.42903 * 1000 / 32
-    Ydf['NO3 (uM)'] = Ydf['NO3 (mg/L)'].to_numpy() * 1000 / 14
-    Ydf['NO2 (uM)'] = Ydf['NO2 (mg/L)'].to_numpy() * 1000 / 14
-    Ydf['SiO4 (uM)'] = Ydf['SiO4 (mg/L)'].to_numpy() * 1000 / 28.0855
+    fac_dict = {
+        'DO (mL/L)': 1.42903 * 1000 / 32,
+        'NO3 (mg/L)': 1000 / 14,
+        'NO2 (mg/L)': 1000 / 14,
+        'SiO4 (mg/L)': 1000 / 28.0855
+    }
+    name_dict = {
+        'DO (mL/L)': 'DO (uM)',
+        'NO3 (mg/L)': 'NO3 (uM)',
+        'NO2 (mg/L)': 'NO2 (uM)',
+        'SiO4 (mg/L)': 'SiO4 (uM)'
+    }
+    for vnn in fac_dict.keys():
+        if vnn in Ydf.columns:
+            Ydf[name_dict[vnn]] = Ydf[vnn].to_numpy() * fac_dict[vnn]
+        else:
+            pass
     
     # Retain only selected variables
     cols = ['cid', 'cruise', 'time', 'lat', 'lon', 'name', 'z',
@@ -223,4 +249,9 @@ for year in year_list:
         Ydf.to_pickle(out_fn)
         info_df = obs_functions.make_info_df(Ydf)
         info_df.to_pickle(info_out_fn)
+        
+    print('- took %0.1f sec to process' % (time()-tt0))
+
+total_minutes = (time()-tt00)/60
+print('Total processing time %0.1f minutes' % (total_minutes))
  

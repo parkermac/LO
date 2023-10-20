@@ -116,3 +116,34 @@ Calculated_Longitude_Decimal_Degrees_NAD83HARN                                  
 Record_Created_On                                                               6/7/2021 3:41:51 PM
 Result_System_ID                                                                          214410966
 ```
+
+---
+
+#### Bad Data Issue:
+
+In many of the years there are some stations, often in Hood Canal, where DO is not real, and instead is a duplicate of Salinity:
+
+```
+In [51]: run process_data -test True
+
+1939
+*** HCB548 There were 1 casts at this station ***
+- took 0.2 sec to process
+Total processing time 0.0 minutes
+
+In [52]: A
+Out[52]:
+      salt (ppt)  temp (degC)  DO (mL/L)  SiO4 (mg/L)  NO2 (mg/L)    name                time         lon        lat  cid
+z                                                                                                                        
+-105       30.59         8.87      30.59        1.882     0.00448  HCB548 1939-04-29 14:00:00 -123.132933  47.388148    0
+-75        30.57         9.10      30.57        1.826     0.00182  HCB548 1939-04-29 14:00:00 -123.132933  47.388148    0
+-50        30.52         9.14      30.52        1.854     0.00070  HCB548 1939-04-29 14:00:00 -123.132933  47.388148    0
+-30        30.43         9.10      30.43        1.826     0.00098  HCB548 1939-04-29 14:00:00 -123.132933  47.388148    0
+-20        30.34         9.02      30.34        1.657     0.00252  HCB548 1939-04-29 14:00:00 -123.132933  47.388148    0
+-10        30.17         8.78      30.17        1.629         NaN  HCB548 1939-04-29 14:00:00 -123.132933  47.388148    0
+ 0         29.69         9.24      29.69        1.573         NaN  HCB548 1939-04-29 14:00:00 -123.132933  47.388148    0
+```
+
+This is now handled with a mask in `process_data.py`.
+
+NOTE: there are also some instances of way-too-high NO2 that will have to be dealt with.
