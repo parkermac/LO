@@ -99,6 +99,12 @@ if testing:
     
 # Loop over years
 for year in year_list:
+    ys = str(year)
+    print('\n'+ys)
+    
+    # name output files
+    out_fn = out_dir / (ys + '.p')
+    info_out_fn = out_dir / ('info_' + ys + '.p')
     
     # initialize cast ID
     cid = 0
@@ -184,15 +190,37 @@ for year in year_list:
         
     Ydf['cruise'] = None # no cruise info for this data
     
-    # still neet to fix units and generate CT and SA
+    # Fix units and generate CT and SA
+    # SA and CT
+    SP = Ydf['salt (ppt)'].to_numpy() # assume this is close enough to psu
+    IT = Ydf['temp (degC)'].to_numpy() # I assume this is in-situ
+    z = Ydf.z.to_numpy()
+    lon = Ydf.lon.to_numpy()
+    lat = Ydf.lat.to_numpy()
+    p = gsw.p_from_z(z, lat)
+    # - do the conversions
+    SA = gsw.SA_from_SP(SP, p, lon, lat)
+    CT = gsw.CT_from_t(SA, IT, p)
+    # - add the results to the DataFrame
+    Ydf['SA'] = SA
+    Ydf['CT'] = CT
+    # Other variables
+    Ydf['DO (uM)'] = Ydf['DO (mL/L)'].to_numpy() * 1.42903 * 1000 / 32
+    Ydf['NO3 (uM)'] = Ydf['NO3 (mg/L)'].to_numpy() * 1000 / 14
+    Ydf['NO2 (uM)'] = Ydf['NO2 (mg/L)'].to_numpy() * 1000 / 14
+    Ydf['SiO4 (uM)'] = Ydf['SiO4 (mg/L)'].to_numpy() * 1000 / 28.0855
     
-    # if len(Ydf) > 0:
-    #     # Save the data
-    #     df.to_pickle(out_fn)
-    #     info_df = obs_functions.make_info_df(df)
-    #     info_df.to_pickle(info_out_fn)
-    #
-    #
-    # # save result
-    # Ydf.to_pickle(dir0 / ('Bottles_' + str(year) + '.p'))
+    # Retain only selected variables
+    cols = ['cid', 'cruise', 'time', 'lat', 'lon', 'name', 'z',
+        'CT', 'SA', 'DO (uM)',
+        'NO3 (uM)', 'NO2 (uM)', 'NH4 (uM)', 'PO4 (uM)', 'SiO4 (uM)',
+        'TA (uM)', 'DIC (uM)']
+    this_cols = [item for item in cols if item in Ydf.columns]
+    Ydf = Ydf[this_cols]
+    
+    # Save results
+    if len(Ydf) > 0:
+        Ydf.to_pickle(out_fn)
+        info_df = obs_functions.make_info_df(Ydf)
+        info_df.to_pickle(info_out_fn)
  
