@@ -74,7 +74,8 @@ two_d = dict()
 # units:           meter second-1
 # negative_value:  upward flux, freshening (net precipitation)
 # positive_value:  downward flux, salting (net evaporation)
-two_d['EminusP'] = ds.EminusP[0,:,:].values
+if 'EminusP' in ds.data_vars:
+    two_d['EminusP'] = ds.EminusP[0,:,:].values
 
 # Surface salinity, to use with EminusP
 two_d['salt_surf'] = ds.salt[0,-1,:,:].values
@@ -86,7 +87,8 @@ two_d['salt_surf'] = ds.salt[0,-1,:,:].values
 # units:           watt meter-2
 # negative_value:  upward flux, cooling
 # positive_value:  downward flux, heating
-two_d['shflux'] = ds.shflux[0,:,:].values
+if 'sh_flux' in ds.data_vars:
+    two_d['shflux'] = ds.shflux[0,:,:].values
 
 # set list of variables to extract
 if args.get_bio:
@@ -99,6 +101,14 @@ if args.get_bio:
             'TIC', 'alkalinity']
 else:
     vn_list = ['salt']
+    
+# Trim vn_list to only have variable in ds
+for vn in vn_list:
+    if vn not in ds.data_vars:
+        vn_list.remove(vn)
+    
+# add custom 3-D variables, like salt-squared
+vn_list = vn_list + ['salt2']
 
 # find the volume and other variables for each segment, at this time
 A = pd.DataFrame(index=seg_list)
@@ -117,7 +127,10 @@ for seg in seg_list:
     A.loc[seg, 'area'] = area
 # 3-D tracers
 for vn in vn_list:
-    fld = ds[vn][0,:,:,:].values
+    if vn == 'salt2':
+        fld = ds.salt[0,:,:,:].values * ds.salt[0,:,:,:].values
+    else:
+        fld = ds[vn][0,:,:,:].values
     for seg in seg_list:
         jjj = j_dict[seg]
         iii = i_dict[seg]
