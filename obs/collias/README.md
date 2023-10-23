@@ -2,13 +2,15 @@
 
 ---
 
-Run `get_initial_file_info.py` to see info about the data: variable names, units, and spatial and temporal extent.
+Run `get_initial_file_info.py` to see info about the data: variable names, units, and spatial and temporal extent. Years with data are 1932 to 1975, with some gaps. Missing 1943-1948 and 1973.
 
-Years with data are 1932 to 1975, with some gaps
+Run `process_data.py` to do all the processing. Files (one per year, with an info file) end up in LO_output/obs/collias/bottle.
+
+Run `plot_results.py` which makes one plot per year for the processed data and saves them in LO_output/obs/collias/bottle_check_plots.
 
 ---
 
-Here are the unique values of 'Result_Parameter_Name' and 'Result_Value_Units':
+Here are the unique values of selected 'Result_Parameter_Name' and 'Result_Value_Units':
 ```
                       Salinity [ppt]
     Alkalinity, Total as CaCO3 [mg/L]
@@ -119,9 +121,17 @@ Result_System_ID                                                                
 
 ---
 
-#### Bad Data Issue:
+#### Bad Data Issues:
 
-In many of the years there are some stations, often in Hood Canal, where DO is not real, and instead is a duplicate of Salinity:
+NOTE: The process for finding and fixing these bugs is to:
+1. Visually inspect all the plots for each year to look for outliers.
+2. Set a mask in `plot_results.py` that will catch this error for one year and plot it with red dots (using -test True). Then by inspecting df1 you can figure out a station "name" that has the issue.
+3. Then set the testing choices in `process_data.py` to just do this year and station. Then inspect the DataFrame "A" which has not had the units conversion done, and this should allow you to identify problems like duplicated columns.
+
+_**Problem 1**_
+
+In many of the years there are some stations, often in Hood Canal, where DO is not real, and instead is a duplicate of Salinity. This is now handled with a mask in `process_data.py` by making that DO column nan.
+
 
 ```
 In [51]: run process_data -test True
@@ -144,6 +154,26 @@ z
  0         29.69         9.24      29.69        1.573         NaN  HCB548 1939-04-29 14:00:00 -123.132933  47.388148    0
 ```
 
-This is now handled with a mask in `process_data.py`.
+_**Problem 2**_
 
-NOTE: there are also some instances of way-too-high NO2 that will have to be dealt with.
+There is a similar problem with NO2, where NO2 and SiO4 are the same. This is now handled with a mask in `process_data.py` by making both SiO4 and DO column nan.
+
+```
+In [7]: run process_data -test True
+
+1932
+*** DAB523 There were 1 casts at this station ***
+- took 0.1 sec to process
+Total processing time 0.0 minutes
+
+In [8]: A
+Out[8]:
+      salt (ppt)  NO3 (mg/L)  temp (degC)  SiO4 (mg/L)  NO2 (mg/L)    name                time        lon       lat  cid
+z                                                                                                                       
+-185       30.34       0.363         8.40        2.444       2.444  DAB523 1932-07-01 17:32:00 -122.83962  47.73482    0
+-100       29.85       0.345         8.10        1.854       1.854  DAB523 1932-07-01 17:32:00 -122.83962  47.73482    0
+-50        29.58       0.326         9.10        1.657       1.657  DAB523 1932-07-01 17:32:00 -122.83962  47.73482    0
+-25        29.09       0.275         9.35        1.376       1.376  DAB523 1932-07-01 17:32:00 -122.83962  47.73482    0
+-10        28.44         NaN        11.80        1.067       1.067  DAB523 1932-07-01 17:32:00 -122.83962  47.73482    0
+ 0         26.00         NaN        19.60        0.674       0.674  DAB523 1932-07-01 17:32:00 -122.83962  47.73482    0
+```

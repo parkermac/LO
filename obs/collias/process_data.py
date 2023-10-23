@@ -94,8 +94,8 @@ print_info = False
 
 if testing:
     print_info = True
-    year_list = [1939]
-    sta_list = ['HCB548']
+    year_list = [1932]
+    sta_list = ['DAB523']
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
     pd.options.display.width = 0 # auto-detect full display width
@@ -177,6 +177,13 @@ for year in year_list:
                     mask = A['salt (ppt)'] == A['DO (mL/L)']
                     A.loc[mask,'DO (mL/L)'] = np.nan
                 # ==============================================================
+                # NOTE: Deal with an issue where in some years, at some stations
+                # the SiO4 and NO2 columns are the same
+                if ('SiO4 (mg/L)' in A.columns) and ('NO2 (mg/L)' in A.columns):
+                    mask = A['SiO4 (mg/L)'] == A['NO2 (mg/L)']
+                    A.loc[mask,'NO2 (mg/L)'] = np.nan
+                    A.loc[mask,'SiO4 (mg/L)'] = np.nan
+                # ==============================================================
                 
                 # Then add remaining columns. This ensures that in the final product
                 # each cast has these values tha same for all depths.
@@ -245,7 +252,7 @@ for year in year_list:
     Ydf = Ydf[this_cols]
     
     # Save results
-    if len(Ydf) > 0:
+    if (len(Ydf) > 0) and (testing==False):
         Ydf.to_pickle(out_fn)
         info_df = obs_functions.make_info_df(Ydf)
         info_df.to_pickle(info_out_fn)

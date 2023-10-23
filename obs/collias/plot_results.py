@@ -37,7 +37,7 @@ year_list = range(1932,1976)
 
 if testing:
     print_info = True
-    year_list = [1939]
+    year_list = [1932]
     # sta_list = ['LCH551']
     pd.set_option('display.max_rows', 500)
     pd.set_option('display.max_columns', 500)
@@ -66,16 +66,18 @@ for year in year_list:
     sta_list = list(df.name.unique())
     
     # checking for bad values
-    df1 = df.loc[df['DO (uM)']>800,:]
-    if len(df1)>0:
-        print('** Bad DO found in year '+ys)
+    if testing:
+        df1 = df.loc[df['NO2 (uM)']>30,:]
+        if len(df1)>0:
+            print('** Bad data found in year '+ys)
 
     fig = plt.figure()
 
     # map
     ax = fig.add_subplot(331)
     df.plot(x='lon', y='lat',style='.b', legend=False, ax=ax)
-    df1.plot(x='lon', y='lat',style='.r', legend=False, ax=ax)
+    if testing:
+        df1.plot(x='lon', y='lat',style='.r', legend=False, ax=ax)
     pfun.add_coast(ax)
     pfun.dar(ax)
     ax.axis([-125, -122, 47, 49])
@@ -85,7 +87,8 @@ for year in year_list:
     # time series
     ax = plt.subplot2grid((3,3), (0,1), colspan=2)
     df.plot(x='time',y='z',style='.b', legend=False, ax=ax)
-    df1.plot(x='time',y='z',style='.r', legend=False, ax=ax)
+    if testing:
+        df1.plot(x='time',y='z',style='.r', legend=False, ax=ax)
     ax.set_xlabel('Time')
     ax.set_ylabel('Z [m]')
     ax.grid(True)
@@ -96,7 +99,8 @@ for year in year_list:
         if vn in df.columns:
             ax = fig.add_subplot(3,3,ii)
             df.plot(x=vn, y='z',style='.b', legend=False, ax=ax, grid=True)
-            df1.plot(x=vn, y='z',style='.r', legend=False, ax=ax, grid=True)
+            if testing:
+                df1.plot(x=vn, y='z',style='.r', legend=False, ax=ax, grid=True)
             if ii in [4,7]:
                 ax.set_ylabel('Z [m]')
             ax.text(.95,.1,vn,fontweight='bold',transform=ax.transAxes,ha='right')
