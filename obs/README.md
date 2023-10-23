@@ -65,6 +65,9 @@ Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/park
 - **nceiCoastal** Data from WCOA and other North American coastal cruises with carbon data. Good for carbon data on the WA/OR shelf. The original data came from: https://www.ncei.noaa.gov/data/oceans/ncei/ocads/metadata/0219960.html.
   - bottle 2011-2017 in the LO model domain, good DIC and TA, 41-56 casts per year
   - ctd None
+- **collias** Historic Data collected by Eugene Collias. 368,858 results from the years 1932 until 1975. Data was collected using approximately 15-20 different methods and captures 9 different parameters. Data came from https://apps.ecology.wa.gov/eim/search/Eim/EIMSearchResults.aspx?ResultType=EIMStudyTab&LocationWRIAs=2 (Select the dropdown menu for Collias and then select Download. This tirggers an EIM request and eventually they get it to you.)
+  - bottle 1932-1975. Missing 1943-1948 and 1973. Good SA, CT and DO, then less for NO3, NO2, and SiO4.
+  - ctd None.
 
 Notes on usage:
 - 2017 is a good year for validation, with bottle coverage from all four sources.
