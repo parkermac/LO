@@ -31,3 +31,7 @@
 ---
 
 2023.04.11 Over the weekend I started a new run on mox, and along the way made a change to how I organize the bio code that may be useful. In LO_roms_user/x1b I added the fennel.h code to the x1b folder, instead of leaving it in LO_roms_source_alt. Then I changed a line in build_roms.sh so that MY_ANALYTICAL_DIR points to x1b as well. The motivation is that it keeps any edits of fennel.h connected to a specific [ex_name].
+
+---
+
+**2023.10.24 I should add more notes, but I am feeling like probably no one ever reads this, and it is a hassle to keep up to data. It is probably better to just email everyone about important changes.**
