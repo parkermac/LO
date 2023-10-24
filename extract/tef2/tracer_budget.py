@@ -176,12 +176,15 @@ for which_vol in vol_list:
                     # include EminusP
                     surf_h += this_ds.salt_surf.values * this_ds.area.values * this_ds.EminusP.values
                 elif vn == 'temp':
-                    # include shflux
+                    # NOTE on units: "Heat" [J m-3] = rho * Cp * T [deg K = C + 273.16]
                     rho = 1025 # approximate density [kg m-3]
                     Cp = 3985 # approximate heat capacity [J kg-1 degK-1]
                     # NOTE: In ROMS Cp is defined in Modules/mod_scalars.F
+                    #
+                    # include shflux
                     surf_h += this_ds.area.values * this_ds.shflux.values / (rho * Cp)
-                    # Units of surf_sh are [degC m3 s-1]
+                    # Units of surf_h are [degC m3 s-1]
+                    #
                     # Note: this does not work very well. May need to do a proper
                     # heat budget keeping track of actual Joules m-3, but this implies
                     # intervening in the extractions.
