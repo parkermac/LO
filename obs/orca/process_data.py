@@ -5,7 +5,9 @@ This is just a light reformatting of the extensive pre-processing Erin Broatch d
 to get the ORCA mooring data into clean daily values in xarray Datasets.
 
 This also is the first instance of formatting MOORING data in the LO standard
-for LO_output/obs
+for LO_output/obs.
+
+Performance: Takes only seconds to run
 
 """
 
@@ -31,7 +33,8 @@ in_dir = Ldir['data'] / 'obs' / 'ORCA' / 'orca_profiles' / 'datasets'
 
 # output location
 out_dir = Ldir['LOo'] / 'obs' / source / otype
-Lfun.make_dir(out_dir)
+if not testing:
+    Lfun.make_dir(out_dir, clean=True)
 
 sn_name_dict = {
     'CI':'Carr Inlet',
@@ -56,9 +59,8 @@ sn_loc_dict = {
     'TW': [-123.0083, 47.3750]
 }
 
-vn_list = ['CT', 'SA', 'DO (uM)','NO3 (uM)','fluor','par']
-
 for sn in sn_list:
+    print(sn)
     in_fn = in_dir / (sn + '_ds_daily.nc')
     out_fn = out_dir / (sn + '_daily.nc')
     ds0 = xr.open_dataset(in_fn)
@@ -114,7 +116,10 @@ for sn in sn_list:
     # no conversion of fluor or par (is the data any good?)
     FLUOR = np.transpose(ds0.fluor.values[::-1,:])
     PAR = np.transpose(ds0.par.values[::-1,:])
-
+    # compute sigma0
+    # potential density relative to 0 dbar, minus 1000 kg m-3
+    SIG0 = gsw.sigma0(SA,CT)
+    
     # initialize new Dataset and fill
     coords = {'time':(('time'),tt),'z':(('z'),zz)}
     ds = xr.Dataset(coords=coords, attrs={'Station Name':sn_name_dict[sn],'lon':lon,'lat':lat})
@@ -131,19 +136,9 @@ for sn in sn_list:
     ds['PAR'] = xr.DataArray(PAR, dims=('time','z'),
         attrs={'units':'uEinstein m-2 s-1',
             'long_name':'Photosynthetically Active Radiation'})
-            
+    # add sigma0
+    ds['SIG0'] = xr.DataArray(SIG0, dims=('time','z'),
+        attrs={'units':'kg m-3', 'long_name':'Sigma0'})
+    
     if not testing:
         ds.to_netcdf(out_fn)
-    else:
-        # plots to check things out
-        # [needs improvement]
-        import matplotlib.pyplot as plt
-        plt.close('all')
-        fig = plt.figure()
-        ax = fig.add_subplot(111)
-        z = ds.z.values
-        t = ds.time.values
-        do = np.transpose(ds['DO (uM)'].values)
-        cs = ax.pcolormesh(t,z,do[1:,1:])
-        fig.colorbar(cs, ax=ax)
-        plt.show()
