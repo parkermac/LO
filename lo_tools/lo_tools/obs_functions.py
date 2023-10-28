@@ -4,6 +4,16 @@ Module of functions for LO/obs and associated code.
 import numpy as np
 import pandas as pd
 
+# Names of the seasons
+season_name_dict = {0:'Winter',1:'Spring',2:'Summer',3:'Fall'}
+
+# Colors for the seasons
+season_c_dict = {0:'b',1:'g',2:'r',3:'orange'}
+
+# dayofyear for the seasons (edges)
+season_daylist = [0, 92,183,275,367]
+
+
 def renumber_cid(df):
     # Rework cid (cast ID) to be increasing from zero in steps of one.
     a = df.cid.values
