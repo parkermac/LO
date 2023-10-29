@@ -8,7 +8,7 @@
 
 #### Naming Notes
 - [source] is some string identifier of the database, e.g. 'dfo', which is then further identified by
-- [otype] observation type, e.g. 'ctd' or 'bottle', and finally by
+- [otype] observation type, e.g. 'ctd', 'bottle', or 'moor', and finally by
 - [year] e.g. 2017.
 
 
@@ -79,4 +79,42 @@ Notes on usage:
 
 ## Mooring output conventions
 
-_Under construction_
+#### Input/Output file naming conventions
+- Input: LO_data/obs/[source]/[whatever]
+- Code: LO/obs/[source]/process_data.py or whatever is called for
+- Output: LO_output/obs/[source]/[otype]/[whatever name makes sense].nc
+
+#### Output format
+We store processed mooring files in NetCDF, created from xarray Datasets.
+- Each variable is an array packed with dimensions (time,z).
+- the time coordinate is best made as a pandas DatetimeIndex object, with regular interval.
+- z is a vector of vertical position, packed bottom to top
+- The variable naming convention follows that of the bottle and ctd data. We also store metadata about each variable, which can be accessed for example as ds.SA.attrs['long_name'] or ds.SA.attrs['units']
+
+Here is an example of the contents of processed ORCA data `LO_output/obs/orca/moor/DB_daily.nc`:
+```
+<xarray.Dataset>
+Dimensions:   (time: 4243, z: 104)
+Coordinates:
+  * time      (time) datetime64[ns] 2010-06-08 2010-06-09 ... 2022-01-18
+  * z         (z) float64 -105.1 -104.1 -103.1 -102.1 ... -4.958 -3.966 -2.975
+Data variables:
+    SA        (time, z) float64 nan nan nan nan nan ... 26.79 25.35 23.15 20.4
+    CT        (time, z) float64 nan nan nan nan nan ... 7.696 7.43 7.411 7.204
+    DO (uM)   (time, z) float64 nan nan nan nan nan ... 267.6 289.5 308.5 317.5
+    NO3 (uM)  (time, z) float64 ...
+    FLUOR     (time, z) float64 ...
+    PAR       (time, z) float64 ...
+    SIG0      (time, z) float64 ...
+Attributes:
+    Station Name:  Dabob Bay
+    lon:           -122.8029
+    lat:           47.8034
+```
+#### Sources that have been processed up to these specifications
+
+- **orca** ORCA profiling mooring data from NANOOS. Six moorings around Puget Sound, processed into regular daily profiles (with gaps) by Erin Broatch. See Erin's report in LO_data/obs/ORCA/orca_report.pdf for the original source at NANOOS, however the link to that source is broken, and now (as of late 2023) there is a new automated server at https://data.nanoos.org/erddap/tabledap/index.html?page=1&itemsPerPage=1000. Eventually we will want to do the processing from that data source.
+ - time range 2005 to the end of 2021 (at most), daily, with many gaps
+ - variables: SA, CT, DO (uM), and SIG0 are pretty robust. NO3 (uM), FLUOR, and PAR are carried along in the processing, but I am not sure they can be trusted, or that the even have much data.
+ - There is more plotting code to help explore the data in different ways in LO/obs/orca.
+![ORCA Mooring Data](readme_plots/orca.png)
