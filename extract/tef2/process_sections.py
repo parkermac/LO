@@ -108,13 +108,17 @@ for ext_fn in sect_list:
             XF = QV[vn][tt,:,:].squeeze().flatten()
             if vn == 'q':
                 # also keep track of volume transport
-                qnet[tt] = XF.sum()
+                #qnet[tt] = XF.sum() #jx
+                qnet[tt] = np.nansum(XF) #jx
                 # and tidal energy flux
                 zi = zeta[tt,:].squeeze()
-                ssh[tt] = zi.mean()
+                zi[np.isnan(QV[vn][tt,0,:])] = np.nan # jx, if q = NaN, zi = NaN
+                #ssh[tt] = zi.mean() #jx
+                ssh[tt] = np.nanmean(zi) #jx
                 fnet[tt] = g * rho * ssh[tt] * qnet[tt]
                 
             # scipy.stats.binned_statistic(x, values, statistic='mean', bins=10, range=None)
+            XF[np.isnan(XF)] = 0 #jx
             TEF[vn][tt,:] = binned_statistic(sf, XF, statistic='sum', bins=NS, range=(S_low,S_hi)).statistic
             
             if Ldir['testing'] and (tt==10) and (vn=='salt'):
