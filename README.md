@@ -24,6 +24,8 @@ The main users of this repo are people who are in some way collaborating with me
 
 To work with the LO system, ROMS, and generally to be able to do modern numerical modeling, it is important that you have reasonable skill with linux, python, and git.  If you need a refresher or a starting place with any of these you could look at the lectures from my [Effective Computing Class](http://faculty.washington.edu/pmacc/Classes/EffCom_2020/index.html).  Ignore the first lectures about installing linux and python.  They are superseded by the notes here.  But the lectures starting with [Linux 1](http://faculty.washington.edu/pmacc/Classes/EffCom_2020/lectures/Linux%201.pdf) and continuing through those on python and GitHub will be relevant.
 
+Here is a great short tutorial about how to make a "pull request" in GitHub: https://www.youtube.com/watch?v=jRLGobWwA3Y. This is the preferred way for other users to contribute to the improvement of this code project. (Thanks to Jilian Xiong for finding the link!)
+
 ---
 
 ## Installation - four steps
