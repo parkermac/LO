@@ -590,6 +590,36 @@ def get_sect(fn, vn, x_e, y_e):
         # We assume that the lon, lat arrays are plaid.
         col0, col1, colf = zfun.get_interpolant(x, lon[1,:])
         row0, row1, rowf = zfun.get_interpolant(y, lat[:,1])
+        
+        # Do some munging to avoid masked cells. This works well!
+        #
+        # loop over all points on the section
+        nn = len(col0)
+        for ii in range(nn):
+            # find the mask (0 or 1) for each of the 4 grid points around the section point
+            m00 = mask[row0[ii],col0[ii]]
+            m10 = mask[row1[ii],col0[ii]]
+            m01 = mask[row0[ii],col1[ii]]
+            m11 = mask[row1[ii],col1[ii]]
+            mm = np.array([m00, m10, m01, m11])
+            # rc is a list to access the 4 grid points
+            rc = [(row0[ii],col0[ii]), (row1[ii],col0[ii]), (row0[ii],col1[ii]), (row1[ii],col1[ii])]
+            if np.sum(mm) < 4:
+                # if the sum of mm < 4 then there are masked grid points for this section point
+                iii = 0
+                # loop over the 4 mask values surrounding this section point
+                for mmm in [m00, m10, m01, m11]:
+                    if mmm == 1:
+                        # fill everything with the first GOOD point we encounter
+                        row0[ii] = rc[iii][0];
+                        row1[ii] = rc[iii][0];
+                        col0[ii] = rc[iii][1];
+                        col1[ii] = rc[iii][1];
+                        rowf[ii] = 1
+                        colf[ii] = 1
+                        break
+                    iii += 1
+                
         colff = 1 - colf
         rowff = 1 - rowf
         if len(fld.shape) == 3:

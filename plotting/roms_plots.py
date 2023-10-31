@@ -919,9 +919,120 @@ def P_sect(in_dict):
     ax.plot(dist, ztop, '-b', linewidth=1)
     ax.set_xlim(dist.min(), dist.max())
     ax.set_ylim(zdeep, 5)
+    
     # plot section
     svlims = pinfo.vlims_dict[vn]
-    cs = ax.pcolormesh(dist_se,zw_se,fld_s,
+    cs = ax.pcolormesh(dist_se,zw_se,sf,
+                       vmin=svlims[0], vmax=svlims[1], cmap=pinfo.cmap_dict[vn])
+    fig.colorbar(cs, ax=ax)
+    ax.set_xlabel('Distance (km)')
+    ax.set_ylabel('Z (m)')
+    ax.set_title('Section %s %s' % (pinfo.tstr_dict[vn],pinfo.units_dict[vn]))
+    fig.tight_layout()
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+        
+def P_sect_hc(in_dict):
+    """
+    This plots a map and a section (distance, z), and makes sure
+    that the color limits are identical.  If the color limits are
+    set automatically then the section is the preferred field for
+    setting the limits.
+    
+    Focus on Hood Canal.
+    
+    Uses the new pfun.get_sect() function.
+    
+    2023.10.31 This is the first code to use the new location of user-created sections
+    in LO_output/section_lines, created using the new tool LO/plotting/create_sect_lines.py.
+    """
+    # START
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(20,9))
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
+    # PLOT CODE
+    vn = 'oxygen'#'phytoplankton'
+    if vn == 'salt':
+        pinfo.cmap_dict[vn] = 'jet'
+    elif vn == 'oxygen':
+        pinfo.cmap_dict[vn] = 'Spectral_r'
+    # GET DATA
+    G, S, T = zrfun.get_basic_info(in_dict['fn'])
+    # CREATE THE SECTION
+    # read in a section (or list of sections)
+    tracks_path = Ldir['LOo'] / 'section_lines'
+    tracks = ['hc1.p','hc2.p','hc3.p']
+    zdeep = -175
+    xx = np.array([])
+    yy = np.array([])
+    for track in tracks:
+        track_fn = tracks_path / track
+        # get the track to interpolate onto
+        tdf = pd.read_pickle(track_fn)
+        xx = np.concatenate((xx,tdf['x'].to_numpy()))
+        yy = np.concatenate((yy,tdf['y'].to_numpy()))
+    for ii in range(len(xx)-1):
+        x0 = xx[ii]
+        x1 = xx[ii+1]
+        y0 = yy[ii]
+        y1 = yy[ii+1]
+        nn = 20
+        if ii == 0:
+            x_e = np.linspace(x0, x1, nn)
+            y_e = np.linspace(y0,y1, nn)
+        else:
+            x_e = np.concatenate((x_e, np.linspace(x0, x1, nn)[1:]))
+            y_e = np.concatenate((y_e, np.linspace(y0, y1, nn)[1:]))
+                
+    x, y, dist, dist_e, zbot, ztop, dist_se, zw_se, fld_s, lon, lat = \
+        pfun.get_sect(in_dict['fn'], vn, x_e, y_e)
+        
+    # COLOR
+    # scaled section data
+    sf = pinfo.fac_dict[vn] * fld_s
+    # now we use the scaled section as the preferred field for setting the
+    # color limits of both figures in the case -avl True
+    if in_dict['auto_vlims']:
+        pinfo.vlims_dict[vn] = pfun.auto_lims(sf)
+    
+    # PLOTTING
+    # map with section line
+    ax = fig.add_subplot(1, 3, 1)
+    cs = pfun.add_map_field(ax, ds, vn, pinfo.vlims_dict,
+            cmap=pinfo.cmap_dict[vn], fac=pinfo.fac_dict[vn], do_mask_edges=True)
+    # fig.colorbar(cs, ax=ax) # It is identical to that of the section
+    pfun.add_coast(ax)
+    aaf = [-123.5, -122.5, 47.25, 48.5] # focus domain
+    ax.axis(aaf)
+    pfun.dar(ax)
+    pfun.add_info(ax, in_dict['fn'], loc='upper_right')
+    ax.set_title('Surface %s %s' % (pinfo.tstr_dict[vn],pinfo.units_dict[vn]))
+    ax.set_xlabel('Longitude')
+    ax.set_ylabel('Latitude')
+    # add section track
+    ax.plot(x, y, '-k', linewidth=2)
+    ax.plot(x[0], y[0], 'o', markersize=5, markerfacecolor='w',
+        markeredgecolor='k', markeredgewidth=2)
+    ax.set_xticks([-123.5, -123, -122.5])
+    ax.set_yticks([47.5, 48, 48.5])
+    # section
+    ax = fig.add_subplot(1, 3, (2, 3))
+    
+    ax.plot(dist, zbot, '-k', linewidth=2)
+    ax.plot(dist, ztop, '-b', linewidth=1)
+    ax.set_xlim(dist.min(), dist.max())
+    ax.set_ylim(zdeep, 5)
+    
+    # plot section
+    svlims = pinfo.vlims_dict[vn]
+    cs = ax.pcolormesh(dist_se,zw_se,sf,
                        vmin=svlims[0], vmax=svlims[1], cmap=pinfo.cmap_dict[vn])
     fig.colorbar(cs, ax=ax)
     ax.set_xlabel('Distance (km)')
