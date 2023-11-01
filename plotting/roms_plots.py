@@ -962,7 +962,9 @@ def P_sect_hc(in_dict):
     if vn == 'salt':
         pinfo.cmap_dict[vn] = 'jet'
     elif vn == 'oxygen':
-        pinfo.cmap_dict[vn] = 'Spectral_r'
+        # pinfo.cmap_dict[vn] = 'Spectral_r'
+        pinfo.cmap_dict[vn] = 'nipy_spectral'
+        # pinfo.cmap_dict[vn] = 'tab20b'
     # GET DATA
     G, S, T = zrfun.get_basic_info(in_dict['fn'])
     # CREATE THE SECTION
