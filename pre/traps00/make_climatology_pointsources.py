@@ -50,11 +50,11 @@ args = parser.parse_args()
 ctag = args.ctag
 
 # location to save file
-clim_dir = Ldir['LOo'] / 'pre' / 'traps' / 'point_sources' / ctag / 'Data_historical'
+clim_dir = Ldir['LOo'] / 'pre' / Ldir['traps_name'] / 'point_sources' / ctag / 'Data_historical'
 Lfun.make_dir(clim_dir)
 
 # get flow and loading data
-wwtp_fn = Ldir['data'] / 'traps' / 'all_point_source_data.nc'
+wwtp_fn = Ldir['data'] / Ldir['traps_name'] / 'all_point_source_data.nc'
 ecology_data_ds = xr.open_dataset(wwtp_fn)
 
 # get wwtp names and wwtp ids

@@ -50,11 +50,11 @@ args = parser.parse_args()
 ctag = args.ctag
 
 # location to save file
-clim_dir = Ldir['LOo'] / 'pre' / 'traps' / 'LO_rivbio' / ctag / 'Data_historical'
+clim_dir = Ldir['LOo'] / 'pre' / Ldir['traps_name'] / 'LO_rivbio' / ctag / 'Data_historical'
 Lfun.make_dir(clim_dir)
 
 # get flow and loading data
-riv_fn = Ldir['data'] / 'traps' / 'all_nonpoint_source_data.nc'
+riv_fn = Ldir['data'] / Ldir['traps_name'] / 'all_nonpoint_source_data.nc'
 ecology_data_ds = xr.open_dataset(riv_fn)
 
 # get riv names
@@ -62,7 +62,7 @@ rivnames_all = ecology_data_ds['name'].values
 
 # Remove pre-existing LO rivers
 # read overlapping rivers
-repeatrivs_fn = Ldir['data'] / 'traps' / 'LiveOcean_SSM_rivers.xlsx'
+repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
 repeatrivs_df = pd.read_excel(repeatrivs_fn)
 SSM_repeats = repeatrivs_df['SSM_rname'].values
 # remove nans
