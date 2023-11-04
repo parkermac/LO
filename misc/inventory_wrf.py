@@ -14,7 +14,7 @@ if 'mac' in Ldir['lo_env']:
     testing = True
 elif 'apogee' in Ldir['lo_env']:
     wrf_dir = Path('/pgdat1/parker/LO_data/wrf')
-elif 'apogee' in Ldir['lo_env']:
+elif 'perigee' in Ldir['lo_env']:
     wrf_dir = Path('/data1/parker/LO_data/wrf')
 
 if testing:
