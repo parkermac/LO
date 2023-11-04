@@ -1,14 +1,13 @@
 """
 Code to generate an inventory of WRF files.
 
-Takes about a minute to run on perigee.
+Takes about 8 seconds to run on perigee.
 """
 
 from datetime import datetime, timedelta
 from lo_tools import Lfun
 import pandas as pd
 Ldir = Lfun.Lstart()
-import matplotlib.pyplot as plt
 from pathlib import Path
 from time import time
 
@@ -29,8 +28,6 @@ else:
     year0 = 2012
     year1 = datetime.now().year
     dti = pd.date_range(start=datetime(year0,1,1), end=datetime(year1,12,31))
-    
-    
 
 tt0 = time()
 df = pd.DataFrame(index=dti,columns=['d2','d3','d4'])
