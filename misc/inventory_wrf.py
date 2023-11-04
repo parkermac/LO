@@ -1,5 +1,7 @@
 """
 Code to generate an inventory of WRF files.
+
+Takes about aminute to run on perigee.
 """
 
 from datetime import datetime, timedelta
