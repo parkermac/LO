@@ -1,47 +1,31 @@
 """
 Plot the inventory of WRF files.
+
+RESULTS:
+first good day is 2012.10.07
+d4 (1.4 km grid) started in 2016
+d2 (12 km) and d3 (4 km) went from 3.5 days to 4 days on 2023.11.01
+still getting 3 days of d4
 """
 
-from datetime import datetime, timedelta
 from lo_tools import Lfun
+from lo_tools import plotting_functions as pfun
+import matplotlib.pyplot as plt
 import pandas as pd
 Ldir = Lfun.Lstart()
-from pathlib import Path
-from time import time
 
-testing = False
-if 'mac' in Ldir['lo_env']:
-    wrf_dir = Ldir['data'] / 'wrf'
-    testing = True
-elif 'apogee' in Ldir['lo_env']:
-    wrf_dir = Path('/pgdat1/parker/LO_data/wrf')
-elif 'perigee' in Ldir['lo_env']:
-    wrf_dir = Path('/data1/parker/LO_data/wrf')
+pd.set_option('display.max_rows', 500)
+pd.set_option('display.max_columns', 500)
+pd.options.display.width = 0 # auto-detect full display width
 
-if testing:
-    year0 = 2019
-    year1 = 2019
-    dti = pd.date_range(start=datetime(year0,7,1), end=datetime(year1,7,7))
-else:
-    year0 = 2012
-    year1 = datetime.now().year
-    dti = pd.date_range(start=datetime(year0,1,1), end=datetime(year1,12,31))
+in_dir = Ldir['LOo'] / 'misc'
+in_fn = in_dir / 'inventory_wrf.p'
+df = pd.read_pickle(in_fn)
 
-tt0 = time()
-df = pd.DataFrame(index=dti,columns=['d2','d3','d4'])
-for dt in dti:
-    fdir = wrf_dir / (dt.strftime('%Y%m%d')+'00')
-    if fdir.is_dir():
-        for dd in ['d2','d3','d4']:
-            ddl = list(fdir.glob('*'+dd+'*'))
-            ddl.sort()
-            df.loc[dt,dd] = len(ddl)
-    else:
-        pass
-print('Total time = %0.1f sec' % (time()-tt0))
+pfun.start_plot(figsize=(20,10))
+plt.close('all')
 
-out_dir = Ldir['LOo'] / 'misc'
-Lfun.make_dir(out_dir)
-out_fn = out_dir / 'inventory_wrf.p'
-print('DataFrame saved to ' + str(out_fn))
-df.to_pickle(out_fn)
+df.plot(subplots=True,ylim=(0,100),title='WRF Inventory')
+
+plt.show()
+plt.savefig(in_dir / 'inventory_wrf.png')
