@@ -1,7 +1,7 @@
 """
 Code to generate an inventory of WRF files.
 
-Takes about aminute to run on perigee.
+Takes about a minute to run on perigee.
 """
 
 from datetime import datetime, timedelta
@@ -10,6 +10,7 @@ import pandas as pd
 Ldir = Lfun.Lstart()
 import matplotlib.pyplot as plt
 from pathlib import Path
+from time import time
 
 testing = False
 if 'mac' in Ldir['lo_env']:
@@ -29,7 +30,9 @@ else:
     year1 = datetime.now().year
     dti = pd.date_range(start=datetime(year0,1,1), end=datetime(year1,12,31))
     
+    
 
+tt0 = time()
 df = pd.DataFrame(index=dti,columns=['d2','d3','d4'])
 for dt in dti:
     fdir = wrf_dir / (dt.strftime('%Y%m%d')+'00')
@@ -40,9 +43,10 @@ for dt in dti:
             df.loc[dt,dd] = len(ddl)
     else:
         pass
+print('Total time = %0.1f sec' % (time()-tt0))
 
-plt.close('all')
-fig = plt.figure(figsize=(16,8))
-ax = fig.add_subplot(111)
-df.plot(ax=ax)
-fig.savefig('inventory_wrf.png')
+out_dir = Ldir['LOo'] / 'misc'
+Lfun.make_dir(out_dir)
+out_fn = out_dir / 'inventory_wrf.p'
+print('DataFrame saved to ' + str(out_fn))
+df.to_pickle(out_fn)
