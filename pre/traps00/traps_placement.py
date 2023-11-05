@@ -70,12 +70,12 @@ def traps_placement(source_type,Ldir):
     if source_type == 'wwtp':
         output_fn = 'wwtp_info.csv'
         # read data
-        wwtp_fn = Ldir['data'] / 'traps' / 'all_point_source_data.nc'
+        wwtp_fn = Ldir['data'] / Ldir['traps_name'] / 'all_point_source_data.nc'
         source_ds = xr.open_dataset(wwtp_fn)
     elif source_type == 'riv':
         output_fn = 'triv_info.csv'
         # read data
-        riv_fn = Ldir['data'] / 'traps' / 'all_nonpoint_source_data.nc'
+        riv_fn = Ldir['data'] / Ldir['traps_name'] / 'all_nonpoint_source_data.nc'
         source_ds = xr.open_dataset(riv_fn)
 
     # get the grid data
@@ -90,7 +90,7 @@ def traps_placement(source_type,Ldir):
     Y = lat[:,0] # grid cell Y values
 
     # read overlapping rivers
-    repeatrivs_fn = Ldir['data'] / 'traps' / 'LiveOcean_SSM_rivers.xlsx'
+    repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
     repeatrivs_df = pd.read_excel(repeatrivs_fn)
 
     # initialize dataframe to save results
