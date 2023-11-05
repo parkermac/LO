@@ -15,7 +15,7 @@ def get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type):
     # Only add biology to pre-existing LO river if Ecology has data
     if traps_type == 'LOriv':
         # get names of duplicate rivers
-        repeatrivs_fn = Ldir['data'] / 'traps' / 'LiveOcean_SSM_rivers.xlsx'
+        repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
         repeatrivs_df = pd.read_excel(repeatrivs_fn)
         LObio_names_all = list(repeatrivs_df.loc[repeatrivs_df['in_both'] == 1, 'LO_rname'])
         # remove the weird rivers
@@ -100,7 +100,7 @@ def LO2SSM_name(rname):
     """
     Given a river name in LiveOcean, find corresponding river name in SSM
     """
-    repeatrivs_fn = Ldir['data'] / 'traps' / 'LiveOcean_SSM_rivers.xlsx'
+    repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
     repeatrivs_df = pd.read_excel(repeatrivs_fn)
     rname_SSM = repeatrivs_df.loc[repeatrivs_df['LO_rname'] == rname, 'SSM_rname'].values[0]
 

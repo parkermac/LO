@@ -46,7 +46,7 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir):
     Ldir['Ctemp_fn'] = ri_dir / 'Data_historical' / ('CLIM_temp.p')
 
     # define directory for pre-existing LO river bio climatology
-    LObio_dir = Ldir['LOo'] / 'pre' / 'traps' / 'LO_rivbio' / ctag
+    LObio_dir = Ldir['LOo'] / 'pre' / Ldir['traps_name'] / 'LO_rivbio' / ctag
     traps_type = 'LOriv'
 
     # get climatological data
@@ -59,7 +59,7 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir):
     # get names of rivers for which Ecology has biogeochem data
     # these are the names the LiveOcean calls them.
     # Later, they will be converted to the name Ecology/SSM uses
-    repeatrivs_fn = Ldir['data'] / 'traps' / 'LiveOcean_SSM_rivers.xlsx'
+    repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
     repeatrivs_df = pd.read_excel(repeatrivs_fn)
     LObio_names_all = list(repeatrivs_df.loc[repeatrivs_df['in_both'] == 1, 'LO_rname'])
     # remove the weird rivers

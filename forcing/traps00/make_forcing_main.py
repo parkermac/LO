@@ -6,7 +6,7 @@ By default, point sources and tiny rivers are enabled.
 To turn them off, set lines 38 and 39 to be = False
 
 Test on pc in ipython:
-run make_forcing_main.py -g cas7 -r backfill -d 2017.01.01 -f trapsV00 -test True
+run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -f traps00
 """
 
 #################################################################################

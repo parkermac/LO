@@ -115,7 +115,8 @@ def traps_placement(source_type,Ldir):
             # check if river already in LiveOcean
             SSM_repeats = repeatrivs_df['SSM_rname'] # get names of repeat rivers
             # don't add rivers that already exist
-            if SSM_repeats.str.contains(source).any():
+            # Also drop Willamette R
+            if (SSM_repeats.str.contains(source).any()) or (source == 'Willamette R'):
                 continue 
             else:
                 # add river to LiveOcean if not pre-existing

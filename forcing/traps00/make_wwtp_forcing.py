@@ -44,12 +44,12 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable):
             sys.exit()
 
         # Read WWTP open/close dates
-        open_close_fn = Ldir['data'] / 'traps' / 'wwtp_open_close_dates.xlsx'
+        open_close_fn = Ldir['data'] / Ldir['traps_name'] / 'wwtp_open_close_dates.xlsx'
         open_close_df = pd.read_excel(open_close_fn)
         open_closed_wwtps = open_close_df['name'].tolist()
 
         # define directory for point_source climatology
-        wwtp_dir = Ldir['LOo'] / 'pre' / 'traps' / 'point_sources' /ctag
+        wwtp_dir = Ldir['LOo'] / 'pre' / Ldir['traps_name'] / 'point_sources' /ctag
         traps_type = 'wwtp'  
 
         # get climatological data

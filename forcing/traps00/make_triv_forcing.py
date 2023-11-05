@@ -40,7 +40,7 @@ def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable):
             sys.exit()
 
         # define directory for tiny river climatology
-        triv_dir = Ldir['LOo'] / 'pre' / 'traps' / 'tiny_rivers' / ctag
+        triv_dir = Ldir['LOo'] / 'pre' / Ldir['traps_name'] / 'tiny_rivers' / ctag
         traps_type = 'triv'
 
         # get climatological data
