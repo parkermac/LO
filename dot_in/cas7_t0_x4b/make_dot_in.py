@@ -6,7 +6,7 @@ It is designed to work with the BLANK.in file, replacing things like
 $whatever$ with meaningful values.
 
 To test from ipython on mac:
-run make_dot_in -g cas6 -t v00 -x uu0k -r backfill -s continuation -d 2019.07.04 -bu 0 -np 400
+run make_dot_in -g cas7 -t t0 -x x4b -r backfill -s continuation -d 2019.07.04 -bu 0 -np 400
 
 If you call with -short_roms True it will create a .in that runs for a shorter time or
 writes history files more frequently (exact behavior is in the code below).  This can
@@ -184,7 +184,7 @@ D['dstart'] = int(Lfun.datetime_to_modtime(fdt) / 86400.)
 D['grid_dir'] = Ldir['grid']
 force_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string'])
 D['force_dir'] = force_dir
-D['roms_varinfo_dir'] = Ldir['parent'] / 'LO_roms_source_alt' / 'varinfo'
+D['roms_varinfo_dir'] = Ldir['parent'] / 'LO_roms_source_git' / 'ROMS' / 'External'
 
 # get horizontal coordinate info
 with open(Ldir['grid'] / 'XY_COORDINATE_INFO.csv','r') as xyf:
