@@ -591,6 +591,7 @@ def get_sect(fn, vn, x_e, y_e):
         col0, col1, colf = zfun.get_interpolant(x, lon[1,:])
         row0, row1, rowf = zfun.get_interpolant(y, lat[:,1])
         
+        fld0 = fld.copy()
         # Do some munging to avoid masked cells. This works well!
         #
         # loop over all points on the section
@@ -606,28 +607,44 @@ def get_sect(fn, vn, x_e, y_e):
             rc = [(row0[ii],col0[ii]), (row1[ii],col0[ii]), (row0[ii],col1[ii]), (row1[ii],col1[ii])]
             if np.sum(mm) < 4:
                 # if the sum of mm < 4 then there are masked grid points for this section point
-                iii = 0
+                #iii = 0
                 # loop over the 4 mask values surrounding this section point
-                for mmm in [m00, m10, m01, m11]:
-                    if mmm == 1:
+                #for mmm in [m00, m10, m01, m11]:
+                    #if mmm == 1:
                         # fill everything with the first GOOD point we encounter
-                        row0[ii] = rc[iii][0];
-                        row1[ii] = rc[iii][0];
-                        col0[ii] = rc[iii][1];
-                        col1[ii] = rc[iii][1];
-                        rowf[ii] = 1
-                        colf[ii] = 1
-                        break
-                    iii += 1
-                
+                        #row0[ii] = rc[iii][0];
+                        #row1[ii] = rc[iii][0];
+                        #col0[ii] = rc[iii][1];
+                        #col1[ii] = rc[iii][1];
+                        #rowf[ii] = 1
+                        #colf[ii] = 1
+                        #break
+                    #iii += 1
+                # get average field value from all good points
+                if len(fld.shape) == 3:
+                    mean_val = list(fld[:, row0[ii], col0[ii]]) + list(fld[:, row0[ii], col1[ii]]) + list(fld[:, row1[ii], col0[ii]]) + list(fld[:, row1[ii], col1[ii]])
+                    mean_val = np.array(mean_val).reshape((4,30))
+                    mean_val = np.nanmean(mean_val, axis=0)
+                elif len(fld.shape) == 2:
+                    mean_val = list(fld[row0[ii], col0[ii]]) + list(fld[row0[ii], col1[ii]]) + list(fld[row1[ii], col0[ii]]) + list(fld[row1[ii], col1[ii]])
+                    mean_val = np.array(mean_val).reshape((4,1))
+                    mean_val = np.nanmean(mean_val, axis=0)
+            
+                ix = np.argwhere(mm == 0)[:,0] # find the mask cell
+                for ixx in ix:
+                    if len(fld.shape) == 3:
+                        fld0[:, rc[ixx][0], rc[ixx][1]] = mean_val
+                    if len(fld.shape) == 2:
+                        fld0[rc[ixx][0], rc[ixx][1]] = mean_val
+            
         colff = 1 - colf
         rowff = 1 - rowf
         if len(fld.shape) == 3:
-            fld_s = (rowff*(colff*fld[:, row0, col0] + colf*fld[:, row0, col1])
-                + rowf*(colff*fld[:, row1, col0] + colf*fld[:, row1, col1]))
+            fld_s = (rowff*(colff*fld0[:, row0, col0] + colf*fld0[:, row0, col1])
+                    + rowf*(colff*fld0[:, row1, col0] + colf*fld0[:, row1, col1]))
         elif len(fld.shape) == 2:
-            fld_s = (rowff*(colff*fld[row0, col0] + colf*fld[row0, col1])
-                + rowf*(colff*fld[row1, col0] + colf*fld[row1, col1]))
+            fld_s = (rowff*(colff*fld0[row0, col0] + colf*fld0[row0, col1])
+                    + rowf*(colff*fld0[row1, col0] + colf*fld0[row1, col1]))
         return fld_s
 
     # Do the section extractions for zw (edges) and sv (centers)
