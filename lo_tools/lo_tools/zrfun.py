@@ -260,10 +260,31 @@ def make_varinfo_list():
         
     # specify which varinfo.yaml to use
     Ldir = Lfun.Lstart()
-    fn = Ldir['parent'] / 'LO_roms_source_alt' / 'varinfo' / 'varinfo.yaml'
     
+    # ORIGINAL
+    # fn = Ldir['parent'] / 'LO_roms_source_alt' / 'varinfo' / 'varinfo.yaml'
+    # # parse into a list of dicts
+    # with open(fn,'r') as f:
+    #     yaml_dict = yaml.safe_load(f)
+    # short_list = yaml_dict['metadata'] # a list of dicts, one per item
+    
+    # NEW
+    fn = Ldir['parent'] / 'LO_roms_source_git' / 'ROMS' / 'External' / 'varinfo.yaml'
+    out_dir = Ldir['data'] / 'varinfo'
+    Lfun.make_dir(out_dir)
+    fn2 = out_dir / 'varinfo2.yaml'
+    f = open(fn,'r')
+    f2 = open(fn2,'w')
+    for line in f:
+        if 'svn_repository:' in line:
+            line2 = '#'+line
+        else:
+            line2 = line
+        f2.write(line2)
+    f.close()
+    f2.close()
     # parse into a list of dicts
-    with open(fn,'r') as f:
+    with open(fn2,'r') as f:
         yaml_dict = yaml.safe_load(f)
     short_list = yaml_dict['metadata'] # a list of dicts, one per item
     
@@ -272,8 +293,6 @@ def make_varinfo_list():
     short_list = [item for item in short_list if 'tangent' not in item['field']]
     short_list = [item for item in short_list if 'functional' not in item['field']]
     
-    out_dir = Ldir['data'] / 'varinfo'
-    Lfun.make_dir(out_dir)
     out_fn = out_dir / 'varinfo_list.p'
     pickle.dump(short_list, open(out_fn, 'wb'))
     
