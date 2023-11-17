@@ -62,7 +62,7 @@ else:
 ax = fig.add_subplot(111)
 ax.pcolormesh(plon,plat,h, vmin=-30, vmax=200, cmap=cm.deep)
 pfun.dar(ax)
-ax.set_title('Use keyboard to create or section')
+ax.set_title('Use keyboard to create or delete section')
 ax.text(.05,.95,str(out_dir),transform=ax.transAxes,
     fontweight='bold',bbox=pfun.bbox)
 plt.show()
