@@ -246,6 +246,13 @@ if planC == False:
             # and that it retains the correct shape
             V[vnr][ii, :] = C[vnh]
             
+    if add_CTD:
+        z_rho = zrfun.get_z(G['h'], 0*G['h'], S, only_rho=True)
+        for vn in ['salt','temp']:
+            fld = V[vn].copy()
+            V[vn] = Ofun_bio.fill_polygons(fld, vn, G, z_rho, Ldir)
+    
+            
     # Create masks
     mr2 = np.ones((NT, NR, NC)) * G['mask_rho'].reshape((1, NR, NC))
     mr3 = np.ones((NT, NZ, NR, NC)) * G['mask_rho'].reshape((1, 1, NR, NC))
@@ -262,7 +269,7 @@ if planC == False:
     V['temp'][mr3==0] = np.nan
     V['u'][mu3==0] = np.nan
     V['v'][mv3==0] = np.nan
-    
+        
     # add bio variables if needed
     """
     !------------------------------------------------------------------------------
@@ -297,11 +304,12 @@ if planC == False:
             
         # NOTE: 2023.11.18 Need something like this for initial condition
         # I have G and S so it is easy to make and pass z_rho
+        bvn_list_short = ['NO3','TIC', 'alkalinity', 'oxygen']
         if add_CTD:
             z_rho = zrfun.get_z(G['h'], 0*G['h'], S, only_rho=True)
-            for bvn in bvn_list:
-                V[bvn] = Ofun_bio.salish_fields(V, bvn, G, z_rho)
-        
+            for bvn in bvn_list_short:
+                fld = V[vn].copy()
+                V[bvn] = Ofun_bio.fill_polygons(fld, vn, G, z_rho, Ldir)
             
     # Write climatology file making use of zrfun.get_varinfo().
     
