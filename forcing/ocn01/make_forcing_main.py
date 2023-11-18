@@ -3,23 +3,14 @@ This makes the ocn forcing files for the updated ROMS, including the banas-fenne
 
 Testing:
 
-run make_forcing_main.py -g cas6 -r backfill -d 2019.07.04 -f ocn01 -test True
+run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -f ocn01 -test True
 
-This is the first code that uses the new varinfo.yaml file and the associated method
-zrfun.get_varinfo() [around line 328].  The handling of time coordinate names proved to be
-especially tricky, so here is what I have learned:
-
-For the clm and bry files the time coordinate for each field has the form [varname]_time,
-e.g. salt_time, NO3_time, etc.  This apples to both the climatology and the bry fields,
-so the both salt (clm) and salt_east (bry) need their time to be salt_time.  BUT, a few of
-the fields have times that break this rule (zeta, ubar, vbar, u, v) and they have time
-names that can be found in the Climatology section of varinfo.yaml.  For example ubar uses
-v2d_time
+run make_forcing_main.py -g cas7 -r backfill -s new -d 2012.10.07 -f ocn01
 
 The ini file uses state variables, and all of these have their time coordinate called
 ocean_time.
 
-2023.10.12 Running with -test True will just test planC, which has not been working.
+2023.10.12 Running with -test True will just test planC, which now works.
 To use this you will want to temporarily put the good forcing for a given day in a
 temp directory.
 
@@ -51,38 +42,32 @@ import pandas as pd
 
 from lo_tools import Lfun, zfun, zrfun, Ofun_nc
 import Ofun
-import Ofun_CTD
 import Ofun_bio
 
-if Ldir['testing']:
-    verbose = True
-    from importlib import reload
-    reload(Ofun)
-    reload(Ofun_CTD)
-    reload(Ofun_bio)
-    reload(zrfun)
-else:
-    verbose = False
-    
 # defaults
 planB = False
 planC = False
 add_CTD = False
 do_bio = True
+
+# defaults for testing
 verbose = False
+testing_ncks = False
+testing_fmrc = False
+testing_planC = False
 
 if Ldir['testing']:
     verbose = True
-
-testing_ncks = False
-testing_fmrc = False
-
-# things to test planC
-testing_planC = False
-if Ldir['testing']:
+    from importlib import reload
+    reload(Ofun)
+    reload(Ofun_bio)
+    reload(zrfun)
+    # things to test planC
     testing_planC = True
     planC = True
-
+else:
+    pass
+    
 # This directory is created, along with Info and Data subdirectories, by ffun.intro()
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
 
@@ -90,15 +75,13 @@ out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string'
 this_dt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
 
 # *** automate when to set add_CTD to True ***
-if this_dt == datetime(2016,12,15):
+if this_dt == datetime(2012,10,7):
     print('WARNING: adding CTD data to extrapolation!!')
-    print('AND this is not supported yet')
-    sys.exit()
     add_CTD = True
     
 # this is where all the pre-processed files will go
 h_out_dir = out_dir / 'Data'
-# This already exists becasue it is created by the initialization, but we make sure it is clean
+# This already exists because it is created by the initialization, but we make sure it is clean
 # so that testing, which does not make a clean version, is more consistent with operational use,
 # which does.
 Lfun.make_dir(h_out_dir, clean=True)
@@ -263,7 +246,6 @@ if planC == False:
             # and that it retains the correct shape
             V[vnr][ii, :] = C[vnh]
             
-
     # Create masks
     mr2 = np.ones((NT, NR, NC)) * G['mask_rho'].reshape((1, NR, NC))
     mr3 = np.ones((NT, NZ, NR, NC)) * G['mask_rho'].reshape((1, 1, NR, NC))
@@ -312,6 +294,11 @@ if planC == False:
         salt = V['salt'].copy()
         for bvn in bvn_list:
             V[bvn] = Ofun_bio.create_bio_var(salt, bvn)
+            
+        # 2023.11.18 Need something like this for initial condition
+        # if add_CTD:
+        #     V = salish_fields(V, vn, G)
+        
             
     # Write climatology file making use of zrfun.get_varinfo().
     tt0 = time()
