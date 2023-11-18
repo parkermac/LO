@@ -13,7 +13,6 @@ import seawater
 import subprocess
 import requests
 
-import Ofun_CTD
 from lo_tools import Lfun, zfun, zrfun
 from lo_tools import hycom_functions as hfun
 
@@ -524,15 +523,16 @@ def get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir, add_CTD=False):
                     V[vn][k, :, :] = fldf
             elif add_CTD==True:
                 print(vn + ' Adding CTD data before extrapolating')
-                Cast_dict, sta_df = Ofun_CTD.get_casts(Ldir)
-                for k in range(N):
-                    fld = v[k, :, :]
-                    zz = z[k]
-                    xyorig, fldorig = Ofun_CTD.get_orig(Cast_dict, sta_df,
-                        X, Y, fld, lon, lat, zz, vn)
-                    fldf = Ofun_CTD.extrap_nearest_to_masked_CTD(X,Y,fld,
-                        xyorig=xyorig,fldorig=fldorig,fld0=v0)
-                    V[vn][k, :, :] = fldf
+                # 2023.11.18 Need to do this without Ofun_CTD
+                # Cast_dict, sta_df = Ofun_CTD.get_casts(Ldir)
+                # for k in range(N):
+                #     fld = v[k, :, :]
+                #     zz = z[k]
+                #     xyorig, fldorig = Ofun_CTD.get_orig(Cast_dict, sta_df,
+                #         X, Y, fld, lon, lat, zz, vn)
+                #     fldf = Ofun_CTD.extrap_nearest_to_masked_CTD(X,Y,fld,
+                #         xyorig=xyorig,fldorig=fldorig,fld0=v0)
+                #     V[vn][k, :, :] = fldf
         elif vn in ['u3d', 'v3d']:
             # print(' -- extrapolating ' + vn)
             vv = v.copy()
@@ -591,15 +591,9 @@ def get_zr(G, S, vn):
         zr = zrfun.get_z(h, 0*h, S, only_rho=True)
     elif vn in ['u3d']:    
         xru, yru = get_xyr(G, 'ubar')
-        # hu = zfun.interp_scattered_on_plaid(G['lon_u'], G['lat_u'],
-        #             G['lon_rho'][0,:], G['lat_rho'][:,0], h)
-        # hu = np.reshape(hu, G['lon_u'].shape)
         hu = (h[:,1:] + h[:,:-1])/2
         zr = zrfun.get_z(hu, 0*hu, S, only_rho=True)    
     elif vn in ['v3d']:    
-        # hv = zfun.interp_scattered_on_plaid(G['lon_v'], G['lat_v'],
-        #             G['lon_rho'][0,:], G['lat_rho'][:,0], h)
-        # hv = np.reshape(hv, G['lon_v'].shape)
         hv = (h[1:, :] + h[:-1,:])/2
         zr = zrfun.get_z(hv, 0*hv, S, only_rho=True)
     else:

@@ -295,12 +295,19 @@ if planC == False:
         for bvn in bvn_list:
             V[bvn] = Ofun_bio.create_bio_var(salt, bvn)
             
-        # 2023.11.18 Need something like this for initial condition
-        # if add_CTD:
-        #     V = salish_fields(V, vn, G)
+        # NOTE: 2023.11.18 Need something like this for initial condition
+        # I have G and S so it is easy to make and pass z_rho
+        if add_CTD:
+            z_rho = zrfun.get_z(G['h'], 0*G['h'], S, only_rho=True)
+            for bvn in bvn_list:
+                V[bvn] = Ofun_bio.salish_fields(V, bvn, G, z_rho)
         
             
     # Write climatology file making use of zrfun.get_varinfo().
+    
+    # NOTE: 2023.11.18 I should try filling the interior of the clm arrays with
+    # nan's to make them smaller (except for start_type = new).
+    
     tt0 = time()
     out_fn = out_dir / 'ocean_clm.nc'
     out_fn.unlink(missing_ok=True)
