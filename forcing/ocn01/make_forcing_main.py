@@ -6,15 +6,21 @@ Testing:
 run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -f ocn01 -test True
 
 run make_forcing_main.py -g cas7 -r backfill -s new -d 2012.10.07 -f ocn01 -test True
+run make_forcing_main.py -g cas7 -r backfill -d 2012.10.08 -f ocn01 -test True
 
 2023.11.18 This code is based on ocn00. The main difference is that I have updated the
 Ofun_bio module to give better initial conditions based on observations. As in ocn00
 this is only used for a specific date. We dropped Ofun_CTD.py.
 
+Performance:
+Takes about 2 minutes per day (3 minutes with start_typ = new)
+Output is 600 MB per day (800 MB with start_type = new)
+
 To do:
 - Ofun: use gsw instead of seawater for potential temp calculation
 - Ofun: use xarray instaed of netCDF4
 - main: hollow out arrays unless start_type = new
+- throughout: stop using masked arrays
 
 """
 
