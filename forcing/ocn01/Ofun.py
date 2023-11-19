@@ -476,11 +476,11 @@ def extrap_nearest_to_masked(X, Y, fld, fld0=0):
         checknan(fldd)
         return fldd
 
-def get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir, add_CTD=False):
+def get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir):
     """
     Make use of extrap_nearest_to_masked() to fill fields completely
-    before interpolating to the ROMS grid.  It also adds CTD data if asked to,
-    creates ubar and vbar, and converts the temperature to potential temperature.
+    before interpolating to the ROMS grid.  It also creates ubar and vbar,
+    and converts the temperature to potential temperature.
     """
     b = pickle.load(open(in_fn, 'rb'))
     vn_list = list(b.keys())    
@@ -545,7 +545,8 @@ def get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir, add_CTD=False):
         vv = v.copy()
         vv = np.ma.masked_where(np.isnan(vv), vv)
         vv[vv.mask] = 0
-        V[vn] = vv.data  
+        V[vn] = vv.data
+        
     # calculate potential temperature
     press_db = -z.reshape((N,1,1))
     V['theta'] = seawater.ptmp(V['s3d'], V['t3d'], press_db)    

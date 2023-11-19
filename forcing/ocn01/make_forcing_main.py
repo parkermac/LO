@@ -5,18 +5,16 @@ Testing:
 
 run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -f ocn01 -test True
 
-run make_forcing_main.py -g cas7 -r backfill -s new -d 2012.10.07 -f ocn01
+run make_forcing_main.py -g cas7 -r backfill -s new -d 2012.10.07 -f ocn01 -test True
 
-The ini file uses state variables, and all of these have their time coordinate called
-ocean_time.
+2023.11.18 This code is based on ocn00. The main difference is that I have updated the
+Ofun_bio module to give better initial conditions based on observations. As in ocn00
+this is only used for a specific date. We dropped Ofun_CTD.py.
 
-2023.10.12 Running with -test True will just test planC, which now works.
-To use this you will want to temporarily put the good forcing for a given day in a
-temp directory.
-
-2023.11.18 This code is based on ocn00. The only difference is that I have updated the
-Ofun_CTD module to give better initial conditions based on observations. As in ocn00
-these only are used for a specific date.
+To do:
+- Ofun: use gsw instead of seawater for potential temp calculation
+- Ofun: use xarray instaed of netCDF4
+- main: hollow out arrays unless start_type = new
 
 """
 
@@ -61,10 +59,6 @@ if Ldir['testing']:
     from importlib import reload
     reload(Ofun)
     reload(Ofun_bio)
-    reload(zrfun)
-    # things to test planC
-    testing_planC = True
-    planC = True
 else:
     pass
     
@@ -182,8 +176,7 @@ if planC == False:
     for fn in fh_list:
         print('-Extrapolating ' + fn)
         in_fn = h_out_dir / fn
-        V = Ofun.get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir,
-            add_CTD=add_CTD)
+        V = Ofun.get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir)
         pickle.dump(V, open(h_out_dir / ('x' + fn), 'wb'))
 
     # and interpolate to ROMS format
@@ -247,11 +240,13 @@ if planC == False:
             V[vnr][ii, :] = C[vnh]
             
     if add_CTD:
+        tt00 = time()
         z_rho = zrfun.get_z(G['h'], 0*G['h'], S, only_rho=True)
         for vn in ['salt','temp']:
             fld = V[vn].copy()
             V[vn] = Ofun_bio.fill_polygons(fld, vn, G, z_rho, Ldir)
-    
+        print(' - add_CTD task for salt and temp: %0.2f sec' % (time()-tt00))
+            
             
     # Create masks
     mr2 = np.ones((NT, NR, NC)) * G['mask_rho'].reshape((1, NR, NC))
@@ -271,29 +266,7 @@ if planC == False:
     V['v'][mv3==0] = np.nan
         
     # add bio variables if needed
-    """
-    !------------------------------------------------------------------------------
-    ! Fennel et al (2006), Nitrogen-based Biological Model Parameters. Currently,
-    ! it can be configured with 15 biological tracers:
-    !
-    ! idbio( 1)     NO3               Nitrate concentration
-    ! idbio( 2)     NH4               Ammonium concentration
-    ! idbio( 3)     chlorophyll       Chorophyll concentration
-    ! idbio( 4)     phytoplankton     Phytoplankton biomass
-    ! idbio( 5)     zooplankton       Zooplankton biomass
-    ! idbio( 6)     LdetritusN        Large detritus N-concentration
-    ! idbio( 7)     SdetritusN        Small detritus N-concentration
-    ! idbio( 8)     LdetritusC        Large detritus C-concentration     if CARBON
-    ! idbio( 9)     SdetritusC        Small detritus C-concentration     if CARBON
-    ! idbio(10)     TIC               Total inorganic carbon             if CARBON
-    ! idbio(11)     alkalinity        Alkalinity                         if CARBON
-    ! idbio(12)     oxygen            Oxygen concentration               if OXYGEN
-    ! idbio(13)     PO4               Phosphate concentration            if PO4
-    ! idbio(14)     RdetritusN        River detritus N-concentration     if RIVER_DON
-    ! idbio(15)     RdetritusC        River detritus C-concentration     if RIVER_DON
-    !
-    !------------------------------------------------------------------------------
-    """
+    tt0 = time()
     if do_bio:
         bvn_list = ['NO3', 'NH4', 'chlorophyll', 'phytoplankton', 'zooplankton',
                 'LdetritusN', 'SdetritusN', 'LdetritusC', 'SdetritusC',
@@ -301,21 +274,22 @@ if planC == False:
         salt = V['salt'].copy()
         for bvn in bvn_list:
             V[bvn] = Ofun_bio.create_bio_var(salt, bvn)
+        print('- Add bio variables: %0.2f sec' % (time()-tt0))
             
-        # NOTE: 2023.11.18 Need something like this for initial condition
-        # I have G and S so it is easy to make and pass z_rho
-        bvn_list_short = ['NO3','TIC', 'alkalinity', 'oxygen']
         if add_CTD:
+            tt00 = time()
+            bvn_list_short = ['NO3','TIC', 'alkalinity', 'oxygen']
             z_rho = zrfun.get_z(G['h'], 0*G['h'], S, only_rho=True)
             for bvn in bvn_list_short:
-                fld = V[vn].copy()
-                V[bvn] = Ofun_bio.fill_polygons(fld, vn, G, z_rho, Ldir)
+                fld = V[bvn].copy()
+                V[bvn] = Ofun_bio.fill_polygons(fld, bvn, G, z_rho, Ldir)
+                V[bvn][mr3==0] = np.nan
+            print(' - add_CTD task for bio variables: %0.2f sec' % (time()-tt00))
             
     # Write climatology file making use of zrfun.get_varinfo().
-    
+    #
     # NOTE: 2023.11.18 I should try filling the interior of the clm arrays with
     # nan's to make them smaller (except for start_type = new).
-    
     tt0 = time()
     out_fn = out_dir / 'ocean_clm.nc'
     out_fn.unlink(missing_ok=True)
