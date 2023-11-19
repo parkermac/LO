@@ -26,8 +26,8 @@ basin_clim_dict = {
     'temp':(12,9),
     'oxygen':(226,141),
     'NO3':(17,27),
-    'TIC':(2116,2213),
-    'alkalinity':(2185,2247),
+    'TIC':(2029,2098), # copied from ps
+    'alkalinity':(2106,2149), # copied from ps
     },
 'jdf': {
     'salt':(31,32),
