@@ -13,7 +13,7 @@ Ofun_bio module to give better initial conditions based on observations. As in o
 this is only used for a specific date. We dropped Ofun_CTD.py.
 
 Performance:
-Takes about 2 minutes per day (3 minutes with start_typ = new)
+Takes about 2 minutes per day (3 minutes with start_type = new)
 Output is 600 MB per day (800 MB with start_type = new)
 
 To do:
