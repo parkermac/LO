@@ -17,8 +17,7 @@ LOd="/gscratch/macc/parker/LO/driver"
 
 00 12 * * * crontab <<< $(crontab -l)
 
-# 20 03 * * * source ~/.bashrc; python3 $LOd/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOd/ak_cron.log
-# 10 10 * * * source ~/.bashrc; python3 $LOd/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOd/ak_cron_2.log
-# 00 14 * * * source ~/.bashrc; python3 $LOd/driver_roms2.py -g cas6 -t v0 -x u0kb -r forecast -np 400 -N 40 --old_roms True > $LOd/ak_cron_3.log
+00 06 * * * source ~/.bashrc; mail -s 'Long Hindcast' pmacc@uw.edu < $LOd/cas7a.log
+00 16 * * * source ~/.bashrc; mail -s 'Long Hindcast' pmacc@uw.edu < $LOd/cas7a.log
 
 
