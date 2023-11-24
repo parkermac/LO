@@ -17,7 +17,7 @@ LOd="/gscratch/macc/parker/LO/driver"
 
 00 12 * * * crontab <<< $(crontab -l)
 
-00 06 * * * source ~/.bashrc; mail -s 'Long Hindcast' pmacc@uw.edu < $LOd/cas7a.log
-00 16 * * * source ~/.bashrc; mail -s 'Long Hindcast' pmacc@uw.edu < $LOd/cas7a.log
+00 06 * * * source ~/.bashrc; tail -30 $LOd/cas7a.log | mail -s 'Long Hindcast' pmacc@uw.edu
+00 16 * * * source ~/.bashrc; tail -30 $LOd/cas7a.log | mail -s 'Long Hindcast' pmacc@uw.edu
 
 
