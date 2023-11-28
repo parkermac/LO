@@ -4,7 +4,7 @@
 
 The code here handles all the non-research tasks of making model (e.g. ROMS) forcing files, running the model on a remote linux cluster, and post-processing of model output.  Many of the post-processing tasks, such as mooring- cast- and layer extractions, and particle tracking, are designed for other users to be able to run from the linux command line, or modify if needed.
 
-This version is the second major release of this project, the first was called LiveOcean. This version incorporates all the things I learned building the first one. A few specifics: it uses python Path objects everywhere possible. It defaults to using NetCDF4 for all the ROMS forcing. It uses python code instead of shell scripts wherever that makes things simpler - especially in the drivers. It also uses a much more rigorous and naming and organization system. It transitions to using xarray instead of the netCDF4 module.  For a very few pieces of code you also need Matlab, and these are being deprecated, so you can likely ignore this requirement.
+This version is the second major release of this project, the first was called LiveOcean. This version incorporates all the things I learned building the first one. A few specifics: it uses python Path objects everywhere possible. It defaults to using NetCDF4 for all the ROMS forcing. It uses python code instead of shell scripts wherever that makes things simpler - especially in the drivers. It also uses a much more rigorous naming and organization system. It transitions to using xarray instead of the netCDF4 module.  It no longer uses matlab.
 
 All the instructions assume you are working from the linux (bash) command line.
 
@@ -44,7 +44,7 @@ Anaconda is a great way to get python. We will use a minimal installation of pyt
 
 Go to this miniconda webpage to find the link for the "latest" installer for your platform: [INSTALLERS](https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links).  The "latest" is the table at the top of the page.  The bash versions are shell scripts, and the pkg versions are graphical installers.  These directions assume you are using the bash shellscript.
 
-On a Mac click on the link to download the installer, or copy the link address and then from the command line do:
+On a mac click on the link to download the installer, or copy the link address and then from the command line do:
 ```
 curl -O [address]
 ```
@@ -64,7 +64,7 @@ Next run the installer:
 ```
 bash [installer.sh]
 ```
-and answer yes to everything, especially "initialization".  For one of my linux installations I chose to put it in /data1/parker/miniconda3, or on my mac I put it in /Applications/miniconda3.  It doesn't matter what folder you put it in.  The initialization adds some lines to your ~/.bashrc or ~/.bash_profile (mac). After you "source" this you should have (base) appended to your bash prompt, and this tells you that you are in the (base) conda environment so you can run python - but not much else, yet.
+and answer yes to everything, especially "initialization".  For one of my linux installations I chose to put it in /data1/parker/miniconda3, or on my mac I put it in /Applications/miniconda3.  It doesn't matter what folder you put it in.  The initialization adds some lines to your ~/.bashrc (or ~/.bash_profile on a mac). After you "source" this you should have (base) appended to your bash prompt, and this tells you that you are in the (base) conda environment so you can run python - but not much else, yet.
 
 Then for good measure do:
 ```
@@ -80,7 +80,7 @@ conda install -c anaconda git
 
 The main pile of programs that you will use are in a GitHub repo called LO, maintained by MacCready.  You will clone this to all the machines you are working on, and should not have to make any changes to it, except for updating occasionally.
 
-On your machine, first go to wherever you want the LO repo to end up.  On my mac I go to Documents.  On one of our linux machines you might put it in /data1/[username] which is the working directory we made for you.  On the linux mashines don't put it in your home (~) folder because there is not much disk space there. When you are at whatever place you have decided on do:
+On your machine, first go to wherever you want the LO repo to end up.  On my mac I go to Documents.  On one of our linux machines you might put it in /data1/[username] which is the working directory we made for you.  On the linux machines don't put it in your home (~) folder because there is not much disk space there. When you are at whatever place you have decided on do:
 ```
 git clone https://github.com/parkermac/LO.git
 ```
@@ -102,7 +102,7 @@ conda env create -f loenv.yml > env.log &
 ```
 This may take a half hour or so, which is why I added the `> env.log &` at the end of the command. You can look in the .yml file to see what is being installed.  It even adds the non-python nco toolbox and ffmpeg.  It also adds LO/lo_tools as a local "package" so that when you are in (loenv) you can access any of the modules in LO/lo_tools/lo_tools with a line in your python code like `from lo_tools import zfun`.  Instructions for a simple approach to making your own local packages can be found [HERE](https://pythonchb.github.io/PythonTopics/where_to_put_your_code.html).
 
-If you like you can make your own .yml and make your own environment, especially if you want to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package. One question I have is, if you made your own `LO_user/loenv.yml` file you need to set a path in the pip line that installs the lo_tools package (see instructions below, under: Creating your own environment).
+If you like you can make your own .yml and make your own environment, especially if you want to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package. One question I have is, if you made your own `LO_user/loenv.yml` file do you need to set a path in the pip line that installs the lo_tools package (see instructions below, under: Creating your own environment).
 
 Then if you want to use this environment all the time add this line:
 ```
@@ -134,6 +134,7 @@ NOTE: 2023.02.24 Kate suggests that using pip3 in place of pip (including in the
 
 One way to do this would be to:
 
+- create a directory LO_user at the same level as LO
 - copy `loenv.yml` to LO_user or any other repo that is yours
 - rename it, for example, to `myenv.yml`
 - edit it so that `name: myenv` is the first line
@@ -150,7 +151,7 @@ As of 2022.12.07 the conda-forge version of the nco operators does not have a ve
 - Install nco using homebrew: https://formulae.brew.sh/formula/nco#default
 - Both are one-liners. Easy!
 
-After installing nco using homebrew, you can add -nco back to your myenv.yml and in terminal do: conda env update -f myenv.yml. A similar solution might exist for pytide, but I haven't tried it yet.
+After installing nco using homebrew, you can add -nco back to your myenv.yml and in the terminal do: `conda env update -f myenv.yml`. A similar solution might exist for pytide, but I haven't tried it yet.
 
 #### (4) Create your own LO_user and make it a GitHub repo
 
@@ -198,8 +199,8 @@ The user version of `get_lo_info.py` that you created above in LO_user is an exa
 Similar hooks are built into other parts of the LO system where we expect that users will want to use the LO code but have it access customized versions of some parts.  Here is the list of current hooks that it looks for:
 - `LO_user/get_lo_info.py`
 - `LO_user/pgrid/gfun_user.py`
-- `LO_user/forcing/[frc]` (used by `LO/driver_forcing.py`)
-- `LO_user/dot_in/[gtagex]` (used by `LO/driver_roms2.py`)
+- `LO_user/forcing/[frc]` (used by `LO/driver_forcing#.py`)
+- `LO_user/dot_in/[gtagex]` (used by `LO/driver_roms#.py`)
 - `LO_user/tracker/experiments.py` and `LO_user/tracker/trackfun.py`
 - `LO_user/extract/box/job_definitions.py` (used by `LO/extract/box/extract_box.py` and `extract_box_chunks.py`)
 - `LO_user/extract/moor/job_lists.py` (used by `LO/extract/moor/multi_mooring_driver.py`)
@@ -207,8 +208,6 @@ Similar hooks are built into other parts of the LO system where we expect that u
 
 Not yet implemented, but should be:
 - Ask for what you want to see!
-
-NOTE: there is now a [blog-like file](https://github.com/parkermac/LO/blob/main/notes/USER_NOTES.md) `LO/notes/USER_NOTES.md` where I keep notes about changes to the code that users should be aware of.
 
 NOTE: The hooks are meant to allow a user to change a single part of the LO system (like having their own lists of mooring locations) while still making use of the generic and well-tested LO machinery (like for mooring extraction). But for other types of analysis the user may be better off just copying a whole directory of code into LO and then editing it to do what they need. For example, the `LO/extract/tef` code is probably too closely tied to the TEF sections and segments from the MacCready et al. (2021, JGR) paper. If you do make a copy of an LO code folder and put it in LO_user, I suggest that you maintain the LO directory structure.  In the example this would mean putting the code in `LO_user/extract/tef`. Most LO code is designed to load modules either from lo_tools (which you always have access to if you are in the loenv python environment) or from modules in the current working directory. For output, unless you change things it will probably go to LO_output, just like the things from LO. I think this is probably fine - no need to create a separate LO_user_output.
 
