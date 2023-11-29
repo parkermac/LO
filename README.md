@@ -262,9 +262,8 @@ In the fields below:
 | LO_data   | Create your own folder on 1 and copy to 2,3  | 1,2,3  | Data files like grids and coastlines. Not a repo.  |
 | LO_output   | Created automatically  | Will appear on 1,2,3  | LO output, like forcing files. Not a repo.  |
 | LO_roms   | Created automatically  | Will appear on 2,3 and you can copy to 1  | ROMS output. Not a repo.  |
-| LO_roms_source   | Clone using svn from ROMS site.   | 1,3  | ROMS source code. Good to have on 1 for reference, even though you only compile on 3  |
-| LO_roms_source_alt   | Clone from parkermac  | 1,2,3  | Our customized bits of the ROMS source code, especially the biology routines.  Also an edited version of varinfo.yaml  |
-| LO_roms_user   | Create your own repo on 1 and copy in bits from the verion on parkermac. Then clone to 3.  | 1,3  | Files for configuring specific ROMS versions that are defined by lists of compiler flags.  |
+| LO_roms_source   | Clone from ROMS GitHub site   | 1,3  | ROMS source code. Good to have on 1 for reference, even though you only compile on 3  |
+| LO_roms_user   | Create your own repo on 1 and copy in bits from the version on parkermac. Then clone to 3.  | 1,3  | Files for configuring specific ROMS versions that are defined by lists of compiler flags.  |
 
 ---
 
@@ -274,12 +273,12 @@ In the fields below:
 
 Things that I type in [ ] below mean that they would be replaced by specific strings, for example when using them as command line arguments.
 
-- [gridname] is the name of the grid (e.g. cas6)
-- [tag] is a name to identify any of the things that are controlled by a "dot_in" instance (e.g. v00)
-- [ex_name] is the name of the ROMS executable (e.g. u0kb)
+- [gridname] is the name of the grid (e.g. cas7)
+- [tag] is a name to identify any of the things that are controlled by a "dot_in" instance (e.g. t0)
+- [ex_name] is the name of the ROMS executable (e.g. x4b)
 - [fstring] is a date string of the form fYYYY.MM.DD (e.g. f2021.07.04)
 - [date_string] is a date string of the form YYYY.MM.DD (e.g. 2021.07.04)
-- [frc] is the name of one of the model forcings (e.g. ocn0)
+- [frc] is the name of one of the model forcings (e.g. ocn00)
 
 Grids are just identified by [gridname].
 
@@ -294,13 +293,15 @@ Here is some info on the various folders in LO, and how they relate to the namin
 | LO | LO_output |
 | --- | --- |
 | lo_tools/lo_tools: place for shared modules | |
-| pre: pre-processing code, like for loading historical river records | pre/river/cas6_v3/... |
-| driver: has a couple of drivers that can be used with command-line arguments to (i) create any of the forcing files, and (ii) run one or more ROMS days | |
+| pre: pre-processing code, like for loading historical river records | pre/river1/lo_base/... |
+| driver: has drivers that can be used with command-line arguments to (i) create any of the forcing files, (ii) run one or more ROMS days, (iii) run post-processing jobs | |
 | forcing: the code for making each of the separate types of forcing | forcing/[gridname]/[fstring]/[frc]/... |
 | dot_in: code (one folder for each [gtagex]) for making the .in file for a ROMS run for a given day |
-| post: code for automated post-processing of the daily forecast, e.g. for the movies that are sent to the LiveOcean website | post/[gtagex]/layers, etc. |
+| post: code for automated post-processing of the daily forecast, e.g. for the movies that are sent to the LiveOcean website | post/[gtagex]/[fstring]/daymovie0, etc. |
 | extract: code for various types of extractions | extract/[gtagex]/cast, etc. |
 | pgrid: code for making ROMS grids   |   |
 | tracker: particle tracking code   |   |
 | daymovie: code to make the daily forecast movies for the website   |   |
 | notes: README's on various topics   |   |
+| obs:   |   |
+| pre:   |   |
