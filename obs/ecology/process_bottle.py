@@ -23,6 +23,9 @@ testing = False
 
 if testing:
     year_list = [2017]
+    # pd.set_option('display.max_rows', 500)
+    # pd.set_option('display.max_columns', 500)
+    # pd.options.display.width = 0 # auto-detect full display width
 else:
     year_list = range(2008,2018)
 
@@ -176,7 +179,7 @@ for year in year_list:
 
     df['cruise'] = None
     
-    if len(df) > 0:
+    if (len(df) > 0) and (testing == False):
         # Save the data
         df.to_pickle(out_fn)
         info_df = obs_functions.make_info_df(df)
