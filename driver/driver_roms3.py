@@ -91,7 +91,7 @@ for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'np_num', 'cor
 Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
 
 # Assign some variables related to the remote machine.  These are user-specific
-# and are specified in lo_tools/get_lo_info.py.
+# and are specified in get_lo_info.py.
 remote_user = Ldir['remote_user']
 remote_machine = Ldir['remote_machine']
 remote_dir0 = Ldir['remote_dir0']
