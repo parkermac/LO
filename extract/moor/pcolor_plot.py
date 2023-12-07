@@ -15,12 +15,16 @@ Ldir = Lfun.Lstart()
 
 # choose the file
 in_dir0 = Ldir['LOo'] / 'extract'
-gtagex = Lfun.choose_item(in_dir0, tag='', exclude_tag='',
-    itext='** Choose gtagex from list **')
+gtagex = Lfun.choose_item(in_dir0, tag='', exclude_tag='', itext='** Choose gtagex from list **')
 in_dir = in_dir0 / gtagex / 'moor'
-moor_name = Lfun.choose_item(in_dir, tag='.nc', exclude_tag='',
-    itext='** Choose mooring extraction from list **')
-moor_fn = in_dir / moor_name
+# you can choose either a file or a directory
+moor_name = Lfun.choose_item(in_dir, itext='** Choose mooring extraction or folder from list **')
+moor_item = in_dir / moor_name
+if moor_item.is_file() and moor_name[-3:]=='.nc':
+    moor_fn = moor_item
+elif moor_item.is_dir():
+    moor_name = Lfun.choose_item(moor_item, tag='.nc', itext='** Choose mooring extraction from list **')
+    moor_fn = moor_item / moor_name
 
 # load everything using xarray
 ds = xr.open_dataset(moor_fn)
@@ -58,7 +62,7 @@ OX = (ox[1:,:] + ox[:-1,:])/2
 OX = OX*32/1000 # convert uM to mg/L
 
 plt.close('all')
-pfun.start_plot()
+pfun.start_plot(figsize=(12,8))
 fig = plt.figure()
 
 ax = fig.add_subplot(311)
