@@ -18,13 +18,15 @@
 ## bug fix 2022.09.14
 ##. /opt/ohpc/admin/lmod/lmod/init/profile
 
-echo -e "Pre: $(date)\n" # Timestamp to .out file before anything else
-env                      # Dump the environment to .out
-
 module purge
 module load intel/oneAPI
-NFDIR=/gscratch/macc/local/netcdf-ifort/
-export LD_LIBRARY_PATH=${NFDIR}/lib:${LD_LIBRARY_PATH}
+NFDIR=/gscratch/macc/local/netcdf-ifort
+NCDIR=/gscratch/macc/local/netcdf-icc
+
+export LD_LIBRARY_PATH=${NFDIR}/lib:${NCDIR}/lib:${LD_LIBRARY_PATH}
+
+echo -e "Pre: $(date)\n" # Timestamp to .out file before anything else
+env                      # Dump the environment to .out
 
 mpirun -np $np_num$ $roms_ex_dir$/$roms_ex_name$ $roms_out_dir$/liveocean.in > $roms_out_dir$/log.txt
 
