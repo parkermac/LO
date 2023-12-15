@@ -87,7 +87,7 @@ You typically override some of the defaults in `LO_user/pgrid/gfun_user.py` when
 ```
 pickle.dump(dch, open(Gr['gdir'] + 'choices.p', 'wb'))
 ```
-You can also go back and change things in dch later using `Z_edit_dch.py`.
+You can also go back and change things in dch later using `edit_dch.py` although this should only be done sparingly. Read the documentation for that code to learn more.
 
 Each time you run a piece of code it makes a new grid file with the name altered to indicate what happened.  The names start as: grid_m00_r00_s00_x00.nc with the letters and numbers indicating changes to: mask (m), river (r), smoothing (s), or extras (x).
 
