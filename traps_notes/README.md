@@ -32,13 +32,15 @@ So you should have:
 
 The data used to generate TRAPS forcing is stored on Perigee.
 
-On Perigee, copy the /data1/auroral/LO_data/trapsV00 folder into LO_data on your computer and whichever machine you will use to generate forcing (Perigee or Apogee).
+On Perigee, copy the /data1/auroral/LO_data/trapsD00* folder into LO_data on your computer and whichever machine you will use to generate forcing (Perigee or Apogee).
 
-Once this is complete you should have an LO_data/trapsV00 folder with the following files:
+Once this is complete you should have an LO_data/trapsD00 folder with the following files:
 - **LiveOcean_SSM_rivers.xlsx:** Excel sheet with list of duplicate rivers in LiveOcean and the Salish Sea Model. When you create TRAPS climatology and when you generate forcing, the scripts will look at this excel sheet to determine which rivers to omit from LiveOcean. This ensures that TRAPS does not add duplicate rivers to LiveOcean.
 - **wwtp_open_close_dates.xlsx:** Excel sheet with a list of WWTPs and the year that they closed or opened.
-- **all_nonpoint_source_data.nc**: Ecology's timeseries data of state variables and lat/lon coordinates for all river mouths. Used in LO_traps/user/pre/trapsV00 to generate climatology files.
-- **all_point_source_data.nc:** Ecology's timeseries data of state variables and lat/lon coordinates for all point sources. Used in LO_traps/user/pre/trapsV00 to generate climatology files.
+- **all_nonpoint_source_data.nc**: Ecology's timeseries data of state variables and lat/lon coordinates for all river mouths. Used in LO_traps/user/pre/trapsP## to generate climatology files.
+- **all_point_source_data.nc:** Ecology's timeseries data of state variables and lat/lon coordinates for all point sources. Used in LO_traps/user/pre/trapsP## to generate climatology files.
+
+*Note: trapsD00 is the current version of Ecology data used to generate traps climatologies and forcing. If new data becomes available, I will increment the version number to be trapsD01.
 
 </details>
 

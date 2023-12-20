@@ -11,6 +11,10 @@ run traps_placement.py -g cas7
 
 To look at plots, run:
 run traps_placement.py -g cas7 -test True
+
+To change the Ecology data version, run from ipython with:
+run traps_placement.py -trapsD trapsD##
+(default is trapsD00)
 """
 
 #################################################################################
@@ -38,7 +42,11 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--gridname', type=str) 
 # -test True will output plots
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+# add Ecology data version
+parser.add_argument('-trapsD', type=str, default='trapsD00')
 args = parser.parse_args()
+ctag = args.ctag
+trapsD = args.trapsD
 
 # make sure grid name was provided
 argsd = args.__dict__
@@ -70,12 +78,12 @@ def traps_placement(source_type,Ldir):
     if source_type == 'wwtp':
         output_fn = 'wwtp_info.csv'
         # read data
-        wwtp_fn = Ldir['data'] / Ldir['traps_name'] / 'all_point_source_data.nc'
+        wwtp_fn = Ldir['data'] / trapsD / 'all_point_source_data.nc'
         source_ds = xr.open_dataset(wwtp_fn)
     elif source_type == 'riv':
         output_fn = 'triv_info.csv'
         # read data
-        riv_fn = Ldir['data'] / Ldir['traps_name'] / 'all_nonpoint_source_data.nc'
+        riv_fn = Ldir['data'] / trapsD / 'all_nonpoint_source_data.nc'
         source_ds = xr.open_dataset(riv_fn)
 
     # get the grid data
@@ -90,7 +98,7 @@ def traps_placement(source_type,Ldir):
     Y = lat[:,0] # grid cell Y values
 
     # read overlapping rivers
-    repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
+    repeatrivs_fn = Ldir['data'] / trapsD / 'LiveOcean_SSM_rivers.xlsx'
     repeatrivs_df = pd.read_excel(repeatrivs_fn)
 
     # initialize dataframe to save results

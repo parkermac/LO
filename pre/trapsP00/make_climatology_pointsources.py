@@ -1,21 +1,25 @@
 """
-Make climatologies for pre-existing LO rivers.
-Biogeochemisty variables only.
+Make climatologies for point sources.
+Discharge rate, temperature, and biogeochemisty variables.
 
 Based on Ecology's timeseries, using data stored in 
-LO_data/traps/all_nonpoint_source_data.nc
+LO_data/[trapsD##]/all_point_source_data.nc
 
-To run, from ipython:
-run make_climatology_LOrivbio.py
+        To run, from ipython:
+        run make_climatology_pointsources.py
 
 To create individual climatology figures, run from ipython with:
-run make_climatology_LOrivbio.py -test True
+run make_climatology_pointsources.py -test True
+
+To change the Ecology data version, run from ipython with:
+run make_climatology_LOrivbio.py -trapsD trapsD##
+(default is trapsD00)
 
 Figures saved in:
-LO_output/pre/traps/LO_rivbio/[ctag]/Data_historical/climatology_plots
+LO_output/pre/trapsP##/point_sources/[ctag]/Data_historical/climatology_plots
 
 Note that running with -test True adds
-about a minute to run time. 
+several minutes to run time. (~ 3 min)
 """
 
 #################################################################################
@@ -34,6 +38,7 @@ import datetime
 import matplotlib.dates as mdates
 import datetime
 import traps_helper
+import os
     
 
 #################################################################################
@@ -46,52 +51,46 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 # add ctag
 parser.add_argument('-ctag', type=str, default='lo_base')
+# add Ecology data version
+parser.add_argument('-trapsD', type=str, default='trapsD00')
 args = parser.parse_args()
 ctag = args.ctag
+trapsD = args.trapsD
+
+# get traps pre-processing version (folder name)
+path = os.getcwd()
+trapsP_vers = os.path.basename(path)
+print(trapsP_vers)
 
 # location to save file
-clim_dir = Ldir['LOo'] / 'pre' / Ldir['traps_name'] / 'LO_rivbio' / ctag / 'Data_historical'
+clim_dir = Ldir['LOo'] / 'pre' / trapsP_vers / 'point_sources' / ctag / 'Data_historical'
 Lfun.make_dir(clim_dir)
 
 # get flow and loading data
-riv_fn = Ldir['data'] / Ldir['traps_name'] / 'all_nonpoint_source_data.nc'
-ecology_data_ds = xr.open_dataset(riv_fn)
+wwtp_fn = Ldir['data'] / trapsD / 'all_point_source_data.nc'
+ecology_data_ds = xr.open_dataset(wwtp_fn)
 
-# get riv names
-rivnames_all = ecology_data_ds['name'].values
+# get wwtp names and wwtp ids
+wwtpnames = ecology_data_ds['name'].values
 
-# Remove pre-existing LO rivers
-# read overlapping rivers
-repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
-repeatrivs_df = pd.read_excel(repeatrivs_fn)
-SSM_repeats = repeatrivs_df['SSM_rname'].values
-# remove nans
-SSM_repeats = [x for x in SSM_repeats if str(x) != 'nan']
-# Keep only SSM repeat river names from list of river names
-LOrivnames = [river for river in rivnames_all if river in SSM_repeats]
+# # just test a few WWTPs for now 
+# wwtpnames = wwtpnames[28:30]
 
-# # just test 5 rivs for now -------------------------------------------------
-# LOrivnames = LOrivnames[5:10]
-
-# separate rivers with weird biogeochem
-weird_biogeochem = ['Alberni Inlet', 'Chehalis R', 'Gold River',
-                    'Willapa R', 'Columbia R', 'Comox']
-# get list of rivers with more realistic biogeochem
-LOrivnames_realisticBGC = [river for river in LOrivnames
-                          if river not in weird_biogeochem]
-
-# initialize dataframes for all rivs
+# initialize dataframes for all wwtps
 DO_clim_df   = pd.DataFrame()
+flow_clim_df = pd.DataFrame()
+temp_clim_df = pd.DataFrame()
 NO3_clim_df  = pd.DataFrame()
 NH4_clim_df  = pd.DataFrame()
 TIC_clim_df  = pd.DataFrame()
 Talk_clim_df = pd.DataFrame()
 
 # variable names
-vns = ['DO(mmol/m3)','NO3(mmol/m3)', 'NH4(mmol/m3)','TIC(mmol/m3)','Talk(meq/m3)']
-clims = [DO_clim_df, NO3_clim_df,
+vns = ['DO(mmol/m3)','Flow(m3/s)','Temp(C)','NO3(mmol/m3)',
+       'NH4(mmol/m3)','TIC(mmol/m3)','Talk(meq/m3)']
+clims = [DO_clim_df, flow_clim_df, temp_clim_df, NO3_clim_df,
          NH4_clim_df, TIC_clim_df, Talk_clim_df]
-letters = ['(a)','(b)','(c)','(d)','(e)']
+letters = ['(a)','(b)','(c)','(d)','(e)','(f)','(g)']
 
 # create one-year date range for plotting
 yrday = pd.date_range(start ='1/1/2020', end ='12/31/2020', freq ='D')
@@ -102,11 +101,11 @@ yrday = pd.date_range(start ='1/1/2020', end ='12/31/2020', freq ='D')
 
 print('Calculating climatologies...')
 
-# loop through all nonpoint sources
-for i,rname in enumerate(LOrivnames_realisticBGC):
+# loop through all point sources
+for i,wname in enumerate(wwtpnames):
 
     # turn dataset information for this wwtp into a dataframe
-    LOriv_df, LOriv_avgs_df, LOriv_sds_df = traps_helper.ds_to_avgdf(rname,ecology_data_ds)
+    wwtp_df, wwtp_avgs_df, wwtp_sds_df = traps_helper.ds_to_avgdf(wname,ecology_data_ds)
 
 #################################################################################
 #                            Create climatologies                               #
@@ -114,23 +113,23 @@ for i,rname in enumerate(LOrivnames_realisticBGC):
 
     # Add data to climatology dataframes
     for j,vn in enumerate(vns):
-        clims[j] = pd.concat([clims[j],pd.Series(LOriv_avgs_df[vn].values, name=rname)],
+        clims[j] = pd.concat([clims[j],pd.Series(wwtp_avgs_df[vn].values, name=wname)],
                          axis = 1)
 
-# Calculate summary statistics for all LOrivs
+# Calculate summary statistics for all wwtps
 clim_avgs = pd.DataFrame()
 clim_max = pd.DataFrame()
 clim_min = pd.DataFrame()
 clim_sds = pd.DataFrame()
 
 for i,vn in enumerate(vns):
-    # average values of all nonpoint sources
+    # average values of all point sources
     clim_avgs[vn] = clims[i].mean(axis=1)
     # max climatology values
     clim_max[vn] = clims[i].max(axis=1)
     # min climatology values
     clim_min[vn] = clims[i].min(axis=1)
-    # standard deviation of all nonpoint sources
+    # standard deviation of all point sources
     clim_sds[vn] = clims[i].std(axis=1)
 
 #################################################################################
@@ -138,7 +137,7 @@ for i,vn in enumerate(vns):
 #################################################################################
 
 # Plot Summary Statistics
-fig, axes = plt.subplots(3,2, figsize=(16, 8), sharex=True)
+fig, axes = plt.subplots(4,2, figsize=(16, 9), sharex=True)
 ax = axes.ravel()
 for j,vn in enumerate(vns):
     i = j+1
@@ -177,29 +176,29 @@ for j,vn in enumerate(vns):
     ax[i].tick_params(axis='both', which='major', labelsize=12)
     ax[i].tick_params(axis='x', which='major', rotation=30)
     ax[i].set_xlim([datetime.date(2020, 1, 1), datetime.date(2020, 12, 31)])
-    if i < 5:
+    if i < 7:
         ax[i].set_ylim([0,1.3*max(maxvals)])
     # create legend
-    if i ==5:
+    if i ==7:
         ax[i].set_ylim([0,1.3*max(clim_max['TIC(mmol/m3)'].values)])
-        handles, labels = ax[5].get_legend_handles_labels()
+        handles, labels = ax[7].get_legend_handles_labels()
         ax[0].legend(handles, labels, loc='center', ncol = 2,fontsize=14)
         ax[0].axis('off')
     # Define the date format
-    if i >= 4:
+    if i >= 6:
         date_form = mdates.DateFormatter("%b")
         ax[i].xaxis.set_major_formatter(date_form)
 # plot title is name of source
-plt.suptitle('Pre-existing LO River Climatology Summary (n={})'.format(len(LOrivnames_realisticBGC)),fontsize=18)
+plt.suptitle('Point Source Climatology Summary (n={})'.format(len(wwtpnames)),fontsize=18)
 # Save figure
-figname = 'LOrivbio_river_summary.png'
+figname = 'point_source_summary.png'
 save_path = clim_dir / figname
 fig.savefig(save_path)
 
 print('Climatologies done\n')
 
 #################################################################################
-#                    Plot all individual river climatologies                    #
+#              Plot all individual point source climatologies                   #
 #################################################################################
 
 if args.testing == True:
@@ -209,15 +208,15 @@ if args.testing == True:
     fig_dir = clim_dir / 'climatology_plots'
     Lfun.make_dir(fig_dir)
 
-    for i,rname in enumerate(LOrivnames_realisticBGC):
+    for i,wname in enumerate(wwtpnames):
 
-        print('{}/{}: {}'.format(i+1,len(LOrivnames_realisticBGC),rname))
+        print('{}/{}: {}'.format(i+1,len(wwtpnames),wname))
 
         # turn dataset information for this wwtp into a dataframe
-        LOriv_df, LOriv_avgs_df, LOriv_sds_df = traps_helper.ds_to_avgdf(rname,ecology_data_ds)
+        wwtp_df, wwtp_avgs_df, wwtp_sds_df = traps_helper.ds_to_avgdf(wname,ecology_data_ds)
 
-        # Plotting climatologies for each source
-        fig, axes = plt.subplots(3,2, figsize=(16, 8), sharex=True)
+        # Plot climatologies for each source
+        fig, axes = plt.subplots(4,2, figsize=(16, 9), sharex=True)
         ax = axes.ravel()
         for j,vn in enumerate(vns):
 
@@ -234,8 +233,8 @@ if args.testing == True:
             ax[i].set_title(var,fontsize=14)
             # Plot individual years
             for yr in range(1999,2017):
-                LOriv_yr_df = LOriv_df.loc[LOriv_df['year'] == yr]
-                values_to_plot = LOriv_yr_df[vn].values*scale
+                wwtp_yr_df = wwtp_df.loc[wwtp_df['year'] == yr]
+                values_to_plot = wwtp_yr_df[vn].values*scale
                 values_to_plot = values_to_plot.tolist()
                 # skip leap years
                 if np.mod(yr,4) != 0:
@@ -247,36 +246,36 @@ if args.testing == True:
                     ax[i].plot(yrday_17,values_to_plot,alpha=0.5, label=yr, linewidth=1)
                 else:
                     ax[i].plot(yrday,values_to_plot,alpha=0.5, label=yr, linewidth=1)
-            # Plot climatology
-            ax[i].plot(yrday,clims[j][rname].values*scale, label='climatology', color='black', linewidth=1.5)
+            # Plot average
+            ax[i].plot(yrday,wwtp_avgs_df[vn].values*scale, label='average', color='black', linewidth=1.5)
             # fontsize of tick labels
             ax[i].tick_params(axis='both', which='major', labelsize=12)
             ax[i].tick_params(axis='x', which='major', rotation=30)
             ax[i].set_xlim([datetime.date(2020, 1, 1), datetime.date(2020, 12, 31)])
             # create legend
-            if i ==5:
-                handles, labels = ax[5].get_legend_handles_labels()
+            if i ==7:
+                handles, labels = ax[7].get_legend_handles_labels()
                 ax[0].legend(handles, labels, loc='center', ncol = 4,fontsize=14)
                 ax[0].axis('off')
             # Define the date format
-            if i >= 4:
+            if i >= 6:
                 date_form = mdates.DateFormatter("%b")
                 ax[i].xaxis.set_major_formatter(date_form)
         # plot title is name of source
-        plt.suptitle(rname,fontsize=18)
+        plt.suptitle(wname,fontsize=18)
         # Save figure
-        figname = rname + '.png'
+        figname = wname + '.png'
         save_path = clim_dir / 'climatology_plots' / figname
         fig.savefig(save_path)
         plt.close('all')
 
     print('Done')
-
+    
 #################################################################################
 #                             Save climatologies                                #
 #################################################################################
 
-pickle_names = ['DO', 'NO3', 'NH4', 'TIC', 'Talk']
+pickle_names = ['DO', 'flow', 'temp', 'NO3', 'NH4', 'TIC', 'Talk']
 
 # check for missing values:
 for i,clim in enumerate(clims):
