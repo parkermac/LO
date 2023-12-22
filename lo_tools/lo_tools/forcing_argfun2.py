@@ -11,6 +11,8 @@ def intro():
     # required arguments
     parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
     parser.add_argument('-f', '--frc', type=str)        # e.g. tide
+    parser.add_argument('-tD', '--trapsD', type=str, default='trapsD00') # LO_data/trapsD## version
+    parser.add_argument('-tP', '--trapsP', type=str, default='trapsP00') # LO/pre/trapsP## version
     parser.add_argument('-r', '--run_type', type=str)   # backfill or forecast
     parser.add_argument('-s', '--start_type', type=str, default='continuation') # new, continuation, or perfect
     parser.add_argument('-d', '--date_string', type=str) # e.g. 2019.07.04

@@ -6,7 +6,11 @@ By default, point sources and tiny rivers are enabled.
 To turn them off, set lines 38 and 39 to be = False
 
 Test on pc in ipython:
-run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -f traps00
+run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -tD trapsD## -tP trapsP## -f trapF##
+
+where tD is the traps data folder
+and tP is the traps climatology folder
+and f is the forcing name (current folder)
 """
 
 #################################################################################
@@ -52,6 +56,10 @@ result_dict['start_dt'] = datetime.now()
 date_string = Ldir['date_string']
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + date_string) / Ldir['frc']
 
+# get correct version of traps climatology output and ecology data
+trapsP = Ldir['trapsP']
+trapsD = Ldir['trapsD']
+
 if Ldir['testing']:
     reload(zrfun)
     reload(rivfun)
@@ -84,13 +92,13 @@ G = zrfun.get_basic_info(grid_fn, only_G=True)
 #################################################################################
 
 # generate forcing for pre-existing LO rivers
-LOriv_ds, NRIV = LOriv.make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir)
+LOriv_ds, NRIV = LOriv.make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD)
 
 # generate forcing for tiny rivers
-triv_ds, NTRIV = triv.make_forcing(N,NT,NRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_trivs)
+triv_ds, NTRIV = triv.make_forcing(N,NT,NRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_trivs,trapsP, trapsD)
 
 # generate forcing for marine point sources
-wwtp_ds, NWWTP = wwtp.make_forcing(N,NT,NRIV,NTRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_wwtps)
+wwtp_ds, NWWTP = wwtp.make_forcing(N,NT,NRIV,NTRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_wwtps,trapsP,trapsD)
 
 #################################################################################
 #                   Combine forcing outputs and save results                    #

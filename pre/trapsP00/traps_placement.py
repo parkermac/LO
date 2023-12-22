@@ -13,7 +13,7 @@ To look at plots, run:
 run traps_placement.py -g cas7 -test True
 
 To change the Ecology data version, run from ipython with:
-run traps_placement.py -trapsD trapsD##
+run traps_placement.py -tD trapsD##
 (default is trapsD00)
 """
 
@@ -43,10 +43,10 @@ parser.add_argument('-g', '--gridname', type=str)
 # -test True will output plots
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 # add Ecology data version
-parser.add_argument('-trapsD', type=str, default='trapsD00')
+parser.add_argument('-tD', type=str, default='trapsD00')
 args = parser.parse_args()
 ctag = args.ctag
-trapsD = args.trapsD
+trapsD = args.tD
 
 # make sure grid name was provided
 argsd = args.__dict__

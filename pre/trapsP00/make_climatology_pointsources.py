@@ -12,7 +12,7 @@ To create individual climatology figures, run from ipython with:
 run make_climatology_pointsources.py -test True
 
 To change the Ecology data version, run from ipython with:
-run make_climatology_LOrivbio.py -trapsD trapsD##
+run make_climatology_LOrivbio.py -tD trapsD##
 (default is trapsD00)
 
 Figures saved in:
@@ -52,10 +52,10 @@ parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_strin
 # add ctag
 parser.add_argument('-ctag', type=str, default='lo_base')
 # add Ecology data version
-parser.add_argument('-trapsD', type=str, default='trapsD00')
+parser.add_argument('-tD', type=str, default='trapsD00')
 args = parser.parse_args()
 ctag = args.ctag
-trapsD = args.trapsD
+trapsD = args.tD
 
 # get traps pre-processing version (folder name)
 path = os.getcwd()

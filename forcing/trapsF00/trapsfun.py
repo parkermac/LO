@@ -10,12 +10,12 @@ from lo_tools import forcing_argfun2 as ffun
 
 Ldir = ffun.intro() # this handles all the argument passing
 
-def get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type):
+def get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD):
 
     # Only add biology to pre-existing LO river if Ecology has data
     if traps_type == 'LOriv':
         # get names of duplicate rivers
-        repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
+        repeatrivs_fn = Ldir['data'] / trapsD / 'LiveOcean_SSM_rivers.xlsx'
         repeatrivs_df = pd.read_excel(repeatrivs_fn)
         LObio_names_all = list(repeatrivs_df.loc[repeatrivs_df['in_both'] == 1, 'LO_rname'])
         # remove the weird rivers
@@ -96,11 +96,11 @@ def weighted_average(vn,qtbio_df_1, qtbio_df_2):
     waverage = [np.average([var1[i], var2[i]], weights = [flow1[i], flow2[i]]) for i in range(len(flow1))]
     return waverage
 
-def LO2SSM_name(rname):
+def LO2SSM_name(rname,trapsD):
     """
     Given a river name in LiveOcean, find corresponding river name in SSM
     """
-    repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
+    repeatrivs_fn = Ldir['data'] / trapsD / 'LiveOcean_SSM_rivers.xlsx'
     repeatrivs_df = pd.read_excel(repeatrivs_fn)
     rname_SSM = repeatrivs_df.loc[repeatrivs_df['LO_rname'] == rname, 'SSM_rname'].values[0]
 
