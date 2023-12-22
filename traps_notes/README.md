@@ -15,16 +15,13 @@ All data and source locations have been downloaded from Washington State Departm
 
 <details><summary><strong>Where to put which files</strong></summary>
 
-To enable TRAPS, you will need to move the files in LO_traps to the correct directory within the LO system (i.e your LO_user).
+To enable TRAPS, you need to git pull on the LO repo to get the latest functional version of TRAPS on your local pc and remote machines.
 
-First, clone the LO_traps repo onto your computer so you can pull updates easily. Note that you will still need to manually copy files from your instance of LO_traps into your instance of LO_user. Specifically:
-
-- Copy the LO_traps/user/pre/trapsV00 directory into your LO_user/pre directory
-- Copy the LO_traps/user/forcing/trapsV00 directory into your LO_user/forcing directory
+The most important folders to look for are:
 
 So you should have:
-- LO_user/pre/trapsV00
-- LO_user/forcing/trapsV00
+- LO/pre/trapsP00
+- LO/forcing/trapsF00
 
 </details>
 
@@ -44,14 +41,6 @@ Once this is complete you should have an LO_data/trapsD00 folder with the follow
 
 </details>
 
-<details><summary><strong>Update get_lo_info.py</strong></summary> 
-
-The last required step is to update your LO_user/get_lo_info.py file to specify a name for your traps code. In this repo, the default name is "trapsV00." See example of my get_lo_info.py:
-
-![traps_name](https://github.com/ajleeson/LO_user/assets/15829099/2e18508c-c10f-4d1a-a1c4-e9e75897095f)
-
-</details>
-
 ---
 ## Running TRAPS
 
@@ -68,7 +57,7 @@ After getting the required files, users should be able to add TRAPS to their mod
 <details><summary>1. Generate climatologies</summary>
     
 This step generates climatology files for each of the TRAPS.
-From your remote machine in LO_user/pre/trapsV00 in ipython:
+From your remote machine in LO/pre/trapsP## in ipython:
 
 ```
 run make_climatology_tinyrivs.py
@@ -76,13 +65,13 @@ run make_climatology_pointsources.py
 run make_climatology_LOrivbio.py 
 ```
 
-Climatology pickle files will be generated and saved in three folders in LO_output/pre/trapsV00:
+Climatology pickle files will be generated and saved in three folders in LO_output/pre/trapsP##:
 
 - **point_sources:** Climatology files for point sources
 - **tiny_rivers:** Climatology files for tiny rivers
 - **LO_rivbio:** Climatology files for pre-existing LO rivers
   
-If you want to look at climatology timeseries, run with ```-test True``` on your local machine. This option will create a subfolder in LO_output/pre/trapsV00/[source type]/lo_base/Data_historical/climatology_plots with a climatology figure for each source. An example figure for Burley Creek is shown below.
+If you want to look at climatology timeseries, run with ```-test True``` on your local machine. This option will create a subfolder in LO_output/pre/trapsP##/[source type]/lo_base/Data_historical/climatology_plots with a climatology figure for each source. An example figure for Burley Creek is shown below.
 
 ![Burley Cr](https://github.com/ajleeson/LO_user/assets/15829099/adc0456f-f855-4428-82c5-63f5aa1fa5b0)
 
@@ -90,7 +79,7 @@ If you want to look at climatology timeseries, run with ```-test True``` on your
 
 <details><summary>2. Map TRAPS to the grid</summary>
 
-This step uses the lat/lon coordinates of TRAPS to map each source to the nearest appropriate grid cell. Tiny rivers are mapped to the nearest coastal grid cell. Point sources are mapped to the nearest water cell. From your remote maching in LO_user/pre/trapsV00 in ipython:
+This step uses the lat/lon coordinates of TRAPS to map each source to the nearest appropriate grid cell. Tiny rivers are mapped to the nearest coastal grid cell. Point sources are mapped to the nearest water cell. From your remote maching in LO/pre/trapsP## in ipython:
 
 ```
 run traps_placement.py -g [gridname]
@@ -111,8 +100,10 @@ This step generates a rivers.nc files with forcing for all pre-existing LO river
 From your remote machine in LO/driver:
 
 ```
-python driver_forcing3.py -g [gridname] -r backfill -s new -0 2017.01.01 -1 2017.01.02 -f trapsV00
+python driver_forcing3.py -g [gridname] -r backfill -s new -0 2017.01.01 -1 2017.01.02 -f trapsF##
 ```
+
+where trapsF## is the traps forcing version you want to use. 
 
 </details>
 
@@ -138,7 +129,7 @@ After completing this change, run the model as you normally would.
 
 Ammonium (NO4) climatology generated from Ecology's data for the Fraser River is a constant value of 0.074 mmol/m3. This concentration is lower than I expected. Since the Fraser River is so large, it is important to get this value right. I reached out to Susan Allen at UBC to learn what NO4 concentration her group uses for the Fraser. She recommended a constant concentration of 4.43 mmol/m3 which is the mean measurement from Environmental Canada ([Olson et al, 2020](https://agupubs.onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1029%2F2019JC015766&file=jgrc24099-sup-0001-Text_SI-S01.pdf)).
 
-The 4.43 mmol/m3 NO4 concentration is implemented as an ```if``` statement in the depths of LO_traps/user/forcing/trapsV00/make_LOriv_forcing.py code.
+The 4.43 mmol/m3 NO4 concentration is implemented as an ```if``` statement in the depths of LO/forcing/trapsV##/make_LOriv_forcing.py code.
 
 ![fraser-nh4-code](https://github.com/ajleeson/LO_user/assets/15829099/353472de-8444-48e6-a016-8ae12aca7b30)
 
@@ -148,7 +139,7 @@ The 4.43 mmol/m3 NO4 concentration is implemented as an ```if``` statement in th
 
 Several Hood Canal rivers in Ecology's data, like Union River, get their flow data from the Big Beef Creek USGS river gage. However, the Big Beef Creek gage became inactive in mid-2012. As a result, from mid-2012 through the end of 2014, river data for these Hood Canal rivers are a copy of prior year data. These copied data also appear to be shifted by 3 months.
 
-To prevent river climatologies from being biased by these shifted, copied data, I have removed data from mid-2012 through the end of 2014 for the affected Hood Canal rivers. This "data cropping" is implemented in LO_traps/user/pre/trapsV00/make_climatology_tinyrivs.py.
+To prevent river climatologies from being biased by these shifted, copied data, I have removed data from mid-2012 through the end of 2014 for the affected Hood Canal rivers. This "data cropping" is implemented in LO_traps/user/pre/trapsV##/make_climatology_tinyrivs.py.
 
 An example hydrograph for Union River is shown below before and after the data were cropped.
 
@@ -158,7 +149,7 @@ An example hydrograph for Union River is shown below before and after the data w
 
 <details><summary><strong>WWTP open and close dates</strong></summary>
 
-LO_data/trapsV00/wwtp_open_close_dates.xlsx is a user-modifiable sheet with the open and close dates of the WWTPs (with a yearly resolution). The information in this excel sheet is read by the LO_traps/user/forcing/trapsV00/make_wwtp_forcing.py script and turned into a series of ``if`` statements. When the user generates forcing for a year in which a WWTP is closed, then the scripts will still add the WWTP to the model grid. However, the script will set the discharge rate to be 0 m3/s.
+LO_data/trapsD00/wwtp_open_close_dates.xlsx is a user-modifiable sheet with the open and close dates of the WWTPs (with a yearly resolution). The information in this excel sheet is read by the LO_traps/user/forcing/trapsV##/make_wwtp_forcing.py script and turned into a series of ``if`` statements. When the user generates forcing for a year in which a WWTP is closed, then the scripts will still add the WWTP to the model grid. However, the script will set the discharge rate to be 0 m3/s.
 
 </details>
 
@@ -174,11 +165,11 @@ The Lake Stevens 001 and Lake Stevens 002 WWTPs overlap on the cas7 grid. Howeve
 
 Willamette River is included in the Ecology data, and it is not explicitly a duplicate pre-existing LiveOcean river. However, Willamette River discharges into the Columbia River. The Columbia River was pre-existing to LiveOcean, and its USGS gauge is downstream of the Willamette River (meaning that the pre-existing Columbia River already includes contribution from the Willamette). Therefore, the TRAPS code needs to remove the Willamette River from being incorporated into LiveOcean.
 
-This exception is handled in LO_user/pre/trapsV00/make_climatology_tinyrivs.py:
+This exception is handled in LO/pre/trapsV##/make_climatology_tinyrivs.py:
 
 ![Willamette](https://github.com/ajleeson/LO_user/assets/15829099/8271fb86-d892-4148-9cc7-8b0bfd2cdb75)
 
-And also in LO_user/pre/trapsV00/traps_placement.py:
+And also in LO_user/pre/trapsV##/traps_placement.py:
 
 ![remove_willamette](https://github.com/ajleeson/LO_user/assets/15829099/bbdc8f44-db1c-4734-aac6-fcd8ab4c54a0)
 
@@ -186,6 +177,18 @@ And also in LO_user/pre/trapsV00/traps_placement.py:
 
 ---
 ## Update Notes
+
+<details><summary><strong>2023.12.22 update</strong></summary>
+
+**Improved naming convention**
+
+Modified naming convention of folders containing different traps versions. TRAPS data start at trapsD00, and count up. TRAPS pre scrips start at trapsP00 and count up. TRAPS forcing scripts start at trapsF00 and count up.
+
+The TRAPS scripts now also look at their current folder to get their respective version name.
+
+As another small improvement, all TRAPS README's were moved to one central location in the LO repo. TRAPS subfolders all link to this central README folder.
+
+</details>
 
 <details><summary><strong>2023.11.28 update</strong></summary>
 
