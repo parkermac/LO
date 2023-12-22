@@ -23,9 +23,11 @@ So you should have:
 - LO/pre/trapsP00
 - LO/forcing/trapsF00
 
+Feel free to copy LO/forcing/trapsF00 into your LO_user repo, and modify as desired. The TRAPS workflow should still work fine.
+
 </details>
 
-<details><summary><strong>Additional required files</strong></summary> 
+<details><summary><strong>Additional required files</strong></summary>
 
 The data used to generate TRAPS forcing is stored on Perigee.
 
@@ -48,7 +50,7 @@ After getting the required files, users should be able to add TRAPS to their mod
 
 <details><summary><strong>TRAPS workflow diagram</strong></summary>
 
-![traps-top-level-diagram-v4](https://github.com/ajleeson/LO_user/assets/15829099/610263e8-80e4-459d-bc4e-cbf69f98f918)
+![traps-top-level-diagram-v5](https://github.com/ajleeson/LO_user/assets/15829099/ff9e6ad4-2ee2-423c-90b2-a890191960d2)
 
 </details>
 
@@ -60,10 +62,12 @@ This step generates climatology files for each of the TRAPS.
 From your remote machine in LO/pre/trapsP## in ipython:
 
 ```
-run make_climatology_tinyrivs.py
-run make_climatology_pointsources.py
-run make_climatology_LOrivbio.py 
+run make_climatology_tinyrivs.py -tD trapsD##
+run make_climatology_pointsources.py -tD trapsD##
+run make_climatology_LOrivbio.py -tD trapsD##
 ```
+
+where trapsD## is the version of LO_data/trapsD## the code will reference (This is an optional argument. The default is trapsD00).  
 
 Climatology pickle files will be generated and saved in three folders in LO_output/pre/trapsP##:
 
@@ -82,8 +86,10 @@ If you want to look at climatology timeseries, run with ```-test True``` on your
 This step uses the lat/lon coordinates of TRAPS to map each source to the nearest appropriate grid cell. Tiny rivers are mapped to the nearest coastal grid cell. Point sources are mapped to the nearest water cell. From your remote maching in LO/pre/trapsP## in ipython:
 
 ```
-run traps_placement.py -g [gridname]
+run traps_placement.py -g [gridname] -tD trapsD##
 ```
+
+where trapsD## is the version of LO_data/trapsD## the code will reference (This is an optional argument. The default is trapsD00).
 
 Csv files with river directions and grid indices for the sources will be generated and saved in LO_data/grid/[gridname]
 
@@ -100,10 +106,12 @@ This step generates a rivers.nc files with forcing for all pre-existing LO river
 From your remote machine in LO/driver:
 
 ```
-python driver_forcing3.py -g [gridname] -r backfill -s new -0 2017.01.01 -1 2017.01.02 -f trapsF##
+python driver_forcing3.py -g [gridname] -r backfill -s new -0 2017.01.01 -1 2017.01.02 -td trapsD## -tp trapsP## -f trapsF##
 ```
 
-where trapsF## is the traps forcing version you want to use. 
+where trapsD## and trapsP## are the versions of LO_data/trapsD## and LO/pre/trapsP## you want to use (default to trapsD00 and trapsP00). 
+
+Likewise, trapsF## is the traps forcing version you want to use.  
 
 </details>
 
