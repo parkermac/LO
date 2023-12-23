@@ -198,7 +198,7 @@ for i,fn in enumerate(wwtp_fns):
     pointsource_ds = add_data(pointsource_ds, source_ID, source_name, latlon_df, wwtp_df)
 
 # save dataset as .nc file in LO_data
-out_fn = '../../../LO_data/traps/all_point_source_data.nc'
+out_fn = '../../../LO_data/' + trapsD + '/all_point_source_data.nc'
 pointsource_ds.to_netcdf(out_fn)
 pointsource_ds.close()
 print('Point sources complete --------------------------------------------\n')
