@@ -42,6 +42,8 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--gridname', type=str) 
 # -test True will output plots
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+# add ctag
+parser.add_argument('-ctag', type=str, default='lo_base')
 # add Ecology data version
 parser.add_argument('-tD', type=str, default='trapsD00')
 args = parser.parse_args()
