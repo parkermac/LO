@@ -129,6 +129,7 @@ def add_data(ds, source_ID, source_name, latlon_df, ecologydata_df):
 parser = argparse.ArgumentParser()
 # add Ecology data version
 parser.add_argument('-tD', type=str, default='trapsD00')
+args = parser.parse_args()
 trapsD = args.tD
 
 # location of historical data to process
