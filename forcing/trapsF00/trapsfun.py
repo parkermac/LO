@@ -21,7 +21,7 @@ def get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD):
         # remove the weird rivers
         weird_duplicate_rivers = ['Alberni Inlet', 'Chehalis R', 'Gold River', 'Willapa R', 'Columbia R', 'Comox']
         # Note that these are the names that LO calls the rivers
-        LObio_names = [rname for rname in LObio_names_all if LO2SSM_name(rname) not in weird_duplicate_rivers]
+        LObio_names = [rname for rname in LObio_names_all if LO2SSM_name(rname,trapsD) not in weird_duplicate_rivers]
 
     # load climatological data
     if traps_type != 'LOriv':
@@ -44,7 +44,7 @@ def get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD):
         # convert LO river name to SSM river name
         if traps_type == 'LOriv':
             if rn in LObio_names:
-                rn = LO2SSM_name(rn)
+                rn = LO2SSM_name(rn,trapsD)
             else:
                 # skips rivers for which Ecology does not have data
                 continue    

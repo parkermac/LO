@@ -66,7 +66,7 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD):
     weird_rivers = ['Alberni Inlet', 'Chehalis R', 'Gold River',
                     'Willapa R', 'Columbia R', 'Comox']
     # These are the names that LO uses
-    LObio_names = [rname for rname in LObio_names_all if trapsfun.LO2SSM_name(rname) not in weird_rivers]
+    LObio_names = [rname for rname in LObio_names_all if trapsfun.LO2SSM_name(rname,trapsD) not in weird_rivers]
 
     # get the list of rivers and indices for this grid
     gri_fn = Ldir['grid'] / 'river_info.csv'

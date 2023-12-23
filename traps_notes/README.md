@@ -114,7 +114,7 @@ This step generates a rivers.nc files with forcing for all pre-existing LO river
 From your remote machine in LO/driver:
 
 ```
-python driver_forcing3.py -g [gridname] -r backfill -s new -0 2017.01.01 -1 2017.01.02 -td trapsD## -tp trapsP## -f trapsF##
+python driver_forcing3.py -g [gridname] -r backfill -s new -0 2017.01.01 -1 2017.01.02 -tD trapsD## -tP trapsP## -f trapsF##
 ```
 
 where trapsD## and trapsP## are the versions of LO_data/trapsD## and LO/pre/trapsP## you want to use (default to trapsD00 and trapsP00). 
