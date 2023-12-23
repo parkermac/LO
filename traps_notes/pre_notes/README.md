@@ -3,6 +3,13 @@
 This folder contains the scripts that generate climatologies for TRAPS and that map TRAPS to the model grid. Details of each can be found below.
 
 ---
+## ecology_excel2netCDF.py
+
+This script converts all of Ecology's raw data from excel format to netCDF format.
+
+Note: Users do not need to run this script. It was already run during TRAPS development, and users can simply use the output .nc files provided on perigee in auroral's LO_data folder. The script is provided here for completion only.
+
+---
 ## make_climatology scripts
 
 The climatology scripts condense the 1999-2017 Ecology timeseries data into yearly climatologies for each source. This section describes how these scripts work.

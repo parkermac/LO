@@ -31,7 +31,7 @@ Feel free to copy LO/forcing/trapsF00 into your LO_user repo, and modify as desi
 
 The data used to generate TRAPS forcing is stored on Perigee.
 
-On Perigee, copy the /data1/auroral/LO_data/trapsD00* folder into LO_data on your computer and whichever machine you will use to generate forcing (Perigee or Apogee).
+On Perigee, copy the **files** in /data1/auroral/LO_data/trapsD00* folder into LO_data/trapsD00 on your computer and whichever machine you will use to generate forcing (Perigee or Apogee). **You do not need to copy the folders titled nonpoint_sources and point_sources. These folders contain bulky raw Ecology data. The two .nc files contain the condensed version of these data that are used by the TRAPS code**
 
 Once this is complete you should have an LO_data/trapsD00 folder with the following files:
 - **LiveOcean_SSM_rivers.xlsx:** Excel sheet with list of duplicate rivers in LiveOcean and the Salish Sea Model. When you create TRAPS climatology and when you generate forcing, the scripts will look at this excel sheet to determine which rivers to omit from LiveOcean. This ensures that TRAPS does not add duplicate rivers to LiveOcean.
@@ -55,6 +55,14 @@ After getting the required files, users should be able to add TRAPS to their mod
 </details>
 
 <details><summary><strong>Run steps</strong></summary>
+
+<details><summary>0. Convert raw Ecology data from excel file to netCDF</summary>
+    
+*Note: User does not need to run this step. It is listed here for completion. During TRAPS development and testing, the developer already ran this script. Users can simply begin at Step 1.*
+
+This step runs one script which consolidates all of Ecology's raw data (in excel format) into netCDF files with daily resolution from Jan 1999 - Jul 2017.
+
+</details>
 
 <details><summary>1. Generate climatologies</summary>
     
