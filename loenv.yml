@@ -32,7 +32,7 @@ dependencies:
   - lxml
   - xlrd
   - openpyxl
-  - pytide
+  # pytide
   - sqlalchemy
   - git
   - pip
