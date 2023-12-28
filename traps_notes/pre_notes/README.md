@@ -10,6 +10,13 @@ This script converts all of Ecology's raw data from excel format to netCDF forma
 Note: Users do not need to run this script. It was already run during TRAPS development, and users can simply use the output .nc files provided on perigee in auroral's LO_data folder. The script is provided here for completion only.
 
 ---
+## traps_data_ver.csv
+
+This is a config file that allows for modularity. This file contains the name of the LO_data/trapsD## that the user wants to use for climatology generation.
+
+In theory, different versions of trapsD## allows the user to pick different versions of Ecology data to use, should updates be released in the future. However, there is currently only one traps data version: **trapsD00**
+
+---
 ## make_climatology scripts
 
 The climatology scripts condense the 1999-2017 Ecology timeseries data into yearly climatologies for each source. This section describes how these scripts work.

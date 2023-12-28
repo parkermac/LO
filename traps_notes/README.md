@@ -50,32 +50,40 @@ After getting the required files, users should be able to add TRAPS to their mod
 
 <details><summary><strong>TRAPS workflow diagram</strong></summary>
 
-![traps-top-level-diagram-v5](https://github.com/ajleeson/LO_user/assets/15829099/ff9e6ad4-2ee2-423c-90b2-a890191960d2)
+![traps-top-level-diagram-v6](https://github.com/ajleeson/LO_user/assets/15829099/25faac21-59fd-4b3a-9ec4-2db46a8ef6cc)
 
 </details>
 
 <details><summary><strong>Run steps</strong></summary>
 
-<details><summary>0. Convert raw Ecology data from excel file to netCDF</summary>
+<details><summary>1. Specify data folder name</summary>
     
-*Note: User does not need to run this step. It is listed here for completion. During TRAPS development and testing, the developer already ran this script. Users can simply begin at Step 1.*
+In LO/pre/trapsP##/traps_data_ver.csv, specify the version of LO_data you want to use to generate climatologies.
 
-This step runs one script which consolidates all of Ecology's raw data (in excel format) into netCDF files with daily resolution from Jan 1999 - Jul 2017.
+Note that currently, only trapsD00 is available for use. However, this config file creates modularity which will make it easy to switch to a new version of Ecology data in the future (ie. simply update traps_data_ver.csv to be trapsD01)
 
 </details>
 
-<details><summary>1. Generate climatologies</summary>
+<details><summary>1.5. Convert raw Ecology data from excel file to netCDF</summary>
+    
+*Note: User does not need to run this step. It is listed here for completion. During TRAPS development and testing, the developer already ran this script. Users can skip to step 2.*
+
+This step runs one script which consolidates all of Ecology's raw data (in excel format) into netCDF files with daily resolution from Jan 1999 - Jul 2017.
+
+These new files are all_nonpoint_source_data.nc and all_point_source_data.nc stored in LO_data.
+
+</details>
+
+<details><summary>2. Generate climatologies</summary>
     
 This step generates climatology files for each of the TRAPS.
 From your remote machine in LO/pre/trapsP## in ipython:
 
 ```
-run make_climatology_tinyrivs.py -tD trapsD##
-run make_climatology_pointsources.py -tD trapsD##
-run make_climatology_LOrivbio.py -tD trapsD##
+run make_climatology_tinyrivs.py
+run make_climatology_pointsources.py
+run make_climatology_LOrivbio.py
 ```
-
-where trapsD## is the version of LO_data/trapsD## the code will reference (This is an optional argument. The default is trapsD00).  
 
 Climatology pickle files will be generated and saved in three folders in LO_output/pre/trapsP##:
 
@@ -89,15 +97,13 @@ If you want to look at climatology timeseries, run with ```-test True``` on your
 
 </details>
 
-<details><summary>2. Map TRAPS to the grid</summary>
+<details><summary>3. Map TRAPS to the grid</summary>
 
 This step uses the lat/lon coordinates of TRAPS to map each source to the nearest appropriate grid cell. Tiny rivers are mapped to the nearest coastal grid cell. Point sources are mapped to the nearest water cell. From your remote maching in LO/pre/trapsP## in ipython:
 
 ```
-run traps_placement.py -g [gridname] -tD trapsD##
+run traps_placement.py -g [gridname]
 ```
-
-where trapsD## is the version of LO_data/trapsD## the code will reference (This is an optional argument. The default is trapsD00).
 
 Csv files with river directions and grid indices for the sources will be generated and saved in LO_data/grid/[gridname]
 
@@ -107,23 +113,23 @@ To look at where the TRAPS get mapped, run with run with ```-test True``` on you
 
 </details>
 
-<details><summary>3. Generate TRAPS forcing</summary>
+<details><summary>4. Generate TRAPS forcing</summary>
 
-This step generates a rivers.nc files with forcing for all pre-existing LO rivers and TRAPS. It uses the climatologies generated in Step 1, and the grid indices and river directions generated in Step 2.
+This step generates a rivers.nc files with forcing for all pre-existing LO rivers and TRAPS. It uses the climatologies generated in Step 2, and the grid indices and river directions generated in Step 3.
 
 From your remote machine in LO/driver:
 
 ```
-python driver_forcing3.py -g [gridname] -r backfill -s new -0 2017.01.01 -1 2017.01.02 -tD trapsD## -tP trapsP## -f trapsF##
+python driver_forcing3.py -g [gridname] -r backfill -s new -0 2017.01.01 -1 2017.01.02 -tP trapsP## -f trapsF##
 ```
 
-where trapsD## and trapsP## are the versions of LO_data/trapsD## and LO/pre/trapsP## you want to use (default to trapsD00 and trapsP00). 
+where trapsP## is the version of LO/pre/trapsP## you want to use (default to trapsP00).
 
-Likewise, trapsF## is the traps forcing version you want to use.  
+Likewise, trapsF## is the traps forcing version you want to use.
 
 </details>
 
-<details><summary>4. Run the model</summary>
+<details><summary>5. Run the model</summary>
 
 Before running the model, make sure that you enable vertical sources in your dot in file. To do this, update the boolean option in your dot in file so:
 

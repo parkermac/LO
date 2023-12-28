@@ -5,6 +5,12 @@ This folder contains forcing directories used to generate TRAPS forcing. Every f
 ---
 ## Forcing folders
 
+<details><summary><strong>trapsF00 (2023.12.27)</strong></summary>
+
+This version of TRAPS forcing was updated as part of a larger TRAPS upgrade which made the code base more modular.
+
+</details>
+
 <details><summary><strong>trapsV00 (2023.09.04)</strong></summary>
 
 This is the first, fully functional, version of TRAPS. The code implements WWTPs as vertical sources (and they no longer blow up!).
