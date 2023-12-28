@@ -173,7 +173,7 @@ LO_data/trapsD00/wwtp_open_close_dates.xlsx is a user-modifiable sheet with the 
 
 For the cas7 grid, several pairs of tiny river and pairs of WWTPs get mapped to the same grid cell (despite having different lat/lon coordinates). These pairs of sources are called "overlapping" sources. To prevent ROMS from getting confused, the forcing scripts consolidate overlapping sources into a single source. The scripts sum the flowrates of both sources, and calculates a weighted average for the other state variables (e.g. temperature) based on flowrate. Even if users are not using the cas7 grid, the TRAPS forcing script will identify and consolidate overlapping sources. Note that this script can only consolidate a pair of overlapping tiny rivers, or a pair of overlapping WWTPs. The script is not able to identify whether a tiny river and WWTP are overlapping. Luckily, this scenario does not occur in the cas7 grid.
 
-The Lake Stevens 001 and Lake Stevens 002 WWTPs overlap on the cas7 grid. However, these WWTPs are never open concurrently-- Lake Stevens 002 opens after Lake Stevens 001 closes. Thus, there is a conditional statement in the LO_traps/user/forcing/make_wwtp_forcing.py script that <i>un-</i>consolidates these WWTPs.
+The Lake Stevens 001 and Lake Stevens 002 WWTPs overlap on the cas7 grid. However, these WWTPs are never open concurrently-- Lake Stevens 002 opens after Lake Stevens 001 closes. Thus, there is a conditional statement in the LO_traps/user/forcing/trapsV##/make_wwtp_forcing.py script that <i>un-</i>consolidates these WWTPs.
 
 </details>
 
@@ -185,7 +185,7 @@ This exception is handled in LO/pre/trapsV##/make_climatology_tinyrivs.py:
 
 ![Willamette](https://github.com/ajleeson/LO_user/assets/15829099/8271fb86-d892-4148-9cc7-8b0bfd2cdb75)
 
-And also in LO_user/pre/trapsV##/traps_placement.py:
+And also in LO/pre/trapsV##/traps_placement.py:
 
 ![remove_willamette](https://github.com/ajleeson/LO_user/assets/15829099/bbdc8f44-db1c-4734-aac6-fcd8ab4c54a0)
 

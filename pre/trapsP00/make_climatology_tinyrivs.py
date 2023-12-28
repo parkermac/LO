@@ -4,16 +4,13 @@ Discharge rate, temperature, and biogeochemisty variables.
 
 Based on Ecology's timeseries, using data stored in 
 LO_data/[trapsD##]/all_nonpoint_source_data.nc
+(To change the Ecology data version, modify traps_data_ver.csv)
 
         To run, from ipython:
         run make_climatology_tinyrivs.py
 
 To create individual climatology figures, run from ipython with:
 run make_climatology_tinyrivs.py -test True
-
-To change the Ecology data version, run from ipython with:
-run make_climatology_LOrivbio.py -tD trapsD##
-(default is trapsD00)
 
 Figures saved in:
 LO_output/pre/trapsP##/tiny_rivers/[ctag]/Data_historical/climatology_plots
@@ -39,6 +36,7 @@ import matplotlib.dates as mdates
 import datetime
 import traps_helper
 import os
+from pathlib import Path
     
 
 #################################################################################
@@ -51,16 +49,18 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 # add ctag
 parser.add_argument('-ctag', type=str, default='lo_base')
-# add Ecology data version
-parser.add_argument('-tD', type=str, default='trapsD00')
 args = parser.parse_args()
 ctag = args.ctag
-trapsD = args.tD
+
+# read Ecology data version (i.e. trapsP## listed in traps_data_ver.csv)
+this_dir = Path(__file__).absolute().parent
+with open(this_dir / 'traps_data_ver.csv','r') as f:
+    for ver in f:
+        trapsD = ver
 
 # get traps pre-processing version (folder name)
 path = os.getcwd()
 trapsP_vers = os.path.basename(path)
-print(trapsP_vers)
 
 # location to save file
 clim_dir = Ldir['LOo'] / 'pre' / trapsP_vers / 'tiny_rivers' / ctag / 'Data_historical'

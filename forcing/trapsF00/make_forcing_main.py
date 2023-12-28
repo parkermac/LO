@@ -3,13 +3,12 @@ This is the main program for making the RIVER and TRAPS
 forcing file for the updated ROMS
 
 By default, point sources and tiny rivers are enabled. 
-To turn them off, set lines 38 and 39 to be = False
+To turn them off, set lines 41 and 42 to be = False
 
 Test on pc in ipython:
-run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -tD trapsD## -tP trapsP## -f trapsF##
+run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -tP trapsP## -f trapsF##
 
-where tD is the traps data folder
-and tP is the traps climatology folder
+where tP is the traps climatology folder
 and f is the forcing name (current folder)
 """
 
@@ -23,6 +22,7 @@ import xarray as xr
 from lo_tools import Lfun, zrfun
 import numpy as np
 import pandas as pd
+from pathlib import Path
 from importlib import reload
 import rivfun
 import make_LOriv_forcing as LOriv
@@ -56,9 +56,14 @@ result_dict['start_dt'] = datetime.now()
 date_string = Ldir['date_string']
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + date_string) / Ldir['frc']
 
-# get correct version of traps climatology output and ecology data
+# get correct version of traps climatology output
 trapsP = Ldir['trapsP']
-trapsD = Ldir['trapsD']
+
+# get correct version of Ecology data (based on what is saved in LO_output/pre/trapsP##)
+this_dir = Path(__file__).absolute().parent.parent.parent
+with open(this_dir / 'pre' / trapsP / 'traps_data_ver.csv','r') as f:
+    for ver in f:
+        trapsD = ver
 
 if Ldir['testing']:
     reload(zrfun)

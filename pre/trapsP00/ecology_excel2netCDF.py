@@ -4,13 +4,16 @@ loading data into two netCDF files:
 one for point sources
 one for rivers
 
+Looks at data stored in LO_data/trapsD##
+(To change the Ecology data version, modify traps_data_ver.csv)
+
 In theory, this script only needs to be run once.
-Then, the netCDF files can be referenced to generate climatologies.
+Then, the netCDF files can be referenced to generate climatologies
 
 Takes about 5-8 minutes to run on my local machine.
 
 To run from ipython:
-run ecology_excel2xarray.py -td trapsD##
+run ecology_excel2xarray.py
 """
 
 #################################################################################
@@ -24,7 +27,7 @@ import numpy as np
 import os
 import datetime
 import xarray as xr
-import argparse
+from pathlib import Path
 
 #################################################################################
 #                              Helper functions                                 #
@@ -125,12 +128,11 @@ def add_data(ds, source_ID, source_name, latlon_df, ecologydata_df):
 #                              Get path to data                                 #
 #################################################################################
 
-# read arguments
-parser = argparse.ArgumentParser()
-# add Ecology data version
-parser.add_argument('-tD', type=str, default='trapsD00')
-args = parser.parse_args()
-trapsD = args.tD
+# read Ecology data version (i.e. trapsP## listed in traps_data_ver.csv)
+this_dir = Path(__file__).absolute().parent
+with open(this_dir / 'traps_data_ver.csv','r') as f:
+    for ver in f:
+        trapsD = ver
 
 # location of historical data to process
 wwtp_dir = Ldir['data'] / trapsD / 'point_sources'

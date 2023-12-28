@@ -43,7 +43,6 @@ parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['ro
 parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocnN forcing
 
 # optional arguments to select different version of traps data and traps pre
-parser.add_argument('-tD', '--trapsD', type=str, default='trapsD00') # LO_data/trapsD## version
 parser.add_argument('-tP', '--trapsP', type=str, default='trapsP00') # LO/pre/trapsP## version
 
 args = parser.parse_args()
@@ -109,7 +108,7 @@ while dt <= dt1:
     cmd_list = ['python3', str(f_fn),
                 '-g', args.gridname, '-f', args.frc,
                 '-r', args.run_type, '-s', args.start_type,
-                '-tD', args.trapsD, '-tP', args.trapsP,
+                '-tP', args.trapsP,
                 '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing),
                 '-gtx', args.gtagex, '-ro', str(args.roms_out_num), '-do_bio', str(args.do_bio)]
     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

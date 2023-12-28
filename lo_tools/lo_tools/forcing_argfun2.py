@@ -11,7 +11,6 @@ def intro():
     # required arguments
     parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
     parser.add_argument('-f', '--frc', type=str)        # e.g. tide
-    parser.add_argument('-tD', '--trapsD', type=str, default='trapsD00') # LO_data/trapsD## version
     parser.add_argument('-tP', '--trapsP', type=str, default='trapsP00') # LO/pre/trapsP## version
     parser.add_argument('-r', '--run_type', type=str)   # backfill or forecast
     parser.add_argument('-s', '--start_type', type=str, default='continuation') # new, continuation, or perfect
@@ -37,7 +36,7 @@ def intro():
     # get the dict Ldir
     Ldir = Lfun.Lstart(gridname=args.gridname)
     # add more entries to Ldir for use by make_forcing_main.py
-    for a in ['frc', 'run_type', 'start_type', 'date_string', 'testing','gtagex','roms_out_num','do_bio', 'trapsD', 'trapsP']:
+    for a in ['frc', 'run_type', 'start_type', 'date_string', 'testing','gtagex','roms_out_num','do_bio','trapsP']:
         Ldir[a] = argsd[a]
     # set where to look for model output
     if Ldir['roms_out_num'] == 0:
