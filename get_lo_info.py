@@ -53,9 +53,8 @@ except KeyError:
 # print('HOME = ' + str(HOME))
 # print('HOSTNAME = ' + HOSTNAME)
 
-if str(HOME) == '/Users/pm8':
+if str(HOME) == '/Users/parkermaccready':
     lo_env = 'pm_mac'
-    which_matlab = '/Applications/MATLAB_R2020a.app/bin/matlab'
 
 elif (str(HOME) == '/home/parker') & ('perigee' in HOSTNAME):
     lo_env = 'pm_perigee'

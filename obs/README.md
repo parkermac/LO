@@ -47,6 +47,23 @@
 
 Note that we use a sort of cumbersome naming convention for the data columns, including the units explicitly so it is clear what we are dealing with in subsequent use. After we have done more processing I will create a master list of preferred and acceptable variable names.
 
+Here is an example of the contents of one of the Ecology DataFrames:
+
+```
+cid       time        lat         lon    name  ...  NO2 (uM)  NH4 (uM)  PO4 (uM)  SiO4 (uM)  cruise
+0      0.0 2017-01-11  47.092040 -122.918197  BUD005  ...  0.388398  0.668405  2.632084  84.497398    None
+1      0.0 2017-01-11  47.092040 -122.918197  BUD005  ...  0.340418  0.726122  2.629354  82.600006    None
+2      0.0 2017-01-11  47.092040 -122.918197  BUD005  ...  0.348933  0.628245  2.605122  82.263443    None
+3      1.0 2017-01-11  47.276485 -122.709575  CRR001  ...  0.103605  0.037389  2.551934  71.561836    None
+4      1.0 2017-01-11  47.276485 -122.709575  CRR001  ...  0.117088  0.051287  2.561856  70.790131    None
+..     ...        ...        ...         ...     ...  ...       ...       ...       ...        ...     ...
+939  276.0 2017-12-13  47.398148 -122.929592  HCB007  ...  0.303905  1.652716  3.884351  84.559181    None
+940  277.0 2017-12-13  47.670000 -122.820000  HCB010  ...  0.318795  0.071606  1.763635  77.125214    None
+941  277.0 2017-12-13  47.670000 -122.820000  HCB010  ...  0.090017  0.102635  2.565202  61.486889    None
+942  277.0 2017-12-13  47.670000 -122.820000  HCB010  ...  0.042560  0.000384  2.714923  58.599747    None
+943  277.0 2017-12-13  47.670000 -122.820000  HCB010  ...  0.120723  0.001253  2.887872  57.303364    None
+```
+
 #### Sources that have been processed up to these specifications
 
 Note: After you download these to your laptop you can get a quick look at the data by running LO/obs/plot_ctd_bottle.py.
@@ -65,7 +82,7 @@ Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/park
 - **nceiCoastal** Data from WCOA and other North American coastal cruises with carbon data. Good for carbon data on the WA/OR shelf. The original data came from: https://www.ncei.noaa.gov/data/oceans/ncei/ocads/metadata/0219960.html.
   - bottle 2011-2017 in the LO model domain, good DIC and TA, 41-56 casts per year
   - ctd None
-- **collias** Historic Data collected by Eugene Collias. 368,858 results from the years 1932 until 1975. Data was collected using approximately 15-20 different methods and captures 9 different parameters. Data came from https://apps.ecology.wa.gov/eim/search/Eim/EIMSearchResults.aspx?ResultType=EIMStudyTab&LocationWRIAs=2 (Select the dropdown menu for Collias and then select Download. This tirggers an EIM request and eventually they get it to you.)
+- **collias** Historic Data collected by Eugene Collias. 368,858 results from the years 1932 until 1975. Data was collected using approximately 15-20 different methods and captures 9 different parameters. Data came from https://apps.ecology.wa.gov/eim/search/Eim/EIMSearchResults.aspx?ResultType=EIMStudyTab&LocationWRIAs=2 (Select the dropdown menu for Collias and then select Download. This tirggers an EIM request and eventually they get it to you.) And here is a source of more information: https://apps.ecology.wa.gov/eim/search/Detail/Detail.aspx?DetailType=Study&SystemProjectId=99971885 with links to some great studies.
   - bottle 1932-1975. Missing 1943-1948 and 1973. Good SA, CT and DO, then less for NO3, NO2, and SiO4.
   - ctd None.
 

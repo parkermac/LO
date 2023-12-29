@@ -1,4 +1,6 @@
 """
+NOTE: this is a one-off test of trying launching sbatch by hand...2023.12.11
+
 This runs ROMS for one or more days, allowing for either a forecast or backfill.
 
 This code:
@@ -295,6 +297,10 @@ while dt <= dt1:
             if 'klone' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc',
                     str(roms_out_dir / 'klone_batch.sh')]
+                # DEBUGGING
+                print(cmd_list)
+                sys.exit()
+                # END DEBUGGING
             elif 'mox' in Ldir['lo_env']:
                 cmd_list = ['sbatch', '-p', 'macc', '-A', 'macc',
                     str(roms_out_dir / 'mox_batch.sh')]

@@ -12,7 +12,7 @@ pth = Path(__file__).absolute().parent
 
 # get command line arguments
 import argparse
-from numpy import ceil
+# from numpy import ceil
 
 parser = argparse.ArgumentParser()
 
@@ -27,7 +27,8 @@ parser.add_argument('-j', '--jobname', type=str, help="jobname")
 
 args = parser.parse_args()
 in_dict = args.__dict__
-in_dict['node_num'] = int(ceil(in_dict['np_num'] / in_dict['cores_per_node']))
+# in_dict['node_num'] = int(ceil(in_dict['np_num'] / in_dict['cores_per_node']))
+in_dict['node_num'] = int(in_dict['np_num'] / in_dict['cores_per_node'])
 
 ## create lo_batch.sh - batch job script  ##########################
 
