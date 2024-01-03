@@ -26,13 +26,6 @@ roms_code = parent / 'LiveOcean_roms'
 # NOTE 2023.11.03 This is obsolete. It was only used with an old model version
 # and is not used in any current ones.
 
-# This is a new piece of information, to help with integration of
-# Aurora Leeson's new LO_traps repo, 2023.11.03.
-traps_name = 'traps00'
-# In order for this to be more useful it would have to be integrated
-# into Aurora's code.
-# I'm not sure this is the best way to solve this problem.
-
 # These are places where the ROMS history files are kept
 roms_out = parent / 'LO_roms'
 roms_out1 = parent / 'BLANK' # placeholder
@@ -110,7 +103,5 @@ Ldir0['remote_user'] = remote_user
 Ldir0['remote_machine'] = remote_machine
 Ldir0['remote_dir0'] = remote_dir0
 Ldir0['local_user'] = local_user
-#
-Ldir0['traps_name'] = traps_name
 
 

@@ -42,6 +42,9 @@ parser.add_argument('-gtx', '--gtagex', default='cas6_traps2_x2b', type=str) # e
 parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
 parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocnN forcing
 
+# optional argument to select different version of traps pre
+parser.add_argument('-tP', '--trapsP', type=str, default='trapsP00') # LO/pre/trapsP## version
+
 args = parser.parse_args()
 
 # check for required arguments
@@ -105,6 +108,7 @@ while dt <= dt1:
     cmd_list = ['python3', str(f_fn),
                 '-g', args.gridname, '-f', args.frc,
                 '-r', args.run_type, '-s', args.start_type,
+                '-tP', args.trapsP,
                 '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing),
                 '-gtx', args.gtagex, '-ro', str(args.roms_out_num), '-do_bio', str(args.do_bio)]
     proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)

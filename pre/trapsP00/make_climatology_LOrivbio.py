@@ -3,16 +3,17 @@ Make climatologies for pre-existing LO rivers.
 Biogeochemisty variables only.
 
 Based on Ecology's timeseries, using data stored in 
-LO_data/traps/all_nonpoint_source_data.nc
+LO_data/[trapsD##]/all_nonpoint_source_data.nc
+(To change the Ecology data version, modify traps_data_ver.csv)
 
-To run, from ipython:
-run make_climatology_LOrivbio.py
+        To run, from ipython:
+        run make_climatology_LOrivbio.py
 
 To create individual climatology figures, run from ipython with:
 run make_climatology_LOrivbio.py -test True
 
 Figures saved in:
-LO_output/pre/traps/LO_rivbio/[ctag]/Data_historical/climatology_plots
+LO_output/pre/trapsP##/LO_rivbio/[ctag]/Data_historical/climatology_plots
 
 Note that running with -test True adds
 about a minute to run time. 
@@ -34,6 +35,8 @@ import datetime
 import matplotlib.dates as mdates
 import datetime
 import traps_helper
+import os
+from pathlib import Path
     
 
 #################################################################################
@@ -49,12 +52,22 @@ parser.add_argument('-ctag', type=str, default='lo_base')
 args = parser.parse_args()
 ctag = args.ctag
 
+# read Ecology data version (i.e. trapsP## listed in traps_data_ver.csv)
+this_dir = Path(__file__).absolute().parent
+with open(this_dir / 'traps_data_ver.csv','r') as f:
+    for ver in f:
+        trapsD = ver
+
+# get traps pre-processing version (folder name)
+path = os.getcwd()
+trapsP_vers = os.path.basename(path)
+
 # location to save file
-clim_dir = Ldir['LOo'] / 'pre' / Ldir['traps_name'] / 'LO_rivbio' / ctag / 'Data_historical'
+clim_dir = Ldir['LOo'] / 'pre' / trapsP_vers / 'LO_rivbio' / ctag / 'Data_historical'
 Lfun.make_dir(clim_dir)
 
 # get flow and loading data
-riv_fn = Ldir['data'] / Ldir['traps_name'] / 'all_nonpoint_source_data.nc'
+riv_fn = Ldir['data'] / trapsD / 'all_nonpoint_source_data.nc'
 ecology_data_ds = xr.open_dataset(riv_fn)
 
 # get riv names
@@ -62,7 +75,7 @@ rivnames_all = ecology_data_ds['name'].values
 
 # Remove pre-existing LO rivers
 # read overlapping rivers
-repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
+repeatrivs_fn = Ldir['data'] / trapsD / 'LiveOcean_SSM_rivers.xlsx'
 repeatrivs_df = pd.read_excel(repeatrivs_fn)
 SSM_repeats = repeatrivs_df['SSM_rname'].values
 # remove nans

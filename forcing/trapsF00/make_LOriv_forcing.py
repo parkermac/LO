@@ -20,7 +20,7 @@ import trapsfun
 #                   Initialize function and empty dataset                       #
 #################################################################################
 
-def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir):
+def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD):
     # Start Dataset
     LOriv_ds = xr.Dataset()
 
@@ -46,7 +46,7 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir):
     Ldir['Ctemp_fn'] = ri_dir / 'Data_historical' / ('CLIM_temp.p')
 
     # define directory for pre-existing LO river bio climatology
-    LObio_dir = Ldir['LOo'] / 'pre' / Ldir['traps_name'] / 'LO_rivbio' / ctag
+    LObio_dir = Ldir['LOo'] / 'pre' / trapsP / 'LO_rivbio' / ctag
     traps_type = 'LOriv'
 
     # get climatological data
@@ -59,14 +59,14 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir):
     # get names of rivers for which Ecology has biogeochem data
     # these are the names the LiveOcean calls them.
     # Later, they will be converted to the name Ecology/SSM uses
-    repeatrivs_fn = Ldir['data'] / Ldir['traps_name'] / 'LiveOcean_SSM_rivers.xlsx'
+    repeatrivs_fn = Ldir['data'] / trapsD / 'LiveOcean_SSM_rivers.xlsx'
     repeatrivs_df = pd.read_excel(repeatrivs_fn)
     LObio_names_all = list(repeatrivs_df.loc[repeatrivs_df['in_both'] == 1, 'LO_rname'])
     # remove the weird rivers
     weird_rivers = ['Alberni Inlet', 'Chehalis R', 'Gold River',
                     'Willapa R', 'Columbia R', 'Comox']
     # These are the names that LO uses
-    LObio_names = [rname for rname in LObio_names_all if trapsfun.LO2SSM_name(rname) not in weird_rivers]
+    LObio_names = [rname for rname in LObio_names_all if trapsfun.LO2SSM_name(rname,trapsD) not in weird_rivers]
 
     # get the list of rivers and indices for this grid
     gri_fn = Ldir['grid'] / 'river_info.csv'
@@ -87,7 +87,7 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir):
     # get the flow and temperature data for these days
     qt_df_dict = rivfun.get_qt(gri_df, ri_df, dt_ind, yd_ind, Ldir, dt1, days)
     # get the biology for LO pre-existing rivers for which Ecology has data
-    LObio_df_dict = trapsfun.get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type)
+    LObio_df_dict = trapsfun.get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD)
 
     # Add time coordinate
     LOriv_ds['river_time'] = (('river_time',), ot_vec)
@@ -207,7 +207,7 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir):
             # Add biogeochem climatology for rivers for which Ecology have data
             if rn in LObio_names and bvn in ['NO3', 'NH4', 'TIC', 'TAlk', 'Oxyg']:
                 # get corresponding Ecology/SSM river name
-                rn_SSM = trapsfun.LO2SSM_name(rn)
+                rn_SSM = trapsfun.LO2SSM_name(rn, trapsD)
                 # get the biogeochem values from climatology
                 bio_LOriv_df = LObio_df_dict[rn_SSM]
                 bvals = bio_LOriv_df[bvn].values

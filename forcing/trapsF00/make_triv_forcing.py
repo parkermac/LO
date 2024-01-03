@@ -20,7 +20,7 @@ import trapsfun
 #                   Initialize function and empty dataset                       #
 #################################################################################
 
-def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable):
+def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP, trapsD):
     # Start Dataset
     triv_ds = xr.Dataset()
     NTRIV = 0
@@ -40,7 +40,7 @@ def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable):
             sys.exit()
 
         # define directory for tiny river climatology
-        triv_dir = Ldir['LOo'] / 'pre' / Ldir['traps_name'] / 'tiny_rivers' / ctag
+        triv_dir = Ldir['LOo'] / 'pre' / trapsP / 'tiny_rivers' / ctag
         traps_type = 'triv'
 
         # get climatological data
@@ -97,7 +97,7 @@ def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable):
         NTRIV = len(gri_df_no_ovrlp)
 
         # get the flow, temperature, and nutrient data for these days
-        qtbio_triv_df_dict = trapsfun.get_qtbio(gtri_df, dt_ind, yd_ind, Ldir, traps_type)
+        qtbio_triv_df_dict = trapsfun.get_qtbio(gtri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD)
 
         # Add time coordinate
         triv_ds['river_time'] = (('river_time',), ot_vec)

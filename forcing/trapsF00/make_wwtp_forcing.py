@@ -20,7 +20,7 @@ import trapsfun
 #                   Initialize function and empty dataset                       #
 #################################################################################
 
-def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable):
+def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD):
 
     # Start Dataset
     wwtp_ds = xr.Dataset()
@@ -44,12 +44,12 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable):
             sys.exit()
 
         # Read WWTP open/close dates
-        open_close_fn = Ldir['data'] / Ldir['traps_name'] / 'wwtp_open_close_dates.xlsx'
+        open_close_fn = Ldir['data'] / trapsD / 'wwtp_open_close_dates.xlsx'
         open_close_df = pd.read_excel(open_close_fn)
         open_closed_wwtps = open_close_df['name'].tolist()
 
         # define directory for point_source climatology
-        wwtp_dir = Ldir['LOo'] / 'pre' / Ldir['traps_name'] / 'point_sources' /ctag
+        wwtp_dir = Ldir['LOo'] / 'pre' / trapsP / 'point_sources' /ctag
         traps_type = 'wwtp'  
 
         # get climatological data
@@ -110,7 +110,7 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable):
         NWWTP = len(gri_df_no_ovrlp)
 
         # get the flow, temperature, and nutrient data for these days
-        qtbio_wwtp_df_dict = trapsfun.get_qtbio(gwi_df, dt_ind, yd_ind, Ldir, traps_type)
+        qtbio_wwtp_df_dict = trapsfun.get_qtbio(gwi_df, dt_ind, yd_ind, Ldir, traps_type, trapsD)
 
         # Add time coordinate
         wwtp_ds['river_time'] = (('river_time',), ot_vec)

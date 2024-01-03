@@ -1,6 +1,20 @@
-# LO_traps/user/pre/traps
+# LO/pre/trapsP##
 
 This folder contains the scripts that generate climatologies for TRAPS and that map TRAPS to the model grid. Details of each can be found below.
+
+---
+## ecology_excel2netCDF.py
+
+This script converts all of Ecology's raw data from excel format to netCDF format.
+
+Note: Users do not need to run this script. It was already run during TRAPS development, and users can simply use the output .nc files provided on perigee in auroral's LO_data folder. The script is provided here for completion only.
+
+---
+## traps_data_ver.csv
+
+This is a config file that allows for modularity. This file contains the name of the LO_data/trapsD## that the user wants to use for climatology generation.
+
+In theory, different versions of trapsD## allows the user to pick different versions of Ecology data to use, should updates be released in the future. However, there is currently only one traps data version: **trapsD00**
 
 ---
 ## make_climatology scripts
@@ -15,7 +29,7 @@ There are three main climatology scripts:
 - `make_climatology_tinyrivers.py`: Creates climatology files for river mouths using Ecology's data in LO_traps/data/all_nonpoint_source_data.nc. This script does not generate climatology for pre-existing rivers in LiveOcean.
 - `make_climatology_LOrivbio.py`: Creates biogeochemistry climatology files for all pre-existing LiveOcean rivers for which Ecology has data in LO_traps/data/all_nonpoint_source_data.nc. This script does not generate climatology for tiny rivers, nor does it generate flowrate or temperature climatology.
 
-These scripts generate climatology pickle files in LO_output/pre/traps/[source type]/lo_base/Data_historical.
+These scripts generate climatology pickle files in LO_output/pre/trapsP##/[source type]/lo_base/Data_historical.
 
 Climatologies are generated for the following variables:
 - flow (TRAPS only)
@@ -32,15 +46,15 @@ Climatologies are generated for the following variables:
 
 The structure of these scripts are all similar, so they will be explained generally. There are a few nuances in `make_climatology_tinyrivers.py` which are discussed explicitly.
 
-1. First, raw data are read from LO_data/traps/all_nonpoint_source_data.nc and LO_data/traps/all_point_source_data.nc. 
+1. First, raw data are read from LO_data/trapsD##/all_nonpoint_source_data.nc and LO_data/trapsD##/all_point_source_data.nc. 
 
->>> **River notes:** For rivers, the script also reads the list of pre-existing LO rivers from LO_data/traps/LiveOcean_SSM_rivers.xlsx. The pre-existing rivers are omitted from  tinyriver climatology. The non-pre-existing rivers are omitted from LOrivbio climatology.
+>>> **River notes:** For rivers, the script also reads the list of pre-existing LO rivers from LO_data/trapsD##/LiveOcean_SSM_rivers.xlsx. The pre-existing rivers are omitted from  tinyriver climatology. The non-pre-existing rivers are omitted from LOrivbio climatology.
 
 >>> **Tiny river notes:** In the raw Ecology data, there are several tiny rivers with unrealistic biogeochemistry parameters (i.e. zero DO, negative TIC, etc.). These "weird rivers" are temporarily removed from climatology generation. They are handled separately in Step 4.
 
 2. Then, the script creates empty dataframes for DO, discharge, temperature, NO3, NH4, TIC, and TAlk. For every source, the script then fills these dataframes with the average yearly climatology of the full 1999-2017 timeseries from Ecology. Essentially, climatologies are the "average year" of each source. The script also calculates the standard deviations of these climatologies.
 
-3. Next, the script plots the climatology summary statistics. For every state variable, the script calculates and plots the average climatology profile, the standard deviation, and the min and max climatology values. This plot is saved in LO_output/pre/traps/[source type]/lo_base/Data_historical. An example figure is shown below for tiny rivers.<p style="text-align:center;"><img src="https://github.com/ajleeson/LO_user/assets/15829099/43092aad-d254-4e28-b63f-68c84103f53a" width="800"/><br></p>
+3. Next, the script plots the climatology summary statistics. For every state variable, the script calculates and plots the average climatology profile, the standard deviation, and the min and max climatology values. This plot is saved in LO_output/pre/trapsP##/[source type]/lo_base/Data_historical. An example figure is shown below for tiny rivers.<p style="text-align:center;"><img src="https://github.com/ajleeson/LO_user/assets/15829099/43092aad-d254-4e28-b63f-68c84103f53a" width="800"/><br></p>
 
 4. **Only applies to tiny rivers.** The script then overwrites the biogeochemistry climatologies for "weird rivers" with the average climatology of other rivers calculated in Step 3.
 
@@ -66,7 +80,7 @@ The following subsections provide more details about the placement algorithm and
 
 *Tiny Rivers*
 
-1. For each river listed in LO_data/traps/all_nonpoint_source_data.nc, the algorithm first checks if the river is already pre-existing in LiveOcean. If it is pre-existing, then this function does nothing and skips to the next river. If the river is not pre-existing in LiveOcean, then this function proceeds to the next step.
+1. For each river listed in LO_data/trapsD##/all_nonpoint_source_data.nc, the algorithm first checks if the river is already pre-existing in LiveOcean. If it is pre-existing, then this function does nothing and skips to the next river. If the river is not pre-existing in LiveOcean, then this function proceeds to the next step.
 2. This function then feeds the lat/lon coordinates of each river into `traps_helper.get_nearest_coastal_cell_riv` to obtain i,j-indices and direction of the placed river (See the "Tiny River Handling" section below for more details).
 3. Finally, this function saves river information in LO_data/grids/[gridname]/triv_info.csv.
 
@@ -74,7 +88,7 @@ The following subsections provide more details about the placement algorithm and
 
 There are no pre-existing rivers in LiveOcean, nor are there any point sources that discharge to multiple grid cells in the SSM. Thus, point sources are easier to handle than tiny rivers.
 
-1. First, the functions feeds each point source listed in LO_data/traps/all_point_source_data.nc into `get_nearest_coastal_cell_wwtp` to obtain the i,j-indices of the places source (See the "Point Source Handling" section below for more details).
+1. First, the functions feeds each point source listed in LO_data/trapsD##/all_point_source_data.nc into `get_nearest_coastal_cell_wwtp` to obtain the i,j-indices of the places source (See the "Point Source Handling" section below for more details).
 2. Then, this function saves point source information in LO_data/grids/[gridname]/wwtp_info.csv.
 
 </details>
