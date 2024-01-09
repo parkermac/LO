@@ -111,6 +111,7 @@ for ext_fn in sect_list:
                 #qnet[tt] = XF.sum() #jx
                 qnet[tt] = np.nansum(XF) #jx
                 # and tidal energy flux
+                #zi = zeta[tt,:].squeeze()
                 zi = zeta[tt,:].squeeze()
                 zi[np.isnan(QV[vn][tt,0,:])] = np.nan # jx, if q = NaN, zi = NaN
                 #ssh[tt] = zi.mean() #jx
