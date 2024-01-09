@@ -85,6 +85,8 @@ def get_box(job, Lon, Lat):
         aa = [-(122 + 43/60 + 13.91/3600), -(122 + 17/60 + 7.93/3600),
             (47 + 13/60 + 23.69/3600), (48 +1/60 + 17.79/3600)]
         vn_list = 'h,pm,pn,mask_rho,salt,temp,u,v,bustr,bvstr,zeta'
-    
+    elif job == 'kudela0':
+        aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
+        vn_list = 'h,f,pm,pn,mask_rho,salt,temp,NO3,phytoplankton'
         
     return aa, vn_list
