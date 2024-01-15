@@ -5,9 +5,17 @@ This folder contains forcing directories used to generate TRAPS forcing. Every f
 ---
 ## Forcing folders
 
+<details><summary><strong>trapsF01 (2024.01.05)</strong></summary>
+
+trapsF01 is identical to trapsF00 (realistic conditions), except that there are no nutrients coming from WWTP effluent. i.e. NO3 and NH4 concentrations are set to zero for all point sources (all w-sources). This includes all WWTPs in both US and Canadian waters, and also factories as well. In all cases, the factories had zero or low DIN dischage to begin with. Thus, these changes to the factory nutrient discharges are not expected to make a significant difference relative to changes in WWTP discharge.
+
+</details>
+
 <details><summary><strong>trapsF00 (2023.12.27)</strong></summary>
 
 This version of TRAPS forcing was updated as part of a larger TRAPS upgrade which made the code base more modular.
+
+trapsF00 is the baseline version of TRAPS forcing that most accurately represents realistic conditions.
 
 </details>
 
