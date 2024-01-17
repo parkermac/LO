@@ -133,7 +133,10 @@ for job in job_list:
     cmd_list = ['python3', str(j_fn),
                 '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
                 '-r', Ldir['run_type'], '-d', Ldir['date_string'],
-                '-job', job, '-test', str(Ldir['testing'])]
+                '-job', job, '-test', 'False']
+                # 2024.01.17 Override the testing flag here so that the results of the shorter job list
+                # will go to the APL server (not a good idea?).
+                # '-job', job, '-test', str(Ldir['testing'])]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     with open(out_dir / 'Info' / 'screen_output.txt', 'w') as fout:
