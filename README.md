@@ -262,7 +262,7 @@ In the fields below:
 | LO_data   | Create your own folder on 1 and copy to 2,3  | 1,2,3  | Data files like grids and coastlines. Not a repo.  |
 | LO_output   | Created automatically  | Will appear on 1,2,3  | LO output, like forcing files. Not a repo.  |
 | LO_roms   | Created automatically  | Will appear on 2,3 and you can copy to 1  | ROMS output. Not a repo.  |
-| LO_roms_source   | Clone from ROMS GitHub site   | 1,3  | ROMS source code. Good to have on 1 for reference, even though you only compile on 3  |
+| LO_roms_source_git   | Clone from ROMS GitHub site   | 1,3  | ROMS source code. Good to have on 1 for reference, even though you only compile on 3  |
 | LO_roms_user   | Create your own repo on 1 and copy in bits from the version on parkermac. Then clone to 3.  | 1,3  | Files for configuring specific ROMS versions that are defined by lists of compiler flags.  |
 
 ---
