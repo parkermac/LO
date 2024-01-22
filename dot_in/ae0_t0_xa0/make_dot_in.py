@@ -6,7 +6,7 @@ It is designed to work with the BLANK.in file, replacing things like
 $whatever$ with meaningful values.
 
 To test from ipython on mac:
-run make_dot_in -g cas7 -t t0 -x x4b -r backfill -s continuation -d 2019.07.04 -bu 0 -np 400
+run make_dot_in -g ae0 -t t0 -x xa0 -r backfill -s continuation -d 2020.01.01 -bu 0 -np 40
 
 If you call with -short_roms True it will create a .in that runs for a shorter time or
 writes history files more frequently (exact behavior is in the code below).  This can
@@ -19,7 +19,8 @@ from pathlib import Path
 import sys
 from datetime import datetime, timedelta
 
-pth = Path(__file__).absolute().parent.parent.parent / 'lo_tools' / 'lo_tools'
+# This is designed to find lo_tools starting from either LO/dot_in or LO_user/dot_in
+pth = Path(__file__).absolute().parent.parent.parent.parent / 'LO' / 'lo_tools' / 'lo_tools'
 if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import dot_in_argfun as dfun
@@ -110,33 +111,12 @@ for O in list('NSEW'):
 
 # DERIVED VALUES
 if multi_core:
-    if Ldir['np_num'] == 64: # for new mox nodes 2*32=64 2019_02
+    if Ldir['np_num'] == 64: # mox 2*32 = 64
         ntilei = '8' # number of tiles in I-direction
         ntilej = '8' # number of tiles in J-direction
-    elif Ldir['np_num'] == 72:
-        ntilei = '6' # number of tiles in I-direction
-        ntilej = '12' # number of tiles in J-direction
-    elif Ldir['np_num'] == 84:
+    elif Ldir['np_num'] == 84: # mox 3*28 = 84
         ntilei = '6' # number of tiles in I-direction
         ntilej = '14' # number of tiles in J-direction
-    elif Ldir['np_num'] == 112:
-        ntilei = '8' # number of tiles in I-direction
-        ntilej = '14' # number of tiles in J-direction
-    elif Ldir['np_num'] == 144:
-        ntilei = '8' # number of tiles in I-direction
-        ntilej = '18' # number of tiles in J-direction
-    elif Ldir['np_num'] == 196:
-        ntilei = '14' # number of tiles in I-direction
-        ntilej = '14' # number of tiles in J-direction
-    elif Ldir['np_num'] == 252:
-        ntilei = '14' # number of tiles in I-direction
-        ntilej = '18' # number of tiles in J-direction
-    elif Ldir['np_num'] == 392:
-        ntilei = '14' # number of tiles in I-direction
-        ntilej = '28' # number of tiles in J-direction
-    elif Ldir['np_num'] == 588:
-        ntilei = '21' # number of tiles in I-direction
-        ntilej = '28' # number of tiles in J-direction
     elif Ldir['np_num'] == 400: # klone
         ntilei = '20' # number of tiles in I-direction
         ntilej = '20' # number of tiles in J-direction
@@ -237,16 +217,16 @@ f.close()
 f2.close()
 
 # create bio_Banas.in #######################
-f = open(dot_in_dir / 'bio_Fennel_BLANK.in','r')
-bio_dot_in_name = 'bio_Banas.in'
-f3 = open(out_dir / bio_dot_in_name,'w')
-for line in f:
-    for var in D.keys():
-        if '$'+var+'$' in line:
-            line2 = line.replace('$'+var+'$', str(D[var]))
-            line = line2
-        else:
-            line2 = line
-    f3.write(line2)
-f.close()
-f3.close()
+# f = open(dot_in_dir / 'bio_Fennel_BLANK.in','r')
+# bio_dot_in_name = 'bio_Banas.in'
+# f3 = open(out_dir / bio_dot_in_name,'w')
+# for line in f:
+#     for var in D.keys():
+#         if '$'+var+'$' in line:
+#             line2 = line.replace('$'+var+'$', str(D[var]))
+#             line = line2
+#         else:
+#             line2 = line
+#     f3.write(line2)
+# f.close()
+# f3.close()
