@@ -455,7 +455,7 @@ LtracerSponge == F F                            ! temperature, salinity, inert
 ! Sources/Sinks (like volume vertical influx), [1:Ngrids].
 
       LuvSrc == T                          ! horizontal momentum transport
-       LwSrc == T                          ! volume vertical influx
+       LwSrc == F                          ! volume vertical influx
 
 ! Logical switches (TRUE/FALSE) to activate tracers point Sources/Sinks
 ! (like river runoff) and to specify which tracer variables to consider:
@@ -1048,16 +1048,16 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
 ! continuation (\) or a vertical bar (|) symbol after each entry, except
 ! the last one.
 
-     NFFILES == 8                          ! number of unique forcing files
+!     NFFILES == 8                          ! number of unique forcing files
 
-     FRCNAME == $force_dir$/$atm$/lwrad_down.nc \
-                $force_dir$/$atm$/Pair.nc \
-                $force_dir$/$atm$/Qair.nc \
-                $force_dir$/$atm$/rain.nc \
-                $force_dir$/$atm$/swrad.nc \
-                $force_dir$/$atm$/Tair.nc \
-                $force_dir$/$atm$/Uwind.nc \
-                $force_dir$/$atm$/Vwind.nc  
+!     FRCNAME == $force_dir$/$atm$/lwrad_down.nc \
+!                $force_dir$/$atm$/Pair.nc \
+!                $force_dir$/$atm$/Qair.nc \
+!                $force_dir$/$atm$/rain.nc \
+!                $force_dir$/$atm$/swrad.nc \
+!                $force_dir$/$atm$/Tair.nc \
+!                $force_dir$/$atm$/Uwind.nc \
+!                $force_dir$/$atm$/Vwind.nc  
 
 ! Output NetCDF file names, [1:Ngrids].
 

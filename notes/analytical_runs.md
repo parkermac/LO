@@ -51,37 +51,23 @@ Then copy LO_data/grids/ae0 from your laptop to the remote machine.  You could u
 Working on the remote machine, go to `LO/driver` and execute these three commands from the linux command line (sequence doesn't matter):
 ```
 python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f rivA0
-python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f ocnA0
+python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f ocnA0 -s new
 python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f tideA0
 ```
 These will make files in `LO_output/forcing/ae0/f2020.01.01` and `f2020.01.02`. These are the NetCDF files ROMS will need to force the run for two days.
 
 #### Run ROMS on klone
 
-Get an account on the hyak supercomputer klone from David Darr.
+See [HERE](https://github.com/parkermac/LO_roms_user/blob/main/README.md) for detailed info on getting ROMS working on klone. You should follow these all the way through running the upwelling example and creating your own LO_roms_user repo.
 
-In your main directory /gscratch/macc/[username] = (*) clone the LO (from parkermac), LO_user (from your GitHub account), and LO_roms_source_alt (from parkermac) repositories.
+Compile the xa0 executable.
 
-Also make your own repo called LO_roms_user, and copy into it the directories from the parkermac repo `LO_roms_user/upwelling` and `LO_roms_user/uu1k`.
-
-There is no need to install python on klone.  It already exists in a basic state.
-
----
-
-#### Directions are incomplete from this point on...
-
-Get a ROMS user account, and then use svn to put a copy of the ROMS source code onto klone in (*)/LO_roms_source.  See [HERE](https://github.com/parkermac/LO_roms_user/blob/main/README.md) for more detailed info on getting ROMS working on klone.
-
-See if you can run the upwelling case.
-
-Compile uu1k on klone (on a compute node, just as you did for the upwelling case).
-
-Copy the grid file with a command like this:
+Copy the grid file to klone with a command like this:
 ```
 scp -r parker@apogee.ocean.washington.edu:/dat1/parker/LO_data/grids/ae0 .
 ```
 
 Run the analytical case, from the head node, with a command like this.
 ```
-python3 driver_roms3.py -g ae0 -t v0 -x uu1k -r backfill -s new -0 2020.01.01 -1 2020.01.02 -np 40 -N 40 < /dev/null > ae.log &
+python3 driver_roms3.py -g ae0 -t t0 -x xa0 -s new -0 2020.01.01 -1 2020.01.02 -np 40 -N 40 < /dev/null > ae.log &
 ```
