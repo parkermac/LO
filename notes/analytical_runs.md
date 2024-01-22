@@ -40,15 +40,33 @@ You may notice along the way that the code made new directories on your computer
 
 [Data] -> [Code] -> [Output]
 
+---
+
+**NOTE: the handling of river information can be confusing. Here is what happens:**
+
+1. LO/pgrid/start_grid.py (calling gfun_user.py) creates files that have information about rivers (names and gage numbers - if any) and their channel locations. For non-analytical runs these are would be created by the LO/pre/river1 programs. The README in LO/pre/river1 gives a lot more information. For analytical cases things are much simpler so we just make these by hand using code in gfun_user.py.
+    - LO_output/pre/river1/ae0_v0/river_info.csv
+    - LO_output/pre/river1/ae0_v0/tracks/creek0.p
+2. LO/pgrid/carve_rivers.py goes through each river and figures out the exact grid indices where it's source should be on the ROMS grid you are making, saving the output in:
+    - LO_output/pgrid/ae0/roms_river_info.csv
+3. LO/pgrid/grid_to_LO.py copies the roms_river_info.csv you just made into a place where it can be used by the forcing code, e.g. rivA0.
+    - LO_data/grids/ae0/river_info.csv
+
+The confusing bit is that the name "river_info.csv" was reused in steps 1 and 3, even though in 3 it is a file full of indices, and in 1 it has gage numbers. This is just a legacy of how the code was developed, and me not wanting to break things already in place.
+
+---
+
 #### Repeat some steps on a remote linux machine
 
 Get an account on perigee or apogee from David Darr.  Then, working in the main directory he makes for you (e.g. /dat1/[username], not in your $HOME directory ~) again install python and the LO (clone from parkermac) and LO_user (clone from your GitHub account) repos.
 
 Then copy LO_data/grids/ae0 from your laptop to the remote machine.  You could use scp for this, or I like the Transmit program from the App store, but it is $25 per year.
 
+---
+
 #### Create the forcing files for a run
 
-Working on the remote machine, go to `LO/driver` and execute these three commands from the linux command line (sequence doesn't matter):
+Working on a remote machine like apogee or perigee, go to `LO/driver` and execute these three commands from the linux command line (sequence doesn't matter):
 ```
 python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f rivA0
 python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f ocnA0 -s new
