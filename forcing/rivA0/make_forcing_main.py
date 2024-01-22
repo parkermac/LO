@@ -1,5 +1,5 @@
 """
-This is the main program for making the TIDE forcing file.
+This is the main program for making the RIVER forcing file.
 
 Test on mac in ipython:
 

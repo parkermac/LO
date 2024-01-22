@@ -16,7 +16,7 @@ import gfun_utility as gfu
 import gfun
 
 # This is the name of the grid that you are working on.
-gridname = 'wgh2'
+gridname = 'ae0'
 
 # default s-coordinate info (could override below)
 s_dict = {'THETA_S': 4, 'THETA_B': 2, 'TCLINE': 10, 'N': 30,
@@ -104,36 +104,7 @@ def make_initial_info(gridname=gridname):
                 
         if dch['use_z_offset']:
             z = z + dch['z_offset']
-            
-    elif gridname == 'wgh1':
-        # Willapa Bay and Grays Harbor nest
-        dch = gfun.default_choices()
-        aa = [-124.4,-123.7,46.35,47.1]
-        res = 200 # target resolution (m)
-        Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
-        dch['z_offset'] = -1
-        # The docs for nw_pacific say the vertical datum is "sea level" so to match
-        # this we would use z_offset = 0, but the intention here is to make the z=0
-        # level be higher up, so that we catch more of the intertidal when using
-        # WET_DRY. This must be matched by a similar intervention to zeta in ocnN.
-        dch['nudging_edges'] = ['north', 'south', 'west']
-        dch['nudging_days'] = (0.1, 1.0)
-        
-        # by setting a small min_depth were are planning to use
-        # WET_DRY in ROMS, but maintaining positive depth
-        # for all water cells
-        dch['min_depth'] = 0.2 # meters (positive down)
-        
-        # Make the rho grid.
-        lon, lat = np.meshgrid(Lon_vec, Lat_vec)
-        
-        # Initialize bathymetry
-        dch['t_list'] = ['nw_pacific','grays_harbor','willapa_bay']
-        z = gfu.combine_bathy_from_sources(lon, lat, dch)
-                
-        if dch['use_z_offset']:
-            z = z + dch['z_offset']
-            
+                    
     elif gridname == 'wgh2':
         # Willapa Bay and Grays Harbor nest
         dch = gfun.default_choices()

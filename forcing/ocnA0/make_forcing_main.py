@@ -1,7 +1,9 @@
 """
-This makes the ocn forcing files for an analytical run.
+This makes the OCN forcing files for an analytical run.
 
 Designed to run only as backfill.
+
+You would want to run with -st new to get the ini file for a new run.
 
 Testing:
 

@@ -1,5 +1,5 @@
 """
-This makes the atm forcing files for an analytical run.
+This makes the ATM forcing files for an analytical run.
 
 Designed to run only as backfill.
 
@@ -48,10 +48,8 @@ NT = len(ot_vec)
 # Create fields for the state variables.
 vn_list = ['Pair','rain','swrad','lwrad_down','Tair','Qair','Uwind','Vwind']
 
-# For now we just fill everything with zeros and nan's
+# For now we just fill everything with zeros
 omat = np.zeros((NT, NR, NC))
-# mr2 = np.ones((NT, NR, NC)) * G['mask_rho'].reshape((1, NR, NC))
-# omat[mr2==0] = np.nan
 # NOTE: I when we tried masking for atm fields ROMS did not like it.
 
 for vn in vn_list:
