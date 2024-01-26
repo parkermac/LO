@@ -17,6 +17,15 @@ fn = in_dir / '1999to2023CTDnuts.nc'
 ds = xr.open_dataset(fn, decode_times=False)
 
 # converting the times
-t = ds.UTCDatetime.values
-tt = [item.decode() for item in t]
-ti = pd.to_datetime(tt)
+tu = ds.UTCDatetime.values
+tu_dc = [item.decode() for item in tu]
+ti = pd.to_datetime(tu_dc)
+
+c = ds.CastGUID.values
+c_dc = [item.decode() for item in c]
+
+t = ds.Temp.values
+p = ds.Pres.values
+d = ds.DepthInterval.values
+
+df = pd.DataFrame(index=ti, data={'c':c_dc,'t':t,'p':p})
