@@ -92,7 +92,7 @@ def get_box(job, Lon, Lat):
         aa = [-123, -122.2, 47.6, 48.4]
         vn_list = 'h,f,pm,pn,mask_rho,mask_u,mask_v,salt,temp,u,v,w,zeta,AKs,AKv,sustr,svstr,bustr,bvstr'
     elif job == 'barbosa0':
-        aa = [-127.345470, -125.498403, -50.335856, -51.095854,]
+        aa = [-127.345470, -125.498403, 50.335856, 51.095854]
         vn_list = 'h,f,pm,pn,mask_rho,zeta,salt,temp,NO3,u,v'
         
     return aa, vn_list
