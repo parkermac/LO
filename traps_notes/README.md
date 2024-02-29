@@ -66,7 +66,7 @@ Note that currently, only trapsD00 is available for use. However, this config fi
 
 <details><summary>1.5. Convert raw Ecology data from excel file to netCDF</summary>
     
-*Note: User does not need to run this step. It is listed here for completion. During TRAPS development and testing, the developer already ran this script. Users can skip to step 2.*
+*Note: User does not need to run this step. It is listed here for completion. During TRAPS development and testing, the developer already ran this script. Users can skip to step 2. However, if the user decides to run this script, it is advised that they run it on their remote machine (or wherever they plan to generate forcing).*
 
 This step runs one script which consolidates all of Ecology's raw data (in excel format) into netCDF files with daily resolution from Jan 1999 - Jul 2017.
 
@@ -77,7 +77,7 @@ These new files are all_nonpoint_source_data.nc and all_point_source_data.nc sto
 <details><summary>2. Generate climatologies</summary>
     
 This step generates climatology files for each of the TRAPS.
-From your remote machine in LO/pre/trapsP## in ipython:
+From your **remote machine** (or whichever machine you will use to generate forcing) in LO/pre/trapsP## in ipython:
 
 ```
 run make_climatology_tinyrivs.py
