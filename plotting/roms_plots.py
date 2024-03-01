@@ -774,8 +774,9 @@ def P_layer(in_dict):
     fig = plt.figure()
     ds = xr.open_dataset(in_dict['fn'])
     # PLOT CODE
-    vn_list = ['oxygen', 'temp']
-    z_level = -250
+    #vn_list = ['oxygen', 'temp']
+    vn_list = ['TIC', 'alkalinity']
+    z_level = -1500
     zfull = pfun.get_zfull(ds, in_dict['fn'], 'rho')
     ii = 1
     for vn in vn_list:
