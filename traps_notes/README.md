@@ -50,7 +50,7 @@ After getting the required files, users should be able to add TRAPS to their mod
 
 <details><summary><strong>TRAPS workflow diagram</strong></summary>
 
-![traps-top-level-diagram-v6](https://github.com/ajleeson/LO_user/assets/15829099/25faac21-59fd-4b3a-9ec4-2db46a8ef6cc)
+![traps-top-level-diagram-v7](https://github.com/ajleeson/LO_user/assets/15829099/c8534744-5240-476e-807d-7c7d44793a1f)
 
 </details>
 
@@ -77,13 +77,12 @@ These new files are all_nonpoint_source_data.nc and all_point_source_data.nc sto
 <details><summary>2. Generate climatologies</summary>
     
 This step generates climatology files for each of the TRAPS.
-From your **remote machine** (or whichever machine you will use to generate forcing) in LO/pre/trapsP## in ipython:
+From your **remote machine** (or whichever machine you will use to generate forcing) in LO/pre/trapsP##:
 
 ```
-run make_climatology_tinyrivs.py
-run make_climatology_pointsources.py
-run make_climatology_LOrivbio.py
+bash climatology_all_source_types.sh
 ```
+This shellscript runs climatology scripts for all source types (tiny rivers, pre-existing LiveOcean rivers, and point sources).
 
 Climatology pickle files will be generated and saved in three folders in LO_output/pre/trapsP##:
 
@@ -91,7 +90,15 @@ Climatology pickle files will be generated and saved in three folders in LO_outp
 - **tiny_rivers:** Climatology files for tiny rivers
 - **LO_rivbio:** Climatology files for pre-existing LO rivers
   
-If you want to look at climatology timeseries, run with ```-test True``` on your local machine. This option will create a subfolder in LO_output/pre/trapsP##/[source type]/lo_base/Data_historical/climatology_plots with a climatology figure for each source. An example figure for Burley Creek is shown below.
+If you want to look at timeseries figures of the climatologies, then run the following commands **on your local machine** from LO/pre/trapsP### in ipython:
+
+```
+run make_climatology_tinyrivs.py -test True
+run make_climatology_pointsources.py -test True
+run make_climatology_LOrivbio.py -test True
+```
+
+The "test" option will create a subfolder in LO_output/pre/trapsP##/[source type]/lo_base/Data_historical/climatology_plots with a climatology figure for each source. An example figure for Burley Creek is shown below.
 
 ![Burley Cr](https://github.com/ajleeson/LO_user/assets/15829099/adc0456f-f855-4428-82c5-63f5aa1fa5b0)
 
@@ -199,6 +206,20 @@ And also in LO/pre/trapsV##/traps_placement.py:
 
 ---
 ## Update Notes
+
+<details><summary><strong>2024.03.01 update</strong></summary>
+
+**Fixed object type error and added climatology shellscript**
+
+This update fixes a user-reported bug in the TRAPS forcing generation step. Previously, the object type for river_direction was inconsistent between tiny rivers and pre-existing LO rivers, which caused an error. Now, river_direction is defined as an int for both tiny rivers and pre-existing rivers, resolving the incompatible-type issue.
+
+Additionally, I have added a shellscript in LO/pre/trapsP## called climatology_all_source_types.sh. This new script automates the climatology generation process so users no longer need to separately generate climatology for point sources, tiny rivers, and pre-existing LO rivers.
+
+READMEs have been updated to reflect code changes.
+
+Thanks to Parker for providing user feedback.
+
+</details>
 
 <details><summary><strong>2023.12.22 update</strong></summary>
 
