@@ -139,7 +139,7 @@ for riv in shifted:
 #                          Calculate climatologies                              #
 #################################################################################
 
-print('Calculating climatologies...')
+print('Calculating tiny river climatologies...')
 
 # loop through all nonpoint sources
 for i,rname in enumerate(trivnames):
@@ -291,7 +291,7 @@ for rname in weird_DO_and_NH4:
     NH4_clim_df[rname]  = clim_avgs['NH4(mmol/m3)']     # [mmol/m3]
     DO_clim_df[rname]   = clim_avgs['DO(mmol/m3)']      # [mmol/m3]
 
-print('Climatologies done\n')
+print('Tiny river climatologies done\n')
 
 #################################################################################
 #                Plot all individual tiny river climatologies                   #
