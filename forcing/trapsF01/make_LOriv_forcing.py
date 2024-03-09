@@ -125,7 +125,7 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD):
         vinfo = zrfun.get_varinfo(vn, vartype='climatology')
         # get river direction (idir)
         if vn == 'river_direction':
-            LOriv_ds[vn] = (('river',), gri_df.idir.to_numpy())
+            LOriv_ds[vn] = (('river',), gri_df.idir.to_numpy().astype(int))
         # Add X-position (column index on v-grid)
         elif vn == 'river_Xposition':
             X_vec = np.nan * np.ones(NRIV)

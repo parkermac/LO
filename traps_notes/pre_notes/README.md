@@ -17,6 +17,13 @@ This is a config file that allows for modularity. This file contains the name of
 In theory, different versions of trapsD## allows the user to pick different versions of Ecology data to use, should updates be released in the future. However, there is currently only one traps data version: **trapsD00**
 
 ---
+## climatology_all_source_types.sh
+
+This shellscript automates the climatology generation process.
+
+To use TRAPS, users need to generate climatology for three TRAPS types: point sources, tiny rivers, and pre-existing LO rivers. Running this script will automatically step through the make_climatology scripts for each of these sources types (so users do not need to independently run three different climatology scripts).
+
+---
 ## make_climatology scripts
 
 The climatology scripts condense the 1999-2017 Ecology timeseries data into yearly climatologies for each source. This section describes how these scripts work.

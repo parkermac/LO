@@ -13,7 +13,7 @@ Then, the netCDF files can be referenced to generate climatologies
 Takes about 5-8 minutes to run on my local machine.
 
 To run from ipython:
-run ecology_excel2xarray.py
+run ecology_excel2netCDF.py
 """
 
 #################################################################################

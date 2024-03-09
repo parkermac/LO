@@ -113,7 +113,7 @@ yrday = pd.date_range(start ='1/1/2020', end ='12/31/2020', freq ='D')
 #                          Calculate climatologies                              #
 #################################################################################
 
-print('Calculating climatologies...')
+print('Calculating pre-existing LO river climatologies...')
 
 # loop through all nonpoint sources
 for i,rname in enumerate(LOrivnames_realisticBGC):
@@ -209,7 +209,7 @@ figname = 'LOrivbio_river_summary.png'
 save_path = clim_dir / figname
 fig.savefig(save_path)
 
-print('Climatologies done\n')
+print('Pre-existing LO river climatologies done\n')
 
 #################################################################################
 #                    Plot all individual river climatologies                    #

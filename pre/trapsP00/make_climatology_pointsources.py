@@ -99,7 +99,7 @@ yrday = pd.date_range(start ='1/1/2020', end ='12/31/2020', freq ='D')
 #                          Calculate climatologies                              #
 #################################################################################
 
-print('Calculating climatologies...')
+print('Calculating point source climatologies...')
 
 # loop through all point sources
 for i,wname in enumerate(wwtpnames):
@@ -195,7 +195,7 @@ figname = 'point_source_summary.png'
 save_path = clim_dir / figname
 fig.savefig(save_path)
 
-print('Climatologies done\n')
+print('Point source climatologies done\n')
 
 #################################################################################
 #              Plot all individual point source climatologies                   #
