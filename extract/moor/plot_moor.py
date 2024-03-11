@@ -54,7 +54,7 @@ vn3_list = []
 if 'salt' in VN_list:
     vn3_list += ['salt', 'temp']
 if 'NO3' in VN_list:
-    vn3_list += ['oxygen','NO3']
+    vn3_list += ['TIC','alkalinity']
 if 'u' in VN_list:
     vn3_list += ['u', 'v']
 
