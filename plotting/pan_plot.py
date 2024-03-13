@@ -33,7 +33,7 @@ from lo_tools import Lfun
 parser = argparse.ArgumentParser()
 
 # which run to use
-parser.add_argument('-gtx', '--gtagex', default='cas6_traps2_x2b', type=str)
+parser.add_argument('-gtx', '--gtagex', default='cas7_t0_x4b', type=str)
 parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
 # 2 = Ldir['roms_out2'], etc.
 
