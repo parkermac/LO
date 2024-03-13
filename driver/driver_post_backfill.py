@@ -73,7 +73,8 @@ print(('Post backfill for: %s-%s ' % (ds0, ds1)).center(60,'-'))
 if Ldir['testing'] == True:
     job_list = ['layers1']
 else:
-    job_list = ['layers1']
+    job_list = ['nest_wgh', 'surface1', 'layers1', 'ubc1', 'sequim1', 'critfc1',
+        'daymovie0', 'drifters0', 'archive0']
 
 # loop over all days
 dt = dt0
