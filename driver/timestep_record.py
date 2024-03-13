@@ -19,8 +19,8 @@ from lo_tools import Lfun
 
 parser = argparse.ArgumentParser()
 # which run to use
-parser.add_argument('-gtx', '--gtagex', type=str, default='cas6_v3_lo8b')
-parser.add_argument('-ro', '--roms_out_num', type=int, default=2)
+parser.add_argument('-gtx', '--gtagex', type=str, default='cas7_t0_x4b')
+parser.add_argument('-ro', '--roms_out_num', type=int, default=0)
 # select time period and frequency
 parser.add_argument('-0', '--ds0', type=str, default='2019.07.04')
 parser.add_argument('-1', '--ds1', type=str, default='2019.07.06')
