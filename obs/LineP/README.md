@@ -16,10 +16,10 @@
   
   - ctd: 1956-2023 
   - bottle: 1956-2023
-  - NOTE: **CTD_oxygen** data was missing before year 2004; **bottle** data from the first two methods only contain nutrients **(e.g., N, P, Si)**. If you want to have CARBON varibales **(e.g., DIC, TA)**, try the **3rd** method below
+  - NOTE: **CTD_oxygen** data was missing before year 2004; **bottle** data from the first two methods only contain nutrients **(e.g., N, P, Si)**. If you want to have CARBON variables **(e.g., DIC, TA)**, try the **3rd** method below
 
 
-- the 3rd method to download compiled bottle data is through NCEI (Recommanded): https://www.ncei.noaa.gov/data/oceans/ncei/ocads/metadata/0234342.html.   NOTE: compiled
+- the 3rd method to download compiled bottle data is through NCEI (Recommended): https://www.ncei.noaa.gov/data/oceans/ncei/ocads/metadata/0234342.html.   NOTE: compiled
   
   - ctd: None
   - bottle: 1990-2019
