@@ -50,7 +50,7 @@ Note that we use a sort of cumbersome naming convention for the data columns, in
 Here is an example of the contents of one of the Ecology DataFrames:
 
 ```
-cid       time        lat         lon    name  ...  NO2 (uM)  NH4 (uM)  PO4 (uM)  SiO4 (uM)  cruise
+       cid       time        lat         lon    name  ...  NO2 (uM)  NH4 (uM)  PO4 (uM)  SiO4 (uM)  cruise
 0      0.0 2017-01-11  47.092040 -122.918197  BUD005  ...  0.388398  0.668405  2.632084  84.497398    None
 1      0.0 2017-01-11  47.092040 -122.918197  BUD005  ...  0.340418  0.726122  2.629354  82.600006    None
 2      0.0 2017-01-11  47.092040 -122.918197  BUD005  ...  0.348933  0.628245  2.605122  82.263443    None
@@ -73,21 +73,41 @@ Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/park
 - **dfo1** Canadian data from a large database created by Susan Allen's group. The original data came from: https://data.cioospacific.ca/erddap/index.html. This replaces the older "dfo" that was parsed from an SQL database.
   - bottle 1930-2021 with gaps in the early years, has some Chl data
   - ctd 1965-2021
+
 - **ecology** Department of Ecology monthly repeat station data. Covers 2008-2017 for bottles and 2008-2019 for ctd casts. 300-400 casts per year, monthly at 39 stations in Puget Sound and the coastal estuaries. Processing note: I added SA, CT, and DO (uM) to the processed bottle files using values interpolated from ctd casts.
   - bottle 2008-2017, added SA, CT, DO from ctd casts
   - ctd 2008-2019, has some Chl data
+
 - **nceiSalish** Data from WOAC and other cruises, mainly in Puget sound and JdF. The original data came from: https://www.ncei.noaa.gov/access/ocean-carbon-acidification-data-system/oceans/SalishCruise_DataPackage.html.
   - bottle 2008-2018, good DIC and TA, 40-199 casts per year
   - ctd None
+
 - **nceiCoastal** Data from WCOA and other North American coastal cruises with carbon data. Good for carbon data on the WA/OR shelf. The original data came from: https://www.ncei.noaa.gov/data/oceans/ncei/ocads/metadata/0219960.html.
-  - bottle 2011-2017 in the LO model domain, good DIC and TA, 41-56 casts per year
+  - bottle 2011-2017 and 2021 (2021 processed by Yifan Zhu at U Conn) in the LO model domain, good DIC and TA, 41-56 casts per year
   - ctd None
-- **collias** Historic Data collected by Eugene Collias. 368,858 results from the years 1932 until 1975. Data was collected using approximately 15-20 different methods and captures 9 different parameters. Data came from https://apps.ecology.wa.gov/eim/search/Eim/EIMSearchResults.aspx?ResultType=EIMStudyTab&LocationWRIAs=2 (Select the dropdown menu for Collias and then select Download. This tirggers an EIM request and eventually they get it to you.) And here is a source of more information: https://apps.ecology.wa.gov/eim/search/Detail/Detail.aspx?DetailType=Study&SystemProjectId=99971885 with links to some great studies.
+
+- **collias** Historic Data collected by Eugene Collias. 368,858 results from the years 1932 until 1975. Data was collected using approximately 15-20 different methods and captures 9 different parameters. Data came from https://apps.ecology.wa.gov/eim/search/Eim/EIMSearchResults.aspx?ResultType=EIMStudyTab&LocationWRIAs=2 (Select the dropdown menu for Collias and then select Download. This triggers an EIM request and eventually they get it to you.) And here is a source of more information: https://apps.ecology.wa.gov/eim/search/Detail/Detail.aspx?DetailType=Study&SystemProjectId=99971885 with links to some great studies.
   - bottle 1932-1975. Missing 1943-1948 and 1973. Good SA, CT and DO, then less for NO3, NO2, and SiO4.
   - ctd None.
 
-Notes on usage:
-- 2017 is a good year for validation, with bottle coverage from all four sources.
+- **LineP** Historic Data collected three times a year at Line P off coastal Canadian waters off Vancouver island. Processed by Yifan Zhu. See the README in the associated folder for details.
+  - bottle 1956-2023 (1990-2019 have carbon variables)
+  - ctd 1956-2023
+
+- **nceiPNW** Historic Data collected in Pacific Northwest region by Department of Fisheries and Oceans Canada (DFO). Processed by Yifan Zhu. See the README in the associated folder for details.
+  - bottle 1985-2017
+  - ctd 1985-2017
+
+- **NHL** Historic Data collected nearly bi-weekly at Newport Hydrography Line off Oregon using CTD. Data are publicly available at https://doi.org/10.5281/zenodo.5814071  (Select "Newport_Hydrographic_Line_Data_1997_2021.zip" and then select Download). Processed by Yifan Zhu. See the README in the associated folder for details.
+  - bottle None
+  - ctd 1997-2021. Missing oxygen data between 1997-July 1998.
+
+- **WOD** Historic Data collected in Pacific North West from the World Ocean Database. Data are publicly available at https://www.ncei.noaa.gov/products/world-ocean-database.  Processed by Yifan Zhu. See the README in the associated folder for details.
+  - ctd None
+  - bottle 1993-2014
+
+#### Notes on usage [2024.03.21 these notes need to be updated to reflect new additions to the collection: LineP, nceiPNW, NHL, and WOD]:
+- 2017 is a good year for validation, with bottle coverage from several sources.
 - If you are interested in Chl, you will only find it in dfo1-bottle and ecology-ctd.
 - For ctd data (much finer vertical resolution, and potentially more info about bottom hypoxia) there are only two sources: dfo1 and ecology.
 - For carbon data (DIC and TA) you will only find them in nceiSalish and nceiCoastal, hence no coverage in Canadian waters.
@@ -131,7 +151,7 @@ Attributes:
 #### Sources that have been processed up to these specifications
 
 - **orca** ORCA profiling mooring data from NANOOS. Six moorings around Puget Sound, processed into regular daily profiles (with gaps) by Erin Broatch. See Erin's report in LO_data/obs/ORCA/orca_report.pdf for the original source at NANOOS, however the link to that source is broken, but this should give the same access: https://nwem.apl.washington.edu/prod_DataReq.shtml#. Now (as of late 2023) there is also a new automated server at https://data.nanoos.org/erddap/tabledap/index.html?page=1&itemsPerPage=1000. Eventually we will want to do the processing from that data source.
- - time range 2005 to the end of 2021 (at most), daily, with many gaps
- - variables: SA, CT, DO (uM), and SIG0 are pretty robust. NO3 (uM), FLUOR, and PAR are carried along in the processing, but I am not sure they can be trusted, or that the even have much data.
- - There is more plotting code to help explore the data in different ways in LO/obs/orca.
+  - time range 2005 to the end of 2021 (at most), daily, with many gaps
+  - variables: SA, CT, DO (uM), and SIG0 are pretty robust. NO3 (uM), FLUOR, and PAR are carried along in the processing, but I am not sure they can be trusted, or that the even have much data.
+  - There is more plotting code to help explore the data in different ways in LO/obs/orca.
 ![ORCA Mooring Data](readme_plots/orca.png)
