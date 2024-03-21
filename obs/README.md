@@ -155,3 +155,16 @@ Attributes:
   - variables: SA, CT, DO (uM), and SIG0 are pretty robust. NO3 (uM), FLUOR, and PAR are carried along in the processing, but I am not sure they can be trusted, or that the even have much data.
   - There is more plotting code to help explore the data in different ways in LO/obs/orca.
 ![ORCA Mooring Data](readme_plots/orca.png)
+
+- **ocnms** Olympic Coast National Marine Sanctuary (OCNMS) Moorings. Variables for the 10 current, OCNMS moorings are processed in LO format. Processed by Kate Hewett. See the README in the associated folder for details.
+  - time range 2011 - 2023 (mainly spring and summer) 
+  - variables: hourly averages of 10 minute mooring data. Saved variables include: SA, SP, IT, CT, DO, SIG0, and P.
+  - **OCNMS nomenclature and site designations:** Moored sensors were first deployed in 2000 and ~10 lightweight, coastal moorings are currently maintained from Cape Elizabeth (“CE”) to Makah Bay (“MB”) at depths of ~15m, ~42m, or ~27m.
+  - **North to south sites:**
+    - MB = Makah Bay 
+    - CA = Cape Alava
+    - TH = Teahwhit Head
+    - KL = Kalaloch
+    - CE = Cape Elizabeth
+  - **Naming convention:** The mooring depth is listed with its site id, e.g., CE042 is placed at ~42m; KL027 at ~27m; and CE015 is placed at ~15m.
+![OCNMS Mooring Data](readme_plots/ocnms_2011_2023.png)
