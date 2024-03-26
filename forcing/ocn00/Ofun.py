@@ -17,7 +17,7 @@ import Ofun_CTD
 from lo_tools import Lfun, zfun, zrfun
 from lo_tools import hycom_functions as hfun
 
-verbose = False
+verbose = True
 
 def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
     """
