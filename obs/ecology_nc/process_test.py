@@ -13,11 +13,20 @@ from lo_tools import plotting_functions as pfun
 Ldir = Lfun.Lstart()
 
 in_dir = Ldir['data'] / 'obs' / 'ecology_nc'
-fn = in_dir / 'test2002.nc'
+# fn = in_dir / 'test2002.nc'
+fn = in_dir / 'test2005.nc'
 
 ds = xr.open_dataset(fn)
 
+for vn in ds.data_vars:
+    try:
+        print('%s: %s' % (vn, ds[vn].units))
+    except AttributeError:
+        print('%s: None' % (vn))
+
 """
+These results are for test2002.nc.
+
 <xarray.Dataset>
 Dimensions:         (obs: 34015, profiles: 306, stations: 41)
 Coordinates:
@@ -63,68 +72,57 @@ sta_name = [item.decode() for item in ds.Station.values]
 # These have dimension (profiles) 306
 pro_sta_num = ds.station_index.values # array with values 1 to 52 {*}
 pro_num = ds.profile_index.values     # array with values from 1249 to 1554 {**}
-# pro_date = [item.decode() for item in ds.FieldDate.values]
-# pro_date_dti = pd.to_datetime(pro_date) # DatetimeIndex
 pro_date_dti = pd.to_datetime(ds.FieldDate.values)
 
 # These have dimension (obs) 34015
 obs_pro_num = ds.obs_index.values     # array with values from 1249 to 1554 {**}
-# obs_dt = [item.decode() for item in ds.UTCDatetime.values]
-# obs_dti = pd.to_datetime(obs_dt) # a DatetimeIndex
 obs_dti = pd.to_datetime(ds.UTCDatetime.values)
-temp = ds.Temp.values
-salt = ds.Salinity.values
-NO3 = ds.NO3.values
 z = -ds.Depth.values
+
+v_dict = dict()
+vn_list = ['Temp','Salinity','DOAdjusted','NO3','NH4']
+for vn in vn_list:
+    v_dict[vn] = ds[vn].values
 
 plt.close('all')
 for N in range(0,len(pro_num)):
-
-    this_pro_num = pro_num[N]
-    this_sta_num = pro_sta_num[N]
-    this_dstr = pro_date_dti[N].strftime('%Y.%m.%d')
-
-    # get other info about this cast
-    sta_ind = np.argwhere(sta_num==this_sta_num)
-    sta_ind = sta_ind[0][0]
-    this_sta_name = sta_name[sta_ind]
-    this_lon = sta_lon[sta_ind]
-    this_lat = sta_lat[sta_ind]
 
     # inspect selected profiles
 
     NN = 100
     if np.mod(N,NN)==0:
 
+        this_pro_num = pro_num[N]
+        this_sta_num = pro_sta_num[N]
+        this_dstr = pro_date_dti[N].strftime('%Y.%m.%d')
+
+        # get other info about this cast
+        sta_ind = np.argwhere(sta_num==this_sta_num)
+        sta_ind = sta_ind[0][0]
+        this_sta_name = sta_name[sta_ind]
+        this_lon = sta_lon[sta_ind]
+        this_lat = sta_lat[sta_ind]
+
         mask = obs_pro_num == this_pro_num
         zz = z[mask]
-        tt = temp[mask]
-        ss = salt[mask]
-        nn = NO3[mask]
+
         ti = obs_dti[mask]
         this_ti0_dstr = ti[0].strftime('%Y.%m.%d')
 
-        pfun.start_plot(figsize=(11,8))
+        pfun.start_plot(figsize=(16,8))
         fig = plt.figure()
-
-        ax = fig.add_subplot(131)
-        ax.plot(tt,zz,'-ob')
-        ax.set_title('T')
-        ax.set_ylim(np.floor(zz.min()),0)
-
-        ax = fig.add_subplot(132)
-        ax.plot(ss,zz,'-or')
-        ax.set_title('S')
-        ax.set_ylim(np.floor(zz.min()),0)
-
-        ax = fig.add_subplot(133)
-        ax.plot(nn,zz,'og')
-        ax.set_title('NO3')
-        ax.set_ylim(np.floor(zz.min()),0)
-
-        ax.text(.05,.5,'pro_num=%d\nsta_num=%2d\nsta_name=%s\n(lon,lat)=(%0.1f, %0.1f)\nFieldDate=%s\nUTCDatetime=%s' %
-            (this_pro_num, this_sta_num, this_sta_name, this_lon, this_lat, this_dstr, this_ti0_dstr),
-            transform=ax.transAxes)
+        ncol = len(vn_list)
+        ii = 1
+        for vn in vn_list:
+            ax = fig.add_subplot(1,ncol,ii)
+            ax.plot(v_dict[vn][mask],zz,'ob')
+            ax.set_title(vn)
+            ax.set_ylim(np.floor(zz.min()),0)
+            if ii == ncol:
+                ax.text(.05,.5,'pro_num=%d\nsta_num=%2d\nsta_name=%s\n(lon,lat)=(%0.1f, %0.1f)\nFieldDate=%s\nUTCDatetime=%s' %
+                    (this_pro_num, this_sta_num, this_sta_name, this_lon, this_lat, this_dstr, this_ti0_dstr),
+                    transform=ax.transAxes)
+            ii += 1
 
         plt.show()
         pfun.end_plot()
