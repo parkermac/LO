@@ -102,7 +102,7 @@ conda env create -f loenv.yml > env.log &
 ```
 This may take a half hour or so, which is why I added the `> env.log &` at the end of the command. You can look in the .yml file to see what is being installed.  It even adds the non-python nco toolbox and ffmpeg.  It also adds LO/lo_tools as a local "package" so that when you are in (loenv) you can access any of the modules in LO/lo_tools/lo_tools with a line in your python code like `from lo_tools import zfun`.  Instructions for a simple approach to making your own local packages can be found [HERE](https://pythonchb.github.io/PythonTopics/where_to_put_your_code.html).
 
-If you like you can make your own .yml and make your own environment, especially if you want to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package. One question I have is, if you made your own `LO_user/loenv.yml` file do you need to set a path in the pip line that installs the lo_tools package (see instructions below, under: Creating your own environment).
+If you like you can make your own .yml and make your own environment, especially if you want to add additional packages.  The LO code does not need to be run in (loenv) but it does assume that lo_tools is an installed local package. Tf you made your own `LO_user/loenv.yml` file you need to change the path in the pip line that installs the lo_tools package (see instructions below, under: Creating your own environment).
 
 Then if you want to use this environment all the time add this line:
 ```
@@ -303,5 +303,5 @@ Here is some info on the various folders in LO, and how they relate to the namin
 | tracker: particle tracking code   |   |
 | daymovie: code to make the daily forecast movies for the website   |   |
 | notes: README's on various topics   |   |
-| obs:   |   |
-| pre:   |   |
+| obs: Code for preprocessing of observational datasets into "LO Standard" format | obs/[dataset name] |
+
