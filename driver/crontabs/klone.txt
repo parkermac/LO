@@ -1,7 +1,8 @@
 LANG=en-US.UTF-8
 LOd="/gscratch/macc/parker/LO/driver"
 
-00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron.log
+# 00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron.log
+00 02 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron.log
 00 08 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron_2.log
 00 17 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron_3.log
 
