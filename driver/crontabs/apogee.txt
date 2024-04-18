@@ -4,7 +4,7 @@ HOSTNAME=apogee
 # 00 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f tide00 > $LOd/tide00_new.log
 # 05 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f traps2 > $LOd/traps2_new.log
 # 20 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f ocn00 > $LOd/ocn00_new.log
-55 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f atm00 > $LOd/atm00_new.log
+55 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f atm00 > $LOd/atm00_new_orig.log
 
 # EARLY versions
 01 00 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f tide00 > $LOd/tide00_new.log
