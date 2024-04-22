@@ -1,16 +1,16 @@
 LOd=/dat1/parker/LO/driver
 HOSTNAME=apogee
 
-# 00 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f tide00 > $LOd/tide00_new.log
-# 05 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f traps2 > $LOd/traps2_new.log
-# 20 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f ocn00 > $LOd/ocn00_new.log
-55 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f atm00 > $LOd/atm00_new_orig.log
+00 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f tide00 > $LOd/tide00_new.log
+05 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f traps2 > $LOd/traps2_new.log
+20 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f ocn00 > $LOd/ocn00_new.log
+55 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f atm00 > $LOd/atm00_new.log
 
 # EARLY versions
-01 00 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f tide00 > $LOd/tide00_new.log
-03 00 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f traps2 > $LOd/traps2_new.log
-20 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f ocn00 > $LOd/ocn00_new.log
-00 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f atm00 > $LOd/atm00_new.log
+# 01 00 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f tide00 > $LOd/tide00_new.log
+# 03 00 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f traps2 > $LOd/traps2_new.log
+# 20 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f ocn00 > $LOd/ocn00_new.log
+# 00 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f atm00 > $LOd/atm00_new.log
 
 00 05 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas6_traps2_x2b -ro 0 -r forecast < /dev/null > $LOd/post1.log
 
