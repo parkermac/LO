@@ -2,14 +2,13 @@
 Driver to make tidally averaged files.
 
 Test on mac:
-run extract_lowpass -gtx cas6_v0_live -ro 0 -0 2019.07.04 -1 2019.07.05 -test True -Nproc 4
-run extract_lowpass -gtx cas6_v0_live -ro 0 -0 2019.07.04 -1 2019.07.04 -test False -Nproc 4
+run extract_lowpass -gtx cas7_t0_x4b -0 2017.07.04 -1 2017.07.04 -Nproc 4 -test True
 
 Performance:
 
 mac
--Nproc 4 = 3-4 min per day: BEST CHOICE
--Nproc 10 bogs down my 4-core mac.
+-Nproc 4 = 1.7 min per day
+-Nproc 10 bogs down my 11-core mac, 2.6 minutes
 
 perigee
 -Nproc 20 = 2.5 min per day
@@ -47,17 +46,17 @@ lat_psi = S_ds.lat_psi
 S_ds.close()
 
 # loop over all days
-dt00 = dt0
-while dt00 <= dt1:
-    ds00 = dt00.strftime(Lfun.ds_fmt)
-    print('\n'+ds00)
+verbose = 'True'
+dtlp = dt0
+# dtlp is the day at the middle of the lowpass
+while dtlp <= dt1:
+    dslp = dtlp.strftime(Lfun.ds_fmt)
+    print('\n'+dslp)
     # temporary file output location
-    temp_out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'lowpass' / ('temp_' + ds00)
+    temp_out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'lowpass' / ('temp_' + dslp)
     Lfun.make_dir(temp_out_dir, clean=True)
     # final file output location
-    dt_out = dt00 + timedelta(days=1)
-    ds_out = dt_out.strftime(Lfun.ds_fmt)
-    out_dir = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + ds_out)
+    out_dir = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + dslp)
 
     # Start of chunks loop for this day.
     tt0 = time()
@@ -77,8 +76,9 @@ while dt00 <= dt1:
         # sys.stdout.flush()
         cmd_list = ['python', 'lp_worker.py',
                     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
-                    '-0', ds00, '-ii0', str(cc0), '-ii1', str(cc1),
-                    '-fnum', str(fnum), '-test', str(Ldir['testing'])]
+                    '-dslp', dslp, '-ii0', str(cc0), '-ii1', str(cc1),
+                    '-fnum', str(fnum), '-test', str(Ldir['testing']), '-v', verbose]
+        verbose = 'False' # turn off verbose after the first call
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         proc_list.append(proc)
         # Nproc controls how many ncks subprocesses we allow to stack up
@@ -88,6 +88,8 @@ while dt00 <= dt1:
                 stdout, stderr = proc.communicate()
                 if len(stderr) > 0:
                     print(stderr.decode())
+                if len(stdout) > 0:
+                    print(stdout.decode())
             # make sure everyone is finished before continuing
             proc_list = []
         fnum += 1
@@ -103,7 +105,7 @@ while dt00 <= dt1:
             lp_full = (lp_full + ds).compute()
     # add a time dimension
     lp_full = lp_full.expand_dims('ocean_time')
-    lp_full['ocean_time'] = (('ocean_time'), pd.DatetimeIndex([dt_out + timedelta(days=0.5)]))
+    lp_full['ocean_time'] = (('ocean_time'), pd.DatetimeIndex([dtlp + timedelta(days=0.5)]))
     # add z fields
     # NOTE: this only works if you have h, zeta, and salt as saved fields
     lp_full['h'] = h
@@ -130,4 +132,4 @@ while dt00 <= dt1:
     
     print(' - Time to make tidal average = %0.1f minutes' % ((time()-tt0)/60))
     
-    dt00 = dt00 + timedelta(days=1)
+    dtlp = dtlp + timedelta(days=1)

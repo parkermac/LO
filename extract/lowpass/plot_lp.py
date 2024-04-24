@@ -9,10 +9,10 @@ import xarray as xr
 import matplotlib.pyplot as plt
 from lo_tools import plotting_functions as pfun
 
-Ldir = Lfun.Lstart(gridname='cas6', tag='v0', ex_name = 'live')
+Ldir = Lfun.Lstart(gridname='cas7', tag='t0', ex_name = 'x4b')
 
-his_fn = Ldir['roms_out'] / Ldir['gtagex'] / 'f2019.07.05' / 'ocean_his_0013.nc'
-lp_fn = Ldir['roms_out'] / Ldir['gtagex'] / 'f2019.07.05' / 'lowpassed.nc'
+his_fn = Ldir['roms_out'] / Ldir['gtagex'] / 'f2017.07.04' / 'ocean_his_0013.nc'
+lp_fn = Ldir['roms_out'] / Ldir['gtagex'] / 'f2017.07.04' / 'lowpassed.nc'
 
 his_ds = xr.open_dataset(his_fn)
 lp_ds = xr.open_dataset(lp_fn)
@@ -24,7 +24,7 @@ vmax = 33
 cmap='Spectral_r'
 
 plt.close('all')
-pfun.start_plot(figsize=(18,12))
+pfun.start_plot(figsize=(14,8))
 fig = plt.figure()
 
 ax = fig.add_subplot(121)
