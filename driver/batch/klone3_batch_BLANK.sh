@@ -10,8 +10,8 @@
 #SBATCH --ntasks-per-node=$cores_per_node$
 
 ## Walltime 
-## SBATCH --time=02:00:00
-#SBATCH --time=01:20:00
+#SBATCH --time=02:00:00
+## SBATCH --time=01:20:00
 
 ## Memory per node
 #SBATCH --mem=128G
