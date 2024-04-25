@@ -1,15 +1,17 @@
 """
 Driver to make tidally averaged files.
 
+It runs over a user-specified range of days for a given gtagex. For each day the
+input is 71 hourly files centered on Noon UTC of that day (so using files from the
+day before and the day after). The output is a 
+
 Test on mac:
 run extract_lowpass -gtx cas7_t0_x4b -0 2017.07.04 -1 2017.07.04 -Nproc 4 -test True
 
 Performance:
-
 mac
--Nproc 4 = 1.7 min per day
+-Nproc 4 = 1.7 min per day: BEST CHOICE
 -Nproc 10 bogs down my 11-core mac, 2.6 minutes
-
 perigee
 -Nproc 20 = 2.5 min per day
 -Nproc 10 = 2.0 min per day: BEST CHOICE
@@ -115,7 +117,7 @@ while dtlp <= dt1:
     lp_full.z_rho.attrs = {'units':'m', 'long_name': 'vertical position on s_rho grid, positive up'}
     lp_full.z_w.attrs = {'units':'m', 'long_name': 'vertical position on s_w grid, positive up'}
     hh = h.values
-    zeta = lp_full.zeta[0,:,:].values
+    zeta = lp_full.zeta[0,:,:].values # why is the first index 0? maybe a singletn dimension
     z_rho, z_w = zrfun.get_z(hh, zeta, S)
     lp_full['z_rho'][0,:,:,:] = z_rho
     lp_full['z_w'][0,:,:,:] = z_w
