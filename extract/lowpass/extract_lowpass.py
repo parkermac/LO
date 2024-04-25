@@ -1,9 +1,22 @@
 """
 Driver to make tidally averaged files.
 
-It runs over a user-specified range of days for a given gtagex. For each day the
-input is 71 hourly files centered on Noon UTC of that day (so using files from the
-day before and the day after). The output is a 
+This runs over a user-specified range of days for a given gtagex. For each day the
+input is 71 hourly files centered on Noon UTC of that day (hence using files from the
+day before and the day after). The output is a single NetCDF file called lowpassed.nc
+that is placed in the same LO_roms/[gtagex]/[f_string] folder that the central history
+files came from. The output file format is very similar to a history file and should
+be ready for plotting and extraction just like history files (untested).
+
+This should work even on day 2 of a new run (where we would be missing the 0025 file from
+the day before day 1) because we trim the first and last entries from fm_list in lp_worker.py.
+
+To make the job faster this driver splits the work up into Nproc simultaneous subprocesses
+which are instances of lp_worker. Each of these works through a subset of the files, multiplying
+selected fields by a filter weight and adding them up.
+
+The lp_worker code does its best to automate the selection of fields to low-pass, including
+atm fields if they are there and bio fields for old and new code versions if they are there.
 
 Test on mac:
 run extract_lowpass -gtx cas7_t0_x4b -0 2017.07.04 -1 2017.07.04 -Nproc 4 -test True
@@ -14,7 +27,7 @@ mac
 -Nproc 10 bogs down my 11-core mac, 2.6 minutes
 perigee
 -Nproc 20 = 2.5 min per day
--Nproc 10 = 2.0 min per day: BEST CHOICE
+-Nproc 10 = 2.0 min per day: BEST CHOICE (12 hours per year)
 
 """
 
@@ -66,8 +79,8 @@ while dtlp <= dt1:
     # Always split the job into Nproc parts. It won't get any faster
     # by using more chunks.
     ccas = np.array_split(cca, Ldir['Nproc'])
-    if Ldir['testing']:
-        ccas = ccas[:2]
+    # if Ldir['testing']:
+    #     ccas = ccas[:2]
     fnum = 0
     proc_list = []
     N = len(ccas)
@@ -117,7 +130,8 @@ while dtlp <= dt1:
     lp_full.z_rho.attrs = {'units':'m', 'long_name': 'vertical position on s_rho grid, positive up'}
     lp_full.z_w.attrs = {'units':'m', 'long_name': 'vertical position on s_w grid, positive up'}
     hh = h.values
-    zeta = lp_full.zeta[0,:,:].values # why is the first index 0? maybe a singletn dimension
+    zeta = lp_full.zeta[0,:,:].values # time is a singleton dimension, which we drop here for the
+        # purpose of calculating the z fields from low-passed zeta.
     z_rho, z_w = zrfun.get_z(hh, zeta, S)
     lp_full['z_rho'][0,:,:,:] = z_rho
     lp_full['z_w'][0,:,:,:] = z_w
@@ -128,9 +142,10 @@ while dtlp <= dt1:
     lp_full.to_netcdf(out_fn)
     lp_full.close()
     
-    # tidying up
-    Lfun.make_dir(temp_out_dir, clean=True)
-    temp_out_dir.rmdir()
+    if not Ldir['testing']:
+        # tidying up
+        Lfun.make_dir(temp_out_dir, clean=True)
+        temp_out_dir.rmdir()
     
     print(' - Time to make tidal average = %0.1f minutes' % ((time()-tt0)/60))
     
