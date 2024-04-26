@@ -148,5 +148,6 @@ while dtlp <= dt1:
         temp_out_dir.rmdir()
     
     print(' - Time to make tidal average = %0.1f minutes' % ((time()-tt0)/60))
+    sys.stdout.flush()
     
     dtlp = dtlp + timedelta(days=1)
