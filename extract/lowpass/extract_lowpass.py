@@ -56,8 +56,14 @@ S_fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + ds0) / 'ocean_his_0002.nc'
 S = zrfun.get_basic_info(S_fn, only_S=True)
 S_ds = xr.open_dataset(S_fn)
 h = S_ds.h
-lon_psi = S_ds.lon_psi
-lat_psi = S_ds.lat_psi
+lon_psi = S_ds.lon_psi.values
+lat_psi = S_ds.lat_psi.values
+# save masks
+mask_dict = dict()
+for grd in ['rho','u','v','psi']:
+    mask_dict[grd] = S_ds['mask_'+grd].values
+pm = S_ds.pm.values
+pn = S_ds.pn.values
 S_ds.close()
 
 # loop over all days
@@ -135,8 +141,13 @@ while dtlp <= dt1:
     z_rho, z_w = zrfun.get_z(hh, zeta, S)
     lp_full['z_rho'][0,:,:,:] = z_rho
     lp_full['z_w'][0,:,:,:] = z_w
-    lp_full.coords['lon_psi'] = (('eta_psi','xi_psi'), lon_psi.values)
-    lp_full.coords['lat_psi'] = (('eta_psi','xi_psi'), lat_psi.values)
+    lp_full.coords['lon_psi'] = (('eta_psi','xi_psi'), lon_psi)
+    lp_full.coords['lat_psi'] = (('eta_psi','xi_psi'), lat_psi)
+    # add masks (what happens with WETDRY?)
+    for grd in ['rho','u','v','psi']:
+        lp_full['mask_'+grd] = (('eta_'+grd,'xi_'+grd), mask_dict[grd])
+    lp_full['pm'] = (('eta_rho','xi_rho'), pm)
+    lp_full['pn'] = (('eta_rho','xi_rho'), pn)
     out_fn = out_dir / 'lowpassed.nc'
     out_fn.unlink(missing_ok=True)
     lp_full.to_netcdf(out_fn)

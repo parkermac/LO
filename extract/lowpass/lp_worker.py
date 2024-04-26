@@ -98,7 +98,7 @@ if Ldir['testing']:
         print('Testing')
         print('- variables that would have been processed:')
         print(vn_list)
-    vn_list = ['h','zeta','salt']
+    vn_list = ['h','zeta','salt','temp','u','v']
 
 for ii in range(Ldir['ii0'], Ldir['ii1']+1):
     ds = xr.open_dataset(fn_list[ii])
