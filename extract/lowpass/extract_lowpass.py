@@ -25,9 +25,8 @@ Performance:
 mac
 -Nproc 4 = 1.7 min per day: BEST CHOICE
 -Nproc 10 bogs down my 11-core mac, 2.6 minutes
-perigee
--Nproc 20 = 2.5 min per day
--Nproc 10 = 2.0 min per day: BEST CHOICE (12 hours per year)
+apogee
+-Nproc 10 = 2.6 min per day: BEST CHOICE (16 hours per year)
 
 """
 
