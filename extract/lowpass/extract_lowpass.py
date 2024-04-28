@@ -6,7 +6,7 @@ input is 71 hourly files centered on Noon UTC of that day (hence using files fro
 day before and the day after). The output is a single NetCDF file called lowpassed.nc
 that is placed in the same LO_roms/[gtagex]/[f_string] folder that the central history
 files came from. The output file format is very similar to a history file and should
-be ready for plotting and extraction just like history files (untested).
+be ready for plotting and extraction just like history files.
 
 This should work even on day 2 of a new run (where we would be missing the 0025 file from
 the day before day 1) because we trim the first and last entries from fm_list in lp_worker.py.
@@ -50,21 +50,6 @@ ds0 = Ldir['ds0']
 ds1 = Ldir['ds1']
 dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
 dt1 = datetime.strptime(ds1, Lfun.ds_fmt)
-
-# get the S dict for future use
-S_fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + ds0) / 'ocean_his_0002.nc'
-S = zrfun.get_basic_info(S_fn, only_S=True)
-S_ds = xr.open_dataset(S_fn)
-h = S_ds.h
-lon_psi = S_ds.lon_psi.values
-lat_psi = S_ds.lat_psi.values
-# save masks
-mask_dict = dict()
-for grd in ['rho','u','v','psi']:
-    mask_dict[grd] = S_ds['mask_'+grd].values
-pm = S_ds.pm.values
-pn = S_ds.pn.values
-S_ds.close()
 
 # loop over all days
 verbose = 'True'
@@ -127,27 +112,25 @@ while dtlp <= dt1:
     # add a time dimension
     lp_full = lp_full.expand_dims('ocean_time')
     lp_full['ocean_time'] = (('ocean_time'), pd.DatetimeIndex([dtlp + timedelta(days=0.5)]))
-    # add z fields
-    # NOTE: this only works if you have h, zeta, and salt as saved fields
-    lp_full['h'] = h
-    NT, N, NR, NC = lp_full.salt.shape
-    lp_full.update({'z_rho':(('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), np.nan*np.ones((NT, N, NR, NC)))})
-    lp_full.update({'z_w':(('ocean_time', 's_w', 'eta_rho', 'xi_rho'), np.nan*np.ones((NT, N+1, NR, NC)))})
-    lp_full.z_rho.attrs = {'units':'m', 'long_name': 'vertical position on s_rho grid, positive up'}
-    lp_full.z_w.attrs = {'units':'m', 'long_name': 'vertical position on s_w grid, positive up'}
-    hh = h.values
-    zeta = lp_full.zeta[0,:,:].values # time is a singleton dimension, which we drop here for the
-        # purpose of calculating the z fields from low-passed zeta.
-    z_rho, z_w = zrfun.get_z(hh, zeta, S)
-    lp_full['z_rho'][0,:,:,:] = z_rho
-    lp_full['z_w'][0,:,:,:] = z_w
-    lp_full.coords['lon_psi'] = (('eta_psi','xi_psi'), lon_psi)
-    lp_full.coords['lat_psi'] = (('eta_psi','xi_psi'), lat_psi)
-    # add masks (what happens with WETDRY?)
-    for grd in ['rho','u','v','psi']:
-        lp_full['mask_'+grd] = (('eta_'+grd,'xi_'+grd), mask_dict[grd])
-    lp_full['pm'] = (('eta_rho','xi_rho'), pm)
-    lp_full['pn'] = (('eta_rho','xi_rho'), pn)
+
+    # Add other fields to make this easy to use with plotting and extraction tools
+    # in the same way as history files. The xarray copy() method returns everything,
+    # including dimensions and attributes.
+    his_fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + ds0) / 'ocean_his_0002.nc'
+    ds = xr.open_dataset(his_fn)
+    for vn in ['rho','u','v','psi']:
+        # note that we have to be explicit for coords
+        lp_full.coords['lon_'+vn] = ds.coords['lon_'+vn].copy()
+        lp_full.coords['lat_'+vn] = ds.coords['lat_'+vn].copy()
+    for vn in ['rho','u','v','psi']:
+        lp_full['mask_'+vn] = ds['mask_'+vn].copy()
+    for vn in ['s_rho','s_w']:
+        lp_full.coords[vn] = ds.coords[vn].copy()
+    for vn in ['h','hc','Cs_r','Cs_w','Vtransform','pm','pn']:
+        lp_full[vn] = ds[vn].copy()
+    ds.close()
+
+    # save output
     out_fn = out_dir / 'lowpassed.nc'
     out_fn.unlink(missing_ok=True)
     lp_full.to_netcdf(out_fn)

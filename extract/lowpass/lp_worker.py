@@ -69,7 +69,7 @@ vnl1 = [vn for vn in vnl0 if 'time' in ds[vn].attrs.keys()]
 ds.close()
 
 # starter list
-vn_list = ['h','zeta','salt','temp','u','v','w']
+vn_list = ['zeta','salt','temp','u','v','w']
 
 # add bio variables if available
 if ('NO3' in vnl1) and ('NH4' not in vnl1): # old bio version
@@ -98,7 +98,7 @@ if Ldir['testing']:
         print('Testing')
         print('- variables that would have been processed:')
         print(vn_list)
-    vn_list = ['h','zeta','salt','temp','u','v']
+    vn_list = ['zeta','salt','temp','u','v']
 
 for ii in range(Ldir['ii0'], Ldir['ii1']+1):
     ds = xr.open_dataset(fn_list[ii])
