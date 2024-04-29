@@ -50,7 +50,7 @@ parser.add_argument('-ro', '--roms_out_num', type=int) # 2 = Ldir['roms_out2'], 
 # select time period and frequency
 parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
-parser.add_argument('-lt', '--list_type', type=str) # list type: hourly, daily, weekly
+parser.add_argument('-lt', '--list_type', type=str) # list type: hourly, daily, weekly, lowpass
 # select job name
 parser.add_argument('-job', type=str) # job name
 # these flags get only surface or bottom fields if True
@@ -142,8 +142,32 @@ lon0, lon1, lat0, lat1 = aa
 ilon0, ilat0 = check_bounds(lon0, lat0)
 ilon1, ilat1 = check_bounds(lon1, lat1)
 
+# do a final check to drop missing variables from the list
+ds = xr.open_dataset(fn_list[0])
+print('Original vn_list:')
+print(' ' + vn_list)
+vn_list = (',').join([item for item in vn_list.split(',') if item in ds.data_vars])
+print('Trimmed vn_list:')
+print(' ' + vn_list)
+ds.close()
+
 # NOTE: ncks indexing is zero-based but is INCLUSIVE of the last point.
 # NOTE: ncks extractions retain singleton dimensions
+
+def messages(mess_str, stdout, stderr):
+    # utility function to help with subprocess errors
+    try:
+        if len(stdout) > 0:
+            print(mess_str)
+            print(stdout.decode())
+    except TypeError:
+        pass
+    try:
+        if len(stderr) > 0:
+            print(mess_str)
+            print(stderr.decode())
+    except TypeError:
+        pass
 
 # naming the final output file
 box_fn_final = out_dir / (Ldir['job'] + bb_str + dd_str + '.nc')
@@ -190,7 +214,8 @@ for this_cca in ccas:
             '-v', vn_list,
             '-d', 'xi_rho,'+str(ilon0)+','+str(ilon1), '-d', 'eta_rho,'+str(ilat0)+','+str(ilat1),
             '-d', 'xi_u,'+str(ilon0)+','+str(ilon1-1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
-            '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0)+','+str(ilat1-1)]
+            '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0)+','+str(ilat1-1),
+            '--mk_rec_dim', 'ocean_time']
         if Ldir['surf']:
             cmd_list1 += ['-d','s_rho,'+str(S['N']-1)]
         elif Ldir['bot']:
@@ -214,7 +239,8 @@ for this_cca in ccas:
         # before we require them all to finish.
         if ((np.mod(ii,Ldir['Nproc']) == 0) and (ii > 0)) or (ii == N-1):
             for proc in proc_list:
-                proc.communicate()
+                stdout, stderr = proc.communicate()
+                messages('ncks messages:', stdout, stderr)
             # make sure everyone is finished before continuing
             proc_list = []
         ii += 1
@@ -245,10 +271,7 @@ for this_cca in ccas:
     cmd_list = ['ncrcat','-p', str(temp_dir), '-O', str(box_fn)]
     proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
-    if len(stdout) > 0:
-        print('\n'+stdout.decode())
-    if len(stderr) > 0:
-        print('\n'+stderr.decode())
+    messages('ncrcat messages:', stdout, stderr)
     print(' Time to concatenate initial extraction = %0.2f sec' % (time()- tt0))
     sys.stdout.flush()
 
@@ -381,12 +404,27 @@ pp2 = Po(['grep','chunk_'], stdin=pp1.stdout, stdout=Pi)
 cmd_list = ['ncrcat','-p', str(out_dir), '-O', str(box_fn_final)]
 proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
-if len(stdout) > 0:
-    print('\n'+stdout.decode())
-if len(stderr) > 0:
-    print('\n'+stderr.decode())
+messages('ncrcat-final messages:', stdout, stderr)
 print(' Time to concatenate chunks = %0.2f sec' % (time()- tt0))
 sys.stdout.flush()
+
+# add attributes
+ds = xr.open_dataset(box_fn_final)
+ds0 = xr.open_dataset(fn_list[0])
+vn_list = list(ds0.data_vars)
+for vn in vn_list:
+    try:
+        long_name = ds0[vn].attrs['long_name']
+        ds[vn].attrs['long_name'] = long_name
+    except KeyError:
+        pass
+    try:
+        units = ds0[vn].attrs['units']
+        ds[vn].attrs['units'] = units
+    except KeyError:
+        pass
+ds.close()
+ds0.close()
 
 # Finale
 print('\nSize of full rho-grid = %s' % (str(G['lon_rho'].shape)))

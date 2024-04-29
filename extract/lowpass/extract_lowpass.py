@@ -127,9 +127,9 @@ while dtlp <= dt1:
         lp_full.coords[vn] = ds.coords[vn].copy()
     for vn in ['f','h','hc','Cs_r','Cs_w','Vtransform','pm','pn']:
         lp_full[vn] = ds[vn].copy()
-    # also add attributes to the lowpassed variables
+
+    # also add attributes
     vn_list = list(lp_full.data_vars)
-    vn_list = [vn for vn in vn_list if 'ocean_time' in lp_full[vn].dims]
     for vn in vn_list:
         try:
             long_name = ds[vn].attrs['long_name']

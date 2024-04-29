@@ -324,6 +324,24 @@ ds.to_netcdf(box_fn, encoding=Enc_dict)
 ds.close()
 print('Time to compress = %0.2f sec' % (time()- tt0))
 
+# add attributes
+ds = xr.open_dataset(box_fn)
+ds0 = xr.open_dataset(fn_list[0])
+vn_list = list(ds0.data_vars)
+for vn in vn_list:
+    try:
+        long_name = ds0[vn].attrs['long_name']
+        ds[vn].attrs['long_name'] = long_name
+    except KeyError:
+        pass
+    try:
+        units = ds0[vn].attrs['units']
+        ds[vn].attrs['units'] = units
+    except KeyError:
+        pass
+ds.close()
+ds0.close()
+
 # clean up
 Lfun.make_dir(temp_dir, clean=True)
 temp_dir.rmdir()
