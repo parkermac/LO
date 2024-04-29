@@ -43,7 +43,7 @@ parser.add_argument('-ro', '--roms_out_num', type=int) # 2 = Ldir['roms_out2'], 
 # select time period and frequency
 parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
-parser.add_argument('-lt', '--list_type', type=str) # list type: hourly, daily, weekly
+parser.add_argument('-lt', '--list_type', type=str)# hourly, daily, weekly, lowpass
 # select job name
 parser.add_argument('-job', type=str) # job name
 # these flags get only surface or bottom fields if True
@@ -141,8 +141,32 @@ lon0, lon1, lat0, lat1 = aa
 ilon0, ilat0 = check_bounds(lon0, lat0)
 ilon1, ilat1 = check_bounds(lon1, lat1)
 
+# do a final check to drop missing variables from the list
+ds = xr.open_dataset(fn_list[0])
+print('Original vn_list:')
+print(' ' + vn_list)
+vn_list = (',').join([item for item in vn_list.split(',') if item in ds.data_vars])
+print('Trimmed vn_list:')
+print(' ' + vn_list)
+ds.close()
+
 # NOTE: ncks indexing is zero-based but is INCLUSIVE of the last point.
 # NOTE: ncks extractions retain singleton dimensions
+
+def messages(mess_str, stdout, stderr):
+    # utility function to help with subprocess errors
+    try:
+        if len(stdout) > 0:
+            print(mess_str)
+            print(stdout.decode())
+    except TypeError:
+        pass
+    try:
+        if len(stderr) > 0:
+            print(mess_str)
+            print(stderr.decode())
+    except TypeError:
+        pass
 
 # do the extractions
 N = len(fn_list)
@@ -159,7 +183,8 @@ for ii in range(N):
         '-v', vn_list,
         '-d', 'xi_rho,'+str(ilon0)+','+str(ilon1), '-d', 'eta_rho,'+str(ilat0)+','+str(ilat1),
         '-d', 'xi_u,'+str(ilon0)+','+str(ilon1-1), '-d', 'eta_u,'+str(ilat0)+','+str(ilat1),
-        '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0)+','+str(ilat1-1)]
+        '-d', 'xi_v,'+str(ilon0)+','+str(ilon1), '-d', 'eta_v,'+str(ilat0)+','+str(ilat1-1),
+        '--mk_rec_dim', 'ocean_time']
     if Ldir['surf']:
         cmd_list1 += ['-d','s_rho,'+str(S['N']-1)]
     elif Ldir['bot']:
@@ -183,7 +208,8 @@ for ii in range(N):
     # before we require them all to finish.
     if ((np.mod(ii,Ldir['Nproc']) == 0) and (ii > 0)) or (ii == N-1):
         for proc in proc_list:
-            proc.communicate()
+            stdout, stderr = proc.communicate()
+            messages('ncks messages:', stdout, stderr)
         # make sure everyone is finished before continuing
         proc_list = []
     ii += 1

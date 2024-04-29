@@ -125,8 +125,22 @@ while dtlp <= dt1:
         lp_full['mask_'+vn] = ds['mask_'+vn].copy()
     for vn in ['s_rho','s_w']:
         lp_full.coords[vn] = ds.coords[vn].copy()
-    for vn in ['h','hc','Cs_r','Cs_w','Vtransform','pm','pn']:
+    for vn in ['f','h','hc','Cs_r','Cs_w','Vtransform','pm','pn']:
         lp_full[vn] = ds[vn].copy()
+    # also add attributes to the lowpassed variables
+    vn_list = list(lp_full.data_vars)
+    vn_list = [vn for vn in vn_list if 'ocean_time' in lp_full[vn].dims]
+    for vn in vn_list:
+        try:
+            long_name = ds[vn].attrs['long_name']
+            lp_full[vn].attrs['long_name'] = long_name
+        except KeyError:
+            pass
+        try:
+            units = ds[vn].attrs['units']
+            lp_full[vn].attrs['units'] = units
+        except KeyError:
+            pass
     ds.close()
 
     # save output

@@ -36,7 +36,7 @@ parser.add_argument('-ro', '--roms_out_num', type=int) # 1 = Ldir['roms_out1'], 
 # select time period and frequency
 parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
-parser.add_argument('-lt', '--list_type', type=str) # list type: hourly or daily
+parser.add_argument('-lt', '--list_type', type=str) # list type: hourly, daily, or lowpass
 # select mooring location and name
 parser.add_argument('-lon', type=float) # longitude
 parser.add_argument('-lat', type=float) # latitude
@@ -148,11 +148,6 @@ def find_good(ilat, ilon, mask):
     if found_good == False:
         print('ERROR: no good nearby point found on mask for ' + mask)
         sys.exit()
-
-ilat_rho, ilon_rho = find_good(ilat, ilon, 'rho')
-if Ldir['get_vel'] or Ldir['get_surfbot']:
-    ilat_u, ilon_u = find_good(ilat_rho, ilon_rho, 'u')
-    ilat_v, ilon_v = find_good(ilat_rho, ilon_rho, 'v')
     
 fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
 
@@ -183,6 +178,26 @@ if Ldir['get_pressure']: # fields used for 1-D pressure analysis
 vn_list = (',').join([item for item in vn_list.split(',') if item in ds.data_vars])
 ds.close()
 
+ilat_rho, ilon_rho = find_good(ilat, ilon, 'rho')
+if (Ldir['get_vel'] or Ldir['get_surfbot']) and ('u' in vn_list) and ('v' in vn_list):
+    ilat_u, ilon_u = find_good(ilat_rho, ilon_rho, 'u')
+    ilat_v, ilon_v = find_good(ilat_rho, ilon_rho, 'v')
+
+def messages(mess_str, stdout, stderr):
+    # utility function to help with subprocess errors
+    try:
+        if len(stdout) > 0:
+            print(mess_str)
+            print(stdout.decode())
+    except TypeError:
+        pass
+    try:
+        if len(stderr) > 0:
+            print(mess_str)
+            print(stderr.decode())
+    except TypeError:
+        pass
+
 tt_ncks = time()
 proc_list = []
 N = len(fn_list)
@@ -196,7 +211,10 @@ for ii in range(N):
         '-v', vn_list,
         '-d', 'xi_rho,'+str(ilon_rho), '-d', 'eta_rho,'+str(ilat_rho),
         '-d', 'xi_u,'+str(ilon_u), '-d', 'eta_u,'+str(ilat_u),
-        '-d', 'xi_v,'+str(ilon_v), '-d', 'eta_v,'+str(ilat_v)]
+        '-d', 'xi_v,'+str(ilon_v), '-d', 'eta_v,'+str(ilat_v),
+        '--mk_rec_dim', 'ocean_time']
+    # The mk_rec_dim flag is new as of 2024.04.29, and was needed for
+    # workgin with the lowpass files.
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
@@ -218,7 +236,8 @@ for ii in range(N):
     Nproc = Ldir['Nproc']
     if ((np.mod(ii,Nproc) == 0) and (ii > 0)) or (ii == N-1):
         for proc in proc_list:
-            proc.communicate()
+            stdout, stderr = proc.communicate()
+            messages('ncks messsages:', stdout, stderr)
         # make sure everyone is finished before continuing
         proc_list = []
 print(' - time for ncks %0.2f sec' % (time()-tt_ncks))
@@ -230,7 +249,8 @@ pp1 = Po(['ls', str(temp_dir)], stdout=Pi)
 pp2 = Po(['grep','moor_temp'], stdin=pp1.stdout, stdout=Pi)
 cmd_list = ['ncrcat','-p', str(temp_dir), '-O',str(moor_fn)]
 proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi)
-proc.communicate()
+stdout, stderr = proc.communicate()
+messages('ncrcat messsages:', stdout, stderr)
 print(' - time for ncrcat %0.2f sec' % (time()-tt_cat))
 
 # add z_coordinates to the file using xarray
