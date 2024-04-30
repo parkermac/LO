@@ -23,10 +23,10 @@ run extract_lowpass -gtx cas7_t0_x4b -0 2017.07.04 -1 2017.07.04 -Nproc 4 -test 
 
 Performance:
 mac
--Nproc 4 = 1.7 min per day: BEST CHOICE
--Nproc 10 bogs down my 11-core mac, 2.6 minutes
+-Nproc 4 = 2.5 min per day: BEST CHOICE
+-Nproc 10 bogs down my 11-core mac
 apogee
--Nproc 10 = 2.6 min per day: BEST CHOICE (16 hours per year)
+-Nproc 10 = 2.6 (check) min per day: BEST CHOICE (16 hours per year)
 
 """
 
@@ -142,13 +142,20 @@ while dtlp <= dt1:
         except KeyError:
             pass
     ds.close()
-
-    # save output
-    out_fn = out_dir / 'lowpassed.nc'
-    out_fn.unlink(missing_ok=True)
-    lp_full.to_netcdf(out_fn)
-    lp_full.close()
     
+    if not Ldir['testing']:
+        # save output
+        out_fn = out_dir / 'lowpassed.nc'
+        out_fn.unlink(missing_ok=True)
+        lp_full.to_netcdf(out_fn, unlimited_dims=['ocean_time'])
+    else:
+        out_fn = temp_out_dir / 'lowpassed.nc'
+        out_fn.unlink(missing_ok=True)
+        lp_full.to_netcdf(out_fn, unlimited_dims=['ocean_time'])
+        ds_test = xr.open_dataset(out_fn)
+    lp_full.close()
+
+
     if not Ldir['testing']:
         # tidying up
         Lfun.make_dir(temp_out_dir, clean=True)

@@ -211,10 +211,14 @@ for ii in range(N):
         '-v', vn_list,
         '-d', 'xi_rho,'+str(ilon_rho), '-d', 'eta_rho,'+str(ilat_rho),
         '-d', 'xi_u,'+str(ilon_u), '-d', 'eta_u,'+str(ilat_u),
-        '-d', 'xi_v,'+str(ilon_v), '-d', 'eta_v,'+str(ilat_v),
+        '-d', 'xi_v,'+str(ilon_v), '-d', 'eta_v,'+str(ilat_v)],
         '--mk_rec_dim', 'ocean_time']
     # The mk_rec_dim flag is new as of 2024.04.29, and was needed for
-    # workgin with the lowpass files.
+    # working with the lowpass files. This problem went away after I made
+    # ocean_time unlimited when saving the lowpassed files:
+    # From extract_lowpass.py:
+    #   lp_full.to_netcdf(out_fn, unlimited_dims=['ocean_time']), but
+    # keeping the fix here does not hurt anything.
     cmd_list1 += ['-O', str(fn), str(out_fn)]
     proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
     proc_list.append(proc)
