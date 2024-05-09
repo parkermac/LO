@@ -2,6 +2,8 @@
 
 ### This is code to do TEF extractions and processing. The code also works on the segments between TEF sections, for example to make volume-integrated budgets of volume, salt and salinity variance.
 
+### _NOTE: This code is obsolete and no longer supported. It has been replaced by LO/extract/tef2, which does the same things but is better in all respects. 2024.05.01._
+
 #### WORKFLOW OVERVIEW
 
 In order to get to where you can run `flux_salt_budget.py` you need to go through two separate workflows because these prepare the independent information at (1) TEF sections, and (2) segments between the sections.

@@ -182,7 +182,7 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=2):
     List items are Path objects
     
     NEW 2023.10.05: for list_type = 'hourly', if you pass his_num = 1
-    it will start with ocean_his_0001.nc on instead of the default which
+    it will start with ocean_his_0001.nc on the first day instead of the default which
     is to start with ocean_his_0025.nc on the day before.
     """
     dt0 = datetime.strptime(ds0, ds_fmt)
