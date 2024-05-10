@@ -14,7 +14,7 @@ Ldir = Lfun.Lstart()
 
 in_dir = Ldir['data'] / 'obs' / 'ecology_nc'
 # fn = in_dir / 'test2002.nc'
-fn = in_dir / 'test2005.nc'
+fn = in_dir / 'MarineWaterProfilesAndNutrientsYear2023.nc'
 
 ds = xr.open_dataset(fn)
 
