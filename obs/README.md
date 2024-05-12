@@ -47,21 +47,21 @@
 
 Note that we use a sort of cumbersome naming convention for the data columns, including the units explicitly so it is clear what we are dealing with in subsequent use. After we have done more processing I will create a master list of preferred and acceptable variable names.
 
-Here is an example of the contents of one of the Ecology DataFrames:
+Here is an example of the contents of one of the ecology_nc DataFrames:
 
 ```
-       cid       time        lat         lon    name  ...  NO2 (uM)  NH4 (uM)  PO4 (uM)  SiO4 (uM)  cruise
-0      0.0 2017-01-11  47.092040 -122.918197  BUD005  ...  0.388398  0.668405  2.632084  84.497398    None
-1      0.0 2017-01-11  47.092040 -122.918197  BUD005  ...  0.340418  0.726122  2.629354  82.600006    None
-2      0.0 2017-01-11  47.092040 -122.918197  BUD005  ...  0.348933  0.628245  2.605122  82.263443    None
-3      1.0 2017-01-11  47.276485 -122.709575  CRR001  ...  0.103605  0.037389  2.551934  71.561836    None
-4      1.0 2017-01-11  47.276485 -122.709575  CRR001  ...  0.117088  0.051287  2.561856  70.790131    None
-..     ...        ...        ...         ...     ...  ...       ...       ...       ...        ...     ...
-939  276.0 2017-12-13  47.398148 -122.929592  HCB007  ...  0.303905  1.652716  3.884351  84.559181    None
-940  277.0 2017-12-13  47.670000 -122.820000  HCB010  ...  0.318795  0.071606  1.763635  77.125214    None
-941  277.0 2017-12-13  47.670000 -122.820000  HCB010  ...  0.090017  0.102635  2.565202  61.486889    None
-942  277.0 2017-12-13  47.670000 -122.820000  HCB010  ...  0.042560  0.000384  2.714923  58.599747    None
-943  277.0 2017-12-13  47.670000 -122.820000  HCB010  ...  0.120723  0.001253  2.887872  57.303364    None
+       cid cruise                time        lat  ...   NO3 (uM) NH4 (uM)  PO4 (uM)  SiO4 (uM)
+0        0   None 2023-02-08 19:56:48  47.276669  ...  28.820000     0.02      2.77  56.820000
+57       0   None 2023-02-08 19:56:48  47.276669  ...  29.270000     0.17      2.78  57.240002
+192      0   None 2023-02-08 19:56:48  47.276669  ...  29.200001     0.21      2.84  58.200001
+195      1   None 2023-02-08 21:09:20  47.264999  ...  28.610001     0.09      2.85  61.189999
+212      1   None 2023-02-08 21:09:20  47.264999  ...  28.820000     0.17      2.84  62.160000
+...    ...    ...                 ...        ...  ...        ...      ...       ...        ...
+32206  207   None 2023-08-22 17:14:40  47.667000  ...  28.350000     1.13      2.98  50.860001
+32225  208   None 2023-09-01 17:16:48  47.091671  ...   1.530000     0.75      2.01  41.230000
+32233  208   None 2023-09-01 17:16:48  47.091671  ...   2.120000     0.92      2.14  41.619999
+32496  209   None 2023-09-01 18:57:04  47.264999  ...  12.110000     4.76      2.31  36.150002
+33060  210   None 2023-09-01 18:05:52  47.213329  ...   4.820000     3.48      2.25  44.509998
 ```
 
 #### Sources that have been processed up to these specifications
@@ -77,6 +77,9 @@ Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/park
 - **ecology** Department of Ecology monthly repeat station data. Covers 2008-2017 for bottles and 2008-2019 for ctd casts. 300-400 casts per year, monthly at 39 stations in Puget Sound and the coastal estuaries. Processing note: I added SA, CT, and DO (uM) to the processed bottle files using values interpolated from ctd casts.
   - bottle 2008-2017, added SA, CT, DO from ctd casts
   - ctd 2008-2019, has some Chl data
+
+- **ecology_nc** Department of Ecology monthly repeat station data. Covers 1999-2023 for both bottle and ctd casts. 200-400 casts per year, monthly at up to ~50 stations in Puget Sound and the coastal estuaries. See the README in the associated folder for details. NOTE: this replaces the "ecology" source what was originally here.
+  - bottle and ctd 1999-2023
 
 - **nceiSalish** Data from WOAC and other cruises, mainly in Puget sound and JdF. The original data came from: https://www.ncei.noaa.gov/access/ocean-carbon-acidification-data-system/oceans/SalishCruise_DataPackage.html.
   - bottle 2008-2018, good DIC and TA, 40-199 casts per year

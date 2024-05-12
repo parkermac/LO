@@ -28,7 +28,7 @@ args = parser.parse_args()
 
 if args.source=='nceiSalish':
     aa = [-125.5, -122, 47, 50]
-elif args.source=='ecology':
+elif args.source in ['ecology','ecology_nc']:
     aa = [-125, -122, 46, 50]
 else:
     aa = [-130, -122, 42, 52]
