@@ -4,7 +4,7 @@ These files are WA Dept. of Ecology water column samples, both bottle and CTD. T
 
 These were downloaded from:
 https://ecology.wa.gov/research-data/monitoring-assessment/puget-sound-and-marine-monitoring/water-column-data
-on 2024.05.09. Look for the drop down menu for "Yearly marine water column profiles and nutrient data in netCDF for large data users." The unites and other metadata are in the NetCDF files, and on the webpage.
+on 2024.05.09. Look for the drop down menu for "Yearly marine water column profiles and nutrient data in netCDF for large data users." The units and other metadata are in the NetCDF files, and on the webpage.
 
 Files go from 1999-2023 (and presumably a new one will be added each year). No carbon data. The processing of other fields was much easier than in the past using Excel files from Ecology. I assumed that "Fluorescence (mg/m^3)" was the same as what we call "Chl (mg m-3)" in the LO format. I also converted DO from mg/L to uM.
 

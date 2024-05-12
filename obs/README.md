@@ -74,10 +74,6 @@ Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/park
   - bottle 1930-2021 with gaps in the early years, has some Chl data
   - ctd 1965-2021
 
-- **ecology** Department of Ecology monthly repeat station data. Covers 2008-2017 for bottles and 2008-2019 for ctd casts. 300-400 casts per year, monthly at 39 stations in Puget Sound and the coastal estuaries. Processing note: I added SA, CT, and DO (uM) to the processed bottle files using values interpolated from ctd casts.
-  - bottle 2008-2017, added SA, CT, DO from ctd casts
-  - ctd 2008-2019, has some Chl data
-
 - **ecology_nc** Department of Ecology monthly repeat station data. Covers 1999-2023 for both bottle and ctd casts. 200-400 casts per year, monthly at up to ~50 stations in Puget Sound and the coastal estuaries. See the README in the associated folder for details. NOTE: this replaces the "ecology" source what was originally here.
   - bottle and ctd 1999-2023
 
@@ -111,7 +107,7 @@ Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/park
 
 #### Notes on usage [2024.03.21 these notes need to be updated to reflect new additions to the collection: LineP, nceiPNW, NHL, and WOD]:
 - 2017 is a good year for validation, with bottle coverage from several sources.
-- If you are interested in Chl, you will only find it in dfo1-bottle and ecology-ctd.
+- If you are interested in Chl, you will only find it in dfo1-bottle and ecology_nc.
 - For ctd data (much finer vertical resolution, and potentially more info about bottom hypoxia) there are only two sources: dfo1 and ecology.
 - For carbon data (DIC and TA) you will only find them in nceiSalish and nceiCoastal, hence no coverage in Canadian waters.
 
