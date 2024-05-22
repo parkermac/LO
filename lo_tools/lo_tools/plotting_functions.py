@@ -245,8 +245,6 @@ def add_map_field(ax, ds, vn, vlims_dict, slev=-1, cmap='rainbow', fac=1,
     if do_mask_edges:
         v_scaled = mask_edges(v_scaled, x, y)
     
-        
-    
     cs = ax.pcolormesh(px, py, v_scaled, vmin=vlims[0], vmax=vlims[1], cmap=cmap, alpha=alpha)
     return cs
 

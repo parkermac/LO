@@ -60,7 +60,8 @@ if args.small == True:
 else:
     fig = plt.figure(figsize=(12,12)) # external monitor size
 ax = fig.add_subplot(111)
-ax.pcolormesh(plon,plat,h, vmin=-30, vmax=200, cmap=cm.deep)
+#ax.pcolormesh(plon,plat,h, vmin=-30, vmax=200, cmap=cm.deep)
+ax.pcolormesh(plon,plat,h, vmin=-5, vmax=20, cmap=cm.deep)
 pfun.dar(ax)
 ax.set_title('Use keyboard to create or delete section')
 ax.text(.05,.95,str(out_dir),transform=ax.transAxes,

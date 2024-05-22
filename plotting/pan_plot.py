@@ -41,7 +41,7 @@ parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
 parser.add_argument('-0', '--ds0', default='2017.07.04', type=str)
 parser.add_argument('-1', '--ds1', type=str)
 parser.add_argument('-lt', '--list_type', default='snapshot', type=str)
-# snapshot, hourly, or daily
+# snapshot, hourly, daily, or lowpass
 
 # arguments that allow you to bypass the interactive choices
 parser.add_argument('-hn', '--his_num', default=2, type=int)
@@ -101,6 +101,12 @@ if (upth / 'roms_plots.py').is_file():
 else:
     print('Importing roms_plots from LO')
     roms_plots = Lfun.module_from_file('roms_plots', pth / 'roms_plots.py')
+
+if Ldir['testing']:
+    import roms_plots
+    from importlib import reload
+    reload(roms_plots)
+    
 
 # choose the type of plot to make
 if Ldir['plot_type'] == None:
