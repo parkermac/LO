@@ -105,6 +105,10 @@ Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/park
   - ctd None
   - bottle 1993-2014
 
+- **ocnms_ctd** Historic Cruise Data collected at the OCNMS region, including but not limited to mooring sites.  Processed by Yifan Zhu. See the README in the associated folder for details.
+  - ctd 2004-2023, contains DO data
+  - bottle None
+
 #### Notes on usage [2024.03.21 these notes need to be updated to reflect new additions to the collection: LineP, nceiPNW, NHL, and WOD]:
 - 2017 is a good year for validation, with bottle coverage from several sources.
 - If you are interested in Chl, you will only find it in dfo1-bottle and ecology_nc.
