@@ -54,9 +54,9 @@ vn3_list = []
 if 'salt' in VN_list:
     vn3_list += ['salt', 'temp']
 if 'NO3' in VN_list:
-    vn3_list += ['TIC','alkalinity']
-if 'u' in VN_list:
-    vn3_list += ['u', 'v']
+    vn3_list += ['oxygen']
+# if 'u' in VN_list:
+#     vn3_list += ['u', 'v']
 
 # drop missing variables
 vn2_list = [item for item in vn2_list if item in ds.data_vars]
