@@ -63,7 +63,7 @@ lon[~ib_mask] = np.nan
 lat[~ib_mask] = np.nan
 
 # PLOTTING
-plt.close('all')
+# plt.close('all')
 pfun.start_plot(figsize=(14,8))
 fig = plt.figure()
 

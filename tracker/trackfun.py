@@ -382,9 +382,21 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 else:
                     Vstay3 = np.zeros((NP,3))
                 
-                plon, plat, pcs = update_position(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3,
-                                                  (ZH0 + 2*ZH1 + 2*ZH2 + ZH3)/6,
-                                                  S, delt, plon, plat, pcs, surface)
+                if True:
+                    # original
+                    plon, plat, pcs = update_position(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3,
+                                                    (ZH0 + 2*ZH1 + 2*ZH2 + ZH3)/6,
+                                                    S, delt, plon, plat, pcs, surface)
+                else:
+                    # debugging 2024.07.10
+                    plon, plat, pcs_junk = update_position(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3,
+                                (ZH0 + 2*ZH1 + 2*ZH2 + ZH3)/6,
+                                S, delt, plon, plat, pcs, surface)
+                    ZH = get_zh(zf0,zf1,hf,plon,plat,fr1)
+                    plon_junk, plat_junk, pcs = update_position(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3,
+                                ZH,
+                                S, delt, plon, plat, pcs, surface)
+
                 
             elif TR['no_advection'] == True:
                 V3 = np.zeros((NP,3))

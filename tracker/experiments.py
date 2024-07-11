@@ -23,7 +23,7 @@ def get_ic(TR):
     if exp_name == 'jdf0': # Mid-Juan de Fuca
         lonvec = np.linspace(-123.85, -123.6, 20)
         latvec = np.linspace(48.2, 48.4, 20)
-        pcs_vec = np.array([0])
+        pcs_vec = np.array([-1])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
         
     elif exp_name == 'sect_AImid':
