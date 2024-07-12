@@ -107,6 +107,10 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
     # plist_main is what ends up written to output
     plist_main = ['lon', 'lat', 'cs', 'ot', 'z'] + vn_list_other
     
+    # debugging
+    vconst = True # set v to a constant, u and w to zero
+    jx = True # use Jilian's modification of the pcs step
+
     # Step through times.
     #
     for counter_his in range(len(fn_list)-1):
@@ -160,16 +164,36 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
             else:
                 u0 = ds0['u'][0,:,:,:].values
                 u1 = ds1['u'][0,:,:,:].values
+
+                if vconst:
+                    u0 = np.zeros(u0.shape)
+                    u1 = u0.copy()
+
                 uf0 = u0[Masku3]
                 uf1 = u1[Masku3]
                 v0 = ds0['v'][0,:,:,:].values
                 v1 = ds1['v'][0,:,:,:].values
+
+                if vconst:
+                    v0 = 0.1 * np.ones(v0.shape)
+                    v1 = v1.copy()
+
                 vf0 = v0[Maskv3]
                 vf1 = v1[Maskv3]
                 w0 = ds0['w'][0,:,:,:].values
                 w1 = ds1['w'][0,:,:,:].values
+
+                if vconst:
+                    w0 = np.zeros(w0.shape)
+                    w1 = w0.copy()
+
                 wf0 = w0[Maskw3]
                 wf1 = w1[Maskw3]
+
+                if vconst:
+                    uf00 = uf0.copy()
+                    vf00 = vf0.copy()
+                    wf00 = wf0.copy()
                 
                 trf0_dict = dict()
                 trf1_dict = dict()
@@ -249,6 +273,14 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     w1 = ds1['w'][0,:,:,:].values
                     wf0 = wf1.copy()
                     wf1 = w1[Maskw3]
+
+                    if vconst:
+                        uf0 = uf00.copy()
+                        uf1 = uf00.copy()
+                        vf0 = vf00.copy()
+                        vf1 = vf00.copy()
+                        wf0 = wf00.copy()
+                        wf1 = wf00.copy()
                     
                     for vn in tracer_list:
                         tr1 = ds1[vn][0,:,:,:].values
@@ -338,33 +370,41 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 # RK4 integration
                 V0 = get_vel(uf0,uf1,vf0,vf1,wf0,wf1, plon, plat, pcs, fr0, surface)
                 ZH0 = get_zh(zf0,zf1,hf, plon, plat, fr0)
-                #plon1, plat1, pcs1 = update_position(dxg, dyg, maskr, V0, ZH0, S, delt/2,
-                #                                     plon, plat, pcs, surface)
-                plon1, plat1 = update_position_lonlat(dxg, dyg, maskr, V0, delt/2, plon, plat)
-                ZH0_new = get_zh(zf0,zf1,hf, plon1, plat1, fr0)
-                pcs1 = update_position_z(V0, ZH0, ZH0_new, delt/2, pcs, surface)
+                if jx == False:
+                    plon1, plat1, pcs1 = update_position(dxg, dyg, maskr, V0, ZH0, S, delt/2,
+                                                        plon, plat, pcs, surface)
+                else:
+                    plon1, plat1 = update_position_lonlat(dxg, dyg, maskr, V0, delt/2, plon, plat)
+                    ZH0_new = get_zh(zf0,zf1,hf, plon1, plat1, fr0)
+                    pcs1 = update_position_z(V0, ZH0, ZH0_new, delt/2, pcs, surface)
                 
                 
                 V1 = get_vel(uf0,uf1,vf0,vf1,wf0,wf1, plon1, plat1, pcs1, frmid, surface)
                 ZH1 = get_zh(zf0,zf1,hf, plon1, plat1, frmid)
-                #plon2, plat2, pcs2 = update_position(dxg, dyg, maskr, V1, ZH1, S, delt/2,
-                #                                     plon, plat, pcs, surface)
-                plon2, plat2 = update_position_lonlat(dxg, dyg, maskr, V1, delt/2, plon, plat)
-                ZH1_new = get_zh(zf0,zf1,hf, plon2, plat2, frmid)
-                pcs2 = update_position_z(V1, ZH1, ZH1_new, delt/2, pcs, surface)
+
+                if jx == False:
+                    plon2, plat2, pcs2 = update_position(dxg, dyg, maskr, V1, ZH1, S, delt/2,
+                                                        plon, plat, pcs, surface)
+                else:
+                    plon2, plat2 = update_position_lonlat(dxg, dyg, maskr, V1, delt/2, plon, plat)
+                    ZH1_new = get_zh(zf0,zf1,hf, plon2, plat2, frmid)
+                    pcs2 = update_position_z(V1, ZH1, ZH1_new, delt/2, pcs, surface)
                 
                 
                 V2 = get_vel(uf0,uf1,vf0,vf1,wf0,wf1, plon2, plat2, pcs2, frmid, surface)
                 ZH2 = get_zh(zf0,zf1,hf, plon2, plat2, frmid)
-                #plon3, plat3, pcs3 = update_position(dxg, dyg, maskr, V2, ZH2, S, delt,
-                #                                     plon, plat, pcs, surface)
-                plon3, plat3 = update_position_lonlat(dxg, dyg, maskr, V2, delt, plon, plat)
-                ZH2_new = get_zh(zf0,zf1,hf, plon3, plat3, frmid)
-                pcs3 = update_position_z(V2, ZH2, ZH2_new, delt, pcs, surface)
+
+                if jx == False:
+                    plon3, plat3, pcs3 = update_position(dxg, dyg, maskr, V2, ZH2, S, delt,
+                                                        plon, plat, pcs, surface)
+                else:
+                    plon3, plat3 = update_position_lonlat(dxg, dyg, maskr, V2, delt, plon, plat)
+                    ZH2_new = get_zh(zf0,zf1,hf, plon3, plat3, frmid)
+                    pcs3 = update_position_z(V2, ZH2, ZH2_new, delt, pcs, surface)
                 
                 
                 V3 = get_vel(uf0,uf1,vf0,vf1,wf0,wf1, plon3, plat3, pcs3, fr1, surface)
-                ZH3 = get_zh(zf0,zf1,hf, plon3, plat3, fr1)
+                ZH3 = get_zh(zf0,zf1,hf, plon3, plat3, fr1) # not needed?
                 
                 # add windage, calculated from the middle time
                 if (surface == True) and (windage > 0):
@@ -396,13 +436,15 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     Vstay3[:,2] = - stay_dz / (2 * delt)
                 else:
                     Vstay3 = np.zeros((NP,3))
-                    
-                #plon, plat, pcs = update_position(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3, (ZH0 + 2*ZH1 + 2*ZH2 + ZH3)/6, S, delt, plon, plat, pcs, surface)
-                plon, plat = update_position_lonlat(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3, delt, plon, plat)
-                ZH_new = get_zh(zf0,zf1,hf, plon, plat, fr1)  # use fr1?
-                pcs = update_position_z((V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3,
-                                         (ZH0 + 2*ZH1 + 2*ZH2 + ZH3)/6,
-                                         ZH_new, delt, pcs, surface)
+                
+                if jx == False:
+                    plon, plat, pcs = update_position(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3, (ZH0 + 2*ZH1 + 2*ZH2 + ZH3)/6, S, delt, plon, plat, pcs, surface)
+                else:
+                    plon, plat = update_position_lonlat(dxg, dyg, maskr, (V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3, delt, plon, plat)
+                    ZH_new = get_zh(zf0,zf1,hf, plon, plat, fr1)  # use fr1? yes I think so
+                    pcs = update_position_z((V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3,
+                                            ZH0,
+                                            ZH_new, delt, pcs, surface)
                 
                 
             elif TR['no_advection'] == True:
@@ -425,9 +467,11 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 Vturb3 = np.zeros((NP,3))
                 Vturb3[:,2] = Vturb
                 # update vertical position for real
-                #plon_junk, plat_junk, pcs = update_position(dxg, dyg, maskr, Vturb3, ZH, S, delt,
-                                                   #  plon, plat, pcs, surface)
-                pcs = update_position_z(Vturb3, ZH, ZH, delt, pcs, surface)  #jx
+                if jx == False:
+                    plon_junk, plat_junk, pcs = update_position(dxg, dyg, maskr, Vturb3, ZH, S, delt,
+                                                        plon, plat, pcs, surface)
+                else:
+                    pcs = update_position_z(Vturb3, ZH_new, ZH_new, delt, pcs, surface)  #jx
 
             ihr = nd + 1 # number of fractions 1/ndiv into the hour
             nihr = int(ndiv/TR['sph']) # number of fractions 1/ndiv between saves
