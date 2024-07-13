@@ -26,6 +26,12 @@ def get_ic(TR):
         pcs_vec = np.array([-1])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
         
+    elif exp_name == 'jdf1': # Mid-Juan de Fuca, just a line across the channel
+        N = 10
+        plon00 = -123.7 * np.ones(N)
+        plat00 = np.linspace(48.15, 48.3, N)
+        pcs00 = -1 * np.ones(N)
+        
     elif exp_name == 'sect_AImid':
         lons = [-122.7, -122.6]
         lats = [48.075, 48.075]

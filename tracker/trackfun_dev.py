@@ -176,7 +176,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
 
                 if vconst:
                     v0 = 0.1 * np.ones(v0.shape)
-                    v1 = v1.copy()
+                    v1 = v0.copy()
 
                 vf0 = v0[Maskv3]
                 vf1 = v1[Maskv3]

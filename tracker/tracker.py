@@ -219,8 +219,6 @@ if (upth / 'trackfun.py').is_file():
 else:
     print('Importing trackfun from LO')
     tfun = Lfun.module_from_file('trackfun', pth / 'trackfun.py')
-    # print('Importing ALTERNATE trackfun from LO') # debugging
-    # tfun = Lfun.module_from_file('trackfun', pth / 'trackfun_jx_debug.py')
 #
 if (upth / 'customizations.py').is_file():
     print('Importing customizations from LO_user')

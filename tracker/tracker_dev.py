@@ -1,4 +1,7 @@
 """
+This "_dev" version is for development and debugging. It calls
+trackfun_dev.py as it s main module.
+
 Code for particle tracking, designed for ROMS output.  This new version
 makes extensive use of nearest-neighbor KDTree algorithms for interpolation.
 This results is significantly (36x) faster runtimes compared with old version.
@@ -217,10 +220,8 @@ if (upth / 'trackfun.py').is_file():
     print('Importing trackfun from LO_user')
     tfun = Lfun.module_from_file('trackfun', upth / 'trackfun.py')
 else:
-    print('Importing trackfun from LO')
-    tfun = Lfun.module_from_file('trackfun', pth / 'trackfun.py')
-    # print('Importing ALTERNATE trackfun from LO') # debugging
-    # tfun = Lfun.module_from_file('trackfun', pth / 'trackfun_jx_debug.py')
+    print('Importing DEVELOMENT trackfun from LO') # debugging
+    tfun = Lfun.module_from_file('trackfun', pth / 'trackfun_dev.py')
 #
 if (upth / 'customizations.py').is_file():
     print('Importing customizations from LO_user')
@@ -279,6 +280,7 @@ for idt0 in idt_list:
             plon0 = plon00.copy()
             plat0 = plat00.copy()
             pcs0 = pcs00.copy()
+            print(pcs0)
             # do the tracking
             if TR['start_hour'] > 0:
                 fn_list = fn_list[TR['start_hour']:]
