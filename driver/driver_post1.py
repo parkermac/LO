@@ -5,7 +5,7 @@ It is designed only to run for a single forecast, and expects to find the
 history files organized into one-day folders.
 
 Testing on mac:
-run driver_post1.py -gtx cas6_v3_lo8b -r backfill -d 2019.07.04 -ro 2 -test True
+run driver_post1.py -gtx cas7_t0_x4b -r backfill -d 2017.07.04 -ro 0 -test True
 
 Test on apogee:
 python driver_post1.py -gtx cas6_v0_u0kb -r forecast -ro 0 -test True < /dev/null > test_post.log &
@@ -85,33 +85,34 @@ elif Ldir['run_type'] == 'forecast':
     ds1 = dt1.strftime(Lfun.ds_fmt)
 his_fn_list = Lfun.get_fn_list('hourly', Ldir, ds0, ds1)
 
-all_found = False
-ntries = 0
-while all_found == False:
-    for his_fn in his_fn_list:
-        if his_fn.is_file():
-            all_found = True
-            
-        elif not his_fn.is_file():
-            all_found = False
+if Ldir['testing'] == False:
+    all_found = False
+    ntries = 0
+    while all_found == False:
+        for his_fn in his_fn_list:
+            if his_fn.is_file():
+                all_found = True
+                
+            elif not his_fn.is_file():
+                all_found = False
+                break
+        if all_found:
+            print('All files found. Beginning post-processing.\n')
+            sys.stdout.flush()
+            sleep(60) # make sure all copying is able to finish
             break
-    if all_found:
-        print('All files found. Beginning post-processing.\n')
-        sys.stdout.flush()
-        sleep(60) # make sure all copying is able to finish
-        break
-        
-    ntries += 1
-    if ntries >= maxcount:
-        print('Never found all history files.')
-        sys.exit()
-    else:
-        sleep(sleeptime)
+            
+        ntries += 1
+        if ntries >= maxcount:
+            print('Never found all history files.')
+            sys.exit()
+        else:
+            sleep(sleeptime)
 
 tt0 = time()
 # loop over all jobs
 if Ldir['testing'] == True:
-    job_list = ['surface1', 'ubc1', 'sequim1']
+    job_list = ['layers_uv']
     # job_list = ['surface1', 'layers1', 'ubc1', 'sequim1', 'critfc1', 'daymovie0', 'drifters0', 'archive0']
 else:
     job_list = ['nest_wgh', 'surface1', 'layers1', 'ubc1', 'sequim1', 'critfc1',
@@ -133,10 +134,8 @@ for job in job_list:
     cmd_list = ['python3', str(j_fn),
                 '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
                 '-r', Ldir['run_type'], '-d', Ldir['date_string'],
-                '-job', job, '-test', 'False']
-                # 2024.01.17 Override the testing flag here so that the results of the shorter job list
-                # will go to the APL server (not a good idea?).
-                # '-job', job, '-test', str(Ldir['testing'])]
+                '-job', job, '-test', str(Ldir['testing'])]
+
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     with open(out_dir / 'Info' / 'screen_output.txt', 'w') as fout:
