@@ -86,6 +86,7 @@ messages(stdout, stderr, 's3cmd mb', verbose)
 
 # do the extractions
 N = len(fn_list)
+proc_list = []
 print('Working on ' + Ldir['job'] + ' (' + str(N) + ' times)')
 for ii in range(N):
     tt0 = time()
@@ -97,19 +98,38 @@ for ii in range(N):
     cmd_list = ['python', this_dir + 'make_layers.py', '-in_fn', str(in_fn),
         '-out_fn', str(out_fn), '-test', 'False']
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    stdout, stderr = proc.communicate()
-    messages(stdout, stderr, 'python make_layers', verbose)
-    print('- Hour %s took %0.2f seconds' % (hour_str, time()-tt0))
-    sys.stdout.flush()
+    proc_list.append(proc)
+        
+    # Nproc controls how many ncks subprocesses we allow to stack up
+    # before we require them all to finish.
+    # NOTE: we add the (ii > 0) because otherwise it starts by doing a single
+    # job, and in this case the jobs are long enough for that to be a significant
+    # slowdown.
+    if ((np.mod(ii,Ldir['Nproc']) == 0) and (ii > 0)) or (ii == N-1):
+        for proc in proc_list:
+            stdout, stderr = proc.communicate()
+            # make sure everyone is finished before continuing
+            if True:
+                if len(stdout) > 0:
+                    print('\n'+stdout.decode())
+                if len(stderr) > 0:
+                    print('\n'+stderr.decode())
+        proc_list = []
+    ii += 1
+
+    # stdout, stderr = proc.communicate()
+    # messages(stdout, stderr, 'python make_layers', verbose)
+    # print('- Hour %s took %0.2f seconds' % (hour_str, time()-tt0))
+    # sys.stdout.flush()
     
     # copy the file to the S3 bucket
     tt0 = time()
     cmd_list = ['s3cmd', 'put', '--acl-public', str(out_fn), 's3://'+fstr]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
-    messages(stdout, stderr, 's3cmd put', verbose)
-    print('-- copy to S3 bucket %s took %0.2f seconds' % (hour_str, time()-tt0))
-    sys.stdout.flush()
+    # messages(stdout, stderr, 's3cmd put', verbose)
+    # print('-- copy to S3 bucket %s took %0.2f seconds' % (hour_str, time()-tt0))
+    # sys.stdout.flush()
 
 
 
