@@ -8,6 +8,9 @@ from the history files in a given day.
 Testing on mac:
 run post_main.py -gtx cas7_t0_x4b -ro 0 -d 2017.07.04 -r backfill -job layers_uv -test True
 
+Run today's forecast on apogee:
+python post_main.py -gtx cas7_t0_x4b -ro 0 -d [today's datestring] -r forecast -job layers_uv > test.log &
+
 """
 
 from pathlib import Path
@@ -58,11 +61,28 @@ if Ldir['testing']:
 else:
     pass
 
+Ncenter = 30
+verbose = True
+def messages(stdout, stderr, mtitle, verbose):
+    # utility function for displaying subprocess info
+    if verbose:
+        print((' ' + mtitle + ' ').center(Ncenter,'='))
+        if len(stdout) > 0:
+            print(' sdtout '.center(Ncenter,'-'))
+            print(stdout.decode())
+    if len(stderr) > 0:
+        print((' ' + mtitle + ' ').center(Ncenter,'='))
+        # always print errors
+        print(' stderr '.center(Ncenter,'-'))
+        print(stderr.decode())
+    sys.stdout.flush()
+
 # create the S3 bucket for sharing
 fstr = 'f'+ds0
 cmd_list = ['s3cmd', 'mb', 's3://'+fstr]
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-proc.communicate()
+stdout, stderr = proc.communicate()
+messages(stdout, stderr, 's3cmd mb', verbose)
 
 # do the extractions
 N = len(fn_list)
@@ -77,7 +97,8 @@ for ii in range(N):
     cmd_list = ['python', this_dir + 'make_layers.py', '-in_fn', str(in_fn),
         '-out_fn', str(out_fn), '-test', 'False']
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    proc.communicate()
+    stdout, stderr = proc.communicate()
+    messages(stdout, stderr, 'python make_layers', verbose)
     print('- Hour %s took %0.2f seconds' % (hour_str, time()-tt0))
     sys.stdout.flush()
     
@@ -85,7 +106,8 @@ for ii in range(N):
     tt0 = time()
     cmd_list = ['s3cmd', 'put', '--acl-public', str(out_fn), 's3://'+fstr]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    proc.communicate()
+    stdout, stderr = proc.communicate()
+    messages(stdout, stderr, 's3cmd put', verbose)
     print('-- copy to S3 bucket %s took %0.2f seconds' % (hour_str, time()-tt0))
     sys.stdout.flush()
 

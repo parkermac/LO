@@ -80,6 +80,22 @@ ilon0, ilat0 = check_bounds(lon0, lat0)
 ilon1, ilat1 = check_bounds(lon1, lat1)
 in_ds.close()
 
+Ncenter = 30
+verbose = True
+def messages(stdout, stderr, mtitle, verbose):
+    # utility function for displaying subprocess info
+    if verbose:
+        print((' ' + mtitle + ' ').center(Ncenter,'='))
+        if len(stdout) > 0:
+            print(' sdtout '.center(Ncenter,'-'))
+            print(stdout.decode())
+    if len(stderr) > 0:
+        print((' ' + mtitle + ' ').center(Ncenter,'='))
+        # always print errors
+        print(' stderr '.center(Ncenter,'-'))
+        print(stderr.decode())
+    sys.stdout.flush()
+
 # Here we do the ncks extraction to get a smaller file to work with. Note
 # that we take care to have all the grid limits just like in a history file,
 # meaning that the rho-grid extends to the corners and the u, v, and psi
@@ -98,7 +114,8 @@ cmd_list1 = ['ncks',
     '--mk_rec_dim', 'ocean_time']
 cmd_list1 += ['-O', str(in_fn), str(out_fn_small)]
 proc = Po(cmd_list1, stdout=Pi, stderr=Pi)
-proc.communicate()
+stdout, stderr = proc.communicate()
+messages(stdout, stderr, 'ncks', verbose)
 
 # rename "in_fn" so that now we will do the rest of the work using our small file.
 in_fn = out_fn_small
