@@ -81,7 +81,7 @@ ilon1, ilat1 = check_bounds(lon1, lat1)
 in_ds.close()
 
 Ncenter = 30
-verbose = True
+verbose = False
 def messages(stdout, stderr, mtitle, verbose):
     # utility function for displaying subprocess info
     if verbose:

@@ -62,7 +62,7 @@ else:
     pass
 
 Ncenter = 30
-verbose = True
+verbose = False
 def messages(stdout, stderr, mtitle, verbose):
     # utility function for displaying subprocess info
     if verbose:
