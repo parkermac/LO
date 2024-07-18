@@ -25,12 +25,6 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
-# This will be used for the file name that goes to the public server.
-# Note that in this case we will sand the results to an S3 bucket on kopah.
-share_name = 'layers_uv'
-
-# ++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-
 # imports
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
@@ -115,25 +109,16 @@ for ii in range(N):
                 if len(stderr) > 0:
                     print('\n'+stderr.decode())
         proc_list = []
-    ii += 1
-
-    # stdout, stderr = proc.communicate()
-    # messages(stdout, stderr, 'python make_layers', verbose)
-    # print('- Hour %s took %0.2f seconds' % (hour_str, time()-tt0))
-    # sys.stdout.flush()
     
+for ii in range(N):
     # copy the file to the S3 bucket
-    tt0 = time()
+    in_fn = fn_list[ii]
+    hour_str = ('000000' + str(ii))[-4:] # name by UTC hour for this forecast day.
+    out_fn = out_dir / ('layers_hour_' + hour_str + '.nc')
     cmd_list = ['s3cmd', 'put', '--acl-public', str(out_fn), 's3://'+fstr]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
-    # messages(stdout, stderr, 's3cmd put', verbose)
-    # print('-- copy to S3 bucket %s took %0.2f seconds' % (hour_str, time()-tt0))
-    # sys.stdout.flush()
-
-
-
-# -------------------------------------------------------
+    messages(stdout, stderr, 's3cmd put', verbose)
 
 # test for success
 if out_fn.is_file():
