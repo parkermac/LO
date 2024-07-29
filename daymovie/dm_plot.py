@@ -129,6 +129,7 @@ elif len(fn_list) > 1:
     # and make a movie
     if Q['mov']:
         cmd_list = ['ffmpeg','-r','8','-i', str(outdir)+'/plot_%04d.png', '-vcodec', 'libx264',
+            '-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2',
             '-pix_fmt', 'yuv420p', '-crf', '25', str(outdir)+'/movie.mp4']
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
