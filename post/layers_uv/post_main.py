@@ -9,7 +9,7 @@ Testing on mac:
 run post_main.py -gtx cas7_t0_x4b -ro 0 -d 2017.07.04 -r backfill -job layers_uv -test True
 
 Run today's forecast on apogee:
-python post_main.py -gtx cas7_t0_x4b -ro 0 -d [today's datestring] -r forecast -job layers_uv > test.log &
+python post_main.py -gtx cas6_traps2_x2b -ro 0 -d [today's datestring] -r forecast -job layers_uv > test.log &
 
 """
 
