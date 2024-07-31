@@ -17,7 +17,6 @@ import xarray as xr
 import pickle
 from datetime import datetime, timedelta
 import pandas as pd
-from cmocean import cm
 import sys
 
 from lo_tools import Lfun, zfun, zrfun
@@ -34,6 +33,8 @@ else: # remote linux version
     import matplotlib as mpl
     mpl.use('Agg')
 import matplotlib.pyplot as plt
+
+from cmocean import cm # have to import after matplotlib to work on remote machine
     
 def P_basic(in_dict):
     # START
