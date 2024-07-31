@@ -6,11 +6,11 @@ HOSTNAME=apogee
 20 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f ocn00 > $LOd/ocn00_new.log
 55 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f atm00 > $LOd/atm00_new.log
 
-# EARLY versions
-# 01 00 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f tide00 > $LOd/tide00_new.log
-# 03 00 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f traps2 > $LOd/traps2_new.log
-# 20 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f ocn00 > $LOd/ocn00_new.log
-# 00 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f atm00 > $LOd/atm00_new.log
+# cas7 versions
+00 03 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f tide00 > $LOd/tide00_cas7.log
+05 03 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -tP trapsP00 -f trapsF00 > $LOd/trapsF00_cas7.log
+20 03 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f ocn01 > $LOd/ocn01_cas7.log
+55 03 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f atm00 > $LOd/atm00_cas7.log
 
 00 05 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas6_traps2_x2b -ro 0 -r forecast < /dev/null > $LOd/post1.log
 
