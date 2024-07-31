@@ -454,6 +454,75 @@ def get_layer(fld, zfull, which_z):
     lay = fld0*(1 - fr) + fld1*fr
     return lay
 
+def get_laym_alt(ds, zfull, mask, vn, zlev):
+    """
+    Test of a cleaner method of getting the layer.
+    
+    The details are in get_layer_alt().
+    """
+    # make the layer
+    fld_mid = ds[vn].values.squeeze()
+    fld = make_full((fld_mid,))
+    zlev_a = zlev * np.ones(1)
+    lay = get_layer_alt(fld, zfull, zlev_a)
+    lay[mask == False] = np.nan
+    # Note: if mask came directly from the mask_rho field of a history file it is
+    # 1 = water, and 0 = land, so it would be better to add nan's using this as a
+    # test, but using mask == False works.
+    return lay
+
+def get_layer_alt(fld, zfull, which_z):
+    """
+    NEW VERSION: test of using np.argmax() and np.take_along_axis().
+    It appears to be 3x faster than get_layer().
+
+    Creates a horizontal slice through a 3D ROMS data field.  It is very fast
+    because of the use of "take_along_axis"
+    Input:
+        fld (3D ndarray) of the data field to slice
+        z (3D ndarray) of z values (like from make_full)
+        which_z (ndarray of length 1) of the z value for the layer
+    Output:
+        lay (2D ndarray) fld on z == which_z,
+            with np.nan where it is not defined
+    """
+    N, M, L = fld.shape # updates N for full fields
+    fld0 = np.nan * np.zeros((M, L), dtype=int)
+    fld1 = np.nan * np.zeros((M, L), dtype=int)
+    z0 = np.nan * np.zeros((M, L), dtype=int)
+    z1 = np.nan * np.zeros((M, L), dtype=int)
+
+    ind1 = np.argmax(zfull>which_z, axis=0, keepdims=True)
+    # when argmax looks at a boolean array it sees it as 0 and 1,
+    # and so this returns the index of the first instance of 1 (True)
+    # which is the index of the z level above which_z.
+    #
+    # A potential problem is that if the array is all True or all False
+    # np.argmax always returns 0, but I believe this will not be
+    # an issue, by the following reasoning:
+    # - For a water column that is fully above which_z this will be fine
+    # because of the dz[dz == 0] = np.nan step below. In that case
+    # ind1 = ind0 = 0 and so dz = 0.
+    # - For a water column that is fully below which_z it will also work
+    # because again ind1 = ind0 = 0 and so dz = 0.
+
+    # create the index below
+    ind0 = ind1 - 1
+    ind0[ind0<0] = 0
+
+    fld1 = np.take_along_axis(fld,ind1,axis=0)
+    z1 = np.take_along_axis(zfull,ind1,axis=0)
+    fld0 = np.take_along_axis(fld,ind0,axis=0)
+    z0 = np.take_along_axis(zfull,ind0,axis=0)
+
+    # do the interpolation
+    dz = z1 - z0
+    dzf = which_z - z0
+    dz[dz == 0] = np.nan # mask bad points
+    fr = dzf / dz
+    lay = fld0*(1 - fr) + fld1*fr
+    return lay.squeeze()
+
 def make_full(flt):
     """
     Adds top and bottom layers to array fld. This is intended for 3D ROMS data

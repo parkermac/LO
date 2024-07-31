@@ -815,6 +815,85 @@ def P_layer(in_dict):
     else:
         plt.show()
 
+def P_layer_CUC(in_dict):
+    """
+    Focused on plotting a layer relevant to seeing the California Undercurrent.
+
+    This is also the first use of pfun.gat_laym_alt() which uses np.argmax()
+    and np.take_along_axis().
+    
+    """
+    # START
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(12,8))
+    fig = plt.figure()
+    ds = xr.open_dataset(in_dict['fn'])
+    # PLOT CODE
+    from cmocean import cm
+    # from time import time
+    vn_list = ['salt', 'speed']
+    # note that 'speed' is a derived quantity
+    z_level = -400
+    zfull = pfun.get_zfull(ds, in_dict['fn'], 'rho')
+    ii = 1
+    for vn in vn_list:
+        if in_dict['auto_vlims']:
+            pinfo.vlims_dict[vn] = ()
+        ax = fig.add_subplot(1, len(vn_list), ii)
+        if vn == 'speed':
+            zfull_u = pfun.get_zfull(ds, in_dict['fn'], 'u')
+            zfull_v = pfun.get_zfull(ds, in_dict['fn'], 'v')
+            # tt0 = time()
+            u = pfun.get_laym_alt(ds, zfull_u, ds.mask_u.values, 'u', z_level)
+            v = pfun.get_laym_alt(ds, zfull_v, ds.mask_v.values, 'v', z_level)
+            # print('time for u,v layers = %0.2f sec' % (time()-tt0))
+            # interpolate to rho grid
+            ur = np.nan * np.ones(ds.mask_rho.shape)
+            vr = np.nan * np.ones(ds.mask_rho.shape)
+            ur[1:-1,1:-1] = u[1:-1,:-1] + (u[1:-1,1:]-u[1:-1,:-1])/2
+            vr[1:-1,1:-1] = v[:-1,1:-1] + (v[1:,1:-1]-v[:-1,1:-1])/2
+            # create speed and mask
+            speed = np.sqrt(ur*ur + vr*vr)
+            speed[ds.mask_rho.values == 0] = np.nan
+            v_scaled = speed
+            speed_max = 0.2
+            vlims = (0,speed_max)
+            pinfo.cmap_dict['speed'] = cm.amp #cm.speed
+            pinfo.tstr_dict['speed'] = 'Speed'
+            pinfo.units_dict['speed'] = ' $(m\ s^{-1})$'
+        else:
+            laym = pfun.get_laym_alt(ds, zfull, ds.mask_rho.values, vn, z_level)
+            v_scaled = pinfo.fac_dict[vn]*laym
+            vlims = pinfo.vlims_dict[vn]
+        if len(vlims) == 0:
+            vlims = pfun.auto_lims(v_scaled)
+            pinfo.vlims_dict[vn] = vlims
+        cs = ax.pcolormesh(ds['lon_psi'][:], ds['lat_psi'][:], v_scaled[1:-1,1:-1],
+                           vmin=vlims[0], vmax=vlims[1], cmap=pinfo.cmap_dict[vn])
+        cb = fig.colorbar(cs)
+        pfun.add_bathy_contours(ax, ds, txt=True)
+        pfun.add_coast(ax)
+        ax.axis(pfun.get_aa(ds))
+        pfun.dar(ax)
+        ax.set_xlabel('Longitude')
+        ax.set_title('%s %s on Z = %d (m)' % (pinfo.tstr_dict[vn], pinfo.units_dict[vn], z_level))
+        if ii == 1:
+            pfun.add_info(ax, in_dict['fn'])
+            ax.set_ylabel('Latitude')
+            pfun.add_windstress_flower(ax, ds)
+        if ii == 2:
+            pfun.add_velocity_vectors(ax, ds, in_dict['fn'], zlev=z_level, v_leglen=speed_max, v_scl=5)
+        ii += 1
+    fig.tight_layout()
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+
 def P_bpress(in_dict):
     """
     Specialized plot related to bottom pressure anomalies.
