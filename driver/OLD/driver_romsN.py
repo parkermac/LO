@@ -16,7 +16,6 @@ NEW 2024.07.31
 - removed all mox capability, now only klone
 - removed sleep_forecast_window option
 - removed LO_RERUN logic, it caused problems during maintenance
-- --done_tag can be used to get rid of duplicate driver_roms used for nesting.
 
 For testing/debugging these flags can be very useful:
 -v True (verbose screen output)
@@ -68,7 +67,7 @@ parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omit
 parser.add_argument('-np', '--np_num', type=int) # e.g. 200, number of cores
 parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone (32 for gen2 nodes)
 # optional flag to use for nesting
-parser.add_argument('--done_tag', type=str, default='3') # used in done_fn
+parser.add_argument('--done_tag', type=str, default='3') # is set to ds0 if omitted
 # various flags to facilitate testing
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
@@ -107,7 +106,7 @@ if args.run_type == 'forecast':
         ds1 = ds0
         dt1 = dt0
     # Check to see if the forecast has already been run, and if so, exit!
-    done_fn = Ldir['LO'] / 'driver' / ('forecast' + args.done_tag + '_done_' + ds0 + '.txt')
+    done_fn = Ldir['LO'] / 'driver' / ('forecastN_done_' + ds0 + '.txt')
     if done_fn.is_file():
         print('Forecast has already run successfully - exiting')
         print(str(done_fn))
