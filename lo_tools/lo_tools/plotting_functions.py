@@ -492,7 +492,8 @@ def get_layer_alt(fld, zfull, which_z):
     z0 = np.nan * np.zeros((M, L), dtype=int)
     z1 = np.nan * np.zeros((M, L), dtype=int)
 
-    ind1 = np.argmax(zfull>which_z, axis=0, keepdims=True)
+    ind1 = np.argmax(zfull>which_z, axis=0).squeeze()
+    ind1 = ind1[None,:] # add singleton first dimension
     # when argmax looks at a boolean array it sees it as 0 and 1,
     # and so this returns the index of the first instance of 1 (True)
     # which is the index of the z level above which_z.
