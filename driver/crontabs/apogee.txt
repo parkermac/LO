@@ -15,7 +15,9 @@ HOSTNAME=apogee
 00 05 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas6_traps2_x2b -ro 0 -r forecast < /dev/null > $LOd/post1.log
 
 00 04 * * * source ~/.bashrc; cat $LOd/*new.log | mail -s 'apogee new forcing' pmacc@uw.edu
-00 06 * * * source ~/.bashrc; mail -s 'apogee post1' pmacc@uw.edu < $LOd/post1.log
+30 05 * * * source ~/.bashrc; cat $LOd/*cas7.log | mail -s 'apogee cas7 forcing' pmacc@uw.edu
+
+30 06 * * * source ~/.bashrc; mail -s 'apogee post1' pmacc@uw.edu < $LOd/post1.log
 
 00 14 * * * source ~/.bashrc; python $LOd/driver_post2.py -gtx wgh2_t0_xn0b -ro 0 -r forecast < /dev/null > $LOd/post2.log
 
