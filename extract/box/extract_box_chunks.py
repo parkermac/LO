@@ -63,6 +63,8 @@ parser.add_argument('-uv_to_rho', default=False, type=Lfun.boolean_string)
 parser.add_argument('-Nproc', type=int, default=10)
 # Optional: for testing
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+# Optional: for cleanup
+parser.add_argument('-clean', '--cleanup', default=True, type=Lfun.boolean_string) # if True, will not delete chunk_XXXX files at end
 # get the args and put into Ldir
 args = parser.parse_args()
 # test that main required arguments were provided
@@ -108,6 +110,9 @@ else:
 
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'box' / (Ldir['job'] + bb_str + dd_str + '_chunks')
 Lfun.make_dir(out_dir, clean=True)
+
+temp_chunk_dir = out_dir / 'temp_chunks'  # kmh edit: add temp dir
+Lfun.make_dir(temp_chunk_dir, clean=True) 
 
 # get list of files to work on
 fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir, Ldir['ds0'], Ldir['ds1'])
@@ -178,7 +183,18 @@ NFN = len(fn_list)
 cca = np.arange(NFN)
 # The number of "chunks" is the "12" in this call.  The function np.array_split() is a
 # really handy way to split a vectory into a number of approximatly equal-length sub vectors.
-ccas = np.array_split(cca, 12)
+# ccas = np.array_split(cca, 12)
+
+# kmh edit: if we don't request enough input files (<12days, hours, etc) in the box extraction and 
+# NFN < 12 then the code wont run & we get an error msg when trying to step thru the this_cca loop. 
+# To address this, can try replacing ccas = np.array_split(cca, 12) with 
+# ccas = np.array_split(cca, NFN) if NFN<12. 
+if (NFN<13): 
+    print('Too few input files requested. Use extract_box.py for jobs with < 12 input files')
+    sys.exit()
+else: 
+    ccas = np.array_split(cca, 12)
+    
 
 counter = 0
 for this_cca in ccas:
@@ -189,11 +205,12 @@ for this_cca in ccas:
     
     this_fn_list = fn_list[cc0:cc1+1]
 
-    box_fn = out_dir / ('chunk_' + ('0000' + str(counter))[-4:] +'.nc')
+    # kmh edit: replaced out_dir with temp_chunk_dir (3x below) 
+    box_fn = temp_chunk_dir / ('chunk_' + ('0000' + str(counter))[-4:] +'.nc') 
     # also make a temporary name for adding variables
-    box_temp_fn = out_dir / ('chunk_temp_' + ('0000' + str(counter))[-4:] +'.nc')
+    box_temp_fn = temp_chunk_dir / ('chunk_temp_' + ('0000' + str(counter))[-4:] +'.nc')
     # name the temp dir to accumulate individual extractions
-    temp_dir = out_dir / 'temp_dir'
+    temp_dir = temp_chunk_dir / 'temp_dir'
 
     box_fn.unlink(missing_ok=True)
     box_temp_fn.unlink(missing_ok=True)
@@ -399,9 +416,9 @@ for this_cca in ccas:
     
 # concatenate the chunks into one file
 tt0 = time()
-pp1 = Po(['ls', str(out_dir)], stdout=Pi)
+pp1 = Po(['ls', str(temp_chunk_dir)], stdout=Pi)
 pp2 = Po(['grep','chunk_'], stdin=pp1.stdout, stdout=Pi)
-cmd_list = ['ncrcat','-p', str(out_dir), '-O', str(box_fn_final)]
+cmd_list = ['ncrcat','-p', str(temp_chunk_dir), '-O', str(box_fn_final)]
 proc = Po(cmd_list, stdin=pp2.stdout, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
 messages('ncrcat-final messages:', stdout, stderr)
@@ -425,6 +442,11 @@ for vn in vn_list:
         pass
 ds.close()
 ds0.close()
+
+if args.cleanup == True: 
+    print('deleting temp. chunk files...')
+    Lfun.make_dir(temp_chunk_dir, clean=True)
+    temp_chunk_dir.rmdir()
 
 # Finale
 print('\nSize of full rho-grid = %s' % (str(G['lon_rho'].shape)))
