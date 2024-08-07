@@ -46,14 +46,14 @@ These are are an 8-year sequence of quasi-continuous runs (first PM ran each yea
 
 **apogee: /dat1/parker/LO_roms/**
 
-- cas6_traps2_x2b This is the **CURRENT FORECAST** 2023.04.30-now, and a hindcast of 2017. It lands here before being archived into cas6_v1_live on perigee [12 TB and growing]
+- cas6_traps2_x2b This is the **CURRENT FORECAST** 2024.07.01-now. It lands here before being archived into cas6_v1_live on perigee [1 TB and growing]
 - wgh2_t0_xn0b Nested model Willapa Bay and Grays Harbor, running as part of the daily forecast, 2023.08.07-now. [238 GB and growing]
-- cas2k_v0_x2b A low-resolution version of cas6 (2 km grid) designed for lon coastal runs. [2 TB]
+- cas2k_v0_x2b A low-resolution version of cas6 (2 km grid) designed for long coastal runs. [2 TB]
 - Various other nested or analytical runs: ae0, ai0, hc0, so0.
 
 **perigee: /data1/parker/LO_roms/**
 
-- cas6_v1_live **CURRENT FORECAST ARCHIVE** [3.3 TB and growing]
+- cas6_v1_live **CURRENT FORECAST ARCHIVE** 2023.05.21-now [9 TB and growing]
 - cas6_v0_live **OLD FORECAST ARCHIVE**, 2016.12.15-2023.05.23 (6+ years). It was originally the files in cas6_v3_lo8b, and then we started appending files from cas6_v0_u0kb (or occasionally _u0mb) after the transition from the LiveOcean code to the LO code. [40 TB, compressed NetCDF]
 - cas6_v3t075_lo8 A single year, 2018, run with 75% tides, non biology. [3.7 TB]
 - cas6_v3t110_lo8 A single year, 2018, run with 110% tides, non biology. [3.7 TB]
