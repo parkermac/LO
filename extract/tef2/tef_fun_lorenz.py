@@ -202,7 +202,8 @@ def calc_bulk_values(s, thisQ_dict, vn_list, print_info=False, min_trans=1):
             # this allows clipping of cases with tiny transport
         for vn in vn_list_short:
             F_i =-(thisQ_dict[vn][ind[i+1]] - thisQ_dict[vn][ind[i]])
-            vn_i=np.abs(F_i)/np.abs(Q_i)
+            # vn_i=np.abs(F_i)/np.abs(Q_i)
+            vn_i=(F_i)/(Q_i) # do not use absolute value (some mombal terms can be negative) Erin Broatch 2024.08.08
             if Q_i<0 and np.abs(Q_i)>1:
                 out_dict[vn].append(vn_i)
             elif Q_i > 0 and np.abs(Q_i)>1:
