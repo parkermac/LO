@@ -1,8 +1,8 @@
 #!/bin/bash
 
 year=$1
-ymd0=$year".01.01"
-ymd1=$year".07.25"
+ymd0=$year".07.26"
+ymd1=$year".07.31"
 gridname=cas7
 python ./driver_forcing3.py -g $gridname -0 $ymd0 -1 $ymd1 -f ocn01 > ocn01_$year.log &
 python ./driver_forcing3.py -g $gridname -0 $ymd0 -1 $ymd1 -f atm00 > atm00_$year.log &
