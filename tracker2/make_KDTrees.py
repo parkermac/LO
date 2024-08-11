@@ -27,9 +27,9 @@ import argparse
 
 # optional command line arguments, can be input in any order
 parser = argparse.ArgumentParser()
-parser.add_argument('-gtx','--gtagex', default='cas6_v3_lo8b', type=str)
-parser.add_argument('-d', '--date_string', default='2019.07.04', type=str)
-parser.add_argument('-ro', '--roms_out_num', type=int, default=2) # 1 = Ldir['roms_out1'], etc.
+parser.add_argument('-gtx','--gtagex', default='cas7_t0_x4b', type=str)
+parser.add_argument('-d', '--date_string', default='2017.07.04', type=str)
+parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
 
 # get the args and put into Ldir
 args = parser.parse_args()
@@ -48,7 +48,7 @@ elif Ldir['roms_out_num'] > 0:
     Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
 
 fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string']) / 'ocean_his_0002.nc'
-outdir = Ldir['LOo'] / 'tracker_trees' / Ldir['gridname']
+outdir = Ldir['LOo'] / 'tracker2_trees' / Ldir['gridname']
 Lfun.make_dir(outdir, clean=True)
 
 G, S, T = zrfun.get_basic_info(fn)

@@ -2,7 +2,7 @@
 Functions for particle tracking.
 
 Relies on the existence of experiment-specific info in
-LO_output/tracks/exp_info.csv.
+LO_output/tracks2/exp_info.csv.
 
 """
 # setup (assume path to alpha set by calling code)
@@ -17,7 +17,7 @@ import sys
 verbose = False
 
 # this is the full list of tracers we want to find on the track and write to output
-tracer_list_full = ['salt']#, 'oxygen']
+tracer_list_full = ['salt','temp']#, 'oxygen']
 # we trim the list below so that it only includes tracers that are present
 # in the history files
 
@@ -27,7 +27,7 @@ maskr_crit = 0.5 # (maskr = 1 in water, 0 on land) [0.5 seems good]
 # NEW CODE for nearest neighbor interpolation
 Ldir = Lfun.Lstart()
 
-TR0 = Lfun.csv_to_dict(Ldir['LOo'] / 'tracks' / 'exp_info.csv')
+TR0 = Lfun.csv_to_dict(Ldir['LOo'] / 'tracks2' / 'exp_info.csv')
 # Read this in as TR0 instead of TR so as not to confuse it with the TR
 # that we pass to get_tracks() below.  The only difference is that in
 # TR0 everything has been turned into a string, whereas in get_tracks()
@@ -48,7 +48,7 @@ Masku3 = np.tile(Masku.reshape(1,G['M'],G['L']-1),[S['N'],1,1])
 Maskv3 = np.tile(Maskv.reshape(1,G['M']-1,G['L']),[S['N'],1,1])
 Maskw3 = np.tile(Maskr.reshape(1,G['M'],G['L']),[S['N']+1,1,1])
 # load pre-made trees
-tree_dir = Ldir['LOo'] / 'tracker_trees' / TR0['gridname']
+tree_dir = Ldir['LOo'] / 'tracker2_trees' / TR0['gridname']
 # 2D
 xyT_rho = pickle.load(open(tree_dir / 'xyT_rho.p', 'rb'))
 xyT_u   = pickle.load(open(tree_dir / 'xyT_u.p', 'rb'))

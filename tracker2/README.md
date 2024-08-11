@@ -10,13 +10,13 @@ This code is designed to be a flexible, and hopefully fast, tool for doing parti
 
 (1) Create the nearest neighbor search trees for your grid.  You only need to do this once for a grid, but likely will want to repeat on different machines or after updating python.  You can do this from the command line with something like:
 ```
-python make_KDTrees.py -gtx cas6_v3_lo8b -d 2019.07.04 -ro 2
+python make_KDTrees.py -gtx cas7_t0_x4b -d 2017.07.04 -ro 0
 ```
-but providing the tags appropriate for your run.  This takes a few minutes and creates some pickled KDTrees in LO_output/tracker_trees/[gridname]/.
+but providing the tags appropriate for your run.  This takes a few minutes and creates some pickled KDTrees in LO_output/tracker2_trees/[gridname]/.
 
 ---
 
-(2) Edit `LO_user/tracker/experiments.py` to define an experiment.
+(2) Edit `LO_user/tracker2/experiments.py` to define an experiment.
 
 To create the initial positions of your release you make new entries in:
 
@@ -34,18 +34,18 @@ Look at the code near the top of `tracker.py` to see all possible arguments and 
 
 The output appears as NetCDF files in, for example:
 
-LO_output/tracks/jdf0_3d/
+LO_output/tracks2/jdf0_3d/
 - exp_info.csv (a record of the experiment choices)
 - grid.nc (bathy info, used for plotting)
 - release_2019.07.04.nc (there would be more than one of these if you used more start days)
 
 NOTE: the default is to save output every hour, even though the underlying calculation may be done in finer steps (the default ndiv=12 means that we use 300 s steps in the RK4 integration).  You can save more frequently using the "sph" (saves per hour) input parameter.  I find this to be convenient during debugging.
 
-#### NOTE: I don't really like the output naming convention.  It would be better to follow the usual convention, with something like LO_output/tracks/[gtagex]/ ...
+#### NOTE: I don't really like the output naming convention.  It would be better to follow the usual convention, with something like LO_output/tracks2/[gtagex]/ ...
 
 ---
 
-(4) Plot the results using `tplot.py` as a first generic tool.  Copy this to a new name in LO_user/tracker to start making your own plotting tool.
+(4) Plot the results using `tplot.py` as a first generic tool.  Copy this to a new name in LO_user/tracker2 to start making your own plotting tool.
 
 Run from ipython on your laptop, because it creates a screen plot.  It will prompt you to choose the output you want to plot.
 
@@ -59,13 +59,26 @@ NOTE: In the code I set a parameter npmax=300 which subsamples the full set of t
 
 `trackfun.py` is the real heart of the program.  It is a module of functions that does all steps of an experiment, typically in one-day chunks as orchestrated by the calling code `tracker.py`.
 
-**NOTE: `tracker.py` will automatically look first for "LO_user/tracker/trackfun.py" which is a hook in case you want to make your own edited version of the functions to do something exotic like adding diurnal cycling behavior to particles.**
+**NOTE: `tracker.py` will automatically look first for "LO_user/tracker2/trackfun.py" which is a hook in case you want to make your own edited version of the functions to do something exotic like adding diurnal cycling behavior to particles.**
 
 LIMITATIONS: Currently the code is hardwired to only save time series of particle positions, velocity, salinity and temperature.  I will need to do a bit more work to simplify adding more tracers.
 
 ---
 
 #### New Development Notes (most recent on top)
+
+2024.08.12:
+- This version in the tracker2 folder has several bug fixes
+compared to the original in the tracker folder. These became apparent when we
+started doing tracking in very high-resolution runs in Hood Canal.
+- We fixed the logic for updating the vertical position. It had been using the relative
+depth of the starting location. Now instead we figure out how much z should change nad use
+it to update relative depth at the end location for each time step.
+- We added the ability (should be a flag argument) to use more nearest neighbors
+to find the vertical velocity. Spikey w applied over 5 minute time steps caused
+excessive vertical motion.
+- W changed the nearest neighbor trees to use meters in all directions. For
+high resolution grids the original lon, lat, pcs trees were unreliable.
 
 2022.11.16:
 - Based on experiments by Jilian Xiong we made two changes to the turbulent mixing in `trackfun.py`. (i) We modified the top and bottom AKs values to be the same as those one grid cell down (from the top) or up (from the bottom), so that the nearest neighbor did not get a near-zero AKs when it was near the boundaries. (ii) We modified the calculation of d(AKs)/dz to use the instantaneous (tidally varying) dz. Experiments showed that these made little difference, but performed slightly better in the "well-mixed" tests.

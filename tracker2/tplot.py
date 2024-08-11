@@ -12,7 +12,7 @@ from lo_tools import plotting_functions as pfun
 Ldir = Lfun.Lstart()
 
 # Choose an experiment and release to plot.
-in_dir0 = Ldir['LOo'] / 'tracks'
+in_dir0 = Ldir['LOo'] / 'tracks2'
 exp_name = Lfun.choose_item(in_dir0, tag='', exclude_tag='.csv',
     itext='** Choose experiment from list **', last=False)
 rel = Lfun.choose_item(in_dir0 / exp_name, tag='.nc', exclude_tag='grid',

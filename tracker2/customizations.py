@@ -1,6 +1,6 @@
 """
 This is a module of experiment-specific customizations that are applied
-within tracker.
+within tracker2.
 
 It is not clear to me the best way to implement such specific behaviors in the
 code, so this module is an attempt.

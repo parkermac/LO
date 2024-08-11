@@ -3,9 +3,9 @@ Code for particle tracking, designed for ROMS output.  This new version
 makes extensive use of nearest-neighbor KDTree algorithms for interpolation.
 This results is significantly (36x) faster runtimes compared with old version.
 
-PERFORMANCE: about 3 minutes per day for a 3D cas6 experiment with 10k particles.
+PERFORMANCE: about 3 minutes per day for a 3D cas7 experiment with 10k particles.
 
-NOTE: You have to have run make_KDTrees.py for the grid (e.g. cas6) before running.
+NOTE: You have to have run make_KDTrees.py for the grid (e.g. cas7) before running.
 
 NOTE: There is some issue, perhaps with garbage collection, which causes
 the loading of NetCDF files to happen slower after running a few times
@@ -23,8 +23,8 @@ are explained in the argparse section below.
 
 NOTE: To improve usefulness for people other than me, this driver will
 first look for:
-- LO_user/tracker/experiments.py and
-- LO_user/tracker/trackfun.py
+- LO_user/tracker2/experiments.py and
+- LO_user/tracker2/trackfun.py
 before loading my versions.
 
 This allows you to create your own modifications to the tracking
@@ -39,7 +39,7 @@ python tracker.py -clb True
 
 the same command, with all the arguments typed, instead of getting them as defaults:
 
-python tracker.py -gtx cas6_v0_live -ro 0 -d 2019.07.04 -exp jdf0 -clb True
+python tracker.py -gtx cas7_t0_x4b -ro 0 -d 2017.07.04 -exp jdf0 -clb True
 
 """
 
@@ -53,8 +53,8 @@ from lo_tools import Lfun, zfun
 Ldir = Lfun.Lstart()
 
 # get the experiments module, looking first in LO_user
-pth = Ldir['LO'] / 'tracker'
-upth = Ldir['LOu'] / 'tracker'
+pth = Ldir['LO'] / 'tracker2'
+upth = Ldir['LOu'] / 'tracker2'
 if (upth / 'experiments.py').is_file():
     print('Importing experiments from LO_user')
     exp = Lfun.module_from_file('experiments', upth / 'experiments.py')
@@ -75,12 +75,12 @@ parser = argparse.ArgumentParser()
 # Set the experiment name
 # (details set in experiments.py, or, if it exists, user_experiments.py)
 
-parser.add_argument('-gtx', '--gtagex', default='cas6_v0_live', type=str)
+parser.add_argument('-gtx', '--gtagex', default='cas7_t0_x4b', type=str)
 parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
 # 1 = Ldir['roms_out1'], etc.
 
 # this is the first starting day
-parser.add_argument('-d', '--date_string', default='2019.07.04', type=str)
+parser.add_argument('-d', '--date_string', default='2017.07.04', type=str)
 
 parser.add_argument('-exp', '--exp_name', default='jdf0', type=str)
 parser.add_argument('-clb', '--clobber', default=False, type=zfun.boolean_string)
@@ -190,7 +190,7 @@ for nic in range(TR['number_of_start_days']):
     dt = dt + timedelta(TR['days_between_starts'])
 
 # make the output directory (empty)
-outdir0 = Ldir['LOo'] / 'tracks'
+outdir0 = Ldir['LOo'] / 'tracks2'
 outdir1 = out_name
 outdir = outdir0 / outdir1
 if outdir.is_dir():
@@ -210,8 +210,8 @@ Lfun.dict_to_csv(TR, outdir0 / 'exp_info.csv')
 Lfun.dict_to_csv(TR, outdir / 'exp_info.csv')
 
 # get the trackfun and customizations modules, looking first in LO_user
-pth = Ldir['LO'] / 'tracker'
-upth = Ldir['LOu'] / 'tracker'
+pth = Ldir['LO'] / 'tracker2'
+upth = Ldir['LOu'] / 'tracker2'
 #
 if (upth / 'trackfun.py').is_file():
     print('Importing trackfun from LO_user')
