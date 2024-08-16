@@ -87,7 +87,7 @@ Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/park
 
 - **collias** Historic Data collected by Eugene Collias. 368,858 results from the years 1932 until 1975. Data was collected using approximately 15-20 different methods and captures 9 different parameters. Data came from https://apps.ecology.wa.gov/eim/search/Eim/EIMSearchResults.aspx?ResultType=EIMStudyTab&LocationWRIAs=2 (Select the dropdown menu for Collias and then select Download. This triggers an EIM request and eventually they get it to you.) And here is a source of more information: https://apps.ecology.wa.gov/eim/search/Detail/Detail.aspx?DetailType=Study&SystemProjectId=99971885 with links to some great studies.
   - bottle 1932-1975. Missing 1943-1948 and 1973. Good SA, CT and DO, then less for NO3, NO2, and SiO4.
-  - ctd None.
+  - ctd None
 
 - **LineP** Historic Data collected three times a year at Line P off coastal Canadian waters off Vancouver island. Processed by Yifan Zhu. See the README in the associated folder for details.
   - bottle 1956-2023 (1990-2019 have carbon variables)
@@ -95,7 +95,7 @@ Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/park
 
 - **nceiPNW** Historic Data collected in Pacific Northwest region by Department of Fisheries and Oceans Canada (DFO). Processed by Yifan Zhu. See the README in the associated folder for details.
   - bottle 1985-2017
-  - ctd 1985-2017
+  - ctd None
 
 - **NHL** Historic Data collected nearly bi-weekly at Newport Hydrography Line off Oregon using CTD. Data are publicly available at https://doi.org/10.5281/zenodo.5814071  (Select "Newport_Hydrographic_Line_Data_1997_2021.zip" and then select Download). Processed by Yifan Zhu. See the README in the associated folder for details.
   - bottle None
