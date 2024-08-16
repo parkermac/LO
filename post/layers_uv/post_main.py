@@ -110,15 +110,18 @@ for ii in range(N):
                     print('\n'+stderr.decode())
         proc_list = []
     
-for ii in range(N):
-    # copy the file to the S3 bucket
-    in_fn = fn_list[ii]
-    hour_str = ('000000' + str(ii))[-4:] # name by UTC hour for this forecast day.
-    out_fn = out_dir / ('layers_hour_' + hour_str + '.nc')
-    cmd_list = ['s3cmd', 'put', '--acl-public', str(out_fn), 's3://'+fstr]
-    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    stdout, stderr = proc.communicate()
-    messages(stdout, stderr, 's3cmd put', verbose)
+if Ldir['testing'] == False:
+    for ii in range(N):
+        # copy the file to the S3 bucket
+        in_fn = fn_list[ii]
+        hour_str = ('000000' + str(ii))[-4:] # name by UTC hour for this forecast day.
+        out_fn = out_dir / ('layers_hour_' + hour_str + '.nc')
+        cmd_list = ['s3cmd', 'put', '--acl-public', str(out_fn), 's3://'+fstr]
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        messages(stdout, stderr, 's3cmd put', verbose)
+else:
+    pass
 
 # test for success
 if out_fn.is_file():
