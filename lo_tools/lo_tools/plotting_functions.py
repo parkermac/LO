@@ -270,10 +270,6 @@ def add_velocity_vectors(ax, ds, fn, v_scl=10, v_leglen=0.5, nngrid=80, zlev='to
     # set masked values to 0
     u[np.isnan(u)] = 0
     v[np.isnan(v)] = 0
-    # create interpolant
-    import scipy.interpolate as intp
-    ui = intp.interp2d(G['lon_u'][0, :], G['lat_u'][:, 0], u)
-    vi = intp.interp2d(G['lon_v'][0, :], G['lat_v'][:, 0], v)
     # create regular grid
     aaa = ax.axis()
     daax = aaa[1] - aaa[0]
@@ -283,8 +279,9 @@ def add_velocity_vectors(ax, ds, fn, v_scl=10, v_leglen=0.5, nngrid=80, zlev='to
     y = np.linspace(aaa[2], aaa[3], int(nngrid))
     xx, yy = np.meshgrid(x, y)
     # interpolate to regular grid
-    uu = ui(x, y)
-    vv = vi(x, y)
+    uu = zfun.interp2(xx, yy, G['lon_u'], G['lat_u'], u)
+    vv = zfun.interp2(xx, yy, G['lon_v'], G['lat_v'], v)
+
     mask = uu != 0
     # plot velocity vectors
     Q = ax.quiver(xx[mask], yy[mask], uu[mask], vv[mask],
