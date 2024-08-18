@@ -12,6 +12,7 @@ from scipy.spatial import cKDTree
 import seawater
 import subprocess
 import requests
+import warnings
 
 from lo_tools import Lfun, zfun, zrfun
 from lo_tools import hycom_functions as hfun
@@ -312,7 +313,7 @@ def convert_extraction_oneday(fn):
     for var_name in var_list:
         # Get the variables, renaming to be consistent with what we want,
         # and pack bottom to top
-        np.warnings.filterwarnings('ignore') # suppress warning related to nans in fields
+        warnings.filterwarnings('ignore') # suppress warning related to nans in fields
         if var_name == 'surf_el':
             ssh = ds['surf_el'][0, :, :]
             out_dict['ssh'] = ssh
