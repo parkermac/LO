@@ -4,7 +4,7 @@
 
 In all cases the output files are copied to the APL server [https://liveocean.apl.uw.edu/output/](https://liveocean.apl.uw.edu/output/) every morning starting around 6 AM Pacific time (if all goes according to plan) where they are publicly available.  Each day's files are in a folder with a name like f2022.01.11.
 
-The lineup of extraction jobs can be found in `LO/driver/driver_post1.py`.  Currently it is:
+The lineup of extraction jobs can be found in `LO/driver/driver_post1.py`.  For example:
 ```
 job_list = ['nest_wgh', 'surface1', 'layers1', 'ubc1', 'sequim1', 'critfc1',
     'daymovie0', 'drifters0', 'archive0']
@@ -91,7 +91,7 @@ Contacts:
 
 ---
 
-### critfc
+### critfc [not running as of 2024.08.19]
 
 This is a large extraction of model fields used by Charles Seaton as backup boundary conditions for his CRITFC model of the Columbia River.
 
