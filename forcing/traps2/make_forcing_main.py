@@ -150,7 +150,7 @@ LOriv_ds[vn].attrs['long_name'] = vinfo['long_name']
 for vn in ['river_Xposition', 'river_Eposition', 'river_direction']:
     vinfo = zrfun.get_varinfo(vn, vartype='climatology')
     if vn == 'river_direction':
-        LOriv_ds[vn] = (('river',), gri_df.idir.to_numpy())
+        LOriv_ds[vn] = (('river',), gri_df.idir.to_numpy().astype(int))
     elif vn == 'river_Xposition':
         X_vec = np.nan * np.ones(NRIV)
         ii = 0
@@ -319,7 +319,7 @@ if enable_tinyrivers == True:
     for vn in ['river_Xposition', 'river_Eposition', 'river_direction']:
         vinfo = zrfun.get_varinfo(vn, vartype='climatology')
         if vn == 'river_direction':
-            triv_ds[vn] = (('river',), gri_df_no_ovrlp.idir.to_numpy())
+            triv_ds[vn] = (('river',), gri_df_no_ovrlp.idir.to_numpy().astype(int))
         elif vn == 'river_Xposition':
             X_vec = np.nan * np.ones(NTRIV)
             ii = 0
@@ -545,7 +545,7 @@ if enable_pointsources == True:
     for vn in ['river_Xposition', 'river_Eposition', 'river_direction']:
         vinfo = zrfun.get_varinfo(vn, vartype='climatology')
         if vn == 'river_direction':
-            wwtp_ds[vn] = (('river',), gri_df_no_ovrlp.idir.to_numpy())
+            wwtp_ds[vn] = (('river',), gri_df_no_ovrlp.idir.to_numpy().astype(int))
         elif vn == 'river_Xposition':
             X_vec = np.nan * np.ones(NWWTP)
             ii = 0
