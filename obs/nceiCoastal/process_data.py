@@ -17,8 +17,7 @@ Ldir = Lfun.Lstart()
 source = 'nceiCoastal'
 otype = 'bottle'
 in_dir0 = Ldir['data'] / 'obs' / source
-year_list = range(2008,2022)
-year_list = [2021]
+year_list = range(2008,2020)
 
 # output location
 out_dir = Ldir['LOo'] / 'obs' / source / otype
@@ -104,7 +103,7 @@ v_dict = {
     'Ammonium_flag':'',
 }
 
-# load_data = True
+load_data = True
 for year in year_list:
     ys = str(year)
     print('\n'+ys)
@@ -113,45 +112,46 @@ for year in year_list:
     out_fn = out_dir / (ys + '.p')
     info_out_fn = out_dir / ('info_' + ys + '.p')
     
-    # if year in range(2008,2019):
+    if year in range(2008,2020):
 
-    """
-    NOTE: There was a garbled Time_UTC column in the csv version, so I used the excel instead.
-    This was slow so I converted it to a csv. Also, since the second row was the units, I pulled
-    this into a separate csv (and dropped that row from the data csv). Reading in the csv is
-    MUCH faster.
-    
-    Commands to do this:
-    in_fn =  in_dir0 / 'CODAP_NA_v2021.xlsx'
-    df00 = pd.read_excel(in_fn, skiprows=[1])
-    df00.to_csv(in_dir0 / 'converted_from_excel.csv')
-    dfu = pd.read_excel(in_fn, nrows=1)
-    dfu.to_csv(in_dir0 / 'units_converted_from_excel.csv')
-    """
-    
-    in_fn = in_dir0 / 'converted_from_excel.csv'
-
-    df0 = pd.read_csv(in_fn, low_memory=False)
-    df00 = df0[['Year_UTC','Month_UTC','Day_UTC']].copy()
-    df000 = df00.rename(columns={'Year_UTC':'year','Month_UTC':'month','Day_UTC':'day'})
-    hms = df0['Time_UTC'].copy().to_list()
-    hms_hour = [item[:2] for item in hms]
-    hms_minute = [item[3:5] for item in hms]
-    hms_second = [item[6:] for item in hms]
-
-    df000['hour'] = hms_hour
-    df000['minute'] = hms_minute
-    df000['second'] = hms_second
-
-    df0['time'] = pd.to_datetime(df000)
-    
-    units_fn = in_dir0 / 'units_converted_from_excel.csv'
-    units_df = pd.read_csv(units_fn)
-    keys = list(units_df.columns)
-    values = list(units_df.loc[0,])
-    units_dict = { k:v for (k,v) in zip(keys, values)}
+        """
+        NOTE: There was a garbled Time_UTC column in the csv version, so I used the excel instead.
+        This was slow so I converted it to a csv. Also, since the second row was the units, I pulled
+        this into a separate csv (and dropped that row from the data csv). Reading in the csv is
+        MUCH faster.
         
-        # load_data = False # only load the first time
+        Commands to do this:
+        in_fn =  in_dir0 / 'CODAP_NA_v2021.xlsx'
+        df00 = pd.read_excel(in_fn, skiprows=[1])
+        df00.to_csv(in_dir0 / 'converted_from_excel.csv')
+        dfu = pd.read_excel(in_fn, nrows=1)
+        dfu.to_csv(in_dir0 / 'units_converted_from_excel.csv')
+        """
+        
+        in_fn = in_dir0 / 'converted_from_excel.csv'
+
+        if load_data:
+            df0 = pd.read_csv(in_fn, low_memory=False)
+        df00 = df0[['Year_UTC','Month_UTC','Day_UTC']].copy()
+        df000 = df00.rename(columns={'Year_UTC':'year','Month_UTC':'month','Day_UTC':'day'})
+        hms = df0['Time_UTC'].copy().to_list()
+        hms_hour = [item[:2] for item in hms]
+        hms_minute = [item[3:5] for item in hms]
+        hms_second = [item[6:] for item in hms]
+
+        df000['hour'] = hms_hour
+        df000['minute'] = hms_minute
+        df000['second'] = hms_second
+
+        df0['time'] = pd.to_datetime(df000)
+        
+        units_fn = in_dir0 / 'units_converted_from_excel.csv'
+        units_df = pd.read_csv(units_fn)
+        keys = list(units_df.columns)
+        values = list(units_df.loc[0,])
+        units_dict = { k:v for (k,v) in zip(keys, values)}
+        
+        load_data = False # only load the first time
 
             
     # select one year
