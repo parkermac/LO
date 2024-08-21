@@ -50,7 +50,7 @@ do_d3 = True
 do_d4 = True
 wrf_dir = Ldir['data'] / 'wrf' # the default
 if 'apogee' in Ldir['lo_env']:
-    wrf_dir = Path('/pgdat1/parker/LO_data/wrf')
+    wrf_dir = Path('/dat1/parker/LO_data/wrf')
     
 # Create list of hours
 if Ldir['run_type'] == 'backfill':
