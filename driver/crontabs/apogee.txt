@@ -3,10 +3,10 @@ HOSTNAME=apogee
 
 ## get WRF output and add to archive
 LOa=/dat1/parker/LO_data/archive
-00 01 * * * $LOa/getwrf.csh
-30 02 * * * $LOa/getwrf.csh
-00 04 * * * $LOa/getwrf.csh
-16 16 * * * $LOa/getwrf.csh
+00 01 * * * source ~/.bashrc; $LOa/getwrf.csh
+30 02 * * * source ~/.bashrc; $LOa/getwrf.csh
+00 04 * * * source ~/.bashrc; $LOa/getwrf.csh
+17 16 * * * source ~/.bashrc; $LOa/getwrf.csh
 
 00 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f tide00 > $LOd/tide00_new.log
 05 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f traps2 > $LOd/traps2_new.log
