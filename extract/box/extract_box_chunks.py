@@ -39,7 +39,7 @@ import numpy as np
 import xarray as xr
 
 pid = os.getpid()
-print(' extract_box_monthly '.center(60,'='))
+print(' extract_box_chunks '.center(60,'='))
 print('PID for this job = ' + str(pid))
 
 # command line arugments
