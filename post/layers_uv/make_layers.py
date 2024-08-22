@@ -141,7 +141,7 @@ for vn in vn_list:
 if testing:
     z_vec = np.array([-4000,-50,-10,0]) 
 else:
-    z_vec = np.linspace(-200,0,11)
+    z_vec = np.linspace(-300,0,16)
 
 # add z as a coordinate and as a data_var
 out_ds['z'] = (('z'), z_vec)
