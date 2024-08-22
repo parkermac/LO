@@ -190,7 +190,8 @@ for nic in range(TR['number_of_start_days']):
     dt = dt + timedelta(TR['days_between_starts'])
 
 # make the output directory (empty)
-outdir0 = Ldir['LOo'] / 'tracks2'
+outdir00 = Ldir['LOo'] / 'tracks2'
+outdir0 = outdir00 / TR['gtagex']
 outdir1 = out_name
 outdir = outdir0 / outdir1
 if outdir.is_dir():
@@ -205,7 +206,7 @@ print(50*'*' + '\nWriting to ' + str(outdir))
 sys.stdout.flush()
 
 # Write some info to outdir0 for use by trackfun.py
-Lfun.dict_to_csv(TR, outdir0 / 'exp_info.csv')
+Lfun.dict_to_csv(TR, outdir00 / 'exp_info.csv')
 # and write the same info to outdir as part of the archived run output
 Lfun.dict_to_csv(TR, outdir / 'exp_info.csv')
 

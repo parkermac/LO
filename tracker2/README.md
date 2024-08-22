@@ -2,7 +2,7 @@
 
 ## particle tracking utility for the LO system
 
-This code is designed to be a flexible, and hopefully fast, tool for doing particle tracking experiments using saved history files from ROMS.  It assumes that you save fields hourly, and that the file structure follows LiveOcean standards (hours 0-24, numbered 00[01-25]) in a single folder named by date, e.g. f2019.12.18.  This code uses nearest neighbor for most everything and so might work with more complex ROMS grids (the LO grids are plaid), but that is untested.
+This code is designed to be a flexible, and hopefully fast, tool for doing particle tracking experiments using saved history files from ROMS.  It assumes that you save fields hourly, and that the file structure follows LiveOcean standards (hours 1-24, numbered 00[02-25]) in a single folder named by date, e.g. f2019.12.18.  This code uses nearest neighbor for most everything and so might work with more complex ROMS grids (the LO grids are plaid), but that is untested.
 
 ---
 
@@ -34,14 +34,14 @@ Look at the code near the top of `tracker.py` to see all possible arguments and 
 
 The output appears as NetCDF files in, for example:
 
-LO_output/tracks2/jdf0_3d/
+LO_output/tracks2/[gtagex]/jdf0_3d/
 - exp_info.csv (a record of the experiment choices)
 - grid.nc (bathy info, used for plotting)
 - release_2019.07.04.nc (there would be more than one of these if you used more start days)
 
-NOTE: the default is to save output every hour, even though the underlying calculation may be done in finer steps (the default ndiv=12 means that we use 300 s steps in the RK4 integration).  You can save more frequently using the "sph" (saves per hour) input parameter.  I find this to be convenient during debugging.
+NOTE: exp_info.csv is ALSO written to LO_output/tracks2 because we need some grid info when reading in things at the start of trackfun.py, i.e. when it is imported. This is NOT good coding because it can cause errors when trying to run two jobs at the same time. I never figured out how to pass arguments to modules, and maybe that would also be a bad idea.
 
-#### NOTE: I don't really like the output naming convention.  It would be better to follow the usual convention, with something like LO_output/tracks2/[gtagex]/ ...
+NOTE: the default is to save output every hour, even though the underlying calculation may be done in finer steps (the default ndiv=12 means that we use 300 s steps in the RK4 integration).  You can save more frequently using the "sph" (saves per hour) input parameter.  I find this to be convenient during debugging.
 
 ---
 
@@ -72,12 +72,11 @@ LIMITATIONS: Currently the code is hardwired to only save time series of particl
 compared to the original in the tracker folder. These became apparent when we
 started doing tracking in very high-resolution runs in Hood Canal.
 - We fixed the logic for updating the vertical position. It had been using the relative
-depth of the starting location. Now instead we figure out how much z should change nad use
-it to update relative depth at the end location for each time step.
+depth of the starting location. Now instead we figure out how much z should change and use it to update relative depth at the end location for each time step.
 - We added the ability (should be a flag argument) to use more nearest neighbors
 to find the vertical velocity. Spikey w applied over 5 minute time steps caused
 excessive vertical motion.
-- W changed the nearest neighbor trees to use meters in all directions. For
+- We changed the nearest neighbor trees to use meters in all directions. For
 high resolution grids the original lon, lat, pcs trees were unreliable.
 
 2022.11.16:

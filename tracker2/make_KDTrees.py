@@ -8,11 +8,11 @@ Usage:
 
 python make_KDTrees.py (uses defaults)
 
-python make_KDTrees.py -gtx cas6_v3_lo8b -d 2019.07.04 -ro 2
+python make_KDTrees.py -gtx cas7_t0_x4b -d 2017.07.04 -ro 0
 
 (** you have to be pointing it to a history file that exists **)
 
-PERFORMANCE: takes about 30 sec on my mac for the cas6 grid.
+PERFORMANCE: takes about 30 sec on my mac for the cas7 grid.
 
 """
 
@@ -115,7 +115,7 @@ for tag in ['w', 'rho', 'u', 'v']:
     x_m, y_m = zfun.ll2xy(x, y, x_c, y_c)
     X_m = np.tile(x_m.reshape(1,M,L),[N,1,1])
     Y_m = np.tile(y_m.reshape(1,M,L),[N,1,1])
-    Z_m = z  # surfae = 0m, bottom = - local depth, surface elevation is not included
+    Z_m = z  # surface = 0m, bottom = - local depth, surface elevation is not included
     xyz_m = np.array((X_m[Mask],Y_m[Mask],Z_m[Mask])).T
     #------- jx
     

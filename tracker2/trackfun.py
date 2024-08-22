@@ -117,17 +117,24 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
     # plist_main is what ends up written to output
     plist_main = ['lon', 'lat', 'cs', 'ot', 'z'] + vn_list_other
     
-    # debugging
-    vconst = False # set v to a constant, u and w to zero
-    jx = True # use Jilian's modification of the pcs step and new 3D kdTree
+    # >>>>>>>>>>>>>>> Choices for experts <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
+
+    jx = True # Use Jilian's modification of the pcs step and new 3D kdTree.
+    # Generally you should always do this. In a future version we will remove the old code entirely.
+    if jx == False:
+        print('** WARNING: jx is set to False! **')
+
     if jx:
-        average_W = True # average k neighbors of w in get_vel, such as k_nei=20, need this in high-resolution (10m) model
-        k_nei = 20 
         use_new_tree = True  # use a new 3D tree that has a unit of meter in 3D directions
     else:
-        average_W = False
-        k_nei = 1
         use_new_tree = False
+
+    average_W = False
+    k_nei = 1 
+    # Set average_W to True to average k_nei neighbors of w in get_vel.
+    # For example, we needed k_nei=20 in the high-resolution (10m) model.
+
+    # >>>>>>>>>>>>>>>>>>>>>>>> <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     
     # Step through times.
     #
@@ -183,35 +190,18 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 u0 = ds0['u'][0,:,:,:].values
                 u1 = ds1['u'][0,:,:,:].values
 
-                if vconst:
-                    u0 = np.zeros(u0.shape)
-                    u1 = u0.copy()
-
                 uf0 = u0[Masku3]
                 uf1 = u1[Masku3]
                 v0 = ds0['v'][0,:,:,:].values
                 v1 = ds1['v'][0,:,:,:].values
-
-                if vconst:
-                    v0 = 0.1 * np.ones(v0.shape)
-                    v1 = v0.copy()
 
                 vf0 = v0[Maskv3]
                 vf1 = v1[Maskv3]
                 w0 = ds0['w'][0,:,:,:].values
                 w1 = ds1['w'][0,:,:,:].values
 
-                if vconst:
-                    w0 = np.zeros(w0.shape)
-                    w1 = w0.copy()
-
                 wf0 = w0[Maskw3]
                 wf1 = w1[Maskw3]
-
-                if vconst:
-                    uf00 = uf0.copy()
-                    vf00 = vf0.copy()
-                    wf00 = wf0.copy()
                 
                 trf0_dict = dict()
                 trf1_dict = dict()
@@ -291,14 +281,6 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     w1 = ds1['w'][0,:,:,:].values
                     wf0 = wf1.copy()
                     wf1 = w1[Maskw3]
-
-                    if vconst:
-                        uf0 = uf00.copy()
-                        uf1 = uf00.copy()
-                        vf0 = vf00.copy()
-                        vf1 = vf00.copy()
-                        wf0 = wf00.copy()
-                        wf1 = wf00.copy()
                     
                     for vn in tracer_list:
                         tr1 = ds1[vn][0,:,:,:].values
@@ -463,7 +445,6 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                     pcs = update_position_z((V0 + 2*V1 + 2*V2 + V3)/6 + Vwind3 + Vsink3 + Vstay3,
                                             ZH0, ZH_new, delt, pcs, surface)
                 
-                
             elif TR['no_advection'] == True:
                 V3 = np.zeros((NP,3))
                 ZH3 = get_zh(zf0,zf1,hf, plon, plat, frmid)  #jx: may not need this? should it be ZH3 = get_zh(zf0,zf1,hf, plon, plat, fr1)?
@@ -590,7 +571,7 @@ def update_position_z(V, ZH0, ZH1, dt_sec, pcs0, surface):   #jx
     #    Pcs_orig = Pcs.copy()
     #    Pcs += pdz_s
         Pcs = pcs1.copy()
-        # Check for bad pcs values.  This was happening a lot becasue of
+        # Check for bad pcs values.  This was happening a lot because of
         # some bugs on the turbulence code that would return bad vertical velocities
         # but since those were fixed this "bad_pcs" diagnostic is all zeros.
         pcs_mask = np.isnan(Pcs)
