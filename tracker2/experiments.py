@@ -33,16 +33,20 @@ def get_ic(TR):
         pcs00 = -1 * np.ones(N)
 
     elif exp_name == 'wgh0': # Designed for the new nested wgh2 grid.
-        # Grays Harbor
-        lon0 = -124.2; lat0 = 46.9 # center of the circle 
-        radius_km = 3 # radius of the circle km
-        N = 150 # number of particles
+        """
+        north end of Long Beach at 46.497401, -124.064370
+        and the middle of Twin Harbors beach at 46.809169, -124.10805
+        """
+        # Long Beach
+        lon0 = -124.064370; lat0 = 46.497401 # center of the circle 
+        radius_km = 2 # radius of the circle km
+        N = 300 # number of particles
         # make random scattering of points in a circle
         plon00_1, plat00_1 = ic_random_in_circle(lon0, lat0, radius_km, N)
-        # Willapa Bay
-        lon0 = -124.1; lat0 = 46.68 # center of the circle 
-        radius_km = 3 # radius of the circle km
-        N = 150 # number of particles
+        # Twin Harbors
+        lon0 = -124.10805; lat0 = 46.809169 # center of the circle 
+        radius_km = 2 # radius of the circle km
+        N = 300 # number of particles
         # make random scattering of points in a circle
         plon00_2, plat00_2 = ic_random_in_circle(lon0, lat0, radius_km, N)
         # Combine

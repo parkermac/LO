@@ -72,7 +72,7 @@ fig = plt.figure()
 
 # MAP
 # set domain limits
-if False:
+if True:
     # plot full domain
     aa = [lonp.min(), lonp.max(), latp.min(), latp.max()]
 else:
@@ -95,7 +95,7 @@ ax.set_title(exp_name.strip('/'))
 # regular spaghetti plots
 ax.plot(lon, lat, '-k', linewidth=.2)
 ax.plot(lon[0,:], lat[0,:], 'og', alpha=.3)
-ax.plot(lon[-1,:], lat[-1,:], 'or', alpha=.3)
+ax.plot(lon[-1,:], lat[-1,:], 'or', alpha=.2)
 
 # time series
 td = (ot_vec - ot_vec[0])/86400
