@@ -7,21 +7,15 @@ LOa=/dat1/parker/LO_data/accounts
 30 02 * * * source ~/.bashrc; $LOa/getwrf.csh
 00 04 * * * source ~/.bashrc; $LOa/getwrf.csh
 
-00 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f tide00 > $LOd/tide00_new.log
-05 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f traps2 > $LOd/traps2_new.log
-20 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f ocn00 > $LOd/ocn00_new.log
-55 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas6 -r forecast -f atm00 > $LOd/atm00_new.log
-
 # cas7 versions
-00 03 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f tide00 > $LOd/tide00_cas7.log
-10 03 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -tP trapsP00 -f trapsF00 > $LOd/trapsF00_cas7.log
-00 04 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f ocn01 > $LOd/ocn01_cas7.log
-20 03 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f atm00 > $LOd/atm00_cas7.log
+20 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f ocn01 > $LOd/ocn01_cas7.log
+00 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f tide00 > $LOd/tide00_cas7.log
+05 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -tP trapsP00 -f trapsF00 > $LOd/trapsF00_cas7.log
+55 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f atm00 > $LOd/atm00_cas7.log
 
-00 05 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas6_traps2_x2b -ro 0 -r forecast < /dev/null > $LOd/post1.log
+00 05 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas7_t0_x4b -ro 0 -r forecast < /dev/null > $LOd/post1.log
 
-00 04 * * * source ~/.bashrc; cat $LOd/*new.log | mail -s 'apogee new forcing' pmacc@uw.edu
-30 05 * * * source ~/.bashrc; cat $LOd/*cas7.log | mail -s 'apogee cas7 forcing' pmacc@uw.edu
+00 04 * * * source ~/.bashrc; cat $LOd/*cas7.log | mail -s 'apogee cas7 forcing' pmacc@uw.edu
 
 30 06 * * * source ~/.bashrc; mail -s 'apogee post1' pmacc@uw.edu < $LOd/post1.log
 
