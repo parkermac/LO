@@ -23,7 +23,7 @@ This generates the ocean forcing expected by our nested sub-model of Willapa Bay
 
 ---
 
-### surface
+### surface1
 
 This is an extraction of surface fields served by IOOS.
 
@@ -36,7 +36,7 @@ Contacts:
 
 ---
 
-### layers
+### layers1 and layers2
 
 This is an extraction of fields (including processed ones like Aragonite Saturation State) on the surface, the bottom, and several horizontal depth layers. It is what appears on the NANOOS NVS, and is used by an aquaculture services company, SCOOT.
 
@@ -53,6 +53,15 @@ Contacts at SCOOT:
 - Evan Goodwin <evan@scootscience.com>
 - Iwen Su <iwen@scootscience.com>
 - Connor Dibble <connor.dibble@scootscience.com>
+
+---
+
+### layers_uv
+
+This is an extraction of velocity on layers in JdF for some glider operators at APL. The results go to an AWS s3 bucked on kopah.
+
+Contact:
+- Peter Brodsky <pmb@uw.edu>
 
 ---
 
@@ -119,7 +128,7 @@ This runs the particle tracking runs using the tracker tool, and then sends them
 
 ---
 
-### archive
+### archive [not currently running 2024.08.25]
 
 This copies the forecast history files to a standard place on perigee. Some users that have an account there use them, e.g. Harper Simmons who uses them to create boundary conditions for a nested forecast of Hood Canal.
 

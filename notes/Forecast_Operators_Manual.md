@@ -149,7 +149,7 @@ Here current daily lineup of the forecasts and post-processing. Times in parenth
 
 **People who use the forecast products:** In the event that the forecast will be later than about Noon local time, send a brief email with an expected forecast time to this list (just paste this text string into the "To" section of the email):
 ```
-adioso@uw.edu;evan@scootscience.com;djlatornell@gmail.com;Zhaoqing.Yang@pnnl.gov;ryan.mccabe@noaa.gov;harpers@uw.edu;p.maccready@gmail.com
+adioso@uw.edu;evan@scootscience.com;djlatornell@gmail.com;Zhaoqing.Yang@pnnl.gov;ryan.mccabe@noaa.gov;harpers@uw.edu;pmb@uw.edu;p.maccready@gmail.com
 ```
 You can see more info about the post processing and the people who use it in LO/notes/post_users.md.
 
