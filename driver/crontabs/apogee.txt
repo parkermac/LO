@@ -13,11 +13,11 @@ LOa=/dat1/parker/LO_data/accounts
 05 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -tP trapsP00 -f trapsF00 > $LOd/trapsF00_cas7.log
 55 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f atm00 > $LOd/atm00_cas7.log
 
-00 05 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas7_t0_x4b -ro 0 -r forecast < /dev/null > $LOd/post1.log
-
 00 04 * * * source ~/.bashrc; cat $LOd/*cas7.log | mail -s 'apogee cas7 forcing' pmacc@uw.edu
 
-30 06 * * * source ~/.bashrc; mail -s 'apogee post1' pmacc@uw.edu < $LOd/post1.log
+00 06 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas7_t0_x4b -ro 0 -r forecast < /dev/null > $LOd/post1.log
+
+00 07 * * * source ~/.bashrc; mail -s 'apogee post1' pmacc@uw.edu < $LOd/post1.log
 
 00 14 * * * source ~/.bashrc; python $LOd/driver_post2.py -gtx wgh2_t0_xn0b -ro 0 -r forecast < /dev/null > $LOd/post2.log
 
