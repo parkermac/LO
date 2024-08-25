@@ -93,13 +93,13 @@ ax.set_ylabel('Latitude')
 ax.set_title(exp_name.strip('/'))
 # add the tracks (packed [time, particle])
 # regular spaghetti plots
-ax.plot(lon, lat, '-k', linewidth=.2)
+ax.plot(lon, lat, '-k', linewidth=.2, alpha=.1)
 ax.plot(lon[0,:], lat[0,:], 'og', alpha=.3)
 ax.plot(lon[-1,:], lat[-1,:], 'or', alpha=.2)
 
 # time series
 td = (ot_vec - ot_vec[0])/86400
-tv_list = ['z', 'cs', 'salt', 'temp']
+tv_list = ['z', 'salt', 'temp']
 #tv_list = ['u', 'v', 'lon', 'lat']
 ntv = len(tv_list)
 for ii in range(ntv):
