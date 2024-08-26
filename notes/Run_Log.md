@@ -56,8 +56,6 @@ These are are an 8-year sequence of quasi-continuous runs (first PM ran each yea
 
 - **DELETED 2024.08.25** cas6_v1_live **CURRENT FORECAST ARCHIVE** 2023.05.21-now [9 TB and growing]
 - cas6_v0_live **OLD FORECAST ARCHIVE**, 2016.12.15-2023.05.23 (6+ years). It was originally the files in cas6_v3_lo8b, and then we started appending files from cas6_v0_u0kb (or occasionally _u0mb) after the transition from the LiveOcean code to the LO code. [40 TB, compressed NetCDF]
-- cas6_v3t075_lo8 A single year, 2018, run with 75% tides, non biology. [3.7 TB]
-- cas6_v3t110_lo8 A single year, 2018, run with 110% tides, non biology. [3.7 TB]
 
 **perigee: /data2/parker/LiveOcean_roms/output**
 
