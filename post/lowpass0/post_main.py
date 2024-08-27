@@ -4,8 +4,8 @@ This is the main program for making a tidally averaged version of the daily fore
 It just does one day, the first day of the forecast. It could in principle do the 
 second day, but why bother as it will just be overwritten.
 
-Run on apogee:
-run post_main.py -gtx cas7_t0_x4b -ro 0 -d [today's datestring] -r forecast -job lowpass0 < /dev/null > lowpass0.log &
+Test on apogee:
+run post_main.py -gtx cas7_t0_x4b -ro 0 -d [today's datestring] -r forecast -job lowpass0
 """
 
 from pathlib import Path
