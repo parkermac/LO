@@ -8,10 +8,10 @@ Testing on mac:
 run driver_post1.py -gtx cas7_t0_x4b -r backfill -d 2017.07.04 -ro 0 -test True
 
 Test on apogee:
-python driver_post1.py -gtx cas6_v0_u0kb -r forecast -ro 0 -test True < /dev/null > test_post.log &
+python driver_post1.py -gtx cas7_t0_x4b -r forecast -ro 0 -test True < /dev/null > test_post.log &
 
 To run for real on apogee
-python driver_post1.py -gtx cas6_v0_u0mb -r forecast -ro 0 < /dev/null > post.log &
+python driver_post1.py -gtx cas7_t0_x4b -r forecast -ro 0 < /dev/null > post.log &
 
 NOTE: the "< /dev/null" appears to be necessary when running by hand and you stay
 logged on because (maybe) the daymovie0 job is somehow expecting standard input,
@@ -112,11 +112,10 @@ if Ldir['testing'] == False:
 tt0 = time()
 # loop over all jobs
 if Ldir['testing'] == True:
-    job_list = ['surface1', 'layers1', 'ubc1', 'sequim1',
-        'daymovie0', 'drifters0','layers_uv']
+    job_list = ['lowpass0']
 else:
     job_list = ['nest_wgh', 'surface1', 'layers1', 'ubc1', 'sequim1',
-        'daymovie0', 'drifters0','layers_uv']
+        'daymovie0', 'drifters0','layers_uv','lowpass0']
 
 for job in job_list:
     
