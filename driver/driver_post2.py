@@ -115,7 +115,7 @@ tt0 = time()
 if Ldir['testing'] == True:
     job_list = ['daymovie2']
 else:
-    job_list = ['daymovie2','layers2']
+    job_list = ['daymovie2','layers2','drifters_wgh']
 
 for job in job_list:
     
