@@ -31,6 +31,8 @@ f_string = 'f' + ds0
 cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'lowpass' / 'extract_lowpass.py'),
     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
     '-0', ds0, '-1', ds0, '-Nproc', '10']
+# Note that we make use of the cast that testing = False by default. Hence when we run this
+# using driver_post1.py with testing = True it will still run normally.
 proc = PO(cmd_list, stdout=PI, stderr=PI)
 stdout, stderr = proc.communicate()
 Ncenter = 30

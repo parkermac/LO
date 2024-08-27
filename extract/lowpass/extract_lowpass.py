@@ -155,7 +155,6 @@ while dtlp <= dt1:
         ds_test = xr.open_dataset(out_fn)
     lp_full.close()
 
-
     if not Ldir['testing']:
         # tidying up
         Lfun.make_dir(temp_out_dir, clean=True)
