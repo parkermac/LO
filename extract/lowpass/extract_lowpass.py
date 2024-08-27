@@ -79,7 +79,7 @@ while dtlp <= dt1:
         cc1 = this_cca[-1]
         # print(' - Working on index range %d:%d' % (cc0, cc1))
         # sys.stdout.flush()
-        cmd_list = ['python', 'lp_worker.py',
+        cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'lowpass' / 'lp_worker.py'),
                     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
                     '-dslp', dslp, '-ii0', str(cc0), '-ii1', str(cc1),
                     '-fnum', str(fnum), '-test', str(Ldir['testing']), '-v', verbose]
