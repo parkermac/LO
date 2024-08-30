@@ -1,21 +1,26 @@
 LANG=en-US.UTF-8
 LOd="/gscratch/macc/parker/LO/driver"
 
+# main forecast
 00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas7 -t t0 -x x4b -r forecast -np 200 -N 40 --done_tag 7 < /dev/null > $LOd/cas7_forecast.log
 00 08 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas7 -t t0 -x x4b -r forecast -np 200 -N 40 --done_tag 7 < /dev/null > $LOd/cas7_forecast_2.log
-00 17 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas7 -t t0 -x x4b -r forecast -np 200 -N 40 --done_tag 7 < /dev/null > $LOd/cas7_forecast_3.log
-
+00 13 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas7 -t t0 -x x4b -r forecast -np 200 -N 40 --done_tag 7 < /dev/null > $LOd/cas7_forecast_3.log
 00 06 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' pmacc@uw.edu < $LOd/cas7_forecast.log
 00 07 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' pmacc@uw.edu < $LOd/cas7_forecast.log
 
+# emails to the group
 01 07 * * * source ~/.bashrc; mail -s 'LO forecast klone' darrd@uw.edu < $LOd/cas7_forecast.log
 02 07 * * * source ~/.bashrc; mail -s 'LO forecast klone' ebroatch@uw.edu < $LOd/cas7_forecast.log
 03 07 * * * source ~/.bashrc; mail -s 'LO forecast klone' auroral@uw.edu < $LOd/cas7_forecast.log
 04 07 * * * source ~/.bashrc; mail -s 'LO forecast klone' kmhewett@uw.edu < $LOd/cas7_forecast.log
 05 07 * * * source ~/.bashrc; mail -s 'LO forecast klone' jxiong7@uw.edu < $LOd/cas7_forecast.log
 
-00 13 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g wgh2 -t t0 -x xn0b -s perfect -r forecast -np 200 -N 40 --done_tag N < /dev/null > $LOd/wgh2_forecast.log
-00 15 * * * source ~/.bashrc; mail -s 'wgh forecast klone' pmacc@uw.edu < $LOd/wgh2_forecast.log
+# nested forecast
+30 07 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g wgh2 -t t0 -x xn0b -r forecast -np 200 -N 40 --done_tag N < /dev/null > $LOd/wgh2_forecast.log
+30 12 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g wgh2 -t t0 -x xn0b -r forecast -np 200 -N 40 --done_tag N < /dev/null > $LOd/wgh2_forecast_2.log
+30 17 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g wgh2 -t t0 -x xn0b -r forecast -np 200 -N 40 --done_tag N < /dev/null > $LOd/wgh2_forecast_3.log
+00 09 * * * source ~/.bashrc; mail -s 'wgh forecast klone' pmacc@uw.edu < $LOd/wgh2_forecast.log
 
+# refresh this crontab
 00 12 * * * crontab <<< $(crontab -l)
 

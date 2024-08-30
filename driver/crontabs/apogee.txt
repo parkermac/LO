@@ -7,17 +7,17 @@ LOa=/dat1/parker/LO_data/accounts
 30 02 * * * source ~/.bashrc; $LOa/getwrf.csh
 00 04 * * * source ~/.bashrc; $LOa/getwrf.csh
 
-# cas7 versions
+# cas7 forcing
 20 01 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f ocn01 > $LOd/ocn01_cas7.log
 00 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f tide00 > $LOd/tide00_cas7.log
 05 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -tP trapsP00 -f trapsF00 > $LOd/trapsF00_cas7.log
 55 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f atm00 > $LOd/atm00_cas7.log
-
 00 04 * * * source ~/.bashrc; cat $LOd/*cas7.log | mail -s 'apogee cas7 forcing' pmacc@uw.edu
 
+# post1
 00 06 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas7_t0_x4b -ro 0 -r forecast < /dev/null > $LOd/post1.log
-
 00 07 * * * source ~/.bashrc; mail -s 'apogee post1' pmacc@uw.edu < $LOd/post1.log
 
-00 14 * * * source ~/.bashrc; python $LOd/driver_post2.py -gtx wgh2_t0_xn0b -ro 0 -r forecast < /dev/null > $LOd/post2.log
-
+# post2
+00 09 * * * source ~/.bashrc; python $LOd/driver_post2.py -gtx wgh2_t0_xn0b -ro 0 -r forecast < /dev/null > $LOd/post2.log
+00 10 * * * source ~/.bashrc; mail -s 'apogee post2' pmacc@uw.edu < $LOd/post2.log

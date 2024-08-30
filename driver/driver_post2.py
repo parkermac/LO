@@ -75,7 +75,7 @@ else:
 print((' Post-processing %s for %s' % (Ldir['run_type'], Ldir['date_string'])).center(60,'-'))
 
 # check that all history files are in place
-maxcount=360; sleeptime=60 # will keep looking for 6 hours, e.g. 2 PM to 8 PM
+maxcount=1440; sleeptime=60 # will keep looking for 24 hours, e.g. 9 AM to 9 AM the next day
     
 ds0 = Ldir['date_string']
 dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
