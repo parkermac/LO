@@ -72,7 +72,7 @@ fig = plt.figure()
 
 # MAP
 # set domain limits
-if True:
+if False:
     # plot full domain
     aa = [lonp.min(), lonp.max(), latp.min(), latp.max()]
 else:

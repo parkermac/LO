@@ -58,30 +58,6 @@ def get_ic(TR):
         lons = [-122.7, -122.6]
         lats = [48.075, 48.075]
         plon00, plat00, pcs00 = ic_sect(fn00, lons, lats, NPmax=10000)
-
-    elif exp_name == 'nina_jdfw': # For Nina Bednarsek, mouth of JdF
-        lon0 = -124.71; lat0 = 48.5 # center of the circle 
-        radius_km = 3 # radius of the circle km
-        N = 1000 # number of particles
-        # make random scattering of points in a circle
-        plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
-        pcs00 = -0.5 * np.ones(N)
-        
-    elif exp_name == 'nina_jdfe': # For Nina Bednarsek, eastern JdF
-        lon0 = -123; lat0 = 48.3 # center of the circle 
-        radius_km = 3 # radius of the circle km
-        N = 1000 # number of particles
-        # make random scattering of points in a circle
-        plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
-        pcs00 = -0.5 * np.ones(N)
-        
-    elif exp_name == 'nina_aih': # For Nina Bednarsek, AI near Hood Canal
-        lon0 = -122.64; lat0 = 47.97 # center of the circle 
-        radius_km = 3 # radius of the circle km
-        N = 1000 # number of particles
-        # make random scattering of points in a circle
-        plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
-        pcs00 = -0.5 * np.ones(N)
         
     if exp_name == 'ai0': # Mid-Admiralty Inlet
         lonvec = np.array([-122.6])
@@ -124,28 +100,41 @@ def get_ic(TR):
         #
         plon00 = lonmat.flatten(); plat00 = latmat.flatten()
         pcs00 = np.zeros(plon00.shape)
-        
+
+    elif exp_name == 'dmMerhab2':
+        # like dmMerhab but with many more particles
+        nyp = 20
+        x0 = -126; x1 = -125; y0 = 48; y1 = 49
+        clat_1 = np.cos(np.pi*(np.mean([y0, y1]))/180)
+        xyRatio = clat_1 * (x1 - x0) / (y1 - y0)
+        lonvec = np.linspace(x0, x1, (nyp * xyRatio).astype(int))
+        latvec = np.linspace(y0, y1, nyp)
+        lonmat_1, latmat_1 = np.meshgrid(lonvec, latvec)
+        #
+        x0 = -125.2; x1 = -124.2; y0 = 44; y1 = 45
+        clat_2 = np.cos(np.pi*(np.mean([y0, y1]))/180)
+        xyRatio = clat_2 * (x1 - x0) / (y1 - y0)
+        lonvec = np.linspace(x0, x1, (nyp * xyRatio).astype(int))
+        latvec = np.linspace(y0, y1, nyp)
+        lonmat_2, latmat_2 = np.meshgrid(lonvec, latvec)
+        lonmat = np.concatenate((lonmat_1.flatten(), lonmat_2.flatten()))
+        latmat = np.concatenate((latmat_1.flatten(), latmat_2.flatten()))
+        #
+        plon00 = lonmat.flatten(); plat00 = latmat.flatten()
+        pcs00 = np.zeros(plon00.shape)
     elif exp_name == 'full': # the whole domain of cas6, with some edges trimmed
         # used by drifters0
-        lonvec = np.linspace(-129, -122, 30)
-        latvec = np.linspace(43, 51, 60)
+        lonvec = np.linspace(-129, -122, 60)
+        latvec = np.linspace(43, 51, 120)
         pcs_vec = np.array([0])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
         
     elif exp_name == 'PS': # nominally Puget Sound
         # used by drifters0
-        lonvec = np.linspace(-123.6, -122, 50)
-        latvec = np.linspace(47, 49, 100)
+        lonvec = np.linspace(-123.6, -122, 60)
+        latvec = np.linspace(47, 49, 120)
         pcs_vec = np.array([0])
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
-        
-    elif exp_name == 'turn_pt_oil': # For Nina Bednarsek, mouth of JdF
-        lon0 = -123.2427; lat0 = 48.6906 # center of the circle 
-        radius_km = 1 # radius of the circle km
-        N = 10000 # number of particles
-        # make random scattering of points in a circle
-        plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
-        pcs00 = 0 * np.ones(N)
         
     return plon00, plat00, pcs00
     
