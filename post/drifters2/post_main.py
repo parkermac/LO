@@ -118,7 +118,7 @@ for exp in exp_list:
             print(' sdtout '.center(60,'-'))
             print(stdout.decode())
         if len(stderr) > 0:
-            print('WARNING: problem moving tracks to homer ' + out_json_dict[exp].name)
+            print('WARNING: problem moving tracks to homer ' + out_json_dict0[exp].name)
             print(' stderr '.center(60,'-'))
             print(stderr.decode())
             result = 'FAIL'
@@ -131,7 +131,7 @@ for exp in exp_list:
             print(' sdtout '.center(60,'-'))
             print(stdout.decode())
         if len(stderr) > 0:
-            print('WARNING: problem moving times to homer ' + out_json_dict[exp].name)
+            print('WARNING: problem moving times to homer ' + out_json_dict1[exp].name)
             print(' stderr '.center(60,'-'))
             print(stderr.decode())
             result = 'FAIL'
