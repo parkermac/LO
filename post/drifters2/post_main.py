@@ -8,7 +8,7 @@ run post_main.py -gtx cas7_t0_x4b -ro 0 -d 2017.07.04 -job drifters2 -test True
 
 Run for real on apogee:
 
-run post_main.py -gtx cas7_t0_x4b -ro 0 -d ['today's datestring] -job drifters2
+python post_main.py -gtx cas7_t0_x4b -ro 0 -d ['today's datestring] -job drifters2 > drifters2.log &
 
 """
 
