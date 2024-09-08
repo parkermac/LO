@@ -40,10 +40,8 @@ if Ldir['testing']:
     dsr0 = dsr
     dtt = 1
 else:
-    dsr_dt00 = datetime.strptime(dsr,Ldir['ds_fmt'])
-    dsr_dt0 = dsr_dt00 - timedelta(days=6)
-    dsr0 = datetime.strftime(dsr_dt0,Ldir['ds_fmt'])
-    dtt = 9 # assume this is for a daily forecast, so we track three days into the future.
+    dsr0 = dsr
+    dtt = 3
 
 # RUN TRACKER JOBS
 tt0 = time()
