@@ -19,6 +19,7 @@ LOd="/gscratch/macc/parker/LO/driver"
 30 07 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g wgh2 -t t0 -x xn0b -r forecast -np 200 -N 40 --done_tag N < /dev/null > $LOd/wgh2_forecast.log
 30 12 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g wgh2 -t t0 -x xn0b -r forecast -np 200 -N 40 --done_tag N < /dev/null > $LOd/wgh2_forecast_2.log
 30 17 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g wgh2 -t t0 -x xn0b -r forecast -np 200 -N 40 --done_tag N < /dev/null > $LOd/wgh2_forecast_3.log
+30 20 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g wgh2 -t t0 -x xn0b -r forecast -np 200 -N 40 --done_tag N < /dev/null > $LOd/wgh2_forecast_4.log
 00 09 * * * source ~/.bashrc; mail -s 'wgh forecast klone' pmacc@uw.edu < $LOd/wgh2_forecast.log
 
 # refresh this crontab
