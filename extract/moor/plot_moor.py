@@ -67,8 +67,8 @@ df = pd.DataFrame(index=ot)
 for vn in vn2_list:
     df[vn] = ds[vn].values
 for vn in vn3_list:
-    # df[vn] = ds[vn][:, -1] # top
-    df[vn] = ds[vn][:, 0] # bottom
+    df[vn] = ds[vn][:, -1] # top
+    # df[vn] = ds[vn][:, 0] # bottom
     # df[vn] = zfun.lowpass(ds[vn][:, -1].values, f='godin') # top
     # df[vn] = zfun.lowpass(ds[vn][:, 0].values, f='godin') # bottom
 
