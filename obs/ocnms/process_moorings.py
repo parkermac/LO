@@ -106,7 +106,7 @@ for sn in sn_list:
     
     ds['SA'] = xr.DataArray(SA, dims=('time','z'),
         attrs={'units':'g kg-1', 'long_name':'Absolute Salinity'})
-    ds['SP'] = xr.DataArray(SA, dims=('time','z'),
+    ds['SP'] = xr.DataArray(SP, dims=('time','z'),
         attrs={'units':' ', 'long_name':'Practical Salinity'})
     ds['IT'] = xr.DataArray(IT, dims=('time','z'),
         attrs={'units':'degC', 'long_name':'Insitu Temperature'})
