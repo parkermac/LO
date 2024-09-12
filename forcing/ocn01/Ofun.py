@@ -70,6 +70,8 @@ def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
         '-d','lat,'+str(south)+'.,'+str(north)+'.,1',
         '-v',vstr, 'https://tds.hycom.org/thredds/dodsC/GLBy0.08/latest',
         '-4', '-O', full_fn_out]
+    if verbose:
+        print(cmd_list)
     # run ncks
     tt0 = time.time()
     ret1 = subprocess.call(cmd_list)
