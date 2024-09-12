@@ -62,6 +62,17 @@ def get_data_ncks(h_out_dir, dt0, dt1, testing_ncks):
     # time limits
     dstr0 = dt0.strftime('%Y-%m-%dT00:00') 
     dstr1 = dt1.strftime('%Y-%m-%dT00:00')
+
+    # DEBUGGING 2024.09.12 due to change at HYCOM
+    """
+    Possible new url format:
+    https://ncss.hycom.org/thredds/ncss/FMRC_ESPC-D-V02_s3z/FMRC_ESPC-D-V02_s3z_best.ncd?var=salinity&north=53.1&west=229&east=239.1&south=39&disableProjSubset=on&horizStride=1&time_start=2024-09-10T00%3A00%3A00Z&time_end=2024-09-17T00%3A00%3A00Z&timeStride=8&vertCoord=&addLatLon=true&accept=netcdf4
+
+    whereas an example of the ncks command I am using is (when converted to a string):
+    ncks -d time,2024-09-10T00:00,2024-09-17T00:00,8 -d lon,229.,239.,1 -d lat,39.,53.,1 -v surf_el,water_temp,salinity,water_u,water_v,depth https://tds.hycom.org/thredds/dodsC/GLBy0.08/latest -4 -O /dat1/parker/LO_output/forcing/cas7/f2024.09.12/ocn01/Data/forecast_ncks.nc
+    """
+
+
     # use subprocess.call() to execute the ncks command
     vstr = 'surf_el,water_temp,salinity,water_u,water_v,depth'
     cmd_list = ['ncks',
@@ -151,6 +162,9 @@ def get_data_oneday(this_dt, out_fn, testing_fmrc):
     &north=53&south=39&west=229&east=239
     &time=2020-03-11-T00:00:00Z
     &addLatLon=true&accept=netcdf4
+
+    Possible new url format as of September 2024:
+    https://ncss.hycom.org/thredds/ncss/FMRC_ESPC-D-V02_s3z/FMRC_ESPC-D-V02_s3z_best.ncd?var=salinity&north=53.1&west=229&east=239.1&south=39&horizStride=1&time=2024-09-12T00%3A00%3A00Z&vertStride=1&addLatLon=true&accept=netcdf4
     """
     # create the request url (added new url 2019.12.06)
     url = ('https://ncss.hycom.org/thredds/ncss/GLBy0.08/expt_93.0/FMRC/GLBy0.08_930_FMRC_best.ncd'+
