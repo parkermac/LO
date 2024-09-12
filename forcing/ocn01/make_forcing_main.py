@@ -12,6 +12,9 @@ run make_forcing_main.py -g cas7 -r backfill -d 2012.10.08 -f ocn01 -test True
 Ofun_bio module to give better initial conditions based on observations. As in ocn00
 this is only used for a specific date. We dropped Ofun_CTD.py.
 
+2024.09.12 Forcing it to go to Plan C whil I build ocn02 to work with the new
+HYCOM system.
+
 Performance:
 Takes about 2 minutes per day (3 minutes with start_type = new)
 Output is 600 MB per day (800 MB with start_type = new)
@@ -50,7 +53,7 @@ import Ofun_bio
 
 # defaults
 planB = False
-planC = False
+planC = True # NEW as of 2024.09.12
 add_CTD = False
 do_bio = True
 
@@ -58,7 +61,7 @@ do_bio = True
 verbose = False
 testing_ncks = False
 testing_fmrc = False
-testing_planC = False
+testing_planC = True # NEW as of 2024.09.12
 
 if Ldir['testing']:
     verbose = True
