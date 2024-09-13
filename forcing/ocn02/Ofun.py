@@ -73,7 +73,7 @@ def get_data_oneday(this_dt, out_fn, testing_fmrc):
             print('hycom for %s does not exist' % (url))
             got_fmrc = False
             break
-        hycom_time = num2date(ds.variables["time"][:], ds.variables["time"].units)
+        hycom_time = num2date(hycom.variables["time"][:], hycom.variables["time"].units)
         # hycom_time = cftime.num2date(ds.time.values, ds.time.units)
         time_list = np.where(hycom_time == this_dt)[0]
         # ds.close()
