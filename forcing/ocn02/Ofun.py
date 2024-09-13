@@ -13,6 +13,7 @@ import seawater
 import subprocess
 import requests
 import warnings
+from netCDF4 import Dataset, num2date
 
 import xarray as xr
 import cftime
@@ -65,15 +66,18 @@ def get_data_oneday(this_dt, out_fn, testing_fmrc):
         url = url_hycom[i]
         print(i, var, url)
         print('Working step %d for %s using %s' %(i, var, url))
-        try:    
-            ds = xr.open_dataset(url, use_cftime=True, decode_times=False)
+        try:
+            hycom = Dataset(url)    
+            # ds = xr.open_dataset(url, use_cftime=True, decode_times=False)
         except:    
             print('hycom for %s does not exist' % (url))
             got_fmrc = False
             break
-        hycom_time = cftime.num2date(ds.time.values, ds.time.units)
+        hycom_time = num2date(ds.variables["time"][:], ds.variables["time"].units)
+        # hycom_time = cftime.num2date(ds.time.values, ds.time.units)
         time_list = np.where(hycom_time == this_dt)[0]
-        ds.close()
+        # ds.close()
+        hycom.close()
                         
         if not np.any(time_list):
             print("Cannot find valid times")
