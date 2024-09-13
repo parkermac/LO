@@ -13,7 +13,7 @@ Ofun_bio module to give better initial conditions based on observations. As in o
 this is only used for a specific date. We dropped Ofun_CTD.py.
 
 2024.09.12 This code is based on ocn01. The main difference is that it uses a new URL
-becasue of a change at HYCOM. Also we omit the ncks-based Plan A and instead only use
+because of a change at HYCOM. Also we omit the ncks-based Plan A and instead only use
 a modified version of Plan B which gest single times. We also have to combine extractions
 of single variables.
 
@@ -104,19 +104,6 @@ if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
     while dtff <= dt1:
         dt_list_full.append(dtff)
         dtff = dtff + timedelta(days=1)
-    
-    # # Plan A: use ncks
-    # try:
-    #     print('**** Using planA ****')
-    #     result_dict['note'] = 'planA'
-    #     got_ncks = False
-    #     got_ncks = Ofun.get_data_ncks(h_out_dir, dt0, dt1, testing_ncks)
-    # except Exception as e:
-    #     print(e)
-    #     planB = True
-    # if got_ncks == False:
-    #     print('- error getting forecast files using ncks')
-    #     planB = True
 
     planB = True
     

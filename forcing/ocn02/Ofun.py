@@ -14,6 +14,10 @@ import subprocess
 import requests
 import warnings
 
+import xarray as xr
+import cftime
+from time import time
+
 from lo_tools import Lfun, zfun, zrfun
 from lo_tools import hycom_functions as hfun
 
@@ -22,13 +26,12 @@ verbose = True
 def get_data_oneday(this_dt, out_fn, testing_fmrc):
     """"
     Plan B for forecast case: hycom data using the FMRC_best file.
-    It gets only a single time, per the new guidance from Michael McDonald
-    at HYCOM, 2020.03.16.
+    It gets only a single time.
     
-    Note that this hard-codes HYCOM experiment info like GLBy0.08/expt_93.0
-    and so could fail when this is superseded.
+    Note that this hard-codes HYCOM experiment info and so could fail
+    when this is superseded.
     """
-    testing = True
+    testing = False
     
     if testing_fmrc:
         # generate an error
@@ -38,8 +41,6 @@ def get_data_oneday(this_dt, out_fn, testing_fmrc):
     out_fn.unlink(missing_ok=True)
 
     dstr = this_dt.strftime(Lfun.ds_fmt)
-    # time string in HYCOM format
-    dstr_hy = this_dt.strftime('%Y-%m-%d-T00%3A00%3A00Z')
     
     print(' - getting hycom fields for ' + dstr)
     
@@ -50,55 +51,48 @@ def get_data_oneday(this_dt, out_fn, testing_fmrc):
     west = aa[0] + 360
     east = aa[1] + 360
 
-    if testing == True:
-        var_list = 'salinity'
-    else:
-        var_list = 'surf_el,water_temp,salinity,water_u,water_v'
+    # new combined versions
+    url_temp_salt = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_ts3z/FMRC_ESPC-D-V02_ts3z_best.ncd'
+    url_uvel_vvel = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_uv3z/FMRC_ESPC-D-V02_uv3z_best.ncd'
+    url_ssh  = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_ssh/FMRC_ESPC-D-V02_ssh_best.ncd'
+    url_hycom = [url_ssh, url_uvel_vvel, url_temp_salt]
+    variables = ["surf_el", "water_u,water_v", "water_temp,salinity"]
 
-    # template for url from Michael MacDonald March 2020
-    """
-    https://ncss.hycom.org/thredds/ncss/GLBy0.08/expt_93.0/FMRC/GLBy0.08_930_FMRC_best.ncd
-    ?var=surf_el,water_temp,salinity,water_u,water_v
-    &north=53&south=39&west=229&east=239
-    &time=2020-03-11-T00:00:00Z
-    &addLatLon=true&accept=netcdf4
-
-    Possible new url format as of September 2024:
-    https://ncss.hycom.org/thredds/ncss/FMRC_ESPC-D-V02_s3z/FMRC_ESPC-D-V02_s3z_best.ncd?var=salinity&north=53.1&west=229&east=239.1&south=39&horizStride=1&time=2024-09-12T00%3A00%3A00Z&vertStride=1&addLatLon=true&accept=netcdf4
-    """
-    # create the request url
-    url = ('https://ncss.hycom.org/thredds/ncss/FMRC_ESPC-D-V02_s3z/FMRC_ESPC-D-V02_s3z_best.ncd'+
-        '?var='+var_list +
-        '&north='+str(north)+'&south='+str(south)+'&west='+str(west)+'&east='+str(east) +
-        '&time='+dstr_hy +
-        '&addLatLon=true&accept=netcdf4')    
-    if verbose:
-        print(url)
-    # new version 2020.04.22 using requests
-    counter = 1
-    got_fmrc = False
-    while (counter <= 10) and (got_fmrc == False):
-        print(' - Attempting to get data, counter = ' + str(counter))
-        time.sleep(10) # pause before each request
-        tt0 = time.time()
-        try:
-            r = requests.get(url, timeout=200)
-            if r.ok:
-                with open(out_fn,'wb') as f:
-                    f.write(r.content)
-                got_fmrc = True
-                r.close()
-            elif not r.ok:
-                print(' - Failed with status code:')
-                print(r.status_code)
-        except Exception as e:
-            print(' - Exception from requests:')
-            print(e)
-        counter += 1
-        print(' - took %0.1f seconds' % (time.time() - tt0))
-        print(datetime.now())
+    got_fmrc = True
+    for i, var in enumerate(variables):
+        tt0 = time()
         print('')
-        sys.stdout.flush()
+        url = url_hycom[i]
+        print(i, var, url)
+        print('Working step %d for %s using %s' %(i, var, url))
+        try:    
+            ds = xr.open_dataset(url, use_cftime=True, decode_times=False)
+        except:    
+            print('hycom for %s does not exist' % (url))
+            got_fmrc = False
+            break
+        hycom_time = cftime.num2date(ds.time.values, ds.time.units)
+        time_list = np.where(hycom_time == this_dt)[0]
+        ds.close()
+                        
+        if not np.any(time_list):
+            print("Cannot find valid times")
+            print(hycom_time)
+            got_fmrc = False
+            break
+
+        # extract data from HYCOM file
+        if i == 0:
+            cmd='ncks -O -v {:s} -d time,{:d},{:d} -d lat,{:d}.,{:d}.,1 -d lon,{:d}.,{:d}.,1 {:s} {:s}'.format(
+                    var, time_list[0], time_list[0], south, north, west, east, url, str(out_fn))
+        else:
+            cmd='ncks -A -v {:s} -d time,{:d},{:d} -d lat,{:d}.,{:d}.,1 -d lon,{:d}.,{:d}.,1  {:s} {:s}'.format(
+                    var, time_list[0], time_list[0], south, north, west, east, url, str(out_fn))
+
+        print(cmd)
+        os.system(cmd)
+        print('Took %0.1f sec to get %s' % (time()-tt0, var))
+
     return got_fmrc
 
 def get_hnc_short_list(this_dt, Ldir):
@@ -512,7 +506,7 @@ def get_zinds(h, S, z):
     value in the whole 3D array, with the index being the UPPER one of
     the two HYCOM z indices that any ROMS z falls between.
     """
-    tt0 = time.time()
+    tt0 = time()
     zr = zrfun.get_z(h, 0*h, S, only_rho=True)
     zrf = zr.flatten()
     zinds = np.nan * np.ones_like(zrf)
@@ -526,7 +520,7 @@ def get_zinds(h, S, z):
     if isinstance(zinds, np.ma.MaskedArray):
         zinds = zinds.data
     if verbose:
-        print(' --create zinds array took %0.1f seconds' % (time.time() - tt0))
+        print(' --create zinds array took %0.1f seconds' % (time() - tt0))
     return zinds
 
 def get_interpolated(G, S, b, lon, lat, z, N, zinds):
