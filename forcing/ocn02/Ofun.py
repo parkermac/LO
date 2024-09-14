@@ -120,8 +120,7 @@ def get_data_oneday(idt, out_fn, ind_dicts, testing_fmrc):
         raise ValueError('Artificial error for testing')
     # get rid of the old version, if it exists
     out_fn.unlink(missing_ok=True)
-    dstr = this_dt.strftime(Lfun.ds_fmt)
-    print(' - getting hycom fields for ' + dstr)
+    print(' - getting hycom fields for ' + str(out_fn))
     got_fmrc = True
     ii = 0
     for key in ind_dicts.keys():
