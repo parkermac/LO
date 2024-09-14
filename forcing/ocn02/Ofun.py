@@ -102,7 +102,7 @@ def get_indices(h_out_dir, dt_list_full):
                 print(key)
                 print(ind_dicts[key])
                 print('')
-                sys.exit()
+            sys.exit()
     return ind_dict
 
 def get_data_oneday(this_dt, out_fn, testing_fmrc):
