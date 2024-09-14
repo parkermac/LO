@@ -125,7 +125,7 @@ def get_data_oneday(idt, out_fn, ind_dicts, testing_fmrc):
     ii = 0
     for key in ind_dicts.keys():
         tt0 = time()
-        ind_dict = ind_dict[key]
+        ind_dict = ind_dicts[key]
         it = ind_dict['it_list'][idt]
         ix0 = ind_dict['ix0']
         ix1 = ind_dict['ix1']
