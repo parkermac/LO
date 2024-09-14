@@ -10,27 +10,105 @@ import time
 import pickle
 from scipy.spatial import cKDTree
 import seawater
-import subprocess
 import requests
 import warnings
-from netCDF4 import Dataset, num2date
 
 import xarray as xr
-import cftime
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
 from time import time
+import pandas as pd
 
 from lo_tools import Lfun, zfun, zrfun
 from lo_tools import hycom_functions as hfun
 
 verbose = True
 
+# urls for extraction from new hycom (2024.09.14)
+url_ssh  = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_ssh/FMRC_ESPC-D-V02_ssh_best.ncd'
+url_uvel_vvel = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_uv3z/FMRC_ESPC-D-V02_uv3z_best.ncd'
+url_temp_salt = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_ts3z/FMRC_ESPC-D-V02_ts3z_best.ncd'
+# lists and dicts
+hkeys = ['ssh','vel','ts']
+url_list = [url_ssh, url_uvel_vvel, url_temp_salt]
+hycom_var_list = ["surf_el", "water_u,water_v", "water_temp,salinity"]
+url_dict = dict(zip(hkeys,url_list))
+hycom_var_dict = dict(zip(hkeys,hycom_var_list))
+
+def messages(mess_str, stdout, stderr):
+    # utility function to help with subprocess errors
+    try:
+        if len(stdout) > 0:
+            print(mess_str)
+            print(stdout.decode())
+    except TypeError:
+        pass
+    try:
+        if len(stderr) > 0:
+            print(mess_str)
+            print(stderr.decode())
+    except TypeError:
+        pass
+
+def get_indices(h_out_dir, dt_list_full):
+    # find and check the indices into hycom for the extraction
+
+    # specify the sub region of hycom to extract
+    aa = hfun.aa
+    # convert to hycom format
+    north = aa[3]
+    south = aa[2]
+    west = aa[0] + 360
+    east = aa[1] + 360
+
+    ind_dicts = dict()
+    for key in hkeys:
+        if verbose:
+            print('-- getting indices for: ' + key)
+            sys.stdout.flush()
+        url = url_dict[key]
+        out_fn = h_out_dir / (key + '_tyx.nc')
+        # get rid of the old version, if it exists
+        out_fn.unlink(missing_ok=True)
+        # extract coordinates
+        cmd_list = ['ncks','-O','-v','time,lat,lon',url,str(out_fn)]
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        messages('get_indices() messages:', stdout, stderr)
+        # check on the results
+        ds = xr.open_dataset(out_fn)
+        # find selected indices to use with ncks to extract fields
+        t = ds.time.values
+        tind = pd.DatetimeIndex(t)
+        it_list = []
+        for this_dt in dt_list_full:
+            it = np.argwhere(tind==this_dt)[0][0]
+            it_list.append(it)
+        x = ds.lon.values
+        y = ds.lat.values
+        ix0 = zfun.find_nearest_ind(x,west)
+        ix1 = zfun.find_nearest_ind(x,east)
+        iy0 = zfun.find_nearest_ind(y,south)
+        iy1 = zfun.find_nearest_ind(y,north)
+        ds.close()
+        ind_dict = {'it_list':it_list, 'ix0':ix0, 'ix1':ix1, 'iy0':iy0, 'iy1':iy1}
+        ind_dicts[key] = ind_dict
+    for key in hkeys:
+        if ind_dicts[key] == ind_dict:
+            pass
+        else:
+            print('Warning from get_indices(): indices do not match for different variables!!')
+            for key in hkeys:
+                print(key)
+                print(ind_dicts[key])
+                print('')
+                sys.exit()
+    return ind_dict
+
 def get_data_oneday(this_dt, out_fn, testing_fmrc):
     """"
     Plan B for forecast case: hycom data using the FMRC_best file.
     It gets only a single time.
-    
-    Note that this hard-codes HYCOM experiment info and so could fail
-    when this is superseded.
     """
     testing = False
     
@@ -53,11 +131,7 @@ def get_data_oneday(this_dt, out_fn, testing_fmrc):
     east = aa[1] + 360
 
     # new combined versions
-    url_temp_salt = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_ts3z/FMRC_ESPC-D-V02_ts3z_best.ncd'
-    url_uvel_vvel = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_uv3z/FMRC_ESPC-D-V02_uv3z_best.ncd'
-    url_ssh  = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_ssh/FMRC_ESPC-D-V02_ssh_best.ncd'
-    url_hycom = [url_ssh, url_uvel_vvel, url_temp_salt]
-    variables = ["surf_el", "water_u,water_v", "water_temp,salinity"]
+
 
     got_fmrc = True
     for i, var in enumerate(variables):
@@ -351,7 +425,7 @@ def get_coords(in_dir):
 
 def checknan(fld):
     """
-    A utility function that issues a working if there are nans in fld.
+    A utility function that issues a warning if there are nans in fld.
     """
     if np.isnan(fld).sum() > 0:
         print('WARNING: nans in data field')    

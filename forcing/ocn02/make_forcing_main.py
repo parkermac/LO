@@ -3,14 +3,7 @@ This makes the ocn forcing files for the updated ROMS, including the banas-fenne
 
 Testing:
 
-run make_forcing_main.py -g cas7 -r backfill -d 2024.09.12 -f ocn02 -test True
-
-run make_forcing_main.py -g cas7 -r backfill -s new -d 2012.10.07 -f ocn02 -test True
-run make_forcing_main.py -g cas7 -r backfill -d 2012.10.08 -f ocn02 -test True
-
-2023.11.18 This code is based on ocn00. The main difference is that I have updated the
-Ofun_bio module to give better initial conditions based on observations. As in ocn00
-this is only used for a specific date. We dropped Ofun_CTD.py.
+run make_forcing_main.py -g cas7 -r forecast -d 2024.09.14 -f ocn02 -test True
 
 2024.09.12 This code is based on ocn01. The main difference is that it uses a new URL
 because of a change at HYCOM. Also we omit the ncks-based Plan A and instead only use
@@ -18,8 +11,6 @@ a modified version of Plan B which gest single times. We also have to combine ex
 of single variables.
 
 Performance:
-Takes about 2 minutes per day (3 minutes with start_type = new)
-Output is 600 MB per day (800 MB with start_type = new)
 
 To do:
 - Ofun: use gsw instead of seawater for potential temp calculation
@@ -111,6 +102,13 @@ if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
     if planB == True:
         print('**** Using planB ****')
         result_dict['note'] = 'planB'
+
+        # get the indices for extraction using ncks
+        ind_dict = Ofun.get_indices(h_out_dir, dt_list_full)
+        print(ind_dict)
+
+        sys.exit()
+
         try:
             for dtff in dt_list_full:
                 got_fmrc = False
