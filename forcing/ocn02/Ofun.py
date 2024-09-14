@@ -97,79 +97,60 @@ def get_indices(h_out_dir, dt_list_full):
         if ind_dicts[key] == ind_dict:
             pass
         else:
-            print('Warning from get_indices(): indices do not match for different variables!!')
-            for key in hkeys:
-                print(key)
-                print(ind_dicts[key])
-                print('')
-            sys.exit()
-    return ind_dict
+            print('Note from get_indices(): indices do not match for different variables.')
+            """
+            Looking at these the lon,lat indices were the same but the time indices were different for ssh.
+            This is okay and we will deal with it in the extractions.
+            """
+            # for key in hkeys:
+            #     print(key)
+            #     print(ind_dicts[key])
+            #     print('')
+            # sys.exit()
+    return ind_dicts
 
-def get_data_oneday(this_dt, out_fn, testing_fmrc):
+def get_data_oneday(idt, out_fn, ind_dicts, testing_fmrc):
     """"
     Plan B for forecast case: hycom data using the FMRC_best file.
     It gets only a single time.
     """
-    testing = False
-    
+    # testing = False
     if testing_fmrc:
         # generate an error
         raise ValueError('Artificial error for testing')
-
     # get rid of the old version, if it exists
     out_fn.unlink(missing_ok=True)
-
     dstr = this_dt.strftime(Lfun.ds_fmt)
-    
     print(' - getting hycom fields for ' + dstr)
-    
-    # specify spatial limits
-    aa = hfun.aa
-    north = aa[3]
-    south = aa[2]
-    west = aa[0] + 360
-    east = aa[1] + 360
-
-    # new combined versions
-
-
     got_fmrc = True
-    for i, var in enumerate(variables):
+    ii = 0
+    for key in ind_dicts.keys():
         tt0 = time()
-        print('')
-        url = url_hycom[i]
-        print(i, var, url)
-        print('Working step %d for %s using %s' %(i, var, url))
-        try:
-            hycom = Dataset(url)    
-            # ds = xr.open_dataset(url, use_cftime=True, decode_times=False)
-        except:    
-            print('hycom for %s does not exist' % (url))
-            got_fmrc = False
-            break
-        hycom_time = num2date(hycom.variables["time"][:], hycom.variables["time"].units)
-        # hycom_time = cftime.num2date(ds.time.values, ds.time.units)
-        time_list = np.where(hycom_time == this_dt)[0]
-        # ds.close()
-        hycom.close()
-                        
-        if not np.any(time_list):
-            print("Cannot find valid times")
-            print(hycom_time)
-            got_fmrc = False
-            break
-
+        ind_dict = ind_dict[key]
+        it = ind_dict['it_list'][idt]
+        ix0 = ind_dict['ix0']
+        ix1 = ind_dict['ix1']
+        iy0 = ind_dict['iy0']
+        iy1 = ind_dict['iy1']
+        url = url_dict[key]
+        hvars = hycom_var_dict[key]
         # extract data from HYCOM file
-        if i == 0:
-            cmd='ncks -O -v {:s} -d time,{:d},{:d} -d lat,{:d}.,{:d}.,1 -d lon,{:d}.,{:d}.,1 {:s} {:s}'.format(
-                    var, time_list[0], time_list[0], south, north, west, east, url, str(out_fn))
+        if ii == 0:
+            AO = '-O'
         else:
-            cmd='ncks -A -v {:s} -d time,{:d},{:d} -d lat,{:d}.,{:d}.,1 -d lon,{:d}.,{:d}.,1  {:s} {:s}'.format(
-                    var, time_list[0], time_list[0], south, north, west, east, url, str(out_fn))
-
-        print(cmd)
-        os.system(cmd)
-        print('Took %0.1f sec to get %s' % (time()-tt0, var))
+            AO = '-A'
+        cmd_list = ['ncks',AO,'-v',hvars,
+            '-d','time',str(it),str(it),
+            '-d','lat'+str(iy0)+','+str(iy1),
+            '-d','lon'+str(ix0)+','+str(ix1),
+            url,str(out_fn)]
+        if verbose:
+            print(cmd_list)
+            sys.stdout.flush()
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        messages('ncks extract messages:', stdout, stderr)
+        print('Took %0.1f sec to get %s' % (time()-tt0, hvars))
 
     return got_fmrc
 

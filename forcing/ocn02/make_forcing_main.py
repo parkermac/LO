@@ -104,21 +104,18 @@ if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
         result_dict['note'] = 'planB'
 
         # get the indices for extraction using ncks
-        ind_dict = Ofun.get_indices(h_out_dir, dt_list_full)
-        print(ind_dict)
-
-        sys.exit()
+        ind_dicts = Ofun.get_indices(h_out_dir, dt_list_full)
 
         try:
-            for dtff in dt_list_full:
+            for idt in range(len(dt_list_full)):
                 got_fmrc = False
-                data_out_fn =  h_out_dir / ('h' + dtff.strftime(Lfun.ds_fmt)+ '.nc')
+                data_out_fn =  h_out_dir / ('h' + dt_list_full[idt].strftime(Lfun.ds_fmt)+ '.nc')
                 if verbose:
                     print('\n' + str(data_out_fn))
                 sys.stdout.flush()
                 # get hycom forecast data from the web, and save it in the file "data_out_fn".
-                # it tries 10 times before ending
-                got_fmrc = Ofun.get_data_oneday(dtff, data_out_fn, testing_fmrc)
+                # it tries 10 times before ending (?)
+                got_fmrc = Ofun.get_data_oneday(idt, data_out_fn, ind_dicts, testing_fmrc)
                 if got_fmrc == False:
                     # this should break out of the dtff loop at the first failure
                     # and send the code to Plan C
