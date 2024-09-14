@@ -150,6 +150,7 @@ def get_data_oneday(idt, out_fn, ind_dicts, testing_fmrc):
         stdout, stderr = proc.communicate()
         messages('ncks extract messages:', stdout, stderr)
         print('Took %0.1f sec to get %s' % (time()-tt0, hvars))
+        ii += 1
 
     return got_fmrc
 
