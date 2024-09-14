@@ -139,9 +139,9 @@ def get_data_oneday(idt, out_fn, ind_dicts, testing_fmrc):
         else:
             AO = '-A'
         cmd_list = ['ncks',AO,'-v',hvars,
-            '-d','time',str(it),str(it),
-            '-d','lat'+str(iy0)+','+str(iy1),
-            '-d','lon'+str(ix0)+','+str(ix1),
+            '-d','time,'+str(it)+','+str(it),
+            '-d','lat,'+str(iy0)+','+str(iy1),
+            '-d','lon,'+str(ix0)+','+str(ix1),
             url,str(out_fn)]
         if verbose:
             print(cmd_list)
