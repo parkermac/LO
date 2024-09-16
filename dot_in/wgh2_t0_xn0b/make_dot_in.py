@@ -110,30 +110,9 @@ for O in list('NSEW'):
 
 # DERIVED VALUES
 if multi_core:
-    if Ldir['np_num'] == 64: # for new mox nodes 2*32=64 2019_02
-        ntilei = '8' # number of tiles in I-direction
-        ntilej = '8' # number of tiles in J-direction
-    elif Ldir['np_num'] == 72:
-        ntilei = '6' # number of tiles in I-direction
-        ntilej = '12' # number of tiles in J-direction
-    elif Ldir['np_num'] == 112:
-        ntilei = '8' # number of tiles in I-direction
-        ntilej = '14' # number of tiles in J-direction
-    elif Ldir['np_num'] == 144:
-        ntilei = '8' # number of tiles in I-direction
-        ntilej = '18' # number of tiles in J-direction
-    elif Ldir['np_num'] == 196:
-        ntilei = '14' # number of tiles in I-direction
-        ntilej = '14' # number of tiles in J-direction
-    elif Ldir['np_num'] == 252:
-        ntilei = '14' # number of tiles in I-direction
-        ntilej = '18' # number of tiles in J-direction
-    elif Ldir['np_num'] == 392:
-        ntilei = '14' # number of tiles in I-direction
-        ntilej = '28' # number of tiles in J-direction
-    elif Ldir['np_num'] == 588:
-        ntilei = '21' # number of tiles in I-direction
-        ntilej = '28' # number of tiles in J-direction
+    if Ldir['np_num'] == 160: # for new klone cpu-g2 slices (5*32)
+        ntilei = '10' # number of tiles in I-direction
+        ntilej = '16' # number of tiles in J-direction
     elif Ldir['np_num'] == 400: # klone
         ntilei = '20' # number of tiles in I-direction
         ntilej = '20' # number of tiles in J-direction
@@ -146,9 +125,6 @@ if multi_core:
     elif Ldir['np_num'] == 4: # klone
         ntilei = '2' # number of tiles in I-direction
         ntilej = '2' # number of tiles in J-direction
-    elif Ldir['np_num'] == 160: # klone g2 nodes (have 5*32 = 160)
-        ntilei = '10' # number of tiles in I-direction
-        ntilej = '16' # number of tiles in J-direction
     else:
         print('Unsupported number of processors: %d' % (Ldir['np_num']))
 else:

@@ -69,6 +69,8 @@ parser.add_argument('-np', '--np_num', type=int) # e.g. 200, number of cores
 parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone (32 for gen2 nodes)
 # optional flag to use for nesting
 parser.add_argument('--done_tag', type=str, default='3') # used in done_fn
+# optional flag to use a different type of node/slice (cpu-g2 vs compute)
+parser.add_argument('--cpu_choice', type=str, default='compute') # used in the sbatch call
 # various flags to facilitate testing
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
@@ -276,7 +278,7 @@ while dt <= dt1:
             tt0 = time()
             # Run ROMS using the batch script.
             if 'klone' in Ldir['lo_env']:
-                cmd_list = ['sbatch', '-p', 'compute', '-A', 'macc',
+                cmd_list = ['sbatch', '-p', args.cpu_choice, '-A', 'macc',
                     str(roms_out_dir / 'klone_batch.sh')]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             
