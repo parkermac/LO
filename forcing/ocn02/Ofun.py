@@ -63,6 +63,8 @@ def get_indices(h_out_dir, dt_list_full):
 
     ind_dicts = dict()
     for key in hkeys:
+        got_indices = True
+
         if verbose:
             print('-- getting indices for: ' + key)
             sys.stdout.flush()
@@ -75,7 +77,12 @@ def get_indices(h_out_dir, dt_list_full):
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
         messages('get_indices() messages:', stdout, stderr)
-        # check on the results
+
+        if len(stderr) > 0:
+            got_indices = False
+            break
+
+        # use the results
         ds = xr.open_dataset(out_fn)
         # find selected indices to use with ncks to extract fields
         t = ds.time.values
@@ -93,21 +100,24 @@ def get_indices(h_out_dir, dt_list_full):
         ds.close()
         ind_dict = {'it_list':it_list, 'ix0':ix0, 'ix1':ix1, 'iy0':iy0, 'iy1':iy1}
         ind_dicts[key] = ind_dict
-    for key in hkeys:
-        if ind_dicts[key] == ind_dict:
-            pass
-        else:
-            print('Note from get_indices(): indices do not match for different variables.')
-            """
-            Looking at these the lon,lat indices were the same but the time indices were different for ssh.
-            This is okay and we will deal with it in the extractions.
-            """
-            # for key in hkeys:
-            #     print(key)
-            #     print(ind_dicts[key])
-            #     print('')
-            # sys.exit()
-    return ind_dicts
+
+    if got_indices:
+        for key in hkeys:
+            if ind_dicts[key] == ind_dict:
+                pass
+            else:
+                print('Note from get_indices(): indices do not match for different variables.')
+                """
+                Looking at these the lon,lat indices were the same but the time indices were different for ssh.
+                This is okay and we will deal with it in the extractions.
+                """
+                # for key in hkeys:
+                #     print(key)
+                #     print(ind_dicts[key])
+                #     print('')
+                # sys.exit()
+
+    return ind_dicts, got_indices
 
 def get_data_oneday(idt, out_fn, ind_dicts, testing_fmrc):
     """"
@@ -149,6 +159,11 @@ def get_data_oneday(idt, out_fn, ind_dicts, testing_fmrc):
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
         messages('ncks extract messages:', stdout, stderr)
+                
+        if len(stderr) > 0:
+            got_fmrc = False
+            break
+
         print('Took %0.1f sec to get %s' % (time()-tt0, hvars))
         ii += 1
 
