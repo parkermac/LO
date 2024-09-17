@@ -104,7 +104,7 @@ if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
         result_dict['note'] = 'planB'
 
         # get the indices for extraction using ncks
-        got indices = False
+        got_indices = False
         for ntries in range(10):
             if got_indices == False:
                 # try again
