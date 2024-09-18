@@ -9,7 +9,7 @@ files came from. The output file format is very similar to a history file and sh
 be ready for plotting and extraction just like history files.
 
 This should work even on day 2 of a new run (where we would be missing the 0025 file from
-the day before day 1) because we trim the first and last entries from fm_list in lp_worker.py.
+the day before day 1) because we trim the first and last entries from fn_list in lp_worker.py.
 
 To make the job faster this driver splits the work up into Nproc simultaneous subprocesses
 which are instances of lp_worker. Each of these works through a subset of the files, multiplying
