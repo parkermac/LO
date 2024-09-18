@@ -110,7 +110,7 @@ if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
         for ntries in range(10):
             if got_indices == False:
                 # try again
-                print('get_data_oneday: ntries = ' + str(ntries))
+                print('\nget_indices: ntries = ' + str(ntries))
                 ind_dicts, got_indices = Ofun.get_indices(h_out_dir, dt_list_full)
             else:
                 break
@@ -131,7 +131,7 @@ if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
                     for ntries in range(10):
                         if got_fmrc == False:
                             # try again
-                            print('get_data_oneday: ntries = ' + str(ntries))
+                            print('\nget_data_oneday: ntries = ' + str(ntries))
                             got_fmrc = Ofun.get_data_oneday(idt, data_out_fn, ind_dicts, testing_fmrc)
                         else:
                             break
