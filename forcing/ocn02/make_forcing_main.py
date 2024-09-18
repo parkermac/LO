@@ -50,7 +50,7 @@ planC = False
 add_CTD = False
 do_bio = True
 
-# defaults for testing
+# defaults related to testing
 verbose = False
 testing_ncks = False
 testing_fmrc = False
@@ -112,35 +112,42 @@ if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
                 ind_dicts, got_indices = Ofun.get_indices(h_out_dir, dt_list_full)
             else:
                 break
+            
+        if got_indices == True:
 
-        try:
-            for idt in range(len(dt_list_full)):
-                got_fmrc = False # initialize each time
+            try:
+                for idt in range(len(dt_list_full)):
+                    got_fmrc = False # initialize each time
 
-                data_out_fn =  h_out_dir / ('h' + dt_list_full[idt].strftime(Lfun.ds_fmt)+ '.nc')
-                if verbose:
-                    print('\n' + str(data_out_fn))
-                sys.stdout.flush()
-                # get hycom forecast data from the web, and save it in the file "data_out_fn".
-                # it tries 10 times before ending
+                    data_out_fn =  h_out_dir / ('h' + dt_list_full[idt].strftime(Lfun.ds_fmt)+ '.nc')
+                    if verbose:
+                        print('\n' + str(data_out_fn))
+                    sys.stdout.flush()
+                    # get hycom forecast data from the web, and save it in the file "data_out_fn".
+                    # it tries 10 times before ending
 
-                for ntries in range(10):
+                    for ntries in range(10):
+                        if got_fmrc == False:
+                            # try again
+                            print('get_data_oneday: ntries = ' + str(ntries))
+                            got_fmrc = Ofun.get_data_oneday(idt, data_out_fn, ind_dicts, testing_fmrc)
+                        else:
+                            break
+
                     if got_fmrc == False:
-                        # try again
-                        print('get_data_oneday: ntries = ' + str(ntries))
-                        got_fmrc = Ofun.get_data_oneday(idt, data_out_fn, ind_dicts, testing_fmrc)
-                    else:
+                        # this should break out of the dtff loop at the first failure
+                        # and send the code to Plan C
+                        print('- error getting forecast files using fmrc')
+                        planC = True
                         break
 
-                if got_fmrc == False:
-                    # this should break out of the dtff loop at the first failure
-                    # and send the code to Plan C
-                    print('- error getting forecast files using fmrc')
-                    planC = True
-                    break
+            except Exception as e:
+                print(e)
+                planC = True
 
-        except Exception as e:
-            print(e)
+        elif got_indices == False:
+            # send the code to Plan C
+            print('- error getting indices for forecast')
             planC = True
 
 if planC == False:
