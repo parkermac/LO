@@ -5,6 +5,8 @@ Testing:
 
 run make_forcing_main.py -g cas7 -r forecast -d 2024.09.14 -f ocn02 -test True
 
+python make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn02 > test.log &
+
 2024.09.12 This code is based on ocn01. The main difference is that it uses a new URL
 because of a change at HYCOM. Also we omit the ncks-based Plan A and instead only use
 a modified version of Plan B which gest single times. We also have to combine extractions
