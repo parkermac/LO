@@ -22,8 +22,6 @@ import pandas as pd
 from lo_tools import Lfun, zfun, zrfun
 from lo_tools import hycom_functions as hfun
 
-verbose = True
-
 # urls for extraction from new hycom (2024.09.14)
 url_ssh  = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_ssh/FMRC_ESPC-D-V02_ssh_best.ncd'
 url_uvel_vvel = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_uv3z/FMRC_ESPC-D-V02_uv3z_best.ncd'
@@ -50,7 +48,7 @@ def messages(mess_str, stdout, stderr):
     except TypeError:
         pass
 
-def get_indices(h_out_dir, dt_list_full):
+def get_indices(h_out_dir, dt_list_full, verbose=False):
     # find and check the indices into hycom for the extraction
 
     # specify the sub region of hycom to extract
@@ -119,7 +117,7 @@ def get_indices(h_out_dir, dt_list_full):
 
     return ind_dicts, got_indices
 
-def get_data_oneday(idt, out_fn, ind_dicts, testing_fmrc):
+def get_data_oneday(idt, out_fn, ind_dicts, testing_fmrc, verbose=False):
     """"
     Plan B for forecast case: hycom data using the FMRC_best file.
     It gets only a single time.
@@ -593,8 +591,8 @@ def get_zinds(h, S, z):
     zinds = zinds.astype(int)
     if isinstance(zinds, np.ma.MaskedArray):
         zinds = zinds.data
-    if verbose:
-        print(' --create zinds array took %0.1f seconds' % (time() - tt0))
+    # if verbose:
+    #     print(' --create zinds array took %0.1f seconds' % (time() - tt0))
     return zinds
 
 def get_interpolated(G, S, b, lon, lat, z, N, zinds):

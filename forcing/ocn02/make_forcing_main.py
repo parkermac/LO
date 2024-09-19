@@ -3,9 +3,9 @@ This makes the ocn forcing files for the updated ROMS, including the banas-fenne
 
 Testing:
 
-run make_forcing_main.py -g cas7 -r forecast -d 2024.09.14 -f ocn02 -test True
+run make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn02 -test True
 
-python make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn02 > test.log &
+python make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn02 -test True > test.log &
 
 2024.09.12 This code is based on ocn01. The main difference is that it uses a new URL
 because of a change at HYCOM. Also we omit the ncks-based Plan A and instead only use
@@ -111,7 +111,7 @@ if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
             if got_indices == False:
                 # try again
                 print('\nget_indices: ntries = ' + str(ntries))
-                ind_dicts, got_indices = Ofun.get_indices(h_out_dir, dt_list_full)
+                ind_dicts, got_indices = Ofun.get_indices(h_out_dir, dt_list_full, verbose=verbose)
             else:
                 break
             
@@ -132,7 +132,7 @@ if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
                         if got_fmrc == False:
                             # try again
                             print('\nget_data_oneday: ntries = ' + str(ntries))
-                            got_fmrc = Ofun.get_data_oneday(idt, data_out_fn, ind_dicts, testing_fmrc)
+                            got_fmrc = Ofun.get_data_oneday(idt, data_out_fn, ind_dicts, testing_fmrc, verbose=verbose)
                         else:
                             break
 
