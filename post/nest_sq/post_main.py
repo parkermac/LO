@@ -2,18 +2,18 @@
 This is the main program for making creating the forcing for a nested model
 daily forecast.
 
-This is specific to the wgh (Willapa Bay - Grays Harbor) grid.
+This is specific to the sq (Sequim Bay) grid.
 
 Testing on mac:
 
-run post_main.py -gtx cas6_traps2_x2b -d 2017.07.04 -r backfill -job nest_wgh
+run post_main.py -gtx cas7_t0_x4b -d 2017.07.04 -r backfill -job nest_sq
 - works for ocnN but fails for atm00
 
-run post_main.py -gtx cas6_traps2_x2b -d 2019.07.04 -r backfill -job nest_wgh
+run post_main.py -gtx cas7_t0_x4b -d 2019.07.04 -r backfill -job nest_sq
 - works for atm00 but fails for ocnN
 
 Run for real on apogee:
-python post_main.py -gtx cas6_traps2_x2b -d [today's date string] -r forecast -job nest_wgh > nest_test.log &
+python post_main.py -gtx cas7_t0_x4b -d [today's date string] -r forecast -job nest_sq > nest_test.log &
 
 """
 
@@ -52,9 +52,17 @@ elif Ldir['run_type'] == 'forecast':
 
 """
 Example commands to emulate here:
-python driver_forcing3.py -g wgh1 -gtx cas6_traps2_x2b -ro 0 -do_bio True -r backfill -s new -0 2023.05.24 -1 2023.05.26 -f ocnN > ocnN_wgh1.log &
-python driver_forcing3.py -g wgh1 -r forecast -f atm00 > atm00_wgh1.log &
-python driver_forcing3.py -g wgh1 -r forecast -f riv00 > riv00_wgh1.log &    
+
+One day from scratch:
+python driver_forcing3.py -g sq0 -gtx cas7_t0_x4b -ro 0 -do_bio True -r backfill -s new -0 2024.10.07 -1 2024.10.07 -f ocnN > ocnN_sq0.log &
+python driver_forcing3.py -g sq0 -r backfill -0 2024.10.07 -1 2024.10.07 -f atm00 > atm00_sq0.log &
+python driver_forcing3.py -g sq0 -r backfill -0 2024.10.07 -1 2024.10.07 -tP trapsP00 -f trapsF00 > trapsF00_sq0.log &
+
+or
+Forecast:
+python driver_forcing3.py -g sq0 -gtx cas7_t0_x4b -ro 0 -do_bio True -r backfill -s perfect -0 2024.10.07 -1 2024.10.09 -f ocnN > ocnN_sq0.log &
+python driver_forcing3.py -g sq0 -r forecast -f atm00 > atm00_sq0.log &
+python driver_forcing3.py -g sq0 -r forecast -tP trapsP00 -f trapsF00 > trapsF00_sq0.log &    
 """
 # make forcing
 
