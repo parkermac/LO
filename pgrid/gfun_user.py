@@ -16,7 +16,7 @@ import gfun_utility as gfu
 import gfun
 
 # This is the name of the grid that you are working on.
-gridname = 'ae0'
+gridname = 'sq0'
 
 # default s-coordinate info (could override below)
 s_dict = {'THETA_S': 4, 'THETA_B': 2, 'TCLINE': 10, 'N': 30,
@@ -131,6 +131,39 @@ def make_initial_info(gridname=gridname):
         
         # Initialize bathymetry
         dch['t_list'] = ['nw_pacific','grays_harbor','willapa_bay']
+        z = gfu.combine_bathy_from_sources(lon, lat, dch)
+                
+        if dch['use_z_offset']:
+            z = z + dch['z_offset']
+
+    elif gridname == 'sq0':
+        # Sequim Bay nest
+        dch = gfun.default_choices()
+
+        lon_list = [-123.095, -123.059, -123.033, -122.96]
+        x_res_list = [50, 30, 30, 50]
+        lat_list = [48.016, 48.075, 48.097, 48.2]
+        y_res_list = [50, 30, 30, 100]
+        Lon_vec, Lat_vec = gfu.stretched_grid(lon_list, x_res_list, lat_list, y_res_list)
+        
+        dch['z_offset'] = -2
+        # Assume the vertical datum is "sea level" [Check later, the server is down.].
+        # The intention here is to make the z=0
+        # level be higher up, so that we catch more of the intertidal when using
+        # WET_DRY. This should be matched by a similar intervention to zeta in ocnN.
+        dch['nudging_edges'] = ['north', 'east', 'west']
+        dch['nudging_days'] = (0.1, 1.0)
+        
+        # by setting a small min_depth were are planning to use
+        # WET_DRY in ROMS, but maintaining positive depth
+        # for all water cells
+        dch['min_depth'] = 0.2 # meters (positive down)
+        
+        # Make the rho grid.
+        lon, lat = np.meshgrid(Lon_vec, Lat_vec)
+        
+        # Initialize bathymetry
+        dch['t_list'] = ['psdem']
         z = gfu.combine_bathy_from_sources(lon, lat, dch)
                 
         if dch['use_z_offset']:
