@@ -3,7 +3,9 @@ Plot fields in one or more history files.
 
 Testing calls from ipython on mac:
 
+Run with defaults - result is a png in LO_output/plots
 run dm_plot
+run dm_plot -vn speed -dom PS
 
 python dm_plot.py -vn speed -dom PS -mov True -lt hourly < /dev/null > test.log &
 
@@ -33,9 +35,9 @@ plt.close('all')
 
 parser = argparse.ArgumentParser()
 # standard arguments
-parser.add_argument('-gtx', '--gtagex', type=str, default='cas6_v0_live')
+parser.add_argument('-gtx', '--gtagex', type=str, default='cas7_t0_x4b')
 parser.add_argument('-ro', '--roms_out_num', type=int, default=0)
-parser.add_argument('-ds0', type=str, default='2019.07.04')
+parser.add_argument('-ds0', type=str, default='2017.07.04')
 parser.add_argument('-ds1', type=str, default='')
 # arguments that allow you to bypass the interactive choices
 parser.add_argument('-hn', type=int, default=2) # history file number

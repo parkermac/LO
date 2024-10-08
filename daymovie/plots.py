@@ -82,7 +82,10 @@ def P1(Q, M):
         dm_pfun.add_bathy_contours(ax, ds, depth_levs=[100, 200], c='c', lw=1)
         
     if vn == 'speed':
-        dm_pfun.add_velocity_vectors(ax, aa, ds, Q['fn'], v_scl=Q['v_scl'])
+        if Q['dom'] == 'PS':
+            dm_pfun.add_velocity_vectors(ax, aa, ds, Q['fn'], v_scl=Q['v_scl'], nngrid=400)
+        else:
+            dm_pfun.add_velocity_vectors(ax, aa, ds, Q['fn'], v_scl=Q['v_scl'])
         
     pfun.add_coast(ax, color='k')
     ax.axis(aa)
