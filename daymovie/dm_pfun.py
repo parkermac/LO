@@ -38,7 +38,7 @@ def get_tracks(Q, Ldir):
         dtt = (dt1-dt0).days + 1
         import subprocess
         
-        cmd = ['python', str(Ldir['LO']) + '/tracker/tracker.py',
+        cmd = ['python', str(Ldir['LO']) + '/tracker2/tracker.py',
             '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
             '-d', Q['ds0'], '-dtt', str(dtt),
             '-exp', Q['exp'],
@@ -49,7 +49,7 @@ def get_tracks(Q, Ldir):
     else:
         # using test = True allows us to use pre-calculated tracks
         pass
-    tr_fn = Ldir['LOo'] / 'tracks' / (Q['exp'] + '_surf_' + Q['ttag']) / ('release_' + Q['ds0'] + '.nc')
+    tr_fn = Ldir['LOo'] / 'tracks2' / Ldir['gtagex'] / (Q['exp'] + '_surf_' + Q['ttag']) / ('release_' + Q['ds0'] + '.nc')
     #print(str(tr_fn))
     Q['tr_fn'] = tr_fn
     

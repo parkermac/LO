@@ -1,5 +1,7 @@
 # README for tracker
 
+# _This code is OBSOLETE, replaced by tracker2_
+
 ## particle tracking utility for the LO system
 
 This code is designed to be a flexible, and hopefully fast, tool for doing particle tracking experiments using saved history files from ROMS.  It assumes that you save fields hourly, and that the file structure follows LiveOcean standards (hours 0-24, numbered 00[01-25]) in a single folder named by date, e.g. f2019.12.18.  This code uses nearest neighbor for most everything and so might work with more complex ROMS grids (the LO grids are plaid), but that is untested.
