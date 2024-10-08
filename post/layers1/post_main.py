@@ -6,10 +6,10 @@ It creates a single NetCDF file containing fields on selected levels
 from the history files in a given day.
 
 Testing on mac:
-run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -r backfill -job layers1 -test True
+run post_main.py -gtx cas7_t0_x4b -ro 0 -d 2017.07.04 -r backfill -job layers1 -test True
 
 Run for real on apogee:
-python post_main.py -gtx cas6_v0_u0mb -ro 0 -d [today's date string] -r forecast -job layers1
+python post_main.py -gtx [gtagex] -ro 0 -d [today's date string] -r forecast -job layers1
 
 """
 

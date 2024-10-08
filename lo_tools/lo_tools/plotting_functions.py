@@ -380,19 +380,19 @@ def get_zfull(ds, fn, which_grid):
         zfull = zfull0[:, 0:-1, :] + np.diff(zfull0, axis=1)/2
     return zfull
 
-def get_laym(ds, zfull, mask, vn, zlev):
+def get_laym_old(ds, zfull, mask, vn, zlev):
     # make the layer
     fld_mid = ds[vn].values.squeeze()
     fld = make_full((fld_mid,))
     zlev_a = zlev * np.ones(1)
-    lay = get_layer(fld, zfull, zlev_a)
+    lay = get_layer_old(fld, zfull, zlev_a)
     lay[mask == False] = np.nan
     # Note: if mask came directly from the mask_rho field of a history file it is
     # 1 = water, and 0 = land, so it would be better to add nan's using this as a
     # test, but using mask == False works.
     return lay
 
-def get_layer(fld, zfull, which_z):
+def get_layer_old(fld, zfull, which_z):
     """
     Creates a horizontal slice through a 3D ROMS data field.  It is very fast
     because of the use of "choose"
@@ -451,24 +451,25 @@ def get_layer(fld, zfull, which_z):
     lay = fld0*(1 - fr) + fld1*fr
     return lay
 
-def get_laym_alt(ds, zfull, mask, vn, zlev):
+def get_laym(ds, zfull, mask, vn, zlev):
     """
-    Test of a cleaner method of getting the layer.
+    Test of a cleaner method of getting the layer. This replaces
+    the original get_laym() which has been renamed get_laym_old().
     
-    The details are in get_layer_alt().
+    The details are in get_layer().
     """
     # make the layer
     fld_mid = ds[vn].values.squeeze()
     fld = make_full((fld_mid,))
     zlev_a = zlev * np.ones(1)
-    lay = get_layer_alt(fld, zfull, zlev_a)
+    lay = get_layer(fld, zfull, zlev_a)
     lay[mask == False] = np.nan
     # Note: if mask came directly from the mask_rho field of a history file it is
     # 1 = water, and 0 = land, so it would be better to add nan's using this as a
     # test, but using mask == False works.
     return lay
 
-def get_layer_alt(fld, zfull, which_z):
+def get_layer(fld, zfull, which_z):
     """
     NEW VERSION: test of using np.argmax() and np.take_along_axis().
     It appears to be 3x faster than get_layer().

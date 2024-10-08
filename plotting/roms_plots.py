@@ -845,8 +845,8 @@ def P_layer_CUC(in_dict):
             zfull_u = pfun.get_zfull(ds, in_dict['fn'], 'u')
             zfull_v = pfun.get_zfull(ds, in_dict['fn'], 'v')
             # tt0 = time()
-            u = pfun.get_laym_alt(ds, zfull_u, ds.mask_u.values, 'u', z_level)
-            v = pfun.get_laym_alt(ds, zfull_v, ds.mask_v.values, 'v', z_level)
+            u = pfun.get_laym(ds, zfull_u, ds.mask_u.values, 'u', z_level)
+            v = pfun.get_laym(ds, zfull_v, ds.mask_v.values, 'v', z_level)
             # print('time for u,v layers = %0.2f sec' % (time()-tt0))
             # interpolate to rho grid
             ur = np.nan * np.ones(ds.mask_rho.shape)
@@ -863,7 +863,7 @@ def P_layer_CUC(in_dict):
             pinfo.tstr_dict['speed'] = 'Speed'
             pinfo.units_dict['speed'] = ' $(m\ s^{-1})$'
         else:
-            laym = pfun.get_laym_alt(ds, zfull, ds.mask_rho.values, vn, z_level)
+            laym = pfun.get_laym(ds, zfull, ds.mask_rho.values, vn, z_level)
             v_scaled = pinfo.fac_dict[vn]*laym
             vlims = pinfo.vlims_dict[vn]
         if len(vlims) == 0:
