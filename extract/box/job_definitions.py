@@ -107,5 +107,8 @@ def get_box(job, Lon, Lat):
     elif job == 'kastner0':
         aa = [-122.706, -122.457, 48.347, 48.53]
         vn_list = 'h,f,pm,pn,mask_rho,salt,temp,Pair,Uwind,Vwind,shflux,ssflux,latent,sensible,lwrad,Tair,evaporation,rain,EminusP,swrad,sustr,svstr'
+    elif job == 'weber':
+        aa = [-125.5, -123.5, Lat[0], 49]
+        vn_list = 'h,f,pm,pn,mask_rho,salt,temp,oxygen,NO3,NH4,phytoplankton'
         
     return aa, vn_list
