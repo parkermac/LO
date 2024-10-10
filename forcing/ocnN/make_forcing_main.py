@@ -189,12 +189,12 @@ if verbose:
     print('Max zeta = %0.2f m' % (np.nanmax(zz)))
     ds.close()
     dsg.close()
-result_dict['result'] = 'success'
+result_dict['result'] = 'SUCCESS'
 for fn in nc_list:
     if (out_dir / fn).is_file():
         pass
     else:
-       result_dict['result'] = 'fail'
+       result_dict['result'] = 'FAIL'
 
 # *******************************************************
 

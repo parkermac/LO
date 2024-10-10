@@ -335,13 +335,13 @@ if planB == True:
 # -------------------------------------------------------
 
 # test for success
-result_dict['result'] = 'success'
+result_dict['result'] = 'SUCCESS'
 for vn in outvar_list:
     fn = fn = out_dir / (vn + '.nc')
     if fn.is_file():
         pass
     else:
-       result_dict['result'] = 'fail'
+       result_dict['result'] = 'FAIL'
        
 # *******************************************************
 

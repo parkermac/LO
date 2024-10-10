@@ -201,9 +201,9 @@ ds.close()
 
 # test for success
 if True:
-    result_dict['result'] = 'success' # success or fail
+    result_dict['result'] = 'SUCCESS' # success or fail
 else:
-    result_dict['result'] = 'fail'
+    result_dict['result'] = 'FAIL'
 
 # *******************************************************
 

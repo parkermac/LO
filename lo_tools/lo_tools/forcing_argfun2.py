@@ -60,7 +60,7 @@ def finale(Ldir, result_dict):
     if 'note' in result_dict.keys():
         pass
     else:
-        result_dict['note'] = 'NONE'
+        result_dict['note'] = 'none'
         
     s1 = ('* frc=%s, day=%s, result=%s, note=%s\n' %
         (Ldir['frc'], Ldir['date_string'], result_dict['result'], result_dict['note']))

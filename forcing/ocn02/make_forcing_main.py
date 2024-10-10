@@ -400,12 +400,12 @@ if Ldir['testing']:
         dsi = xr.open_dataset(out_dir / 'ocean_ini.nc', decode_times=False)
     dsb = xr.open_dataset(out_dir / 'ocean_bry.nc', decode_times=False)
         
-result_dict['result'] = 'success'
+result_dict['result'] = 'SUCCESS'
 for fn in nc_list:
     if (out_dir / fn).is_file():
         pass
     else:
-       result_dict['result'] = 'fail'
+       result_dict['result'] = 'FAIL'
 
 # *******************************************************
 
