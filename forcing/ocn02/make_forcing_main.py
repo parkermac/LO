@@ -111,7 +111,11 @@ if (Ldir['run_type'] == 'forecast') and (testing_planC == False):
             if got_indices == False:
                 # try again
                 print('\nget_indices: ntries = ' + str(ntries))
-                ind_dicts, got_indices = Ofun.get_indices(h_out_dir, dt_list_full, verbose=verbose)
+                try:
+                    ind_dicts, got_indices = Ofun.get_indices(h_out_dir, dt_list_full, verbose=verbose)
+                except Exception as e:
+                    print(e)
+                    got_indices = False
             else:
                 break
             
