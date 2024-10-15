@@ -20,7 +20,7 @@ import trapsfun
 #                   Initialize function and empty dataset                       #
 #################################################################################
 
-def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD):
+def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD,ctag):
 
     # Start Dataset
     wwtp_ds = xr.Dataset()
@@ -35,13 +35,6 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
 
     # only get data if WWTPs are enabled
     if enable == True:
-
-        # Get ctag
-        if Ldir['gridname'] == 'cas7':
-            ctag = 'lo_base'
-        else:
-            print('You need to specify a gridname for this ctag.')
-            sys.exit()
 
         # Read WWTP open/close dates
         open_close_fn = Ldir['data'] / trapsD / 'wwtp_open_close_dates.xlsx'

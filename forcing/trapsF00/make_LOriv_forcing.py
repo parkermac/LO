@@ -20,20 +20,13 @@ import trapsfun
 #                   Initialize function and empty dataset                       #
 #################################################################################
 
-def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD):
+def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD,ctag):
     # Start Dataset
     LOriv_ds = xr.Dataset()
 
 #################################################################################
 #                                Get data                                       #
 #################################################################################
-
-    # Load a dataframe with info for rivers to get
-    if Ldir['gridname'] == 'cas7':
-        ctag = 'lo_base'
-    else:
-        print('You need to specify a gridname for this ctag.')
-        sys.exit()
 
     # define directory for pre-existing LO river climatology
     ri_dir = Ldir['LOo'] / 'pre' / 'river1' / ctag

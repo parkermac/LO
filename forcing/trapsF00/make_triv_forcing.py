@@ -20,7 +20,7 @@ import trapsfun
 #                   Initialize function and empty dataset                       #
 #################################################################################
 
-def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP, trapsD):
+def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD,ctag):
     # Start Dataset
     triv_ds = xr.Dataset()
     NTRIV = 0
@@ -31,13 +31,6 @@ def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP, trapsD):
 
     # only get data if tiny rivers are enabled
     if enable == True:
-
-        # Get ctag
-        if Ldir['gridname'] == 'cas7':
-            ctag = 'lo_base'
-        else:
-            print('You need to specify a gridname for this ctag.')
-            sys.exit()
 
         # define directory for tiny river climatology
         triv_dir = Ldir['LOo'] / 'pre' / trapsP / 'tiny_rivers' / ctag

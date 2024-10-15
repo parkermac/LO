@@ -5,17 +5,22 @@ forcing file for the updated ROMS
 By default, point sources and tiny rivers are enabled. 
 To turn them off, set lines 41 and 42 to be = False
 
-Test on pc in ipython:
-run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -tP trapsP## -f trapsF##
+Test in ipython:
+run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -tP trapsP00 -f trapsF00
 
 where tP is the traps climatology folder
 and f is the forcing name (current folder)
+
+2024.10.15 Parker moved the specification of the ctag to a single place, around line 67.
+Also added code to catch cases where a grid might not have one or more river types.
+These changes were prompted by wanting to use this code for a nested grid.
 """
 
 #################################################################################
 #                              Import packages                                  #
 #################################################################################
 
+import sys
 from datetime import datetime, timedelta
 from lo_tools import forcing_argfun2 as ffun
 import xarray as xr
@@ -59,6 +64,10 @@ out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + date_string) / Ldi
 # get correct version of traps climatology output
 trapsP = Ldir['trapsP']
 
+# Specify which "ctag" to use. This is related to the collections for which we have
+# river and point source climatologies.
+ctag = 'lo_base'
+
 # get correct version of Ecology data (based on what is saved in LO/pre/trapsP##)
 this_dir = Path(__file__).absolute().parent.parent.parent.parent
 with open(this_dir / 'LO' / 'pre' / trapsP / 'traps_data_ver.csv','r') as f:
@@ -96,21 +105,47 @@ G = zrfun.get_basic_info(grid_fn, only_G=True)
 #                   Run helper scripts to generate forcing                      #
 #################################################################################
 
+ds_to_merge = []
+
 # generate forcing for pre-existing LO rivers
-LOriv_ds, NRIV = LOriv.make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD)
+try:
+    LOriv_ds, NRIV = LOriv.make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD,ctag)
+    ds_to_merge.append(LOriv_ds)
+except Exception as e:
+    print('Error creating LOriv: maybe there are none.')
+    print(e)
+    NRIV = 0
 
 # generate forcing for tiny rivers
-triv_ds, NTRIV = triv.make_forcing(N,NT,NRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_trivs,trapsP, trapsD)
+try:
+    triv_ds, NTRIV = triv.make_forcing(N,NT,NRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_trivs,trapsP,trapsD,ctag)
+    ds_to_merge.append(triv_ds)
+except Exception as e:
+    print('Error creating triv: maybe there are none.')
+    print(e)
+    NTRIV = 0
 
 # generate forcing for marine point sources
-wwtp_ds, NWWTP = wwtp.make_forcing(N,NT,NRIV,NTRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_wwtps,trapsP,trapsD)
+try:
+    wwtp_ds, NWWTP = wwtp.make_forcing(N,NT,NRIV,NTRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_wwtps,trapsP,trapsD,ctag)
+    ds_to_merge.append(wwtp_ds)
+except Exception as e:
+    print('Error creating wwtp: maybe there are none.')
+    print(e)
+    NWWTP = 0
 
 #################################################################################
 #                   Combine forcing outputs and save results                    #
 #################################################################################
 
 # combine all forcing datasets
-all_ds = xr.merge([LOriv_ds,triv_ds, wwtp_ds])
+if len(ds_to_merge) == 0:
+    print('** No river data at all! **')
+    sys.exit()
+elif len(ds_to_merge) == 1:
+    all_ds = ds_to_merge[0].copy()
+else:
+    all_ds = xr.merge(ds_to_merge)
 
 # Save to NetCDF
 all_ds.to_netcdf(out_fn)
@@ -118,9 +153,9 @@ all_ds.close()
 
 # test for success
 if out_fn.is_file():
-    result_dict['result'] = 'success'
+    result_dict['result'] = 'SUCCESS'
 else:
-    result_dict['result'] = 'fail'
+    result_dict['result'] = 'FAIL'
 
 result_dict['end_dt'] = datetime.now()
 ffun.finale(Ldir, result_dict)
