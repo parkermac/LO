@@ -66,17 +66,17 @@ elif Ldir['run_type'] == 'forecast':
 
 # time step in seconds (should fit evenly into 3600 sec)
 if Ldir['blow_ups'] == 0:
-    dtsec = 4
+    dtsec = 10
 elif Ldir['blow_ups'] == 1:
-    dtsec = 3
+    dtsec = 8
 elif Ldir['blow_ups'] == 2:
-    dtsec = 2
+    dtsec = 6
 elif Ldir['blow_ups'] == 3:
-    dtsec = 1
+    dtsec = 4
 elif Ldir['blow_ups'] == 4:
-    dtsec = .5
+    dtsec = 3
 elif Ldir['blow_ups'] == 5:
-    dtsec = .25
+    dtsec = 2
 else:
     print('Unsupported number of blow ups: %d' % (Ldir['blow_ups']))
 
