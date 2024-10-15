@@ -19,7 +19,7 @@ Ldir = Lfun.Lstart()
 import argparse
 parser = argparse.ArgumentParser()
 
-parser.add_argument('-source', type=str, default='ecology') # e.g. dfo
+parser.add_argument('-source', type=str, default='ecology_nc') # e.g. dfo1
 parser.add_argument('-otype', type=str, default='bottle') # observation type, e.g. ctd, bottle
 parser.add_argument('-year', type=int, default = 2017) # e.g. 2019
 parser.add_argument('-small', type=Lfun.boolean_string, default = False) # True for laptop size

@@ -7,7 +7,7 @@
 ## Organization
 
 #### Naming Notes
-- [source] is some string identifier of the database, e.g. 'dfo', which is then further identified by
+- [source] is some string identifier of the database, e.g. 'dfo1', which is then further identified by
 - [otype] observation type, e.g. 'ctd', 'bottle', or 'moor', and finally by
 - [year] e.g. 2017.
 
