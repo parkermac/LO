@@ -397,7 +397,7 @@ ad_LBC(isTvar) ==   Per     Clo     Per     Clo \    ! idbio( 1), NO3
 ! to consider: [NBT,Ngrids] values are expected. See glossary below for
 ! details.
 
-  LtracerSrc == 15*F
+  LtracerSrc == 15*T
 
 ! Logical switches (TRUE/FALSE) to read and process biological tracer
 ! climatology fields: [NBT,Ngrids] values are expected. See glossary below
