@@ -3,7 +3,7 @@ Module of basic utilities for plotting.  The goal is to make the code in
 pfun less cumbersome to write and edit.
 
 I don't like that this duplicates many of the function in lo_tools/plotting_functions.
-However this is value for the daymovie job in having the movie generation not be affected
+However there is value for the daymovie job in having the movie generation not be affected
 by changes I make to plotting_functions.
 
 """

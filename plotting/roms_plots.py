@@ -335,10 +335,10 @@ def P_dive_vort(in_dict):
         if ii == 1:
             plon, plat = pfun.get_plon_plat(ds.lon_rho[1:-1,1:-1].values, ds.lat_rho[1:-1,1:-1].values)
             cs = plt.pcolormesh(plon, plat, dive, cmap=cmap, vmin = vmin, vmax = vmax)
-            ax.set_title('Surface Divergence $[s^{-1}]$', fontsize=1.2*fs)
+            ax.set_title(r'Surface Divergence $[s^{-1}]$', fontsize=1.2*fs)
         elif ii == 2:
             cs = plt.pcolormesh(ds.lon_rho.values, ds.lat_rho.values, vort, cmap=cmap, vmin = vmin, vmax = vmax)
-            ax.set_title('Surface Vorticity $[s^{-1}]$', fontsize=1.2*fs)
+            ax.set_title(r'Surface Vorticity $[s^{-1}]$', fontsize=1.2*fs)
         fig.colorbar(cs)
         pfun.add_coast(ax)
         ax.axis(aa)
@@ -407,10 +407,10 @@ def P_dive_vort2(in_dict):
         if ii == 1:
             plon, plat = pfun.get_plon_plat(ds.lon_rho[1:-1,1:-1].values, ds.lat_rho[1:-1,1:-1].values)
             cs = plt.pcolormesh(plon, plat, dive, cmap=cmap, vmin = vmin, vmax = vmax)
-            ax.set_title('Surface Divergence $[s^{-1}]$', fontsize=1.2*fs)
+            ax.set_title(r'Surface Divergence $[s^{-1}]$', fontsize=1.2*fs)
         elif ii == 2:
             cs = plt.pcolormesh(ds.lon_rho.values, ds.lat_rho.values, vort, cmap=cmap, vmin = vmin, vmax = vmax)
-            ax.set_title('Surface Vorticity $[s^{-1}]$', fontsize=1.2*fs)
+            ax.set_title(r'Surface Vorticity $[s^{-1}]$', fontsize=1.2*fs)
         fig.colorbar(cs)
         pfun.add_coast(ax)
         ax.axis(aa)
@@ -575,13 +575,27 @@ def P_Chl_DO(in_dict):
         
 def P_bot_top_arag(in_dict):
     # START
-    aa = [-124.4,-123.7,46.35,47.1]  # hard-coded for Willapa & Grays
-    fs = 14
-    pfun.start_plot(fs=fs, figsize=(18,10))
-    fig = plt.figure()
+    # find aspect ratio of the map
     fn = in_dict['fn']
     ds = xr.open_dataset(fn)
+    aa = pfun.get_aa(ds)
+    # AR is the aspect ratio of the map: Vertical/Horizontal
+    AR = (aa[3] - aa[2]) / (np.sin(np.pi*aa[2]/180)*(aa[1] - aa[0]))
+    hgt = 8.5
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(hgt*2.7/AR,hgt))
+    fig = plt.figure()
+
     arag_bot, arag_top, px, py = pfun.get_bot_top_arag(fn, aa=aa)
+
+    # dealing with auto_vlims is a little non-standard here because we are plotting
+    # custom fields, not using pfun.add_map_field()
+    if in_dict['auto_vlims']:
+        pinfo.vlims_dict['ARAG'] = pfun.auto_lims(arag_bot, vlims_fac=3)
+    else:
+        pass
+    vmin, vmax = pinfo.vlims_dict['ARAG']
+
     # PLOT CODE
     fs = 14
     for ii in [1,2]:
@@ -592,14 +606,15 @@ def P_bot_top_arag(in_dict):
             fld = arag_top
             stext = 'Surface'
         ax = fig.add_subplot(1, 2, ii)
-        cs = ax.pcolormesh(px,py,fld, vmin=0, vmax=3, cmap='coolwarm_r')
-        fig.colorbar(cs)
+        cs = ax.pcolormesh(px,py,fld, vmin=vmin, vmax=vmax, cmap='coolwarm_r')
+        if ii == 2:
+            fig.colorbar(cs)
         pfun.add_coast(ax)
         ax.axis(aa)
         pfun.dar(ax)
         ax.set_title(r'%s $\Omega_{arag}$' % (stext), fontsize=1.2*fs)
         ax.set_xlabel('Longitude')
-        pfun.add_bathy_contours(ax, ds, txt=True)
+        # pfun.add_bathy_contours(ax, ds, txt=True)
         if ii == 1:
             ax.set_ylabel('Latitude')
             pfun.add_info(ax, in_dict['fn'])
@@ -861,7 +876,7 @@ def P_layer_CUC(in_dict):
             vlims = (0,speed_max)
             pinfo.cmap_dict['speed'] = cm.amp #cm.speed
             pinfo.tstr_dict['speed'] = 'Speed'
-            pinfo.units_dict['speed'] = ' $(m\ s^{-1})$'
+            pinfo.units_dict['speed'] = r' $(m\ s^{-1})$'
         else:
             laym = pfun.get_laym(ds, zfull, ds.mask_rho.values, vn, z_level)
             v_scaled = pinfo.fac_dict[vn]*laym
@@ -1500,7 +1515,7 @@ def P_splash(in_dict):
     tstr = T['dt'].strftime(Lfun.ds_fmt)
     ax.text(.98,.99,'LiveOcean', size=fs*1.2,
          ha='right', va='top', weight='bold', transform=ax.transAxes)
-    ax.text(.98,.95,'Surface water\nTemperature $[^{\circ}C]$\n'+tstr,
+    ax.text(.98,.95,r'Surface water\nTemperature $[^{\circ}C]$\n'+tstr,
          ha='right', va='top', weight='bold', transform=ax.transAxes,
          bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
 
@@ -1593,7 +1608,7 @@ def P_splash2(in_dict):
     tstr = T['dt'].strftime(Lfun.ds_fmt)
     ax.text(.98,.99,'LiveOcean', size=fs*1.5,
          ha='right', va='top', weight='bold', transform=ax.transAxes)
-    ax.text(.03,.45,'Surface water\nTemperature $[^{\circ}C]$\n'+tstr,
+    ax.text(.03,.45,r'Surface water\nTemperature $[^{\circ}C]$\n'+tstr,
          ha='left', va='bottom', weight='bold', transform=ax.transAxes,
          bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
 
@@ -1631,7 +1646,7 @@ def P_splash2(in_dict):
     ax.set_xticks([-125, -124, -123])
     ax.set_yticks([47, 48, 49, 50])
     ax.set_xlabel('Longitude')
-    ax.text(.84,.95,'Salish Sea\n\nBottom Oxygen\n$[mg\ L^{-1}]$',
+    ax.text(.84,.95,r'Salish Sea\n\nBottom Oxygen\n$[mg\ L^{-1}]$',
          ha='right', va='top', weight='bold', transform=ax.transAxes)
          
     # add labels
@@ -1715,7 +1730,7 @@ def P_splash3(in_dict):
     tstr = T['dt'].strftime(Lfun.ds_fmt)
     ax.text(.98,.99,'LiveOcean', size=fs*1.5,
          ha='right', va='top', weight='bold', transform=ax.transAxes)
-    ax.text(.03,.45,'Surface water\nTemperature $[^{\circ}C]$\n'+tstr,
+    ax.text(.03,.45,r'Surface water\nTemperature $[^{\circ}C]$\n'+tstr,
          ha='left', va='bottom', weight='bold', transform=ax.transAxes,
          bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
 
@@ -1823,7 +1838,7 @@ def P_splash4(in_dict):
     tstr = T['dt'].strftime(Lfun.ds_fmt)
     ax.text(.98,.99,'LiveOcean', size=fs*1.5,
          ha='right', va='top', weight='bold', transform=ax.transAxes)
-    ax.text(.03,.45,'Surface Salinity $[g\ kg^{-1}]$\n'+tstr,
+    ax.text(.03,.45,r'Surface Salinity $[g\ kg^{-1}]$\n'+tstr,
          ha='left', va='bottom', weight='bold', transform=ax.transAxes,
          bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
 
@@ -1951,7 +1966,7 @@ def P_splash_sneaker(in_dict):
         ax.text(.98,.99,'Initial release\nlocations', size=fs*1.5,
              ha='right', va='top', weight='bold', transform=ax.transAxes,
              bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
-        ax.text(.17,.05,'LiveOcean\nSurface water\nTemperature $[^{\circ}C]$\n\n'+tstr,
+        ax.text(.17,.05,r'LiveOcean\nSurface water\nTemperature $[^{\circ}C]$\n\n'+tstr,
              ha='left', va='bottom', weight='bold', transform=ax.transAxes,
              bbox=dict(facecolor='w', edgecolor='None',alpha=.5))
 
@@ -2079,10 +2094,10 @@ def P_admiralty(in_dict):
     ax.set_xlim(0,365)
     ax.set_xticklabels([])
     ax.axvline(dd)
-    ax.text(.05,.8,'$S_{in}$', c='r',fontweight='bold',
+    ax.text(.05,.8,r'$S_{in}$', c='r',fontweight='bold',
         transform=ax.transAxes, fontsize= 24,
         bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
-    ax.text(.05,.1,'$S_{out}$', c='b',fontweight='bold',
+    ax.text(.05,.1,r'$S_{out}$', c='b',fontweight='bold',
         transform=ax.transAxes, fontsize= 24,
         bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
     
@@ -2091,7 +2106,7 @@ def P_admiralty(in_dict):
     ax.set_xlim(0,365)
     ax.set_xlabel('Yearday ' + year_str)
     ax.axvline(dd)
-    ax.text(.05,.8,'$Q_{prism}\ [10^{3}m^{3}s^{-1}]$', c='g',fontweight='bold',
+    ax.text(.05,.8,r'$Q_{prism}\ [10^{3}m^{3}s^{-1}]$', c='g',fontweight='bold',
         transform=ax.transAxes, fontsize= 24,
         bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
     
@@ -2131,7 +2146,7 @@ def P_admiralty(in_dict):
     pfun.dar(ax)
     ax.set_xticklabels([])
     ax.set_yticklabels([])
-    ax.text(.95,.85,'Thickness [m]\n$S >\ S_{in}$',
+    ax.text(.95,.85,r'Thickness [m]\n$S >\ S_{in}$',
         transform=ax.transAxes, ha='right',
         bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
     # add section
@@ -2153,7 +2168,7 @@ def P_admiralty(in_dict):
     pfun.dar(ax)
     ax.set_xticklabels([])
     ax.set_yticklabels([])
-    ax.text(.95,.85,'Thickness [m]\n$S <\ S_{out}$',
+    ax.text(.95,.85,r'Thickness [m]\n$S <\ S_{out}$',
         transform=ax.transAxes, ha='right',
         bbox=dict(facecolor='w', edgecolor='None',alpha=.9))
     # add section
