@@ -113,5 +113,8 @@ def get_box(job, Lon, Lat):
     elif job == 'iringan':
         aa = [-123.35, -122.428, 48.293, 48.827]
         vn_list = 'h,f,pm,pn,mask_rho,salt,temp,phytoplankton,Uwind,Vwind'
+    elif job == 'swot':
+        aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
+        vn_list = 'h,f,pm,pn,mask_rho,zeta,u,v'
         
     return aa, vn_list
