@@ -107,7 +107,6 @@ if Ldir['testing']:
     from importlib import reload
     reload(roms_plots)
     
-
 # choose the type of plot to make
 if Ldir['plot_type'] == None:
     print('\n%s\n' % '** Choose Plot type (return for P_basic) **')
