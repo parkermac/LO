@@ -3,7 +3,7 @@ LOd="/gscratch/macc/parker/LO/driver"
 
 # main forecast
 00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas7 -t t0 -x x4b -r forecast --cpu_choice cpu-g2 -np 160 -N 32 --done_tag 7 < /dev/null > $LOd/cas7_forecast.log
-#00 08 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas7 -t t0 -x x4b -r forecast --cpu_choice cpu-g2 -np 160 -N 32 --done_tag 7 < /dev/null > $LOd/cas7_forecast_2.log
+00 08 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas7 -t t0 -x x4b -r forecast --cpu_choice cpu-g2 -np 160 -N 32 --done_tag 7 < /dev/null > $LOd/cas7_forecast_2.log
 00 13 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas7 -t t0 -x x4b -r forecast --cpu_choice cpu-g2 -np 160 -N 32 --done_tag 7 < /dev/null > $LOd/cas7_forecast_3.log
 00 06 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' pmacc@uw.edu < $LOd/cas7_forecast.log
 00 07 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' pmacc@uw.edu < $LOd/cas7_forecast.log
