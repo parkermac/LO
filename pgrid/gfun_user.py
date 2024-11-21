@@ -163,7 +163,7 @@ def make_initial_info(gridname=gridname):
         lon, lat = np.meshgrid(Lon_vec, Lat_vec)
         
         # Initialize bathymetry
-        dch['t_list'] = ['psdem']
+        dch['t_list'] = ['nw_pacific','psdem']
         z = gfu.combine_bathy_from_sources(lon, lat, dch)
                 
         if dch['use_z_offset']:
