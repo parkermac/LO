@@ -8,7 +8,7 @@ run make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn03 -test Tr
 python make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn03 -test True > test.log &
 
 2024.11.19 jx and PM: updated based on ocn02. The main improvement is that it handles the
-fact that the new version of hycom (as of August 2024) has tides. This caused seriosn problems
+fact that the new version of hycom (as of August 2024) has tides. This caused serious problems
 with our old processing scheme which was based on daily snapshots. These aliased in a huge tidal
 signal with fortnightly variation of ssh and velocity. This new version removes the tides by getting 1-hourly ssh
 (and using a Godin filter) and 3-hourly u,v,t,s (and using a hanning n=24 filter - so three days).
@@ -18,8 +18,6 @@ Because we download so much data this is slower, but still only takes about 15 m
 for a 3-day forecast.
 
 To do:
-- Ofun: use gsw instead of seawater for potential temp calculation
-- Ofun: use xarray instaed of netCDF4
 - main: hollow out arrays unless start_type = new
 - throughout: stop using masked arrays
 
@@ -55,8 +53,8 @@ do_bio = True
 
 # defaults related to testing
 verbose = False
-testing_do_not_get_indices = True
-testing_do_not_get_data = True # Set this to True to not get the hycom data,
+testing_do_not_get_indices = False # Set this to True to not get the hycom indices,
+testing_do_not_get_data = False # Set this to True to not get the hycom data,
 # e.g. if you already have it and want to speed up testing
 testing_planB = False
 

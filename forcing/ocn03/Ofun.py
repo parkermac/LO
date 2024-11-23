@@ -212,7 +212,6 @@ def get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir):
     vssh = b[vn].copy()
     vvssh = extrap_nearest_to_masked(X, Y, vssh)
     V[vn] = vvssh
-    # V[vn] = np.frombuffer(vv) # needed to avoid memoryview error when pickling
     vn_list.remove('ssh')    
     # extrapolate 3D fields
     for vn in vn_list:
