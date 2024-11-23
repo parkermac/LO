@@ -7,14 +7,15 @@ run make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn03 -test Tr
 
 python make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn03 -test True > test.log &
 
-2024.09.12 This code is based on ocn01. The main difference is that it uses a new URL
-because of a change at HYCOM. Also we omit the ncks-based Plan A and instead only use
-a modified version of Plan B which gest single times. We also have to combine extractions
-of single variables.
-
-2024.11.19 jx: updated based on ocn02. It uses the same URL from HYCOM but applied different filters for the 1-hourly ssh (Godin) and 3-hourly u,v,t,s (hanning n=24). I also removed the condition "forecast" to enable generating backfill ocn from HYCOM URL directly
+2024.11.19 jx and PM: updated based on ocn02. The main improvement is that it handles the
+fact that the new version of hycom (as of August 2024) has tides. This caused seriosn problems
+with our old processing scheme which was based on daily snapshots. These aliased in a huge tidal
+signal with fortnightly variation of ssh and velocity. This new version removes the tides by getting 1-hourly ssh
+(and using a Godin filter) and 3-hourly u,v,t,s (and using a hanning n=24 filter - so three days).
 
 Performance:
+Because we download so much data this is slower, but still only takes about 15 minutes [CHECK]
+for a 3-day forecast.
 
 To do:
 - Ofun: use gsw instead of seawater for potential temp calculation
@@ -23,7 +24,7 @@ To do:
 - throughout: stop using masked arrays
 
 """
-import netCDF4 as nc
+
 from pathlib import Path
 import sys
 from datetime import datetime, timedelta
@@ -49,15 +50,15 @@ import Ofun_bio
 
 # defaults
 planB = False
-planC = False
 add_CTD = False
 do_bio = True
 
 # defaults related to testing
 verbose = False
-testing_ncks = False
-testing_fmrc = False
-testing_planC = False
+testing_do_not_get_indices = True
+testing_do_not_get_data = True # Set this to True to not get the hycom data,
+# e.g. if you already have it and want to speed up testing
+testing_planB = False
 
 if Ldir['testing']:
     verbose = True
@@ -82,360 +83,192 @@ if this_dt == datetime(2012,10,7):
 h_out_dir = out_dir / 'Data'
 # This already exists because it is created by the initialization, but we make sure it is clean
 # so that testing, which does not make a clean version, is more consistent with operational use,
-# which does.
-Lfun.make_dir(h_out_dir, clean=True)
+# which does. We only clean it out if testing_do_not_get_data == False.
+if (testing_do_not_get_data == False) or (testing_do_not_get_indices == False):
+    Lfun.make_dir(h_out_dir, clean=True)
+else:
+    print('WARNING: skipped extracting hycom data or getting indices')
 
-#if (Ldir['run_type'] == 'forecast') and (testing_planC == False):  #jx
-if testing_planC == False:
-    # this either gets new hycom files, or sets planB to True,
-    # and planB may in turn set planC to True
-    
-    # form list of days to get, datetimes
-    nd_f = np.ceil(Ldir['forecast_days'])  # jx: nd_f = 3
-    dt0 = this_dt - timedelta(days=2)      # jx: previous 2 days
-    dt1 = this_dt + timedelta(days=int(nd_f) + 2) # jx: later 5 days
-#    dt_list_full = []
-#    dtff = dt0
-#    while dtff <= dt1:
-#        dt_list_full.append(dtff)
-#        dtff = dtff + timedelta(days=1)  # daily
-#%    
-    dt_list_full_hr = []
-    dtff_hr = dt0
-    dt2 = this_dt + timedelta(days=int(nd_f) + 2)
-    while dtff_hr <= dt2:
-        dt_list_full_hr.append(dtff_hr)
-        dtff_hr = dtff_hr + timedelta(hours=1)  # hourly
-#%       
-    dt_list_full_3hr = []
-    dtff_3hr = dt0
-    dt3 = this_dt + timedelta(days=int(nd_f) + 2)
-    while dtff_3hr <= dt3:
-        dt_list_full_3hr.append(dtff_3hr)
-        dtff_3hr = dtff_3hr + timedelta(hours=3)  # 3-hrly
-#%%
-    planB = True
-    
-    # Plan B: use fmrc one day at a time
-    if planB == True:
-        print('**** Using planB ****')
-        result_dict['note'] = 'planB'
-#%%
-        # get the indices for extraction using ncks
-        got_indices_ssh = False
+if testing_planB == False:
+    # This either gets and processes new hycom files, or sets planB to True.
+
+    # Get the time limits for the hycom extraction. These go from the start of the
+    # day to the end of the day (or day 3 for the forecast) with 2 days of padding
+    # on either end to allow for filtering.
+    if Ldir['run_type'] == 'forecast':
+        nd_f = np.ceil(Ldir['forecast_days'])
+        dt0 = this_dt - timedelta(days=2)      
+        dt1 = this_dt + timedelta(days=int(nd_f) + 2)
+    elif Ldir['run_type'] == 'backfill':
+        dt0 = this_dt - timedelta(days=2)      
+        dt1 = this_dt + timedelta(days=3)
+    if verbose:
+        print('dt0 = ' + str(dt0))
+        print('dt1 = ' + str(dt1))
+
+    # create lists and dicts of variable names and url's to hycom fields
+    if Ldir['run_type'] == 'forecast':
+        # New ones to try for forecast
+        url_ssh  = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_ssh/FMRC_ESPC-D-V02_ssh_best.ncd'
+        url_uvel = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_u3z/FMRC_ESPC-D-V02_u3z_best.ncd'
+        url_vvel = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_v3z/FMRC_ESPC-D-V02_v3z_best.ncd'
+        url_temp = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_t3z/FMRC_ESPC-D-V02_t3z_best.ncd'
+        url_salt = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_s3z/FMRC_ESPC-D-V02_s3z_best.ncd'
+        # lists and dicts
+    elif test_type == 'backfill':
+        # New ones to try for backfill
+        url_ssh  = 'https://tds.hycom.org/thredds/dodsC/ESPC-D-V02/ssh/2024'
+        # url_Sssh  = 'https://tds.hycom.org/thredds/dodsC/ESPC-D-V02/Sssh/2024'
+        url_uvel  = 'https://tds.hycom.org/thredds/dodsC/ESPC-D-V02/u3z/2024'
+        url_vvel  = 'https://tds.hycom.org/thredds/dodsC/ESPC-D-V02/v3z/2024'
+        url_temp  = 'https://tds.hycom.org/thredds/dodsC/ESPC-D-V02/t3z/2024'
+        url_salt  = 'https://tds.hycom.org/thredds/dodsC/ESPC-D-V02/s3z/2024'
+        # lists and dicts
+    hkeys = ['ssh','u', 'v','t', 's']
+    url_list = [url_ssh, url_uvel, url_vvel, url_temp, url_salt]
+    hycom_var_list = ["surf_el", "water_u", "water_v", "water_temp", "salinity"]
+    url_dict = dict(zip(hkeys,url_list))
+    hycom_var_dict = dict(zip(hkeys,hycom_var_list))
+
+    # get the indices for extraction using ncks
+    got_indices = False
+    if testing_do_not_get_indices:
+        got_indices = True
+    else:
         for ntries in range(10):
-            if got_indices_ssh == False:
+            if got_indices == False:
                 # try again
                 print('\nget_indices: ntries = ' + str(ntries))
                 try:
-                    #ind_dicts, got_indices = Ofun.get_indices(h_out_dir, dt_list_full, verbose=verbose) #jx: get e.g., ssh_tyx.nc
-                    ind_dicts_ssh, got_indices_ssh = Ofun.get_indices_ssh(h_out_dir,   dt_list_full_hr,  verbose=verbose)
-                    ind_dicts_u,   got_indices_u   = Ofun.get_indices_u(  h_out_dir,   dt_list_full_3hr, verbose=verbose)
-                    ind_dicts_v,   got_indices_v   = Ofun.get_indices_v(  h_out_dir,   dt_list_full_3hr, verbose=verbose)
-                    ind_dicts_s,   got_indices_s   = Ofun.get_indices_s(  h_out_dir,   dt_list_full_3hr, verbose=verbose)
-                    ind_dicts_t,   got_indices_t   = Ofun.get_indices_t(  h_out_dir,   dt_list_full_3hr, verbose=verbose)
+                    ind_dicts, got_indices = Ofun.get_indices(h_out_dir, dt0, dt1, url_dict, verbose=verbose)
                 except Exception as e:
                     print(e)
-                    got_indices_ssh = False
+                    got_indices = False
             else:
                 break
-#%%            
-#        if got_indices == True: # not use this
-#            try:
-#                for idt in range(len(dt_list_full)):
-#                    got_fmrc = False # initialize each time
-#                   data_out_fn =  h_out_dir / ('h' + dt_list_full[idt].strftime(Lfun.ds_fmt)+ '.nc')
-#                    if verbose:
-#                       print('\n' + str(data_out_fn))
-#                    sys.stdout.flush()
-#                    # get hycom forecast data from the web, and save it in the file "data_out_fn".
-#                    # it tries 10 times before ending
-#                    for ntries in range(10):
-#                        if got_fmrc == False:
-#                            # try again
-#                            print('\nget_data_oneday: ntries = ' + str(ntries))
-#                            got_fmrc = Ofun.get_data_oneday(idt, data_out_fn, ind_dicts, testing_fmrc, verbose=verbose)
-#                        else:
-#                            break
-#                    if got_fmrc == False:
-#                        # this should break out of the dtff loop at the first failure
-#                        # and send the code to Plan C
-#                        print('- error getting forecast files using fmrc')
-#                        planC = True
-#                        break
-#            except Exception as e:
-#                print(e)
-#                planC = True
                 
-#%%------------  get ssh data ------------
-        if got_indices_ssh == True:
+    if got_indices == True:
+        if testing_do_not_get_data:
+            got_hycom_data = True
+        else:
             try:
-                got_fmrc_ssh = False # initialize each time
-                data_out_fn =  h_out_dir / ('h_ssh.nc') # get all hourly ssh at the same time
-                if verbose:
-                    print('\n' + str(data_out_fn))
-                sys.stdout.flush()
-                # get hycom forecast data from the web, and save it in the file "data_out_fn".
-                # it tries 10 times before ending
-                for ntries in range(10):
-                    if got_fmrc_ssh == False:
-                        # try again
-                        print('\nget_data_oneday: ntries = ' + str(ntries))
-                        got_fmrc_ssh = Ofun.get_data_hrly(data_out_fn, ind_dicts_ssh, testing_fmrc, verbose=verbose)
-                    else:
-                        break
-                if got_fmrc_ssh == False:
-                    # this should break out of the dtff loop at the first failure
-                    # and send the code to Plan C
-                    print('- error getting forecast files using fmrc')
-                    planC = True
+                for hkey in hkeys:
+                    got_hycom_data = False # initialize each time
+                    data_out_fn =  h_out_dir / ('h_' + hkey + '.nc') # get all hourly ssh at the same time
+                    if verbose:
+                        print('\n' + str(data_out_fn))
+                    sys.stdout.flush()
+                    # get hycom forecast data from the web, and save it in the file "data_out_fn".
+                    # it tries 10 times before ending
+                    for ntries in range(10):
+                        if got_hycom_data == False:
+                            # try again
+                            print('\nget_hycom_data: ntries = ' + str(ntries))
+                            got_hycom_data = Ofun.get_hycom_data(data_out_fn, hkey, ind_dicts, url_dict, hycom_var_dict, verbose=verbose)
+                        else:
+                            break
+                    if got_hycom_data == False:
+                        # this should break out of the dtff loop at the first failure
+                        # and send the code to Plan B
+                        print('- error getting hycom files')
+                        planB = True
             except Exception as e:
                 print(e)
-                planC = True
-        elif got_indices_ssh == False:  # send the code to Plan C
-            print('- error getting indices for forecast')
-            planC = True
-            
-#%------------  get u data ------------
-        if got_indices_u == True:
-            try:
-                got_fmrc_u = False # initialize each time
-                data_out_fn =  h_out_dir / ('h_u.nc') # get all hourly ssh at the same time
-                if verbose:
-                    print('\n' + str(data_out_fn))
-                sys.stdout.flush()
-                # get hycom forecast data from the web, and save it in the file "data_out_fn".
-                # it tries 10 times before ending
-                for ntries in range(10):
-                    if got_fmrc_u == False:
-                        # try again
-                        print('\nget_data_oneday: ntries = ' + str(ntries))
-                        got_fmrc_u = Ofun.get_data_hrly(data_out_fn, ind_dicts_u, testing_fmrc, verbose=verbose)
-                    else:
-                        break
-                if got_fmrc_u == False:
-                    # this should break out of the dtff loop at the first failure
-                    # and send the code to Plan C
-                    print('- error getting forecast files using fmrc')
-                    planC = True
-            except Exception as e:
-                print(e)
-                planC = True
-        elif got_indices_u == False: # send the code to Plan C
-            print('- error getting indices for forecast')
-            planC = True
+                planB = True
+    elif got_indices == False:  # send the code to Plan B
+        print('- error getting indices')
+        planB = True
+else:
+    # do this if testing_planB == True
+    planB = True
 
-#%------------  get v data ------------
-        if got_indices_v == True:
-            try:
-                got_fmrc_v = False # initialize each time
-                data_out_fn =  h_out_dir / ('h_v.nc') # get all hourly ssh at the same time
-                if verbose:
-                    print('\n' + str(data_out_fn))
-                sys.stdout.flush()
-                # get hycom forecast data from the web, and save it in the file "data_out_fn".
-                # it tries 10 times before ending
-                for ntries in range(10):
-                    if got_fmrc_v == False:
-                        # try again
-                        print('\nget_data_oneday: ntries = ' + str(ntries))
-                        got_fmrc_v = Ofun.get_data_hrly(data_out_fn, ind_dicts_v, testing_fmrc, verbose=verbose)
-                    else:
-                        break
-                if got_fmrc_v == False:
-                    # this should break out of the dtff loop at the first failure
-                    # and send the code to Plan C
-                    print('- error getting forecast files using fmrc')
-                    planC = True
-            except Exception as e:
-                print(e)
-                planC = True
-        elif got_indices_v == False:
-            # send the code to Plan C
-            print('- error getting indices for forecast')
-            planC = True
-
-#%------------  get s data ------------
-        if got_indices_s == True:
-            try:
-                got_fmrc_s = False # initialize each time
-                data_out_fn =  h_out_dir / ('h_s.nc') # get all hourly ssh at the same time
-                if verbose:
-                    print('\n' + str(data_out_fn))
-                sys.stdout.flush()
-                # get hycom forecast data from the web, and save it in the file "data_out_fn".
-                # it tries 10 times before ending
-                for ntries in range(10):
-                    if got_fmrc_s == False:
-                        # try again
-                        print('\nget_data_oneday: ntries = ' + str(ntries))
-                        got_fmrc_s = Ofun.get_data_hrly(data_out_fn, ind_dicts_s, testing_fmrc, verbose=verbose)
-                    else:
-                        break
-                if got_fmrc_s == False:
-                    # this should break out of the dtff loop at the first failure
-                    # and send the code to Plan C
-                    print('- error getting forecast files using fmrc')
-                    planC = True
-            except Exception as e:
-                print(e)
-                planC = True
-        elif got_indices_s == False:
-            # send the code to Plan C
-            print('- error getting indices for forecast')
-            planC = True
-
-#%------------  get t data ------------
-        if got_indices_t == True:
-            try:
-                got_fmrc_t = False # initialize each time
-                data_out_fn =  h_out_dir / ('h_t.nc') # get all hourly ssh at the same time
-                if verbose:
-                    print('\n' + str(data_out_fn))
-                sys.stdout.flush()
-                # get hycom forecast data from the web, and save it in the file "data_out_fn".
-                # it tries 10 times before ending
-                for ntries in range(10):
-                    if got_fmrc_t == False:
-                        # try again
-                        print('\nget_data_oneday: ntries = ' + str(ntries))
-                        got_fmrc_t = Ofun.get_data_hrly(data_out_fn, ind_dicts_t, testing_fmrc, verbose=verbose)
-                    else:
-                        break
-                if got_fmrc_t == False:
-                    # this should break out of the dtff loop at the first failure
-                    # and send the code to Plan C
-                    print('- error getting forecast files using fmrc')
-                    planC = True
-            except Exception as e:
-                print(e)
-                planC = True
-        elif got_indices_t == False:
-            # send the code to Plan C
-            print('- error getting indices for forecast')
-            planC = True
-            
-#%%
-if planC == False:
+if planB == False:
     # process the hycom files, going from the original NetCDF extractions
     # to the processed pickled dicts.
     
-#    if Ldir['run_type'] == 'backfill':
-#        # Make a list of files to use from the hycom archive.
-#        # This is a list of strings corresponding to NetCDF files
-#        hnc_short_list = Ofun.get_hnc_short_list(this_dt, Ldir)
-#        # step through those days and convert them to the same format
-#        # of pickled dicts as used by the forecast
-#        for fn in hnc_short_list:
-#            a = Ofun.convert_extraction_oneday(fn)
-#            dts = datetime.strftime(a['dt'], Lfun.ds_fmt)
-#            out_fn = h_out_dir / ('h' + dts + '.p')
-#            pickle.dump(a, open(out_fn, 'wb'))
-#            
-#    elif Ldir['run_type'] == 'forecast':
-#        hnc_list = sorted([item.name for item in h_out_dir.iterdir()
-#                if item.name[0]=='h' and item.name[-3:]=='.nc'])
-#        #hnc_list.remove('h_ssh.nc')
-#        for item in hnc_list:
-#            a = Ofun.convert_extraction_oneday(h_out_dir / item) # get "h2024.09.14.p"
-#            out_fn = h_out_dir / item.replace('.nc','.p')
-#            pickle.dump(a, open(out_fn, 'wb'))
-#            sys.stdout.flush()
-            
-#    hp_list = sorted([item.name for item in h_out_dir.iterdir()
-#            if (item.name[0]=='h' and item.name[-2:]=='.p')])
-        
-#    # copy in the coordinates (assume those from first file work)
-#    this_h_dict = pickle.load(open(h_out_dir / hp_list[0], 'rb'))
-#    coord_dict = dict()
-#    for vn in ['lon', 'lat', 'z']:
-#        coord_dict[vn] = this_h_dict[vn]
-#    pickle.dump(coord_dict, open(h_out_dir / 'coord_dict.p', 'wb'))
-    
-#    # filter in time
-#    Ofun.time_filter(h_out_dir, hp_list, h_out_dir, Ldir) # get "fh2024.09.14.p"
-
-#% ------------------------------------------------------
+    # ------------------------------------------------------
     # generate coor_dict.p
-    ds = nc.Dataset(h_out_dir / 'h_s.nc')
-    lon = ds.variables['lon'][:] - 360  # convert from 0:360 to -360:0 format
-    lat = ds.variables['lat'][:]
-    depth = ds.variables['depth'][:]
-    z = -depth[::-1]
+    ds = xr.open_dataset(h_out_dir / 'h_s.nc')
+    lon = ds.lon.values - 360  # convert from 0:360 to -360:0 format
+    lat = ds.lat.values
+    depth = ds.depth.values
+    z = -depth[::-1] # repack bottom to top
     coord_dict = dict()
     coord_dict['lon'] = lon
     coord_dict['lat'] = lat
     coord_dict['z'] = z
     pickle.dump(coord_dict, open(h_out_dir / 'coord_dict.p', 'wb'))
 
-#% -------------- filter HYCOM fields -------------------
-    # filter hourly ssh
-    ds = xr.open_dataset(h_out_dir / 'h_ssh.nc') 
-    time_ssh = ds.time.values
-    ssh_lp = zfun.lowpass(ds.surf_el.values, f='godin')
-    ds.close()
-    # filter 3-hourly u
-    ds = xr.open_dataset(h_out_dir / 'h_u.nc') 
-    time_u = ds.time.values
-    u3d_lp = zfun.lowpass(ds.water_u.values, f='hanning', n=24) # 3-day hanning
-    u3d_lp = u3d_lp[:, ::-1, :,:]  # pack bottom to top
-    ds.close()
-    # filter 3-houry v
-    ds = xr.open_dataset(h_out_dir / 'h_v.nc')
-    time_v = ds.time.values
-    v3d_lp = zfun.lowpass(ds.water_v.values, f='hanning', n=24)
-    v3d_lp = v3d_lp[:, ::-1, :,:]  # pack bottom to top
-    ds.close()
-    # filter 3-hourly t
-    ds = xr.open_dataset(h_out_dir / 'h_t.nc')
-    time_t = ds.time.values
-    t3d_lp = zfun.lowpass(ds.water_temp.values, f='hanning', n=24)
-    t3d_lp = t3d_lp[:, ::-1, :,:]  # pack bottom to top
-    ds.close()
-    # filter 3-hourly s
-    ds = xr.open_dataset(h_out_dir / 'h_s.nc')
-    time_s = ds.time.values
-    s3d_lp = zfun.lowpass(ds.salinity.values, f='hanning', n=24)
-    s3d_lp = s3d_lp[:, ::-1, :,:]  # pack bottom to top
-    ds.close()
+    # -------------- filter HYCOM fields -------------------
+    lp_time_dict = dict()
+    lp_dict = dict()
+    for hkey in hkeys:
+        if hkey == 'ssh':
+            # filter hourly ssh
+            ds = xr.open_dataset(h_out_dir / ('h_' + hkey + '.nc')) 
+            lp_time_dict[hkey] = ds.time.values
+            lp_dict[hkey] = zfun.lowpass(ds[hycom_var_dict[hkey]].values, f='godin')
+            ds.close()
+        else:
+            # filter 3-hourly 3D fields
+            ds = xr.open_dataset(h_out_dir / ('h_' + hkey + '.nc')) 
+            lp_time_dict[hkey] = ds.time.values
+            this_lp = zfun.lowpass(ds[hycom_var_dict[hkey]].values, f='hanning', n=24) # 3-day hanning
+            this_lp = this_lp[:, ::-1, :,:]  # pack bottom to top
+            lp_dict[hkey] = this_lp
+            ds.close()
     
-#% ------------------------------------------------
+    # ------------------------------------------------
     # save filtered data at daily interval
     # for example: fh2024.11.19.p, fh2024.11.20.p, fh2024.11.21.p, fh2024.11.22.p
-    dts0 = Ldir['date_string']  # e.g. '2024.11.19'
-    dt0 = datetime.strptime(dts0, '%Y.%m.%d')
-    dt1 = dt0 + timedelta(days=3)
-    dt = dt0
-    while dt <= dt1:
+    dt00 = this_dt
+    if Ldir['run_type'] == 'forecast':
+        nd_f = np.ceil(Ldir['forecast_days'])
+        dt11 = dt00 + timedelta(days=int(nd_f))
+    elif Ldir['run_type'] == 'backfill':
+        dt11 = dt00 + timedelta(days=1)
+    # We use a different naming convention at this point to be compatible with earlier processing steps
+    # that we would like to re-use from ocn02.
+    alt_name_dict = {'ssh':'ssh', 'u':'u3d', 'v':'v3d', 't':'t3d', 's':'s3d'}
+    dt = dt00
+    while dt <= dt11:
        # print(dt)
-        dts = datetime.strftime(dt, '%Y.%m.%d')
+        dts = datetime.strftime(dt, Lfun.ds_fmt)
         out_name = 'fh' + dts + '.p'
         aa = dict()
         aa['dt'] = dt
-        ix = np.argmin(np.abs(time_ssh - np.datetime64(dt)))
-        aa['ssh'] = ssh_lp[ix,:,:]
-        ix = np.argmin(np.abs(time_u - np.datetime64(dt)))
-        aa['u3d'] = u3d_lp[ix,:,:,:]
-        ix = np.argmin(np.abs(time_v - np.datetime64(dt)))
-        aa['v3d'] = v3d_lp[ix,:,:,:]
-        ix = np.argmin(np.abs(time_t - np.datetime64(dt)))
-        aa['t3d'] = t3d_lp[ix,:,:,:]
-        ix = np.argmin(np.abs(time_s - np.datetime64(dt)))
-        aa['s3d'] = s3d_lp[ix,:,:,:]
-    
+        for hkey in hkeys:
+            ix = np.argmin(np.abs(lp_time_dict[hkey] - np.datetime64(dt)))
+            aa[alt_name_dict[hkey]] = lp_dict[hkey][ix,:] # the last : expands as needed
+            # if verbose:
+            #     print('checking on subsampling for %s %s' % (hkey,dts))
+            #     print(aa[alt_name_dict[hkey]].shape)
         pickle.dump(aa, open(h_out_dir / out_name, 'wb'))
         dt += timedelta(days=1)
-#%-------------------------------------------------------------
+
+    #----------- back to original processing steps -------------------------
     
-    # extrapolate
+    # extrapolate (also get ubar and vbar and convert t to ptmp)
     lon, lat, z, L, M, N, X, Y = Ofun.get_coords(h_out_dir)
     fh_list = sorted([item.name for item in h_out_dir.iterdir()
             if item.name[:2]=='fh'])
     for fn in fh_list:
         print('-Extrapolating ' + fn)
         in_fn = h_out_dir / fn
-        V = Ofun.get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir)
-        pickle.dump(V, open(h_out_dir / ('x' + fn), 'wb'))
+        Vex = Ofun.get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir)
+        # # debugging
+        # for k in Vex.keys():
+        #     if k == 'dt':
+        #         pass
+        #     else:
+        #         print('%s %d' % (k, np.isnan(Vex[k]).sum()))
+        #         print('Vex: max and min of ' + k)
+        #         print(np.min(Vex[k]))
+        #         print(np.max(Vex[k]))
+        pickle.dump(Vex, open(h_out_dir / ('x' + fn), 'wb'))
+
+    # # debugging
+    # sys.exit()
 
     # and interpolate to ROMS format
     # get grid and S info
@@ -505,7 +338,6 @@ if planC == False:
             V[vn] = Ofun_bio.fill_polygons(fld, vn, G, z_rho, Ldir)
         print(' - add_CTD task for salt and temp: %0.2f sec' % (time()-tt00))
             
-            
     # Create masks
     mr2 = np.ones((NT, NR, NC)) * G['mask_rho'].reshape((1, NR, NC))
     mr3 = np.ones((NT, NZ, NR, NC)) * G['mask_rho'].reshape((1, 1, NR, NC))
@@ -571,18 +403,20 @@ if planC == False:
     print('- Write clm file: %0.2f sec' % (time()-tt0))
     sys.stdout.flush()
 
-elif planC == True:
-    print('**** Using planC ****')
-    result_dict['note'] = 'planC'
+elif planB == True:
+
+    # planB means that we use the ocean_clm.nc file from the day before and change its last time value
+    # to be a day later.
+    print('**** Using planB ****')
+    result_dict['note'] = 'planB'
     ds_today = Ldir['date_string']
     dt_today = datetime.strptime(ds_today, Lfun.ds_fmt)
     dt_yesterday = dt_today - timedelta(days=1)
     ds_yesterday = datetime.strftime(dt_yesterday, format=Lfun.ds_fmt)
     clm_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + ds_yesterday) / Ldir['frc'] / 'ocean_clm.nc'
     clm_today = out_dir / 'ocean_clm.nc'
-    
     try:
-        # new cleaner method: use open_dataset, update, and save to a new name
+        # use open_dataset, update, and save to a new name
         ds = xr.open_dataset(clm_yesterday, decode_times=False)
         tname_list = [item for item in ds.coords if 'time' in item]
         for tname in tname_list:
