@@ -113,7 +113,7 @@ if testing_planB == False:
         url_temp = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_t3z/FMRC_ESPC-D-V02_t3z_best.ncd'
         url_salt = 'https://tds.hycom.org/thredds/dodsC/FMRC_ESPC-D-V02_s3z/FMRC_ESPC-D-V02_s3z_best.ncd'
         # lists and dicts
-    elif test_type == 'backfill':
+    elif Ldir['run_type'] == 'backfill':
         # New ones to try for backfill
         url_ssh  = 'https://tds.hycom.org/thredds/dodsC/ESPC-D-V02/ssh/2024'
         # url_Sssh  = 'https://tds.hycom.org/thredds/dodsC/ESPC-D-V02/Sssh/2024'
