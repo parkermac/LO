@@ -1,5 +1,5 @@
 """
-Code to compare the results of ocn03 to ocn02.
+Code to compare the results of ocn03 to ocn02 or ocn01.
 
 RESULT: The fields look reasonabley similar except for the offest
 in zeta, which was the problem we were trying to solve. So all looks
@@ -18,11 +18,18 @@ from lo_tools import plotting_functions as pfun
 
 Ldir = Lfun.Lstart()
 
-dt0 = datetime(2024,11,23)
-dstr0 = dt0.strftime(Lfun.ds_fmt)
+if False:
+    # forecast case
+    dt0 = datetime(2024,11,23)
+    ocn = 'ocn02'
+else:
+    # backfill case
+    dt0 = datetime(2024,9,1)
+    ocn = 'ocn01'
 
+dstr0 = dt0.strftime(Lfun.ds_fmt)
 in_dir0 = Ldir['LOo'] / 'forcing' / 'cas7' / ('f' + dstr0)
-fn2 = in_dir0 / 'ocn02' / 'ocean_clm.nc'
+fn2 = in_dir0 / ocn / 'ocean_clm.nc'
 fn3 = in_dir0 / 'ocn03' / 'ocean_clm.nc'
 ds2 = xr.open_dataset(fn2)
 ds3 = xr.open_dataset(fn3)
@@ -49,18 +56,24 @@ vn_list = ['zeta', 'salt', 'temp', 'u', 'v', 'ubar', 'vbar']
 #  'alkalinity',
 #  'oxygen']
 
+slev = -1 # 0 = bottom, -1 = surface
+t2 = pd.DatetimeIndex(ds2.zeta_time.values)
+t3 = pd.DatetimeIndex(ds3.zeta_time.values)
+it_offset = 1
+it2 = np.argwhere(t2==dt0)[0][0] + it_offset
+it3 = np.argwhere(t3==dt0)[0][0] + it_offset
+tlev = 0
+
 for vn in vn_list:
 
     fig = plt.figure()
 
-    slev = -1 # 0 = bottom, -1 = surface
-    tlev = -1 # 0 = first time, -1 = last time
     if vn in ['zeta','ubar','vbar']:
-        fld2 = ds2[vn][tlev,:,:].values
-        fld3 = ds3[vn][tlev,:,:].values
+        fld2 = ds2[vn][it2,:,:].values
+        fld3 = ds3[vn][it3,:,:].values
     else:
-        fld2 = ds2[vn][tlev,slev,:,:].values
-        fld3 = ds3[vn][tlev,slev,:,:].values
+        fld2 = ds2[vn][it2,slev,:,:].values
+        fld3 = ds3[vn][it3,slev,:,:].values
 
     if vn in ['u', 'ubar']:
         fr2 = np.nan * np.ones((dsg.lon_rho.values).shape)
@@ -82,7 +95,7 @@ for vn in vn_list:
     cs = ax.pcolormesh(plon, plat, fld2)
     fig.colorbar(cs, ax=ax)
     pfun.dar(ax)
-    ax.set_title('ocn02')
+    ax.set_title(ocn)
     ax.text(.05,.9,vn,transform=ax.transAxes, fontweight='bold', bbox=pfun.bbox)
 
     ax = fig.add_subplot(132)
@@ -95,7 +108,7 @@ for vn in vn_list:
     cs = ax.pcolormesh(plon, plat, fld3-fld2)
     fig.colorbar(cs, ax=ax)
     pfun.dar(ax)
-    ax.set_title('03 - 02')
+    ax.set_title('ocn03 - ' + ocn)
 
 plt.show()
 
