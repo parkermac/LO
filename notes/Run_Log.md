@@ -46,7 +46,7 @@ These are are an 8-year sequence of quasi-continuous runs (first PM ran each yea
 
 **apogee: /dat1/parker/LO_roms/**
 
-- cas7_t0_x4b This is the **CURRENT FORECAST** Late 2012-present. [## TB and growing]
+- cas7_t0_x4b This is the **CURRENT FORECAST** Late 2012-present. [100 TB and growing] NOTE: as of November 2024 the years 2012-2019 are in /dat2/parker/LO_roms so that we don't run out of space on /dat1.
 - **OBSOLETE:** cas6_traps2_x2b This was the current forecast 2024.07.01-2024.08.25. It lands here before being archived into cas6_v1_live on perigee [1 TB]
 - wgh2_t0_xn0b Nested model Willapa Bay and Grays Harbor, running as part of the daily forecast, 2023.08.07-now. [238 GB and growing]
 - cas2k_v0_x2b A low-resolution version of cas6 (2 km grid) designed for long coastal runs. [2 TB]
