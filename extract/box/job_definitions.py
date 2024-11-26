@@ -116,5 +116,8 @@ def get_box(job, Lon, Lat):
     elif job == 'swot':
         aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
         vn_list = 'h,f,pm,pn,mask_rho,zeta,u,v'
+    elif job == 'meghana':
+        aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
+        vn_list = 'h,mask_rho,f,pm,pn,Uwind,Vwind,u,v,salt,temp'
         
     return aa, vn_list
