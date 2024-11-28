@@ -16,7 +16,7 @@ import gfun_utility as gfu
 import gfun
 
 # This is the name of the grid that you are working on.
-gridname = 'sq1'
+gridname = 'oly1'
 
 # default s-coordinate info (could override below)
 s_dict = {'THETA_S': 4, 'THETA_B': 2, 'TCLINE': 10, 'N': 30,
@@ -79,15 +79,16 @@ def make_initial_info(gridname=gridname):
         if dch['use_z_offset']:
             z = z + dch['z_offset']
             
-    elif gridname == 'so1':
-        # South Sound, new version, 2023.04.12
+    elif gridname == 'oly1':
+        # South Sound, new version, 2024.11.25
+        # Includes Vashon Island and Colvos Passage
         dch = gfun.default_choices()
-        dch['z_offset'] = -1.3 # NAVD88 is 1.3 m below MSL at Seattle
+        dch['z_offset'] = -2 # same logic as wgh2
         dch['excluded_rivers'] = ['skokomish']
-        aa = [-123.13, -122.76, 47, 47.42]
+        aa = [-123.12, -122.3, 47.02, 47.53]
         res = 100 # target resolution (m)
         Lon_vec, Lat_vec = gfu.simple_grid(aa, res)
-        dch['nudging_edges'] = ['east']
+        dch['nudging_edges'] = ['north']
         dch['nudging_days'] = (0.1, 1.0)
         
         # by setting a small min_depth were are planning to use
