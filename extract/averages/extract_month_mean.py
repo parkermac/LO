@@ -139,7 +139,7 @@ for dt in dti:
         if Ldir['testing']:
             print('  + ' + str(fn))
         else:
-            ds = xr.open_dataset(fn)
+            ds = xr.open_dataset(fn, decode_times=False)
             if fnum == 0:
                 mean_full = ds.copy()
             else:
