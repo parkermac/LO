@@ -9,11 +9,11 @@ LO_roms/[gtagex]/averages/month_mean_[year]_[month].nc
 The file format should be much like history files, and easily plotted and maniputated.
 
 Test on mac:
-run extract_month_mean -gtx cas7_t0_x4b -0 2017.01.01 -1 2017.03.31 -Nproc 4 -test True
+run extract_month_mean -gtx cas7_t0_x4b -0 2020.01.01 -1 2020.03.31 -Nproc 4 -test True
 Just outputs info about input and output files.
 
 Run on apogee:
-run extract_month_mean -gtx cas7_t0_x4b -0 2017.01.01 -1 2017.01.31
+run extract_month_mean -gtx cas7_t0_x4b -0 2020.01.01 -1 2020.01.31
 
 NOTE: The 0 and 1 inputs just provide the year and month of the start and end for averages.
 The days are ignored. Using "-0 2017.01.01 -1 2017.01.31" will just produce
