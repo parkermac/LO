@@ -52,8 +52,8 @@ temp_out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'averages' / ('temp_' 
 # set up to do the partial mean
 fn_list = Lfun.get_fn_list('lowpass', Ldir, Ldir['ds0'], Ldir['ds1'])
 if Ldir['verbose']:
-    print(fn_list['0'])
-    print(fn_list['-1'])
+    print(fn_list[0])
+    print(fn_list[-1])
 
 averaging_factor = 1/Ldir['days_per_month']
 
