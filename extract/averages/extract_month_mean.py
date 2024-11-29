@@ -40,6 +40,10 @@ from lo_tools import extract_argfun as exfun
 
 Ldir = exfun.intro() # this handles the argument passing
 
+verbose = False
+if Ldir['testing']:
+    verbose = True
+
 # prepare to loop over all days
 ds0 = Ldir['ds0']
 ds1 = Ldir['ds1']
@@ -59,7 +63,7 @@ for dt in dti:
     dt_dict[dt] = this_dti
 
 # check results (Result: looks good)
-if False:
+if verbose:
     for dt in dti:
         this_dti = dt_dict[dt]
         print('')
@@ -71,7 +75,6 @@ out_dir = Ldir['roms_out'] / Ldir['gtagex'] / 'averages'
 Lfun.make_dir(out_dir)
 
 # loop over all months
-verbose = 'True'
 for dt in dti:
 
     this_ym = dt.strftime('%Y_%m')
@@ -105,16 +108,19 @@ for dt in dti:
             print('   ' + this_ds1)
             sys.stdout.flush()
 
+        worker_verbose = str(verbose)
+
         cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'averages' / 'month_mean_worker.py'),
                     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
                     '-this_ym', this_ym, '-0', this_ds0, '-1', this_ds1,
                     '-days_per_month', str(days_per_month),
-                    '-fnum', str(fnum), '-test', str(Ldir['testing']), '-v', verbose]
+                    '-fnum', str(fnum), '-test', str(Ldir['testing']), '-v', worker_verbose]
         if verbose:
             print('   ' + (' ').join(cmd_list))
         
+        worker_verbose = 'False' # turn off verbose after the first call
+
         if not Ldir['testing']:
-            verbose = 'False' # turn off verbose after the first call
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             proc_list.append(proc)
             # Nproc controls how many ncks subprocesses we allow to stack up
@@ -137,7 +143,8 @@ for dt in dti:
         fn = temp_out_dir / ('mean_temp_' + fstr + '.nc')
 
         if Ldir['testing']:
-            print('  + ' + str(fn))
+            if verbose:
+                print('  + ' + str(fn))
         else:
             ds = xr.open_dataset(fn, decode_times=False)
             if fnum == 0:
@@ -149,13 +156,15 @@ for dt in dti:
     out_fn = out_dir / ('monthly_mean_' + this_ym + '.nc')
 
     if Ldir['testing']:
-        print(str(out_fn))
+        if verbose:
+            print(str(out_fn))
     else:
         out_fn.unlink(missing_ok=True)
         mean_full.to_netcdf(out_fn, unlimited_dims=['ocean_time'])
 
         if Ldir['testing']:
             ds_test = xr.open_dataset(out_fn)
+            
         mean_full.close()
 
     if not Ldir['testing']:
