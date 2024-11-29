@@ -59,7 +59,7 @@ averaging_factor = 1/Ldir['days_per_month']
 
 ii = 0
 for fn in fn_list:
-    ds = xr.open_dataset(fn)
+    ds = xr.open_dataset(fn, decode_times=False)
     if ii == 0:
         lp = (ds*averaging_factor).compute()
     else:
