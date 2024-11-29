@@ -3,7 +3,7 @@ Custom code to help Parker copy lowpassed files to his laptop.
 
 ** WARNING: I think this code it not ready for general use. It fails too
 often even when I run it with an ethernet cable in my UW office.
-Running from the bach command line does not help.
+Running from the bash command line does not help.
 
 Example call, from my mac:
 run file_copy_utility -gtx cas7_t0_x4b -0 2013.01.01 -1 2013.01.03
