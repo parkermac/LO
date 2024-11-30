@@ -54,6 +54,9 @@ for month in range(1,13):
         # and save to NetCDF, with compression
         Enc_dict = {vn:zrfun.enc_dict for vn in lp.data_vars}
         lp.to_netcdf(out_fn, encoding=Enc_dict)
+        # NOTE: for some reason this compression works fine in this case but
+        # throws an error "OverflowError: Python int too large to convert to C long"
+        # when I try to do it in extract_lowpass.py. No clue why.
 
     print('Month = ' + str(month))
     print(str(out_fn))

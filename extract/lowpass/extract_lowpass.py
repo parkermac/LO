@@ -145,7 +145,6 @@ while dtlp <= dt1:
             pass
     ds.close()
     
-
     # and save to NetCDF, with compression
     out_fn = out_dir / 'lowpassed.nc'
     out_fn.unlink(missing_ok=True)
