@@ -18,6 +18,8 @@ selected fields by a filter weight and adding them up.
 The lp_worker code does its best to automate the selection of fields to low-pass, including
 atm fields if they are there and bio fields for old and new code versions if they are there.
 
+2024.11.30: I added compression to the final output.
+
 Test on mac:
 run extract_lowpass -gtx cas7_t0_x4b -0 2017.07.04 -1 2017.07.04 -Nproc 4 -test True
 
@@ -143,17 +145,16 @@ while dtlp <= dt1:
             pass
     ds.close()
     
-    if not Ldir['testing']:
-        # save output
-        out_fn = out_dir / 'lowpassed.nc'
-        out_fn.unlink(missing_ok=True)
-        lp_full.to_netcdf(out_fn, unlimited_dims=['ocean_time'])
-    else:
-        out_fn = temp_out_dir / 'lowpassed.nc'
-        out_fn.unlink(missing_ok=True)
-        lp_full.to_netcdf(out_fn, unlimited_dims=['ocean_time'])
-        ds_test = xr.open_dataset(out_fn)
+
+    # and save to NetCDF, with compression
+    out_fn = out_dir / 'lowpassed.nc'
+    out_fn.unlink(missing_ok=True)
+    Enc_dict = {vn:zrfun.enc_dict for vn in lp_full.data_vars}
+    lp_full.to_netcdf(out_fn, unlimited_dims=['ocean_time'], encoding=Enc_dict)
     lp_full.close()
+
+    if Ldir['testing']:
+        ds_test = xr.open_dataset(out_fn)
 
     if not Ldir['testing']:
         # tidying up

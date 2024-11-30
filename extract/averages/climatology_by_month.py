@@ -3,7 +3,9 @@ Code to create monthly climatology files by averaging the month_mean files
 for a given month over a range of years.
 
 This is hard-coded instead of being an LO command-line tool because:
-(i) This is a task that swould only be done occasionally.
+(i) This is a task that will only be done occasionally.
+
+This is quick to run: took about 15 minutes to do means of 10 years on apogee.
 """
 
 import xarray as xr
