@@ -81,6 +81,83 @@ def P_basic(in_dict):
     else:
         plt.show()
 
+def P_monthly_mean(in_dict):
+    # plots monthly mean and its difference from climatology
+    # START
+    ds = xr.open_dataset(in_dict['fn'])
+    # also get the associated monthly climatology
+    this_name = in_dict['fn'].name
+    # assume name is like "monthly_mean_2024_11.nc"
+    mo_str = this_name[-5:-3] # 11
+    ym_str = this_name[-10:-3] # 2024_11
+    fn_clim = in_dict['clim_dir'] / ('monthly_clim_' + mo_str + '.nc')
+    ds_clim = xr.open_dataset(fn_clim)
+    # find aspect ratio of the map
+    aa = pfun.get_aa(ds)
+    # AR is the aspect ratio of the map: Vertical/Horizontal
+    AR = (aa[3] - aa[2]) / (np.sin(np.pi*aa[2]/180)*(aa[1] - aa[0]))
+    fs = 14
+    hgt = 8.5
+    pfun.start_plot(fs=fs, figsize=(hgt*2.7/AR,hgt))
+    fig = plt.figure()
+
+    # color lims for field and difference from climatology
+    c_dict = {'temp': (4,20), 'oxygen':(0,12)}
+    d_dict = {'temp': (-1,1), 'oxygen':(-2,2)}
+
+    # PLOT CODE
+    if True:
+        vn = 'temp'
+        slev = -1
+    else:
+        vn = 'oxygen'
+        slev = 0
+    if slev == -1:
+        stext = 'Surface'
+    elif slev == 0:
+        stext = 'Bottom'
+    f1 = pinfo.fac_dict[vn] * ds[vn][0,slev,:,:].values
+    f2 = pinfo.fac_dict[vn] * ds_clim[vn][0,slev,:,:].values
+
+    plon, plat = pfun.get_plon_plat(ds['lon_rho'].values, ds['lat_rho'].values)
+
+    ax1 = fig.add_subplot(121)
+    ax2 = fig.add_subplot(122)
+
+    vmin, vmax = c_dict[vn]
+    cs1 = ax1.pcolormesh(plon,plat,f1,cmap='rainbow', vmin=vmin, vmax = vmax)
+    fig.colorbar(cs1, ax=ax1)
+    pfun.dar(ax1)
+    pfun.add_coast(ax1)
+
+    ax1.set_title('%s %s %s' % (stext,pinfo.tstr_dict[vn],pinfo.units_dict[vn]), fontsize=1.2*fs)
+    ax1.set_xlabel('Longitude')
+    ax1.set_ylabel('Latitude')
+    ax1.text(.05,.1,'Monthly Average ' + ym_str, transform=ax1.transAxes,
+        fontweight='bold',bbox=pfun.bbox)
+    ax1.axis(aa)
+    
+    vmin, vmax = d_dict[vn]
+    cs2 = ax2.pcolormesh(plon,plat,f1-f2,cmap='RdYlBu_r', vmin=vmin, vmax = vmax)
+    fig.colorbar(cs2, ax=ax2)
+    pfun.dar(ax2)
+    pfun.add_coast(ax2)
+    ax2.axis(aa)
+
+    ax2.set_title('Difference from Climatology')
+    ax2.set_xlabel('Longitude')
+    ax2.set_yticklabels([])
+
+    fig.tight_layout()
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+
 def P_bgc_surface(in_dict):
     # Biogeochemical fields at the surface
     # START

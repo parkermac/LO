@@ -27,6 +27,7 @@ import argparse
 from datetime import datetime, timedelta
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
+import pandas as pd
 
 from lo_tools import Lfun
 
@@ -79,7 +80,7 @@ elif Ldir['roms_out_num'] > 0:
 if Ldir['list_type'] == None:
     print(' pan_plot '.center(60,'='))
     print('\n%s\n' % '** Choose List type (return for snapshot) **')
-    lt_list = ['snapshot', 'daily', 'hourly ', 'allhours']
+    lt_list = ['snapshot', 'lowpass', 'hourly', 'daily', 'monthly_mean']
     Nlt = len(lt_list)
     lt_dict = dict(zip(range(Nlt), lt_list))
     for nlt in range(Nlt):
@@ -134,8 +135,26 @@ in_dict['auto_vlims'] = Ldir['auto_vlims']
 in_dict['testing'] = Ldir['testing']
 
 # get list of history files to plot
-fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir,
-    Ldir['ds0'], Ldir['ds1'], his_num=Ldir['his_num'])
+if Ldir['list_type'] == 'monthly_mean':
+    # A new choice that connects to the new monthly averages
+    # I avoid putting it in Lfun.get_fn_list() because is uses pandas.
+    # To get a snapshot call with first and last day of one month:
+    #  run pan_plot -0 2020.01.01 -1 2020.01.31 -lt monthly_mean -pt P_monthly_mean
+    # To run for more months you still use the last day of the last month
+    #  run pan_plot -0 2020.01.01 -1 2020.02.29 -lt monthly_mean -pt P_monthly_mean
+    # would to two months.
+    dt0 = datetime.strptime(Ldir['ds0'], Lfun.ds_fmt)
+    dt1 = datetime.strptime(Ldir['ds1'], Lfun.ds_fmt)
+    dti = pd.date_range(dt0, dt1, freq='ME', inclusive='both')
+    dir0 = Ldir['roms_out'] / Ldir['gtagex'] / 'averages'
+    fn_list = []
+    for dt in dti:
+        ym_str = dt.strftime('%Y_%m')
+        fn_list.append(dir0 / ('monthly_mean_' + ym_str + '.nc'))
+    in_dict['clim_dir'] = Ldir['roms_out'] / Ldir['gtagex'] / 'climatologies'
+else:
+    fn_list = Lfun.get_fn_list(Ldir['list_type'], Ldir,
+        Ldir['ds0'], Ldir['ds1'], his_num=Ldir['his_num'])
     
 if (Ldir['list_type'] == 'allhours') and Ldir['testing']:
     fn_list = fn_list[:4]
