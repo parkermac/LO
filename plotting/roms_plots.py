@@ -103,7 +103,7 @@ def P_monthly_mean(in_dict):
 
     # color lims for field and difference from climatology
     c_dict = {'temp': (4,20), 'oxygen':(0,12)}
-    d_dict = {'temp': (-1,1), 'oxygen':(-2,2)}
+    d_dict = {'temp': (-3,3), 'oxygen':(-3,3)}
 
     # PLOT CODE
     if True:
@@ -148,7 +148,7 @@ def P_monthly_mean(in_dict):
     ax2.set_xlabel('Longitude')
     ax2.set_yticklabels([])
 
-    fig.tight_layout()
+    #fig.tight_layout()
     # FINISH
     ds.close()
     pfun.end_plot()
