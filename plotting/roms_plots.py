@@ -106,7 +106,7 @@ def P_monthly_mean(in_dict):
     d_dict = {'temp': (-3,3), 'oxygen':(-3,3)}
 
     # PLOT CODE
-    if True:
+    if False:
         vn = 'temp'
         slev = -1
     else:
