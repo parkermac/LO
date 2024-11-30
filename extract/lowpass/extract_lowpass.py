@@ -149,9 +149,7 @@ while dtlp <= dt1:
     # and save to NetCDF, with compression
     out_fn = out_dir / 'lowpassed.nc'
     out_fn.unlink(missing_ok=True)
-    Enc_dict = {vn:zrfun.enc_dict for vn in lp_full.data_vars}
-    # lp_full.to_netcdf(out_fn, unlimited_dims=['ocean_time'], encoding=Enc_dict)
-    lp_full.to_netcdf(out_fn, encoding=Enc_dict)
+    lp_full.to_netcdf(out_fn, unlimited_dims=['ocean_time'])
     lp_full.close()
 
     if Ldir['testing']:
