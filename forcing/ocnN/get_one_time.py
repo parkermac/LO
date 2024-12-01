@@ -127,7 +127,8 @@ for vn in vn_dict.keys():
         if vn == 'zeta':
             # NOTE: it would be better to automate this instead of hard-coding!
             # change sea level to match what was used in pgrid for z_offset.
-            z_offset = -1
+            # z_offset = -1 # backed off on this because of wgh2 blowup issue 2024.12.01
+            z_offset = -0.5
             vv = vv + z_offset
             # enforce a minimum depth
             min_depth = 0.3
