@@ -840,7 +840,7 @@ def P_ths(in_dict):
 
 def P_debug(in_dict):
     # Focused on debugging
-    vn_list = ['u', 'v', 'zeta']
+    vn_list = ['salt', 'temp','u', 'v', 'zeta']
     do_wetdry = False
     
     # START
@@ -864,6 +864,11 @@ def P_debug(in_dict):
             v = ds[vn][0,-1,:,:].values
             vmin = -2
             vmax = 2
+            cmap='hsv_r'
+        elif vn in ['salt', 'temp']:
+            v = ds[vn][0,-1,:,:].values
+            vmin = 0
+            vmax = 30
             cmap='hsv_r'
         elif vn == 'zeta':
             v = ds[vn][0,:,:].values
