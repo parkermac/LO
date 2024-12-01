@@ -29,7 +29,7 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
-nest_gridname = 'wgh2'
+nest_gridname = 'oly1'
 
 # imports
 from subprocess import Popen as Po
