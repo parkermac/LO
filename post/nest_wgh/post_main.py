@@ -52,9 +52,9 @@ elif Ldir['run_type'] == 'forecast':
 
 """
 Example commands to emulate here:
-python driver_forcing3.py -g wgh1 -gtx cas6_traps2_x2b -ro 0 -do_bio True -r backfill -s new -0 2023.05.24 -1 2023.05.26 -f ocnN > ocnN_wgh1.log &
-python driver_forcing3.py -g wgh1 -r forecast -f atm00 > atm00_wgh1.log &
-python driver_forcing3.py -g wgh1 -r forecast -f riv00 > riv00_wgh1.log &    
+python driver_forcing3.py -g wgh2 -gtx cas7_t0_x4b -ro 0 -do_bio True -r backfill -s perfect -0 2024.12.01 -1 2024.12.03 -f ocnN > ocnN_wgh2.log &
+python driver_forcing3.py -g wgh2 -r forecast -f atm00 > atm00_wgh2.log &
+python driver_forcing3.py -g wgh2 -r forecast -f riv00 > riv00_wgh2.log &    
 """
 # make forcing
 
