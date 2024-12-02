@@ -66,18 +66,18 @@ python driver_forcing3.py -g oly1 -r forecast -tP trapsP00 -f trapsF00 > trapsF0
 """
 # make forcing
 
-tt0 = time()
-cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
-    '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
-    '-do_bio', 'True', '-r', 'backfill', '-s', 'perfect',
-    '-0', ds0, '-1', ds1, '-f', 'ocnN']
-proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-stdout, stderr = proc.communicate()
-print(stdout.decode())
-if len(stderr) > 0:
-    print(stderr.decode())
-    result_dict['note'] = 'ocnN problem'
-print('Elapsed time = %0.2f sec' % (time()-tt0))
+# tt0 = time()
+# cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
+#     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
+#     '-do_bio', 'True', '-r', 'backfill', '-s', 'perfect',
+#     '-0', ds0, '-1', ds1, '-f', 'ocnN']
+# proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+# stdout, stderr = proc.communicate()
+# print(stdout.decode())
+# if len(stderr) > 0:
+#     print(stderr.decode())
+#     result_dict['note'] = 'ocnN problem'
+# print('Elapsed time = %0.2f sec' % (time()-tt0))
 
 frc = 'atm00'
 tt0 = time()
@@ -102,7 +102,7 @@ frc = 'trapsF00'
 tt0 = time()
 if Ldir['run_type'] == 'forecast':
     cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
-        '-r', 'forecast', '-f', frc, '-tp', 'trapsP00']
+        '-r', 'forecast', '-f', frc, '-tP', 'trapsP00']
 elif Ldir['run_type'] == 'backfill':
     cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
         '-r', 'backfill', '-0', ds0, '-f', frc, '-tP', 'trapsP00']
