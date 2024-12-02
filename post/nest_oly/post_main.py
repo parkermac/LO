@@ -55,7 +55,7 @@ Example commands to emulate here:
 
 One day from scratch:
 python driver_forcing3.py -g oly1 -gtx cas7_t0_x4b -ro 0 -do_bio True -r backfill -s new -0 2024.10.07 -1 2024.10.07 -f ocnN > ocnN_oly1.log &
-python driver_forcing3.py -g oly1 -r backfill -0 2024.10.07 -1 2024.10.07 -f atm00 > atm00_sq0.log &
+python driver_forcing3.py -g oly1 -r backfill -0 2024.10.07 -1 2024.10.07 -f atm00 > atm00_oly1.log &
 python driver_forcing3.py -g oly1 -r backfill -0 2024.10.07 -1 2024.10.07 -tP trapsP00 -f trapsF00 > trapsF00_oly1.log &
 
 or
@@ -105,7 +105,7 @@ if Ldir['run_type'] == 'forecast':
         '-r', 'forecast', '-f', frc, '-tp', 'trapsP00']
 elif Ldir['run_type'] == 'backfill':
     cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
-        '-r', 'backfill', '-0', ds0, '-f', frc, '-tp', 'trapsP00']
+        '-r', 'backfill', '-0', ds0, '-f', frc, '-tP', 'trapsP00']
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
 print(stdout.decode())
