@@ -285,7 +285,7 @@ def add_velocity_vectors(ax, ds, fn, v_scl=10, v_leglen=0.5, nngrid=80, zlev='to
     mask = uu != 0
     # plot velocity vectors
     Q = ax.quiver(xx[mask], yy[mask], uu[mask], vv[mask],
-        units='width', scale=v_scl, scale_units='width', color='m')
+        scale=v_scl, scale_units='width', color='m', units='width')
     plt.quiverkey(Q, .9, .1, v_leglen, str(v_leglen)+' $ms^{-1}$', angle=20)
 
 def add_windstress_flower(ax, ds, t_scl=1, t_leglen=0.1, center=(.85,.25), fs=12):
