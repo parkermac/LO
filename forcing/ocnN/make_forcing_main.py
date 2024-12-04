@@ -110,6 +110,7 @@ for vn in ddk:
 # loop over the temp files
 ot_vec = np.nan * np.ones(NT)
 ii = 0
+tt00 = time()
 for temp_out_fn in temp_out_fn_list:
     dd = pickle.load(open(temp_out_fn, 'rb'))
     for vn in ddk:
@@ -126,6 +127,7 @@ for temp_out_fn in temp_out_fn_list:
             else:
                 print('problem with ndim?')
     ii += 1
+print('-- Put data in ds for clim file: %0.2f sec' % (time()-tt00))
 # Add the time coordinates
 for vn in ddk:
     if vn == 'ocean_time':
@@ -137,8 +139,8 @@ for vn in ddk:
         ds[tname] = ((tname,), ot_vec)
         ds[tname].attrs['units'] = Lfun.roms_time_units
 # and save to NetCDF
-Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
-ds.to_netcdf(out_fn, encoding=Enc_dict)
+#Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
+ds.to_netcdf(out_fn)#, encoding=Enc_dict)
 ds.close()
 print('- Write clm file: %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
