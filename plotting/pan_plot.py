@@ -42,7 +42,7 @@ parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
 parser.add_argument('-0', '--ds0', default='2017.07.04', type=str)
 parser.add_argument('-1', '--ds1', type=str)
 parser.add_argument('-lt', '--list_type', default='snapshot', type=str)
-# snapshot, hourly, daily, or lowpass
+# Choices for -lt: snapshot, hourly, daily, lowpass, monthly_mean
 
 # arguments that allow you to bypass the interactive choices
 parser.add_argument('-hn', '--his_num', default=2, type=int)
@@ -138,7 +138,7 @@ in_dict['testing'] = Ldir['testing']
 if Ldir['list_type'] == 'monthly_mean':
     # A new choice that connects to the new monthly averages
     # I avoid putting it in Lfun.get_fn_list() because is uses pandas.
-    # To get a snapshot call with first and last day of one month:
+    # To get a snapshot, call with first and last day of one month:
     #  run pan_plot -0 2020.01.01 -1 2020.01.31 -lt monthly_mean -pt P_monthly_mean
     # To run for more months you still use the last day of the last month
     #  run pan_plot -0 2020.01.01 -1 2020.02.29 -lt monthly_mean -pt P_monthly_mean

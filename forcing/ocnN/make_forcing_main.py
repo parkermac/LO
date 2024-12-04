@@ -2,10 +2,14 @@
 This makes the ocn forcing files for a nested run, interpolating to get
 the fields from history files for another run.
 
-Designed to run only as backfill.
+Designed to run only as backfill. When called for a forecast using driver_forcing3.py it
+makes daily forcing for the three days of the forecast, instead of a single file that
+covers all three days. This inconsistency is handles in driver_roms3.py but in the future
+we should consider just putting all forcing files into individual days, thereby making
+the backfill and forecast systems more similar.
 
 Testing:
-run make_forcing_main.py -g wgh1 -gtx cas6_traps2_x2b -ro 0 -r backfill -s continuation -d 2017.07.04 -f ocnN -do_bio True -test True
+run make_forcing_main.py -g wgh2 -gtx cas7_t0_x4b -ro 0 -r backfill -s continuation -d 2017.07.04 -f ocnN -do_bio True -test True
 
 Performance: 6 minutes per day on mac for wgh1 grid with do_bio = True and start_type = new.
 """
