@@ -4,9 +4,6 @@ Code to explore plotting of monthly means and their anomaly from climatology.
 This version is intended to put all the fields or anomalies on a single grid.
 The goal is to make it easier to see patterns.
 
-I can test this on my mac (-test True) but I only have one monthly file so to run for
-real it has to be on apogee.
-
 To get the full suite of plots the main things to change are -pt (mean or anomaly)
 and -vn (temp or oxygen).
 
@@ -50,14 +47,16 @@ if Ldir['roms_out_num'] == 0:
 elif Ldir['roms_out_num'] > 0:
     Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
 
-if Ldir['testing']:
-    # hack to start from a month I have on my mac but still do 10 years
-    dt0 = datetime.strptime('2020.01.01', Lfun.ds_fmt)
-    dt1 = datetime.strptime('2029.12.31', Lfun.ds_fmt)
-else:
-    # the actual range of the monthly averages
-    dt0 = datetime.strptime(Ldir['ds0'], Lfun.ds_fmt)
-    dt1 = datetime.strptime(Ldir['ds1'], Lfun.ds_fmt)
+# if Ldir['testing']:
+#     # hack to start from a month I have on my mac but still do 10 years
+#     dt0 = datetime.strptime('2020.01.01', Lfun.ds_fmt)
+#     dt1 = datetime.strptime('2029.12.31', Lfun.ds_fmt)
+# else:
+#     # the actual range of the monthly averages
+#     dt0 = datetime.strptime(Ldir['ds0'], Lfun.ds_fmt)
+#     dt1 = datetime.strptime(Ldir['ds1'], Lfun.ds_fmt)
+dt0 = datetime.strptime(Ldir['ds0'], Lfun.ds_fmt)
+dt1 = datetime.strptime(Ldir['ds1'], Lfun.ds_fmt)
 dti = pd.date_range(dt0, dt1, freq='ME', inclusive='both')
 
 dir1 = Ldir['roms_out'] / Ldir['gtagex'] / 'averages'
@@ -121,9 +120,10 @@ for fn1 in fn1_list:
             f2 = ds2[vn][0,slev,:,:].values
             ds2.close()
 
-    if Ldir['testing'] and (ii > 0):
-        pass
-    elif (not Ldir['testing']) and (ii > 0):
+    # if Ldir['testing'] and (ii > 0):
+    #     pass
+    # elif (not Ldir['testing']) and (ii > 0):
+    else:
         ds1 = xr.open_dataset(fn1)
         f1 = ds1[vn][0,slev,:,:].values
         ds1.close()
@@ -135,9 +135,11 @@ for fn1 in fn1_list:
 
     ax1 = plt.subplot(gs1[ii])
     if pt == 'mean':
-        cs1 = ax1.pcolormesh(plon,plat,f1,cmap='rainbow', vmin=vmin, vmax=vmax)
+        cmap='rainbow'
+        cs1 = ax1.pcolormesh(plon,plat,f1,cmap=cmap, vmin=vmin, vmax=vmax)
     elif pt == 'anomaly':
-        cs1 = ax1.pcolormesh(plon,plat,f1-f2,cmap='rainbow', vmin=vmin, vmax=vmax)
+        cmap='RdYlBu_r'
+        cs1 = ax1.pcolormesh(plon,plat,f1-f2,cmap=cmap, vmin=vmin, vmax=vmax)
     pfun.dar(ax1)
     # ax1.axis('off')
     if ii in range(12):
