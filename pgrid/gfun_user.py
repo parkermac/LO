@@ -84,7 +84,12 @@ def make_initial_info(gridname=gridname):
         # Includes Vashon Island and Colvos Passage
         dch = gfun.default_choices()
         dch['z_offset'] = -2 # same logic as wgh2
+
         dch['excluded_rivers'] = ['skokomish']
+        dch['do_traps'] = True
+        dch['excluded_triv'] = ['Lynch Cove','Tahuya']
+        dch['excluded_wwtp'] = ['Alderbrook']
+
         aa = [-123.12, -122.3, 47.02, 47.53]
         res = 100 # target resolution (m)
         Lon_vec, Lat_vec = gfu.simple_grid(aa, res)

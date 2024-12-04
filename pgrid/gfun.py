@@ -80,6 +80,16 @@ def default_choices():
     # decide what to exclude, and then start again, before putting a lot of
     # time in to edit_mask.py.
     dch['excluded_rivers'] = []
+    # As of 2024.12.03 we also allow for tiny rivers and wwtp's.
+    # Like for rivers, you would populate these lists by hand in gfun_user
+    # after running the code once to see what is there. The new version of
+    # plot_grid allows you to see the names by using the flag -show_names True.
+    # We exclude the rivers at the grid_to_LO step where we first run
+    # LO/pre/trapsP00/traps_placement.py and then the code will clip
+    # out the excluded triv and wwtp from the csv files in LO_data/grids/[gridname].
+    dch['do_traps'] = False
+    dch['excluded_triv'] = []
+    dch['excluded_wwtp'] = []
 
     # SMOOTHING
     dch['use_min_depth'] = True

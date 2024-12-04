@@ -14,6 +14,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-g', '--gridname', default='',type=str) # e.g. cas6
 parser.add_argument('-dmax', default=5, type=int) # max depth for colormap [m]
 parser.add_argument('-small', default=False, type=Lfun.boolean_string) # True for laptop size
+parser.add_argument('-show_names', default=False, type=Lfun.boolean_string) # True for to show river/traps names
 args = parser.parse_args()
 zmin = -args.dmax
 
@@ -24,7 +25,6 @@ else:
     Gr = gfun.gstart()
 from lo_tools import plotting_functions as pfun
 import gfun_plotting as gfp
-
 
 testing = True
 if testing:
@@ -42,12 +42,30 @@ except FileNotFoundError:
     # you could fill this in by hand if you wanted
     dch = {'analytical': False} # hack to make cas6 work
 
+Ldir = Lfun.Lstart(gridname=Gr['gridname'])
 # get river info if it exists
 do_riv = False
-ri_fn = Gr['gdir'] / 'roms_river_info.csv'
-if ri_fn.is_file():
-    rri_df = pd.read_csv(ri_fn, index_col='rname')
+riv_fn0 = Ldir['grid'] / 'river_info.csv' # created by grid_to_LO.py
+riv_fn1 = Gr['gdir'] / 'roms_river_info.csv' # created by carve_rivers.py
+if riv_fn0.is_file():
+    riv_df = pd.read_csv(riv_fn0, index_col='rname')
     do_riv = True
+elif riv_fn1.is_file():
+    riv_df = pd.read_csv(riv_fn1, index_col='rname')
+    do_riv = True
+# also look to see if tiny rivers and wwtp's have been created
+#
+do_triv = False
+triv_fn = Ldir['grid'] / 'triv_info.csv'
+if triv_fn.is_file():
+    triv_df = pd.read_csv(triv_fn, index_col='rname')
+    do_triv = True
+#
+do_wwtp = False
+wwtp_fn = Ldir['grid'] / 'wwtp_info.csv'
+if wwtp_fn.is_file():
+    wwtp_df = pd.read_csv(wwtp_fn, index_col='rname')
+    do_wwtp = True
 
 # load the data
 ds = xr.open_dataset(in_fn)
@@ -89,7 +107,12 @@ ax.set_title(in_fn.name)
 ax.text(.05, .95, Gr['gridname'], transform=ax.transAxes)
 ax.text(.95, .05, str(mask_rho.shape), ha='right', transform=ax.transAxes, bbox=pfun.bbox)
 if do_riv:
-    gfp.add_river_tracks(Gr, ds, ax)
+    gfp.add_riv(riv_df, ds, ax, show_names=args.show_names)
+    gfp.add_riv_tracks(Gr, riv_df, ax)
+if do_triv:
+    gfp.add_triv(triv_df, ds, ax, show_names=args.show_names)
+if do_wwtp:
+    gfp.add_wwtp(wwtp_df, ds, ax, show_names=args.show_names)
 
 if False:    
     # mask

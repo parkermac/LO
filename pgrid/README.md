@@ -35,6 +35,9 @@ Also [plon, plat] is just like [lon_psi, lat_psi] but extended by one on all dir
 - t_dir/t_list
 - use_z_offset/z_offset
 - excluded_rivers
+- do_traps
+- excluded_triv
+- excluded_wwtp
 - trim_grid
 - any other of the default choices in `gfun.default_choices()`
 
@@ -65,9 +68,12 @@ NOTE: you may want to run `carve_rivers.py` again at this point just to make jus
 
 (9) `grid_to_LO.py` writes the grid.nc file that is used by ROMS, saving it in LO_data/grids. It also saves S-coordinate info.
 
-It copies or creates: grid.nc, nudgcoef.nc, river_info.csv, S_COORDINATE_INFO.csv, XY_COORDINATE_INFO.csv. NOTE: the river_info.csv file contains the index and direction info used by ROMS. Don't confuse it with the file of the same name (sorry) that is in LO_output/pre/river.
+It copies or creates: grid.nc, nudgcoef.nc, river_info.csv, S_COORDINATE_INFO.csv, XY_COORDINATE_INFO.csv. NOTE: the river_info.csv file contains the index and direction info used by ROMS. Don't confuse it with the file of the same name (sorry) that is in LO_output/pre/river. As of 2024.12.03 it also can create and trim triv_info.csv and wwtp_info.csv.
 - nudging_edges
 - nudging_days
+- do_traps
+- excluded_triv
+- excluded_wwtp
 
 ---
 

@@ -139,7 +139,7 @@ cy0, cy1, cyf = zfun.get_interpolant(clat, lat, show_warnings=False)
 ax1.plot(cx0 + cxf, NRp - (cy0 + cyf) - 1, '-k')
 
 def edit_mask_river_tracks(Gr, NRp, ax, hpad):
-    # add river tracks and endpoints for edit_mask.py
+    # add river endpoints for edit_mask.py
     rri_fn = Gr['gdir'] / 'roms_river_info.csv'
     if rri_fn.is_file():
         df = pd.read_csv(rri_fn, index_col='rname')
