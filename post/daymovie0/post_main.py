@@ -1,8 +1,8 @@
 """
 This is the main program for making the daymovies and pushing them to homer.
 
-Testing on mac:
-run post_main.py -gtx cas6_v3_lo8b -ro 2 -d 2019.07.04 -job daymovie0 -test True
+Testing on apogee:
+run post_main.py -gtx cas7_t0_x4b -ro 0 -d 2024.12.05 -job daymovie0 -test True
 
 """
 
@@ -29,13 +29,11 @@ print((' Creating daymovies for ' + Ldir['date_string'] + ' ').center(60,'='))
 ds00 = Ldir['date_string']
 dt00 = datetime.strptime(ds00,'%Y.%m.%d')
 
-# if Ldir['testing'] == True:
-#     moviename_list = ['P1_full_oxygen_bot']
-# else:
-moviename_list = ['P1_full_salt_top', 'P1_full_oxygen_bot', 'P1_nshelf_oxygen_bot',
-                    'P1_PS_temp_top', 'P1_PS_speed_top',
-                    'P1_willapa_ARAG_top', 'P1_willapa_ARAG_bot',
-                    'Phab_full_salt_top']
+if Ldir['testing'] == True:
+    moviename_list = ['Phab_full_salt_top']
+else:
+    moviename_list = ['P1_full_salt_top', 'P1_full_oxygen_bot', 'P1_nshelf_oxygen_bot',
+        'P1_PS_temp_top', 'P1_PS_speed_top', 'Phab_full_salt_top']
 
 tt0 = time()
 result = 'success'
@@ -113,7 +111,7 @@ for moviename in moviename_list:
     input_filename = Ldir['LOo'] / 'daymovie' / Ldir['gtagex'] / moviename / 'movie.mp4'
     output_filename = moviename + '.mp4'
 
-    if Ldir['testing'] == False:
+    if True: #Ldir['testing'] == False:
         # send file to homer (only works from apogee)
         print(' - copying '+output_filename+' to homer')
         sys.stdout.flush()
