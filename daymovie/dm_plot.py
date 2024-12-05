@@ -60,9 +60,9 @@ Q = args.__dict__
 Q['figsize'] = (6.5,12) # the default, nice for phone
 Q['fontsize'] = 18 # the default
 # Override defaults in specific cases
-if Q['dom'] == 'Phab':
+if Q['pt'] == 'Phab':
     Q['figsize'] = (11.5,12)
-elif Q['dom'] in ['Psouth']:
+if Q['dom'] in ['Psouth']:
     Q['figsize'] = (10,12) # more square, e.g. for oly1 grid
 
 if len(Q['ds1']) == 0:
