@@ -56,6 +56,15 @@ parser.add_argument('-test', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 Q = args.__dict__
 
+# Automate the figsize and fontsize
+Q['figsize'] = (6.5,12) # the default, nice for phone
+Q['fontsize'] = 18 # the default
+# Override defaults in specific cases
+if Q['dom'] == 'Phab':
+    Q['figsize'] = (11.5,12)
+elif Q['dom'] in ['Psouth']:
+    Q['figsize'] = (10,12) # more square, e.g. for oly1 grid
+
 if len(Q['ds1']) == 0:
     Q['ds1'] = Q['ds0']
 
@@ -104,7 +113,10 @@ if len(fn_list) == 1:
     Q['fn'] = fn
     plotname = ('daymovie_' + Q['gtagex'] + '_' + Q['pt'] + '_'
         + Q['dom'] + '_' + Q['vn'] + '_' + bot_tag + '.png')
-    Q['fn_out'] = Ldir['LOo'] / 'plots' / plotname
+    if not Q['test']:
+        Q['fn_out'] = Ldir['LOo'] / 'plots' / plotname
+    else:
+        Q['fn_out'] = '' # plot to screen if testing
     whichplot(Q, M)
     
 elif len(fn_list) > 1:

@@ -163,10 +163,10 @@ def get_ax_limits(Q):
         Q['v_scl'] = 25
         Q['exp'] = 'dmPS'
     elif Q['dom'] == 'Psouth':
-        # South Sound
-        Q['aa'] = [-123.15, -122.5, 47, 47.5]
+        # South Sound, e.g. the oly1 grid
+        Q['aa'] = aa = []
         Q['xtl'] = [-123, -122.5]
-        Q['ytl'] = [47, 47.5]
+        Q['ytl'] = [47.25, 47.5]
         Q['v_scl'] = 40
     elif Q['dom'] == 'willapa':
         Q['aa'] = [-124.6, -123.65, 46, 47.2]
@@ -226,7 +226,6 @@ def get_moor_info(Q):
         M['city'] = 'Westport'
         M['wscl'] = 20
 
-    
     return M
 
 def plot_time_series(ax, M, T):
