@@ -106,8 +106,8 @@ def make_bry_file(in_fn, out_fn):
             ds[Vn].attrs['long_name'] = vinfo['long_name']
     
     ds0.close()
-    #Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
+    Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
     # and save to NetCDF
-    ds.to_netcdf(out_fn)#, encoding=Enc_dict)
+    ds.to_netcdf(out_fn, encoding=Enc_dict)
     ds.close()
 
