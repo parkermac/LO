@@ -139,8 +139,8 @@ for vn in ddk:
         ds[tname] = ((tname,), ot_vec)
         ds[tname].attrs['units'] = Lfun.roms_time_units
 # and save to NetCDF
-#Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
-ds.to_netcdf(out_fn)#, encoding=Enc_dict)
+Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
+ds.to_netcdf(out_fn), encoding=Enc_dict)
 ds.close()
 print('- Write clm file: %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
