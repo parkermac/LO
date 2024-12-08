@@ -32,7 +32,7 @@ dt00 = datetime.strptime(ds00,'%Y.%m.%d')
 if Ldir['testing'] == True:
     moviename_list = ['Phab_full_salt_top']
 else:
-    moviename_list = ['P1_full_salt_top', 'P1_full_oxygen_bot', 'P1_nshelf_oxygen_bot',
+    moviename_list = ['P1_full_oxygen_bot', 'P1_nshelf_oxygen_bot',
         'P1_PS_temp_top', 'P1_PS_speed_top', 'Phab_full_salt_top']
 
 tt0 = time()

@@ -136,4 +136,6 @@ if False:
         
 ds.close()
 
+fig.tight_layout()
+
 plt.show()
