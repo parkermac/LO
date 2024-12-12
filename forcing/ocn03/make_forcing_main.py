@@ -181,225 +181,232 @@ else:
     planB = True
 
 if planB == False:
-    # process the hycom files, going from the original NetCDF extractions
-    # to the processed pickled dicts.
-    
-    # ------------------------------------------------------
-    # generate coor_dict.p
-    ds = xr.open_dataset(h_out_dir / 'h_s.nc')
-    lon = ds.lon.values - 360  # convert from 0:360 to -360:0 format
-    lat = ds.lat.values
-    depth = ds.depth.values
-    z = -depth[::-1] # repack bottom to top
-    coord_dict = dict()
-    coord_dict['lon'] = lon
-    coord_dict['lat'] = lat
-    coord_dict['z'] = z
-    pickle.dump(coord_dict, open(h_out_dir / 'coord_dict.p', 'wb'))
+    try:
+        # process the hycom files, going from the original NetCDF extractions
+        # to the processed pickled dicts.
+        
+        # ------------------------------------------------------
+        # generate coor_dict.p
+        ds = xr.open_dataset(h_out_dir / 'h_s.nc')
+        lon = ds.lon.values - 360  # convert from 0:360 to -360:0 format
+        lat = ds.lat.values
+        depth = ds.depth.values
+        z = -depth[::-1] # repack bottom to top
+        coord_dict = dict()
+        coord_dict['lon'] = lon
+        coord_dict['lat'] = lat
+        coord_dict['z'] = z
+        pickle.dump(coord_dict, open(h_out_dir / 'coord_dict.p', 'wb'))
 
-    # -------------- filter HYCOM fields -------------------
-    lp_time_dict = dict()
-    lp_dict = dict()
-    for hkey in hkeys:
-        if hkey == 'ssh':
-            # filter hourly ssh
-            ds = xr.open_dataset(h_out_dir / ('h_' + hkey + '.nc')) 
-            lp_time_dict[hkey] = ds.time.values
-            lp_dict[hkey] = zfun.lowpass(ds[hycom_var_dict[hkey]].values, f='godin')
-            ds.close()
-        else:
-            # filter 3-hourly 3D fields
-            ds = xr.open_dataset(h_out_dir / ('h_' + hkey + '.nc')) 
-            lp_time_dict[hkey] = ds.time.values
-            this_lp = zfun.lowpass(ds[hycom_var_dict[hkey]].values, f='hanning', n=24) # 3-day hanning
-            this_lp = this_lp[:, ::-1, :,:]  # pack bottom to top
-            lp_dict[hkey] = this_lp
-            ds.close()
-    
-    # ------------------------------------------------
-    # save filtered data at daily interval
-    # for example: fh2024.11.19.p, fh2024.11.20.p, fh2024.11.21.p, fh2024.11.22.p
-    dt00 = this_dt
-    if Ldir['run_type'] == 'forecast':
-        nd_f = np.ceil(Ldir['forecast_days'])
-        dt11 = dt00 + timedelta(days=int(nd_f))
-    elif Ldir['run_type'] == 'backfill':
-        dt11 = dt00 + timedelta(days=1)
-    # We use a different naming convention at this point to be compatible with earlier processing steps
-    # that we would like to re-use from ocn02.
-    alt_name_dict = {'ssh':'ssh', 'u':'u3d', 'v':'v3d', 't':'t3d', 's':'s3d'}
-    dt = dt00
-    while dt <= dt11:
-       # print(dt)
-        dts = datetime.strftime(dt, Lfun.ds_fmt)
-        out_name = 'fh' + dts + '.p'
-        aa = dict()
-        aa['dt'] = dt
+        # -------------- filter HYCOM fields -------------------
+        lp_time_dict = dict()
+        lp_dict = dict()
         for hkey in hkeys:
-            ix = np.argmin(np.abs(lp_time_dict[hkey] - np.datetime64(dt)))
-            aa[alt_name_dict[hkey]] = lp_dict[hkey][ix,:] # the last : expands as needed
-            # if verbose:
-            #     print('checking on subsampling for %s %s' % (hkey,dts))
-            #     print(aa[alt_name_dict[hkey]].shape)
-        pickle.dump(aa, open(h_out_dir / out_name, 'wb'))
-        dt += timedelta(days=1)
+            if hkey == 'ssh':
+                # filter hourly ssh
+                ds = xr.open_dataset(h_out_dir / ('h_' + hkey + '.nc')) 
+                lp_time_dict[hkey] = ds.time.values
+                lp_dict[hkey] = zfun.lowpass(ds[hycom_var_dict[hkey]].values, f='godin')
+                ds.close()
+            else:
+                # filter 3-hourly 3D fields
+                ds = xr.open_dataset(h_out_dir / ('h_' + hkey + '.nc')) 
+                lp_time_dict[hkey] = ds.time.values
+                this_lp = zfun.lowpass(ds[hycom_var_dict[hkey]].values, f='hanning', n=24) # 3-day hanning
+                this_lp = this_lp[:, ::-1, :,:]  # pack bottom to top
+                lp_dict[hkey] = this_lp
+                ds.close()
+        
+        # ------------------------------------------------
+        # save filtered data at daily interval
+        # for example: fh2024.11.19.p, fh2024.11.20.p, fh2024.11.21.p, fh2024.11.22.p
+        dt00 = this_dt
+        if Ldir['run_type'] == 'forecast':
+            nd_f = np.ceil(Ldir['forecast_days'])
+            dt11 = dt00 + timedelta(days=int(nd_f))
+        elif Ldir['run_type'] == 'backfill':
+            dt11 = dt00 + timedelta(days=1)
+        # We use a different naming convention at this point to be compatible with earlier processing steps
+        # that we would like to re-use from ocn02.
+        alt_name_dict = {'ssh':'ssh', 'u':'u3d', 'v':'v3d', 't':'t3d', 's':'s3d'}
+        dt = dt00
+        while dt <= dt11:
+        # print(dt)
+            dts = datetime.strftime(dt, Lfun.ds_fmt)
+            out_name = 'fh' + dts + '.p'
+            aa = dict()
+            aa['dt'] = dt
+            for hkey in hkeys:
+                ix = np.argmin(np.abs(lp_time_dict[hkey] - np.datetime64(dt)))
+                aa[alt_name_dict[hkey]] = lp_dict[hkey][ix,:] # the last : expands as needed
+                # if verbose:
+                #     print('checking on subsampling for %s %s' % (hkey,dts))
+                #     print(aa[alt_name_dict[hkey]].shape)
+            pickle.dump(aa, open(h_out_dir / out_name, 'wb'))
+            dt += timedelta(days=1)
 
-    #----------- back to original processing steps -------------------------
-    
-    # extrapolate (also get ubar and vbar and convert t to ptmp)
-    lon, lat, z, L, M, N, X, Y = Ofun.get_coords(h_out_dir)
-    fh_list = sorted([item.name for item in h_out_dir.iterdir()
-            if item.name[:2]=='fh'])
-    for fn in fh_list:
-        print('-Extrapolating ' + fn)
-        in_fn = h_out_dir / fn
-        Vex = Ofun.get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir)
+        #----------- back to original processing steps -------------------------
+        
+        # extrapolate (also get ubar and vbar and convert t to ptmp)
+        lon, lat, z, L, M, N, X, Y = Ofun.get_coords(h_out_dir)
+        fh_list = sorted([item.name for item in h_out_dir.iterdir()
+                if item.name[:2]=='fh'])
+        for fn in fh_list:
+            print('-Extrapolating ' + fn)
+            in_fn = h_out_dir / fn
+            Vex = Ofun.get_extrapolated(in_fn, L, M, N, X, Y, lon, lat, z, Ldir)
+            # # debugging
+            # for k in Vex.keys():
+            #     if k == 'dt':
+            #         pass
+            #     else:
+            #         print('%s %d' % (k, np.isnan(Vex[k]).sum()))
+            #         print('Vex: max and min of ' + k)
+            #         print(np.min(Vex[k]))
+            #         print(np.max(Vex[k]))
+            pickle.dump(Vex, open(h_out_dir / ('x' + fn), 'wb'))
+
         # # debugging
-        # for k in Vex.keys():
-        #     if k == 'dt':
-        #         pass
-        #     else:
-        #         print('%s %d' % (k, np.isnan(Vex[k]).sum()))
-        #         print('Vex: max and min of ' + k)
-        #         print(np.min(Vex[k]))
-        #         print(np.max(Vex[k]))
-        pickle.dump(Vex, open(h_out_dir / ('x' + fn), 'wb'))
+        # sys.exit()
 
-    # # debugging
-    # sys.exit()
-
-    # and interpolate to ROMS format
-    # get grid and S info
-    G = zrfun.get_basic_info(Ldir['grid'] / 'grid.nc', only_G=True)
-    S_info_dict = Lfun.csv_to_dict(Ldir['grid'] / 'S_COORDINATE_INFO.csv')
-    S = zrfun.get_S(S_info_dict)
-    # make list of files to process
-    xfh_list = sorted([item.name for item in h_out_dir.iterdir()
-            if item.name[:3]=='xfh'])
-    # HyCOM grid info
-    lon, lat, z, L, M, N, X, Y = Ofun.get_coords(h_out_dir)
-    # load a dict of hycom fields
-    dt_list = []
-    count = 0
-    c_dict = dict()
-    zinds = Ofun.get_zinds(G['h'], S, z)
-    for fn in xfh_list:
-        print('-Interpolating ' + fn + ' to ROMS grid')
-        b = pickle.load(open(h_out_dir / fn, 'rb'))
-        dt_list.append(b['dt'])
-        c = Ofun.get_interpolated(G, S, b, lon, lat, z, N, zinds)
-        c_dict[count] = c
-        count += 1
+        # and interpolate to ROMS format
+        # get grid and S info
+        G = zrfun.get_basic_info(Ldir['grid'] / 'grid.nc', only_G=True)
+        S_info_dict = Lfun.csv_to_dict(Ldir['grid'] / 'S_COORDINATE_INFO.csv')
+        S = zrfun.get_S(S_info_dict)
+        # make list of files to process
+        xfh_list = sorted([item.name for item in h_out_dir.iterdir()
+                if item.name[:3]=='xfh'])
+        # HyCOM grid info
+        lon, lat, z, L, M, N, X, Y = Ofun.get_coords(h_out_dir)
+        # load a dict of hycom fields
+        dt_list = []
+        count = 0
+        c_dict = dict()
+        zinds = Ofun.get_zinds(G['h'], S, z)
+        for fn in xfh_list:
+            print('-Interpolating ' + fn + ' to ROMS grid')
+            b = pickle.load(open(h_out_dir / fn, 'rb'))
+            dt_list.append(b['dt'])
+            c = Ofun.get_interpolated(G, S, b, lon, lat, z, N, zinds)
+            c_dict[count] = c
+            count += 1
+            
+        # Write to ROMS forcing files
+        # The fields we want to write are in c_dict, whose keys are indices of time.
+        # Then c_dict[i] is another dict of arrays at that time, with keys:
+        # ['ssh', 'ubar', 'vbar', 'theta', 's3d', 'u3d', 'v3d']
+        # and the associated time vector is dt_list (datetimes).
         
-    # Write to ROMS forcing files
-    # The fields we want to write are in c_dict, whose keys are indices of time.
-    # Then c_dict[i] is another dict of arrays at that time, with keys:
-    # ['ssh', 'ubar', 'vbar', 'theta', 's3d', 'u3d', 'v3d']
-    # and the associated time vector is dt_list (datetimes).
-    
-    # Here I will write these to the dict V as expected below
-    hycom_names = ['ssh', 'ubar', 'vbar', 'theta', 's3d', 'u3d', 'v3d']
-    roms_names = ['zeta', 'ubar', 'vbar', 'temp', 'salt', 'u', 'v']
-    names_dict = dict(zip(hycom_names, roms_names))
-    
-    # get sizes
-    NZ = S['N']; NR = G['M']; NC = G['L']
-
-    # Make the time vector.
-    ot_vec = np.array([Lfun.datetime_to_modtime(item) for item in dt_list])
-    NT = len(ot_vec)
-
-    # Create a dict of fields for the state variables.
-    V = dict()
-    V['zeta'] = np.zeros((NT, NR, NC))
-    V['ubar'] = np.zeros((NT, NR, NC-1))
-    V['vbar'] = np.zeros((NT, NR-1, NC))
-    V['salt'] = np.zeros((NT, NZ, NR, NC))
-    V['temp'] = np.zeros((NT, NZ, NR, NC))
-    V['u'] = np.zeros((NT, NZ, NR, NC-1))
-    V['v'] = np.zeros((NT, NZ, NR-1, NC))
-    
-    # Fill the V dict
-    for ii in range(NT):
-        C = c_dict[ii]
-        for vnh in hycom_names:
-            vnr = names_dict[vnh]
-            # note that the : here represents all axes after 0
-            # and that it retains the correct shape
-            V[vnr][ii, :] = C[vnh]
-            
-    if add_CTD:
-        tt00 = time()
-        z_rho = zrfun.get_z(G['h'], 0*G['h'], S, only_rho=True)
-        for vn in ['salt','temp']:
-            fld = V[vn].copy()
-            V[vn] = Ofun_bio.fill_polygons(fld, vn, G, z_rho, Ldir)
-        print(' - add_CTD task for salt and temp: %0.2f sec' % (time()-tt00))
-            
-    # Create masks
-    mr2 = np.ones((NT, NR, NC)) * G['mask_rho'].reshape((1, NR, NC))
-    mr3 = np.ones((NT, NZ, NR, NC)) * G['mask_rho'].reshape((1, 1, NR, NC))
-    mu2 = np.ones((NT, NR, NC-1)) * G['mask_u'].reshape((1, NR, NC-1))
-    mu3 = np.ones((NT, NZ, NR, NC-1)) * G['mask_u'].reshape((1, 1, NR, NC-1))
-    mv2 = np.ones((NT, NR-1, NC)) * G['mask_v'].reshape((1, NR-1, NC))
-    mv3 = np.ones((NT, NZ, NR-1, NC)) * G['mask_v'].reshape((1, 1, NR-1, NC))
-
-    # Apply masks
-    V['zeta'][mr2==0] = np.nan
-    V['ubar'][mu2==0] = np.nan
-    V['vbar'][mv2==0] = np.nan
-    V['salt'][mr3==0] = np.nan
-    V['temp'][mr3==0] = np.nan
-    V['u'][mu3==0] = np.nan
-    V['v'][mv3==0] = np.nan
+        # Here I will write these to the dict V as expected below
+        hycom_names = ['ssh', 'ubar', 'vbar', 'theta', 's3d', 'u3d', 'v3d']
+        roms_names = ['zeta', 'ubar', 'vbar', 'temp', 'salt', 'u', 'v']
+        names_dict = dict(zip(hycom_names, roms_names))
         
-    # add bio variables if needed
-    tt0 = time()
-    if do_bio:
-        bvn_list = ['NO3', 'NH4', 'chlorophyll', 'phytoplankton', 'zooplankton',
-                'LdetritusN', 'SdetritusN', 'LdetritusC', 'SdetritusC',
-                'TIC', 'alkalinity', 'oxygen']
-        salt = V['salt'].copy()
-        for bvn in bvn_list:
-            V[bvn] = Ofun_bio.create_bio_var(salt, bvn)
-        print('- Add bio variables: %0.2f sec' % (time()-tt0))
-            
+        # get sizes
+        NZ = S['N']; NR = G['M']; NC = G['L']
+
+        # Make the time vector.
+        ot_vec = np.array([Lfun.datetime_to_modtime(item) for item in dt_list])
+        NT = len(ot_vec)
+
+        # Create a dict of fields for the state variables.
+        V = dict()
+        V['zeta'] = np.zeros((NT, NR, NC))
+        V['ubar'] = np.zeros((NT, NR, NC-1))
+        V['vbar'] = np.zeros((NT, NR-1, NC))
+        V['salt'] = np.zeros((NT, NZ, NR, NC))
+        V['temp'] = np.zeros((NT, NZ, NR, NC))
+        V['u'] = np.zeros((NT, NZ, NR, NC-1))
+        V['v'] = np.zeros((NT, NZ, NR-1, NC))
+        
+        # Fill the V dict
+        for ii in range(NT):
+            C = c_dict[ii]
+            for vnh in hycom_names:
+                vnr = names_dict[vnh]
+                # note that the : here represents all axes after 0
+                # and that it retains the correct shape
+                V[vnr][ii, :] = C[vnh]
+                
         if add_CTD:
             tt00 = time()
-            bvn_list_short = ['NO3','TIC', 'alkalinity', 'oxygen']
             z_rho = zrfun.get_z(G['h'], 0*G['h'], S, only_rho=True)
-            for bvn in bvn_list_short:
-                fld = V[bvn].copy()
-                V[bvn] = Ofun_bio.fill_polygons(fld, bvn, G, z_rho, Ldir)
-                V[bvn][mr3==0] = np.nan
-            print(' - add_CTD task for bio variables: %0.2f sec' % (time()-tt00))
+            for vn in ['salt','temp']:
+                fld = V[vn].copy()
+                V[vn] = Ofun_bio.fill_polygons(fld, vn, G, z_rho, Ldir)
+            print(' - add_CTD task for salt and temp: %0.2f sec' % (time()-tt00))
+                
+        # Create masks
+        mr2 = np.ones((NT, NR, NC)) * G['mask_rho'].reshape((1, NR, NC))
+        mr3 = np.ones((NT, NZ, NR, NC)) * G['mask_rho'].reshape((1, 1, NR, NC))
+        mu2 = np.ones((NT, NR, NC-1)) * G['mask_u'].reshape((1, NR, NC-1))
+        mu3 = np.ones((NT, NZ, NR, NC-1)) * G['mask_u'].reshape((1, 1, NR, NC-1))
+        mv2 = np.ones((NT, NR-1, NC)) * G['mask_v'].reshape((1, NR-1, NC))
+        mv3 = np.ones((NT, NZ, NR-1, NC)) * G['mask_v'].reshape((1, 1, NR-1, NC))
+
+        # Apply masks
+        V['zeta'][mr2==0] = np.nan
+        V['ubar'][mu2==0] = np.nan
+        V['vbar'][mv2==0] = np.nan
+        V['salt'][mr3==0] = np.nan
+        V['temp'][mr3==0] = np.nan
+        V['u'][mu3==0] = np.nan
+        V['v'][mv3==0] = np.nan
             
-    # Write climatology file making use of zrfun.get_varinfo().
-    #
-    # NOTE: 2023.11.18 I should try filling the interior of the clm arrays with
-    # nan's to make them smaller (except for start_type = new).
-    tt0 = time()
-    out_fn = out_dir / 'ocean_clm.nc'
-    out_fn.unlink(missing_ok=True)
-    ds = xr.Dataset()    
-    for vn in V.keys():
-        # tt00 = time()
-        vinfo = zrfun.get_varinfo(vn, vartype='climatology')
-        # print(' -- time to get varinfo: %0.2f sec' % (time()-tt00))
-        tname = vinfo['time_name']
-        dims = (vinfo['time_name'],) + vinfo['space_dims_tup']
-        ds[vn] = (dims, V[vn])
-        ds[vn].attrs['units'] = vinfo['units']
-        ds[vn].attrs['long_name'] = vinfo['long_name']
-        # time coordinate
-        ds[tname] = ((tname,), ot_vec)
-        ds[tname].attrs['units'] = Lfun.roms_time_units
-    # and save to NetCDF
-    Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
-    ds.to_netcdf(out_fn, encoding=Enc_dict)
-    ds.close()
-    print('- Write clm file: %0.2f sec' % (time()-tt0))
-    sys.stdout.flush()
+        # add bio variables if needed
+        tt0 = time()
+        if do_bio:
+            bvn_list = ['NO3', 'NH4', 'chlorophyll', 'phytoplankton', 'zooplankton',
+                    'LdetritusN', 'SdetritusN', 'LdetritusC', 'SdetritusC',
+                    'TIC', 'alkalinity', 'oxygen']
+            salt = V['salt'].copy()
+            for bvn in bvn_list:
+                V[bvn] = Ofun_bio.create_bio_var(salt, bvn)
+            print('- Add bio variables: %0.2f sec' % (time()-tt0))
+                
+            if add_CTD:
+                tt00 = time()
+                bvn_list_short = ['NO3','TIC', 'alkalinity', 'oxygen']
+                z_rho = zrfun.get_z(G['h'], 0*G['h'], S, only_rho=True)
+                for bvn in bvn_list_short:
+                    fld = V[bvn].copy()
+                    V[bvn] = Ofun_bio.fill_polygons(fld, bvn, G, z_rho, Ldir)
+                    V[bvn][mr3==0] = np.nan
+                print(' - add_CTD task for bio variables: %0.2f sec' % (time()-tt00))
+                
+        # Write climatology file making use of zrfun.get_varinfo().
+        #
+        # NOTE: 2023.11.18 I should try filling the interior of the clm arrays with
+        # nan's to make them smaller (except for start_type = new).
+        tt0 = time()
+        out_fn = out_dir / 'ocean_clm.nc'
+        out_fn.unlink(missing_ok=True)
+        ds = xr.Dataset()    
+        for vn in V.keys():
+            # tt00 = time()
+            vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+            # print(' -- time to get varinfo: %0.2f sec' % (time()-tt00))
+            tname = vinfo['time_name']
+            dims = (vinfo['time_name'],) + vinfo['space_dims_tup']
+            ds[vn] = (dims, V[vn])
+            ds[vn].attrs['units'] = vinfo['units']
+            ds[vn].attrs['long_name'] = vinfo['long_name']
+            # time coordinate
+            ds[tname] = ((tname,), ot_vec)
+            ds[tname].attrs['units'] = Lfun.roms_time_units
+        # and save to NetCDF
+        Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
+        ds.to_netcdf(out_fn, encoding=Enc_dict)
+        ds.close()
+        print('- Write clm file: %0.2f sec' % (time()-tt0))
+        sys.stdout.flush()
+
+    except Exception as e:
+        # This try-except structure really should be more granular, with multiple
+        # ones around each of the staps above.
+        print(e)
+        planB = True
 
 elif planB == True:
 
