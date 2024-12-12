@@ -63,6 +63,7 @@ if Ldir['testing']:
     from importlib import reload
     reload(Ofun)
     reload(Ofun_bio)
+    testing_planB = True
 else:
     pass
     
