@@ -53,8 +53,8 @@ do_bio = True
 
 # defaults related to testing
 verbose = True
-testing_do_not_get_indices = True # Set this to True to not get the hycom indices,
-testing_do_not_get_data = True # Set this to True to not get the hycom data,
+testing_do_not_get_indices = False # Set this to True to not get the hycom indices,
+testing_do_not_get_data = False # Set this to True to not get the hycom data,
 # e.g. if you already have it and want to speed up testing
 testing_planB = False
 
@@ -200,6 +200,7 @@ if planB == False:
         pickle.dump(coord_dict, open(h_out_dir / 'coord_dict.p', 'wb'))
     except Exception as e:
         print(e)
+        print('- error making coord_dict')
         planB = True
 
 if planB == False:
@@ -224,6 +225,7 @@ if planB == False:
                 ds.close()
     except Exception as e:
         print(e)
+        print('- filtering error')
         planB = True
 
 if planB == False:
@@ -268,10 +270,11 @@ if planB == False:
                 break
     except Exception as e:
         print(e)
+        print('- subsampling error')
         planB = True
 
         # debugging
-        sys.exit()
+        # sys.exit()
 
 if planB == False:
     try:
@@ -298,6 +301,7 @@ if planB == False:
 
     except Exception as e:
         print(e)
+        print('- extrapolation error')
         planB = True
 
 if planB == False:
@@ -326,11 +330,11 @@ if planB == False:
             count += 1
     except Exception as e:
         print(e)
+        print('- interpolate to ROMS grid error')
         planB = True
             
 if planB == False:
     try:
-
         # Write to ROMS forcing files
         # The fields we want to write are in c_dict, whose keys are indices of time.
         # Then c_dict[i] is another dict of arrays at that time, with keys:
@@ -443,6 +447,7 @@ if planB == False:
 
     except Exception as e:
         print(e)
+        print('- error somwhere while creating clm file')
         planB = True
 
 elif planB == True:
