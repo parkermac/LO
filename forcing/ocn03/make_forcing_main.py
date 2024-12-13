@@ -52,9 +52,9 @@ add_CTD = False
 do_bio = True
 
 # defaults related to testing
-verbose = False
-testing_do_not_get_indices = False # Set this to True to not get the hycom indices,
-testing_do_not_get_data = False # Set this to True to not get the hycom data,
+verbose = True
+testing_do_not_get_indices = True # Set this to True to not get the hycom indices,
+testing_do_not_get_data = True # Set this to True to not get the hycom data,
 # e.g. if you already have it and want to speed up testing
 testing_planB = False
 
@@ -240,11 +240,14 @@ if planB == False:
             for hkey in hkeys:
                 ix = np.argmin(np.abs(lp_time_dict[hkey] - np.datetime64(dt)))
                 aa[alt_name_dict[hkey]] = lp_dict[hkey][ix,:] # the last : expands as needed
-                # if verbose:
-                #     print('checking on subsampling for %s %s' % (hkey,dts))
-                #     print(aa[alt_name_dict[hkey]].shape)
+                if verbose:
+                    print('checking on subsampling for %s %s' % (hkey,dts))
+                    print(aa[alt_name_dict[hkey]].shape)
             pickle.dump(aa, open(h_out_dir / out_name, 'wb'))
             dt += timedelta(days=1)
+
+        # debugging
+        sys.exit()
 
         #----------- back to original processing steps -------------------------
         
@@ -405,7 +408,7 @@ if planB == False:
 
     except Exception as e:
         # This try-except structure really should be more granular, with multiple
-        # ones around each of the staps above.
+        # ones around each of the steps above.
         print(e)
         planB = True
 
