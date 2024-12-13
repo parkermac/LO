@@ -198,7 +198,12 @@ if planB == False:
         coord_dict['lat'] = lat
         coord_dict['z'] = z
         pickle.dump(coord_dict, open(h_out_dir / 'coord_dict.p', 'wb'))
+    except Exception as e:
+        print(e)
+        planB = True
 
+if planB == False:
+    try:
         # -------------- filter HYCOM fields -------------------
         lp_time_dict = dict()
         lp_dict = dict()
@@ -217,7 +222,12 @@ if planB == False:
                 this_lp = this_lp[:, ::-1, :,:]  # pack bottom to top
                 lp_dict[hkey] = this_lp
                 ds.close()
-        
+    except Exception as e:
+        print(e)
+        planB = True
+
+if planB == False:
+    try:
         # ------------------------------------------------
         # save filtered data at daily interval
         # for example: fh2024.11.19.p, fh2024.11.20.p, fh2024.11.21.p, fh2024.11.22.p
@@ -239,17 +249,32 @@ if planB == False:
             aa['dt'] = dt
             for hkey in hkeys:
                 ix = np.argmin(np.abs(lp_time_dict[hkey] - np.datetime64(dt)))
-                print('ix = %d' % (ix))
-                aa[alt_name_dict[hkey]] = lp_dict[hkey][ix,:] # the last : expands as needed
+                this_slice = lp_dict[hkey][ix,:]
+                if np.all(np.isnan(this_slice)):
+                    print('ERROR: All-Nan slice in lp_dict for ' + hkey)
+                    print ('- going to planB')
+                    planB = True
+                    break
+                else:
+                    aa[alt_name_dict[hkey]] = this_slice # the last : expands as needed
                 if verbose:
                     print('checking on subsampling for %s %s' % (hkey,dts))
                     print(aa[alt_name_dict[hkey]].shape)
-            pickle.dump(aa, open(h_out_dir / out_name, 'wb'))
-            dt += timedelta(days=1)
+                    print('time index: ix = %d' % (ix))
+            if planB == False:
+                pickle.dump(aa, open(h_out_dir / out_name, 'wb'))
+                dt += timedelta(days=1)
+            else:
+                break
+    except Exception as e:
+        print(e)
+        planB = True
 
         # debugging
         sys.exit()
 
+if planB == False:
+    try:
         #----------- back to original processing steps -------------------------
         
         # extrapolate (also get ubar and vbar and convert t to ptmp)
@@ -271,9 +296,12 @@ if planB == False:
             #         print(np.max(Vex[k]))
             pickle.dump(Vex, open(h_out_dir / ('x' + fn), 'wb'))
 
-        # # debugging
-        # sys.exit()
+    except Exception as e:
+        print(e)
+        planB = True
 
+if planB == False:
+    try:
         # and interpolate to ROMS format
         # get grid and S info
         G = zrfun.get_basic_info(Ldir['grid'] / 'grid.nc', only_G=True)
@@ -296,7 +324,13 @@ if planB == False:
             c = Ofun.get_interpolated(G, S, b, lon, lat, z, N, zinds)
             c_dict[count] = c
             count += 1
+    except Exception as e:
+        print(e)
+        planB = True
             
+if planB == False:
+    try:
+
         # Write to ROMS forcing files
         # The fields we want to write are in c_dict, whose keys are indices of time.
         # Then c_dict[i] is another dict of arrays at that time, with keys:
@@ -408,8 +442,6 @@ if planB == False:
         sys.stdout.flush()
 
     except Exception as e:
-        # This try-except structure really should be more granular, with multiple
-        # ones around each of the steps above.
         print(e)
         planB = True
 
