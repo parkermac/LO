@@ -239,6 +239,7 @@ if planB == False:
             aa['dt'] = dt
             for hkey in hkeys:
                 ix = np.argmin(np.abs(lp_time_dict[hkey] - np.datetime64(dt)))
+                print('ix = %d' % (ix))
                 aa[alt_name_dict[hkey]] = lp_dict[hkey][ix,:] # the last : expands as needed
                 if verbose:
                     print('checking on subsampling for %s %s' % (hkey,dts))
