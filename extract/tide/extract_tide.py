@@ -6,7 +6,11 @@ Test on my mac:
 run extract_tide -test True
 
 Run for real on apogee:
-python extract_tide.py -gtx cas7_t0_x4b -ro 2 -0 2017.01.01 -1 2017.12.31
+python extract_tide.py -gtx cas7_t0_x4b -ro 2 -0 2017.01.01 -1 2017.12.31 > test.log &
+
+Performance:
+20 sec for three days, both mac and apogee
+2000 sec for a year on apogee
 
 """
 
@@ -217,4 +221,7 @@ print('\nTime to do extractions = %0.1f sec' % (time()-tt0))
 # performance: 21 sec for three days on my mac
 
 # save the output in a single file
-ssh_df.to_pickle(out_dir / ('ssh_df_' + year_str + '.p'))
+if Ldir['testing'] == False:
+    ssh_df.to_pickle(out_dir / ('ssh_df_' + year_str + '.p'))
+# and save station info
+sta_df.to_pickle(out_dir / ('sta_df_' + year_str + '.p'))

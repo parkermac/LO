@@ -1,12 +1,10 @@
 """
 Code to automate getting year-long tide height records from
-a series of NOAA and DFO sites around the Salish Sea and NE Pacific
+a series of NOAA sites around the Salish Sea and NE Pacific
 coast.
-
 """
 
 import pandas as pd
-import obsfun as ofn
 import requests
 from time import sleep
 import sys
@@ -17,19 +15,27 @@ Ldir = Lfun.Lstart()
 # defaults for year(s), end date, and stations
 year_list = [2017]
 end_date = '1231'
-noaa_sn_dict, dfo_sn_dict, sn_dict = ofn.get_sn_dicts()
+
+noaa_sn_dict = {
+    'Charleston': 9432780,
+    'South Beach': 9435380,
+    'Garibaldi': 9437540,
+    'Toke Point': 9440910,
+    'Westport': 9441102,
+    'La Push': 9442396,
+    'Neah Bay': 9443090,
+    'Port Angeles': 9444090,
+    'Friday Harbor': 9449880,
+    'Cherry Point': 9449424,
+    'Port Townsend': 9444900,
+    'Seattle': 9447130,
+    'Tacoma': 9446484}
 
 # flag for testing
 testing = True
 
 if testing:
-    from importlib import reload
-    reload(ofn)
-    # end_date = '0106'
-    # noaa_sn_dict = {}
-    # noaa_sn_dict = {'Charleston': 9432780}
-    dfo_sn_dict = {}
-    # dfo_sn_dict = {'Point Atkinson': 7795}
+    noaa_sn_dict = {'Charleston': 9432780}
 
 out_dir = Ldir['LOo'] / 'obs' / 'tide'
 Lfun.make_dir(out_dir)
@@ -101,46 +107,4 @@ for year in year_list:
             if testing:
                 sn_ser.plot()
 
-    for name in dfo_sn_dict.keys():
-
-        sn = dfo_sn_dict[name] # station number
-        out_fn = out_dir / ('tide_' + str(sn) + '_' + str(year) + '.p') # data (pickled Series)
-        metadata_out_fn = out_dir / ('info_' + str(sn) + '_' + str(year) + '.csv') # station metadata
-        # harmonics_out_fn = out_dir / ('h_' + str(sn) + '_' + str(year) + '.p') # harmonics (do later)
-        
-        print(' - DFO station = ' + name)
-        sys.stdout.flush()
-
-        # debugging before we hide this in a function
-
-        sn = str(sn) # station number
-        year_str = str(year)
-
-        start_date = '31-DEC-' + str(int(year)-1)
-        end_date = '01-JAN-' + str(int(year)+1)
-        # outfile = '../../ptools_data/tide/dfo_scratch_'+sn+'_'+year+'.csv'
-        # Form urls and html information
-        base_url = 'http://www.meds-sdmm.dfo-mpo.gc.ca/isdm-gdsi/twl-mne/inventory-inventaire/'
-        form_handler = ('data-donnees-eng.asp?user=isdm-gdsi&region=PAC&tst=1&no='
-            + sn)
-        sitedata = {'start_period': start_date,
-            'end_period': end_date,
-            'resolution': 'h',
-            'time_zone': 'u'}
-        data_provider = (
-            'download-telecharger.asp'
-            '?File=E:%5Ciusr_tmpfiles%5CTWL%5C'
-            + sn + '-'+start_date + '_slev.csv'
-            '&Name=' + sn + '-'+start_date+'_slev.csv')
-        # Go get the data from the DFO site
-        with requests.Session() as s:
-            s.post(base_url + form_handler, data=sitedata)
-            r = s.get(base_url + data_provider)
-
-
-        # df, m_dict = ofn.get_dfo_tide(sn, year)
-        # h = ofn.get_harmonics(df, float(m_dict['lat']))
-        # df.to_pickle(fn)
-        # Lfun.dict_to_csv(m_dict, mfn)
-        # pickle.dump(h, open(hfn, 'wb'))
     
