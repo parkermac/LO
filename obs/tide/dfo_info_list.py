@@ -34,64 +34,56 @@ The reponse is a json with entries like:
     "value": 3.277,
     "timeSeriesId": "5ddeee612a8a340001a3676f"
   },
-  
+
 """
 dfo_info_list = [
     {"id": "5cebf1de3d0f4a073c4bb94c",
     "code": "07795",
     "officialName": "Point Atkinson",
     "alternativeName": "Caulfeild Cove",
-    "operating": true,
     "latitude": 49.337,
-    "longitude": -123.253,}
+    "longitude": -123.253,},
 
     {"id": "5cebf1de3d0f4a073c4bb943",
     "code": "07735",
     "officialName": "Vancouver",
-    "operating": true,
     "latitude": 49.2863,
-    "longitude": -123.0997,}
+    "longitude": -123.0997,},
 
     {"id": "5cebf1df3d0f4a073c4bbd2d",
     "code": "07277",
     "officialName": "Patricia Bay",
-    "operating": true,
     "latitude": 48.6536,
-    "longitude": -123.4515,}
+    "longitude": -123.4515,},
 
     {"id": "5cebf1df3d0f4a073c4bbd1e",
     "code": "07120",
     "officialName": "Victoria Harbour",
-    "operating": true,
     "latitude": 48.424666,
-    "longitude": -123.3707,}
+    "longitude": -123.3707,},
 
     {"id": "5cebf1e23d0f4a073c4bc062",
     "code": "08545",
     "officialName": "Bamfield",
-    "operating": true,
     "latitude": 48.836,
-    "longitude": -125.136,}
+    "longitude": -125.136,},
 
     {"id": "5cebf1e23d0f4a073c4bc07c",
     "code": "08615",
     "officialName": "Tofino",
     "alternativeName": "Clayoquot , CLAYOQUOT ",
-    "operating": true,
     "latitude": 49.154,
-    "longitude": -125.913,}
+    "longitude": -125.913,},
 
     {"id": "5cebf1de3d0f4a073c4bb996",
     "code": "08074",
     "officialName": "Campbell River",
-    "operating": true,
     "latitude": 50.042,
-    "longitude": -125.247,}
+    "longitude": -125.247,},
 
     {"id": "5cebf1e13d0f4a073c4bbf93",
     "code": "07654",
     "officialName": "New Westminster",
-    "operating": true,
     "latitude": 49.2,
     "longitude": -122.91,}
 
