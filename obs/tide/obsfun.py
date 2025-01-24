@@ -7,7 +7,7 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 from datetime import datetime
 import pytz
-import utide
+# import utide
 from matplotlib.dates import date2num
 
 def get_AG(hn, Hobs, Hmod):
@@ -70,14 +70,15 @@ def get_sn_dicts():
 def get_noaa_tide(sn, year):
     # inputs can be ints or strings
     sn = str(sn) # station number
-    year = str(year)
-    a = ('https://tidesandcurrents.noaa.gov/api/datagetter?'
-        + 'begin_date=' + year + '0101 00:00'
-        + '&end_date=' + year + '1231 23:00'
+    year_str = str(year)
+    # next_year_str = str(year+1)
+    a = ('https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?'
+        + 'begin_date=' + year_str + '0101'
+        + '&end_date=' + year_str + '1231'
         + '&station=' + sn
         + '&product=hourly_height'
-        + '&datum=mllw&units=metric&time_zone=gmt'
-        + '&application=University of Washington'
+        + '&datum=MLLW&units=metric&time_zone=gmt'
+        + '&application=University_of_Washington'
         + '&format=xml')
     b = requests.get(a)
     root = ET.fromstring(b.text)
@@ -162,6 +163,7 @@ def read_dfo_info(fn):
     
 def get_harmonics(df, lat):
     t = date2num(df.index.to_pydatetime())
+    # NOTE 1/23/2025 t should just be a DatetimeIndex
     z = df['eta'].to_numpy()
     h = utide.solve(t, z, v=None,
                  lat=lat,
