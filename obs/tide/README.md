@@ -2,13 +2,25 @@
 
 ## This is code to download and process tide height data.
 
-### Useful website describing the tidesandcurrents api:
+### This is the starting point for testing tide height simulation in the model. The whole process consists of three parts:
+- Get observed tide time series (this code)
+- Extract the corresponding time series from a model run. This is handled in LO/extract/obs, and relies on the sta_df files created here in order to know the station locations.
+- Comparisons are handled in LPM/obsmod/compare_tide.py.
 
-https://api.tidesandcurrents.noaa.gov/api/prod/
+## There are two programs to run here. You have to edit them by hand to get different years.
 
-### Here is a sample tidesandcurrents api query for hourly tide data:
+### get_noaa_tide.py
+Input: from a NOAA website
 
-https://api.tidesandcurrents.noaa.gov/api/prod/datagetter?begin_date=20200101&end_date=20201231&station=8518750&product=hourly_height&datum=MLLW&time_zone=lst&units=metric&application=DataAPI_Sample&format=json
+Output: LO_output/obs/tide/
+- sn_df_noaa_[year].p a pickled DataFrame of station names and locations. The index is the unique station number.
+- sn_df_noaa_[year].csv a csv version for convenience of inspection
+- tide_noaa_[station number]_[year].p pickled Series of a year of SSH vs. time, hourly, UTC, at a given station.
 
-### The programs here are lightly modified from ptools/tide_obs_mod
+### get_dfo_tide.py
+Input: from a DFO website
 
+Output: LO_output/obs/tide/
+- sn_df_dfo_[year].p a pickled DataFrame of station names and locations. The index is the unique station number.
+- sn_df_dfo_[year].csv a csv version for convenience of inspection
+- tide_dfo_[station number]_[year].p pickled Series of a year of SSH vs. time, hourly, UTC, at a given station.
