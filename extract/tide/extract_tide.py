@@ -49,9 +49,11 @@ for a in argsd.keys():
     if a not in Ldir.keys():
         Ldir[a] = argsd[a]
 
+year_str = Ldir['ds0'][:4]
+info_year_str = year_str
 # testing
 if Ldir['testing']:
-    pass
+    info_year_str = '2022'
 
 # set where to look for model output
 if Ldir['roms_out_num'] == 0:
@@ -66,28 +68,18 @@ in_dir = Ldir['LOo'] / 'obs' / 'tide' # where to find station location info
 out_dir = Ldir['LOo'] / 'extract' / Ldir['gtagex'] / 'tide'
 Lfun.make_dir(out_dir)
 
-# gather all station location info, focusing only on the year we plan to extract
-year_str = Ldir['ds0'][:4]
-obs_info_fn_list = list(in_dir.glob('info_*_'+year_str+'.csv'))
-
 # To keep things clear I will stick to the ordering convention:
 # (lat,lon) (j,i) (row,col)
 
 # combine station info into a DataFrame, with station number as the index
-sta_df = pd.DataFrame(columns=['name','lat','lon','jgood','igood'])
-for fn in obs_info_fn_list:
-    info_dict = dict()
-    with open(fn, 'r') as f:
-        for line in f:
-            kv = line.split(',')
-            # Had to do this by hand instead of using Lfun.csv_to_dict()
-            # because one of the entries had a two-part name:
-            # "La Push, Quillayute River". We just keep La Push.
-            info_dict[kv[0]] = str(kv[1]).replace('\n','')
-    # info_dict = Lfun.csv_to_dict(fn)
-    sta_df.loc[info_dict['id'],'name'] = info_dict['name']
-    sta_df.loc[info_dict['id'],'lat'] = float(info_dict['lat'])
-    sta_df.loc[info_dict['id'],'lon'] = float(info_dict['lon'])
+sn_df = pd.DataFrame(columns=['name','lat','lon','jgood','igood'])
+
+sn_df_noaa = pd.read_pickle(in_dir / ('sn_df_noaa_' + info_year_str + '.p'))
+sn_df_dfo = pd.read_pickle(in_dir / ('sn_df_dfo_' + info_year_str + '.p'))
+for sn in sn_df_noaa.index:
+    sn_df.loc[sn,['name','lat','lon']] = sn_df_noaa.loc[sn,['name','lat','lon']]
+for sn in sn_df_dfo.index:
+    sn_df.loc[sn,['name','lat','lon']] = sn_df_dfo.loc[sn,['name','lat','lon']]
 
 # get indices for extraction
 in_dir0 = Ldir['roms_out'] / Ldir['gtagex']
@@ -158,16 +150,16 @@ def get_ji_good(G, lat00, lon00):
     
     return jgood, igood
 
-for sn in sta_df.index:
+for sn in sn_df.index:
     # Find the closest good grid indices and pack everything
     # in a single DataFrame.
-    lat00 = sta_df.loc[sn,'lat']
-    lon00 = sta_df.loc[sn,'lon']
-    name = sta_df.loc[sn,'name']
+    lat00 = sn_df.loc[sn,'lat']
+    lon00 = sn_df.loc[sn,'lon']
+    name = sn_df.loc[sn,'name']
     # get indices
     jgood, igood = get_ji_good(G, lat00, lon00)
-    sta_df.loc[sn,'jgood'] = jgood
-    sta_df.loc[sn,'igood'] = igood
+    sn_df.loc[sn,'jgood'] = jgood
+    sn_df.loc[sn,'igood'] = igood
     print('%s (j,i)=(%d,%d)' % (name, jgood, igood))
 
 if Ldir['testing']:
@@ -186,14 +178,14 @@ if Ldir['testing']:
     pfun.add_coast(ax)
     aa = [plon[0,0], plon[0,-1], plat[0,0], plat[-1,0]]
     ax.axis(aa)
-    for sn in sta_df.index:
+    for sn in sn_df.index:
         # Find the closest good grid indices and pack everything
         # in a single DataFrame.
-        lat00 = sta_df.loc[sn,'lat']
-        lon00 = sta_df.loc[sn,'lon']
-        name = sta_df.loc[sn,'name']
-        jgood = sta_df.loc[sn,'jgood']
-        igood = sta_df.loc[sn,'igood']
+        lat00 = sn_df.loc[sn,'lat']
+        lon00 = sn_df.loc[sn,'lon']
+        name = sn_df.loc[sn,'name']
+        jgood = sn_df.loc[sn,'jgood']
+        igood = sn_df.loc[sn,'igood']
         ax.plot(lon00,lat00,'or')
         ax.plot(G['lon_rho'][jgood,igood],G['lat_rho'][jgood,igood],'ob')
         ax.text(lon00,lat00,name)
@@ -204,11 +196,11 @@ if Ldir['testing']:
 fn_list = Lfun.get_fn_list('hourly', Ldir, Ldir['ds0'], Ldir['ds1'])
 
 # initialize a DataFrame to hold results
-ssh_df = pd.DataFrame(columns=sta_df.index)
+ssh_df = pd.DataFrame(columns=sn_df.index)
 # do the extraction
 tt0 = time()
-jj = sta_df.jgood.to_numpy(dtype=int)
-ii = sta_df.igood.to_numpy(dtype=int)
+jj = sn_df.jgood.to_numpy(dtype=int)
+ii = sn_df.igood.to_numpy(dtype=int)
 for fn in fn_list:
     ds = xr.open_dataset(fn)
     ssh = ds.zeta[0,:,:].values
@@ -224,4 +216,5 @@ print('\nTime to do extractions = %0.1f sec' % (time()-tt0))
 if Ldir['testing'] == False:
     ssh_df.to_pickle(out_dir / ('ssh_df_' + year_str + '.p'))
 # and save station info
-sta_df.to_pickle(out_dir / ('sta_df_' + year_str + '.p'))
+sn_df.to_pickle(out_dir / ('sn_df_' + year_str + '.p'))
+sn_df.to_csv(out_dir / ('sn_df_' + year_str + '.csv'))

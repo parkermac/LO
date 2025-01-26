@@ -6,7 +6,7 @@
 
 This created pickled Series of model tide height at stations where we have observations.
 
-Input: station numbers and locations from LO_output/obs/tide/info_[station_number]_[year].csv
+Input: station numbers and locations from LO_output/obs/tide/sta_df_[noaa,dfo]_[year].p
 
 Output: pickled Series in LO_output/extract/[gtagex]/tide/tide_[station_number]_[year].p
 
