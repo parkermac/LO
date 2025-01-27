@@ -119,5 +119,8 @@ def get_box(job, Lon, Lat):
     elif job == 'meghana':
         aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
         vn_list = 'h,mask_rho,f,pm,pn,Uwind,Vwind,u,v,salt,temp'
+    elif job == 'townsend':
+        aa = [-125, -124, 42.3, 46.3]
+        vn_list = 'h,mask_rho,pm,pn,u,v,salt,temp'
         
     return aa, vn_list
