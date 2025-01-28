@@ -24,3 +24,5 @@ LOd="/gscratch/macc/parker/LO/driver"
 # refresh this crontab
 00 12 * * * crontab <<< $(crontab -l)
 
+# test line 2025.01.28 for new scrontab capability
+
