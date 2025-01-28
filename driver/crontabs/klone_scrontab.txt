@@ -21,4 +21,4 @@
 
 DIR=/gscratch/macc/parker/LO/driver/crontabs
 # @hourly echo 'hi' > /gscratch/macc/parker/LO/driver/crontabs/test.txt
-@hourly crontab $DIR/klone.txt
+@hourly crontab <<< $DIR/klone.txt
