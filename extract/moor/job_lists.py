@@ -79,6 +79,31 @@ def get_sta_dict(job_name):
             'qmm': (-124.781, 47.30859),
             'qdm': (-125.082, 47.35265),
         }
+
+    elif job_name == 'graham':
+        # Olivia Graham Feb. 2025
+        sta_dict = {
+            'NCU1':( -123.05377, 48.704861), # North Cove U1.0m
+            'NCU3':(-123.05444, 48.7044444), # North Cove U3.60m
+            'NCL4':(-123.05361, 48.705), # North Cove L4.0m
+            'NCL6':( -123.05444, 48.7047222), # North Cove L6.60m
+            'BHU1':(-122.95287, 48.69165), # Beach Haven U1.0m
+            'BHU3':(-122.95333, 48.6913889), # Beach Haven U3.60m
+            'BHL4':(-122.95278, 48.6916667), # Beach Haven L4.0m
+            'BHL6':(-122.95361, 48.6913889), # Beach Haven L6.60m
+            'ICU1':(-122.93562, 48.5635), # Indian Cove U1.0m
+            'ICU3':(-122.93472, 48.5636111), # Indian Cove U3.60m
+            'ICL4':(-122.93528, 48.5630556), # Indian Cove L4.0m
+            'ICL6':(-122.93444, 48.5633333), # Indian Cove L6.60m
+            'FBU1':(-123.07436, 48.48262), # False Bay U1.0m
+            'FBU3':(-123.07333, 48.4827778), # False Bay U3.60m
+            'FBL4':(-123.07417, 48.4825), # False Bay L4.0m
+            'FBL6':(-123.07333, 48.4825), # False Bay L6.60m
+            'FJU1':(-123.00211, 48.46862), # Fourth of July U1.0m
+            'FJU3':(-123.00111, 48.4680556), # Fourth of July U3.60m
+            'FJL4':(-123.00167, 48.4686111), # Fourth of July L4.0m
+            'FJL6':( -123.00111, 48.4683333), # Fourth of July L6.60m
+        }
         
     else:
         print('Unsupported job name!')
