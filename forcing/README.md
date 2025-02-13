@@ -20,3 +20,5 @@
 #### Specific Notes
 
 **riv01** is like riv00 but it uses the new pre/river1 system, with more robust naming, for historical and climatological data.
+
+**tide01** is like tide00 but with the ad hoc scaling factors of tidal amplitude turned off. This is a step in testing using the tractive force in ROMS.
