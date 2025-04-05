@@ -33,6 +33,7 @@ dependencies:
   - lxml
   - xlrd
   - openpyxl
+  - copernicusmarine
   # pytide
   - sqlalchemy
   - git
