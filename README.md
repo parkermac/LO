@@ -201,7 +201,7 @@ Similar hooks are built into other parts of the LO system where we expect that u
 - `LO_user/pgrid/gfun_user.py`
 - `LO_user/forcing/[frc]` (used by `LO/driver_forcing#.py`)
 - `LO_user/dot_in/[gtagex]` (used by `LO/driver_roms#.py`)
-- `LO_user/tracker/experiments.py` and `LO_user/tracker/trackfun.py`
+- `LO_user/tracker2/experiments.py` and `LO_user/tracker2/trackfun.py`
 - `LO_user/extract/box/job_definitions.py` (used by `LO/extract/box/extract_box.py` and `extract_box_chunks.py`)
 - `LO_user/extract/moor/job_lists.py` (used by `LO/extract/moor/multi_mooring_driver.py`)
 - `LO_user/plotting/roms_plots.py` (used by `LO/plotting/pan_plot.py`)
@@ -300,7 +300,7 @@ Here is some info on the various folders in LO, and how they relate to the namin
 | post: code for automated post-processing of the daily forecast, e.g. for the movies that are sent to the LiveOcean website | post/[gtagex]/[fstring]/daymovie0, etc. |
 | extract: code for various types of extractions | extract/[gtagex]/cast, etc. |
 | pgrid: code for making ROMS grids   |   |
-| tracker: particle tracking code   |   |
+| tracker2: particle tracking code   |   |
 | daymovie: code to make the daily forecast movies for the website   |   |
 | notes: README's on various topics   |   |
 | obs: Code for preprocessing of observational datasets into "LO Standard" format | obs/[dataset name] |
