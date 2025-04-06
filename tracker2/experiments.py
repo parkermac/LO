@@ -141,6 +141,12 @@ def get_ic(TR):
         latvec = np.linspace(47, 49, 120)
         pcs_vec = np.linspace(-1,-0.5,10)
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
+
+    elif exp_name == 'PS3shallow': # nominally Puget Sound, over shallower depths
+        lonvec = np.linspace(-123.6, -122, 60)
+        latvec = np.linspace(47, 49, 120)
+        pcs_vec = np.linspace(-.5,0,10)
+        plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
         
     return plon00, plat00, pcs00
     

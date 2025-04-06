@@ -169,7 +169,8 @@ if TR['start_hour'] > 0:
     out_name += '_sh' + str(int(TR['start_hour']))
 if TR['sink'] > 0:
     out_name += '_sink' + str(int(TR['sink']))
-    # what would happen with negative sinking speed?
+    # NOTE: use e.g. " -40" for a rising tendency of 40 m/day.
+    # The quotes and space before the - are required for argparse.
 if TR['stay'] > 0:
     out_name += '_stay' + str(int(TR['stay']))
 if TR['stay'] < 0:

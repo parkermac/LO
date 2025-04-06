@@ -11,6 +11,8 @@ be made into a movie.
 import matplotlib.pyplot as plt
 import xarray as xr
 import numpy as np
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
 
 from lo_tools import Lfun
 from lo_tools import plotting_functions as pfun
@@ -38,11 +40,28 @@ lat0 = dsr.lat[0,:].to_numpy()
 lon = dsr.lon.to_numpy()
 lat = dsr.lat.to_numpy()
 
-NT, NP = dsr.lon.shape
+# filter to only use deeper particles
+z0 = dsr.z[0,:].to_numpy()
+zmask = z0 <= -50
+lon0 = lon0[zmask]
+lat0 = lat0[zmask]
+lon = lon[:,zmask]
+lat = lat[:,zmask]
 
-# get a list of datetimes
-ot_vec = dsr.ot.values
-dt_list = [Lfun.modtime_to_datetime(ot) for ot in ot_vec]
+# filter to only use a limited spatial domain
+xymask = (lon0>-123.5) & (lon0<-123) & (lat0>48) & (lat0<48.5)
+lon0 = lon0[xymask]
+lat0 = lat0[xymask]
+lon = lon[:,xymask]
+lat = lat[:,xymask]
+
+# filter to use fewer time steps
+nstep = 12
+lon = lon[::nstep,:]
+lat = lat[::nstep,:]
+
+
+NT, NP = lon.shape
 
 # gather some fields, for convenience
 lonp, latp = pfun.get_plon_plat(dsg.lon_rho.values, dsg.lat_rho.values)
@@ -70,8 +89,10 @@ for tt in range(NT):
     # set domain limits
     # automatically plot region of particles, with padding
     pad = .2
-    aa = [np.nanmin(lon0) - pad, np.nanmax(lon0) + pad,
-    np.nanmin(lat0) - pad, np.nanmax(lat0) + pad]
+    # aa = [np.nanmin(lon0) - pad, np.nanmax(lon0) + pad,
+    # np.nanmin(lat0) - pad, np.nanmax(lat0) + pad]
+
+    aa = [-126, -122, 47, 51]
         
     ax = fig.add_subplot(111)
     zm = -np.ma.masked_where(maskr==0, hh)
@@ -83,8 +104,8 @@ for tt in range(NT):
     ax.set_xlabel('Longitude')
     ax.set_ylabel('Latitude')
     ax.set_title(exp_name.strip('/'))
-    ax.plot(lon0, lat0, '.g', alpha=.3)
-    ax.plot(lon1, lat1, '.r', alpha=.2)
+    # ax.plot(lon0, lat0, '.g', alpha=.3)
+    ax.plot(lon1, lat1, '.r')#, alpha=.2)
 
     ntt = ('0000' + str(tt))[-4:]
 
@@ -93,6 +114,13 @@ for tt in range(NT):
     plt.close()
 
 pfun.end_plot()
+
+# make a movie
+cmd_list = ['ffmpeg','-r','8','-i', str(out_dir)+'/plot_%04d.png', '-vcodec', 'libx264',
+    '-vf', 'pad=ceil(iw/2)*2:ceil(ih/2)*2',
+    '-pix_fmt', 'yuv420p', '-crf', '25', str(out_dir)+'/tplot1movie.mp4']
+proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+stdout, stderr = proc.communicate()
 
 
 
