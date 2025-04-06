@@ -48,36 +48,44 @@ def get_indices(h_out_dir, dt0, dt1, url_dict, verbose=False):
     ind_dicts = dict()
     for hkey in url_dict.keys():
         got_indices = True
-        if verbose:
-            print('-- getting indices for: ' + hkey)
-            sys.stdout.flush()
-        url = url_dict[hkey]
-        out_fn = h_out_dir / (hkey + '_tyx.nc')
-        # get rid of the old version, if it exists
-        out_fn.unlink(missing_ok=True)
-        # extract coordinates
-        cmd_list = ['ncks','-O','-v','time,lat,lon',url,str(out_fn)]
-        #print(cmd_list)
-        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-        stdout, stderr = proc.communicate()
-        messages('get_indices() messages:', stdout, stderr)
-        if len(stderr) > 0:
-            got_indices = False
-            break
-        # use the results
-        ds = xr.open_dataset(out_fn)
-        # find selected indices to use with ncks to extract fields
-        t = ds.time.values
-        tind = pd.DatetimeIndex(t)
-        it0 = np.argwhere(tind==dt0)[0][0]
-        it1 = np.argwhere(tind==dt1)[0][0]
-        x = ds.lon.values
-        y = ds.lat.values
-        ix0 = zfun.find_nearest_ind(x,west)
-        ix1 = zfun.find_nearest_ind(x,east)
-        iy0 = zfun.find_nearest_ind(y,south)
-        iy1 = zfun.find_nearest_ind(y,north)
-        ds.close()
+        # if verbose:
+        #     print('-- getting indices for: ' + hkey)
+        #     sys.stdout.flush()
+        # url = url_dict[hkey]
+        # out_fn = h_out_dir / (hkey + '_tyx.nc')
+        # # get rid of the old version, if it exists
+        # out_fn.unlink(missing_ok=True)
+        # # extract coordinates
+        # cmd_list = ['ncks','-O','-v','time,lat,lon',url,str(out_fn)]
+        # #print(cmd_list)
+        # proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        # stdout, stderr = proc.communicate()
+        # messages('get_indices() messages:', stdout, stderr)
+        # if len(stderr) > 0:
+        #     got_indices = False
+        #     break
+        # # use the results
+        # ds = xr.open_dataset(out_fn)
+        # # find selected indices to use with ncks to extract fields
+        # t = ds.time.values
+        # tind = pd.DatetimeIndex(t)
+        # it0 = np.argwhere(tind==dt0)[0][0]
+        # it1 = np.argwhere(tind==dt1)[0][0]
+        # x = ds.lon.values
+        # y = ds.lat.values
+        # ix0 = zfun.find_nearest_ind(x,west)
+        # ix1 = zfun.find_nearest_ind(x,east)
+        # iy0 = zfun.find_nearest_ind(y,south)
+        # iy1 = zfun.find_nearest_ind(y,north)
+        # ds.close()
+
+        # NEW version 2025.04.06: provide the indices as lat, lon and times
+        it0 = dt0.strftime("%Y-%m-%dT%H:%M:%SZ")
+        it1 = dt1.strftime("%Y-%m-%dT%H:%M:%SZ")
+        ix0 = f"{west:.2f}"
+        ix1 = f"{east:.2f}"
+        iy0 = f"{south:.2f}"
+        iy1 = f"{north:.2f}"
         ind_dict = {'it0':it0, 'it1':it1, 'ix0':ix0, 'ix1':ix1, 'iy0':iy0, 'iy1':iy1}
         ind_dicts[hkey] = ind_dict
 

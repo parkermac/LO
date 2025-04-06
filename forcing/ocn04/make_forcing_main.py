@@ -3,15 +3,19 @@ This makes the ocn forcing files for the updated ROMS, including the banas-fenne
 
 Testing:
 
-run make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn03 -test True
+run make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn04 -test True
 
-python make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn03 -test True > test.log &
+python make_forcing_main.py -g cas7 -r forecast -d [today's date] -f ocn04 -test True > test.log &
 
 2024.11.19 jx and PM: updated based on ocn02. The main improvement is that it handles the
 fact that the new version of hycom (as of August 2024) has tides. This caused serious problems
 with our old processing scheme which was based on daily snapshots. These aliased in a huge tidal
 signal with fortnightly variation of ssh and velocity. This new version removes the tides by getting 1-hourly ssh
 (and using a Godin filter) and 3-hourly u,v,t,s (and using a hanning n=24 filter - so three days).
+
+2025.04.06 Updated based on ocn03 to use lat lon and time directly in the ncks calls instead of
+massing around with finding numerical indices. The issue is discussed in the README in this
+directory.
 
 Performance:
 Because we download so much data this is slower, but still only takes about 15 minutes [CHECK]
@@ -63,7 +67,7 @@ if Ldir['testing']:
     from importlib import reload
     reload(Ofun)
     reload(Ofun_bio)
-    testing_planB = True
+    # testing_planB = True
 else:
     pass
     
