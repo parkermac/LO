@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from time import time
 import xarray as xr
 import numpy as np
+import sys
 
 from lo_tools import Lfun, zfun, zrfun
 Ldir = Lfun.Lstart()
@@ -16,9 +17,16 @@ cred_fn = Ldir['data'] / 'accounts' / 'glorys_pm_2025.04.02.csv'
 cred_dict = Lfun.csv_to_dict(cred_fn)
 
 # set lat-lon limits for the glorys extraction
-aa = [-131, -121, 41, 53]
+def get_glorys_region(region):
+    if region == 'region7':
+        # this encompasses the cas7 domain
+        aa = [-131, -121, 41, 53]
+        return aa
+    else:
+        print('Error: unsupported region in get_glorys_region()')
+        sys.exit()
 
-def get_glorys_forecast(dt, out_dir, verbose=False):
+def get_glorys_forecast(dt, out_dir, region, verbose=False):
     """
     Extract glorys daily average from forecast at one time.
     dt = datetime for the extraction: should be at midnight
@@ -29,6 +37,7 @@ def get_glorys_forecast(dt, out_dir, verbose=False):
     vn_list = ['so', 'thetao', 'zos','cur']
     tt00 = time()
     g_dstr = dt.strftime('%Y-%m-%dT%H:%M:%S')
+    aa = get_glorys_region(region)
     for vn in vn_list:
         tt0 = time()
         if vn == 'zos':
@@ -66,7 +75,7 @@ def get_glorys_forecast(dt, out_dir, verbose=False):
     if verbose:
         print('\nTime to get all variables from forecast = %0.1f' % (time()-tt00))
 
-def get_glorys_hindcast(dt, out_dir, verbose=False):
+def get_glorys_hindcast(dt, out_dir, source, region, verbose=False):
     """
     Extract glorys daily average from hindcast at one time.
     dt = datetime for the extraction: should be at midnight
@@ -79,8 +88,13 @@ def get_glorys_hindcast(dt, out_dir, verbose=False):
     out_name = 'hindcast_' + dstr + '.nc'
     g_dstr = dt.strftime('%Y-%m-%dT%H:%M:%S')
     tt0 = time()
+    aa = get_glorys_region(region)
+    if source == 'hindcast':
+        dsid = 'cmems_mod_glo_phy_my_0.083deg_P1D-m'
+    elif source == 'interim':
+        dsid = 'cmems_mod_glo_phy_myint_0.083deg_P1D-m'
     copernicusmarine.subset(
-        dataset_id='cmems_mod_glo_phy_my_0.083deg_P1D-m',
+        dataset_id=dsid,
         variables=vn_list,
         minimum_longitude=aa[0],
         maximum_longitude=aa[1],
