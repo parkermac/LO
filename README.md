@@ -146,12 +146,12 @@ At any time you can do `conda info --envs` to find out what environments you hav
 
 #### _NOTE for mac users_
 
-As of 2022.12.07 the conda-forge version of the nco operators does not have a version for the new M1 chip. So you will want to make your own environment yaml file, deleting nco from the list (and pytide as well, with is not used much). And then install nco using homebrew instead:
+As of 2022.12.07 the conda-forge version of the nco operators does not have a version for the new M1 chip. So you will want to make your own environment yaml file, deleting nco from the list. And then install nco using homebrew instead:
 - Instructions to install homebrew: https://brew.sh/
 - Install nco using homebrew: https://formulae.brew.sh/formula/nco#default
 - Both are one-liners. Easy!
 
-After installing nco using homebrew, you can add -nco back to your myenv.yml and in the terminal do: `conda env update -f myenv.yml`. A similar solution might exist for pytide, but I haven't tried it yet.
+After installing nco using homebrew, you can add -nco back to your myenv.yml and in the terminal do: `conda env update -f myenv.yml`.
 
 #### (4) Create your own LO_user and make it a GitHub repo
 
