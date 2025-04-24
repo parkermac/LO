@@ -44,6 +44,12 @@ Anaconda is a great way to get python. We will use a minimal installation of pyt
 
 Go to this miniconda webpage to find the link for the "latest" installer for your platform: [INSTALLERS](https://docs.conda.io/en/latest/miniconda.html#latest-miniconda-installer-links).  The "latest" is the table at the top of the page.  The bash versions are shell scripts, and the pkg versions are graphical installers.  These directions assume you are using the bash shellscript.
 
+2025.04.24 When I was reinstalling miniconda on perigee it was a little confusing to navigate the installers page. Eventually I got here:
+https://www.anaconda.com/docs/getting-started/miniconda/install#linux
+which was helpful.
+
+NOTE: when you are working on apogee and perigee there is very little space in /home. Instead install your miniconda3 and associated environments in /data1/[username] on perigee or /dat1/[username] on apogee.
+
 On a mac click on the link to download the installer, or copy the link address and then from the command line do:
 ```
 curl -O [address]
