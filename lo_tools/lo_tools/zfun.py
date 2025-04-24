@@ -231,7 +231,7 @@ def godin_shape():
     ** use ONLY with hourly data! **
     """
     k = np.arange(12)
-    filt = np.NaN * np.ones(71)
+    filt = np.nan * np.ones(71)
     filt[35:47] = (0.5/(24*24*25))*(1200-(12-k)*(13-k)-(12+k)*(13+k))
     k = np.arange(12,36)
     filt[47:71] = (0.5/(24*24*25))*(36-k)*(37-k)
