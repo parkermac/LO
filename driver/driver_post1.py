@@ -9,6 +9,7 @@ run driver_post1.py -gtx cas7_t0_x4b -r backfill -d 2017.07.04 -ro 0 -test True
 
 Test on apogee:
 python driver_post1.py -gtx cas7_t0_x4b -r forecast -ro 0 -test True < /dev/null > test_post.log &
+python driver_post1.py -gtx cas7_t0_x4b -r forecast -ro 0 -test True -override_cmd_list_test True < /dev/null > test_post.log &
 
 To run for real on apogee
 python driver_post1.py -gtx cas7_t0_x4b -r forecast -ro 0 < /dev/null > post.log &
