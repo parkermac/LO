@@ -10,12 +10,12 @@ Testing on mac:
 run driver_post2.py -gtx wgh2_t0_xn0b -r backfill -d 2023.09.14 -ro 0 -test True
 
 Test on apogee:
-python driver_post2.py -gtx wgh2_t0_xn0b -r forecast -ro 0 -test True < /dev/null > test_post.log &
-python driver_post2.py -gtx wgh2_t0_xn0b -r forecast -ro 0 -test True -override_cmd_list_test True < /dev/null > test_post.log &
+python driver_post2.py -gtx wgh2_t0_xn0b -r forecast -ro 0 -test True < /dev/null > test_post2.log &
+python driver_post2.py -gtx wgh2_t0_xn0b -r forecast -ro 0 -test True -override_cmd_list_test True < /dev/null > test_post2.log &
 
 
 To run for real on apogee
-python driver_post2.py -gtx wgh2_t0_xn0b -r forecast -ro 0 < /dev/null > post.log &
+python driver_post2.py -gtx wgh2_t0_xn0b -r forecast -ro 0 < /dev/null > post2.log &
 
 NOTE: the "< /dev/null" appears to be necessary when running by hand and you stay
 logged on because (maybe) the daymovie0 job is somehow expecting standard input,
