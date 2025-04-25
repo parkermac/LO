@@ -146,7 +146,6 @@ for job in job_list:
                     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
                     '-r', Ldir['run_type'], '-d', Ldir['date_string'],
                     '-job', job, '-test', 'False']
-
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     with open(out_dir / 'Info' / 'screen_output.txt', 'w') as fout:
