@@ -1,7 +1,8 @@
 """
 Code to download a sequence of GLORYS hindcast daily averages.
 
-For region7 each output file is 7 MB and takes about 1.5 minutes on my mac.
+For region7 each output file is 7 MB and takes about 1.5 minutes on my mac,
+and three minutes on apogee.
 
 We send the output to LO_data/glorys to match the pattern we used for hycom.
 """
