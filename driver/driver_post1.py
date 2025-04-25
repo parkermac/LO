@@ -35,6 +35,9 @@ parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['ro
 parser.add_argument('-r', '--run_type', type=str)   # backfill or forecast
 parser.add_argument('-d', '--date_string', default='', type=str) # e.g. 2019.07.04
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+# The special arguement below will pass -test False in the cmd_list.
+# This is useful for fixing specific problems without having to re-run all jobs.
+parser.add_argument('-override_cmd_list_test', default=False, type=Lfun.boolean_string)
 # get the args and put into Ldir
 args = parser.parse_args()
 argsd = args.__dict__
@@ -132,14 +135,16 @@ for job in job_list:
         print(str(out_dir))
     
     j_fn = Ldir['LO'] / 'post' / job / 'post_main.py'
-    # cmd_list = ['python3', str(j_fn),
-    #             '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
-    #             '-r', Ldir['run_type'], '-d', Ldir['date_string'],
-    #             '-job', job, '-test', str(Ldir['testing'])]
-    cmd_list = ['python3', str(j_fn),
-                '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
-                '-r', Ldir['run_type'], '-d', Ldir['date_string'],
-                '-job', job, '-test', 'False']
+    if args.override_cmd_list_test == False: # the default
+        cmd_list = ['python3', str(j_fn),
+                    '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
+                    '-r', Ldir['run_type'], '-d', Ldir['date_string'],
+                    '-job', job, '-test', str(Ldir['testing'])]
+    elif args.override_cmd_list_test == True:
+        cmd_list = ['python3', str(j_fn),
+                    '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
+                    '-r', Ldir['run_type'], '-d', Ldir['date_string'],
+                    '-job', job, '-test', 'False']
 
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
