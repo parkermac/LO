@@ -139,7 +139,7 @@ for job in job_list:
     cmd_list = ['python3', str(j_fn),
                 '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
                 '-r', Ldir['run_type'], '-d', Ldir['date_string'],
-                '-job', job, '-test', 'False')]
+                '-job', job, '-test', 'False']
 
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
