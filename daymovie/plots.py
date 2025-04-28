@@ -250,6 +250,8 @@ def Phab(Q, M):
         add_focus_tracks(ax1, iot)
     ax1.axis(aa1)
     pfun.dar(ax1)
+    # 2025.04.28 Add the ESP mooring location
+    ax1.plot(-124.9427, 47.9692, '*', markersize=24, markerfacecolor='orange')
     
     # Focus plot 2
     ax2 = plt.subplot2grid((2,2), (1,1))
