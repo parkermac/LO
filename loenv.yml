@@ -23,6 +23,8 @@ dependencies:
   - nodejs
   # - dask-labextension
   # my additions
+  - requests
+  - aiohttp
   - ipython
   - cmcrameri
   - seawater
