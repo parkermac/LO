@@ -36,7 +36,7 @@ parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['ro
 parser.add_argument('-r', '--run_type', type=str)   # backfill or forecast
 parser.add_argument('-d', '--date_string', default='', type=str) # e.g. 2019.07.04
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
-# The special arguement below will pass -test False in the cmd_list.
+# The special argument below will pass -test False in the cmd_list.
 # This is useful for fixing specific problems without having to re-run all jobs.
 parser.add_argument('-override_cmd_list_test', default=False, type=Lfun.boolean_string)
 # get the args and put into Ldir
@@ -116,7 +116,7 @@ if Ldir['testing'] == False:
 tt0 = time()
 # loop over all jobs
 if Ldir['testing'] == True:
-    job_list = ['layers1']
+    job_list = ['daymovie0']
 else:
     job_list = ['nest_wgh', 'surface1', 'layers1', 'ubc1', 'sequim1',
         'daymovie0', 'drifters2','layers_uv','lowpass0', 'nest_oly']
