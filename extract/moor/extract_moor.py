@@ -2,10 +2,11 @@
 This is code for doing mooring extractions.
 
 Test on mac in ipython:
-run extract_moor -gtx cas6_v0_live -test True
+run extract_moor -gtx cas7_t0_x4b -test True
 
 The same job would be run with flags as:
-python extract_moor.py -gtx cas6_v0_live -ro 0 -0 2019.07.04 -1 2019.07.06 -lt hourly -sn test -lon ' -125' -lat 47 -get_all True > test.log &
+python extract_moor.py -gtx cas7_t0_x4b -ro 0 -0 2017.07.04 -1 2017.07.06 -lt hourly -sn test -lon ' -125' -lat 47 -get_all True > test.log &
+
 NOTE: the quotes and space are required to feed it a negative longitude.
 
 The performance on this is excellent, taking about 24 minutes for a year of hourly records
@@ -31,11 +32,11 @@ import xarray as xr
 # command line arugments
 parser = argparse.ArgumentParser()
 # which run to use
-parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas6_v3_l08b
+parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas7_t0_x4b
 parser.add_argument('-ro', '--roms_out_num', type=int) # 1 = Ldir['roms_out1'], etc.
 # select time period and frequency
-parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
-parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
+parser.add_argument('-0', '--ds0', type=str) # e.g. 2017.07.04
+parser.add_argument('-1', '--ds1', type=str) # e.g. 2017.07.06
 parser.add_argument('-lt', '--list_type', type=str) # list type: hourly, daily, or lowpass
 # select mooring location and name
 parser.add_argument('-lon', type=float) # longitude
@@ -71,8 +72,8 @@ for a in argsd.keys():
 # testing
 if Ldir['testing']:
     Ldir['roms_out_num'] = 0
-    Ldir['ds0'] = '2019.07.04'
-    Ldir['ds1'] = '2019.07.06'
+    Ldir['ds0'] = '2017.07.04'
+    Ldir['ds1'] = '2017.07.06'
     Ldir['list_type'] = 'hourly'
     Ldir['lon'] = -125
     Ldir['lat'] = 47
@@ -179,9 +180,8 @@ vn_list = (',').join([item for item in vn_list.split(',') if item in ds.data_var
 ds.close()
 
 ilat_rho, ilon_rho = find_good(ilat, ilon, 'rho')
-if (Ldir['get_vel'] or Ldir['get_surfbot']) and ('u' in vn_list) and ('v' in vn_list):
-    ilat_u, ilon_u = find_good(ilat_rho, ilon_rho, 'u')
-    ilat_v, ilon_v = find_good(ilat_rho, ilon_rho, 'v')
+ilat_u, ilon_u = find_good(ilat_rho, ilon_rho, 'u')
+ilat_v, ilon_v = find_good(ilat_rho, ilon_rho, 'v')
 
 def messages(mess_str, stdout, stderr):
     # utility function to help with subprocess errors
