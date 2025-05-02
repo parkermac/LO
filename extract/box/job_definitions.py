@@ -122,6 +122,9 @@ def get_box(job, Lon, Lat):
     elif job == 'townsend':
         aa = [-125, -124, 42.3, 46.3]
         vn_list = 'h,mask_rho,pm,pn,u,v,salt,temp'
+    elif job == 'townsend2':
+        aa = [-125, -124, 42.3, 46.3]
+        vn_list = 'h,mask_rho,pm,pn,NO3'
     elif job == 'smolt0':
         aa = [-129, -123.5, 46, 51.5]
         vn_list = 'h,mask_rho,pm,pn,u,v,salt,temp,phytoplankton'
