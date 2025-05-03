@@ -35,6 +35,7 @@ for ii in range(2,26):
         ds.close()
     else:
         url = 's3://cas7-t0-x4b/' + fstr + '/ocean_his_' + hh + '.nc'
+        print(url)
         fs = fsspec.filesystem('s3', anon=True, endpoint_url='https://s3.kopah.uw.edu')
         ds = xr.open_dataset(fs.open(url))
         a += ds.salt.to_numpy()
