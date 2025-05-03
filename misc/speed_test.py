@@ -4,6 +4,8 @@ Code to test access speed for kopah.
 Results:
 
 mac: 6 sec for 24 files
+apogee: 15 sec for 24 files
+klone: 18 sec for 24 files (cpu-g2, standard access)
 
 """
 
@@ -27,8 +29,15 @@ cc = 0
 for ii in range(2,26):
     hh = ('0000' + str(ii))[-4:]
     fn = in_dir / ('ocean_his_' + hh + '.nc')
-    ds = xr.open_dataset(fn)
-    a += ds.salt.to_numpy()
-    ds.close()
-    cc += 1
+    if False:
+        ds = xr.open_dataset(fn)
+        a += ds.salt.to_numpy()
+        ds.close()
+    else:
+        url = 's3://cas7-t0-x4b/' + fstr + '/ocean_his_' + hh + '.nc'
+        fs = fsspec.filesystem('s3', anon=True, endpoint_url='https://s3.kopah.uw.edu')
+        ds = xr.open_dataset(fs.open(url))
+        a += ds.salt.to_numpy()
+        ds.close()
+        cc += 1
 print('%0.2f sec for %d files' % (time()-tt0, cc))
