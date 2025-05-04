@@ -31,7 +31,7 @@ lat_vec = lat[:,0]
 # load the default choices
 dch = pickle.load(open(Gr['gdir'] / 'choices.p', 'rb'))
 
-def mask_from_interpolation(in_fn, maskfile_list, pgdir):
+def mask_from_interpolation(in_fn, maskfile_list):
     # Warning: untested
     ds = xr.open_dataset(in_fn)
     lonr = ds['lon_rho'].values
@@ -66,7 +66,7 @@ if mask_rho_orig.all() == 1:
         m = z >= dch['z_land']
     else:
         print('using maskfile list')
-        m = mask_from_existing(in_fn, dch['maskfile_list_to_interpolate'])
+        m = mask_from_interpolation(in_fn, dch['maskfile_list_to_interpolate'])
         m[z >= dch['z_land']] = True
         print(m.shape)
         print(np.sum(m))
