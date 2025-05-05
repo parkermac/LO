@@ -25,7 +25,7 @@ Daily fields are available over three different time ranges, accessed using diff
 
 ---
 
-**lo_tools/glorys_functions.py** is a module of useful functions for downloading and processing (e.g. interpolate to ROMS grid) glorys fields. An important function is **get_glorys_region()** which returns a list of lon-lat limits associated with a **region** name such as "region7" for a region that encomapsses the cas7 domain.
+**lo_tools/glorys_functions.py** is a module of useful functions for downloading and processing (e.g. interpolate to ROMS grid) glorys fields. An important function is **get_glorys_region()** which returns a list of lon-lat limits associated with a **region** name such as "region7" for a region that encompasses the cas7 domain.
 
 ---
 

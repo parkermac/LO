@@ -203,7 +203,7 @@ def interpolate_glorys_to_roms_2d(fng, vn, vng, gtag, G, verbose=False):
     This function interpolates a glorys field to a roms grid. First it
     fills what it can using linear interpolation from the regular glorys
     grid (fast), and then using cKDTree nearest-neighbor to fill in any
-    remaining gaps (slower, about 8 seconds per 3-D field).
+    remaining gaps.
 
     This function is specific to 2-D fields, presumably just z0s => zeta.
     """
