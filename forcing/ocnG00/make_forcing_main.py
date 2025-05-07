@@ -44,6 +44,7 @@ if Ldir['testing']:
     verbose = True
     from importlib import reload
     reload(gfun)
+    reload(Ofun2_nc)
 else:
     pass
     
@@ -156,7 +157,8 @@ if planB == False:
         for fng in fn_list:
             for vn in vn_list:
                 vng = vn_dict[vn]
-                print('Getting %s from %s' % (vn, vng))
+                if verbose:
+                    print('Getting %s from %s' % (vn, vng))
                 # if Ldir['run_type'] == 'forecast':
                 #     if vng in ['so','thetao','zos']:
                 #         fng = indir0 / 'glorys' / 'Data' / ('forecast_'+vng+'.nc')
@@ -318,7 +320,7 @@ if True:
         in_fn = out_dir / 'ocean_clm.nc'
         out_fn = out_dir / 'ocean_ini.nc'
         out_fn.unlink(missing_ok=True)
-        Ofun_nc.make_ini_file(in_fn, out_fn)
+        Ofun2_nc.make_ini_file(in_fn, out_fn)
         print('- Write ini file: %0.2f sec' % (time()-tt0))
         sys.stdout.flush()
 
@@ -327,7 +329,7 @@ if True:
     in_fn = out_dir / 'ocean_clm.nc'
     out_fn = out_dir / 'ocean_bry.nc'
     out_fn.unlink(missing_ok=True)
-    Ofun_nc.make_bry_file(in_fn, out_fn)
+    Ofun2_nc.make_bry_file(in_fn, out_fn)
     print('- Write bry file: %0.2f sec' % (time()-tt0))
     sys.stdout.flush()
 

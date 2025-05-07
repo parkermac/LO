@@ -185,7 +185,8 @@ def interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G, verbose=False, testing
         Data = data[mask2].flatten()
         zyx2 = np.array((z2[mask2].flatten(),y2[mask2].flatten(),x2[mask2].flatten())).T
         zyxT = cKDTree(zyx2)
-        print('- time to make tree = %0.1f sec' % (time()-tt0))
+        if verbose:
+            print('- time to make tree = %0.1f sec' % (time()-tt0))
         tt0 = time()
         mask3 = np.isnan(FLD) & Mask
         zyx3 = np.array((Z[mask3].flatten(),Y[mask3].flatten(),X[mask3].flatten())).T
@@ -239,7 +240,8 @@ def interpolate_glorys_to_roms_2d(fng, vn, vng, gtag, G, verbose=False, testing=
         Data = data[mask2].flatten()
         yx2 = np.array((y2[mask2].flatten(),x2[mask2].flatten())).T
         yxT = cKDTree(yx2)
-        print('- time to make tree = %0.1f sec' % (time()-tt0))
+        if verbose:
+            print('- time to make tree = %0.1f sec' % (time()-tt0))
         tt0 = time()
         mask3 = np.isnan(FLD) & Mask
         yx3 = np.array((Y[mask3].flatten(),X[mask3].flatten())).T
