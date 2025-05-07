@@ -122,25 +122,26 @@ def create_roms_grid_info(gridname):
     S = zrfun.get_S(S_info_dict)
     return G, S
 
-def get_zr(G, S, vn):
+def get_zr(h, zeta, S, vn):
     """
     A utility function to get the ROMS z coordinate on any of
     the ROMS grids.
     """
-    h = G['h']
     if vn in ['salt', 'temp', 'zeta']:
-        zr = zrfun.get_z(h, 0*h, S, only_rho=True)
+        zr, zw = zrfun.get_z(h, zeta, S)
     elif vn == 'u':    
         hu = (h[:,1:] + h[:,:-1])/2
-        zr = zrfun.get_z(hu, 0*hu, S, only_rho=True)    
+        zetau = (zeta[:,1:] + zeta[:,:-1])/2
+        zr, zw = zrfun.get_z(hu, zetau, S)    
     elif vn == 'v':    
         hv = (h[1:, :] + h[:-1,:])/2
-        zr = zrfun.get_z(hv, 0*hv, S, only_rho=True)
+        zetav = (zeta[1:, :] + zeta[:-1,:])/2
+        zr, zw = zrfun.get_z(hv, zetav, S)
     else:
         print('Unknown variable name for get_zr: ' + vn)
-    return zr
+    return zr, zw
 
-def interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G, verbose=False):
+def interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G, verbose=False, testing=False):
     """
     This function interpolates a glorys field to a roms grid. First it
     fills what it can using linear interpolation from the regular glorys
@@ -174,7 +175,7 @@ def interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G, verbose=False):
     FLD[Mask] = interpolated_values
     if verbose:
         print('- time to interpolate = %0.1f sec' % (time()-tt0))
-    if True:
+    if testing == False:
         # since this is the slowest step you can turn it off for testing
         tt0 = time()
         # Next fill in remaining missing values using nearest neighbor.
@@ -198,7 +199,7 @@ def interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G, verbose=False):
     dsg.close()
     return FLD
 
-def interpolate_glorys_to_roms_2d(fng, vn, vng, gtag, G, verbose=False):
+def interpolate_glorys_to_roms_2d(fng, vn, vng, gtag, G, verbose=False, testing=False):
     """
     This function interpolates a glorys field to a roms grid. First it
     fills what it can using linear interpolation from the regular glorys
@@ -228,7 +229,7 @@ def interpolate_glorys_to_roms_2d(fng, vn, vng, gtag, G, verbose=False):
     FLD[Mask] = interpolated_values
     if verbose:
         print('- time to interpolate = %0.1f sec' % (time()-tt0))
-    if True:
+    if testing == False:
         # since this is the slowest step you can turn it off for testing
         tt0 = time()
         # Next fill in remaining missing values using nearest neighbor.
