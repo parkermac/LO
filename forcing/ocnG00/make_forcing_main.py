@@ -8,6 +8,10 @@ Testing:
 
 run make_forcing_main.py -g cas7 -r backfill -d 2017.01.01 -f ocnG00 -test True
 
+NOTE: the main effect of -test True is that it does the interpolation of glorys
+fields to the roms grid much faster, by skipping the nearest-neighbor search
+step. This is good for testing, but cannot be used for real applications because
+it leaves a lot of unfilled cells.
 
 """
 
@@ -112,33 +116,24 @@ if planB == False:
         print('- error while getting glorys data')
         planB = True
 
+# interpolate the glorys fields to the roms grid
 if planB == False:
     try:
-        # process the glorys fields to ROMS format
-
-        V = dict() # dict to hold fields interpolated to ROMS grid
-
-        G, S = gfun.create_roms_grid_info(Ldir['gridname'])
-
+        tt0 = time()
         # variables to look at
         vn_list = ['zeta','salt','temp','u','v']
-        # vn_list = ['salt','temp','u','v']
-        # vn_list = ['salt', 'zeta']
-
         # dict to relate the roms variables to the glorys variables
         vn_dict = {'salt':'so', 'temp':'thetao', 'u':'uo', 'v':'vo', 'zeta':'zos'}
 
-        # NOTE: need to fill in ubar and vbar
-
         # get sizes
+        G, S = gfun.create_roms_grid_info(Ldir['gridname'])
         NZ = S['N']; NR = G['M']; NC = G['L']
-
         # Make the time vector.
         ot_vec = np.array([Lfun.datetime_to_modtime(item) for item in dt_list])
         NT = len(ot_vec)
 
         # Create a dict of fields for the state variables.
-        V = dict()
+        V = dict() # dict to hold fields interpolated to ROMS grid
         VV = dict() # an extra dict for temporary things
         V['zeta'] = np.nan * np.zeros((NT, NR, NC))
         V['ubar'] = np.nan * np.zeros((NT, NR, NC-1))
@@ -200,6 +195,7 @@ if planB == False:
             # note that the ":" here represents all axes after 0
             # and that it retains the correct shape
             tt += 1
+        print(' - interpolate glorys fields to roms grid: %0.2f sec' % (time()-tt0))
 
     except Exception as e:
         print(e)
@@ -287,79 +283,77 @@ if planB == False:
         print('- error while creating clm file')
         planB = True
 
-if True:
+if planB == True:
+    # planB means that we use the ocean_clm.nc file from the day before and change its last time value
+    # to be a day later.
+    print('**** Using planB ****')
+    result_dict['note'] = 'planB'
+    ds_today = Ldir['date_string']
+    dt_today = datetime.strptime(ds_today, Lfun.ds_fmt)
+    dt_yesterday = dt_today - timedelta(days=1)
+    ds_yesterday = datetime.strftime(dt_yesterday, format=Lfun.ds_fmt)
+    clm_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + ds_yesterday) / Ldir['frc'] / 'ocean_clm.nc'
+    clm_today = out_dir / 'ocean_clm.nc'
+    try:
+        # use open_dataset, update, and save to a new name
+        ds = xr.open_dataset(clm_yesterday, decode_times=False)
+        tname_list = [item for item in ds.coords if 'time' in item]
+        for tname in tname_list:
+            ot_vec = ds[tname].values
+            ot_vec[-1] += 86400
+            ds.update({tname: (('ocean_time',), ot_vec)})
+            ds[tname].attrs['units'] = Lfun.roms_time_units
+        ds.to_netcdf(clm_today)
+        ds.close()
+    except Exception as e:
+        print(e)
 
-    if planB == True:
-        # planB means that we use the ocean_clm.nc file from the day before and change its last time value
-        # to be a day later.
-        print('**** Using planB ****')
-        result_dict['note'] = 'planB'
-        ds_today = Ldir['date_string']
-        dt_today = datetime.strptime(ds_today, Lfun.ds_fmt)
-        dt_yesterday = dt_today - timedelta(days=1)
-        ds_yesterday = datetime.strftime(dt_yesterday, format=Lfun.ds_fmt)
-        clm_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + ds_yesterday) / Ldir['frc'] / 'ocean_clm.nc'
-        clm_today = out_dir / 'ocean_clm.nc'
-        try:
-            # use open_dataset, update, and save to a new name
-            ds = xr.open_dataset(clm_yesterday, decode_times=False)
-            tname_list = [item for item in ds.coords if 'time' in item]
-            for tname in tname_list:
-                ot_vec = ds[tname].values
-                ot_vec[-1] += 86400
-                ds.update({tname: (('ocean_time',), ot_vec)})
-                ds[tname].attrs['units'] = Lfun.roms_time_units
-            ds.to_netcdf(clm_today)
-            ds.close()
-        except Exception as e:
-            print(e)
-
-    if Ldir['start_type'] == 'new':
-        # Write initial condition file if needed
-        tt0 = time()
-        in_fn = out_dir / 'ocean_clm.nc'
-        out_fn = out_dir / 'ocean_ini.nc'
-        out_fn.unlink(missing_ok=True)
-        Ofun2_nc.make_ini_file(in_fn, out_fn)
-        print('- Write ini file: %0.2f sec' % (time()-tt0))
-        sys.stdout.flush()
-
-    # Write boundary file
+if Ldir['start_type'] == 'new':
+    # Write initial condition file if needed
     tt0 = time()
     in_fn = out_dir / 'ocean_clm.nc'
-    out_fn = out_dir / 'ocean_bry.nc'
+    out_fn = out_dir / 'ocean_ini.nc'
     out_fn.unlink(missing_ok=True)
-    Ofun2_nc.make_bry_file(in_fn, out_fn)
-    print('- Write bry file: %0.2f sec' % (time()-tt0))
+    Ofun2_nc.make_ini_file(in_fn, out_fn)
+    print('- Write ini file: %0.2f sec' % (time()-tt0))
     sys.stdout.flush()
 
-    def print_info(fn):
-        print('\n' + str(fn))
-        ds = xr.open_dataset(fn)#, decode_times=False)
-        print(ds)
-        ds.close()
+# Write boundary file
+tt0 = time()
+in_fn = out_dir / 'ocean_clm.nc'
+out_fn = out_dir / 'ocean_bry.nc'
+out_fn.unlink(missing_ok=True)
+Ofun2_nc.make_bry_file(in_fn, out_fn)
+print('- Write bry file: %0.2f sec' % (time()-tt0))
+sys.stdout.flush()
 
-    # Check results
+def print_info(fn):
+    print('\n' + str(fn))
+    ds = xr.open_dataset(fn)#, decode_times=False)
+    print(ds)
+    ds.close()
+
+# Check results
+if Ldir['start_type'] == 'new':
+    nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
+else:
+    nc_list = ['ocean_clm.nc', 'ocean_bry.nc']
+    
+if Ldir['testing']:
+    # open datasets to have a peek manually
+    dsc = xr.open_dataset(out_dir / 'ocean_clm.nc', decode_times=False)
     if Ldir['start_type'] == 'new':
-        nc_list = ['ocean_clm.nc', 'ocean_ini.nc', 'ocean_bry.nc']
-    else:
-        nc_list = ['ocean_clm.nc', 'ocean_bry.nc']
+        dsi = xr.open_dataset(out_dir / 'ocean_ini.nc', decode_times=False)
+    dsb = xr.open_dataset(out_dir / 'ocean_bry.nc', decode_times=False)
         
-    if Ldir['testing']:
-        # open datasets to have a peek manually
-        dsc = xr.open_dataset(out_dir / 'ocean_clm.nc', decode_times=False)
-        if Ldir['start_type'] == 'new':
-            dsi = xr.open_dataset(out_dir / 'ocean_ini.nc', decode_times=False)
-        dsb = xr.open_dataset(out_dir / 'ocean_bry.nc', decode_times=False)
-            
-    result_dict['result'] = 'SUCCESS'
-    for fn in nc_list:
-        if (out_dir / fn).is_file():
-            pass
-        else:
-            result_dict['result'] = 'FAIL'
+result_dict['result'] = 'SUCCESS'
+for fn in nc_list:
+    if (out_dir / fn).is_file():
+        pass
+    else:
+        result_dict['result'] = 'FAIL'
 
-    # *******************************************************
+# *******************************************************
 
-    result_dict['end_dt'] = datetime.now()
-    ffun.finale(Ldir, result_dict)
+result_dict['end_dt'] = datetime.now()
+ffun.finale(Ldir, result_dict)
