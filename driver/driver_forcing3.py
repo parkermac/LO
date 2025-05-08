@@ -127,6 +127,7 @@ while dt <= dt1:
                 print(line.replace('\n',''))
     else:
         print('ERROR: missing results.txt file')
+    sys.stdout.flush()
             
     dt += timedelta(days=1)
     print('')
