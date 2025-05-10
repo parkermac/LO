@@ -18,24 +18,18 @@ NEW 2024.07.31
 - removed LO_RERUN logic, it caused problems during maintenance
 - --done_tag can be used to get rid of duplicate driver_roms used for nesting.
 
+NEW 2025.05.10
+- do not default back to perfect restart
+
 For testing/debugging these flags can be very useful:
 -v True (verbose screen output)
 --get_forcing False (don't get the forcing files, e.g. if they are already on klone)
 --short_roms True (do a very short run, just a few timesteps)
 --move_his False (don't move the results to apogee)
 
-Example call on klone:
-
 testing on mac:
-python3 driver_roms3.py -g cas7 -t t0 -x x4b -0 2021.01.01 -np 200 -N 40 --get_forcing False --run_roms False --move_his False
+python3 driver_roms4.py -g cas7 -t t1 -x x4a -0 2017.01.01 -np 160 -N 32 -v True --get_forcing False --run_roms False --move_his False
 
-testing on klone:
-(requires the ocean_rst.nc file from the previous day)
-python3 driver_roms3.py -g cas7 -t t0 -x x4b -0 2021.01.01 -1 2021.01.01 -np 200 -N 40 --short_roms True < /dev/null > x4b_test.log &
-
-production forecast run on klone:
-LOd="/gscratch/macc/parker/LO/driver"
-python3 $LOd/driver_roms3.py -g cas7 -t t0 -x x4b -r forecast -np 200 -N 40 < /dev/null > $LOd/ak_cron.log &
 
 """
 
@@ -70,7 +64,9 @@ parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone (32 for ge
 # optional flag to use for nesting
 parser.add_argument('--done_tag', type=str, default='3') # used in done_fn
 # optional flag to use a different type of node/slice (cpu-g2 vs compute)
-parser.add_argument('--cpu_choice', type=str, default='compute') # used in the sbatch call
+parser.add_argument('--cpu_choice', type=str, default='cpu-g2') # used in the sbatch call
+# optional flag to use a different group choice (macc or coenv)
+parser.add_argument('--group_choice', type=str, default='macc') # used in the sbatch call
 # various flags to facilitate testing
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
@@ -149,8 +145,8 @@ start_type = args.start_type
 while dt <= dt1:
     
     # update start_type after the first day
-    if (dt != dt0) and (start_type in ['new', 'continuation']):
-        start_type = 'perfect'
+    # if (dt != dt0) and (start_type in ['new', 'continuation']):
+    #     start_type = 'perfect'
         
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
     f_string0 = 'f' + dt0.strftime(Lfun.ds_fmt) # used for forcing a forecast
@@ -278,7 +274,7 @@ while dt <= dt1:
             tt0 = time()
             # Run ROMS using the batch script.
             if 'klone' in Ldir['lo_env']:
-                cmd_list = ['sbatch', '-p', args.cpu_choice, '-A', 'macc',
+                cmd_list = ['sbatch', '-p', args.cpu_choice, '-A', args.group_choice,
                     str(roms_out_dir / 'klone_batch.sh')]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             
