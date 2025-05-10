@@ -282,7 +282,7 @@ while dt <= dt1:
             
             # these are for checking on the run using squeue
             if 'klone' in Ldir['lo_env']:
-                cmd_list = ['squeue', '-A', 'macc']
+                cmd_list = ['squeue', '-p', args.cpu_choice, '-A', args.group_choice]
 
             # first figure out if it has started
             for rrr in range(10):
