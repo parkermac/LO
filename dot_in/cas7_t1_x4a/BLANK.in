@@ -420,7 +420,7 @@ LtracerSponge == F F                            ! temperature, salinity, inert
 ! NetCDF units attribute.
 
       DSTART =  $dstart$.0d0               ! days
-  TIDE_START =  8035.0d0                   ! days
+  TIDE_START =  8034.95833d0                   ! days (one hour less than 8035)
 ! PM Note: TIDE_START is days from TIME_REF to 1/1/1992
     TIME_REF =  19700101.0d0               ! yyyymmdd.dd
 
@@ -751,10 +751,10 @@ Aout(idUvel) == T       ! u                  3D U-velocity
 Aout(idVvel) == T       ! v                  3D V-velocity
 Aout(idu3dE) == F       ! u_eastward         3D U-eastward  at RHO-points
 Aout(idv3dN) == F       ! v_northward        3D V-northward at RHO-points
-Aout(idWvel) == T       ! w                  3D W-velocity
-Aout(idOvel) == T       ! omega              omega vertical velocity
-Aout(idUbar) == T       ! ubar               2D U-velocity
-Aout(idVbar) == T       ! vbar               2D V-velocity
+Aout(idWvel) == F       ! w                  3D W-velocity
+Aout(idOvel) == F       ! omega              omega vertical velocity
+Aout(idUbar) == F       ! ubar               2D U-velocity
+Aout(idVbar) == F       ! vbar               2D V-velocity
 Aout(idu2dE) == F       ! ubar_eastward      2D U-eastward  at RHO-points
 Aout(idv2dN) == F       ! vbar_northward     2D V-northward at RHO-points
 Aout(idFsur) == T       ! zeta               free-surface

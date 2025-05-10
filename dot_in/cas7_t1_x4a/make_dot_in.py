@@ -1,5 +1,5 @@
 """
-This creates and populates directories for ROMS runs on mox or similar.
+This creates and populates directories for ROMS runs on klone or similar.
 Its main product is the .in file used for a ROMS run.
 
 It is designed to work with the BLANK.in file, replacing things like
@@ -55,14 +55,20 @@ D['EX_NAME'] = Ldir['ex_name'].upper()
 #### USER DEFINED VALUES ####
 
 # which ROMS code to use
-D['roms_name'] = 'LO_roms_source'
+# D['roms_name'] = 'LO_roms_source'
+# No longer used
 
 multi_core = True # use more than one core
 
-if Ldir['run_type'] == 'backfill':
-    days_to_run = 1.0
-elif Ldir['run_type'] == 'forecast':
-    days_to_run = float(Ldir['forecast_days'])
+# if Ldir['run_type'] == 'backfill':
+#     days_to_run = 1.0
+# elif Ldir['run_type'] == 'forecast':
+#     days_to_run = float(Ldir['forecast_days'])
+# NOTE: this forecast "days_to_run" logic is no longer used because we
+# always only run one day at at time. In driver_roms3.py it only passes
+# "-run_type backfill" to make_dot_in.py (this code).
+# To make this all clearer I am hard-coding days_to_run here:
+days_to_run = 1.0
 
 # time step in seconds (should fit evenly into 3600 sec)
 if Ldir['blow_ups'] == 0:
@@ -82,7 +88,7 @@ else:
 
 D['ndtfast'] = 20
     
-his_interval = 3600 # seconds to define and write to history files
+his_interval = 86400 # seconds to define and write to history files
 rst_interval = 1 # days between writing to the restart file (e.g. 5)
 
 # Find which forcings to look for (search the csv file in this directory).
@@ -213,17 +219,17 @@ for line in f:
 f.close()
 f2.close()
 
-# create bio_Banas.in #######################
-f = open(dot_in_dir / 'bio_Fennel_BLANK.in','r')
-bio_dot_in_name = 'bio_Banas.in'
-f3 = open(out_dir / bio_dot_in_name,'w')
-for line in f:
-    for var in D.keys():
-        if '$'+var+'$' in line:
-            line2 = line.replace('$'+var+'$', str(D[var]))
-            line = line2
-        else:
-            line2 = line
-    f3.write(line2)
-f.close()
-f3.close()
+# # create bio_Banas.in #######################
+# f = open(dot_in_dir / 'bio_Fennel_BLANK.in','r')
+# bio_dot_in_name = 'bio_Banas.in'
+# f3 = open(out_dir / bio_dot_in_name,'w')
+# for line in f:
+#     for var in D.keys():
+#         if '$'+var+'$' in line:
+#             line2 = line.replace('$'+var+'$', str(D[var]))
+#             line = line2
+#         else:
+#             line2 = line
+#     f3.write(line2)
+# f.close()
+# f3.close()
