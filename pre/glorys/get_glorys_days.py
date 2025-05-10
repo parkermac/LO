@@ -65,5 +65,5 @@ while dt <= dt1:
         Lfun.make_dir(out_dir)
         gfun.get_glorys_forecast(dt, out_dir, region, verbose=verbose)
     dt += timedelta(days=1)
-    print('Time for download = %0.1f\n' % (time()-tt0))
+    print('%s Time for download = %0.1f\n' % (dstr, time()-tt0))
     sys.stdout.flush()
