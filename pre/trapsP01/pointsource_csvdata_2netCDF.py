@@ -25,10 +25,13 @@ Ldir = Lfun.Lstart()
 import pandas as pd
 import numpy as np
 import matplotlib.pylab as plt
+import cmocean
 import os
 import datetime
 import xarray as xr
 from pathlib import Path
+
+from lo_tools import plotting_functions as pfun
 
 #################################################################################
 #                          Data range for raw data                              #
@@ -187,7 +190,7 @@ for ID in all_sources:
 # or are irrelevant to LiveOcean (initialized at end of 2012)
 source.remove('WA0020567-001') # OAK HARBOR STP which ends mid-way through 2010
 source.remove('WA0020893-thru2012') # LAKE STEVENS SEWER DISTRICT which was moved at the start of 2013
-source.remove('WA0032182') # Discharges far upstream into Snoqualmie River, and not Puget Sound
+# source.remove('WA0032182') # Discharges far upstream into Snoqualmie River, and not Puget Sound
 
 # Start Dataset (with empty data)
 NWWTP = len(source)
@@ -250,11 +253,55 @@ for i,FAC_ID in enumerate(source):
 # print('Point sources complete --------------------------------------------\n')
 
 # plot WWTP outfall locations on a map
-fig, ax = plt.subplots(1,1,figsize = (5,10))
-# add data
+fig, ax = plt.subplots(1,1,figsize = (12,9))
+# get the grid data
+ds = xr.open_dataset('../../../LO_data/grids/cas7/grid.nc')
+z = -ds.h.values
+mask_rho = np.transpose(ds.mask_rho.values)
+lon = ds.lon_rho.values
+lat = ds.lat_rho.values
+X = lon[0,:] # grid cell X values
+Y = lat[:,0] # grid cell Y values
+plon, plat = pfun.get_plon_plat(lon,lat)
+# make a version of z with nans where masked
+zm = z.copy()
+zm[np.transpose(mask_rho) == 0] = np.nan
+zm[np.transpose(mask_rho) != 0] = -1
+# add land and water mask to both subplots
+ax.pcolormesh(plon, plat, zm, vmin=-20, vmax=0, cmap=plt.get_cmap(cmocean.cm.ice))
+
+# add old WWTP data
+old_ds = xr.open_dataset('../../../LO_data/trapsD00/all_point_source_data.nc')
+lats = old_ds['lat'].values
+lons = old_ds['lon'].values
+ax.scatter(lons,lats, color='deeppink',s=30,alpha=0.8,
+           zorder=5,label='Old WWTP Data')
+
+# add new WWTP data
 lats = pointsource_ds['lat'].values
 lons = pointsource_ds['lon'].values
-ax.scatter(lons,lats)
+ax.scatter(lons,lats, s=30,zorder=5,facecolors='none',
+           edgecolors='black',
+           label='New WWTP Data')
+# show labels
+for i,wwtp in enumerate(old_ds['name'].values):
+    ax.text(old_ds['lon'].values[i],
+            old_ds['lat'].values[i],
+            wwtp, color='deeppink',
+            horizontalalignment='right')
+for i,wwtp in enumerate(pointsource_ds['name'].values):
+    ax.text(pointsource_ds['lon'].values[i],
+            pointsource_ds['lat'].values[i],
+            wwtp, color='k')
+
+# format figure
+pfun.dar(ax)
+pfun.add_coast(ax,color='paleturquoise')
+ax.set_title('WWTP locations',fontsize=14)
+ax.set_ylim([46.8,49.4])
+ax.set_xlim([-125,-121])
+ax.legend(loc='lower left',fontsize=14)
+
 plt.show()
 
 # #################################################################################
