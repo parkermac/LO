@@ -37,7 +37,8 @@ parser.add_argument('-ro', '--roms_out_num', type=int) # 1 = Ldir['roms_out1'], 
 # select time period and frequency
 parser.add_argument('-0', '--ds0', type=str) # e.g. 2017.07.04
 parser.add_argument('-1', '--ds1', type=str) # e.g. 2017.07.06
-parser.add_argument('-lt', '--list_type', type=str) # list type: hourly, daily, or lowpass
+parser.add_argument('-lt', '--list_type', type=str)
+# list type: hourly, daily, lowpass, average, etc.
 # select mooring location and name
 parser.add_argument('-lon', type=float) # longitude
 parser.add_argument('-lat', type=float) # latitude

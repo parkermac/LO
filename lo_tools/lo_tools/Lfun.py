@@ -211,6 +211,14 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=2):
             f_string = 'f' + dl
             fn = dir0 / f_string / 'lowpassed.nc'
             fn_list.append(fn)
+    elif list_type == 'average':
+        # list of daily averaged files (Noon PST) over a date range
+        fn_list = []
+        date_list = date_list_utility(dt0, dt1)
+        for dl in date_list:
+            f_string = 'f' + dl
+            fn = dir0 / f_string / 'ocean_avg_0001.nc'
+            fn_list.append(fn)
     elif list_type == 'weekly':
         # like "daily" but at 7-day intervals
         fn_list = []
