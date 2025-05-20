@@ -642,3 +642,7 @@ if unique_plant_locations == True:
         plt.tight_layout()
         plt.show()
 
+# TODO: verify the total N load variable is the same as if I manually calculate it (it's not, and I need to correct the above figures)
+# TODO: save figures in this section
+# TODO: incorporate new_wwtp_loading.py plotting
+# TODO: check loads in Hood Canal from WWTPs and fish hatcheries
