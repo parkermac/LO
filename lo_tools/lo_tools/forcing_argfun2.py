@@ -21,7 +21,7 @@ def intro():
     # optional arguments used only for ocnN, to determine what to nest inside
     parser.add_argument('-gtx', '--gtagex', default='cas6_traps2_x2b', type=str) # e.g. cas6_traps2_x2b
     parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
-    parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocnN forcing
+    parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocn forcing
     
     # get the args
     args = parser.parse_args()
