@@ -786,10 +786,10 @@ Aout(idV3Sd) == F       ! v_stokes           3D V-Stokes velocity
 
 Aout(idPair) == F       ! Pair               surface air pressure
 Aout(idTair) == F       ! Tair               surface air temperature
-Aout(idUair) == F       ! Uair               surface U-wind component
-Aout(idVair) == F       ! Vair               surface V-wind component
+Aout(idUair) == T       ! Uair               surface U-wind component
+Aout(idVair) == T       ! Vair               surface V-wind component
 
-Aout(idTsur) == F F     ! shflux, ssflux     surface net heat and salt flux
+Aout(idTsur) == T F     ! shflux, ssflux     surface net heat and salt flux
 Aout(idLhea) == F       ! latent             latent heat flux
 Aout(idShea) == F       ! sensible           sensible heat flux
 Aout(idLrad) == F       ! lwrad              longwave radiation flux
