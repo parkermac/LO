@@ -117,9 +117,12 @@ for O in list('NSEW'):
 
 # DERIVED VALUES
 if multi_core:
-    if Ldir['np_num'] == 160: # for new klone cpu-g2 slices (5*32)
+    if Ldir['np_num'] == 160: # klone cpu-g2 slices (5*32)
         ntilei = '10' # number of tiles in I-direction
         ntilej = '16' # number of tiles in J-direction
+    elif Ldir['np_num'] == 320: # klone cpu-g2 slices (10*32)
+        ntilei = '16' # number of tiles in I-direction
+        ntilej = '20' # number of tiles in J-direction
     elif Ldir['np_num'] == 400: # klone
         ntilei = '20' # number of tiles in I-direction
         ntilej = '20' # number of tiles in J-direction
