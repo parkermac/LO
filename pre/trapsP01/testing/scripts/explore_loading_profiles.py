@@ -38,7 +38,7 @@ print('\n')
 #################################################################################
 
 plot_individual_WWTP_loads = False
-plot_facility_type_load_comparison = True
+plot_facility_type_load_comparison = False
 plot_hoodcanal_load_comparison = True
 
 # read Ecology data version (i.e. trapsP## listed in traps_data_ver.csv)
@@ -215,6 +215,7 @@ if plot_hoodcanal_load_comparison == True:
                                 'MCKERNAN STATE HATCHERY',
                                 'GEORGE ADAMS HATCHERY']
         hoodcanal_wwtp = ['ALDERBROOK RESORT & SPA']
+        hoodcanal_rivers = ['Skokomish R', 'Cushman No 2', 'Tahuya', 'Lynch Cove']
         # get hood canal facilitiy IDs
         hoodcanal_hatcheries_ID = []
         hoodcanal_wwtp_ID = []
@@ -223,8 +224,96 @@ if plot_hoodcanal_load_comparison == True:
         for i,wwtp in enumerate(hoodcanal_wwtp):
                 hoodcanal_wwtp_ID.append(psmeta_df.loc[psmeta_df['FAC_NAME']==wwtp, 'FAC_ID'].values[0])
 
+        # get river data
+        riv_data = Ldir['data'] / trapsD / 'mohamedali_etal2020' / 'all_nonpoint_source_data.nc'
+        riv_ds = xr.open_dataset(riv_data)
         
         fig, ax = plt.subplots(2,1,gridspec_kw={'height_ratios': [3, 1]},figsize = (7,9))
+
+         # plot nutrient loads (monthly)
+        # get all loading data for each facility type
+        WWTP_load_df = psloads_df[psloads_df['FAC_ID'].isin(hoodcanal_wwtp_ID)]
+        hatchery_load_df = psloads_df[psloads_df['FAC_ID'].isin(hoodcanal_hatcheries_ID)]
+        # first, sum all of the individual plants together to get one 2005 - 2020 timeseries (which is the sum of all plants)
+        all_WWWTP_loads = WWTP_load_df.groupby(['YEAR', 'MONTH'])['TN_LOAD_KG_MO'].sum()
+        all_hatchery_loads = hatchery_load_df.groupby(['YEAR', 'MONTH'])['TN_LOAD_KG_MO'].sum()
+        # then, get the mean annual loading profile (still, sum of all plants)
+        annualmean_all_WWTP_loads = all_WWWTP_loads.groupby(['MONTH']).mean()
+        annualmean_all_hatchery_loads = all_hatchery_loads.groupby(['MONTH']).mean()
+        # plot time series of loads
+        t = pd.date_range(start='2005-01-01', end='2005-12-01', freq='MS')
+        month_days = [1/31, 1/28.25, 1/31, 1/30,
+                      1/31, 1/30,    1/31, 1/31,
+                      1/30, 1/31,    1/30, 1/31]
+        ax[1].plot(t,annualmean_all_WWTP_loads*month_days, color='deeppink',linewidth=3,alpha=0.7)
+        ax[1].plot(t,annualmean_all_hatchery_loads*month_days, color='black',linewidth=3,alpha=0.7)
+
+        # plot river loads
+        # create new variable representing nutrient load in kg/day
+        riv_ds['load [kg/d]'] = riv_ds['flow'] * (riv_ds['NO3'] + riv_ds['NH4']) * 14.01 * 60 * 60 * 24 / 1000 / 1000
+        # get all loading data for each facility type
+        riv_load_ds = riv_ds.sel(source=riv_ds['name'].isin(hoodcanal_rivers))
+        # get sum of load from all sources
+        all_riv_loads = riv_load_ds['load [kg/d]'].sum(dim='source')
+        # then, get the mean annual loading profile with monthly resolution (still, sum of all plants)
+        annualmean_all_riv_loads = all_riv_loads.groupby('date.month').mean(dim='date')
+        # plot time series of loads
+        t = pd.date_range(start='2005-01-01', end='2005-12-01', freq='MS')
+        ax[1].plot(t,annualmean_all_riv_loads, color='royalblue',linewidth=3,alpha=0.7)
+
+        # # get all loading data for each facility type
+        # riv_load_ds = riv_ds.sel(source=riv_ds['name'].isin(['Skokomish R']))
+        # # get sum of load from all sources
+        # all_riv_loads = riv_load_ds['load [kg/d]'].sum(dim='source')
+        # # then, get the mean annual loading profile with monthly resolution (still, sum of all plants)
+        # annualmean_all_riv_loads = all_riv_loads.groupby('date.month').mean(dim='date')
+        # # plot time series of loads
+        # t = pd.date_range(start='2005-01-01', end='2005-12-01', freq='MS')
+        # ax[1].plot(t,annualmean_all_riv_loads, color='royalblue',linewidth=3,alpha=0.7,label='Skokomish')
+
+        # # get all loading data for each facility type
+        # riv_load_ds = riv_ds.sel(source=riv_ds['name'].isin(['Cushman No 2']))
+        # # get sum of load from all sources
+        # all_riv_loads = riv_load_ds['load [kg/d]'].sum(dim='source')
+        # # then, get the mean annual loading profile with monthly resolution (still, sum of all plants)
+        # annualmean_all_riv_loads = all_riv_loads.groupby('date.month').mean(dim='date')
+        # # plot time series of loads
+        # t = pd.date_range(start='2005-01-01', end='2005-12-01', freq='MS')
+        # ax[1].plot(t,annualmean_all_riv_loads, color='deepskyblue',linewidth=3,alpha=0.7, label='Cushman No 2')
+
+        # # get all loading data for each facility type
+        # riv_load_ds = riv_ds.sel(source=riv_ds['name'].isin(['Tahuya']))
+        # # get sum of load from all sources
+        # all_riv_loads = riv_load_ds['load [kg/d]'].sum(dim='source')
+        # # then, get the mean annual loading profile with monthly resolution (still, sum of all plants)
+        # annualmean_all_riv_loads = all_riv_loads.groupby('date.month').mean(dim='date')
+        # # plot time series of loads
+        # t = pd.date_range(start='2005-01-01', end='2005-12-01', freq='MS')
+        # ax[1].plot(t,annualmean_all_riv_loads, color='purple',linewidth=3,alpha=0.7, label='Tahuya')
+
+        # # get all loading data for each facility type
+        # riv_load_ds = riv_ds.sel(source=riv_ds['name'].isin(['Lynch Cove']))
+        # # get sum of load from all sources
+        # all_riv_loads = riv_load_ds['load [kg/d]'].sum(dim='source')
+        # # then, get the mean annual loading profile with monthly resolution (still, sum of all plants)
+        # annualmean_all_riv_loads = all_riv_loads.groupby('date.month').mean(dim='date')
+        # # plot time series of loads
+        # t = pd.date_range(start='2005-01-01', end='2005-12-01', freq='MS')
+        # ax[1].plot(t,annualmean_all_riv_loads, color='hotpink',linewidth=3,alpha=0.7, label='Lynch Cove')
+
+        # format figure
+        ax[1].set_title('Mean Annual Total Nitrogen Loads',fontsize=14)
+        ax[1].set_ylabel('Total Nitrogen Load\n[kg/day]',fontsize=12)
+        # ax[1].set_title('Mean Annual DIN Loads',fontsize=14)
+        # ax[1].set_ylabel('Total DIN Load\n[kg/day]',fontsize=12)
+        ax[1].set_yscale('log')
+        ax[1].set_ylim([0.1,1e4])
+        # ax[1].set_ylim([0,500])
+        # ax[1].legend(loc='best')
+        ax[1].set_xlim([t[0],t[-1]])
+        ax[1].xaxis.set_major_locator(mdates.MonthLocator())
+        ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+        ax[1].grid(True)
 
         # plot outfall locations on a map
         # get the grid data
@@ -243,49 +332,31 @@ if plot_hoodcanal_load_comparison == True:
         # add land and water mask to both subplots
         ax[0].pcolormesh(plon, plat, zm, vmin=-20, vmax=0, cmap=plt.get_cmap(cmocean.cm.ice))
         # add WWTPs
-        ax[0].scatter(WWTP_df['FAC_LON'],WWTP_df['FAC_LAT'], s=30,zorder=5,
+        WWTP_list_df = psmeta_df[psmeta_df['FAC_ID'].isin(hoodcanal_wwtp_ID)]
+        ax[0].scatter(WWTP_list_df['FAC_LON'],WWTP_list_df['FAC_LAT'], s=30,zorder=5,
                 facecolors='deeppink', edgecolors='none', alpha=0.9,
-                label='WWTPs')
+                label='WWTPs (Wasielewski et al., 2024)')
         # add hatcheries
-        ax[0].scatter(hatcheries_df['FAC_LON'],hatcheries_df['FAC_LAT'], s=30, zorder=5,
+        hatchery_list_df = psmeta_df[psmeta_df['FAC_ID'].isin(hoodcanal_hatcheries_ID)]
+        ax[0].scatter(hatchery_list_df['FAC_LON'],hatchery_list_df['FAC_LAT'], s=30, zorder=5,
                 facecolors='black', edgecolors='none', alpha=0.9, marker='d',
-                label='Hatcheries')
+                label='Hatcheries (Wasielewski et al., 2024)')
+        # add rivers
+        ax[0].scatter(riv_load_ds['lon'].values,riv_load_ds['lat'].values,s=30,zorder=5,
+                      facecolors='royalblue', edgecolors='none', alpha=0.9, marker='s',
+                      label='Rivers (Mohamedali et al., 2020)')
+        # for x, y, label in zip(riv_ds['lon'].values, riv_ds['lat'].values, riv_ds['name'].values):
+        #         ax[0].text(x, y, label, color='royalblue')
         # format figure
         pfun.dar(ax[0])
         pfun.add_coast(ax[0],color='paleturquoise')
         ax[0].set_title('Hood Canal Facility locations',fontsize=14)
-        ax[0].set_ylim([47.25,47.55])
-        ax[0].set_xlim([-123.35,-122.85])
+        ax[0].set_ylim([47.25,47.6])
+        ax[0].set_xlim([-123.35,-122.82])
         ax[0].legend(loc='upper left',fontsize=12)
 
-        # plot nutrient loads (monthly)
-        # get all loading data for each facility type
-        WWTP_load_df = psloads_df[psloads_df['FAC_ID'].isin(hoodcanal_wwtp_ID)]
-        hatchery_load_df = psloads_df[psloads_df['FAC_ID'].isin(hoodcanal_hatcheries_ID)]
-        # first, sum all of the individual plants together to get one 2005 - 2020 timeseries (which is the sum of all plants)
-        all_WWWTP_loads = WWTP_load_df.groupby(['YEAR', 'MONTH'])['TN_LOAD_KG_MO'].sum()
-        all_hatchery_loads = hatchery_load_df.groupby(['YEAR', 'MONTH'])['TN_LOAD_KG_MO'].sum()
-        # then, get the mean annual loading profile (still, sum of all plants)
-        annualmean_all_WWTP_loads = all_WWWTP_loads.groupby(['MONTH']).mean()
-        annualmean_all_hatchery_loads = all_hatchery_loads.groupby(['MONTH']).mean()
-        # plot time series of loads
-        t = pd.date_range(start='2005-01-01', end='2005-12-01', freq='MS')
-        month_days = [1/31, 1/28.25, 1/31, 1/30,
-                      1/31, 1/30,    1/31, 1/31,
-                      1/30, 1/31,    1/30, 1/31]
-        ax[1].plot(t,annualmean_all_WWTP_loads*month_days, color='deeppink',linewidth=3,alpha=0.7)
-        ax[1].plot(t,annualmean_all_hatchery_loads*month_days, color='black',linewidth=3,alpha=0.7)
-        # format figure
-        ax[1].set_title('Mean Annual Total Nitrogen Loads',fontsize=14)
-        ax[1].set_ylabel('Total Nitrogen Load\n[kg/day]',fontsize=12)
-        ax[1].set_yscale('log')
-        ax[1].set_ylim([0.1,1e2])
-        ax[1].set_xlim([t[0],t[-1]])
-        ax[1].xaxis.set_major_locator(mdates.MonthLocator())
-        ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%b'))
 
         # format and save figure
-        plt.suptitle('Wasielewski et al. (2024)',fontsize=14,fontweight='bold')
         plt.tight_layout
         plt.show()
         plt.savefig(out_dir / 'Wasielewski_etal2024' / 'hoodcanal_loads_comparison.png')
@@ -298,7 +369,7 @@ wasielewski24_WWTP_df = psloads_df.loc[psloads_df['FAC_ID'].isin(WWTP_df['FAC_ID
 #################################################################################
 
 plot_individual_WWTP_loads_mohamedali = False
-plot_facility_type_load_comparison_mohamedali = True
+plot_facility_type_load_comparison_mohamedali = False
 
 # location of point source data to process
 pointsource_dir = Ldir['data'] / trapsD / 'mohamedali_etal2020'
@@ -431,8 +502,8 @@ mohamedali2020_WWTP_ds = psloads_ds.sel(source=psloads_ds['name'].isin(WWTP_name
 #################################################################################
 
 compare_plant_locations = True
-largest_plants_analysis = True
-unique_plant_locations = True
+largest_plants_analysis = False
+unique_plant_locations = False
 
 # plot WWTP outfall locations on an interactive map ----------------------------------
 if compare_plant_locations == True:
@@ -791,6 +862,7 @@ if plot_proposed_loads == True:
 
                 # get Mohamedali et al. (2020) data
                 # Subsample to one value per month
+                mohamedali2020_WWTP_ds['load [kg/d]'] = mohamedali2020_WWTP_ds['flow'] * (mohamedali2020_WWTP_ds['NO3'] + mohamedali2020_WWTP_ds['NH4']) * 14.01 * 60 * 60 * 24 / 1000 / 1000
                 moh20_raw = mohamedali2020_WWTP_ds.sel(source=(mohamedali2020_WWTP_ds['name']==
                                                                   wwtp))['load [kg/d]'].resample(date='1MS').first()[0]
                 
@@ -801,6 +873,18 @@ if plot_proposed_loads == True:
                         print(was24name)
                         # get ID
                         ID = WWTP_df.loc[WWTP_df['FAC_NAME']==was24name,'FAC_ID'].values[0]
+                        # special check for Everett Water Pollution Control Facility 
+                        if was24name == 'Everett Water Pollution Control Facility':
+                                if wwtp == 'OF-100':
+                                        ID = 'WA0024490_Gardner'
+                                elif wwtp == 'Everett Snohomish':
+                                        ID = 'WA0024490_Snohomish'
+                        # special check for Oak Harbor
+                        if was24name == 'OAK HARBOR STP':
+                                if wwtp == 'Oak Harbor RBC':
+                                        ID = 'WA0020567-001'
+                                elif wwtp == 'Oak Harbor Lagoon':
+                                        ID = 'WA0020567-002'
                         WWTP_load_df = wasielewski24_WWTP_df.loc[wasielewski24_WWTP_df['FAC_ID']==ID]
                         # get mean loading of each WWTP
                         flow = WWTP_load_df['FLOW_MGD'].replace('.', np.nan).astype(float) * 0.0438126364 # m3/s from mill gallons per day
@@ -884,6 +968,3 @@ if plot_proposed_loads == True:
                 plt.savefig(out_dir / 'CombinedData_ProposedLoads' / 'WWTPs' /
                             (wwtp + '.png'))
                 plt.close()
-
-
-# TODO: incorporate new_wwtp_loading.py plotting
