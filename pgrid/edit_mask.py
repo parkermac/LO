@@ -382,6 +382,8 @@ while flag_get_ginput:
             remove_poly()
             
         elif (bdict[nb]=='done') and not flag_start:
+            hh_prev = hh.copy()
+            flag_continue = False
             flag_get_ginput = False
             ax1.set_title('DONE')
             
