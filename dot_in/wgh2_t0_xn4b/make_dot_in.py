@@ -1,12 +1,12 @@
 """
-This creates and populates directories for ROMS runs on mox or similar.
+This creates and populates directories for ROMS runs on klone or similar.
 Its main product is the .in file used for a ROMS run.
 
 It is designed to work with the BLANK.in file, replacing things like
 $whatever$ with meaningful values.
 
 To test from ipython on mac:
-run make_dot_in -g wgh0 -t t0 -x xn4b -r backfill -s continuation -d 2019.07.04 -bu 0 -np 160
+run make_dot_in -g wgh2 -t t0 -x xn4b -r backfill -s continuation -d 2019.07.04 -bu 0 -np 160
 
 If you call with -short_roms True it will create a .in that runs for a shorter time or
 writes history files more frequently (exact behavior is in the code below).  This can
@@ -54,29 +54,23 @@ D['EX_NAME'] = Ldir['ex_name'].upper()
 
 #### USER DEFINED VALUES ####
 
-# which ROMS code to use
-D['roms_name'] = 'LO_roms_source'
-
 multi_core = True # use more than one core
 
-if Ldir['run_type'] == 'backfill':
-    days_to_run = 1.0
-elif Ldir['run_type'] == 'forecast':
-    days_to_run = float(Ldir['forecast_days'])
+days_to_run = 1.0
 
 # time step in seconds (should fit evenly into 3600 sec)
 if Ldir['blow_ups'] == 0:
     dtsec = 12
 elif Ldir['blow_ups'] == 1:
-    dtsec = 10
+    dtsec = 9
 elif Ldir['blow_ups'] == 2:
-    dtsec = 8
-elif Ldir['blow_ups'] == 3:
     dtsec = 6
-elif Ldir['blow_ups'] == 4:
+elif Ldir['blow_ups'] == 3:
     dtsec = 4
-elif Ldir['blow_ups'] == 5:
+elif Ldir['blow_ups'] == 4:
     dtsec = 3
+elif Ldir['blow_ups'] == 5:
+    dtsec = 2
 else:
     print('Unsupported number of blow ups: %d' % (Ldir['blow_ups']))
 
@@ -111,9 +105,12 @@ for O in list('NSEW'):
 
 # DERIVED VALUES
 if multi_core:
-    if Ldir['np_num'] == 160: # for new klone cpu-g2 slices (5*32)
+    if Ldir['np_num'] == 160: # klone cpu-g2 slices (5*32)
         ntilei = '10' # number of tiles in I-direction
         ntilej = '16' # number of tiles in J-direction
+    elif Ldir['np_num'] == 320: # klone cpu-g2 slices (10*32)
+        ntilei = '16' # number of tiles in I-direction
+        ntilej = '20' # number of tiles in J-direction
     elif Ldir['np_num'] == 400: # klone
         ntilei = '20' # number of tiles in I-direction
         ntilej = '20' # number of tiles in J-direction
