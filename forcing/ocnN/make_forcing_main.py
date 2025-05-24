@@ -141,6 +141,7 @@ for vn in ddk:
 # and save to NetCDF
 Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
 ds.to_netcdf(out_fn, encoding=Enc_dict)
+# ds.to_netcdf(out_fn)
 ds.close()
 print('- Write clm file: %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
