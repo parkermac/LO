@@ -245,6 +245,48 @@ def P_bgc_surface(in_dict):
         plt.close()
     else:
         plt.show()
+
+def P_bgc_bottom(in_dict):
+    # Biogeochemical fields at the bottom
+    # START
+    ds = xr.open_dataset(in_dict['fn'])
+    fs = 14
+    pfun.start_plot(fs=fs, figsize=(17,13))
+    fig = plt.figure()
+    # PLOT CODE
+    vn_list = ['phytoplankton','TIC','alkalinity','oxygen','NO3','NH4']
+    slev = 0
+    ii = 1
+    for vn in vn_list:
+        if in_dict['auto_vlims']:
+            pinfo.vlims_dict[vn] = ()
+        ax = fig.add_subplot(2, 3, ii)
+        cs = pfun.add_map_field(ax, ds, vn, pinfo.vlims_dict, slev=slev,
+                cmap=pinfo.cmap_dict[vn], fac=pinfo.fac_dict[vn], vlims_fac=pinfo.range_dict[vn])
+        fig.colorbar(cs)
+        pfun.add_coast(ax)
+        ax.axis(pfun.get_aa(ds))
+        pfun.dar(ax)
+        ax.set_title('Bottom %s %s' % (pinfo.tstr_dict[vn],pinfo.units_dict[vn]), fontsize=1.2*fs)
+        if ii in [4,5,6]:
+            ax.set_xlabel('Longitude')
+        if ii in [1,4]:
+            ax.set_ylabel('Latitude')
+        if ii == 1:
+            pfun.add_info(ax, in_dict['fn'])
+            pfun.add_bathy_contours(ax, ds, txt=True)
+        elif ii in [2,3,5,6]:
+            ax.set_yticklabels([])
+        ii += 1
+    fig.tight_layout()
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
         
 def P_basic_AttSW_boxes(in_dict):
     # One-off code to look at the places in Aurora's code where AttSW is increased
