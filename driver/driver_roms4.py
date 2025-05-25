@@ -21,6 +21,10 @@ NEW 2024.07.31
 NEW 2025.05.10
 - do not default back to perfect restart
 
+NEW 2025.05.25
+- reworked start_type logic to allow either continuation or perfect to persist
+- and for both to be able to start with new
+
 For testing/debugging these flags can be very useful:
 -v True (verbose screen output)
 --get_forcing False (don't get the forcing files, e.g. if they are already on klone)
@@ -55,7 +59,8 @@ parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
 parser.add_argument('-t', '--tag', type=str)        # e.g. v00
 parser.add_argument('-x', '--ex_name', type=str)    # e.g. uu0mb
 parser.add_argument('-r', '--run_type', type=str, default='backfill')   # forecast or backfill
-parser.add_argument('-s', '--start_type', type=str, default='perfect') # new, perfect, or continuation
+parser.add_argument('-s', '--start_type', type=str, default='perfect')
+# newperfect, newcontinuation, perfect, or continuation
 # -0 and -1 only required for -r backfill
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
@@ -141,12 +146,21 @@ def messages(stdout, stderr, mtitle, verbose):
 
 # Loop over days
 dt = dt0
-start_type = args.start_type
+original_start_type = args.start_type
 while dt <= dt1:
     
-    # update start_type after the first day
-    # if (dt != dt0) and (start_type in ['new', 'continuation']):
-    #     start_type = 'perfect'
+    # update start_type after the first day if needed
+    
+    if (dt == dt0) and (original_start_type in ['newperfect','newcontinuation']):
+        start_type = 'new':
+    else:
+        start_type = original_start_type
+
+    if (dt != dt0) and (original_start_type in ['newperfect','perfect']):
+        start_type = 'perfect'
+
+    if (dt != dt0) and (original_start_type in ['newcontinuation','continuation']):
+        start_type = 'continuation'
         
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
     f_string0 = 'f' + dt0.strftime(Lfun.ds_fmt) # used for forcing a forecast
