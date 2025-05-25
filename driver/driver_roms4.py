@@ -23,7 +23,9 @@ NEW 2025.05.10
 
 NEW 2025.05.25
 - reworked start_type logic to allow either continuation or perfect to persist
-- and for both to be able to start with new
+- valid start_type values:
+-  new, perfect, continuation (standard behavior)
+-  newperfect, newcontinuation (first day is new, and then perfect or continuation thereafter)
 
 For testing/debugging these flags can be very useful:
 -v True (verbose screen output)
@@ -151,8 +153,8 @@ while dt <= dt1:
     
     # update start_type after the first day if needed
     
-    if (dt == dt0) and (original_start_type in ['newperfect','newcontinuation']):
-        start_type = 'new':
+    if (dt == dt0) and (original_start_type in ['new','newperfect','newcontinuation']):
+        start_type = 'new'
     else:
         start_type = original_start_type
 
