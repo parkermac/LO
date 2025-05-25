@@ -281,37 +281,37 @@ LtracerSponge == 15*F
 ! two letters, regardless if using uppercase or lowercase. If nested
 ! grids, specify values for each grid.
 
-   Hadvection == HSIMT    \                     ! idbio( 1), NO3
-                 HSIMT    \                     ! idbio( 2), NH4
-                 HSIMT    \                     ! idbio( 3), chlorophyll
-                 HSIMT    \                     ! idbio( 4), phytoplankton
-                 HSIMT    \                     ! idbio( 5), zooplankton
-                 HSIMT    \                     ! idbio( 6), LdetritusN
-                 HSIMT    \                     ! idbio( 7), SdetritusN
-                 HSIMT    \                     ! idbio( 8), LdetritusC
-                 HSIMT    \                     ! idbio( 9), SdetritusC
-                 HSIMT    \                     ! idbio(10), TIC
-                 HSIMT    \                     ! idbio(11), alkalinity
-                 HSIMT    \                     ! idbio(12), oxygen
-                 HSIMT    \                     ! idbio(13), PO4
-                 HSIMT    \                     ! idbio(14), RdetritusN
-                 HSIMT                          ! idbio(15), RdetritusC
+   Hadvection == MPDATA    \                     ! idbio( 1), NO3
+                 MPDATA    \                     ! idbio( 2), NH4
+                 MPDATA    \                     ! idbio( 3), chlorophyll
+                 MPDATA    \                     ! idbio( 4), phytoplankton
+                 MPDATA    \                     ! idbio( 5), zooplankton
+                 MPDATA    \                     ! idbio( 6), LdetritusN
+                 MPDATA    \                     ! idbio( 7), SdetritusN
+                 MPDATA    \                     ! idbio( 8), LdetritusC
+                 MPDATA    \                     ! idbio( 9), SdetritusC
+                 MPDATA    \                     ! idbio(10), TIC
+                 MPDATA    \                     ! idbio(11), alkalinity
+                 MPDATA    \                     ! idbio(12), oxygen
+                 MPDATA    \                     ! idbio(13), PO4
+                 MPDATA    \                     ! idbio(14), RdetritusN
+                 MPDATA                          ! idbio(15), RdetritusC
 
-   Vadvection == HSIMT    \                     ! idbio( 1), NO3
-                 HSIMT    \                     ! idbio( 2), NH4
-                 HSIMT    \                     ! idbio( 3), chlorophyll
-                 HSIMT    \                     ! idbio( 4), phytoplankton
-                 HSIMT    \                     ! idbio( 5), zooplankton
-                 HSIMT    \                     ! idbio( 6), LdetritusN
-                 HSIMT    \                     ! idbio( 7), SdetritusN
-                 HSIMT    \                     ! idbio( 8), LdetritusC
-                 HSIMT    \                     ! idbio( 9), SdetritusC
-                 HSIMT    \                     ! idbio(10), TIC
-                 HSIMT    \                     ! idbio(11), alkalinity
-                 HSIMT    \                     ! idbio(12), oxygen
-                 HSIMT    \                     ! idbio(13), PO4
-                 HSIMT    \                     ! idbio(14), RdetritusN
-                 HSIMT                          ! idbio(15), RdetritusC
+   Vadvection == MPDATA    \                     ! idbio( 1), NO3
+                 MPDATA    \                     ! idbio( 2), NH4
+                 MPDATA    \                     ! idbio( 3), chlorophyll
+                 MPDATA    \                     ! idbio( 4), phytoplankton
+                 MPDATA    \                     ! idbio( 5), zooplankton
+                 MPDATA    \                     ! idbio( 6), LdetritusN
+                 MPDATA    \                     ! idbio( 7), SdetritusN
+                 MPDATA    \                     ! idbio( 8), LdetritusC
+                 MPDATA    \                     ! idbio( 9), SdetritusC
+                 MPDATA    \                     ! idbio(10), TIC
+                 MPDATA    \                     ! idbio(11), alkalinity
+                 MPDATA    \                     ! idbio(12), oxygen
+                 MPDATA    \                     ! idbio(13), PO4
+                 MPDATA    \                     ! idbio(14), RdetritusN
+                 MPDATA                          ! idbio(15), RdetritusC
 
 ! Adjoint-based algorithms can have different horizontal and schemes
 ! for active and inert tracers.
