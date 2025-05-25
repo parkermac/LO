@@ -18,9 +18,6 @@ NEW 2024.07.31
 - removed LO_RERUN logic, it caused problems during maintenance
 - --done_tag can be used to get rid of duplicate driver_roms used for nesting.
 
-NEW 2025.05.10
-- do not default back to perfect restart
-
 NEW 2025.05.25
 - reworked start_type logic to allow either continuation or perfect to persist
 - valid start_type values:
