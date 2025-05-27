@@ -1,14 +1,12 @@
 """
 Note that this script is only compatible with trapsD01 (listed in traps_data_ver.csv)
 
------ OLDER BELOW-- NEED TO RE-WRITE ------
-This script compiles all of Ecology's excel
-loading data into two netCDF files:
-one for point sources
-one for rivers
-
-Looks at data stored in LO_data/trapsD##
-(To change the Ecology data version, modify traps_data_ver.csv)
+This script compiles all of the excel files from Mohamedali et al. (2020)
+and the csv files from Wasielewski et al. (2024) into three netCDF files
+which are saved in LO_data/trapsD01/processed_data:
+    river_data_mohamedali_etal_2020.nc
+    wwtp_data_mohamedali_etal_2020.nc
+    wwtp_data_wasielewski_etal_2024.nc
 
 In theory, this script only needs to be run once.
 Then, the netCDF files can be referenced to generate climatologies
@@ -16,7 +14,7 @@ Then, the netCDF files can be referenced to generate climatologies
 Takes about 15 minutes to run on my local machine.
 
 To run from ipython:
-run rawdata_2netCDF.py
+    run rawdata_2netCDF.py
 """
 
 #################################################################################
@@ -488,8 +486,8 @@ for i,FAC_ID in enumerate(was24_wwtp_IDs):
 
 # save dataset as .nc file in LO_data
 out_fn = '../../../LO_data/' + trapsD + '/processed_data/wwtp_data_wasielewski_etal_2024.nc'
-moh20_wwtp_ds.to_netcdf(out_fn)
-moh20_wwtp_ds.close()
+was24_wwtp_ds.to_netcdf(out_fn)
+was24_wwtp_ds.close()
 print('Wasielewski et al. (2024) WWTPs complete --------------------------------------------\n')
 
 #################################################################################

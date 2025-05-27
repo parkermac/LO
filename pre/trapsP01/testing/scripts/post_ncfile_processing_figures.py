@@ -167,3 +167,73 @@ for i,wwtp in enumerate(moh20_data['name'].values):
         plt.show()
 
         # plt.close()
+
+
+# loop through all WWTPs in Wasielewski et al. (2024):
+for i,wwtp in enumerate(was24_data['name'].values):
+        
+        # initialize figure
+        fig, ax = plt.subplots(1,2,gridspec_kw={'width_ratios': [2, 3]},figsize = (14,5))
+        
+        # plot wwtp location on map -------------------------------------------
+        # get the grid data
+        ds = xr.open_dataset('../../../../../LO_data/grids/cas7/grid.nc')
+        z = -ds.h.values
+        mask_rho = np.transpose(ds.mask_rho.values)
+        lon = ds.lon_rho.values
+        lat = ds.lat_rho.values
+        X = lon[0,:] # grid cell X values
+        Y = lat[:,0] # grid cell Y values
+        plon, plat = pfun.get_plon_plat(lon,lat)
+        # make a version of z with nans where masked
+        zm = z.copy()
+        zm[np.transpose(mask_rho) == 0] = np.nan
+        zm[np.transpose(mask_rho) != 0] = -1
+        # add land and water mask to both subplots
+        ax[0].pcolormesh(plon, plat, zm, vmin=-20, vmax=0, cmap=plt.get_cmap(cmocean.cm.ice))
+
+        # plot wwtp location
+        lat = was24_data.sel(source=was24_data['name']==wwtp)['lat']
+        lon = was24_data.sel(source=was24_data['name']==wwtp)['lon']
+        ax[0].scatter(lon,lat,color='navy',s=100,marker='*',zorder=3)
+
+        # format figure
+        pfun.dar(ax[0])
+        pfun.add_coast(ax[0],color='paleturquoise')
+        ax[0].set_title('{} location'.format(wwtp),fontsize=14)
+        ax[0].set_ylim([46.8,49.4])
+        ax[0].set_xlim([-125,-121.5])
+
+        # add loading profiles --------------------------------------------------------
+
+        # Subsample to one value per month
+        was24_data['load [kg/d]'] = was24_data['flow'] * (was24_data['NO3'] + was24_data['NH4']) * 14.01 * 60 * 60 * 24 / 1000 / 1000
+        was24_raw = was24_data.sel(source=(was24_data['name']==
+                                wwtp))['load [kg/d]'].resample(date='1MS').first()[0]
+
+        # get time array
+        t_new = pd.date_range(start='2005-01-01', end='2020-12-31', freq='MS').to_list()
+        # t_old = pd.date_range(start='1999-01-01', end='2017-7-31', freq='MS').to_list()
+        t_all = pd.date_range(start='1999-01-01',end='2020-12-31', freq='MS').to_list()
+
+                
+        # get Wasielewski et al. (2024) data
+        ax[1].plot(t_new,was24_raw, label='Wasielewski et al. (2024) raw',
+                                linewidth=2.5,color='hotpink', alpha=0.8)    
+
+        # format figure
+        ax[1].set_title('{} nutrient load comparison'.format(wwtp),
+                fontsize=14,fontweight='bold')
+        ax[1].set_ylabel('DIN nutrient load [kg/day]',fontsize=12)
+        ax[1].legend(loc='best', fontsize=12)
+
+        ax[1].set_ylim([0,np.nanmax(was24_raw)*1.1])
+        ax[1].set_xlim([pd.to_datetime('1999-01-01'),pd.to_datetime('2020-12-31')])
+        ax[1].xaxis.set_major_locator(mdates.YearLocator())
+        ax[1].xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+        ax[1].tick_params(axis='x', labelrotation=30)
+        ax[1].grid(True,color='gainsboro',linewidth=1,linestyle='--',axis='both')
+
+        # show figure ---------------------------------------------------------------
+        plt.tight_layout()
+        plt.show()
