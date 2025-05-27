@@ -50,7 +50,7 @@ Figure 3 depicts the locations of WWTPs across the two datasets. They are proces
 - WWTPs in <span style="color:dodgerblue">blue</span> are present in both datasets, and they ARE integrated into LiveOcean. Their lat/lon data come from Mohamedali et al. (2020), but their discharge and nutrient concentrations come from Wasielewski et al. (2024)
 - WWTPs in <span style="color:goldenrod">yellow</span> are present ONLY in Wasielewski et al. (2024), and they ARE NOT integrated into LiveOcean.
 
-<p style="text-align:center;"><img src="figures/wwtp_locations.png" width="430"/><br></p><br>
+<p style="text-align:center;"><img src="figures/wwtp_locations.png" width="430"/><br>Fig 3. Locations of WWTPs across the datasets.</p><br>
 
 </details>
 
