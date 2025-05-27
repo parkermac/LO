@@ -50,7 +50,7 @@ Figure 3 depicts the locations of WWTPs across the two datasets. They are proces
 - WWTPs in <span style="color:dodgerblue">blue</span> are present in both datasets, and they ARE integrated into LiveOcean. Their lat/lon data come from Mohamedali et al. (2020), but their discharge and nutrient concentrations come from Wasielewski et al. (2024)
 - WWTPs in <span style="color:goldenrod">yellow</span> are present ONLY in Wasielewski et al. (2024), and they ARE NOT integrated into LiveOcean.
 
-**TO-DO:** Add figure of WWTP locations & the resulting loading profiles
+<p style="text-align:center;"><img src="figures/wwtp_locations.png" width="430"/><br></p><br>
 
 </details>
 
@@ -131,6 +131,7 @@ This script takes about 15 minutes to run on my local machine.
         - removed Oak Harbor STP (WA0020567-001), which stopped operating in 2010
         - removed Lake Stevens Sewer Disctric (WA0020893-thru2012) and later combined flows with the newer Lake Stevens WWTP
         <p style="text-align:center;"><img src="figures/lake_stevens_handling.png" width="430"/><br></p><br>
+
         - padded end of Port Gamble WWTP (WA0022292) with zeros, because it was [decommisioned in 2017](https://ecology.wa.gov/blog/june-2017/around-the-sound-ongoing-and-future-restoration-r#:~:text=Decommissioning%20of%20the%20Port%20Gamble,be%20finished%20by%20March%202018.)
 
 </details>
