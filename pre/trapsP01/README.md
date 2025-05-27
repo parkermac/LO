@@ -10,6 +10,8 @@ Two different datasets were combined in this Tiny River And Point Source (TRAPS)
 
 <details><summary><strong>Wastewater Treatment Plants (WWTPs)</strong></summary>
 
+</br>
+
 <details><summary>Mohamedali et al. (2020)</summary>
 
 [**Data source**](https://fortress.wa.gov/ecy/ezshare/EAP/SalishSea/SalishSeaModelBoundingScenarios.html)
