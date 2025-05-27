@@ -1,5 +1,6 @@
 """
-Script to plot and compare new WWTP data and my older climatologies.
+Script to plot, compare, and explore WWTP data from
+Mohamedali et al. (2020) and Wasielewski et al. (2024)
 """
 
 #################################################################################
@@ -37,7 +38,7 @@ print('\n')
 #                   Wasielewski et al., 2024 loading plots                      #
 #################################################################################
 
-plot_individual_WWTP_loads = False
+plot_individual_WWTP_loads = True
 plot_facility_type_load_comparison = False
 plot_hoodcanal_load_comparison = True
 
@@ -225,7 +226,7 @@ if plot_hoodcanal_load_comparison == True:
                 hoodcanal_wwtp_ID.append(psmeta_df.loc[psmeta_df['FAC_NAME']==wwtp, 'FAC_ID'].values[0])
 
         # get river data
-        riv_data = Ldir['data'] / trapsD / 'mohamedali_etal2020' / 'all_nonpoint_source_data.nc'
+        riv_data = Ldir['data'] / 'trapsD00' / 'all_nonpoint_source_data.nc'
         riv_ds = xr.open_dataset(riv_data)
         
         fig, ax = plt.subplots(2,1,gridspec_kw={'height_ratios': [3, 1]},figsize = (7,9))
@@ -368,11 +369,11 @@ wasielewski24_WWTP_df = psloads_df.loc[psloads_df['FAC_ID'].isin(WWTP_df['FAC_ID
 #                    Mohamedali et al., 2020 loading plots                      #
 #################################################################################
 
-plot_individual_WWTP_loads_mohamedali = False
-plot_facility_type_load_comparison_mohamedali = False
+plot_individual_WWTP_loads_mohamedali = True
+plot_facility_type_load_comparison_mohamedali = True
 
 # location of point source data to process
-pointsource_dir = Ldir['data'] / trapsD / 'mohamedali_etal2020'
+pointsource_dir = Ldir['data'] / 'trapsD00'
 pointsource_loads = pointsource_dir / 'all_point_source_data.nc'
 # get point source data
 psloads_ds = xr.open_dataset(pointsource_loads)
@@ -502,8 +503,8 @@ mohamedali2020_WWTP_ds = psloads_ds.sel(source=psloads_ds['name'].isin(WWTP_name
 #################################################################################
 
 compare_plant_locations = True
-largest_plants_analysis = False
-unique_plant_locations = False
+largest_plants_analysis = True
+unique_plant_locations = True
 
 # plot WWTP outfall locations on an interactive map ----------------------------------
 if compare_plant_locations == True:
@@ -704,6 +705,7 @@ if unique_plant_locations == True:
 
         # Original Mohamedali et al. (2020)
         # get sum of load from all sources
+        mohamedali2020_WWTP_ds['load [kg/d]'] = mohamedali2020_WWTP_ds['flow'] * (mohamedali2020_WWTP_ds['NO3'] + mohamedali2020_WWTP_ds['NH4']) * 14.01 * 60 * 60 * 24 / 1000 / 1000
         all_WWTP_loads = mohamedali2020_WWTP_ds['load [kg/d]'].sum(dim='source')
         # then, get the mean annual loading profile with monthly resolution (still, sum of all plants)
         currentLO = all_WWTP_loads.groupby('date.month').mean(dim='date')
