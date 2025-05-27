@@ -278,6 +278,8 @@ def make_varinfo_list():
     for line in f:
         if 'svn_repository:' in line:
             line2 = '#'+line
+        elif 'git_repository:' in line:
+            line2 = '#'+line
         else:
             line2 = line
         f2.write(line2)
