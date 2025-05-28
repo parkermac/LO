@@ -437,8 +437,10 @@ for i,FAC_ID in enumerate(was24_wwtp_IDs):
     if source_name == 'Everett Water Pollution Control Facility':
             if FAC_ID == 'WA0024490_Gardner':
                     moh20name = 'OF100'
+                    source_name = 'Gardner - Everett Water Pollution Control Facility'
             elif FAC_ID == 'WA0024490_Snohomish':
                     moh20name = 'Everett Snohomish'
+                    source_name = 'Snohomish - Everett Water Pollution Control Facility'
     elif source_name == 'OAK HARBOR STP':
             if FAC_ID == 'WA0020567-002':
                     moh20name = 'Oak Harbor Lagoon'

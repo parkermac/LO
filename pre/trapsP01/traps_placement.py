@@ -61,6 +61,8 @@ if argsd['gridname'] == None:
 
 Ldir = Lfun.Lstart(gridname=args.gridname)
 
+plt.close('all')
+
 #################################################################################
 #                     Function to place TRAPS on grid                           #
 #################################################################################
@@ -72,24 +74,35 @@ def traps_placement(source_type,Ldir):
     in the LiveOcean grid. 
 
     Input:
-        source_type:    'riv' or 'wwtp'
+        source_type:    'moh20_triv' or 'moh20_wwtp' or 'was24_wwtp'
 
     Output:
-        wwtp_info.csv or triv_info.csv saved in LO_data/grids/[gridname]
+        moh20_triv_info.csv or moh20_wwtp_info.csv or was24_wwtp_info.csv saved in LO_data/grids/[gridname]
         Figures with source locations saved in LO_data/grids/[gridname]
     '''
 
+# traps_placement('moh20_triv',Ldir)
+# traps_placement('moh20_wwtp',Ldir)
+# traps_placement('was24_wwtp',Ldir)
+
     # open data if dealing with either river or wwtp
-    if source_type == 'wwtp':
-        output_fn = 'wwtp_info.csv'
+    if source_type == 'was24_wwtp':
+        output_fn = 'was24_wwtp_info.csv'
         # read data
-        wwtp_fn = Ldir['data'] / trapsD / 'all_point_source_data.nc'
-        source_ds = xr.open_dataset(wwtp_fn)
-    elif source_type == 'riv':
-        output_fn = 'triv_info.csv'
+        was24_wwtp_fn = Ldir['data'] / trapsD / 'processed_data' / 'wwtp_data_wasielewski_etal_2024.nc'
+        source_ds = xr.open_dataset(was24_wwtp_fn)
+    elif source_type == 'moh20_wwtp':
+        output_fn = 'moh20_wwtp_info.csv'
         # read data
-        riv_fn = Ldir['data'] / trapsD / 'all_nonpoint_source_data.nc'
-        source_ds = xr.open_dataset(riv_fn)
+        moh20_wwtp_fn = Ldir['data'] / trapsD / 'processed_data' / 'wwtp_data_mohamedali_etal_2020.nc'
+        source_ds = xr.open_dataset(moh20_wwtp_fn)
+    elif source_type == 'moh20_triv':
+        output_fn = 'moh20_triv_info.csv'
+        # read data
+        moh20_riv_fn = Ldir['data'] / trapsD / 'processed_data' / 'river_data_mohamedali_etal_2020.nc'
+        source_ds = xr.open_dataset(moh20_riv_fn)
+    else:
+        raise Exception('Incorrect inputs')
 
     # get the grid data
     grid_fn = Ldir['grid'] / 'grid.nc'
@@ -123,7 +136,7 @@ def traps_placement(source_type,Ldir):
         y = source_ds.lat[source_ds.name == source].values[0]
         
         # place tiny rivers
-        if source_type == 'riv':
+        if source_type == 'moh20_triv':
 
             # check if river already in LiveOcean
             SSM_repeats = repeatrivs_df['SSM_rname'] # get names of repeat rivers
@@ -195,7 +208,7 @@ def traps_placement(source_type,Ldir):
 #                  Plot tiny rivers and pre-existing LO rivers                  #
 #################################################################################
 
-        if source_type == 'riv':
+        if source_type == 'moh20_triv':
             lon_u = ds.lon_u.values
             lat_u = ds.lat_u.values
             lon_v = ds.lon_v.values
@@ -326,7 +339,7 @@ def traps_placement(source_type,Ldir):
 #################################################################################
         
         # draw tracks for point sources
-        if source_type == 'wwtp':
+        if source_type == 'moh20_wwtp' or source_type == 'was24_wwtp':
 
             # get new source locations
             ps_lon = []
@@ -383,5 +396,6 @@ def traps_placement(source_type,Ldir):
 #################################################################################
 
 # Run placement algorithm
-traps_placement('riv',Ldir)
-traps_placement('wwtp',Ldir)
+traps_placement('moh20_triv',Ldir)
+traps_placement('moh20_wwtp',Ldir)
+traps_placement('was24_wwtp',Ldir)
