@@ -544,8 +544,8 @@ for i,fn in enumerate(moh20_river_fns):
 
 # save dataset as .nc file in LO_data
 out_fn = '../../../LO_data/' + trapsD + '/processed_data/river_data_mohamedali_etal_2020.nc'
-moh20_wwtp_ds.to_netcdf(out_fn)
-moh20_wwtp_ds.close()
+moh20_riv_ds.to_netcdf(out_fn)
+moh20_riv_ds.close()
 print('Mohamedali et al. (2020) rivers complete --------------------------------------------\n')
 
 # print(moh20_wwtp_ds)

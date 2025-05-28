@@ -1,22 +1,21 @@
 """
-Make climatologies for nonpoint sources.
+Make climatologies for Mohamedali et al. (2020) tiny rivers.
 Discharge rate, temperature, and biogeochemisty variables.
 
-Based on Ecology's timeseries, using data stored in 
-LO_data/[trapsD##]/all_nonpoint_source_data.nc
-(To change the Ecology data version, modify traps_data_ver.csv)
+Based on Mohamedali et al. (2020) timeseries, using data stored in 
+LO_data/trapsD01/processed_data/river_data_mohamedali_etal_2020.nc
 
         To run, from ipython:
-        run make_climatology_tinyrivs.py
+        run make_climatology_moh20_tinyrivs.py
 
 To create individual climatology figures, run from ipython with:
-run make_climatology_tinyrivs.py -test True
+run make_climatology_moh20_tinyrivs.py -test True
 
 Figures saved in:
-LO_output/pre/trapsP##/tiny_rivers/[ctag]/Data_historical/climatology_plots
+LO_output/pre/trapsP01/tiny_rivers/[ctag]/Data_historical/climatology_plots
 
 Note that running with -test True adds
-several minutes to run time. (~ 6 min)
+a couple minutes to run time. (~ 2 min)
 """
 
 #################################################################################
@@ -63,15 +62,15 @@ path = os.getcwd()
 trapsP_vers = os.path.basename(path)
 
 # location to save file
-clim_dir = Ldir['LOo'] / 'pre' / trapsP_vers / 'tiny_rivers' / ctag / 'Data_historical'
+clim_dir = Ldir['LOo'] / 'pre' / trapsP_vers / 'moh20_tinyrivers' / ctag / 'Data_historical'
 Lfun.make_dir(clim_dir)
 
 # get flow and loading data
-triv_fn = Ldir['data'] / trapsD / 'all_nonpoint_source_data.nc'
-ecology_data_ds = xr.open_dataset(triv_fn)
+moh20_triv_fn = Ldir['data'] / trapsD / 'processed_data'/ 'river_data_mohamedali_etal_2020.nc'
+moh20_river_data_ds = xr.open_dataset(moh20_triv_fn)
 
 # get triv names
-trivnames_all = ecology_data_ds['name'].values
+trivnames_all = moh20_river_data_ds['name'].values
 
 # Remove pre-existing LO rivers
 # read overlapping rivers
@@ -113,8 +112,13 @@ TIC_clim_df  = pd.DataFrame()
 Talk_clim_df = pd.DataFrame()
 
 # variable names
-vns = ['DO(mmol/m3)','Flow(m3/s)','Temp(C)','NO3(mmol/m3)',
-       'NH4(mmol/m3)','TIC(mmol/m3)','Talk(meq/m3)']
+# IMPORTANT: all variables must be in the same order in the following lests
+# TO-DO: turn this into a dictionay so order will not matter
+print('TO-DO: MAKE A DICTIONARY OF VARIABLE NAMES (including clims later in code)')
+vns = ['Flow(m3/s)','NO3(mmol/m3)','NH4(mmol/m3)',
+       'TIC(mmol/m3)','Talk(meq/m3)','DO(mmol/m3)','Temp(C)']
+pickle_names = ['flow', 'NO3', 'NH4',
+                 'TIC',  'Talk', 'DO', 'temp']
 letters = ['(a)','(b)','(c)','(d)','(e)','(f)','(g)']
 
 # create one-year date range for plotting
@@ -126,14 +130,15 @@ shifted = ['Kitsap NE', 'Kitsap_Hood', 'Lynch Cove',
            'NW Hood', 'Port Gamble', 'Tahuya']
 keys = ['flow', 'temp', 'NO3', 'NH4', 'TIC', 'Talk', 'DO']
 # create a mask for the years 2012-2014
-mask_2012_2014 = (ecology_data_ds['date'] > np.datetime64('2012-07-31')) & (ecology_data_ds['date.year'] < 2015)
+mask_2012_2014 = (moh20_river_data_ds['date'] > np.datetime64('2012-07-31')) & (moh20_river_data_ds['date.year'] < 2015)
+
 # replace the 2012-2014 flow data with nan for the shifted years
 for riv in shifted:
     # get river index
-    riv_index = int(ecology_data_ds.where(ecology_data_ds['name'] == riv, drop=True)['source'])
+    riv_index = int(moh20_river_data_ds.where(moh20_river_data_ds['name'] == riv, drop=True)['source'])
     # replace 2012-2014 flow data with nans
     for key in keys:
-        ecology_data_ds[key].loc[dict(source=riv_index, date=mask_2012_2014)] = np.nan
+        moh20_river_data_ds[key].loc[dict(source=riv_index, date=mask_2012_2014)] = np.nan
 
 #################################################################################
 #                          Calculate climatologies                              #
@@ -145,7 +150,7 @@ print('Calculating tiny river climatologies...')
 for i,rname in enumerate(trivnames):
 
     # turn dataset information for this wwtp into a dataframe
-    triv_df, triv_avgs_df, triv_sds_df = traps_helper.ds_to_avgdf(rname,ecology_data_ds)
+    triv_df, triv_avgs_df, triv_sds_df = traps_helper.ds_to_avgdf(rname,moh20_river_data_ds)
 
 #################################################################################
 #                            Create climatologies                               #
@@ -191,8 +196,8 @@ clim_min = pd.DataFrame()
 clim_sds = pd.DataFrame()
 
 # climatology dfs
-clims = [DO_clim_df, flow_clim_df, temp_clim_df, NO3_clim_df,
-         NH4_clim_df, TIC_clim_df, Talk_clim_df]
+clims = [flow_clim_df, NO3_clim_df, NH4_clim_df,
+        TIC_clim_df, Talk_clim_df, DO_clim_df, temp_clim_df]
 
 for i,vn in enumerate(vns):
     # average values of all nonpoint sources
@@ -304,17 +309,25 @@ if args.testing == True:
     fig_dir = clim_dir / 'climatology_plots'
     Lfun.make_dir(fig_dir)
 
-    for i,rname in enumerate(trivnames):
+    for j,rname in enumerate(trivnames):
 
-        print('{}/{}: {}'.format(i+1,len(trivnames),rname))
+        print('{}/{}: {}'.format(j+1,len(trivnames),rname))
 
-        # turn dataset information for this wwtp into a dataframe
-        triv_df, triv_avgs_df, triv_sds_df = traps_helper.ds_to_avgdf(rname,ecology_data_ds)
+        # turn dataset information for this triv into a dataframe
+        triv_df, triv_avgs_df, triv_sds_df = traps_helper.ds_to_avgdf(rname,moh20_river_data_ds)
 
         # Plot climatologies for each source
-        fig, axes = plt.subplots(4,2, figsize=(16, 9), sharex=True)
+        fig, axes = plt.subplots(7,1, figsize=(10, 9), sharex=True)
         ax = axes.ravel()
-        for j,vn in enumerate(vns):
+
+        # loop through variables
+        for i,vn in enumerate(vns):
+
+            # format axis
+            ax[i].set_facecolor('#EEEEEE')
+            ax[i].grid(True,color='w',linewidth=1,linestyle='-',axis='both')
+            for border in ['top','right','bottom','left']:
+                ax[i].spines[border].set_visible(False)
 
             # convert DO from mmol/m3 to mg/L for plotting
             if vn == 'DO(mmol/m3)':
@@ -324,41 +337,56 @@ if args.testing == True:
                 scale = 1
                 var = vn
 
-            i = j+1
             # label subplot
-            ax[i].set_title(var,fontsize=14)
-            # Plot individual years
-            for yr in range(1999,2017):
-                triv_yr_df = triv_df.loc[triv_df['year'] == yr]
-                values_to_plot = triv_yr_df[vn].values*scale
-                values_to_plot = values_to_plot.tolist()
-                # skip leap years
-                if np.mod(yr,4) != 0:
-                    # pad Feb 29th with nan
-                    values_to_plot = values_to_plot[0:60] + [np.nan] + values_to_plot[60::]
-                if yr == 2017:
-                    yrday_17 = pd.date_range(start ='1/1/2020',
-                                            end ='8/02/2020', freq ='D') # don't have full 2017 dataset
-                    ax[i].plot(yrday_17,values_to_plot,alpha=0.5, label=yr, linewidth=1)
-                else:
-                    ax[i].plot(yrday,values_to_plot,alpha=0.5, label=yr, linewidth=1)
-            # Plot climatology
-            ax[i].plot(yrday,clims[j][rname].values*scale, label='climatology', color='black', linewidth=1.5)
+            ax[i].text(0.02,0.8,var,fontsize=12,fontweight='bold',
+                       transform=ax[i].transAxes)
+
+            # Plot whole time series
+            values_to_plot = triv_df[vn].values*scale # scale variable properly
+            time = triv_df['Date'].values
+            ax[i].plot(time,values_to_plot, color='deeppink', label='Raw data',
+                       linewidth=2, alpha=0.5)
+
+            # Plot average
+            leapyear_clim = clims[i][rname].values*scale #triv_avgs_df[vn].values*scale
+            # remove leap day to get non-leap year climatology (365 days)
+            feb29_index = 59
+            nonleapyear_clim = np.delete(leapyear_clim, feb29_index)
+            # generate climatology for the entire period
+            # correctly alternate leap and non-leap years to create artificial 2005-2020 time series
+            leap = leapyear_clim   # renamed for convenience
+            non = nonleapyear_clim # renamed for convenience
+            clim_1999to2017 = np.concatenate((
+            #   1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017
+                non ,leap,non ,non ,non ,leap,non ,non ,non ,leap,non ,non ,non ,leap,non ,non ,non ,leap,non[0:212]))
+            # plot
+            ax[i].plot(time,clim_1999to2017, label='climatology',
+                        color='black', linewidth=1)
+            
+            # set y-axis
+            if i > 0 and (rname in weird_biogeochem or rname in weird_DO or rname in weird_DO_and_NH4):
+                maxval = np.nanmax(leapyear_clim)
+            else:
+                maxval = 1.3*np.nanmax(values_to_plot)
+            ax[i].set_ylim([0,maxval])
+
+            # add legend
+            if i == 0:
+                ax[i].legend(loc='upper right',ncol=2,fontsize=12)
+
             # fontsize of tick labels
             ax[i].tick_params(axis='both', which='major', labelsize=12)
             ax[i].tick_params(axis='x', which='major', rotation=30)
-            ax[i].set_xlim([datetime.date(2020, 1, 1), datetime.date(2020, 12, 31)])
-            # create legend
-            if i ==7:
-                handles, labels = ax[7].get_legend_handles_labels()
-                ax[0].legend(handles, labels, loc='center', ncol = 4,fontsize=14)
-                ax[0].axis('off')
+            ax[i].set_xlim([datetime.date(1999, 1, 1), datetime.date(2017, 12, 31)])
+
             # Define the date format
-            if i >= 6:
-                date_form = mdates.DateFormatter("%b")
-                ax[i].xaxis.set_major_formatter(date_form)
+            ax[1].xaxis.set_major_locator(mdates.YearLocator())
+            ax[1].xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
+
         # plot title is name of source
-        plt.suptitle(rname,fontsize=18)
+        plt.suptitle(rname,fontsize=14)
+        plt.subplots_adjust(top=0.95)
+
         # Save figure
         figname = rname + '.png'
         save_path = clim_dir / 'climatology_plots' / figname
@@ -370,8 +398,6 @@ if args.testing == True:
 #################################################################################
 #                             Save climatologies                                #
 #################################################################################
-
-pickle_names = ['DO', 'flow', 'temp', 'NO3', 'NH4', 'TIC', 'Talk']
 
 # check for missing values:
 for i,clim in enumerate(clims):

@@ -166,11 +166,11 @@ for i,wwtp in enumerate(moh20_data['name'].values):
         plt.tight_layout()
         plt.show()
 
-        # plt.close()
+        plt.close()
 
 
 # loop through all WWTPs in Wasielewski et al. (2024):
-for i,wwtp in enumerate(was24_data['name'].values):
+for i,wwtp_ID in enumerate(was24_data['ID'].values):
         
         # initialize figure
         fig, ax = plt.subplots(1,2,gridspec_kw={'width_ratios': [2, 3]},figsize = (14,5))
@@ -193,14 +193,15 @@ for i,wwtp in enumerate(was24_data['name'].values):
         ax[0].pcolormesh(plon, plat, zm, vmin=-20, vmax=0, cmap=plt.get_cmap(cmocean.cm.ice))
 
         # plot wwtp location
-        lat = was24_data.sel(source=was24_data['name']==wwtp)['lat']
-        lon = was24_data.sel(source=was24_data['name']==wwtp)['lon']
+        lat = was24_data.sel(source=was24_data['ID']==wwtp_ID)['lat']
+        lon = was24_data.sel(source=was24_data['ID']==wwtp_ID)['lon']
         ax[0].scatter(lon,lat,color='navy',s=100,marker='*',zorder=3)
 
         # format figure
         pfun.dar(ax[0])
         pfun.add_coast(ax[0],color='paleturquoise')
-        ax[0].set_title('{} location'.format(wwtp),fontsize=14)
+        wwtp_name = was24_data.sel(source=was24_data['ID']==wwtp_ID)['name'].values[0]
+        ax[0].set_title('{} location'.format(wwtp_name),fontsize=14)
         ax[0].set_ylim([46.8,49.4])
         ax[0].set_xlim([-125,-121.5])
 
@@ -208,8 +209,8 @@ for i,wwtp in enumerate(was24_data['name'].values):
 
         # Subsample to one value per month
         was24_data['load [kg/d]'] = was24_data['flow'] * (was24_data['NO3'] + was24_data['NH4']) * 14.01 * 60 * 60 * 24 / 1000 / 1000
-        was24_raw = was24_data.sel(source=(was24_data['name']==
-                                wwtp))['load [kg/d]'].resample(date='1MS').first()[0]
+        was24_raw = was24_data.sel(source=(was24_data['ID']==
+                                wwtp_ID))['load [kg/d]'].resample(date='1MS').first()[0]
 
         # get time array
         t_new = pd.date_range(start='2005-01-01', end='2020-12-31', freq='MS').to_list()
@@ -222,7 +223,7 @@ for i,wwtp in enumerate(was24_data['name'].values):
                                 linewidth=2.5,color='hotpink', alpha=0.8)    
 
         # format figure
-        ax[1].set_title('{} nutrient load comparison'.format(wwtp),
+        ax[1].set_title('{} nutrient load comparison'.format(wwtp_name),
                 fontsize=14,fontweight='bold')
         ax[1].set_ylabel('DIN nutrient load [kg/day]',fontsize=12)
         ax[1].legend(loc='best', fontsize=12)
@@ -237,3 +238,6 @@ for i,wwtp in enumerate(was24_data['name'].values):
         # show figure ---------------------------------------------------------------
         plt.tight_layout()
         plt.show()
+        plt.close()
+
+print('TO-DO: save test figures!!')
