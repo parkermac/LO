@@ -57,10 +57,10 @@ def start_ds(date,source,numdates,Nsources,riv_or_wwtp,data_source):
         raise Exception('data_source must be either `moh20` or `was24`')
 
     ds = xr.Dataset(data_vars=dict(
-        ID   =(['source'], ['placeholder placeholder placeholder']*Nsources),
+        ID   =(['source'], ['placeholder placeholder placeholder placeholder placeholder']*Nsources),
         lon  =(['source'], np.ones((Nsources,))),
         lat  =(['source'], np.ones((Nsources,))),
-        name =(['source'], ['placeholder placeholder placeholder']*Nsources),
+        name =(['source'], ['placeholder placeholder placeholder placeholder placeholder']*Nsources),
         flow =(['source', 'date'], np.zeros((Nsources, numdates))),
         temp =(['source', 'date'], np.zeros((Nsources, numdates))),
         NO3  =(['source', 'date'], np.zeros((Nsources, numdates))),
