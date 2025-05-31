@@ -260,14 +260,7 @@ def make_varinfo_list():
         
     # specify which varinfo.yaml to use
     Ldir = Lfun.Lstart()
-    
-    # ORIGINAL
-    # fn = Ldir['parent'] / 'LO_roms_source_alt' / 'varinfo' / 'varinfo.yaml'
-    # # parse into a list of dicts
-    # with open(fn,'r') as f:
-    #     yaml_dict = yaml.safe_load(f)
-    # short_list = yaml_dict['metadata'] # a list of dicts, one per item
-    
+        
     # NEW
     fn = Ldir['parent'] / 'LO_roms_source_git' / 'ROMS' / 'External' / 'varinfo.yaml'
     out_dir = Ldir['data'] / 'varinfo'
