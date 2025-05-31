@@ -104,6 +104,13 @@ def get_sta_dict(job_name):
             'FJL4':(-123.00167, 48.4686111), # Fourth of July L4.0m
             'FJL6':( -123.00111, 48.4683333), # Fourth of July L6.60m
         }
+
+    elif job_name == 'willapa0':
+        # Info from Andy Suhrbier <suhrbier@pacshell.org> for 2017 Willapa Moorings
+        sta_dict = {
+            'Tokeland': (-123.96797728985608, 46.707252252710354),
+            'Nahcotta': (-124.03074795328776, 46.500242867945865),
+        }
         
     else:
         print('Unsupported job name!')
