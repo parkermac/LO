@@ -33,7 +33,7 @@ def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD,ctag)
     if enable == True:
 
         # define directory for tiny river climatology
-        triv_dir = Ldir['LOo'] / 'pre' / trapsP / 'tiny_rivers' / ctag
+        triv_dir = Ldir['LOo'] / 'pre' / trapsP / 'moh20_tinyrivers' / ctag
         traps_type = 'triv'
 
         # get climatological data
@@ -44,9 +44,9 @@ def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD,ctag)
             Ldir[clim_fn] = triv_dir / 'Data_historical' / ('CLIM_'+clim_vns[i]+'.p')
 
         # first, make sure file exists
-        gtri_fn = Ldir['grid'] / 'triv_info.csv'
+        gtri_fn = Ldir['grid'] / 'moh20_triv_info.csv'
         if not os.path.isfile(gtri_fn):
-            print('***Missing triv_info.csv file. Please run traps_placement')
+            print('***Missing moh20_triv_info.csv file. Please run traps_placement')
             sys.exit()
         # then get the list of tiny rivers and indices for this grid
         gtri_df = pd.read_csv(gtri_fn, index_col='rname')

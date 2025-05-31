@@ -6,8 +6,7 @@ By default, point sources and tiny rivers are enabled.
 To turn them off, set lines 41 and 42 to be = False
 
 Test in ipython:
-run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -tP trapsP00 -f trapsF00
-run make_forcing_main.py -g sq0 -r backfill -d 2019.07.04 -tP trapsP00 -f trapsF00
+run make_forcing_main.py -g cas7 -r backfill -d 2019.07.10 -tP trapsP01 -f trapsN00
 
 where tP is the traps climatology folder
 and f is the forcing name (current folder)
@@ -31,9 +30,9 @@ import pandas as pd
 from pathlib import Path
 from importlib import reload
 import rivfun
-import make_LOriv_forcing as LOriv
-import make_triv_forcing as triv
-import make_wwtp_forcing as wwtp
+import make_moh20_LOriv_forcing as LOriv
+import make_moh20_triv_forcing as triv
+import make_moh20_wwtp_forcing as wwtp
 
 reload(LOriv)
 reload(triv)
@@ -71,7 +70,7 @@ ctag = 'lo_base'
 
 # get correct version of Ecology data (based on what is saved in LO/pre/trapsP##)
 this_dir = Path(__file__).absolute().parent.parent.parent.parent
-with open(this_dir / 'LO' / 'pre' / trapsP / 'traps_data_ver.csv','r') as f:
+with open(this_dir / 'LO_forked' / 'pre' / trapsP / 'traps_data_ver.csv','r') as f:
     for ver in f:
         trapsD = ver
 

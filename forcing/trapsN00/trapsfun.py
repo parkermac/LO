@@ -63,7 +63,7 @@ def get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD):
         qtbio_df.loc[:, 'NO3']  = CNO3_df.loc[yd_ind,rn].values
         qtbio_df.loc[:, 'TAlk'] = CTalk_df.loc[yd_ind,rn].values
         qtbio_df.loc[:, 'TIC']  = CTIC_df.loc[yd_ind,rn].values
-        sout += 'filled from climatology (Ecology dataset)'
+        sout += 'filled from climatology (Mohamedali et al., 2020 dataset)'
           
         # save in the dict
         qtbio_df_dict[rn] = qtbio_df

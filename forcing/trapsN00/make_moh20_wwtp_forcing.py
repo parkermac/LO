@@ -36,13 +36,8 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
     # only get data if WWTPs are enabled
     if enable == True:
 
-        # Read WWTP open/close dates
-        open_close_fn = Ldir['data'] / trapsD / 'wwtp_open_close_dates.xlsx'
-        open_close_df = pd.read_excel(open_close_fn)
-        open_closed_wwtps = open_close_df['name'].tolist()
-
         # define directory for point_source climatology
-        wwtp_dir = Ldir['LOo'] / 'pre' / trapsP / 'point_sources' /ctag
+        wwtp_dir = Ldir['LOo'] / 'pre' / trapsP / 'moh20_wwtps' /ctag
         traps_type = 'wwtp'  
 
         # get climatological data
@@ -53,18 +48,15 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
             Ldir[clim_fn] = wwtp_dir / 'Data_historical' / ('CLIM_'+clim_vns[i]+'.p')
 
         # first, make sure file exists
-        gwi_fn = Ldir['grid'] / 'wwtp_info.csv'
+        gwi_fn = Ldir['grid'] / 'moh20_wwtp_info.csv'
         if not os.path.isfile(gwi_fn):
-            print('***Missing wwtp_info.csv file. Please run traps_placement')
+            print('***Missing moh20_wwtp_info.csv file. Please run traps_placement')
             sys.exit()
         # then get the list of point sources and indices for this grid
         gwi_df = pd.read_csv(gwi_fn, index_col='rname')
         # if testing, only look at a few sources
         if Ldir['testing']:
-            # gwi_df = gwi_df.loc[['Brightwater', 'Kimberly_Clark', 'Lake Stevens 001',
-            #                      'Lake Stevens 002', 'Oak Harbor RBC', 'OF100'],:]
-            gwi_df = gwi_df.loc[['West Point', 'Birch Bay', 'Lake Stevens 001',
-                                 'Lake Stevens 002', 'Tacoma Central', 'US Oil & Refining'],:]
+            gwi_df = gwi_df.loc[['LOTT', 'Iona'],:]
         
 #################################################################################
 #       Combine name of sources that are located at the same grid cell          #
@@ -182,22 +174,8 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
             else:
                 qtbio_wwtp_df = qtbio_wwtp_df_dict[rn]
                 flow = qtbio_wwtp_df['flow'].values
-            # set flowrate to zero for years that WWTP was closed!
-            opendates = np.ones(NT)
-            if rn in open_closed_wwtps:
-                # check wheter WWTP opened or closed
-                open_or_close = open_close_df.loc[open_close_df['name'] == rn, 'open/close'].item()
-                change_year = open_close_df.loc[open_close_df['name'] == rn, 'year first opened/closed'].item()
-                # loop through forcing years
-                for i,year in enumerate(years):
-                    # If WWTP opened on given year, set values to zero before that year
-                    if open_or_close == 'open' and year < change_year:
-                        opendates[i] = 0
-                    # If WWTP closed on a given year, set values to zero for that year and year afterwards
-                    elif open_or_close == 'close' and year >= change_year:
-                        opendates[i] = 0
             # update flowrate with open/close date information
-            Q_mat[:,rr] = flow * opendates
+            Q_mat[:,rr] = flow
         # add metadata
         wwtp_ds[vn] = (dims, Q_mat)
         wwtp_ds[vn].attrs['long_name'] = vinfo['long_name']

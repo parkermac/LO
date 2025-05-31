@@ -39,7 +39,7 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD,ctag):
     Ldir['Ctemp_fn'] = ri_dir / 'Data_historical' / ('CLIM_temp.p')
 
     # define directory for pre-existing LO river bio climatology
-    LObio_dir = Ldir['LOo'] / 'pre' / trapsP / 'LO_rivbio' / ctag
+    LObio_dir = Ldir['LOo'] / 'pre' / trapsP / 'moh20_LOrivbio' / ctag
     traps_type = 'LOriv'
 
     # get climatological data
@@ -49,9 +49,9 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD,ctag):
     for i, clim_fn in enumerate(clim_fns):
         Ldir[clim_fn] = LObio_dir / 'Data_historical' / ('CLIM_'+clim_vns[i]+'.p')
 
-    # get names of rivers for which Ecology has biogeochem data
+    # get names of rivers for which Mohamedali et al. (2020) has biogeochem data
     # these are the names the LiveOcean calls them.
-    # Later, they will be converted to the name Ecology/SSM uses
+    # Later, they will be converted to the name Mohamedali et al. (2020)/SSM uses
     repeatrivs_fn = Ldir['data'] / trapsD / 'LiveOcean_SSM_rivers.xlsx'
     repeatrivs_df = pd.read_excel(repeatrivs_fn)
     LObio_names_all = list(repeatrivs_df.loc[repeatrivs_df['in_both'] == 1, 'LO_rname'])
@@ -79,7 +79,7 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD,ctag):
 
     # get the flow and temperature data for these days
     qt_df_dict = rivfun.get_qt(gri_df, ri_df, dt_ind, yd_ind, Ldir, dt1, days)
-    # get the biology for LO pre-existing rivers for which Ecology has data
+    # get the biology for LO pre-existing rivers for which Mohamedali et al. (2020) has data
     LObio_df_dict = trapsfun.get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD)
 
     # Add time coordinate
@@ -197,9 +197,9 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD,ctag):
         dims = (vinfo['time'],) + ('s_rho', 'river')
         B_mat = np.nan * np.zeros((NT, N, NRIV))
         for rr,rn in enumerate(gri_df.index):
-            # Add biogeochem climatology for rivers for which Ecology have data
+            # Add biogeochem climatology for rivers for which Mohamedali et al. (2020) have data
             if rn in LObio_names and bvn in ['NO3', 'NH4', 'TIC', 'TAlk', 'Oxyg']:
-                # get corresponding Ecology/SSM river name
+                # get corresponding Mohamedali et al. (2020)/SSM river name
                 rn_SSM = trapsfun.LO2SSM_name(rn, trapsD)
                 # get the biogeochem values from climatology
                 bio_LOriv_df = LObio_df_dict[rn_SSM]
@@ -209,7 +209,7 @@ def make_forcing(N,NT,dt_ind,yd_ind,ot_vec,dt1,days,Ldir,trapsP,trapsD,ctag):
                 # doi=10.1029%2F2019JC015766&file=jgrc24099-sup-0001-Text_SI-S01.pdf
                 if rn == 'fraser' and bvn == 'NH4':
                     bvals = 4.43 * np.ones(NT) # uM = mmol/m3
-            # If Ecology doesn't have data, use default LO bio
+            # If Mohamedali et al. (2020) doesn't have data, use default LO bio
             else:
                 bvals = rivfun.get_bio_vec(bvn, rn, yd_ind)
             for nn in range(N):
