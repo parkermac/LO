@@ -929,7 +929,7 @@ def P_ths(in_dict):
 def P_debug(in_dict):
     # Focused on debugging
     vn_list = ['salt', 'temp','u', 'v', 'zeta']
-    do_wetdry = False
+    do_wetdry = True
     
     # START
     fs = 10
@@ -964,13 +964,29 @@ def P_debug(in_dict):
             mr = ds.mask_rho.values
             v[mr==0] = np.nan
             h[mr==0] = np.nan
-            v = v + h
-            vn = 'depth'
-            vmin = 2
-            vmax = 4
+            if False:
+                v = v + h
+                vn = 'depth'
+                vmin = 2
+                vmax = 4
+            else:
+                vmin = -4
+                vmax = -3
             cmap='RdYlGn'
         else:
             v = ds[vn][0, -1,:,:].values
+        # apply wetdry mask
+        if do_wetdry:
+            if vn == 'u':
+                m = ds.wetdry_mask_u.to_numpy().squeeze()
+                v[m==0] = np.nan
+            elif vn == 'v':
+                m = ds.wetdry_mask_v.to_numpy().squeeze()
+                v[m==0] = np.nan
+            else:
+                m = ds.wetdry_mask_rho.to_numpy().squeeze()
+                v[m==0] = np.nan
+
         ax = fig.add_subplot(1, len(vn_list), ii)
         ax.set_xticks([])
         ax.set_yticks([])
