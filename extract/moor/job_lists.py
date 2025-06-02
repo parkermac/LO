@@ -111,6 +111,12 @@ def get_sta_dict(job_name):
             'Tokeland': (-123.96797728985608, 46.707252252710354),
             'Nahcotta': (-124.03074795328776, 46.500242867945865),
         }
+
+    elif job_name == 'willapa1':
+        # Info from Andy Suhrbier <suhrbier@pacshell.org> for 2017 Willapa Moorings
+        sta_dict = {
+            'BayCenter': (-123.95239473341415, 46.629030151420984),
+        }
         
     else:
         print('Unsupported job name!')
