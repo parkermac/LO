@@ -51,7 +51,8 @@ if G['mask_rho'][iy,ix] == 0:
     print('ERROR: point on land mask ' + out_fn.name)
     sys.exit()
     
-v_list = 'AKs,salt,temp,h'
+v_list = 'salt,temp,h'
+#v_list = 'AKs,salt,temp,h'
 if npzd == 'new':
     v_list += ',phytoplankton,chlorophyll,zooplankton,SdetritusN,LdetritusN,oxygen,alkalinity,TIC,NO3,NH4'
 elif npzd == 'old':
