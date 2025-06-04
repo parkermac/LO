@@ -73,6 +73,7 @@ def get_cast(out_fn, fn, lon, lat, npzd):
         
 def get_his_fn_from_dt(Ldir, dt):
     # This creates the Path of a ROMS file from its datetime
+    date_string = dt.strftime(Ldir['ds_fmt'])
     if Ldir['list_type'] == 'hourly':
         if dt.hour == 0:
             # perfect restart does not write the 0001 file
