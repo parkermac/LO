@@ -42,13 +42,14 @@ for year in year_list:
         Lfun.make_dir(out_dir, clean=True)
 
     fn_dict = {
-        'Tokeland':'Bay Center 2017share.xlsx', # is this correct?
+        'BayCenter':'Bay Center 2017share.xlsx', # is this correct?
         'Nahcotta':'Nahcotta 2017share.xlsx',
     }
 
     sta_dict = {
         'Tokeland': (-123.96797728985608, 46.707252252710354),
         'Nahcotta': (-124.03074795328776, 46.500242867945865),
+        'BayCenter': (-123.95239473341415, 46.629030151420984),
     }
 
     if False:
@@ -77,7 +78,7 @@ for year in year_list:
         # # Convert to UTC
         # tiu = til.tz_convert('UTC')
 
-        if sta == 'Tokeland':
+        if sta == 'BayCenter':
             ti = pd.DatetimeIndex(a['Date'])
             SP = a['S Corr'].to_numpy()
             IT = a['Temp C'].to_numpy()
