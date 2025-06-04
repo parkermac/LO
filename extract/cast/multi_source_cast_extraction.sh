@@ -13,6 +13,7 @@
 # 2. roms out number
 
 # for year in 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023
+list_type=average
 for year in 2017
 do
 
@@ -20,14 +21,14 @@ do
     # for source in nceiCoastal LineP nceiPNW WOD
     for source in dfo1 ecology_nc nceiSalish nceiCoastal LineP nceiPNW WOD
     do
-    python ./extract_casts_fast.py -gtx $1 -ro $2 -source $source -otype $otype -year $year > ./$1"_"$source"_"$otype"_"$year.log
+    python ./extract_casts_fast.py -gtx $1 -ro $2 -lt $list_type -source $source -otype $otype -year $year > ./$1"_"$source"_"$otype"_"$year.log
     done
 
     otype=ctd
     # for source in LineP NHL
     for source in dfo1 ecology_nc LineP NHL ocnms_ctd
     do
-    python ./extract_casts_fast.py -gtx $1 -ro $2 -source $source -otype $otype -year $year > ./$1"_"$source"_"$otype"_"$year.log
+    python ./extract_casts_fast.py -gtx $1 -ro $2 -lt $list_type -source $source -otype $otype -year $year > ./$1"_"$source"_"$otype"_"$year.log
     done
 
 done
