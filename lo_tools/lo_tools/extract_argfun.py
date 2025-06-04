@@ -14,6 +14,7 @@ def intro():
     # select time period and frequency
     parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
     parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
+    parser.add_argument('-lt', '--list_type', type=str, default='hourly') # list type: hourly, lowpass, average, daily
     parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
     parser.add_argument('-Nproc', type=int, default=10) # number of subprocesses to use
     # arguments used by extract/cast

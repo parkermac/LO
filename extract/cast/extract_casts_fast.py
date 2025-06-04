@@ -5,8 +5,10 @@ capability.
 
 Refactored 2022_07 to conform to the new cast data format.
 
+2025.06.04 Now accepts -lt, --list_type [hourly, lowpass, average, daily]
+
 Test on mac in ipython:
-run extract_casts_fast -gtx cas6_v0_live -source ecology -otype ctd -year 2019 -test True
+run extract_casts_fast -gtx cas7_t0_x4b -source ecology -otype ctd -year 2017 -test True
 
 """
 

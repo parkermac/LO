@@ -72,13 +72,18 @@ def get_cast(out_fn, fn, lon, lat, npzd):
     foo.close()
         
 def get_his_fn_from_dt(Ldir, dt):
-    # This creates the Path of a history file from its datetime
-    if dt.hour == 0:
-        # perfect restart does not write the 0001 file
-        dt = dt - timedelta(days=1)
-        his_num = '0025'
-    else:
-        his_num = ('0000' + str(dt.hour + 1))[-4:]
-    date_string = dt.strftime(Ldir['ds_fmt'])
-    fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + date_string) / ('ocean_his_' + his_num + '.nc')
+    # This creates the Path of a ROMS file from its datetime
+    if Ldir['list_type'] == 'hourly':
+        if dt.hour == 0:
+            # perfect restart does not write the 0001 file
+            dt = dt - timedelta(days=1)
+            his_num = '0025'
+        else:
+            his_num = ('0000' + str(dt.hour + 1))[-4:]
+        date_string = dt.strftime(Ldir['ds_fmt'])
+        fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + date_string) / ('ocean_his_' + his_num + '.nc')
+    elif Ldir['list_type'] == 'lowpass':
+        fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + date_string) / 'lowpassed.nc'
+    elif Ldir['list_type'] == 'average':
+        fn = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + date_string) / 'ocean_avg_0001.nc'
     return fn
