@@ -147,6 +147,23 @@ def get_ic(TR):
         latvec = np.linspace(47, 49, 120)
         pcs_vec = np.linspace(-.5,0,10)
         plon00, plat00, pcs00 = ic_from_meshgrid(lonvec, latvec, pcs_vec)
+
+    elif exp_name == 'depthrange': # the whole domain of cas7, with some edges trimmed
+        # and then trim it to be in a specific depth range.
+        # For James Murray June 2025
+        lonvec = np.linspace(-129, -122, 500)
+        latvec = np.linspace(43, 51, 1000)
+        from lo_tools import zfun, zrfun
+        G = zrfun.get_basic_info(fn00, only_G=True)
+        lon, lat = np.meshgrid(lonvec, latvec)
+        h = G['h']
+        h[G['mask_rho']==0] = 0
+        hh = zfun.interp2(lon,lat,G['lon_rho'],G['lat_rho'],h)
+        hmin = 10; hmax = 50
+        mask = (hh>=hmin) & (hh<=hmax) # keep only depth range hmin to hmax
+        plon00 = lon[mask]
+        plat00 = lat[mask]
+        pcs00 = -np.ones(len(plon00))
         
     return plon00, plat00, pcs00
     
