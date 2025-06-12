@@ -413,6 +413,11 @@ while dt <= dt1:
                         print(' - ROMS SUCCESS')
                         roms_worked = True
                         break
+                    elif 'ROMS: DONE' in line: # new version 2025.06.12
+                        found_line = True
+                        print(' - ROMS SUCCESS')
+                        roms_worked = True
+                        break
             if not found_line:
                 print(' - Problem finding line in log file.')
                 sys.exit()
