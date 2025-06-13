@@ -6,7 +6,7 @@ It is designed to work with the BLANK.in file, replacing things like
 $whatever$ with meaningful values.
 
 To test from ipython on mac:
-run make_dot_in -g cas7 -t t0 -x x4b -r backfill -s continuation -d 2019.07.04 -bu 0 -np 400
+run make_dot_in -g cas7 -t t1 -x x11ab -r backfill -s continuation -d 2019.07.04 -bu 0 -np 400
 
 If you call with -short_roms True it will create a .in that runs for a shorter time or
 writes history files more frequently (exact behavior is in the code below).  This can
@@ -71,18 +71,34 @@ multi_core = True # use more than one core
 days_to_run = 1.0
 
 # time step in seconds (should fit evenly into 3600 sec)
+# ORIGINAL
+# if Ldir['blow_ups'] == 0:
+#     dtsec = 40
+# elif Ldir['blow_ups'] == 1:
+#     dtsec = 30
+# elif Ldir['blow_ups'] == 2:
+#     dtsec = 25
+# elif Ldir['blow_ups'] == 3:
+#     dtsec = 20
+# elif Ldir['blow_ups'] == 4:
+#     dtsec = 15
+# elif Ldir['blow_ups'] == 5:
+#     dtsec = 10
+# else:
+#     print('Unsupported number of blow ups: %d' % (Ldir['blow_ups']))
+# EXPERIMENTING WITH LONGER TIME STEPS
 if Ldir['blow_ups'] == 0:
-    dtsec = 40
+    dtsec = 120
 elif Ldir['blow_ups'] == 1:
-    dtsec = 30
+    dtsec = 100
 elif Ldir['blow_ups'] == 2:
-    dtsec = 25
+    dtsec = 90
 elif Ldir['blow_ups'] == 3:
-    dtsec = 20
+    dtsec = 60
 elif Ldir['blow_ups'] == 4:
-    dtsec = 15
+    dtsec = 50
 elif Ldir['blow_ups'] == 5:
-    dtsec = 10
+    dtsec = 40
 else:
     print('Unsupported number of blow ups: %d' % (Ldir['blow_ups']))
 
