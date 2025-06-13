@@ -117,7 +117,19 @@ def get_sta_dict(job_name):
         sta_dict = {
             'BayCenter': (-123.95239473341415, 46.629030151420984),
         }
-        
+
+    elif job_name == 'willapa25':
+        # Mooring locations for an observational experiment in June 2025
+        # for Jim Thomson and Christie Hegermiller.
+        sta dict = {
+            'OS': (-124.15, 46.721021), # Offshore
+            'NC': (-124.089593, 46.733819), # North Channel
+            'MC': (-124.083920,46.715140), # Mid Channel
+            'MB': (-124.0036308196363, 46.69039774784152), # Mid Bay
+            'EB': (-123.9551377630581, 46.694), # East Bay
+            'SB': (-123.993093733228, 46.65901928767435), # South Bay
+        }
+
     else:
         print('Unsupported job name!')
         a = dict()

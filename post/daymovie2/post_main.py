@@ -34,7 +34,8 @@ dt00 = datetime.strptime(ds00,'%Y.%m.%d')
 if Ldir['testing'] == True:
     moviename_list = ['P1_wgh_ARAG_top']
 else:
-    moviename_list = ['P1_wgh_ARAG_top', 'P1_wgh_ARAG_bot']
+    moviename_list = ['P1_wgh_ARAG_top', 'P1_wgh_ARAG_bot',
+        'P1_wgh_temp_top', 'P1_wgh_salt_top', 'P1_wgh_speed_top']
 
 tt0 = time()
 result = 'success'
