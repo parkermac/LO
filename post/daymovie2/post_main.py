@@ -59,8 +59,8 @@ for moviename in moviename_list:
         avl = 'False'
     if (vn in ['oxygen', 'ARAG']) and (dom == 'full'):
         emask = 'True'
-    if vn == 'salt':
-        tracks = 'True'
+    # if vn == 'salt':
+    #     tracks = 'True'
     
     if moviename == 'Phab_full_salt_top':
         ttag = 'hab'
