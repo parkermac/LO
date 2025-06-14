@@ -121,7 +121,7 @@ def get_sta_dict(job_name):
     elif job_name == 'willapa25':
         # Mooring locations for an observational experiment in June 2025
         # for Jim Thomson and Christie Hegermiller.
-        sta dict = {
+        sta_dict = {
             'OS': (-124.15, 46.721021), # Offshore
             'NC': (-124.089593, 46.733819), # North Channel
             'MC': (-124.083920,46.715140), # Mid Channel
