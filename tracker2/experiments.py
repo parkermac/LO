@@ -164,6 +164,33 @@ def get_ic(TR):
         plon00 = lon[mask]
         plat00 = lat[mask]
         pcs00 = -np.ones(len(plon00))
+
+    elif exp_name == 'willapa25':
+        # Release from a number of locations in Willapa Bay, for Jim Thomson and
+        # Christie Hegermiller, June 2025.
+        sta_dict = {
+            'OS': (-124.15, 46.721021), # Offshore
+            'NC': (-124.089593, 46.733819), # North Channel
+            'MC': (-124.083920,46.715140), # Mid Channel
+            'MB': (-124.0036308196363, 46.69039774784152), # Mid Bay
+            'EB': (-123.9551377630581, 46.694), # East Bay
+            'SB': (-123.993093733228, 46.65901928767435), # South Bay
+        }
+        ii = 0
+        radius_km = 0.2 # radius of the circle km
+        N = 200 # number of particles
+        for sta in sta_dict.keys():
+            lon0, lat0 = sta_dict[sta]
+            # make random scattering of points in a circle
+            if ii == 0:
+                plon00, plat00 = ic_random_in_circle(lon0, lat0, radius_km, N)
+            else:
+                plon00a, plat00a = ic_random_in_circle(lon0, lat0, radius_km, N)
+                # Combine
+                plon00 = np.concatenate((plon00, plon00a))
+                plat00 = np.concatenate((plat00, plat00a))
+            ii += 1
+        pcs00 = np.zeros(plon00.shape)
         
     return plon00, plat00, pcs00
     
