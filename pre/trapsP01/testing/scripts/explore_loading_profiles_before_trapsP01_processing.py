@@ -38,8 +38,8 @@ print('\n')
 #                   Wasielewski et al., 2024 loading plots                      #
 #################################################################################
 
-plot_individual_WWTP_loads = True
-plot_facility_type_load_comparison = False
+plot_individual_WWTP_loads = False
+plot_facility_type_load_comparison = True
 plot_hoodcanal_load_comparison = True
 
 # read Ecology data version (i.e. trapsP## listed in traps_data_ver.csv)
@@ -369,7 +369,7 @@ wasielewski24_WWTP_df = psloads_df.loc[psloads_df['FAC_ID'].isin(WWTP_df['FAC_ID
 #                    Mohamedali et al., 2020 loading plots                      #
 #################################################################################
 
-plot_individual_WWTP_loads_mohamedali = True
+plot_individual_WWTP_loads_mohamedali = False
 plot_facility_type_load_comparison_mohamedali = True
 
 # location of point source data to process
@@ -502,8 +502,8 @@ mohamedali2020_WWTP_ds = psloads_ds.sel(source=psloads_ds['name'].isin(WWTP_name
 #                             Dataset comparisons                               #
 #################################################################################
 
-compare_plant_locations = True
-largest_plants_analysis = True
+compare_plant_locations = False
+largest_plants_analysis = False
 unique_plant_locations = True
 
 # plot WWTP outfall locations on an interactive map ----------------------------------
@@ -812,7 +812,7 @@ if unique_plant_locations == True:
 #                             Plot proposed loads                               #
 #################################################################################
 
-plot_proposed_loads = True
+plot_proposed_loads = False
 
 if plot_proposed_loads == True:
         

@@ -21,10 +21,13 @@ from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 
 #################################################################################
-#                             Facility information                              #
+#                           Create output directory                             #
 #################################################################################
 
 plt.close('all')
+
+out_dir = Ldir['LOo'] / 'point_source_integration' / 'final_WWTP_loads'
+Lfun.make_dir(out_dir)
 
 print('\n')
 
@@ -162,9 +165,9 @@ for i,wwtp in enumerate(moh20_data['name'].values):
         ax[1].tick_params(axis='x', labelrotation=30)
         ax[1].grid(True,color='gainsboro',linewidth=1,linestyle='--',axis='both')
 
-        # show figure ---------------------------------------------------------------
+        # save figure ---------------------------------------------------------------
         plt.tight_layout()
-        plt.show()
+        plt.savefig(out_dir / (wwtp + '.png'))
 
         plt.close()
 
@@ -235,9 +238,7 @@ for i,wwtp_ID in enumerate(was24_data['ID'].values):
         ax[1].tick_params(axis='x', labelrotation=30)
         ax[1].grid(True,color='gainsboro',linewidth=1,linestyle='--',axis='both')
 
-        # show figure ---------------------------------------------------------------
+        # save figure ---------------------------------------------------------------
         plt.tight_layout()
-        plt.show()
+        plt.savefig(out_dir / (wwtp_name + '.png'))
         plt.close()
-
-print('TO-DO: save test figures!!')

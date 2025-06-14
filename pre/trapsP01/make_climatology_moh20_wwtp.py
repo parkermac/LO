@@ -86,17 +86,24 @@ NH4_clim_df  = pd.DataFrame()
 TIC_clim_df  = pd.DataFrame()
 Talk_clim_df = pd.DataFrame()
 
-# variable names
-# IMPORTANT: all variables must be in the same order in the following lests
-# TO-DO: turn this into a dictionay so order will not matter
-print('TO-DO: MAKE A DICTIONARY OF VARIABLE NAMES')
-vns = ['Flow(m3/s)','NO3(mmol/m3)','NH4(mmol/m3)',
-       'TIC(mmol/m3)','Talk(meq/m3)','DO(mmol/m3)','Temp(C)']
-# climatology dfs
-clims = [flow_clim_df, NO3_clim_df, NH4_clim_df,
-        TIC_clim_df, Talk_clim_df, DO_clim_df, temp_clim_df]
-pickle_names = ['flow', 'NO3', 'NH4',
-                 'TIC',  'Talk', 'DO', 'temp']
+# initialize variable name and climatology df dictionary
+vn_clim_dict = {'Flow(m3/s)': flow_clim_df,
+                'NO3(mmol/m3)': NO3_clim_df,
+                'NH4(mmol/m3)': NH4_clim_df,
+                'TIC(mmol/m3)': TIC_clim_df,
+                'Talk(meq/m3)': Talk_clim_df,
+                'DO(mmol/m3)': DO_clim_df,
+                'Temp(C)': temp_clim_df}
+
+# initialize pickle name dictionary
+vn_pickle_dict = {'Flow(m3/s)': 'flow',
+                'NO3(mmol/m3)': 'NO3',
+                'NH4(mmol/m3)': 'NH4',
+                'TIC(mmol/m3)': 'TIC',
+                'Talk(meq/m3)': 'Talk',
+                'DO(mmol/m3)': 'DO',
+                'Temp(C)': 'temp'}
+
 letters = ['(a)','(b)','(c)','(d)','(e)','(f)','(g)']
 
 # create one-year date range for plotting
@@ -118,10 +125,11 @@ for i,wname in enumerate(wwtpnames):
 #                            Create climatologies                               #
 #################################################################################
 
-    # Add data to climatology dataframes
-    for j,vn in enumerate(vns):
-        clims[j] = pd.concat([clims[j],pd.Series(wwtp_avgs_df[vn].values, name=wname)],
-                         axis = 1)
+    # Add WWTP's data as new column to climatology dataframe
+    for vn, clim_df in vn_clim_dict.items():
+        new_col = pd.Series(wwtp_avgs_df[vn].values, name=wname)
+        vn_clim_dict[vn] = pd.concat([clim_df, new_col], axis=1)
+
 
 # Calculate summary statistics for all wwtps
 clim_avgs = pd.DataFrame()
@@ -129,15 +137,16 @@ clim_max = pd.DataFrame()
 clim_min = pd.DataFrame()
 clim_sds = pd.DataFrame()
 
-for i,vn in enumerate(vns):
+for vn in vn_clim_dict.keys():
     # average values of all point sources
-    clim_avgs[vn] = clims[i].mean(axis=1)
+    clim_avgs[vn] = vn_clim_dict[vn].mean(axis=1)
     # max climatology values
-    clim_max[vn] = clims[i].max(axis=1)
+    clim_max[vn] = vn_clim_dict[vn].max(axis=1)
     # min climatology values
-    clim_min[vn] = clims[i].min(axis=1)
+    clim_min[vn] = vn_clim_dict[vn].min(axis=1)
     # standard deviation of all point sources
-    clim_sds[vn] = clims[i].std(axis=1)
+    clim_sds[vn] = vn_clim_dict[vn].std(axis=1)
+    
 
 #################################################################################
 #                           Plot summary statistics                             #
@@ -146,7 +155,7 @@ for i,vn in enumerate(vns):
 # Plot Summary Statistics
 fig, axes = plt.subplots(4,2, figsize=(16, 9), sharex=True)
 ax = axes.ravel()
-for j,vn in enumerate(vns):
+for j,vn in enumerate(vn_clim_dict.keys()):
     i = j+1
 
     # convert DO from mmol/m3 to mg/L for plotting
@@ -183,11 +192,9 @@ for j,vn in enumerate(vns):
     ax[i].tick_params(axis='both', which='major', labelsize=12)
     ax[i].tick_params(axis='x', which='major', rotation=30)
     ax[i].set_xlim([datetime.date(2020, 1, 1), datetime.date(2020, 12, 31)])
-    if i < 7:
-        ax[i].set_ylim([0,1.3*max(maxvals)])
+    ax[i].set_ylim([0,1.3*max(maxvals)])
     # create legend
     if i ==7:
-        ax[i].set_ylim([0,1.3*max(clim_max['TIC(mmol/m3)'].values)])
         handles, labels = ax[7].get_legend_handles_labels()
         ax[0].legend(handles, labels, loc='center', ncol = 2,fontsize=14)
         ax[0].axis('off')
@@ -227,7 +234,7 @@ if args.testing == True:
         ax = axes.ravel()
 
         # loop through variables
-        for i,vn in enumerate(vns):
+        for i,vn in enumerate(vn_clim_dict.keys()):
 
             # format axis
             ax[i].set_facecolor('#EEEEEE')
@@ -302,10 +309,11 @@ if args.testing == True:
 #################################################################################
 
 # check for missing values:
-for i,clim in enumerate(clims):
+for vn,clim in vn_clim_dict.items():
     if pd.isnull(clim).sum().sum() != 0:
-        print('Warning, there are missing '+pickle_names[i]+' values!')
+        print('Warning, there are missing '+vn+' values!')
 
 # save results
-for i,clim in enumerate(clims):
-    clim.to_pickle(clim_dir / ('CLIM_' + pickle_names[i] + '.p'))
+for vn,pickle_name in vn_pickle_dict.items():
+    clim = vn_clim_dict[vn]
+    clim.to_pickle(clim_dir / ('CLIM_' + pickle_name + '.p'))
