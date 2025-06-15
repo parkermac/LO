@@ -40,7 +40,6 @@ def get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD):
     yd_ind = yd_ind.copy().to_numpy()
     # and shift yearday by one if it is after Feb 28 and it is not a leap year
     # since climatologies are generated with 366 days per year
-    print('I made it here')
     for i, date in enumerate(dt_ind):
         if (date.year % 4 != 0 or (date.year % 100 == 0 and date.year % 400 != 0)) and date.month > 2:
             yd_ind[i] = yd_ind[i] + 1
