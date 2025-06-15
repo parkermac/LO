@@ -46,7 +46,7 @@ else:
 
 # RUN TRACKER JOBS
 tt0 = time()
-exp_list = ['wgh0']
+exp_list = ['wgh0','willapa25']
 three_flag = 'True'
 for exp in exp_list:
     cmd = ['python', str(Ldir['LO']) + '/tracker2/tracker.py',
