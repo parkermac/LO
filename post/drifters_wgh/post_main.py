@@ -47,13 +47,9 @@ else:
 # RUN TRACKER JOBS
 tt0 = time()
 exp_list = ['wgh0','willapa25']
-if exp == 'wgh0':
-    three_flag = 'True'
-elif exp == 'willapa25':
-    three_flag = 'False'
-else:
-    three_flag = 'False'
+three_flag_dict = {'wgh0':'True', 'willapa25':'False'}
 for exp in exp_list:
+    three_flag = three_flag_dict[exp]
     cmd = ['python', str(Ldir['LO']) + '/tracker2/tracker.py',
         '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
         '-d', dsr0, '-dtt', str(dtt),
@@ -73,6 +69,7 @@ out_fn_dict = {}
 out_json_dict0 = {}
 out_json_dict1 = {}
 for exp in exp_list:
+    three_flag = three_flag_dict[exp]
     if three_flag == 'True':
         three_tag = '3d'
     else:
