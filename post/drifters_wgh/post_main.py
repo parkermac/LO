@@ -47,7 +47,12 @@ else:
 # RUN TRACKER JOBS
 tt0 = time()
 exp_list = ['wgh0','willapa25']
-three_flag = 'True'
+if exp == 'wgh0':
+    three_flag = 'True'
+elif exp == 'willapa25':
+    three_flag = 'False'
+else:
+    three_flag = 'False'
 for exp in exp_list:
     cmd = ['python', str(Ldir['LO']) + '/tracker2/tracker.py',
         '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
