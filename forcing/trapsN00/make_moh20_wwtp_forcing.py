@@ -174,7 +174,7 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
             else:
                 qtbio_wwtp_df = qtbio_wwtp_df_dict[rn]
                 flow = qtbio_wwtp_df['flow'].values
-            # update flowrate with open/close date information
+            # update flowrate
             Q_mat[:,rr] = flow
         # add metadata
         wwtp_ds[vn] = (dims, Q_mat)

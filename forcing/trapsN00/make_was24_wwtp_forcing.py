@@ -20,7 +20,7 @@ import trapsfun
 #                   Initialize function and empty dataset                       #
 #################################################################################
 
-def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD,ctag):
+def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsD):
 
     # Start Dataset
     wwtp_ds = xr.Dataset()
@@ -29,6 +29,9 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
     # get year list
     years = [fulldate.year for fulldate in dt_ind]
 
+    # adjust date format
+    dt_ind = dt_ind.normalize()
+
 #################################################################################
 #                                Get data                                       #
 #################################################################################
@@ -36,28 +39,44 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
     # only get data if WWTPs are enabled
     if enable == True:
 
-        # define directory for point_source climatology
-        wwtp_dir = Ldir['LOo'] / 'pre' / trapsP / 'moh20_wwtps' /ctag
-        traps_type = 'wwtp'  
-
-        # get climatological data
-        clim_fns = ['Cflow_wwtp_fn', 'Ctemp_wwtp_fn', 'CDO_wwtp_fn',
-                    'CNH4_wwtp_fn', 'CNO3_wwtp_fn', 'CTalk_wwtp_fn', 'CTIC_wwtp_fn']
-        clim_vns = ['flow', 'temp', 'DO', 'NH4', 'NO3', 'Talk', 'TIC']
-        for i, clim_fn in enumerate(clim_fns):
-            Ldir[clim_fn] = wwtp_dir / 'Data_historical' / ('CLIM_'+clim_vns[i]+'.p')
+        # get raw data
+        was24_wwtp_fn = Ldir['data'] / trapsD / 'processed_data'/ 'wwtp_data_wasielewski_etal_2024.nc'
+        was24_wwtp_data_ds = xr.open_dataset(was24_wwtp_fn)
 
         # first, make sure file exists
-        gwi_fn = Ldir['grid'] / 'moh20_wwtp_info.csv'
+        gwi_fn = Ldir['grid'] / 'was24_wwtp_info.csv'
         if not os.path.isfile(gwi_fn):
-            print('***Missing moh20_wwtp_info.csv file. Please run traps_placement')
+            print('***Missing was24_wwtp_info.csv file. Please run traps_placement')
             sys.exit()
-        # then get the list of point sources and indices for this grid
+        # then get the list of WWTPs and indices for this grid
         gwi_df = pd.read_csv(gwi_fn, index_col='rname')
         # if testing, only look at a few sources
         if Ldir['testing']:
-            gwi_df = gwi_df.loc[['LOTT', 'Iona'],:]
-        
+            gwi_df = gwi_df.loc[['King County West Point WWTP', 'BELLINGHAM STP'],:]
+        # # Test code to simulate WWTP mapped to same grid cell
+        # gwi_df = gwi_df.loc[['King County West Point WWTP', 'BELLINGHAM STP'],:]
+        # gwi_df.loc['King County West Point WWTP'] = [947.0, 573.0]
+        # gwi_df.loc['BELLINGHAM STP'] = [947.0, 573.0]
+
+        # check if there are moh20 and was24 wwtps that are mapped to the same grid cell
+        moh20_df = pd.read_csv(Ldir['grid'] / 'moh20_wwtp_info.csv', index_col='rname')
+        # # Test code to artifically add overlapping WWTPs
+        # gwi_df.loc['FAKE_WAS24_WWTP'] = [947.0, 573.0]
+        # moh20_df.loc['FAKE_MOH20_WWTP'] = [947.0, 573.0]
+        shared = set(zip(gwi_df.row_py, gwi_df.col_py)) & set(zip(moh20_df.row_py, moh20_df.col_py))
+        if shared:
+            print("\033[91m\nWARNING: WWTPs in Mohamedali et al. (2020) and Wasielewski et al. (2024) mapped to same grid cell\033[0m")
+            # Get matching rows by coordinate
+            gwi_matches = gwi_df[gwi_df.set_index(['row_py', 'col_py']).index.isin(shared)]
+            moh20_matches = moh20_df[moh20_df.set_index(['row_py', 'col_py']).index.isin(shared)]
+            # Print duplicate rnames
+            print("Wasielewski et al. (2024) WWTPs:\n", gwi_matches.index.tolist())
+            print("Mohamedali et al. (2020) WWTPs:\n", moh20_matches.index.tolist())
+            # print next steps
+            print('\033[91mPlease write additional code to handle this edge case!!!\033[0m\n')
+        else:
+            print("WWTPs in Mohamedali et al. (2020) and Wasielewski et al. (2024) mapped to unique grid cells")
+
 #################################################################################
 #       Combine name of sources that are located at the same grid cell          #
 #################################################################################
@@ -94,16 +113,13 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
         # get number of wwtps after consolidating overlapping ones
         NWWTP = len(gri_df_no_ovrlp)
 
-        # get the flow, temperature, and nutrient data for these days
-        qtbio_wwtp_df_dict = trapsfun.get_qtbio(gwi_df, dt_ind, yd_ind, Ldir, traps_type, trapsD)
-
         # Add time coordinate
         wwtp_ds['river_time'] = (('river_time',), ot_vec)
         wwtp_ds['river_time'].attrs['units'] = Lfun.roms_time_units
         wwtp_ds['river_time'].attrs['long_name'] = 'river time'
 
         # Add river coordinate
-        wwtp_ds['river'] = (('river',), np.arange(NRIV+NTRIV+1,NRIV+NTRIV+NWWTP+1))
+        wwtp_ds['river'] = (('river',), np.arange(NRIV+NTRIV+NWWTP_moh+1,NRIV+NTRIV+NWWTP_moh+NWWTP+1))
         wwtp_ds['river'].attrs['long_name'] = 'marine point source identification number'
 
         # Add river names
@@ -165,16 +181,19 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
                 # split into individual point sources
                 [wwtp1,wwtp2] = rn.split('+')
                 # get individual point source flowrates
-                qtbio_wwtp_df_1 = qtbio_wwtp_df_dict[wwtp1]
-                qtbio_wwtp_df_2 = qtbio_wwtp_df_dict[wwtp2]
-                flow1 = qtbio_wwtp_df_1['flow'].values
-                flow2 = qtbio_wwtp_df_2['flow'].values
+                flow1 = was24_wwtp_data_ds.flow.sel(source=
+                    was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == wwtp1].item(),
+                    date=dt_ind).values
+                flow2 = was24_wwtp_data_ds.flow.sel(source=
+                    was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == wwtp2].item(),
+                    date=dt_ind).values
                 # combine point source flow
                 flow = flow1 + flow2
             else:
-                qtbio_wwtp_df = qtbio_wwtp_df_dict[rn]
-                flow = qtbio_wwtp_df['flow'].values
-            # update flowrate with open/close date information
+                flow = was24_wwtp_data_ds.flow.sel(source=
+                    was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == rn].item(),
+                    date=dt_ind).values
+            # update flowrate
             Q_mat[:,rr] = flow
         # add metadata
         wwtp_ds[vn] = (dims, Q_mat)
@@ -200,14 +219,13 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
                     if '+' in rn:
                         # split into individual point sources
                         [wwtp1,wwtp2] = rn.split('+')
-                        # get individual point source dataframe
-                        qtbio_wwtp_df_1 = qtbio_wwtp_df_dict[wwtp1]
-                        qtbio_wwtp_df_2 = qtbio_wwtp_df_dict[wwtp2]
                         # calculate weighted average (based on flowrate)
-                        temps = trapsfun.weighted_average('temp',qtbio_wwtp_df_1, qtbio_wwtp_df_2)
+                        temps = trapsfun.weighted_average_ds('temp', dt_ind, was24_wwtp_data_ds, wwtp1, wwtp2)
                     else:
-                        qtbio_wwtp_df = qtbio_wwtp_df_dict[rn]
-                        temps = qtbio_wwtp_df['temp'].values
+                        temps = was24_wwtp_data_ds.temp.sel(source=
+                            was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == rn].item(),
+                            date=dt_ind).values
+                    print('-- {}: filled from raw Wasielewski et al. (2024) dataset'.format(rn))
                     for nn in range(N):
                         TS_mat[:, nn, rr] = temps
             # check for nans
@@ -225,23 +243,27 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
 
         # Add biologeochemistry parameters
         for var in ['NO3', 'NH4', 'TIC', 'TAlk', 'Oxyg']:
+        # for var in ['NO3', 'NH4', 'TIC', 'Talk', 'DO']:
             vn = 'river_' + var
             vinfo = zrfun.get_varinfo(vn, vartype='climatology')
             dims = (vinfo['time'],) + ('s_rho', 'river')
             B_mat = np.nan * np.zeros((NT, N, NWWTP))
             for rr,rn in enumerate(gri_df_no_ovrlp.index):
+                # adjust names to get data from dataset
+                if var == 'TAlk':
+                    var = 'Talk'
+                if var == 'Oxyg':
+                    var = 'DO'
                 # consolidate sources located at same grid cell
                 if '+' in rn:
                     # split into individual point sources
                     [wwtp1,wwtp2] = rn.split('+')
-                    # get individual point source dataframe
-                    qtbio_wwtp_df_1 = qtbio_wwtp_df_dict[wwtp1]
-                    qtbio_wwtp_df_2 = qtbio_wwtp_df_dict[wwtp2]
                     # calculate weighted average (based on flowrate)
-                    bvals = trapsfun.weighted_average(var,qtbio_wwtp_df_1, qtbio_wwtp_df_2)
+                    bvals = trapsfun.weighted_average_ds(var, dt_ind, was24_wwtp_data_ds, wwtp1, wwtp2)
                 else:
-                    qtbio_wwtp_df = qtbio_wwtp_df_dict[rn]
-                    bvals = qtbio_wwtp_df[var].values
+                    bvals = was24_wwtp_data_ds[var].sel(
+                            source=was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == rn].item(),
+                            date=dt_ind)
                 for nn in range(N):
                     B_mat[:, nn, rr] = bvals
             # check for nans
@@ -281,5 +303,8 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
 #################################################################################
 #          Return WWTP forcing dataset in the form that ROMS expects            #
 #################################################################################
+
+    # print(wwtp_ds.river_transport)
+    # print(wwtp_ds.river_NH4)
 
     return wwtp_ds, NWWTP

@@ -36,6 +36,14 @@ def get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD):
 
     # year day index starts from 1. Convert to start from 0 to work with python
     yd_ind = yd_ind - 1
+    # create a mutable copy that we can manipulate one element at a time
+    yd_ind = yd_ind.copy().to_numpy()
+    # and shift yearday by one if it is after Feb 28 and it is not a leap year
+    # since climatologies are generated with 366 days per year
+    print('I made it here')
+    for i, date in enumerate(dt_ind):
+        if (date.year % 4 != 0 or (date.year % 100 == 0 and date.year % 400 != 0)) and date.month > 2:
+            yd_ind[i] = yd_ind[i] + 1
 
     # initialize output dict
     qtbio_df_dict = dict()
@@ -85,6 +93,7 @@ def combine_adjacent(lst):
 def weighted_average(vn,qtbio_df_1, qtbio_df_2):
     '''
     Calculate the weighted average properties based on flowrate of two overlapping sources
+    Inputs only work for climatologies
     '''
     # get flowrates
     flow1 = qtbio_df_1['flow'].values
@@ -92,6 +101,21 @@ def weighted_average(vn,qtbio_df_1, qtbio_df_2):
     # get variable
     var1 = qtbio_df_1[vn].values
     var2 = qtbio_df_2[vn].values
+    # calculate weighted average based on flowrate
+    waverage = [np.average([var1[i], var2[i]], weights = [flow1[i], flow2[i]]) for i in range(len(flow1))]
+    return waverage
+
+def weighted_average_ds(vn, dt_ind, ds, rn1, rn2):
+    '''
+    Calculate the weighted average properties based on flowrate of two overlapping sources
+    Inputs only work for raw data in a ds
+    '''
+    # get flowrates
+    flow1 = ds.flow.sel(source=ds.source[ds.name == rn1].item(),date=dt_ind).values
+    flow2 = ds.flow.sel(source=ds.source[ds.name == rn2].item(),date=dt_ind).values
+    # get variable
+    var1 = ds[vn].sel(source=ds.source[ds.name == rn1].item(),date=dt_ind).values
+    var2 = ds[vn].sel(source=ds.source[ds.name == rn2].item(),date=dt_ind).values
     # calculate weighted average based on flowrate
     waverage = [np.average([var1[i], var2[i]], weights = [flow1[i], flow2[i]]) for i in range(len(flow1))]
     return waverage

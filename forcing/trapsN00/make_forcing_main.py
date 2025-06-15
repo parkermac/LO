@@ -32,11 +32,13 @@ from importlib import reload
 import rivfun
 import make_moh20_LOriv_forcing as LOriv
 import make_moh20_triv_forcing as triv
-import make_moh20_wwtp_forcing as wwtp
+import make_moh20_wwtp_forcing as wwtp_moh20
+import make_was24_wwtp_forcing as wwtp_was24
 
 reload(LOriv)
 reload(triv)
-reload(wwtp)
+reload(wwtp_moh20)
+reload(wwtp_was24)
 
 #################################################################################
 #                     Switch to enable/disable TRAPS                            #
@@ -73,6 +75,8 @@ this_dir = Path(__file__).absolute().parent.parent.parent.parent
 with open(this_dir / 'LO_forked' / 'pre' / trapsP / 'traps_data_ver.csv','r') as f:
     for ver in f:
         trapsD = ver
+
+trapsD = 'trapsD01'
 
 if Ldir['testing']:
     reload(zrfun)
@@ -125,14 +129,23 @@ except Exception as e:
     print(e)
     NTRIV = 0
 
-# generate forcing for marine point sources
+# generate forcing for marine point sources (Mohamedali et al., 2020)
 try:
-    wwtp_ds, NWWTP = wwtp.make_forcing(N,NT,NRIV,NTRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_wwtps,trapsP,trapsD,ctag)
+    wwtp_ds, NWWTP_moh = wwtp_moh20.make_forcing(N,NT,NRIV,NTRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_wwtps,trapsP,trapsD,ctag)
     ds_to_merge.append(wwtp_ds)
 except Exception as e:
     print('Error creating wwtp: maybe there are none.')
     print(e)
-    NWWTP = 0
+    NWWTP_moh = 0
+
+# generate forcing for marine point sources (Mohamedali et al., 2020)
+try:
+    wwtp_ds, NWWTP_was = wwtp_was24.make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind,yd_ind,ot_vec,Ldir,enable_wwtps,trapsD)
+    ds_to_merge.append(wwtp_ds)
+except Exception as e:
+    print('Error creating wwtp: maybe there are none.')
+    print(e)
+    NWWTP_was = 0
 
 #################################################################################
 #                   Combine forcing outputs and save results                    #
