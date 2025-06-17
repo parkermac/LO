@@ -239,7 +239,7 @@ def make_forcing(N,NT,NRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD,ctag)
                 for nn in range(N):
                     B_mat[:, nn, rr] = bvals
             # check for nans
-            if np.isnan(TS_mat).any():
+            if np.isnan(B_mat).any():
                 print('Error from traps: nans in tiny river bio!')
                 sys.exit()
             # add metadata

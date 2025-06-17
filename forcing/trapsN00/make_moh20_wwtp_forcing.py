@@ -212,7 +212,7 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
                         TS_mat[:, nn, rr] = temps
             # check for nans
             if np.isnan(TS_mat).any():
-                print('Error from traps: nans in point source river_temp!')
+                print('Error from traps: nans in moh20 wwtp river_temp!')
                 sys.exit()
             # add metadata
             wwtp_ds[vn] = (dims, TS_mat)
@@ -245,8 +245,8 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
                 for nn in range(N):
                     B_mat[:, nn, rr] = bvals
             # check for nans
-            if np.isnan(TS_mat).any():
-                print('Error from traps: nans in tiny river bio!')
+            if np.isnan(B_mat).any():
+                print('Error from traps: nans in moh20 wwtp bio!')
                 sys.exit()
             # add metadata
             wwtp_ds[vn] = (dims, B_mat)
@@ -271,7 +271,7 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
                     B_mat[:, nn, rr] = rivfun.get_bio_vec(bvn, rn, yd_ind)
             # check for nans
             if np.isnan(B_mat).any():
-                print('Error from traps: nans in B_mat for tiny river ' + vn)
+                print('Error from traps: nans in B_mat for moh20 wwtp ' + vn)
                 sys.exit()
             # add metadata
             wwtp_ds[vn] = (dims, B_mat)
