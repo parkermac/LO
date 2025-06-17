@@ -47,24 +47,24 @@ Note that "cur" contains velocity variables uo and vo.
 
 ---
 
-**get_time_ranges.py** will print out the current time ranges available for each product. As of 2025.04.22 these were:
+**get_time_ranges.py** will print out the current time ranges available for each product. As of 2025.06.16 these were:
 
 ```
 hindcast
 cmems_mod_glo_phy_my_0.083deg_P1D-m
-INFO - 2025-04-22T15:53:42Z - Selected dataset version: "202311"
-INFO - 2025-04-22T15:53:42Z - Selected dataset part: "default"
+INFO - 2025-06-16T15:22:57Z - Selected dataset version: "202311"
+INFO - 2025-06-16T15:22:57Z - Selected dataset part: "default"
 Range: 1993.01.01 to 2021.06.30
 
 interim
 cmems_mod_glo_phy_myint_0.083deg_P1D-m
-INFO - 2025-04-22T15:53:58Z - Selected dataset version: "202311"
-INFO - 2025-04-22T15:53:58Z - Selected dataset part: "default"
-Range: 2021.07.01 to 2025.03.25
+INFO - 2025-06-16T15:23:14Z - Selected dataset version: "202311"
+INFO - 2025-06-16T15:23:14Z - Selected dataset part: "default"
+Range: 2021.07.01 to 2025.05.27
 
 forecast
 cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m
-INFO - 2025-04-22T15:54:11Z - Selected dataset version: "202406"
-INFO - 2025-04-22T15:54:11Z - Selected dataset part: "default"
-Range: 2022.06.01 to 2025.05.01
+INFO - 2025-06-16T15:23:28Z - Selected dataset version: "202406"
+INFO - 2025-06-16T15:23:28Z - Selected dataset part: "default"
+Range: 2022.06.01 to 2025.06.22
 ```

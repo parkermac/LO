@@ -8,6 +8,8 @@ Testing:
 
 run make_forcing_main.py -g cas7 -r backfill -d 2017.01.01 -f ocnG00 -test True
 
+run make_forcing_main.py -g cas7 -r forecast -d 2025.06.17 -f ocnG00 -test True
+
 NOTE: the main effect of -test True is that it does the interpolation of glorys
 fields to the roms grid much faster, by skipping the nearest-neighbor search
 step. This is good for testing, but cannot be used for real applications because
@@ -76,8 +78,12 @@ if testing_planB == False:
     if verbose:
         print('dt0 = ' + str(dt0))
         print('dt1 = ' + str(dt1))
+    # make the list of datetimes (really a DatetimeIndex)
     dt_list = pd.date_range(dt0,dt1,freq='D')
-
+    # make a list of datestrings to use with file names
+    dstr_list = [dt.strftime(Lfun.ds_fmt) for dt in dt_list]
+    # and a dict relating them
+    dstr_dict = dict(zip(dt_list,dstr_list))
 else:
     # do this if testing_planB == True
     planB = True
@@ -92,25 +98,39 @@ if planB == False:
             print('unsupported region')
             sys.exit()
         # get data
+        g_indir0 = Ldir['data'] / 'glorys' / region
         if Ldir['run_type'] == 'forecast':
             # Need to get fields from glorys site
-            print('not supported yet')
-            sys.exit()
+            # loop over all days
+            tt00 = time()
+            for dt in dt_list:
+                tt0 = time()
+                dstr = dstr_dict[dt]
+                g_out_dir = g_indir0 / ('forecast_' + dstr)
+                Lfun.make_dir(g_out_dir, clean=True)
+                # Note: I could make this a standalone subprocess and try to do
+                # all four days at once to speed things up.
+                gfun.get_glorys_forecast(dt, g_out_dir, region, verbose=verbose)
+                print('%s Time for download = %0.1f\n' % (dstr, time()-tt0))
+                sys.stdout.flush()
+            print('%s TOTAL time for all downloads = %0.1f\n' % (dstr, time()-tt00))
+            sys.stdout.flush()
+
         elif Ldir['run_type'] == 'backfill':
             # See if we already have the needed files
-            # otherwise go to the glorys site and get them
-            g_indir0 = Ldir['data'] / 'glorys' / region
-            fn0 = g_indir0 / ('hindcast_' + dt0.strftime(Lfun.ds_fmt) + '.nc')
-            fn1 = g_indir0 / ('hindcast_' + dt1.strftime(Lfun.ds_fmt) + '.nc')
-            fn_list = [fn0, fn1]
-            got_data = False
-            if fn0.is_file() and fn1.is_file():
-                got_data = True
-            if got_data == True:
-                planB = False
-            elif got_data == False:
-                print('- error getting data')
-                planB = True
+            # otherwise tell the user to get them using LO/pre/glorys
+            for dt in dt_list:
+                dstr = dstr_dict[dt]
+                fn = g_indir0 / ('hindcast_' + dstr + '.nc')
+                got_data = False
+                if fn.is_file():
+                    got_data = True
+                if got_data == True:
+                    planB = False
+                elif got_data == False:
+                    print('- error getting data')
+                    print('- Please get the hindcast files using LO/pre/glorys/get_glorys_days.py')
+                    planB = True
     except Exception as e:
         print(e)
         print('- error while getting glorys data')
@@ -149,18 +169,21 @@ if planB == False:
         VV['zw_v'] = np.nan * np.zeros((NT, NZ+1, NR-1, NC))
 
         tt = 0 # time index counter
-        for fng in fn_list:
+        for dt in dt_list:
+            dstr = dstr_dict[dt]
             for vn in vn_list:
                 vng = vn_dict[vn]
                 if verbose:
                     print('Getting %s from %s' % (vn, vng))
-                # if Ldir['run_type'] == 'forecast':
-                #     if vng in ['so','thetao','zos']:
-                #         fng = indir0 / 'glorys' / 'Data' / ('forecast_'+vng+'.nc')
-                #     elif vng in ['uo','vo']:
-                #         fng = indir0 / 'glorys' / 'Data' / 'forecast_cur.nc'
-                # elif Ldir['run_type'] == 'backfill':
-                #     fng = Ldir['parent'] / 'LPM_output' / 'glorys_archive' / ('hindcast_'+dstr+'.nc')
+
+                if Ldir['run_type'] == 'forecast':
+                    if vng in ['so','thetao','zos']:
+                        fng = g_indir0 / ('forecast_' + dstr) / ('forecast_'+vng+'.nc')
+                    elif vng in ['uo','vo']:
+                        fng = g_indir0 / ('forecast_' + dstr) / 'forecast_cur.nc'
+                elif Ldir['run_type'] == 'backfill':
+                    fng = g_indir0 / ('hindcast_'+dstr+'.nc')
+
                 if vn in ['salt', 'temp', 'zeta']:
                     gtag = 'rho'
                 elif vn == 'u':
