@@ -23,7 +23,7 @@ We keep forcing_list.csv as a separate file because it is also used by `driver_r
 
 #### Current development runs
 - `cas7_t1_x11ab` **Leading edge of our development**, with bio code from x10ab. Has changed TIDE_START. Uses new ROMS (4.3) presumably with Harcourt turbulence/advection improvements. Uses OMEGA_IMPLICIT. These allow DT = 60 sec instead of 40. 
-- `cas7_t1_x11b` **Candidate for new primary forecast**, like cas7_t1_x11ab but with hourly saves and no averages.
+- `cas7_t1_x11b` **Candidate for new primary forecast**, like cas7_t1_x11ab but with hourly saves and no averages. NOTE: the only thing you need to edit to go from hourly saves to daily saves is to change his_interval (3600 or 86400) around line 77. Clean! The other decisions about saving averages, diagnostics, or perfect restart are made when compiling the executable.
 - `cas7_t1_x10ab` experiment along the way to x11ab. Has 50% burial of particles (including Carbon) in the Salish Sea, 2017 run used for validation. The validation results look great, even for pCO2. I saved a version of 2017 output from  and earlier version of this that used HSIMT for bio tracers and renamed it cas7_hsimt_x10ab. (on apogee). The "a" in the executable name implies that we use daily saves for speed and low storage and create a daily **average** for validation.
 - `wgh2_t0_xn4b` like wgh2_t0_xn0b but using updated bio code based on x4b. Has 2017 run done for mooring validation.
 

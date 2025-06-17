@@ -6,7 +6,7 @@ It is designed to work with the BLANK.in file, replacing things like
 $whatever$ with meaningful values.
 
 To test from ipython on mac:
-run make_dot_in -g cas7 -t t1 -x x11ab -r backfill -s continuation -d 2019.07.04 -bu 0 -np 400
+run make_dot_in -g [gridname] -t [tag] -x [ex_name] -r backfill -s continuation -d 2019.07.04 -bu 0 -np 160
 
 If you call with -short_roms True it will create a .in that runs for a shorter time or
 writes history files more frequently (exact behavior is in the code below).  This can
@@ -74,8 +74,8 @@ else:
 
 D['ndtfast'] = 20
     
-his_interval = 86400 # seconds to define and write to history files
-rst_interval = 1 # days between writing to the restart file (e.g. 5)
+his_interval = 3600 # seconds to define and write to history files (also averages and diagnostics)
+rst_interval = 1 # days between writing to the restart file (e.g. 1)
 
 # Find which forcings to look for (search the csv file in this directory).
 # We use the csv file because driver_roms_mox.py also uses it to copy forcing
@@ -182,8 +182,12 @@ if Ldir['start_type'] == 'perfect':
     ininame = 'ocean_rst.nc' # start from restart file
     ini_fullname = out_dir_yesterday / ininame
 elif Ldir['start_type'] == 'continuation':
+    # restart from a history file
     nrrec = '0' # '0' for a history or ini file
-    ininame = 'ocean_his_0002.nc' # restart from a history file
+    if his_interval == 86400: # daily saves
+        ininame = 'ocean_his_0002.nc' 
+    elif his_interval == 3600:
+        ininame = 'ocean_his_0025.nc' # hourly saves
     ini_fullname = out_dir_yesterday / ininame
 elif Ldir['start_type'] == 'new':
     nrrec = '0' # '0' for a history or ini file
