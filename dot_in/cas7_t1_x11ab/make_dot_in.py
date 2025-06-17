@@ -53,52 +53,22 @@ D = dict()
 D['EX_NAME'] = Ldir['ex_name'].upper()
 
 #### USER DEFINED VALUES ####
-
-# which ROMS code to use
-# D['roms_name'] = 'LO_roms_source'
-# No longer used
-
 multi_core = True # use more than one core
-
-# if Ldir['run_type'] == 'backfill':
-#     days_to_run = 1.0
-# elif Ldir['run_type'] == 'forecast':
-#     days_to_run = float(Ldir['forecast_days'])
-# NOTE: this forecast "days_to_run" logic is no longer used because we
-# always only run one day at at time. In driver_roms3.py it only passes
-# "-run_type backfill" to make_dot_in.py (this code).
-# To make this all clearer I am hard-coding days_to_run here:
 days_to_run = 1.0
 
 # time step in seconds (should fit evenly into 3600 sec)
-# ORIGINAL
-# if Ldir['blow_ups'] == 0:
-#     dtsec = 40
-# elif Ldir['blow_ups'] == 1:
-#     dtsec = 30
-# elif Ldir['blow_ups'] == 2:
-#     dtsec = 25
-# elif Ldir['blow_ups'] == 3:
-#     dtsec = 20
-# elif Ldir['blow_ups'] == 4:
-#     dtsec = 15
-# elif Ldir['blow_ups'] == 5:
-#     dtsec = 10
-# else:
-#     print('Unsupported number of blow ups: %d' % (Ldir['blow_ups']))
-# EXPERIMENTING WITH LONGER TIME STEPS
 if Ldir['blow_ups'] == 0:
-    dtsec = 120
-elif Ldir['blow_ups'] == 1:
-    dtsec = 100
-elif Ldir['blow_ups'] == 2:
-    dtsec = 90
-elif Ldir['blow_ups'] == 3:
     dtsec = 60
-elif Ldir['blow_ups'] == 4:
+elif Ldir['blow_ups'] == 1:
     dtsec = 50
-elif Ldir['blow_ups'] == 5:
+elif Ldir['blow_ups'] == 2:
     dtsec = 40
+elif Ldir['blow_ups'] == 3:
+    dtsec = 30
+elif Ldir['blow_ups'] == 4:
+    dtsec = 25
+elif Ldir['blow_ups'] == 5:
+    dtsec = 20
 else:
     print('Unsupported number of blow ups: %d' % (Ldir['blow_ups']))
 
