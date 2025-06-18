@@ -207,7 +207,12 @@ if planB == False:
                     if vn == 'v':
                         z_v = zr.copy()
                         zw_v = zw.copy()
-                    FLD = gfun.interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G,
+
+                    if Ldir['start_type'] == 'new':
+                        hollow = False
+                    else:
+                        hollow = True
+                    FLD = gfun.interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G, hollow=hollow,
                         verbose=verbose, testing=Ldir['testing'])
                 V[vn][tt,:] = FLD
             VV['z_rho'][tt,:] = z_rho

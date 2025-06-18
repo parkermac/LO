@@ -141,7 +141,7 @@ def get_zr(h, zeta, S, vn):
         print('Unknown variable name for get_zr: ' + vn)
     return zr, zw
 
-def interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G, verbose=False, testing=False):
+def interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G, hollow=False, verbose=False, testing=False):
     """
     This function interpolates a glorys field to a roms grid. First it
     fills what it can using linear interpolation from the regular glorys
@@ -149,6 +149,10 @@ def interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G, verbose=False, testing
     remaining gaps (slower, about 8 seconds per 3-D field).
 
     This function is specific to 3-D fields.
+
+    If you pass hollow=True it will make all but the outer "npad" gridpoints nan.
+    Hopefully this will speed things up and result in smaller ocean_clm.nc files.
+
     """
     # open the raw glorys field
     dsg = xr.open_dataset(fng)
@@ -168,6 +172,9 @@ def interpolate_glorys_to_roms(fng, vn, vng, gtag, zr, G, verbose=False, testing
     Y = np.tile(G['lat_'+gtag].reshape(1,M,L),[N,1,1])
     Z = zr
     mask = G['mask_'+gtag]==1
+    if hollow == True:
+        npad = 10
+        mask[npad:-npad,npad:-npad] = False
     Mask = np.tile(mask.reshape(1,M,L),[N,1,1])
     zyx = np.array((Z[Mask].flatten(),Y[Mask].flatten(),X[Mask].flatten())).T
     interpolated_values = interp(zyx)
