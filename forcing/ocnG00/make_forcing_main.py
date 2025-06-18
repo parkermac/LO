@@ -266,7 +266,7 @@ if planB == False:
                 for bvn in bvn_list_short:
                     fld = V[bvn].copy()
                     V[bvn] = Ofun_bio.fill_polygons(fld, bvn, G, z_rho, Ldir)
-                    V[bvn][mr3==0] = np.nan
+                    V[bvn][np.isnan(salt)] = np.nan
                 print(' - add_CTD task for bio variables: %0.2f sec' % (time()-tt0))
     except Exception as e:
         print(e)
