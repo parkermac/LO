@@ -14,7 +14,7 @@ import pickle
 parser = argparse.ArgumentParser()
 parser.add_argument('-grid_fn', type=str) # full path to nest grid.nc file
 parser.add_argument('-his_fn', type=str) # full path to history file to interpolate from
-parser.add_argument('-start_type', type=str) # continuation or new
+parser.add_argument('-start_type', type=str) # continuation, or perfect, or new
 parser.add_argument('-out_fn', type=str) # full path to output pickle file
 parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars
 args = parser.parse_args()
