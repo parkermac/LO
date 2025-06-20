@@ -184,6 +184,12 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=2):
     NEW 2023.10.05: for list_type = 'hourly', if you pass his_num = 1
     it will start with ocean_his_0001.nc on the first day instead of the default which
     is to start with ocean_his_0025.nc on the day before.
+
+    NEW 2025.06/20: for list_type = 'hourly0'
+    which will start with ocean_his_0001.nc on the first day instead of the default which
+    is to start with ocean_his_0025.nc on the day before.
+    This is identical to passing his_num = 1, but may be more convenient, especially
+    as we move to "continuation" start_type, which always writes an 0001 file.
     """
     dt0 = datetime.strptime(ds0, ds_fmt)
     dt1 = datetime.strptime(ds1, ds_fmt)
@@ -195,6 +201,9 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=2):
     elif list_type == 'hourly':
         # list of hourly files over a date range
         fn_list = fn_list_utility(dt0,dt1,Ldir,his_num=his_num)
+    elif list_type == 'hourly0':
+        # list of hourly files over a date range, starting with 0001 of dt0.
+        fn_list = fn_list_utility(dt0,dt1,Ldir,his_num=1)
     elif list_type == 'daily':
         # list of history file 21 (Noon PST) over a date range
         fn_list = []
