@@ -57,7 +57,7 @@ for tag in tag_list:
 ds.close()
 
 if args.start_type in ['continuation','perfect']:
-    pad = 20
+    pad = 10
 elif args.start_type == 'new':
     pad = 0
 else:
