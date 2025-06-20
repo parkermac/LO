@@ -58,17 +58,17 @@ days_to_run = 1.0
 
 # time step in seconds (should fit evenly into 3600 sec)
 if Ldir['blow_ups'] == 0:
-    dtsec = 60
-elif Ldir['blow_ups'] == 1:
-    dtsec = 50
-elif Ldir['blow_ups'] == 2:
-    dtsec = 40
-elif Ldir['blow_ups'] == 3:
-    dtsec = 30
-elif Ldir['blow_ups'] == 4:
-    dtsec = 25
-elif Ldir['blow_ups'] == 5:
     dtsec = 20
+elif Ldir['blow_ups'] == 1:
+    dtsec = 15
+elif Ldir['blow_ups'] == 2:
+    dtsec = 12
+elif Ldir['blow_ups'] == 3:
+    dtsec = 9
+elif Ldir['blow_ups'] == 4:
+    dtsec = 6
+elif Ldir['blow_ups'] == 5:
+    dtsec = 4
 else:
     print('Unsupported number of blow ups: %d' % (Ldir['blow_ups']))
 
