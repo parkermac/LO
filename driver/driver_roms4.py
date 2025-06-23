@@ -52,25 +52,46 @@ if str(pth) not in sys.path:
     sys.path.append(str(pth))
 import Lfun
 
+# Command line arguments. Arguments without defaults are required
 parser = argparse.ArgumentParser()
-# arguments without defaults are required
+# Typically when you use these at the command line you can use the short version,
+# like "-g" but the long version works as well "--gridname". In the code the longname
+# is what is used.
+
+# Basic info to specify which model configuration to run
 parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
 parser.add_argument('-t', '--tag', type=str)        # e.g. v00
 parser.add_argument('-x', '--ex_name', type=str)    # e.g. uu0mb
-parser.add_argument('-r', '--run_type', type=str, default='backfill')   # forecast or backfill
+
+# Set the run_type
+parser.add_argument('-r', '--run_type', type=str, default='backfill')
+# choices: forecast or backfill
+
 parser.add_argument('-s', '--start_type', type=str, default='perfect')
-# newperfect, newcontinuation, perfect, or continuation
-# -0 and -1 only required for -r backfill
+# choices: new, newperfect, newcontinuation, perfect, or continuation
+
+# If the run type is backfill you need to set the time range
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
-parser.add_argument('-np', '--np_num', type=int) # e.g. 200, number of cores
-parser.add_argument('-N', '--cores_per_node', type=int) # 40 on klone (32 for gen2 nodes)
-# optional flag to use for nesting
+
+# Tell it how many cpu's (or cores) to use, and how many cores per slice or node
+parser.add_argument('-np', '--np_num', type=int) # e.g. 160, number of cores
+parser.add_argument('-N', '--cores_per_node', type=int) # 32 for cpu-g2 slices, 40 for old compute nodes
+
+# Optional flag used only for forecasts, so that they leave a clue if they are done for a given day.
+# This allows a backup job in the crontab to exist but only run if needed.
 parser.add_argument('--done_tag', type=str, default='3') # used in done_fn
-# optional flag to use a different type of node/slice (cpu-g2 vs compute)
+
+# Optional flag to use a different type of node/slice
 parser.add_argument('--cpu_choice', type=str, default='cpu-g2') # used in the sbatch call
-# optional flag to use a different group choice (macc or coenv)
+# Generally use cpu-gs unless you specifically want to use our older klone nodes.
+# Choices: cpu-g2 or compute
+
+# Optional flag to use a different group choice.
 parser.add_argument('--group_choice', type=str, default='macc') # used in the sbatch call
+# Choices: macc, coenv, ckpt-g2
+# NOTE: Check with Parker before using macc or coenv. ckpt-g2 is free for everyone.
+
 # various flags to facilitate testing
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
@@ -78,6 +99,7 @@ parser.add_argument('--short_roms', default=False, type=Lfun.boolean_string)
 parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
 parser.add_argument('--run_roms', default=True, type=Lfun.boolean_string)
 parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
+
 args = parser.parse_args()
 
 # check for required arguments
