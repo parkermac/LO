@@ -11,13 +11,11 @@
 
 ## Walltime 
 #SBATCH --time=02:00:00
-## SBATCH --time=01:20:00
 
 ## Memory per node
 #SBATCH --mem=128G
 
-## bug fix 2022.09.14
-##. /opt/ohpc/admin/lmod/lmod/init/profile
+#SBATCH --error=/gscratch/macc/parker/LO/driver/sbatch_error.txt
 
 module purge
 module load intel/oneAPI
@@ -27,7 +25,7 @@ NCDIR=/gscratch/macc/local/netcdf-icc
 export LD_LIBRARY_PATH=${NFDIR}/lib:${NCDIR}/lib:${LD_LIBRARY_PATH}
 
 echo -e "Pre: $(date)\n" # Timestamp to .out file before anything else
-env                      # Dump the environment to .out
+## env                      # Dump the environment to .out
 
 mpirun -np $np_num$ $roms_ex_dir$/$roms_ex_name$ $roms_out_dir$/liveocean.in > $roms_out_dir$/log.txt
 
