@@ -1011,6 +1011,125 @@ def P_debug(in_dict):
     else:
         plt.show()
 
+def P_courant(in_dict):
+    # Focused on debugging: displays max for all three Courant Numbers
+    vn_list = ['Cu','Cv','Cw']
+    G,S,T = zrfun.get_basic_info(in_dict['fn'])
+    ds = xr.open_dataset(in_dict['fn'])
+    if 'wetdry_mask_rho' in ds.data_vars:
+        do_wetdry = True
+    else:
+        do_wetdry = False
+    h = G['h']
+    nr,nc = h.shape
+    zeta = ds.zeta.to_numpy().squeeze()
+    zw = zrfun.get_z(h,zeta,S,only_w=True)
+    dz = np.diff(zw,axis=0)
+    dx = G['DX'].reshape((1,nr,nc))*np.ones((S['N'],1,1))
+    dy = G['DY'].reshape((1,nr,nc))*np.ones((S['N'],1,1))
+    dxu = dx[:,:,0:-1] + np.diff(dx,axis=2)/2
+    dyu = dy[:,:,0:-1] + np.diff(dy,axis=2)/2
+    dzu = dz[:,:,0:-1] + np.diff(dz,axis=2)/2
+    dxv = dx[:,0:-1,:] + np.diff(dx,axis=1)/2
+    dyv = dy[:,0:-1,:] + np.diff(dy,axis=1)/2
+    dzv = dz[:,0:-1,:] + np.diff(dz,axis=1)/2
+    dt = ds.dt.to_numpy()
+
+    def maxmin3(a):
+        # find the value and location of the max and min of a 3D array
+        try:
+            kmax,jmax,imax = np.unravel_index(np.nanargmax(a),a.shape)
+            amax = a[kmax,jmax,imax]
+            kmin,jmin,imin = np.unravel_index(np.nanargmin(a),a.shape)
+            amin = a[kmin,jmin,imin]
+        except ValueError:
+            amax, kmax, jmax, imax, amin, kmin, jmin, imin = (0,0,0,0,0,0,0,0)
+        return amax, kmax, jmax, imax, amin, kmin, jmin, imin
+    
+    # START
+    fs = 10
+    pfun.start_plot(fs=fs, figsize=(8*len(vn_list),10))
+    fig = plt.figure()
+    # PLOT CODE
+    ii = 1
+    for vn in vn_list:
+
+        if vn == 'Cu':
+            x = ds.lon_u.to_numpy()
+            y = ds.lat_u.to_numpy()
+            px, py = pfun.get_plon_plat(x,y)
+            v = ds['u'].to_numpy().squeeze()
+            if do_wetdry:
+                m = ds.wetdry_mask_u.to_numpy().squeeze()
+                nr,nc = m.shape
+                M = m.reshape((1,nr,nc)) * np.ones((S['N'],1,1))
+                v[M==0] = np.nan
+            else:
+                pass
+                # assume masked places are already nans
+            C = dt*v/dxu
+
+        elif vn == 'Cv':
+            x = ds.lon_v.to_numpy()
+            y = ds.lat_v.to_numpy()
+            px, py = pfun.get_plon_plat(x,y)
+            v = ds['v'].to_numpy().squeeze()
+            if do_wetdry:
+                m = ds.wetdry_mask_v.to_numpy().squeeze()
+                nr,nc = m.shape
+                M = m.reshape((1,nr,nc)) * np.ones((S['N'],1,1))
+                v[M==0] = np.nan
+            else:
+                pass
+                # assume masked places are already nans
+            C = dt*v/dxv
+
+        elif vn == 'Cw':
+            x = ds.lon_rho.to_numpy()
+            y = ds.lat_rho.to_numpy()
+            px, py = pfun.get_plon_plat(x,y)
+            v = ds['w'][0,1:,:,:].to_numpy().squeeze() # drop bottom point?
+            if do_wetdry:
+                m = ds.wetdry_mask_rho.to_numpy().squeeze()
+                nr,nc = m.shape
+                M = m.reshape((1,nr,nc)) * np.ones((S['N'],1,1))
+                v[M==0] = np.nan
+            else:
+                pass
+                # assume masked places are already nans
+            C = dt*v/dz
+        
+        amax, kmax, jmax, imax, amin, kmin, jmin, imin = maxmin3(C)
+
+        cmap='RdYlGn_r'
+
+        ax = fig.add_subplot(2, 3, ii)
+        cs = ax.pcolormesh(px, py, v[kmax,:,:], cmap=cmap)
+        pfun.add_coast(ax)
+        ax.axis(pfun.get_aa(ds))
+        pfun.dar(ax)
+        ax.plot(x[jmax,imax], y[jmax,imax],'*y', mec='k', markersize=15)
+        ax.set_title('Max %s=%0.3f (k,j,i)=(%d,%d,%d)' % (vn, amax, kmax, jmax, imax))
+
+        ax = fig.add_subplot(2, 3, ii+3)
+        cs = ax.pcolormesh(px, py, v[kmin,:,:], cmap=cmap)
+        pfun.add_coast(ax)
+        ax.axis(pfun.get_aa(ds))
+        pfun.dar(ax)
+        ax.plot(x[jmin,imin], y[jmin,imin],'oy', mec='k', markersize=10)
+        ax.set_title('Min %s=%0.3f (k,j,i)=(%d,%d,%d)' % (vn, amin, kmin, jmin, imin))
+
+        ii += 1
+
+    # FINISH
+    ds.close()
+    pfun.end_plot()
+    if len(str(in_dict['fn_out'])) > 0:
+        plt.savefig(in_dict['fn_out'])
+        plt.close()
+    else:
+        plt.show()
+
 def P_layer(in_dict):
     # START
     fs = 14
