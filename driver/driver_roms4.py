@@ -85,12 +85,12 @@ parser.add_argument('--done_tag', type=str, default='3') # used in done_fn
 # Optional flag to use a different type of node/slice
 parser.add_argument('--cpu_choice', type=str, default='cpu-g2') # used in the sbatch call
 # Generally use cpu-gs unless you specifically want to use our older klone nodes.
-# Choices: cpu-g2 or compute
+# Choices: cpu-g2, compute, or ckpt-g2
 
 # Optional flag to use a different group choice.
 parser.add_argument('--group_choice', type=str, default='macc') # used in the sbatch call
-# Choices: macc, coenv, ckpt-g2
-# NOTE: Check with Parker before using macc or coenv. ckpt-g2 is free for everyone.
+# Choices: macc, coenv
+# NOTE: Check with Parker before using macc or coenv. Not used when cpu_choice = ckpt-g2 (I think).
 
 # various flags to facilitate testing
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
