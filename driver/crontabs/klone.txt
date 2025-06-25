@@ -17,10 +17,10 @@ LOd=/gscratch/macc/parker/LO/driver
 00 09 * * * source ~/.bashrc; mail -s 'wgh forecast klone' pmacc@uw.edu < $LOd/wgh2_forecast.log
 01 09 * * * source ~/.bashrc; mail -s 'wgh forecast klone' kmhewett@uw.edu < $LOd/wgh2_forecast.log
 
-# 00 09 * * * source ~/.bashrc; python3 $LOd/driver_roms4.py -g oly1 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -np 160 -N 32 --done_tag o11 < /dev/null > $LOd/oly1_forecast.log
+00 09 * * * source ~/.bashrc; python3 $LOd/driver_roms4.py -g oly1 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -np 160 -N 32 --done_tag o11 < /dev/null > $LOd/oly1_forecast.log
 # 00 15 * * * source ~/.bashrc; python3 $LOd/driver_roms4.py -g oly1 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -np 160 -N 32 --done_tag o11 < /dev/null > $LOd/oly1_forecast_2.log
-# 00 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' pmacc@uw.edu < $LOd/oly1_forecast.log
-# 01 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' kmhewett@uw.edu < $LOd/oly1_forecast.log
+00 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' pmacc@uw.edu < $LOd/oly1_forecast.log
+01 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' kmhewett@uw.edu < $LOd/oly1_forecast.log
 
 # refresh this crontab
 00 12 * * * crontab <<< $(crontab -l)
