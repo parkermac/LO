@@ -352,7 +352,7 @@ LtracerSponge == F F                            ! temperature, salinity, inert
        GLS_P == 3.0d0                           ! K-epsilon
        GLS_M == 1.5d0
        GLS_N == -1.0d0
-    GLS_Kmin == 7.6d-6
+    GLS_Kmin == 1.6e-10        ! default was 7.6d-6
     GLS_Pmin == 1.0d-12
 
     GLS_CMU0 == 0.5477d0
@@ -385,7 +385,7 @@ LtracerSponge == F F                            ! temperature, salinity, inert
 
 ! Minimum depth for wetting and drying.
 
-       DCRIT == 0.10d0                     ! m
+       DCRIT == 0.50d0                     ! m
 
 ! Various parameters.
 
