@@ -15,6 +15,9 @@
 ## Memory per node
 #SBATCH --mem=128G
 
+## See if this flag helps (notes from Run Log 12, 12/9/2024)
+#SBATCH --exclusive
+
 #SBATCH --error=/gscratch/macc/parker/LO/driver/sbatch_error.txt
 
 module purge
