@@ -13,7 +13,10 @@
 #SBATCH --time=02:00:00
 
 ## Memory per node
-#SBATCH --mem=128G
+##SBATCH --mem=128G
+
+## Try requesting all memory on each node instead
+#SBATCH --mem=0
 
 ## See if this flag helps (notes from Run Log 12, 12/9/2024)
 #SBATCH --exclusive
