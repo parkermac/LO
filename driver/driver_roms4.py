@@ -335,7 +335,7 @@ while dt <= dt1:
                         print('run started ' + str(rrr))
                         sys.stdout.flush()
                     break
-                sleep(10)
+                sleep(60)
 
             # and then figure out if it has finished (keeps looking for two hours, not always enough?)
             for rrr in range(60):
