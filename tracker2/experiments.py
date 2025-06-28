@@ -191,6 +191,11 @@ def get_ic(TR):
                 plat00 = np.concatenate((plat00, plat00a))
             ii += 1
         pcs00 = np.zeros(plon00.shape)
+
+    elif exp_name == 'haro0':
+        # Looking at the difference between laminar and turbulent in Haro Strait
+        plon00, plat00 = ic_random_in_circle(-123.231, 48.5383, 0.2, 1000)
+        pcs00 = -0.5 * np.ones(plon00.shape)
         
     return plon00, plat00, pcs00
     
