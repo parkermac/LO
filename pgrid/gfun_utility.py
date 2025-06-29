@@ -205,7 +205,7 @@ def make_nudgcoef(dch, out_dir, N, NR, NC):
     ds.close()
 
 def GRID_PlusMinusScheme_rx0(MSK, Hobs, rx0max, AreaMatrix,
-    fjord_cliff_edges = True, shift=0):
+    fjord_cliff_edges = True):
     """
     This is a faster version of GRID_PlusMinusScheme_rx0_ORIG, with about 15x
     speedup in the 100x200 test grid.  It is comparable to the Matlab version.
@@ -226,7 +226,6 @@ def GRID_PlusMinusScheme_rx0(MSK, Hobs, rx0max, AreaMatrix,
     """
        
     HH=Hobs.copy()
-    HH = HH - shift
     AA = AreaMatrix.copy()
     MM = MSK.copy()
     R=(1-rx0max)/(1+rx0max)
@@ -309,6 +308,5 @@ def GRID_PlusMinusScheme_rx0(MSK, Hobs, rx0max, AreaMatrix,
     print('Number of iterations = ' + str(count))
     if count == maxcount:
         print('\n** WARNING: more iterations needed! **\n')
-    HH = HH + shift
     return HH
     

@@ -92,7 +92,7 @@ def default_choices():
     dch['excluded_wwtp'] = []
 
     # SMOOTHING
-    dch['use_min_depth'] = True
+    dch['use_min_depth'] = True # Should always be true. I should probably remove this choice.
     dch['min_depth'] = 4 # meters (positive down)
     dch['rx0max'] = 0.15
         
