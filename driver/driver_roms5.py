@@ -107,7 +107,7 @@ args = parser.parse_args()
 
 # check for required arguments
 argsd = args.__dict__
-for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'np_num', 'cores_per_node']:
+for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'tasks_per_node']:
     if argsd[a] == None:
         print('*** Missing required argument for driver_roms3.py: ' + a)
         sys.exit()
