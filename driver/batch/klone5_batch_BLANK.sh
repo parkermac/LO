@@ -32,7 +32,7 @@ export LD_LIBRARY_PATH=${NFDIR}/lib:${NCDIR}/lib:${LD_LIBRARY_PATH}
 echo -e "Pre: $(date)\n" # Timestamp to .out file before anything else
 ## env                      # Dump the environment to .out
 
-mpirun -np $np_num$ $roms_ex_dir$/$roms_ex_name$ $roms_out_dir$/liveocean.in > $roms_out_dir$/log.txt
+mpirun -np $tasks_per_node$ $roms_ex_dir$/$roms_ex_name$ $roms_out_dir$/liveocean.in > $roms_out_dir$/log.txt
 
 MPIRUN_EXIT_CODE=$?  # Capture exit code of mpirun
 
