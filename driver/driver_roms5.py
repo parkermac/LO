@@ -280,7 +280,7 @@ while dt <= dt1:
                         '-g', args.gridname, '-t', args.tag, '-x', args.ex_name,
                         '-r', 'backfill', '-s', start_type,
                         '-d', dt.strftime(Lfun.ds_fmt),
-                        '-bu', str(blow_ups), '-np', str(args.np_num),
+                        '-bu', str(blow_ups), '-np', str(args.tasks_per_node),
                         '-short_roms', str(args.short_roms)]
             proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             stdout, stderr = proc.communicate()
