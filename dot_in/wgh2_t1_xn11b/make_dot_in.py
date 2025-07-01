@@ -106,6 +106,9 @@ if multi_core:
     if Ldir['np_num'] == 160: # klone cpu-g2 slices (5*32)
         ntilei = '10' # number of tiles in I-direction
         ntilej = '16' # number of tiles in J-direction
+    elif Ldir['np_num'] == 192: # klone cpu-g2 slices (6*32)
+        ntilei = '12' # number of tiles in I-direction
+        ntilej = '16' # number of tiles in J-direction
     elif Ldir['np_num'] == 320: # klone cpu-g2 slices (10*32)
         ntilei = '16' # number of tiles in I-direction
         ntilej = '20' # number of tiles in J-direction
