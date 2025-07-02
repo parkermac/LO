@@ -29,7 +29,7 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
-nest_gridname = 'oly1'
+nest_gridname = 'oly2'
 
 # imports
 from subprocess import Popen as Po
@@ -54,22 +54,22 @@ elif Ldir['run_type'] == 'forecast':
 Example commands to emulate here:
 
 One day from scratch:
-python driver_forcing3.py -g oly1 -gtx cas7_t0_x4b -ro 0 -do_bio True -r backfill -s new -0 2024.10.07 -1 2024.10.07 -f ocnN > ocnN_oly1.log &
-python driver_forcing3.py -g oly1 -r backfill -0 2024.10.07 -1 2024.10.07 -f atm00 > atm00_oly1.log &
-python driver_forcing3.py -g oly1 -r backfill -0 2024.10.07 -1 2024.10.07 -tP trapsP00 -f trapsF00 > trapsF00_oly1.log &
+python driver_forcing3.py -g oly2 -gtx [gtagex] -ro 0 -do_bio True -r backfill -s continuation -0 2024.10.07 -1 2024.10.07 -f ocnN > ocnN_oly2.log &
+python driver_forcing3.py -g oly2 -r backfill -0 2024.10.07 -1 2024.10.07 -f atm00 > atm00_oly2.log &
+python driver_forcing3.py -g oly2 -r backfill -0 2024.10.07 -1 2024.10.07 -tP trapsP00 -f trapsF00 > trapsF00_oly2.log &
 
 or
 Forecast:
-python driver_forcing3.py -g oly1 -gtx cas7_t0_x4b -ro 0 -do_bio True -r backfill -s perfect -0 2024.10.07 -1 2024.10.09 -f ocnN > ocnN_oly1.log &
-python driver_forcing3.py -g oly1 -r forecast -f atm00 > atm00_oly1.log &
-python driver_forcing3.py -g oly1 -r forecast -tP trapsP00 -f trapsF00 > trapsF00_oly1.log &    
+python driver_forcing3.py -g oly2 -gtx [gtagex] -ro 0 -do_bio True -r backfill -s continuation -0 2024.10.07 -1 2024.10.09 -f ocnN > ocnN_oly2.log &
+python driver_forcing3.py -g oly2 -r forecast -f atm00 > atm00_oly2.log &
+python driver_forcing3.py -g oly2 -r forecast -tP trapsP00 -f trapsF00 > trapsF00_oly2.log &    
 """
 # make forcing
 
 tt0 = time()
 cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
-    '-do_bio', 'True', '-r', 'backfill', '-s', 'perfect',
+    '-do_bio', 'True', '-r', 'backfill', '-s', 'continuation',
     '-0', ds0, '-1', ds1, '-f', 'ocnN']
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
