@@ -2,9 +2,9 @@ LANG=en-US.UTF-8
 LOd=/gscratch/macc/parker/LO/driver
 
 # main forecast
-00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms5.py -g cas7 -t t1 -x x11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -tpn 160 --done_tag c11 < /dev/null > $LOd/cas7_forecast.log
-# 00 08 * * * source ~/.bashrc; python3 $LOd/driver_roms4.py -g cas7 -t t1 -x x11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -np 160 -N 32 --done_tag c11 < /dev/null > $LOd/cas7_forecast_2.log
-# 00 13 * * * source ~/.bashrc; python3 $LOd/driver_roms4.py -g cas7 -t t1 -x x11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -np 160 -N 32 --done_tag c11 < /dev/null > $LOd/cas7_forecast_3.log
+00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms5.py -g cas7 -t t1 -x x11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -tpn 192 --done_tag c11 < /dev/null > $LOd/cas7_forecast.log
+00 08 * * * source ~/.bashrc; python3 $LOd/driver_roms5.py -g cas7 -t t1 -x x11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -tpn 192 --done_tag c11 < /dev/null > $LOd/cas7_forecast_2.log
+00 13 * * * source ~/.bashrc; python3 $LOd/driver_roms5.py -g cas7 -t t1 -x x11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -tpn 192 --done_tag c11 < /dev/null > $LOd/cas7_forecast_3.log
 00 06 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' pmacc@uw.edu < $LOd/cas7_forecast.log
 00 07 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' pmacc@uw.edu < $LOd/cas7_forecast.log
 01 06 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' kmhewett@uw.edu < $LOd/cas7_forecast.log
@@ -12,15 +12,15 @@ LOd=/gscratch/macc/parker/LO/driver
 02 07 * * * source ~/.bashrc; mail -s 'LO forecast klone' darrd@uw.edu < $LOd/cas7_forecast.log
 
 # nested forecasts
-30 07 * * * source ~/.bashrc; python3 $LOd/driver_roms5.py -g wgh2 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -tpn 160 --done_tag w11 < /dev/null > $LOd/wgh2_forecast.log
-# 30 12 * * * source ~/.bashrc; python3 $LOd/driver_roms4.py -g wgh2 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -np 160 -N 32 --done_tag w11 < /dev/null > $LOd/wgh2_forecast_2.log
+30 07 * * * source ~/.bashrc; python3 $LOd/driver_roms5.py -g wgh2 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -tpn 192 --done_tag w11 < /dev/null > $LOd/wgh2_forecast.log
+30 12 * * * source ~/.bashrc; python3 $LOd/driver_roms5.py -g wgh2 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -tpn 192 --done_tag w11 < /dev/null > $LOd/wgh2_forecast_2.log
 00 09 * * * source ~/.bashrc; mail -s 'wgh forecast klone' pmacc@uw.edu < $LOd/wgh2_forecast.log
 01 09 * * * source ~/.bashrc; mail -s 'wgh forecast klone' kmhewett@uw.edu < $LOd/wgh2_forecast.log
 
-# 00 09 * * * source ~/.bashrc; python3 $LOd/driver_roms4.py -g oly1 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -np 160 -N 32 --done_tag o11 < /dev/null > $LOd/oly1_forecast.log
-# 00 15 * * * source ~/.bashrc; python3 $LOd/driver_roms4.py -g oly1 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -np 160 -N 32 --done_tag o11 < /dev/null > $LOd/oly1_forecast_2.log
-# 00 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' pmacc@uw.edu < $LOd/oly1_forecast.log
-# 01 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' kmhewett@uw.edu < $LOd/oly1_forecast.log
+00 09 * * * source ~/.bashrc; python3 $LOd/driver_roms5.py -g oly2 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -tpn 192 --done_tag o11 < /dev/null > $LOd/oly2_forecast.log
+00 15 * * * source ~/.bashrc; python3 $LOd/driver_roms5.py -g oly2 -t t1 -x xn11b -r forecast -s continuation --group_choice macc --cpu_choice cpu-g2 -tpn 192 --done_tag o11 < /dev/null > $LOd/oly2_forecast_2.log
+00 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' pmacc@uw.edu < $LOd/oly2_forecast.log
+01 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' kmhewett@uw.edu < $LOd/oly2_forecast.log
 
 # refresh this crontab
 00 12 * * * crontab <<< $(crontab -l)

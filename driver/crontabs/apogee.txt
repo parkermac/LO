@@ -26,6 +26,6 @@ LOa=/dat1/parker/LO_data/accounts
 01 09 * * * source ~/.bashrc; mail -s 'apogee post2' kmhewett@uw.edu < $LOd/post22.log
 
 # post3
-# 00 11 * * * source ~/.bashrc; python $LOd/driver_post3.py -gtx oly1_t1_xn11b -ro 0 -r forecast < /dev/null > $LOd/post33.log
-# 00 12 * * * source ~/.bashrc; mail -s 'apogee post3' pmacc@uw.edu < $LOd/post33.log
-# 01 12 * * * source ~/.bashrc; mail -s 'apogee post3' kmhewett@uw.edu < $LOd/post33.log
+00 11 * * * source ~/.bashrc; python $LOd/driver_post3.py -gtx oly2_t1_xn11b -ro 0 -r forecast < /dev/null > $LOd/post33.log
+00 12 * * * source ~/.bashrc; mail -s 'apogee post3' pmacc@uw.edu < $LOd/post33.log
+01 12 * * * source ~/.bashrc; mail -s 'apogee post3' kmhewett@uw.edu < $LOd/post33.log
