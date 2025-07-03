@@ -4,7 +4,7 @@ It is just like daymovie1 but with a different list of movies, aimed at nested r
 like oly1.
 
 Testing on mac:
-run post_main.py -gtx oly1_t0_xn4b -ro 0 -d 2024.12.04 -job daymovie3 -test True
+run post_main.py -gtx [gtagex] -ro 0 -d 2024.12.04 -job daymovie3 -test True
 
 """
 

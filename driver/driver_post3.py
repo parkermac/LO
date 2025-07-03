@@ -7,13 +7,13 @@ It is designed only to run for a single forecast, and expects to find the
 history files organized into one-day folders.
 
 Testing on mac:
-run driver_post3.py -gtx oly1_t0_xn4b -r backfill -d 2024.12.04 -ro 0 -test True
+run driver_post3.py -gtx [gtagex] -r backfill -d 2024.12.04 -ro 0 -test True
 
 Test on apogee:
-python driver_post3.py -gtx oly1_t0_xn4b -r forecast -ro 0 -test True < /dev/null > test_post3.log &
+python driver_post3.py -gtx [gtagex] -r forecast -ro 0 -test True < /dev/null > test_post3.log &
 
 To run for real on apogee
-python driver_post3.py -gtx oly1_t0_xn4b -r forecast -ro 0 < /dev/null > post3.log &
+python driver_post3.py -gtx [gtagex] -r forecast -ro 0 < /dev/null > post3.log &
 """
 
 import sys
