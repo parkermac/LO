@@ -140,7 +140,6 @@ for dt in dti:
     for fnum in range(N):
         fstr = ('000' + str(fnum))[-2:]
         fn = temp_out_dir / ('mean_temp_' + fstr + '.nc')
-
         if Ldir['testing']:
             if verbose:
                 print('  + ' + str(fn))
@@ -151,7 +150,20 @@ for dt in dti:
             else:
                 mean_full = (mean_full + ds).compute()
     
-    # save output
+    # add z_rho and z_w fields
+    NT, N, NR, NC = mean_full.salt.shape
+    mean_full.update({'z_rho':(('ocean_time', 's_rho', 'eta_rho', 'xi_rho'), np.nan*np.ones((NT, N, NR, NC)))})
+    mean_full.update({'z_w':(('ocean_time', 's_w', 'eta_rho', 'xi_rho'), np.nan*np.ones((NT, N+1, NR, NC)))})
+    mean_full.z_rho.attrs = {'units':'m', 'long_name': 'vertical position on s_rho grid, positive up'}
+    mean_full.z_w.attrs = {'units':'m', 'long_name': 'vertical position on s_w grid, positive up'}
+    h = ds.h.to_numpy()
+    zeta = mean_full.zeta[0,:,:].to_numpy().squeeze()
+    S_info_dict = Lfun.csv_to_dict(Ldir['grid'] / 'S_COORDINATE_INFO.csv')
+    z_rho, z_w = zrfun.get_z(h, zeta, S)
+    mean_full['z_rho'][0,:,:,:] = z_rho
+    mean_full['z_w'][0,:,:,:] = z_w
+
+    # save output, with compression
     out_fn = out_dir / ('monthly_mean_' + this_ym + '.nc')
 
     if Ldir['testing']:
@@ -159,7 +171,8 @@ for dt in dti:
             print(str(out_fn))
     else:
         out_fn.unlink(missing_ok=True)
-        mean_full.to_netcdf(out_fn, unlimited_dims=['ocean_time'])
+        Enc_dict = {vn:zrfun.enc_dict for vn in mean_full.data_vars}
+        mean_full.to_netcdf(out_fn, unlimited_dims=['ocean_time'], encoding=Enc_dict)
 
         if Ldir['testing']:
             ds_test = xr.open_dataset(out_fn)
