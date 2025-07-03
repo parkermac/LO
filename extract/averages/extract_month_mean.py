@@ -156,9 +156,10 @@ for dt in dti:
     mean_full.update({'z_w':(('ocean_time', 's_w', 'eta_rho', 'xi_rho'), np.nan*np.ones((NT, N+1, NR, NC)))})
     mean_full.z_rho.attrs = {'units':'m', 'long_name': 'vertical position on s_rho grid, positive up'}
     mean_full.z_w.attrs = {'units':'m', 'long_name': 'vertical position on s_w grid, positive up'}
-    h = ds.h.to_numpy()
+    h = mean_full.h.to_numpy()
     zeta = mean_full.zeta[0,:,:].to_numpy().squeeze()
     S_info_dict = Lfun.csv_to_dict(Ldir['grid'] / 'S_COORDINATE_INFO.csv')
+    S = zrfun.get_S(S_info_dict)
     z_rho, z_w = zrfun.get_z(h, zeta, S)
     mean_full['z_rho'][0,:,:,:] = z_rho
     mean_full['z_w'][0,:,:,:] = z_w
