@@ -12,16 +12,20 @@ Test on mac:
 run extract_month_mean -gtx cas7_t0_x4b -0 2020.01.01 -1 2020.03.31 -Nproc 4 -test True
 Just outputs info about input and output files.
 
-Run on apogee for 10 years:
-run extract_month_mean -gtx cas7_t0_x4b -0 2014.01.01 -1 2023.12.31
+Run on apogee for 11 years:
+python extract_month_mean.py -gtx cas7_t0_x4b -ro 2 -0 2014.01.01 -1 2019.12.31 > x4b_part_1.log &
+python extract_month_mean.py -gtx cas7_t0_x4b -ro 1 -0 2020.01.01 -1 2024.12.31 > x4b_part_2.log &
 
 NOTE: The 0 and 1 inputs just provide the year and month of the start and end for averages.
 The days are ignored. Using "-0 2017.01.01 -1 2017.01.31" will just produce
 month_mean_2017_01.nc
 
+NOTE: to run on a long run that is split across partitions you need to run all the
+months in each, and move them to one of the places, then make the climatology there.
+
 Performance:
 apogee (-Nproc 10, the default)
-## min per month: BEST CHOICE (## hours for 10 years)
+## 2 per month: BEST CHOICE (## hours for 10 years)
 
 """
 
