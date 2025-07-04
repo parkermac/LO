@@ -103,7 +103,7 @@ elif pt == 'anomaly':
 plt.close('all')
 pfun.start_plot(figsize=(8,12))
 fig = plt.figure()
-gs1 = gridspec.GridSpec(10,12, figure=fig)
+gs1 = gridspec.GridSpec(11,12, figure=fig)
 gs1.update(wspace=0.025, hspace=0.015) # set the spacing between axes. 
 
 ii = 0
