@@ -26,7 +26,7 @@ parser = argparse.ArgumentParser()
 parser.add_argument('-gtx', '--gtagex', default='cas7_t0_x4b', type=str)
 parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
 parser.add_argument('-0', '--ds0', default='2014.01.01', type=str)
-parser.add_argument('-1', '--ds1', default = '2023.12.31', type=str)
+parser.add_argument('-1', '--ds1', default = '2024.12.31', type=str)
 parser.add_argument('-pt', '--plot_type', default='mean', type=str) # mean or anomaly
 parser.add_argument('-vn', default='temp', type=str) # temp or oxygen
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
