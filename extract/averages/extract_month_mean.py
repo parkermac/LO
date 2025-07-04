@@ -25,7 +25,10 @@ months in each, and move them to one of the places, then make the climatology th
 
 Performance:
 apogee (-Nproc 10, the default)
-## 2 per month: BEST CHOICE (## hours for 10 years)
+## 2.2 minutes per month, 4 hours for 10 years
+
+Update 2025.07.04: I added z_rho and z_w to the files, and compressed when saving.
+Each output file is now about 780 MB, simlilar to a history file as expected.
 
 """
 
