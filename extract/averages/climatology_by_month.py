@@ -24,7 +24,7 @@ gtagex = 'cas7_t0_x4b'
 # For this run all the monthly means are in /dat1/parker/LO_roms/cas7_t0_x4b/averages
 # with names like "month_mean_2014_01.nc".
 
-years = range(2014,2024) # 2014-2023 is 10 years
+years = range(2014,2025) # 2014-2023 is 10 years
 averaging_factor = 1/len(years)
 
 in_dir = Path('/dat1/parker/LO_roms/cas7_t0_x4b/averages')
