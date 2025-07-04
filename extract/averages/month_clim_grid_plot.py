@@ -144,7 +144,7 @@ for fn1 in fn1_list:
     # ax1.axis('off')
     if ii in range(12):
         ax1.set_title(m_dict[month_list[ii]])
-    if ii in range(0,120,12):
+    if ii in range(0,132,12):
         ax1.set_ylabel(year_list[ii])
     ax1.set_xticklabels([])
     ax1.set_yticklabels([])
