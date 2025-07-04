@@ -30,7 +30,7 @@ averaging_factor = 1/len(years)
 in_dir = Path('/dat1/parker/LO_roms/cas7_t0_x4b/averages')
 out_dir = Path('/dat1/parker/LO_roms/cas7_t0_x4b/climatologies')
 if testing == False:
-    Lfun.make_dir(out_dir)
+    Lfun.make_dir(out_dir, clean=True)
 
 for month in range(1,13):
     tt0 = time()
