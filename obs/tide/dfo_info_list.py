@@ -10,7 +10,7 @@ this url:
 https://api.iwls-sine.azure.cloud-nuage.dfo-mpo.gc.ca/api/v1/stations?chs-region-code=PAC
 There are other API calls there that would get info for specific stations.
 
-The "code" keys correspond to those I hade from a few years ago in the ptools era,
+The "code" keys correspond to those I had from a few years ago in the ptools era,
 except with a "0" at the start.
 
 An example url to access hourly data looks like:
