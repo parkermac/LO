@@ -160,7 +160,7 @@ for fn1 in fn1_list:
     pfun.dar(ax1)
     # ax1.axis('off')
     if ii in range(12):
-        ax1.set_title(m_dict[month_list[ii]])
+        ax1.set_title(m_dict[int(month_list[ii])])
     if ii in range(0,nyears*12,12):
         ax1.set_ylabel(year_list[ii])
     ax1.set_xticklabels([])
