@@ -8,7 +8,7 @@ To get the full suite of plots the main things to change are -pt (mean or anomal
 and -vn (temp or oxygen).
 
 It assumes that you want to plot all years and all months that are available
-in the files in the LO_roms/[gtagex]/averages and climatologies folders that
+in the files in the LO_roms/[gtagex]/averages and /climatologies folders that
 you have. It does this by processing the directory contents.
 
 """
@@ -29,8 +29,6 @@ parser = argparse.ArgumentParser()
 # command line arguments
 parser.add_argument('-gtx', '--gtagex', default='cas7_t0_x4b', type=str)
 parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
-# parser.add_argument('-0', '--ds0', default='2014.01.01', type=str)
-# parser.add_argument('-1', '--ds1', default = '2023.12.31', type=str)
 parser.add_argument('-pt', '--plot_type', default='mean', type=str) # mean or anomaly
 parser.add_argument('-vn', default='temp', type=str) # temp or oxygen
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
@@ -51,10 +49,6 @@ if Ldir['roms_out_num'] == 0:
 elif Ldir['roms_out_num'] > 0:
     Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
 
-# dt0 = datetime.strptime(Ldir['ds0'], Lfun.ds_fmt)
-# dt1 = datetime.strptime(Ldir['ds1'], Lfun.ds_fmt)
-# dti = pd.date_range(dt0, dt1, freq='ME', inclusive='both')
-
 dir1 = Ldir['roms_out'] / Ldir['gtagex'] / 'averages'
 dir2 = Ldir['roms_out'] / Ldir['gtagex'] / 'climatologies'
 fn1_list = list(dir1.glob('*.nc'))
@@ -68,18 +62,6 @@ month_list = [item.name.split('.')[0].split('_')[-1] for item in fn1_list]
 
 fn2_list = list(dir2.glob('*.nc'))
 fn2_list.sort()
-
-# fn1_list = []
-# fn2_list = []
-# year_list = []
-# month_list = []
-# for dt in dti:
-#     ym_str = dt.strftime('%Y_%m')
-#     mo_str = ('000' + str(dt.month))[-2:]
-#     fn1_list.append(dir1 / ('monthly_mean_' + ym_str + '.nc'))
-#     fn2_list.append(dir2 / ('monthly_clim_' + mo_str + '.nc'))
-#     year_list.append(dt.year)
-#     month_list.append(dt.month)
 
 # find out how many years we have, to help format the plots
 year_list_unique = list(set(year_list))
@@ -137,9 +119,6 @@ for fn1 in fn1_list:
             f2 = ds2[vn][0,slev,:,:].values
             ds2.close()
 
-    # if Ldir['testing'] and (ii > 0):
-    #     pass
-    # elif (not Ldir['testing']) and (ii > 0):
     else:
         ds1 = xr.open_dataset(fn1)
         f1 = ds1[vn][0,slev,:,:].values
