@@ -7,6 +7,10 @@ The goal is to make it easier to see patterns.
 To get the full suite of plots the main things to change are -pt (mean or anomaly)
 and -vn (temp or oxygen).
 
+It assumes that you want to plot all years and all months that are available
+in the files in the LO_roms/[gtagex]/averages and climatologies folders that
+you have. It does this by processing the directory contents.
+
 """
 
 import xarray as xr
@@ -25,8 +29,8 @@ parser = argparse.ArgumentParser()
 # command line arguments
 parser.add_argument('-gtx', '--gtagex', default='cas7_t0_x4b', type=str)
 parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
-parser.add_argument('-0', '--ds0', default='2014.01.01', type=str)
-parser.add_argument('-1', '--ds1', default = '2024.12.31', type=str)
+# parser.add_argument('-0', '--ds0', default='2014.01.01', type=str)
+# parser.add_argument('-1', '--ds1', default = '2023.12.31', type=str)
 parser.add_argument('-pt', '--plot_type', default='mean', type=str) # mean or anomaly
 parser.add_argument('-vn', default='temp', type=str) # temp or oxygen
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
@@ -47,31 +51,38 @@ if Ldir['roms_out_num'] == 0:
 elif Ldir['roms_out_num'] > 0:
     Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
 
-# if Ldir['testing']:
-#     # hack to start from a month I have on my mac but still do 10 years
-#     dt0 = datetime.strptime('2020.01.01', Lfun.ds_fmt)
-#     dt1 = datetime.strptime('2029.12.31', Lfun.ds_fmt)
-# else:
-#     # the actual range of the monthly averages
-#     dt0 = datetime.strptime(Ldir['ds0'], Lfun.ds_fmt)
-#     dt1 = datetime.strptime(Ldir['ds1'], Lfun.ds_fmt)
-dt0 = datetime.strptime(Ldir['ds0'], Lfun.ds_fmt)
-dt1 = datetime.strptime(Ldir['ds1'], Lfun.ds_fmt)
-dti = pd.date_range(dt0, dt1, freq='ME', inclusive='both')
+# dt0 = datetime.strptime(Ldir['ds0'], Lfun.ds_fmt)
+# dt1 = datetime.strptime(Ldir['ds1'], Lfun.ds_fmt)
+# dti = pd.date_range(dt0, dt1, freq='ME', inclusive='both')
 
 dir1 = Ldir['roms_out'] / Ldir['gtagex'] / 'averages'
 dir2 = Ldir['roms_out'] / Ldir['gtagex'] / 'climatologies'
-fn1_list = []
-fn2_list = []
-year_list = []
-month_list = []
-for dt in dti:
-    ym_str = dt.strftime('%Y_%m')
-    mo_str = ('000' + str(dt.month))[-2:]
-    fn1_list.append(dir1 / ('monthly_mean_' + ym_str + '.nc'))
-    fn2_list.append(dir2 / ('monthly_clim_' + mo_str + '.nc'))
-    year_list.append(dt.year)
-    month_list.append(dt.month)
+fn1_list = (list(dir1.glob('*.nc'))).sort()
+
+# year list repeats each year 12 times
+year_list = [item.name.split('.')[0].split('_')[-2] for item in fn1_list]
+
+# month list repeats 01-12 as many times as there are years
+month_list = [item.name.split('.')[0].split('_')[-1] for item in fn1_list]
+
+fn2_list = (list(dir2.glob('*.nc'))).sort()
+
+# fn1_list = []
+# fn2_list = []
+# year_list = []
+# month_list = []
+# for dt in dti:
+#     ym_str = dt.strftime('%Y_%m')
+#     mo_str = ('000' + str(dt.month))[-2:]
+#     fn1_list.append(dir1 / ('monthly_mean_' + ym_str + '.nc'))
+#     fn2_list.append(dir2 / ('monthly_clim_' + mo_str + '.nc'))
+#     year_list.append(dt.year)
+#     month_list.append(dt.month)
+
+# find out how many years we have, to help format the plots
+year_list_unique = list(set(year_list))
+year_list_unique.sort() # in place
+nyears = len(year_list_unique)
 
 # plotting choices
 
@@ -101,9 +112,13 @@ elif pt == 'anomaly':
 # plotting
 
 plt.close('all')
-pfun.start_plot(figsize=(8,12))
+if Ldir['testing']:
+    # small plot for laptop
+    pfun.start_plot(figsize=(6,8))
+else:
+    pfun.start_plot(figsize=(8,12))
 fig = plt.figure()
-gs1 = gridspec.GridSpec(11,12, figure=fig)
+gs1 = gridspec.GridSpec(nyears,12, figure=fig)
 gs1.update(wspace=0.025, hspace=0.015) # set the spacing between axes. 
 
 ii = 0
@@ -144,7 +159,7 @@ for fn1 in fn1_list:
     # ax1.axis('off')
     if ii in range(12):
         ax1.set_title(m_dict[month_list[ii]])
-    if ii in range(0,132,12):
+    if ii in range(0,nyears*12,12):
         ax1.set_ylabel(year_list[ii])
     ax1.set_xticklabels([])
     ax1.set_yticklabels([])
