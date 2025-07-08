@@ -57,7 +57,8 @@ elif Ldir['roms_out_num'] > 0:
 
 dir1 = Ldir['roms_out'] / Ldir['gtagex'] / 'averages'
 dir2 = Ldir['roms_out'] / Ldir['gtagex'] / 'climatologies'
-fn1_list = (list(dir1.glob('*.nc'))).sort()
+fn1_list = list(dir1.glob('*.nc'))
+fn1_list.sort()
 
 # year list repeats each year 12 times
 year_list = [item.name.split('.')[0].split('_')[-2] for item in fn1_list]
@@ -65,7 +66,8 @@ year_list = [item.name.split('.')[0].split('_')[-2] for item in fn1_list]
 # month list repeats 01-12 as many times as there are years
 month_list = [item.name.split('.')[0].split('_')[-1] for item in fn1_list]
 
-fn2_list = (list(dir2.glob('*.nc'))).sort()
+fn2_list = list(dir2.glob('*.nc'))
+fn2_list.sort()
 
 # fn1_list = []
 # fn2_list = []
