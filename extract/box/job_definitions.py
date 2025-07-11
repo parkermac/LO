@@ -131,5 +131,8 @@ def get_box(job, Lon, Lat):
     elif job == 'surface2':
         aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
         vn_list = 'h,f,pm,pn,mask_rho,salt,temp,zeta,oxygen,phytoplankton,NO3'
+    elif job == 'lundquist':
+        aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
+        vn_list = 'h,f,pm,pn,mask_rho,temp,zeta'
         
     return aa, vn_list
