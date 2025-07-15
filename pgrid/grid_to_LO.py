@@ -83,26 +83,27 @@ except:
 gfu.make_nudgcoef(dch, out_dir, N, NR, NC)
 
 # Run traps_placement
-if dch['do_traps']:
-    print('\nRunning traps_placement and excluding selected items')
-    from subprocess import Popen as Po
-    from subprocess import PIPE as Pi
-    import pandas as pd
-    cmd_list = ['python', str(Ldir['LO'] / 'pre' / 'trapsP00' / 'traps_placement.py'), '-g', Gr['gridname']]
-    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    stdout, stderr = proc.communicate()
-    if len(stderr) > 0:
-        print(stderr.decode())
-    # if len(stdout) > 0:
-    #     print(stdout.decode())
-    # and edit out excluded triv and wwtp
-    tw_dir = Ldir['data'] / 'grids' / Gr['gridname']
-    for tw in ['triv','wwtp']:
-        in_fn = tw_dir / (tw + '_info.csv')
-        if in_fn.is_file():
-            in_df = pd.read_csv(in_fn, index_col='rname')
-            for item in dch['excluded_' + tw]:
-                in_df = in_df.drop(item)
-                print('Excluding %s' % (item))
-            in_df.to_csv(in_fn)
+if 'do_traps' in dch.keys():
+    if dch['do_traps']:
+        print('\nRunning traps_placement and excluding selected items')
+        from subprocess import Popen as Po
+        from subprocess import PIPE as Pi
+        import pandas as pd
+        cmd_list = ['python', str(Ldir['LO'] / 'pre' / 'trapsP00' / 'traps_placement.py'), '-g', Gr['gridname']]
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        if len(stderr) > 0:
+            print(stderr.decode())
+        # if len(stdout) > 0:
+        #     print(stdout.decode())
+        # and edit out excluded triv and wwtp
+        tw_dir = Ldir['data'] / 'grids' / Gr['gridname']
+        for tw in ['triv','wwtp']:
+            in_fn = tw_dir / (tw + '_info.csv')
+            if in_fn.is_file():
+                in_df = pd.read_csv(in_fn, index_col='rname')
+                for item in dch['excluded_' + tw]:
+                    in_df = in_df.drop(item)
+                    print('Excluding %s' % (item))
+                in_df.to_csv(in_fn)
 
