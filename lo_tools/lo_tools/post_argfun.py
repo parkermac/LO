@@ -131,7 +131,7 @@ def copy_to_kopah(Ldir, out_fn, subdir=''):
     to make the bucket
 
     Anyone can access files using a URL like:
-    https://s3.kopah.uw.edu/liveocean-share/f[date string/[filename]
+    https://s3.kopah.uw.edu/liveocean-share/f[date string]/[filename]
 
     """
     if Ldir['testing'] == False:
