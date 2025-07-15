@@ -1,6 +1,6 @@
 """
 This is the main program for making a box extraction of the daily forecast and sending
-the results to the APL server.
+the results to kopah.
 
 It creates a single NetCDF file containing fields on selected levels
 from the history files in a given day.
@@ -113,8 +113,8 @@ if not Ldir['testing']:
 
 print('\nPath to file:\n%s' % (str(out_fn)))
 
-# copy the file to the server
-post_argfun.copy_to_server(Ldir, out_fn)
+# copy the file to kopah
+post_argfun.copy_to_kopah(Ldir, out_fn)
 
 # -------------------------------------------------------
 

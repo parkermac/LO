@@ -121,4 +121,47 @@ def copy_to_server(Ldir, out_fn, subdir=''):
         print('** Did not copy output to server! **')
         print('Warning: copying extractions to server for sharing only works for parker from apogee.')
         print('Also it will not copy when testing is True.')
+
+def copy_to_kopah(Ldir, out_fn, subdir=''):
+    """
+    Copy the  extraction file to kopah and write a little "done" file.
+
+    I began by issuing the command:
+    s3cmd mb s3://liveocean-share
+    to make the bucket
+
+    """
+    if Ldir['testing'] == False:
+    
+        share_dir = 's3://liveocean-share/' + 'f' + Ldir['date_string'] + '/'
+    
+        is_done = False
+        try:
+            # (ii) copy the extraction to there
+            cmd_list = ['s3cmd','put',str(out_fn),share_dir,'--acl-public']
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            Lfun.messages(stdout, stderr, 'Copying extraction to ' + share_dir)
+            is_done = True
+        except Exception as e:
+            print('Problem moving file to kopak')
+            print(e)
+        
+        if is_done:
+            # (iii) then write a little text file to alert users
+            share_name = out_fn.name.replace('.nc','')
+            out_dir = out_fn.parent
+            done_fn = out_dir / (share_name + '_done.txt')
+            done_fn.unlink(missing_ok=True)
+            with open(done_fn, 'w') as ffout:
+                ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
+            cmd_list = ['s3cmd','put',str(done_fn),share_dir,'--acl-public']
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            Lfun.messages(stdout, stderr, 'Copying done file to server')
+            
+    else:
+        print('** Did not copy output to server! **')
+        print('Warning: you need kopah credentials to do this.')
+        print('Also it will not copy when testing is True.')
         
