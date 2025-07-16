@@ -3,8 +3,7 @@
 # Test of using klone compute nodes.
 
 source ~/.bashrc
-srun -p compute -A macc --pty bash -l
+srun -p cpu-g2 -A macc -n1 -c1
 conda activate loenv
 echo "Date = $(date)" > job_test.txt
 conda deactivate
-exit
