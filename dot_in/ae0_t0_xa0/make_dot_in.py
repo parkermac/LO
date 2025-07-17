@@ -215,17 +215,17 @@ for line in f:
 f.close()
 f2.close()
 
-# create bio_Banas.in #######################
-f = open(dot_in_dir / 'bio_Fennel_BLANK.in','r')
-bio_dot_in_name = 'bio_Banas.in'
-f3 = open(out_dir / bio_dot_in_name,'w')
-for line in f:
-    for var in D.keys():
-        if '$'+var+'$' in line:
-            line2 = line.replace('$'+var+'$', str(D[var]))
-            line = line2
-        else:
-            line2 = line
-    f3.write(line2)
-f.close()
-f3.close()
+# # create bio_Banas.in #######################
+# f = open(dot_in_dir / 'bio_Fennel_BLANK.in','r')
+# bio_dot_in_name = 'bio_Banas.in'
+# f3 = open(out_dir / bio_dot_in_name,'w')
+# for line in f:
+#     for var in D.keys():
+#         if '$'+var+'$' in line:
+#             line2 = line.replace('$'+var+'$', str(D[var]))
+#             line = line2
+#         else:
+#             line2 = line
+#     f3.write(line2)
+# f.close()
+# f3.close()
