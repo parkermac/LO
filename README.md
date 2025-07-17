@@ -80,7 +80,7 @@ Sometimes the remote machines will complain about this. One solution is to issue
 ```
 git config pull.ff only
 ```
-which means that your pull always does "fast forward" moving the local branch to the same state as the one in the cloud. This is appropriate if you are using the "one way" git workflow that I generally follow: only edit code on my laptop, push to the cloud, pull from the cloud to remote machines; **I never edit on remote machines. This helps me stay organized.**.
+which means that your pull always does "fast forward" moving the local branch to the same state as the one in the cloud. This is appropriate if you are using the "one way" git workflow that I generally follow: only edit code on my laptop, push to the cloud, pull from the cloud to remote machines; **I never edit on remote machines. This helps me stay organized.**. Another fix if you have made an edit on a remote machine that you want to ignore is `git stash` which keeps your changes (somewhere?) but allows git pull to work again. I wish I was more expert with git!
 
 #### (3) Create the (loenv) environment
 

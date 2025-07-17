@@ -46,12 +46,10 @@ Contacts at NANOOS:
 - Alex Dioso <adioso@uw.edu>
 - Troy Tanner <troyt@apl.washington.edu>
 - Roxanne J Carini <rjcarini@uw.edu>
-- Craig Risien <craig.risien@oregonstate.edu>
 - Jan A. Newton <janewton@uw.edu> Admin.
 
 Contacts at SCOOT:
 - Evan Goodwin <evan@scootscience.com>
-- Iwen Su <iwen@scootscience.com>
 - Connor Dibble <connor.dibble@scootscience.com>
 
 ---
@@ -85,7 +83,6 @@ Output: `sequim.nc` [54 MB]
 
 Contacts:
 - Zhaoqing Yang <Zhaoqing.Yang@pnnl.gov>,
-- Clair Ma <clair.ma@pnnl.gov>
 
 ---
 
