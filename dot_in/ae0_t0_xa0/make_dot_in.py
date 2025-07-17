@@ -6,7 +6,7 @@ It is designed to work with the BLANK.in file, replacing things like
 $whatever$ with meaningful values.
 
 To test from ipython on mac:
-run make_dot_in -g [gridname] -t [tag] -x [ex_name] -r backfill -s continuation -d 2019.07.04 -bu 0 -np 160
+run make_dot_in -g [gridname] -t [tag] -x [ex_name] -r backfill -s continuation -d 2019.07.04 -bu 0 -np 32
 
 If you call with -short_roms True it will create a .in that runs for a shorter time or
 writes history files more frequently (exact behavior is in the code below).  This can
@@ -109,9 +109,9 @@ if multi_core:
     elif Ldir['np_num'] == 192: # klone cpu-g2 slices (6*32)
         ntilei = '12' # number of tiles in I-direction
         ntilej = '16' # number of tiles in J-direction
-    elif Ldir['np_num'] == 320: # klone cpu-g2 slices (10*32)
-        ntilei = '16' # number of tiles in I-direction
-        ntilej = '20' # number of tiles in J-direction
+    elif Ldir['np_num'] == 64: # klone cpu-g2 slices (2*32)
+        ntilei = '4' # number of tiles in I-direction
+        ntilej = '16' # number of tiles in J-direction
     elif Ldir['np_num'] == 400: # klone
         ntilei = '20' # number of tiles in I-direction
         ntilej = '20' # number of tiles in J-direction
