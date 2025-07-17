@@ -147,9 +147,9 @@ ds.close()
 
 # test for success
 if out_fn.is_file():
-    result_dict['result'] = 'success' # success or fail
+    result_dict['result'] = 'SUCCESS'
 else:
-    result_dict['result'] = 'fail'
+    result_dict['result'] = 'FAIL'
 
 # *******************************************************
 

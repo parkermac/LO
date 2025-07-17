@@ -3,7 +3,7 @@ This makes the OCN forcing files for an analytical run.
 
 Designed to run only as backfill.
 
-You would want to run with -st new to get the ini file for a new run.
+You would want to run with -s new to get the ini file for a new run.
 
 Testing:
 
@@ -140,12 +140,12 @@ if Ldir['testing']:
     # print info about the files to the screen
     for fn in nc_list:
         print_info(out_dir / fn)
-result_dict['result'] = 'success'
+result_dict['result'] = 'SUCCESS'
 for fn in nc_list:
     if (out_dir / fn).is_file():
         pass
     else:
-       result_dict['result'] = 'fail'
+       result_dict['result'] = 'FAIL'
 
 # *******************************************************
 
