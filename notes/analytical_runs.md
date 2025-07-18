@@ -89,5 +89,5 @@ scp -r [username]@apogee.ocean.washington.edu:/dat1/[username]/LO_data/grids/ae0
 
 Run the analytical case, from the head node, with a command like this.
 ```
-python3 driver_roms5.py -g ae0 -t t0 -x xa0 -s new -0 2020.01.01 -1 2020.01.02 --group_choice coenv --cpu_choice cpu-g2 -tpn 64 < /dev/null > ae.log &
+python3 driver_roms5a.py -g ae0 -t t0 -x xa0 -s newcontinuation -0 2020.01.01 -1 2020.01.02 --group_choice coenv --cpu_choice cpu-g2 -tpn 64 < /dev/null > ae.log &
 ```
