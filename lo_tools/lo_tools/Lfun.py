@@ -185,7 +185,7 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=2):
     it will start with ocean_his_0001.nc on the first day instead of the default which
     is to start with ocean_his_0025.nc on the day before.
 
-    NEW 2025.06/20: for list_type = 'hourly0'
+    NEW 2025.06.20: for list_type = 'hourly0'
     which will start with ocean_his_0001.nc on the first day instead of the default which
     is to start with ocean_his_0025.nc on the day before.
     This is identical to passing his_num = 1, but may be more convenient, especially

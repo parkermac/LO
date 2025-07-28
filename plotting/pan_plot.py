@@ -42,7 +42,7 @@ parser.add_argument('-ro', '--roms_out_num', default=0, type=int)
 parser.add_argument('-0', '--ds0', default='2017.07.04', type=str)
 parser.add_argument('-1', '--ds1', type=str)
 parser.add_argument('-lt', '--list_type', default='snapshot', type=str)
-# Choices for -lt: snapshot, hourly, daily, lowpass, monthly_mean
+# Choices for -lt: snapshot, hourly, hourly0, daily, lowpass, monthly_mean
 
 # arguments that allow you to bypass the interactive choices
 parser.add_argument('-hn', '--his_num', default=2, type=int)
