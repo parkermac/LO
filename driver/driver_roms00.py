@@ -15,6 +15,9 @@ For testing/debugging these flags can be very useful:
 --short_roms True (do a very short run, just a few timesteps)
 --move_his False (don't move the results to apogee)
 
+Testing on mac
+run driver_roms00 -g cas7 -t t1 -x x11b -r backfill -0 2025.07.04 -s continuation -np 192 -cpu cpu-g2 -grp macc -vip True -v True --get_forcing False --run_roms False --move_his False
+
 """
 
 import sys, os
@@ -22,10 +25,12 @@ import shutil
 import argparse
 from datetime import datetime, timedelta
 from pathlib import Path
-import subprocess
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
 from time import time, sleep
 import random
 import string
+from math import ceil
 
 # Add the path to lo_tools by hand so that it we can import Lfun on klone
 # without loenv. In general we write code to run on klone using only the
@@ -63,28 +68,28 @@ parser.add_argument('-s', '--start_type', type=str, default='continuation')
 
 # If the run type is backfill you need to set the time range
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
-parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
+parser.add_argument('-1', '--ds1', type=str) #  this is set to ds0 if omitted
 
-# The next three flags are needed for compute resource allocation.
-
-# Specify how many cpu's (cores) to use
-parser.add_argument('-tpn', '--tasks_per_node', type=int) # e.g. 160, number of cores to use, up to 192
-
-# Optional flag to use a different type of node/slice
-parser.add_argument('--cpu_choice', type=str, default='cpu-g2') # used in the sbatch call
-# Generally use cpu-gs unless you specifically want to use our older klone nodes.
+# The next two/three flags are needed for compute resource allocation.
+#
+# Set how many cpu's (cores) to use.
+parser.add_argument('-np', '--np_num', type=int) # e.g. 160, number of cores
+#
+# Choose which type of computer resource
+parser.add_argument('-cpu','--cpu_choice', type=str) # used in the sbatch script
 # Choices: cpu-g2, compute, or ckpt-g2
-
-# Optional flag to use a different group choice.
-parser.add_argument('--group_choice', type=str, default='macc') # used in the sbatch call
+#
+# Choose which group (not needed when using --cpu_choice ckpt_g2)
+parser.add_argument('-grp','--group_choice', type=str) # used in the sbatch script
 # Choices: macc, coenv
-# NOTE: Check with Parker before using macc or coenv. Not used when cpu_choice = ckpt-g2.
+# NOTE: Check with Parker before using macc or coenv.
 
 # Optional flag used only for forecasts, so that they leave a clue if they are done for a given day.
-# This allows a backup job in the crontab to exist but only run if needed.
-parser.add_argument('--done_tag', type=str, default='3') # used in done_fn
+# This allows a backup job in the crontab to exist but only run if needed. By using different
+# done_tags we can have several different forecasts running, with backups, at the same time.
+parser.add_argument('-done','--done_tag', type=str, default='00')
 
-# various flags to facilitate testing
+# Optional flags to facilitate testing.
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
 parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
 parser.add_argument('--short_roms', default=False, type=Lfun.boolean_string)
@@ -92,16 +97,28 @@ parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
 parser.add_argument('--run_roms', default=True, type=Lfun.boolean_string)
 parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
 
+# Specialized flag, only for top-priority jobs like the daily forecasts 
+parser.add_argument('-vip','--exclusive', default=False, type=Lfun.boolean_string)
+
 # >>> END Command Line Arguments <<<
 
 args = parser.parse_args()
 
 # check for required arguments
 argsd = args.__dict__
-for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'tasks_per_node']:
+for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'np_num', 'cpu_choice']:
     if argsd[a] == None:
-        print('*** Missing required argument for driver_roms3.py: ' + a)
+        print('*** Missing required argument for driver_roms##.py: ' + a)
         sys.exit()
+if (argsd['cpu_choice'] == 'cpu-g2') and (argsd['group_choice'] not in ['macc','coenv']):
+    print('*** Need a --group_choice for this --cpu_choice.')
+    sys.exit()
+if (argsd['cpu_choice'] == 'compute') and (argsd['group_choice'] != 'macc'):
+    print('*** Need --group_choice macc for --cpu_choice compute.')
+    sys.exit()
+if (argsd['run_type'] == 'backfill') and (argsd['ds0'] == None):
+    print('*** Need at least -0 YYYY.MM.DD for -r backfill')
+    sys.exit()
 
 # get Ldir
 Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
@@ -110,7 +127,7 @@ Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
 # and are specified in get_lo_info.py.
 remote_user = Ldir['remote_user']
 remote_machine = Ldir['remote_machine']
-remote_dir0 = Ldir['remote_dir0']
+remote_dir0 = Ldir['remote_dir0'] # NOTE: this is a string, not a Path object
 local_user = Ldir['local_user']
 
 # set time range to process
@@ -132,7 +149,7 @@ if args.run_type == 'forecast':
         sys.exit()
 elif args.run_type == 'backfill': # you have to provide at least ds0 for backfill
     ds0 = args.ds0
-    if len(args.ds1) == 0:
+    if args.ds1 == None:
         ds1 = ds0
     else:
         ds1 = args.ds1
@@ -195,8 +212,7 @@ while dt <= dt1:
     if user_dot_in_dir.is_dir():
         dot_in_dir = user_dot_in_dir
     
-    # Decide where to look for executable.
-    # use updated ROMS
+    # Decide where to look for ROMS executable.
     roms_ex_dir = Ldir['parent'] / 'LO_roms_user' / Ldir['ex_name']
     roms_ex_name = 'romsM'
     
@@ -215,46 +231,38 @@ while dt <= dt1:
             which_force, force_choice = line.strip().split(',')
             force_dict[which_force] = force_choice
     
+    # Get the forcing
     if args.get_forcing:
-        for fff in range(10):
-            # We put this in a loop to allow it to try several times. This is prompted
-            # by intermittent ssh_exchange_identification errors, particularly on mox.
-            got_forcing = True
-            tt0 = time()
-            # Name the place where the forcing files will be copied from
-            remote_dir = remote_user + '@' + remote_machine + ':' + remote_dir0
-            Lfun.make_dir(force_dir, clean=True)
-            # Copy the forcing files, one folder at a time.
-            for force in force_dict.keys():
-                if force == 'open':
-                    pass
-                else:
-                    force_choice = force_dict[force]
-                    if (args.run_type == 'backfill') or (force_choice == 'ocnN'):
-                        F_string = f_string
-                    elif args.run_type == 'forecast':
-                        F_string = f_string0
-                    cmd_list = ['scp','-r',
-                        remote_dir + '/LO_output/forcing/' + Ldir['gridname'] + '/' + F_string + '/' + force_choice,
-                        str(force_dir)]
-                    proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                    stdout, stderr = proc.communicate()
-                    if len(stderr) > 0:
-                        got_forcing = False
-                    messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
-            print(' - time to get forcing = %d sec' % (time()-tt0))
-            sys.stdout.flush()
-            if got_forcing == True:
-                break
+        tt0 = time()
+        # Name the place where the forcing files will be copied from
+        remote_dir = remote_user + '@' + remote_machine + ':' + remote_dir0
+        Lfun.make_dir(force_dir, clean=True)
+        # Copy the forcing files, one folder at a time.
+        for force in force_dict.keys():
+            if force == 'open':
+                pass
             else:
-                sleep(60)
-        if got_forcing == False:
-            print('Error getting forcing, fff = %d' % (fff))
-            sys.exit()
+                force_choice = force_dict[force]
+                if (args.run_type == 'backfill') or (force_choice == 'ocnN'):
+                    F_string = f_string
+                elif args.run_type == 'forecast':
+                    F_string = f_string0
+                cmd_list = ['scp','-r',
+                    remote_dir + '/LO_output/forcing/' + Ldir['gridname'] + '/' + F_string + '/' + force_choice,
+                    str(force_dir)]
+                proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+                stdout, stderr = proc.communicate()
+                if len(stderr) > 0:
+                    print('Error getting forcing %s' % (force))
+                    sys.exit()
+                    # got_forcing = False
+
+                messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
+        print(' - time to get forcing = %d sec' % (time()-tt0))
     else:
         print(' ** skipped getting forcing')
         
-    # Loop over blow ups.
+    # Run ROMS. Loop over blow ups.
     blow_ups = 0
     if args.short_roms:
         blow_ups_max = 0
@@ -262,7 +270,6 @@ while dt <= dt1:
         blow_ups_max = 5
     roms_worked = False
     while blow_ups <= blow_ups_max:
-        # print((' - Blow-ups = ' + str(blow_ups)))
         sys.stdout.flush()
 
         if args.run_dot_in:
@@ -271,26 +278,68 @@ while dt <= dt1:
                         '-g', args.gridname, '-t', args.tag, '-x', args.ex_name,
                         '-r', 'backfill', '-s', start_type,
                         '-d', dt.strftime(Lfun.ds_fmt),
-                        '-bu', str(blow_ups), '-np', str(args.tasks_per_node),
+                        '-bu', str(blow_ups), '-np', str(args.np_num),
                         '-short_roms', str(args.short_roms)]
-            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Make dot in', args.verbose)
             
             # Create batch script
-            batch_name = 'klone5_make_batch.py'
+            f  = open(Ldir['LO'] / 'driver' / 'batch' / 'klone00_batch_BLANK.sh','r')
+            f2 = open(roms_out_dir / 'klone_batch.sh','w')
             # generate a random jobname
             jobname = ''.join(random.choices(string.ascii_lowercase, k=5))
-            cmd_list = ['python3', str(Ldir['LO'] / 'driver' / 'batch' / batch_name),
-                '-xd', str(roms_ex_dir),
-                '-rxn', roms_ex_name,
-                '-rod', str(roms_out_dir),
-                '-tpn', str(args.tasks_per_node),
-                '-x', Ldir['ex_name'],
-                '-j', jobname]
-            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Create batch script', args.verbose)
+
+            # make choices about compute allocation
+            np_num = args.np_num # integer
+            if args.cpu_choice == 'compute': # compute nodes only have 40 cores
+                ntasks_per_node = 40
+                if np_num >= ntasks_per_node:
+                    number_of_nodes = int(ceil(np_num / ntasks_per_node))
+                else:
+                    number_of_nodes = 1
+                    ntasks_per_node = np_num
+            if args.cpu_choice in ['cpu-g2', 'ckpt-g2']: # cpu-g2 nodes have 192 cores
+                ntasks_per_node = 192
+                if np_num >= ntasks_per_node:
+                    number_of_nodes = int(ceil(np_num / ntasks_per_node))
+                else:
+                    number_of_nodes = 1
+                    ntasks_per_node = np_num
+            if args.exclusive:
+                # only run this job on the node, and use all memory
+                sbatch_exclusive_line = '#SBATCH --exclusive'
+                sbatch_mem = '0'
+            else:
+                sbatch_exclusive_line = ''
+                sbatch_mem = '128G'
+                
+            in_dict = {
+                'jobname':jobname,
+                'number_of_nodes':number_of_nodes,
+                'ntasks_per_node':ntasks_per_node,
+                'sbatch_mem':sbatch_mem,
+                'sbatch_exclusive_line':sbatch_exclusive_line,
+                'np_num':args.np_num,
+                'roms_ex_dir':roms_ex_dir,
+                'roms_ex_name':roms_ex_name,
+                'roms_out_dir':roms_out_dir,
+            }
+            if args.verbose:
+                print('Info for sbatch script:')
+                for k in in_dict.keys():
+                    print(' %s: %s' % (k, str(in_dict[k])))
+
+            for line in f:
+                for var in in_dict.keys():
+                    if '$'+var+'$' in line: 
+                        line2 = line.replace('$'+var+'$', str(in_dict[var]))
+                        line = line2
+                    else:
+                        line2 = line
+                f2.write(line2)
+            f.close()
+            f2.close()
         else:
             print(' ** skipped making dot_in and batch script')
             args.run_roms = False # never run ROMS if we skipped making the dot_in
@@ -298,85 +347,38 @@ while dt <= dt1:
         if args.run_roms:
             tt0 = time()
             # Run ROMS using the batch script.
-            cmd_list = ['sbatch', '-p', args.cpu_choice, '-A', args.group_choice,
-                str(roms_out_dir / 'klone_batch.sh')]
-            proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            
-            # now we need code to wait until the run has completed
-            
-            # these are for checking on the run using squeue
-            cmd_list = ['squeue', '-p', args.cpu_choice, '-A', args.group_choice]
+            if args.group_choice != None:
+                cmd_list = ['sbatch', '-p', args.cpu_choice, '-A', args.group_choice,
+                    str(roms_out_dir / 'klone_batch.sh')]
+            else:
+                cmd_list = ['sbatch', '-p', args.cpu_choice,
+                    str(roms_out_dir / 'klone_batch.sh')]
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            messages(stdout, stderr, 'Run ROMS', args.verbose)
+            print('returncode = %d' % (proc.returncode))
 
-            # first figure out if it has started
+            # Error trap to fail gracefully if the run takes too long to start
+            if args.group_choice != None:
+                cmd_list = ['squeue', '-p', args.cpu_choice, '-A', args.group_choice]
+            else:
+                cmd_list = ['squeue', '-p', args.cpu_choice]
             for rrr in range(10):
                 if rrr == 9:
                     print('Took too long for job to start: quitting')
                     sys.exit()
-                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = proc.communicate()
-                if jobname not in stdout.decode():
+                proc1 = Po(cmd_list, stdout=Pi, stderr=Pi)
+                stdout1, stderr1 = proc1.communicate()
+                if jobname not in stdout1.decode():
                     if args.verbose:
                         print('still waiting for run to start ' + str(rrr))
-                        sys.stdout.flush()
-                elif jobname in stdout.decode():
+                        sys.stdout1.flush()
+                elif jobname in stdout1.decode():
                     if args.verbose:
                         print('run started ' + str(rrr))
-                        sys.stdout.flush()
+                        sys.stdout1.flush()
                     break
                 sleep(60)
-
-            # and then figure out if it has finished (keeps looking for two hours, not always enough?)
-            for rrr in range(60):
-                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = proc.communicate()
-                messages(stdout, stderr, 'Finished?', args.verbose)
-                if jobname in stdout.decode():
-                    if args.verbose:
-                        print('still waiting ' + str(rrr))
-                        sys.stdout.flush()
-                    else:
-                        pass
-                elif (jobname not in stdout.decode()) and (len(stderr) == 0):
-                    print(' - time to run ROMS = %d sec' % (time()-tt0))
-                    sys.stdout.flush()
-                    break
-                else:
-                    pass
-                sleep(120)
-    
-            # The code here is a lot of claptrap to make sure there is a log file
-            
-            # A bit of checking to make sure that the log file exists...
-            lcount = 0
-            while not log_file.is_file():
-                sleep(10)
-                if args.verbose:
-                    print(' - lcount = %d' % (lcount))
-                    sys.stdout.flush()
-                lcount += 1
-                
-                # trap for possible sbatch errors
-                if lcount >= 10:
-                    print(' - too long to write log.txt, assume there was some sbatch error')
-                    sys.exit()
-                    
-            # ...and that it is done being written to.
-            llcount = 0
-            log_done = False
-            while log_done == False:
-                sleep(3)
-                cmd_list = ['lsof', '-u', local_user,'|','grep',str(log_file)]
-                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = proc.communicate()
-                if args.verbose:
-                    print(' - llcount = %d' % (llcount))
-                    sys.stdout.flush()
-                llcount += 1
-                if str(log_file) not in stdout.decode():
-                    if args.verbose:
-                        print(' - log done and closed')
-                        sys.stdout.flush()
-                    log_done = True
                     
             # Look in the log file to see what happened, and decide what to do.
             roms_worked = False
@@ -448,27 +450,17 @@ while dt <= dt1:
             # (i) make sure the output directory exists
             cmd_list = ['ssh', remote_user + '@' + remote_machine,
                 'mkdir -p ' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
-            for rrr in range(10):
-                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = proc.communicate()
-                if len(stderr) == 0: # it worked
-                    break
-                else:
-                    sleep(20) # try again
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Make output directory on ' + remote_machine, args.verbose)
             # (ii) move the contents of roms_out_dir
             cmd_list = ['scp','-r',str(roms_out_dir),
-                remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
-            for rrr in range(10):
-                proc = subprocess.Popen(cmd_list, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-                stdout, stderr = proc.communicate()
-                if len(stderr) == 0: # it worked
-                    break
-                else:
-                    sleep(20) # try again
+            remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
             # (iii) delete roms_out_dir and forcing files from several days in the past
-            dt_prev = dt - timedelta(days=4)
+            dt_prev = dt - timedelta(days=6)
             f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
             roms_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / f_string_prev
             roms_bu_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / (f_string_prev + '_blowup')
