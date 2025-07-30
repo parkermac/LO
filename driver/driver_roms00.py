@@ -176,7 +176,7 @@ def messages(stdout, stderr, mtitle, verbose):
         print(stderr.decode())
     sys.stdout.flush()
 
-# Loop over days
+# RUNNING ROMS: Loop over days
 dt = dt0
 original_start_type = args.start_type
 while dt <= dt1:
@@ -356,29 +356,9 @@ while dt <= dt1:
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Run ROMS', args.verbose)
-            print('returncode = %d' % (proc.returncode))
-
-            # Error trap to fail gracefully if the run takes too long to start
-            if args.group_choice != None:
-                cmd_list = ['squeue', '-p', args.cpu_choice, '-A', args.group_choice]
-            else:
-                cmd_list = ['squeue', '-p', args.cpu_choice]
-            for rrr in range(10):
-                if rrr == 9:
-                    print('Took too long for job to start: quitting')
-                    sys.exit()
-                proc1 = Po(cmd_list, stdout=Pi, stderr=Pi)
-                stdout1, stderr1 = proc1.communicate()
-                if jobname not in stdout1.decode():
-                    if args.verbose:
-                        print('still waiting for run to start ' + str(rrr))
-                        sys.stdout1.flush()
-                elif jobname in stdout1.decode():
-                    if args.verbose:
-                        print('run started ' + str(rrr))
-                        sys.stdout1.flush()
-                    break
-                sleep(60)
+            if args.verbose:
+                print('sbatch returncode = %d' % (proc.returncode))
+            print(' - time to run ROMS = %d sec' % (time()-tt0))
                     
             # Look in the log file to see what happened, and decide what to do.
             roms_worked = False
