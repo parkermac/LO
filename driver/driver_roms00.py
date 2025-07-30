@@ -104,7 +104,7 @@ parser.add_argument('-vip','--exclusive', default=False, type=Lfun.boolean_strin
 
 args = parser.parse_args()
 
-# check for required arguments
+# check for required arguments and other input errors
 argsd = args.__dict__
 for a in ['gridname', 'tag', 'ex_name', 'run_type', 'start_type', 'np_num', 'cpu_choice']:
     if argsd[a] == None:
@@ -355,9 +355,12 @@ while dt <= dt1:
                     str(roms_out_dir / 'klone_batch.sh')]
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Run ROMS', args.verbose)
-            if args.verbose:
+            if proc.returncode != 0:
+                # Halt the program if there is a non-zero returncode from sbatch.
+                print('EXITING due to sbatch error')
                 print('sbatch returncode = %d' % (proc.returncode))
+                sys.exit()
+            messages(stdout, stderr, 'Run ROMS', args.verbose)
             print(' - time to run ROMS = %d sec' % (time()-tt0))
                     
             # Look in the log file to see what happened, and decide what to do.
