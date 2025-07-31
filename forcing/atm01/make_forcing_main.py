@@ -7,10 +7,13 @@ short test:
 run make_forcing_main.py -g cas6 -r backfill -d 2019.07.04 -test True -f atm00
 
 test a forecast:
-run make_forcing_main.py -g cas6 -r forecast -d 2019.07.04 -f atm0
+run make_forcing_main.py -g cas7 -r forecast -d 2019.07.04 -f atm0
 
 test a forecast that will go to planB:
 run make_forcing_main.py -g cas6 -r forecast -d 2019.07.05 -f atm0
+
+NEW 2025.07.30: For start_type = forecast this writes the forcing files
+to separate day folders.
 
 """
 
@@ -31,9 +34,9 @@ import time
 import shutil
 import xarray as xr
 import numpy as np
-import seawater as sw
-from scipy.interpolate import griddata
 from scipy.spatial import cKDTree
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
 
 from lo_tools import Lfun, zfun, zrfun
 
@@ -43,7 +46,9 @@ if Ldir['testing']:
     reload(afun)
 
 # This directory is created, along with Info and Data subdirectories, by ffun.intro()
-out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
+out_dir_data = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc'] / 'Data'
+# We use this as a scratch directory for processsed files. Then either move the results to the
+# main folder, or split them up into the forecast days.
 
 # Set where are files located, and other situational choices.
 do_d3 = True
@@ -260,7 +265,7 @@ if planB == False:
             D[vn][tt,:,:] = this_field
             
     for vn in outvar_list:
-        out_fn = out_dir / (vn + '.nc')
+        out_fn = out_dir_data / (vn + '.nc')
         out_fn.unlink(missing_ok=True)
         ds = xr.Dataset()
         vinfo = zrfun.get_varinfo(vn)
@@ -286,8 +291,58 @@ if planB == False:
         ds.to_netcdf(out_fn, encoding=Enc_dict)
         ds.close()
 
+    # Then organize the results:
+    # - backfill: move from Data folder to main folder
+    # - forecast: split using ncks into separate day folders
+    out_fn_list = []
+    if Ldir['run_type'] == 'backfill':
+        in_dir = out_dir_data
+        out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
+        for vn in outvar_list:
+            in_fn = in_dir / (vn + '.nc')
+            out_fn = out_dir / (vn + '.nc')
+            out_fn.unlink(missing_ok=True)
+            shutil.move(in_fn, out_fn)
+            out_fn_list.append(out_fn)
+    elif Ldir['run_type'] == 'forecast':
+        in_dir = out_dir_data
+        ds00 = Ldir['date_string']
+        dt00 = datetime.strptime(ds00, Lfun.ds_fmt)
+        for day in range(Ldir['forecast_days']):
+            dt0 = dt00 + timedelta(days=day)
+            dt1 = dt00 + timedelta(days=day+1)
+            ds0 = datetime.strftime(dt0, format=Lfun.ds_fmt)
+            ds1 = datetime.strftime(dt1, format=Lfun.ds_fmt)
+            ds0_for_ncks = datetime.strftime(dt0, format='%Y-%m-%d')
+            ds1_for_ncks = datetime.strftime(dt1, format='%Y-%m-%d')
+            out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + ds0) / Ldir['frc']
+            Lfun.make_dir(out_dir)
+            for vn in outvar_list:
+                in_fn = in_dir / (vn + '.nc')
+                out_fn = out_dir / (vn + '.nc')
+                out_fn.unlink(missing_ok=True)
+                out_fn_list.append(out_fn)
+                ds = xr.open_dataset(in_fn)
+                # start creating the command list
+                cmd_list = ['ncks']
+                for vn1 in ds.data_vars:
+                    vnda = ds[vn1] # get the DataArray for each variables
+                    vnda_dim_tup = vnda.dims
+                    for item in vnda_dim_tup:
+                        if 'time' in item:
+                            time_name = item
+                            cmd_list += ['-d',time_name+','+ds0_for_ncks+','+ds1_for_ncks]
+                    cmd_list.append(str(in_fn))
+                    cmd_list.append(str(out_fn))
+                    #print(cmd_list)
+                    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+                    stdout, stderr = proc.communicate()
+                    if len(stderr) > 0:
+                        print('Error using ncks for %s' % (vn))
+                        sys.exit()
+
 if planB == True:
-    # We make this an in instead of elif because planB might have been set to True
+    # We make this an if instead of elif because planB might have been set to True
     # in the if planB == True section above.  Not great coding but I'm not sure how to
     # handle it more cleanly.
     result_dict['note'] = 'planB'
@@ -296,7 +351,6 @@ if planB == True:
     dt_today = datetime.strptime(ds_today, Lfun.ds_fmt)
     dt_yesterday = dt_today - timedelta(days=1)
     ds_yesterday = datetime.strftime(dt_yesterday, format=Lfun.ds_fmt)
-    
     
     LOogf_f_today = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
     LOogf_f_yesterday = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + ds_yesterday) / Ldir['frc']
@@ -336,10 +390,14 @@ if planB == True:
 
 # test for success
 result_dict['result'] = 'SUCCESS'
-for vn in outvar_list:
-    fn = fn = out_dir / (vn + '.nc')
+for fn in out_fn_list:
     if fn.is_file():
-        pass
+        if 'Pair' in fn.name:
+            print(str(fn))
+            ds = xr.open_dataset(fn)
+            print(ds)
+            print('')
+        #pass
     else:
        result_dict['result'] = 'FAIL'
        
