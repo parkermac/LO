@@ -11,7 +11,6 @@ invar_list = ['Q2', 'T2', 'PSFC', 'U10', 'V10','RAINC', 'RAINNC', 'SWDOWN', 'GLW
 
 outvar_list = ['Pair','rain','swrad','lwrad_down','Tair','Qair','Uwind','Vwind']
 
-    
 def get_wrf_grid(fn):
     wds = xr.open_dataset(fn)
     lon = wds['XLONG'].values.squeeze()
