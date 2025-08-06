@@ -142,7 +142,9 @@ if args.run_type == 'forecast':
         ds1 = ds0
         dt1 = dt0
     # Check to see if the forecast has already been run, and if so, exit!
-    done_fn = Ldir['LO'] / 'driver' / ('forecast' + args.done_tag + '_done_' + ds0 + '.txt')
+    done_dir = Ldir['LO'] / 'driver' / 'done_tags'
+    Lfun.make_dir(done_dir)
+    done_fn = done_dir / ('forecast' + args.done_tag + '_done_' + ds0 + '.txt')
     if done_fn.is_file():
         print('Forecast has already run successfully - exiting')
         print(str(done_fn))
