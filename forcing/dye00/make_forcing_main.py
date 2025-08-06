@@ -1,19 +1,12 @@
 """
-This makes the ocn forcing files for ROMS, including the banas-fennel bio fields.
+This adds dye to ocean and river forcing files.
 
-It uses GLORYS (glorys, hereafter) fields instead of HYCOM. Since the glorys fields
-are daily averages is greatly simplifies the processing.
+It relies on -gtx to find which forcing files it should add to,
+looking in forcing_list.csv.
 
 Testing:
 
-run make_forcing_main.py -g cas7 -r backfill -d 2017.01.01 -f ocnG00 -test True
-
-run make_forcing_main.py -g cas7 -r forecast -d 2025.06.17 -f ocnG00 -test True
-
-NOTE: the main effect of -test True is that it does the interpolation of glorys
-fields to the roms grid much faster, by skipping the nearest-neighbor search
-step. This is good for testing, but cannot be used for real applications because
-it leaves a lot of unfilled cells.
+run make_forcing_main.py -g cas7 -r backfill -d 2025.06.17 -f dye00 -gtx cas7_dye0_x11b -ro 1
 
 """
 
@@ -33,70 +26,75 @@ from time import time
 import numpy as np
 import pandas as pd
 
-from lo_tools import Lfun, zfun, zrfun
+from lo_tools import Lfun, zfun, zrfun, Ofun2_nc
     
 # This directory is created, along with Info and Data subdirectories, by ffun.intro()
 out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / Ldir['frc']
+# NOTE: we will also make new directories for the forcing we add dye to, by appending
+# Ldir['frc'] to the original forcing firectory, so for example ocnG00 would give rise to ocnG00dye00.
 
 # Datetime of the day we are working on
 this_dt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
 
-# *** automate when to set add_CTD to True ***
-if this_dt == datetime(2012,10,7):
-    print('WARNING: adding CTD data to extrapolation!!')
-    add_CTD = True
+# Look to see if there is a user instance of this dot_in, and if so, use it.
+user_dot_in_dir = Ldir['LOu'] / 'dot_in' / Ldir['gtagex']
+dot_in_dir = Ldir['LO'] / 'dot_in' / Ldir['gtagex']
+if user_dot_in_dir.is_dir():
+    dot_in_dir = user_dot_in_dir
 
-# Set time limits for subsequent processing
-if Ldir['run_type'] == 'forecast':
-    nd_f = np.ceil(Ldir['forecast_days'])
-    dt0 = this_dt
-    dt1 = this_dt + timedelta(days=int(nd_f))
-    dt_list = pd.date_range(dt0,dt1,freq='D')
-elif Ldir['run_type'] == 'backfill':
-    dt0 = this_dt
-    dt1 = this_dt + timedelta(days=1)
-if verbose:
-    print('dt0 = ' + str(dt0))
-    print('dt1 = ' + str(dt1))
-# make the list of datetimes (really a DatetimeIndex)
-dt_list = pd.date_range(dt0,dt1,freq='D')
-# make a list of datestrings to use with file names
-dstr_list = [dt.strftime(Lfun.ds_fmt) for dt in dt_list]
-# and a dict relating them
-dstr_dict = dict(zip(dt_list,dstr_list))
+# find which forcing files to work on, based on -gtx
+force_dict = dict()
+with open(dot_in_dir / 'forcing_list.csv', 'r') as f:
+    for line in f:
+        which_force, force_choice = line.strip().split(',')
+        force_dict[which_force] = force_choice
 
 # Add dye to climatology file making use of zrfun.get_varinfo().
 tt0 = time()
-out_fn = out_dir / 'ocean_clm.nc'
+in_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + Ldir['date_string']) / force_dict['ocn']
+in_fn = in_dir /'ocean_clm.nc'
+out_dir = in_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / \
+    ('f' + Ldir['date_string']) / (force_dict['ocn']+Ldir['frc'])
+Lfun.make_dir(out_dir)
+out_fn = out_dir /'ocean_clm.nc'
 out_fn.unlink(missing_ok=True)
-ds = xr.Dataset()    
-for vn in V.keys():
-    # tt00 = time()
-    vinfo = zrfun.get_varinfo(vn, vartype='climatology')
-    tname = vinfo['time_name']
-    dims = (vinfo['time_name'],) + vinfo['space_dims_tup']
-    ds[vn] = (dims, V[vn])
-    ds[vn].attrs['units'] = vinfo['units']
-    ds[vn].attrs['long_name'] = vinfo['long_name']
-    # time coordinate
-    ds[tname] = ((tname,), ot_vec)
-    ds[tname].attrs['units'] = Lfun.roms_time_units
-# add other coordinates
-for gtag in ['rho','u','v']:
-    ds.coords['lon_'+gtag] = (('eta_'+gtag, 'xi_'+gtag), G['lon_'+gtag])
-    ds.coords['lat_'+gtag] = (('eta_'+gtag, 'xi_'+gtag), G['lat_'+gtag])
-# add depth and z_rho
-ds['h'] = (('eta_rho', 'xi_rho'), G['h'])
-ds['z_rho_time'] = (('z_rho_time',), ot_vec)
-ds['z_rho_time'].attrs['units'] = Lfun.roms_time_units
-ds['z_rho'] = (('z_rho_time', 's_rho', 'eta_rho', 'xi_rho'), VV['z_rho'])
+ds = xr.open_dataset(in_fn)
+s = ds.salt # DataArray
+vinfo = zrfun.get_varinfo('dye_', vartype='climatology')
+for dn in range(2):
+    print(dn)
+    dn_string = ('000' + str(dn+1))[-2:]
+    dye_name = 'dye_' + dn_string
+    d = 0 * s
+    d.name=dye_name
+    ds[dye_name] = d
+
+# for vn in V.keys():
+#     # tt00 = time()
+#     vinfo = zrfun.get_varinfo(vn, vartype='climatology')
+#     tname = vinfo['time_name']
+#     dims = (vinfo['time_name'],) + vinfo['space_dims_tup']
+#     ds[vn] = (dims, V[vn])
+#     ds[vn].attrs['units'] = vinfo['units']
+#     ds[vn].attrs['long_name'] = vinfo['long_name']
+#     # time coordinate
+#     ds[tname] = ((tname,), ot_vec)
+#     ds[tname].attrs['units'] = Lfun.roms_time_units
+# # add other coordinates
+# for gtag in ['rho','u','v']:
+#     ds.coords['lon_'+gtag] = (('eta_'+gtag, 'xi_'+gtag), G['lon_'+gtag])
+#     ds.coords['lat_'+gtag] = (('eta_'+gtag, 'xi_'+gtag), G['lat_'+gtag])
+# # add depth and z_rho
+# ds['h'] = (('eta_rho', 'xi_rho'), G['h'])
+# ds['z_rho_time'] = (('z_rho_time',), ot_vec)
+# ds['z_rho_time'].attrs['units'] = Lfun.roms_time_units
+# ds['z_rho'] = (('z_rho_time', 's_rho', 'eta_rho', 'xi_rho'), VV['z_rho'])
 # and save to NetCDF
 Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
 ds.to_netcdf(out_fn, encoding=Enc_dict)
-ds.close()
+# ds.close()
 print('- Add dye to clm file: %0.2f sec' % (time()-tt0))
 sys.stdout.flush()
-
 
 # if Ldir['start_type'] == 'new':
 #     # Write initial condition file if needed
@@ -145,5 +143,5 @@ def print_info(fn):
 
 # *******************************************************
 
-result_dict['end_dt'] = datetime.now()
-ffun.finale(Ldir, result_dict)
+# result_dict['end_dt'] = datetime.now()
+# ffun.finale(Ldir, result_dict)
