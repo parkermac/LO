@@ -4,10 +4,10 @@ This is the main program for making the ATM forcing file.
 Test on mac in ipython:
 
 test a forecast (wgh2 runs faster than cas7):
-run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm0
+run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm0 -test True
 
 test a forecast that will go to planB:
-run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.05 -f atm0
+run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.05 -f atm0 -test True
 
 NEW 2025.07.30: For start_type = forecast this writes the forcing files
 to separate day folders.
@@ -15,6 +15,8 @@ to separate day folders.
 NOTE: atm_fun.py calls the old seawater routines in order to use the
 "dist" method for getting grid angles for vector wind rotation.
 Eventually we should just do this by hand.
+
+NOTE: Only effect of -test True is to be verbose.
 
 """
 
@@ -341,18 +343,18 @@ if planB == False:
                             if 'time' in item:
                                 time_name = item
                                 cmd_list += ['-d',time_name+','+ds0_for_ncks+','+ds1_for_ncks]
-                        cmd_list.append(str(in_fn))
-                        cmd_list.append(str(out_fn))
-                        #print(cmd_list)
-                        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-                        stdout, stderr = proc.communicate()
-                        if len(stderr) > 0:
-                            print('Error using ncks for %s' % (vn))
-                            planB = True
-                            break
+                    cmd_list.append(str(in_fn))
+                    cmd_list.append(str(out_fn))
+                    #print(cmd_list)
+                    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+                    stdout, stderr = proc.communicate()
+                    if len(stderr) > 0:
+                        print('Error using ncks for %s' % (vn))
+                        planB = True
+                        break
                     ds.close()
         except Exception as e:
-            print('Error using nxks to split forecast forcing')
+            print('Error using ncks to split forecast forcing')
             print(e)
             planB = True
     # Cleaning up
