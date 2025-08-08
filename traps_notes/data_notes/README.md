@@ -92,6 +92,8 @@ Figure 4 depicts locations of all rivers in Mohamedali et al. (2020), and the me
     - which are listed in LO_data/trapsD01/wwtp_names.xlsx
 - river lat/lon are averaged because some river mouths are split across two grid cells in SSM.
 
+See the "Exceptions and nuances in the code" section in [LO/traps_notes](https://github.com/parkermac/LO/tree/main/traps_notes) for more information.
+
 </details>
 
 <details><summary>Wasielewski et al. (2024)</summary>
