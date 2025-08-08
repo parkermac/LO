@@ -8,7 +8,9 @@ LO_traps is a module that contains all data and scripts required to add TRAPS to
 
 The TRAPS integration module is a work in progress. If you encounter any bugs or have general feedback, please email auroral@uw.edu. Thanks!
 
-All data and source locations have been downloaded from Washington State Department of Ecology's [website](https://fortress.wa.gov/ecy/ezshare/EAP/SalishSea/SalishSeaModelBoundingScenarios.html). These data are also used in the Salish Sea Model.
+<!-- All data and source locations have been downloaded from Washington State Department of Ecology's [website](https://fortress.wa.gov/ecy/ezshare/EAP/SalishSea/SalishSeaModelBoundingScenarios.html). These data are also used in the Salish Sea Model. -->
+
+For information on the data sources used and how they are handled in LiveOcean, please visit [LO/traps_notes/data_notes](https://github.com/parkermac/LO/tree/main/traps_notes/data_notes).
 
 ---
 ## Getting set up
@@ -20,10 +22,10 @@ To enable TRAPS, you need to git pull on the LO repo to get the latest functiona
 The most important folders to look for are:
 
 So you should have:
-- LO/pre/trapsP00
-- LO/forcing/trapsF00
+- LO/pre/trapsP01
+- LO/forcing/trapsN00
 
-Feel free to copy LO/forcing/trapsF00 into your LO_user repo, and modify as desired. The TRAPS workflow should still work fine.
+Feel free to copy LO/forcing/trapsN00 into your LO_user repo, and modify as desired. The TRAPS workflow should still work fine.
 
 </details>
 
@@ -31,15 +33,18 @@ Feel free to copy LO/forcing/trapsF00 into your LO_user repo, and modify as desi
 
 The data used to generate TRAPS forcing is stored on Perigee.
 
-On Perigee, copy the **files** in /data1/auroral/LO_data/trapsD00* folder into LO_data/trapsD00 on your computer and whichever machine you will use to generate forcing (Perigee or Apogee). **You do not need to copy the folders titled nonpoint_sources and point_sources. These folders contain bulky raw Ecology data. The two .nc files contain the condensed version of these data that are used by the TRAPS code**
+On Apogee, copy the files in /dat1/auroral/LO_data/trapsD01 folder into LO_data/trapsD01 on your computer and whichever machine you will use to generate forcing (Perigee or Apogee). **You do not need to copy the folders titled "wasielewski_etal2024" and "mohamedali_etal2020". These folders contain raw data. The files in "processed_data" contain the condensed version of these data that are used by the TRAPS code**
 
-Once this is complete you should have an LO_data/trapsD00 folder with the following files:
+Once this is complete you should have an LO_data/trapsD01 folder with the following files:
 - **LiveOcean_SSM_rivers.xlsx:** Excel sheet with list of duplicate rivers in LiveOcean and the Salish Sea Model. When you create TRAPS climatology and when you generate forcing, the scripts will look at this excel sheet to determine which rivers to omit from LiveOcean. This ensures that TRAPS does not add duplicate rivers to LiveOcean.
-- **wwtp_open_close_dates.xlsx:** Excel sheet with a list of WWTPs and the year that they closed or opened.
-- **all_nonpoint_source_data.nc**: Ecology's timeseries data of state variables and lat/lon coordinates for all river mouths. Used in LO_traps/user/pre/trapsP## to generate climatology files.
-- **all_point_source_data.nc:** Ecology's timeseries data of state variables and lat/lon coordinates for all point sources. Used in LO_traps/user/pre/trapsP## to generate climatology files.
+- **wwtp_names.xlsx:** Excel sheet with list of WWTPs in the Mohamedali et al. (2020) and Wasielewski et al. (2024) datasets. The naming convention is slightly different between the two datasets, so this file is used to look up the different names for the same WWTPs.
+- **SSM_source_info.xlsx:** Downloaded metadata from the Mohamedali et al. (2020) dataset
 
-*Note: trapsD00 is the current version of Ecology data used to generate traps climatologies and forcing. If new data becomes available, I will increment the version number to be trapsD01.
+- **processed_data/river_data_mohamedali_etal_2020.nc**: Processed Mohamedali et al. (2020) imeseries data of state variables and lat/lon coordinates for all river mouths. Used in LO/pre/trapsP01 to generate climatology files.
+- **processed_data/wwtp_data_mohamedali_etal_2020.nc**: Processed Mohamedali et al. (2020) imeseries data of state variables and lat/lon coordinates for all WWTPs. Used in LO/pre/trapsP01 to generate climatology files.
+- **processed_data/wwtp_data_wasielewski_etal_2024.nc**: Processed Wasielewski et al. (2024) timeseries data of state variables and lat/lon coordinates for all WWTPs. Used in LO/pre/trapsP01 to generate climatology files and in LO/forcing/trapsN00 to generate forcing.
+
+*Note: trapsD01 is the current version of data used to generate traps climatologies and forcing. Please see [LO/traps_notes/data_notes](https://github.com/parkermac/LO/tree/main/traps_notes/data_notes) for more information on thow these data were handled.
 
 </details>
 
