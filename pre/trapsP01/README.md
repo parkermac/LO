@@ -5,7 +5,7 @@ This README describes the processing scripts which converts raw point source (WW
 ---
 ## Data Processing Steps
 
-<details><summary><strong>rawdata_2netCDF.py</strong></summary>
+<details><summary><strong><code>rawdata_2netCDF.py</code></strong></summary>
 
 This script compiles all of the excel files from Mohamedali et al. (2020) and the csv files from Wasielewski et al. (2024) into three netCDF files. These .nc files are used for later processing in the TRAPS integration workflow.
 
@@ -39,7 +39,7 @@ Files located in **trapsP01/testing/scripts**
 
 *Note: these scripts are not necessary to the TRAPS workflow. However, they are here as testing and exploratory tools for the WWTPs in the two datasets.*
 
-<details><summary><strong>explore_loading_profiles_before_trapsP01_processing.py</strong></summary>
+<details><summary><strong><code>explore_loading_profiles_before_trapsP01_processing.py</code></strong></summary>
 
 This script was created prior to writing the processing scripts in trapsP01. The intention of this script was to explore the point source loading data in Mohamedali et al. (2020) and Wasielewski et al. (2024).
 
@@ -49,7 +49,7 @@ Output figures from this script are saved to **LO_output/loading_test/point_sour
 
 </details>
 
-<details><summary><strong>post_ncfile_processing_figures.py</strong></summary>
+<details><summary><strong><code>post_ncfile_processing_figures.py</code></strong></summary>
 
 This script was created to verify that the processing script, rawdata_2netCDF, generated the correct datasets.
 
@@ -70,7 +70,7 @@ There are three main climatology scripts:
 - `make_climatology_moh20_tinyrivs.py`: Creates climatology files for river mouths using Mohamedali et al. (2020) data in LO_data/processed_data/river_data_mohamedali_etal_2020.nc. This script does not generate climatology for pre-existing rivers in LiveOcean.
 - `make_climatology_moh20_LOrivbio.py`: Creates biogeochemistry climatology files for all pre-existing LiveOcean rivers for which Mohamedali et al. (2020) has data in LO_data/processed_data/river_data_mohamedali_etal_2020.nc. This script does not generate climatology for tiny rivers, nor does it generate flowrate or temperature climatology.
 
-These scripts generate climatology pickle files in LO_output/pre/trapsP##/[source type]/lo_base/Data_historical.
+These scripts generate climatology pickle files in LO_output/pre/trapsP01/[source type]/lo_base/Data_historical.
 
 Climatologies are generated for the following variables:
 - flow (TRAPS only)
@@ -85,13 +85,13 @@ Climatologies are generated for the following variables:
 
 <details><summary><strong>Algorithm</strong></summary>
 
-The structure of these scripts are all similar, so they will be explained generally. There are a few nuances in `make_climatology_tinyrivers.py` which are discussed explicitly.
+The structure of these scripts are all similar, so they will be explained generally. There are a few nuances in `make_climatology_moh20_tinyrivs.py` which are discussed explicitly.
 
-1. First, raw data are read from LO_data/trapsD##/all_nonpoint_source_data.nc and LO_data/trapsD##/all_point_source_data.nc. 
+1. First, raw data are read from LO_data/trapsD01/processed_data. 
 
->>> **River notes:** For rivers, the script also reads the list of pre-existing LO rivers from LO_data/trapsD##/LiveOcean_SSM_rivers.xlsx. The pre-existing rivers are omitted from  tinyriver climatology. The non-pre-existing rivers are omitted from LOrivbio climatology.
+>>> **River notes:** For rivers, the script also reads the list of pre-existing LO rivers from LO_data/trapsD01/LiveOcean_SSM_rivers.xlsx. The pre-existing rivers are omitted from  tinyriver climatology. The non-pre-existing rivers are omitted from LOrivbio climatology.
 
->>> **Tiny river notes:** In the raw Ecology data, there are several tiny rivers with unrealistic biogeochemistry parameters (i.e. zero DO, negative TIC, etc.). These "weird rivers" are temporarily removed from climatology generation. They are handled separately in Step 4.
+>>> **Tiny river notes:** In the raw Mohamedali et al. (2020) data, there are several tiny rivers with unrealistic biogeochemistry parameters (i.e. zero DO, negative TIC, etc.). These "weird rivers" are temporarily removed from climatology generation. They are handled separately in Step 4.
 
 2. Then, the script creates empty dataframes for DO, discharge, temperature, NO3, NH4, TIC, and TAlk. For every source, the script then fills these dataframes with the average yearly climatology of the full 1999-2017 timeseries from Ecology. Essentially, climatologies are the "average year" of each source. The script also calculates the standard deviations of these climatologies.
 
@@ -108,14 +108,14 @@ The structure of these scripts are all similar, so they will be explained genera
 
 This is a config file that allows for modularity. This file contains the name of the LO_data/trapsD## that the user wants to use for climatology generation.
 
-In theory, different versions of trapsD## allows the user to pick different versions of Ecology data to use, should updates be released in the future. However, there is currently only one traps data version: **trapsD00**
+In theory, different versions of trapsD## allows the user to pick different versions of Ecology data to use, should updates be released in the future. The current set of code is compatible with data version: **trapsD01**
 
 ---
 ## climatology_all_source_types.sh
 
 This shellscript automates the climatology generation process.
 
-To use TRAPS, users need to generate climatology for three TRAPS types: point sources, tiny rivers, and pre-existing LO rivers. Running this script will automatically step through the make_climatology scripts for each of these sources types (so users do not need to independently run three different climatology scripts).
+To use TRAPS, users need to generate climatology for three TRAPS types: WWTPs, tiny rivers, and pre-existing LO rivers. Running this script will automatically step through the make_climatology scripts for each of these sources types (so users do not need to independently run multiple different climatology scripts).
 
 ---
 ## traps_placement.py & traps_helper.py
