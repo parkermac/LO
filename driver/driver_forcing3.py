@@ -43,7 +43,7 @@ parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['ro
 parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocnN forcing
 
 # optional argument to select different version of traps pre
-parser.add_argument('-tP', '--trapsP', type=str, default='trapsP00') # LO/pre/trapsP## version
+parser.add_argument('-tP', '--trapsP', type=str, default='trapsP01') # LO/pre/trapsP## version
 
 args = parser.parse_args()
 
