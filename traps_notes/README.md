@@ -39,7 +39,6 @@ Once this is complete you should have an LO_data/trapsD01 folder with the follow
 - **LiveOcean_SSM_rivers.xlsx:** Excel sheet with list of duplicate rivers in LiveOcean and the Salish Sea Model. When you create TRAPS climatology and when you generate forcing, the scripts will look at this excel sheet to determine which rivers to omit from LiveOcean. This ensures that TRAPS does not add duplicate rivers to LiveOcean.
 - **wwtp_names.xlsx:** Excel sheet with list of WWTPs in the Mohamedali et al. (2020) and Wasielewski et al. (2024) datasets. The naming convention is slightly different between the two datasets, so this file is used to look up the different names for the same WWTPs.
 - **SSM_source_info.xlsx:** Downloaded metadata from the Mohamedali et al. (2020) dataset
-
 - **processed_data/river_data_mohamedali_etal_2020.nc**: Processed Mohamedali et al. (2020) imeseries data of state variables and lat/lon coordinates for all river mouths. Used in LO/pre/trapsP01 to generate climatology files.
 - **processed_data/wwtp_data_mohamedali_etal_2020.nc**: Processed Mohamedali et al. (2020) imeseries data of state variables and lat/lon coordinates for all WWTPs. Used in LO/pre/trapsP01 to generate climatology files.
 - **processed_data/wwtp_data_wasielewski_etal_2024.nc**: Processed Wasielewski et al. (2024) timeseries data of state variables and lat/lon coordinates for all WWTPs. Used in LO/pre/trapsP01 to generate climatology files and in LO/forcing/trapsN00 to generate forcing.
@@ -65,45 +64,45 @@ After getting the required files, users should be able to add TRAPS to their mod
     
 In LO/pre/trapsP##/traps_data_ver.csv, specify the version of LO_data you want to use to generate climatologies.
 
-Note that currently, only trapsD00 is available for use. However, this config file creates modularity which will make it easy to switch to a new version of Ecology data in the future (ie. simply update traps_data_ver.csv to be trapsD01)
+*Note that the latest WWTP upgrades are included in version trapsD01.*
 
 </details>
 
-<details><summary>1.5. Convert raw Ecology data from excel file to netCDF</summary>
+<details><summary>1.5. Convert raw data from excel file to netCDF</summary>
     
 *Note: User does not need to run this step. It is listed here for completion. During TRAPS development and testing, the developer already ran this script. Users can skip to step 2. However, if the user decides to run this script, it is advised that they run it on their remote machine (or wherever they plan to generate forcing).*
 
-This step runs one script which consolidates all of Ecology's raw data (in excel format) into netCDF files with daily resolution from Jan 1999 - Jul 2017.
+This step runs one script which consolidates all data into netCDF files with daily resolution from Jan 1999 - Jul 2017 for Mohamedali et al. (2020) data, and Jan 2005 - Dec 2020 for Wasielewski et al. (2024) .data
 
-These new files are all_nonpoint_source_data.nc and all_point_source_data.nc stored in LO_data.
+These new files are stored in LO_data/processed_data.
 
 </details>
 
 <details><summary>2. Generate climatologies</summary>
     
 This step generates climatology files for each of the TRAPS.
-From your **remote machine** (or whichever machine you will use to generate forcing) in LO/pre/trapsP##:
+From your **remote machine** (or whichever machine you will use to generate forcing) in LO/pre/trapsP01:
 
 ```
 bash climatology_all_source_types.sh
 ```
-This shellscript runs climatology scripts for all source types (tiny rivers, pre-existing LiveOcean rivers, and point sources).
+This shellscript runs climatology scripts for all source types (tiny rivers, pre-existing LiveOcean rivers, and WWTPs from both datasets).
 
 Climatology pickle files will be generated and saved in three folders in LO_output/pre/trapsP##:
 
-- **point_sources:** Climatology files for point sources
-- **tiny_rivers:** Climatology files for tiny rivers
-- **LO_rivbio:** Climatology files for pre-existing LO rivers
+- **moh20_wwtps:** Climatology files for WWTPs from Mohamedali et al. (2020)
+- **moh20_tinyrivers:** Climatology files for tiny rivers from Mohamedali et al. (2020)
+- **moh20_LOrivbio:** Climatology files for pre-existing LO rivers from Mohamedali et al. (2020)
   
 If you want to look at timeseries figures of the climatologies, then run the following commands **on your local machine** from LO/pre/trapsP### in ipython:
 
 ```
-run make_climatology_tinyrivs.py -test True
-run make_climatology_pointsources.py -test True
-run make_climatology_LOrivbio.py -test True
+run make_climatology_moh20_tinyrivs.py -test True
+run make_climatology_moh20_wwtp.py -test True
+run make_climatology_moh20_LOrivbio.py -test True
 ```
 
-The "test" option will create a subfolder in LO_output/pre/trapsP##/[source type]/lo_base/Data_historical/climatology_plots with a climatology figure for each source. An example figure for Burley Creek is shown below.
+The "test" option will create a subfolder in LO_output/pre/trapsP01/[source type]/lo_base/Data_historical/climatology_plots with a climatology figure for each source. An example figure for Burley Creek is shown below.
 
 ![Burley Cr](https://github.com/ajleeson/LO_user/assets/15829099/adc0456f-f855-4428-82c5-63f5aa1fa5b0)
 
@@ -119,7 +118,7 @@ run traps_placement.py -g [gridname]
 
 Csv files with river directions and grid indices for the sources will be generated and saved in LO_data/grid/[gridname]
 
-To look at where the TRAPS get mapped, run with run with ```-test True``` on your local machine. This option will create an interactive figure that you can zoom into. And example screenshot is shown below.
+To look at where the TRAPS get mapped, run with ```-test True``` on your local machine. This option will create an interactive figure that you can zoom into. An example screenshot is shown below.
 
 ![traps-placements](https://github.com/ajleeson/LO_user/assets/15829099/9cb89ea3-1372-48e6-bddc-e0a979385b8e)
 
@@ -132,12 +131,12 @@ This step generates a rivers.nc files with forcing for all pre-existing LO river
 From your remote machine in LO/driver:
 
 ```
-python driver_forcing3.py -g [gridname] -r backfill -s new -0 2017.01.01 -1 2017.01.02 -tP trapsP## -f trapsF##
+python driver_forcing3.py -g [gridname] -r backfill -s newcontinuation -0 2017.01.01 -1 2017.01.03 -tP trapsP## -f trapsN##
 ```
 
-where trapsP## is the version of LO/pre/trapsP## you want to use (default to trapsP00).
+where trapsP## is the version of LO/pre/trapsP## you want to use (default to trapsP01).
 
-Likewise, trapsF## is the traps forcing version you want to use.
+Likewise, trapsN## is the traps forcing version you want to use.
 
 </details>
 
@@ -211,6 +210,25 @@ And also in LO/pre/trapsV##/traps_placement.py:
 
 ---
 ## Update Notes
+
+<details><summary><strong>2025.08.08 update</strong></summary>
+
+**Incoporated new WWTP loading dataset**
+
+In this update, we incorporated a new WWTP loading dataset from [Wasielewski et al. (2024)](https://www.sciencebase.gov/catalog/item/64762b37d34e4e58932d9d81).
+
+These data were combined with the prior Ecology data ([Mohamedali et al., 2020](https://fortress.wa.gov/ecy/ezshare/EAP/SalishSea/SalishSeaModelBoundingScenarios.html); October 2020 version) to improve WWTP loads. 
+
+Please see [LO/traps_notes/data_notes](https://github.com/parkermac/LO/tree/main/traps_notes/data_notes). for more details on how these data were processed and consolidated.
+
+All modules of the TRAPS code were updated to accomodate the new data integration.
+
+The following file versions were updated:
+- trapsD00 --> trapsD01
+- trapsP00 --> trapsP01
+- trapsF00 --> trapsN00
+
+</details>
 
 <details><summary><strong>2024.03.01 update</strong></summary>
 
