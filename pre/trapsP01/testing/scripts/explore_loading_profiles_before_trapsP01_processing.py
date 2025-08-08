@@ -498,6 +498,72 @@ if plot_facility_type_load_comparison_mohamedali == True:
 # Save WWTP data for later analysis
 mohamedali2020_WWTP_ds = psloads_ds.sel(source=psloads_ds['name'].isin(WWTP_names))
 
+# #################################################################################
+# #                    Mohamedali et al., 2020 RIVER loading plots                      #
+# #################################################################################
+
+# plot_facility_type_load_comparison_mohamedali = True
+
+# # location of point source data to process
+# pointsource_dir = Ldir['data'] / 'trapsD00'
+# river_loads = pointsource_dir / 'all_nonpoint_source_data.nc'
+# # get point source data
+# rivloads_ds = xr.open_dataset(river_loads)
+
+# riv_names = rivloads_ds['name'].values
+
+# # Create nutrient load summary of the different types of plants -------------------------------
+# if plot_facility_type_load_comparison_mohamedali == True:
+        
+#         fig, ax = plt.subplots(2,1,gridspec_kw={'height_ratios': [3, 1]},figsize = (7,9))
+
+#         # plot outfall locations on a map
+#         # add land and water mask to both subplots
+#         ax[0].pcolormesh(plon, plat, zm, vmin=-20, vmax=0, cmap=plt.get_cmap(cmocean.cm.ice))
+#         # add WWTPs
+#         ax[0].scatter(rivloads_ds.sel(source=rivloads_ds['name'].isin(riv_names))['lon'],
+#                 rivloads_ds.sel(source=rivloads_ds['name'].isin(riv_names))['lat'],
+#                 s=15,zorder=5,facecolors='deeppink', edgecolors='none', alpha=0.5,
+#                 label='WWTPs')
+#         # format figure
+#         pfun.dar(ax[0])
+#         pfun.add_coast(ax[0],color='paleturquoise')
+#         ax[0].set_title('River locations',fontsize=14)
+#         # ax[0].set_ylim([46.8,49.6])
+#         # ax[0].set_xlim([-125,-121])
+#         ax[0].set_ylim([45,52])
+#         ax[0].set_xlim([-130,-121])
+#         # ax[0].legend(loc='lower left',fontsize=12)
+
+#         # plot nutrient loads (monthly)
+#         # create new variable representing nutrient load in kg/day
+#         rivloads_ds['load [kg/d]'] = rivloads_ds['flow'] * (rivloads_ds['NO3'] + rivloads_ds['NH4']) * 14.01 * 60 * 60 * 24 / 1000 / 1000
+#         # get all loading data for each facility type
+#         riv_load_ds = rivloads_ds.sel(source=rivloads_ds['name'].isin(riv_names))
+#         # get sum of load from all sources
+#         all_riv_loads = riv_load_ds['load [kg/d]'].sum(dim='source')
+#         # then, get the mean annual loading profile with monthly resolution (still, sum of all plants)
+#         annualmean_all_riv_loads = all_riv_loads.groupby('date.month').mean(dim='date')
+#         # plot time series of loads
+#         t = pd.date_range(start='2005-01-01', end='2005-12-01', freq='MS')
+#         ax[1].plot(t,annualmean_all_WWTP_loads, color='deeppink',linewidth=3,alpha=0.7)
+
+#         # format figure
+#         ax[1].set_title('Mean Annual DIN Loads',fontsize=14)
+#         ax[1].set_ylabel('DIN Load\n[kg/day]',fontsize=12)
+#         ax[1].set_yscale('log')
+#         ax[1].set_ylim([1,1e6])
+#         ax[1].set_xlim([t[0],t[-1]])
+#         ax[1].xaxis.set_major_locator(mdates.MonthLocator())
+#         ax[1].xaxis.set_major_formatter(mdates.DateFormatter('%b'))
+
+#         # format and save figure
+#         plt.suptitle('Mohamedali et al. (2020) Rivers',fontsize=14,fontweight='bold')
+#         plt.tight_layout
+#         plt.show()
+#         # plt.savefig(out_dir / 'Mohamedali_etal2020' / 'all_loads_comparison.png')
+
+
 #################################################################################
 #                             Dataset comparisons                               #
 #################################################################################
@@ -745,6 +811,7 @@ if unique_plant_locations == True:
         NO3 = WWTP_load_df['NO2NO3N_MG_L'].replace('.', np.nan).astype(float) # mg/L
         NH4 = WWTP_load_df['NH4N_MG_L'].replace('.', np.nan).astype(float) # mg/L
         # calculate loads and make a new column in df
+        WWTP_load_df = WWTP_load_df.copy()
         WWTP_load_df['load [kg/day]'] = (flow * (NO3+NH4) * 60 * 60 * 24 / 1000) # convert to kg/day: [1 kg = 1/1000 m3mg/L] [1day = 60*60*24sec]
         # first, sum all of the individual plants together to get one 2005 - 2020 timeseries (which is the sum of all plants)
         all_WWWTP_loads = WWTP_load_df.groupby(['YEAR', 'MONTH'])['load [kg/day]'].sum()
@@ -763,6 +830,7 @@ if unique_plant_locations == True:
         NO3 = WWTP_load_df['NO2NO3N_MG_L'].replace('.', np.nan).astype(float) # mg/L
         NH4 = WWTP_load_df['NH4N_MG_L'].replace('.', np.nan).astype(float) # mg/L
         # calculate loads and make a new column in df
+        WWTP_load_df = WWTP_load_df.copy()
         WWTP_load_df['load [kg/day]'] = (flow * (NO3+NH4) * 60 * 60 * 24 / 1000) # convert to kg/day: [1 kg = 1/1000 m3mg/L] [1day = 60*60*24sec]
         # first, sum all of the individual plants together to get one 2005 - 2020 timeseries (which is the sum of all plants)
         all_WWWTP_loads = WWTP_load_df.groupby(['YEAR', 'MONTH'])['load [kg/day]'].sum()
