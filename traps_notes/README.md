@@ -54,7 +54,7 @@ After getting the required files, users should be able to add TRAPS to their mod
 
 <details><summary><strong>TRAPS workflow diagram</strong></summary>
 
-![traps-top-level-diagram-v7](https://github.com/ajleeson/LO_user/assets/15829099/c8534744-5240-476e-807d-7c7d44793a1f)
+<p style="text-align:center;"><img src="traps_workflow_diagram_v8.png" width="800"/></p>
 
 </details>
 
