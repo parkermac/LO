@@ -109,6 +109,15 @@ letters = ['(a)','(b)','(c)','(d)','(e)','(f)','(g)']
 # create one-year date range for plotting
 yrday = pd.date_range(start ='1/1/2020', end ='12/31/2020', freq ='D')
 
+keys = ['flow', 'temp', 'NO3', 'NH4', 'TIC', 'Talk', 'DO']
+# create a mask for the years 2013-2015
+mask_2013_2015 = (moh20_wwtp_data_ds['date'] > np.datetime64('2012-12-31')) & (moh20_wwtp_data_ds['date.year'] < 2016)
+# replace the 2013-2015 flow data with nan for Clover Point WWTP
+wwtp_index = int(moh20_wwtp_data_ds.where(moh20_wwtp_data_ds['name'] == 'Clover Point', drop=True)['source'])
+# replace 2012-2014 flow data with nans
+for key in keys:
+    moh20_wwtp_data_ds[key].loc[dict(source=wwtp_index, date=mask_2013_2015)] = np.nan
+
 #################################################################################
 #                          Calculate climatologies                              #
 #################################################################################

@@ -211,6 +211,16 @@ And also in LO/pre/trapsP##/traps_placement.py:
 
 </details>
 
+<details><summary><strong>Clover Point WWTP</strong></summary>
+
+Data for Clover Point WWTP had seemingly anomalously high nutrient loads during 2013 - 2015. To prevent these data from biasing the Clover Point climatologies towards a higher-than-normal discharge, we omitted data from 2013 - 2015 prior to calculating climatologies. This case was handled in LO/pre/trapsP01/make_climatology_moh20_wwtp.py
+
+The raw data for Clover Point WWTP, and our climatology with 2013 - 2015 data omitted are shown below:
+
+<p style="text-align:center;"><img src="clover_point.png" width="800"/></p>
+
+</details>
+
 ---
 ## Update Notes
 

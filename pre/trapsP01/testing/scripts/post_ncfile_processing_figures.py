@@ -111,15 +111,18 @@ for i,wwtp in enumerate(moh20_data['name'].values):
         
         # get climatology if using old data (i.e. WWTP not available in was24):
         # get flow [m3/s]
-        fn_oldWWTP_flow = Ldir['LOo'] / 'pre' / 'trapsP00' / 'point_sources' / 'lo_base' / 'Data_historical' / 'CLIM_flow.p'
+        # fn_oldWWTP_flow = Ldir['LOo'] / 'pre' / 'trapsP00' / 'point_sources' / 'lo_base' / 'Data_historical' / 'CLIM_flow.p'
+        fn_oldWWTP_flow = Ldir['LOo'] / 'pre' / 'trapsP01' / 'moh20_wwtps' / 'lo_base' / 'Data_historical' / 'CLIM_flow.p'
         df_oldWWTP_flow = pd.read_pickle(fn_oldWWTP_flow)
         # Get WWTP flow
         old_flow = df_oldWWTP_flow[wwtp].values # [m3/s]
 
         # get NO3 and NH4 [mmol/m3]
-        fn_oldWWTP_NO3 = Ldir['LOo'] / 'pre' / 'trapsP00' / 'point_sources' / 'lo_base' / 'Data_historical' / 'CLIM_NO3.p'
+        # fn_oldWWTP_NO3 = Ldir['LOo'] / 'pre' / 'trapsP00' / 'point_sources' / 'lo_base' / 'Data_historical' / 'CLIM_NO3.p'
+        fn_oldWWTP_NO3 = Ldir['LOo'] / 'pre' / 'trapsP01' / 'moh20_wwtps' / 'lo_base' / 'Data_historical' / 'CLIM_NO3.p'
         df_oldWWTP_NO3 = pd.read_pickle(fn_oldWWTP_NO3)
-        fn_oldWWTP_NH4 = Ldir['LOo'] / 'pre' / 'trapsP00' / 'point_sources' / 'lo_base' / 'Data_historical' / 'CLIM_NH4.p'
+        # fn_oldWWTP_NH4 = Ldir['LOo'] / 'pre' / 'trapsP00' / 'point_sources' / 'lo_base' / 'Data_historical' / 'CLIM_NH4.p'
+        fn_oldWWTP_NH4 = Ldir['LOo'] / 'pre' / 'trapsP01' / 'moh20_wwtps' / 'lo_base' / 'Data_historical' / 'CLIM_NH4.p'
         df_oldWWTP_NH4 = pd.read_pickle(fn_oldWWTP_NH4)
         # Get WWTP NO3 and NH4
         old_NO3 = df_oldWWTP_NO3[wwtp].values # [mmol/m3]
