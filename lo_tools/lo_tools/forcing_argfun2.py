@@ -17,9 +17,10 @@ def intro():
     parser.add_argument('-d', '--date_string', type=str) # e.g. 2019.07.04
     # optional arguments
     parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+    parser.add_argument('-test_planB', default=False, type=Lfun.boolean_string)
     
     # optional arguments used only for ocnN, to determine what to nest inside
-    parser.add_argument('-gtx', '--gtagex', default='cas6_traps2_x2b', type=str) # e.g. cas6_traps2_x2b
+    parser.add_argument('-gtx', '--gtagex', default='cas7_t1_x11b', type=str) # e.g. cas7_t1_x11b
     parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
     parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocn forcing
     
@@ -36,7 +37,8 @@ def intro():
     # get the dict Ldir
     Ldir = Lfun.Lstart(gridname=args.gridname)
     # add more entries to Ldir for use by make_forcing_main.py
-    for a in ['frc', 'run_type', 'start_type', 'date_string', 'testing','gtagex','roms_out_num','do_bio','trapsP']:
+    for a in ['frc', 'run_type', 'start_type', 'date_string', 'testing','test_planB',
+    'gtagex','roms_out_num','do_bio','trapsP']:
         Ldir[a] = argsd[a]
     # set where to look for model output
     if Ldir['roms_out_num'] == 0:

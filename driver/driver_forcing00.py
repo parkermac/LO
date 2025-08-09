@@ -8,9 +8,11 @@ run driver_forcing00 -g [gridname] -0 2019.07.04 -1 2019.07.05 -test True -f [FR
 where [FRC] = atm01, etc.
 
 NOTE: This is just like driver_forcing3.py except it does not use clean=True
-when creating the output directory for a day IF the tun_type = forecast.
+when creating the output directory for a day IF the run_type = forecast.
 This change is because we don't want to lose previous forcing if a given
 forecast is going to planB.
+
+There is also a new optional input: -test_planB True to test planB.
 
 This this driver is suitable for the new forcing organization scheme
 (August 2025) where everything goes in single day folders, including forecasts.
@@ -44,10 +46,12 @@ parser.add_argument('-s', '--start_type', type=str, default='continuation') # ne
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
 parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_string)
+# new optional argument to test whatever planB is implemented for a given forcing
+parser.add_argument('-test_planB', default=False, type=zfun.boolean_string)
 
 # optional arguments used only for ocnN, to determine what to nest inside
 parser.add_argument('-gtx', '--gtagex', type=str) # e.g. cas7_t1_x11b
-parser.add_argument('-ro', '--roms_out_num', type=int, default=1) # 1 = Ldir['roms_out1'], etc.
+parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 0 = Ldir['roms_out1'], etc.
 parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocnN forcing
 
 # optional argument to select different version of traps pre
@@ -59,7 +63,7 @@ args = parser.parse_args()
 argsd = args.__dict__
 for a in ['gridname', 'frc']:
     if argsd[a] == None:
-        print('*** Missing required argument for driver_forcing3.py: ' + a)
+        print('*** Missing required argument for driver_forcing00.py: ' + a)
         sys.exit()
 
 if args.testing:
@@ -122,6 +126,7 @@ while dt <= dt1:
                 '-r', args.run_type, '-s', args.start_type,
                 '-tP', args.trapsP,
                 '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing),
+                '-test_planB', str(args.test_planB),
                 '-gtx', args.gtagex, '-ro', str(args.roms_out_num), '-do_bio', str(args.do_bio)]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()

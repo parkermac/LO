@@ -8,6 +8,8 @@ run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm0 -test True
 
 test a forecast that will go to planB:
 run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.05 -f atm0 -test True
+or
+run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm0 -test True -test_planB True
 
 NEW 2025.07.30: For start_type = forecast this writes the forcing files
 to separate day folders.
@@ -94,6 +96,9 @@ for fn in d2_list:
         print('** Missing file: ' + str(fn))
         planB = True
         break
+
+if Ldir['test_planB'] == True:
+    planB = True
     
 if planB == False:
     # For d3 and d4 just make sure we have the first one, so that we can get the grid
