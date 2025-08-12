@@ -23,13 +23,13 @@ testing = args.testing
 source = 'willapa'
 otype = 'moor' # introducing a new "otype" beyond ctd and bottle
 
-year_list = [2017]
+year_list = [2024]
 
 if testing:
     from lo_tools import plotting_functions as pfun
     import matplotlib.pyplot as plt
     plt.close('all')
-    pfun.start_plot()
+    pfun.start_plot(figsize=(14,8))
 
 for year in year_list:
     year_str = str(year)
@@ -41,10 +41,15 @@ for year in year_list:
     if not testing:
         Lfun.make_dir(out_dir, clean=True)
 
-    fn_dict = {
-        'BayCenter':'Bay Center 2017share.xlsx', # is this correct?
-        'Nahcotta':'Nahcotta 2017share.xlsx',
-    }
+    if year == 2017:
+        fn_dict = {
+            'BayCenter':'Bay Center 2017share.xlsx', # is this correct?
+            'Nahcotta':'Nahcotta 2017share.xlsx',
+        }
+    elif year == 2024:
+        fn_dict = {
+            'Nahcotta':'Nah 2024 TSDO.xlsx'
+        }
 
     sta_dict = {
         'Tokeland': (-123.96797728985608, 46.707252252710354),
@@ -78,17 +83,28 @@ for year in year_list:
         # # Convert to UTC
         # tiu = til.tz_convert('UTC')
 
-        if sta == 'BayCenter':
-            ti = pd.DatetimeIndex(a['Date'])
-            SP = a['S Corr'].to_numpy()
-            IT = a['Temp C'].to_numpy()
-            PH = a['pH Corr'].to_numpy()
-            do_ph = True
-        elif sta == 'Nahcotta':
-            ti = pd.DatetimeIndex(a['Date Time'])
-            SP = a['Sal Corr'].to_numpy()
-            IT = a['T ©'].to_numpy()
-            do_ph = False
+        if year == 2017:
+            if sta == 'BayCenter':
+                ti = pd.DatetimeIndex(a['Date'])
+                SP = a['S Corr'].to_numpy()
+                IT = a['Temp C'].to_numpy()
+                PH = a['pH Corr'].to_numpy()
+                do_ph = True
+                do_DO = False
+            elif sta == 'Nahcotta':
+                ti = pd.DatetimeIndex(a['Date Time'])
+                SP = a['Sal Corr'].to_numpy()
+                IT = a['T ©'].to_numpy()
+                do_ph = False
+                do_DO = False
+        elif year == 2024:
+            if sta == 'Nahcotta':
+                ti = pd.DatetimeIndex(a['Date'])
+                SP = a['Sal psu'].to_numpy()
+                IT = a['Temp °C'].to_numpy()
+                DO_mgl = a['ODO mg/L'].to_numpy()
+                do_ph = False
+                do_DO = True
         lon, lat = sta_dict[sta]
         P = 0 # pressure (the mooring is near the surface)
         # - do the conversions
@@ -97,15 +113,13 @@ for year in year_list:
 
         # pack in a DataFrame
         tiu = ti + timedelta(hours=8)
+        df = pd.DataFrame(index=tiu)
+        df['SA'] = SA
+        df['CT'] = CT
         if do_ph:
-            df = pd.DataFrame(index=tiu, columns=['SA', 'CT', 'PH'])
-            df['SA'] = SA
-            df['CT'] = CT
             df['PH'] = PH
-        else:
-            df = pd.DataFrame(index=tiu, columns=['SA', 'CT'])
-            df['SA'] = SA
-            df['CT'] = CT
+        if do_DO:
+            df['DO (uM)'] = DO_mgl * 1000/32 # convert mg/L to uM
 
         if testing:
             # for some reason this produces 4 figures, 2 of them blank
