@@ -162,11 +162,20 @@ else:
     # original version
     bio_list = ',NO3,phytoplankton,zooplankton,detritus,Ldetritus,oxygen,alkalinity,TIC,rho'
 
+# check to see if the model has WETDRY in use
+do_wetdry = False
+if 'wetdry_mask_rho' in ds.data_vars:
+    do_wetdry = True
+
 vn_list = 'h,zeta'
+if do_wetdry:
+    vn_list += ',wetdry_mask_rho'
 if Ldir['get_tsa']:
     vn_list += ',salt,temp,AKs,AKv'
 if Ldir['get_vel']:
     vn_list += ',u,v,w,ubar,vbar'
+    if do_wetdry:
+        vn_list += ',wetdry_mask_u,wetdry_mask_v'
 if Ldir['get_bio']:
     vn_list += bio_list
 if Ldir['get_surfbot']:
