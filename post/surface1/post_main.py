@@ -87,7 +87,7 @@ else:
 print('\nPath to file:\n%s' % (str(out_fn)))
 
 # copy the file to the server
-post_argfun.copy_to_server(Ldir, out_fn)
+# post_argfun.copy_to_server(Ldir, out_fn)
 # copy the file to kopah
 post_argfun.copy_to_kopah(Ldir, out_fn)
 # -------------------------------------------------------

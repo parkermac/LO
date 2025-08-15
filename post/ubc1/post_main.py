@@ -133,7 +133,7 @@ print('Time to compress = %0.2f sec' % (time()- tt0))
 # ===========================================================
 
 # copy the file to the server
-post_argfun.copy_to_server(Ldir, out_fn)
+# post_argfun.copy_to_server(Ldir, out_fn)
 # copy the file to kopah
 post_argfun.copy_to_kopah(Ldir, out_fn)
 
