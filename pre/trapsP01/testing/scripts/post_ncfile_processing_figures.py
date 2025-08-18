@@ -139,12 +139,11 @@ for i,wwtp in enumerate(moh20_data['name'].values):
         old_nutrient_load_subsampled = old_nutrient_load_kg_day[15::30]
 
         # repeat for 15 years
-        moh20_climatology = np.tile(old_nutrient_load_subsampled,22)
+        moh20_climatology = np.tile(old_nutrient_load_subsampled,27)
 
         # get time array
-        # t_new = pd.date_range(start='2005-01-01', end='2020-12-31', freq='MS').to_list()
         t_old = pd.date_range(start='1999-01-01', end='2017-7-31', freq='MS').to_list()
-        t_all = pd.date_range(start='1999-01-01',end='2020-12-31', freq='MS').to_list()
+        t_all = pd.date_range(start='1999-01-01',end='2025-12-31', freq='MS').to_list()
 
 
         # plot old WWTP climatologies
@@ -162,7 +161,7 @@ for i,wwtp in enumerate(moh20_data['name'].values):
         ax[1].legend(loc='best', fontsize=12)
 
         ax[1].set_ylim([0,np.nanmax(moh20_raw)*1.1])
-        ax[1].set_xlim([pd.to_datetime('1999-01-01'),pd.to_datetime('2020-12-31')])
+        ax[1].set_xlim([pd.to_datetime('1999-01-01'),pd.to_datetime('2025-12-31')])
         ax[1].xaxis.set_major_locator(mdates.YearLocator())
         ax[1].xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
         ax[1].tick_params(axis='x', labelrotation=30)
@@ -211,6 +210,36 @@ for i,wwtp_ID in enumerate(was24_data['ID'].values):
         ax[0].set_ylim([46.8,49.4])
         ax[0].set_xlim([-125,-121.5])
 
+        # get climatologies -----------------------------------------------------------
+
+        # get flow [m3/s]
+        fn_oldWWTP_flow = Ldir['LOo'] / 'pre' / 'trapsP01' / 'was24_wwtps' / 'lo_base' / 'Data_historical' / 'CLIM_flow.p'
+        df_oldWWTP_flow = pd.read_pickle(fn_oldWWTP_flow)
+        # Get WWTP flow
+        old_flow = df_oldWWTP_flow[wwtp_name].values # [m3/s]
+
+        # get NO3 and NH4 [mmol/m3]
+        fn_oldWWTP_NO3 = Ldir['LOo'] / 'pre' / 'trapsP01' / 'was24_wwtps' / 'lo_base' / 'Data_historical' / 'CLIM_NO3.p'
+        df_oldWWTP_NO3 = pd.read_pickle(fn_oldWWTP_NO3)
+        fn_oldWWTP_NH4 = Ldir['LOo'] / 'pre' / 'trapsP01' / 'was24_wwtps' / 'lo_base' / 'Data_historical' / 'CLIM_NH4.p'
+        df_oldWWTP_NH4 = pd.read_pickle(fn_oldWWTP_NH4)
+        # Get WWTP NO3 and NH4
+        old_NO3 = df_oldWWTP_NO3[wwtp_name].values # [mmol/m3]
+        old_NH4 = df_oldWWTP_NH4[wwtp_name].values # [mmol/m3]
+        # sum nutrients
+        old_nutrients = old_NO3 + old_NH4 # [mmol/m3]
+
+        # get total nutrient loading [kg/day]
+        old_nutrient_load_mmol_s = old_flow * old_nutrients # [m3/s * mmol/m3 = mmol/s]
+        # convert to kg/day: [1g = 14.01/1000^2mmol] [1day = 60*60*24sec]
+        old_nutrient_load_kg_day = old_nutrient_load_mmol_s * 14.01 * 60 * 60 * 24 / 1000 / 1000
+
+        # get one value every month
+        old_nutrient_load_subsampled = old_nutrient_load_kg_day[15::30]
+
+        # repeat for 15 years
+        was24_climatology = np.tile(old_nutrient_load_subsampled,5)
+
         # add loading profiles --------------------------------------------------------
 
         # Subsample to one value per month
@@ -220,13 +249,16 @@ for i,wwtp_ID in enumerate(was24_data['ID'].values):
 
         # get time array
         t_new = pd.date_range(start='2005-01-01', end='2020-12-31', freq='MS').to_list()
-        # t_old = pd.date_range(start='1999-01-01', end='2017-7-31', freq='MS').to_list()
-        t_all = pd.date_range(start='1999-01-01',end='2020-12-31', freq='MS').to_list()
+        t_wasclim = pd.date_range(start='2021-01-01',end='2025-12-31', freq='MS').to_list()
 
                 
         # get Wasielewski et al. (2024) data
         ax[1].plot(t_new,was24_raw, label='Wasielewski et al. (2024) raw',
-                                linewidth=2.5,color='hotpink', alpha=0.8)    
+                                linewidth=2.5,color='hotpink', alpha=0.8) 
+
+        # plot WWTP climatologies
+        ax[1].plot(t_wasclim,was24_climatology, label='Climatology (based on Wasielewski et al., 2024)',
+                linewidth=3,color='k', alpha=0.4)   
 
         # format figure
         ax[1].set_title('{} nutrient load comparison'.format(wwtp_name),
@@ -235,7 +267,7 @@ for i,wwtp_ID in enumerate(was24_data['ID'].values):
         ax[1].legend(loc='best', fontsize=12)
 
         ax[1].set_ylim([0,np.nanmax(was24_raw)*1.1])
-        ax[1].set_xlim([pd.to_datetime('1999-01-01'),pd.to_datetime('2020-12-31')])
+        ax[1].set_xlim([pd.to_datetime('1999-01-01'),pd.to_datetime('2025-12-31')])
         ax[1].xaxis.set_major_locator(mdates.YearLocator())
         ax[1].xaxis.set_major_formatter(mdates.DateFormatter("%Y"))
         ax[1].tick_params(axis='x', labelrotation=30)

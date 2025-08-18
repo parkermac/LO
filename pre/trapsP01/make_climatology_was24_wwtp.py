@@ -1,15 +1,15 @@
 """
-Make climatologies for Mohamedali et al. (2020) WWTPs.
+Make climatologies for Wasielewski et al. (2024) WWTPs.
 Discharge rate, temperature, and biogeochemisty variables.
 
-Based on Mohamedali et al. (2020) timeseries, using data stored in 
-LO_data/trapsD01/processed_data/wwtp_data_mohamedali_etal_2020.nc
+Based on Wasielewski et al. (2024) timeseries, using data stored in 
+LO_data/trapsD01/processed_data/wwtp_data_wasielewski_etal_2024.nc
 
         To run, from ipython:
-        run make_climatology_moh20_wwtp.py
+        run make_climatology_was24_wwtp.py
 
 To create individual climatology figures, run from ipython with:
-run make_climatology_moh20_wwtp.py -test True
+run make_climatology_was24_wwtp.py -test True
 
 Figures saved in:
 LO_output/pre/trapsP01/wwtps/[ctag]/Data_historical/climatology_plots
@@ -64,15 +64,15 @@ path = os.getcwd()
 trapsP_vers = os.path.basename(path)
 
 # location to save file
-clim_dir = Ldir['LOo'] / 'pre' / trapsP_vers / 'moh20_wwtps' / ctag / 'Data_historical'
+clim_dir = Ldir['LOo'] / 'pre' / trapsP_vers / 'was24_wwtps' / ctag / 'Data_historical'
 Lfun.make_dir(clim_dir)
 
 # get flow and loading data
-moh20_wwtp_fn = Ldir['data'] / trapsD / 'processed_data'/ 'wwtp_data_mohamedali_etal_2020.nc'
-moh20_wwtp_data_ds = xr.open_dataset(moh20_wwtp_fn)
+was24_wwtp_fn = Ldir['data'] / trapsD / 'processed_data'/ 'wwtp_data_wasielewski_etal_2024.nc'
+was24_wwtp_data_ds = xr.open_dataset(was24_wwtp_fn)
 
 # get wwtp names and wwtp ids
-wwtpnames = moh20_wwtp_data_ds['name'].values
+wwtpnames = was24_wwtp_data_ds['name'].values
 
 # # just test a few WWTPs for now 
 # wwtpnames = wwtpnames[28:30]
@@ -110,13 +110,13 @@ letters = ['(a)','(b)','(c)','(d)','(e)','(f)','(g)']
 yrday = pd.date_range(start ='1/1/2020', end ='12/31/2020', freq ='D')
 
 keys = ['flow', 'temp', 'NO3', 'NH4', 'TIC', 'Talk', 'DO']
-# create a mask for the years 2013-2015
-mask_2013_2015 = (moh20_wwtp_data_ds['date'] > np.datetime64('2012-12-31')) & (moh20_wwtp_data_ds['date.year'] < 2016)
-# replace the 2013-2015 flow data with nan for Clover Point WWTP
-wwtp_index = int(moh20_wwtp_data_ds.where(moh20_wwtp_data_ds['name'] == 'Clover Point', drop=True)['source'])
-# replace 2012-2014 flow data with nans
-for key in keys:
-    moh20_wwtp_data_ds[key].loc[dict(source=wwtp_index, date=mask_2013_2015)] = np.nan
+# # create a mask for the years 2013-2015
+# mask_2013_2015 = (was24_wwtp_data_ds['date'] > np.datetime64('2012-12-31')) & (was24_wwtp_data_ds['date.year'] < 2016)
+# # replace the 2013-2015 flow data with nan for Clover Point WWTP
+# wwtp_index = int(was24_wwtp_data_ds.where(was24_wwtp_data_ds['name'] == 'Clover Point', drop=True)['source'])
+# # replace 2012-2014 flow data with nans
+# for key in keys:
+#     was24_wwtp_data_ds[key].loc[dict(source=wwtp_index, date=mask_2013_2015)] = np.nan
 
 #################################################################################
 #                          Calculate climatologies                              #
@@ -128,7 +128,7 @@ print('Calculating point source climatologies...')
 for i,wname in enumerate(wwtpnames):
 
     # turn dataset information for this wwtp into a dataframe
-    wwtp_df, wwtp_avgs_df, wwtp_sds_df = traps_helper.ds_to_avgdf(wname,moh20_wwtp_data_ds)
+    wwtp_df, wwtp_avgs_df, wwtp_sds_df = traps_helper.ds_to_avgdf(wname,was24_wwtp_data_ds)
 
 #################################################################################
 #                            Create climatologies                               #
@@ -214,7 +214,7 @@ for j,vn in enumerate(vn_clim_dict.keys()):
 # plot title is name of source
 plt.suptitle('Point Source Climatology Summary (n={})'.format(len(wwtpnames)),fontsize=18)
 # Save figure
-figname = 'moh20_wwtp_summary.png'
+figname = 'was24_wwtp_summary.png'
 save_path = clim_dir / figname
 fig.savefig(save_path)
 
@@ -236,14 +236,14 @@ if args.testing == True:
         print('{}/{}: {}'.format(j+1,len(wwtpnames),wname))
 
         # turn dataset information for this wwtp into a dataframe
-        wwtp_df, wwtp_avgs_df, wwtp_sds_df = traps_helper.ds_to_avgdf(wname,moh20_wwtp_data_ds)
+        wwtp_df, wwtp_avgs_df, wwtp_sds_df = traps_helper.ds_to_avgdf(wname,was24_wwtp_data_ds)
 
         # Plot climatologies for each source
-        fig, axes = plt.subplots(7,1, figsize=(10, 9), sharex=True)
+        fig, axes = plt.subplots(3,1, figsize=(10, 9), sharex=True)
         ax = axes.ravel()
 
         # loop through variables
-        for i,vn in enumerate(vn_clim_dict.keys()):
+        for i,vn in enumerate(list(vn_clim_dict.keys())[0:3]):
 
             # format axis
             ax[i].set_facecolor('#EEEEEE')
@@ -278,11 +278,11 @@ if args.testing == True:
             # correctly alternate leap and non-leap years to create artificial 2005-2020 time series
             leap = leapyear_clim   # renamed for convenience
             non = nonleapyear_clim # renamed for convenience
-            clim_1999to2017 = np.concatenate((
-            #   1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017
-                non ,leap,non ,non ,non ,leap,non ,non ,non ,leap,non ,non ,non ,leap,non ,non ,non ,leap,non[0:212]))
+            clim_2005to2020 = np.concatenate((
+            #   2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020
+                non ,non ,non ,leap,non ,non ,non ,leap,non ,non ,non ,leap,non ,non ,non ,leap))
             # plot
-            ax[i].plot(time,clim_1999to2017, label='climatology',
+            ax[i].plot(time,clim_2005to2020, label='climatology',
                         color='black', linewidth=1)
             
             # set y-axis
@@ -295,7 +295,7 @@ if args.testing == True:
             # fontsize of tick labels
             ax[i].tick_params(axis='both', which='major', labelsize=12)
             ax[i].tick_params(axis='x', which='major', rotation=30)
-            ax[i].set_xlim([datetime.date(1999, 1, 1), datetime.date(2017, 12, 31)])
+            ax[i].set_xlim([datetime.date(2005, 1, 1), datetime.date(2020, 12, 31)])
 
             # Define the date format
             ax[1].xaxis.set_major_locator(mdates.YearLocator())
