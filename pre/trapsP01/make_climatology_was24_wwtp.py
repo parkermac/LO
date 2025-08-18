@@ -110,13 +110,60 @@ letters = ['(a)','(b)','(c)','(d)','(e)','(f)','(g)']
 yrday = pd.date_range(start ='1/1/2020', end ='12/31/2020', freq ='D')
 
 keys = ['flow', 'temp', 'NO3', 'NH4', 'TIC', 'Talk', 'DO']
-# # create a mask for the years 2013-2015
-# mask_2013_2015 = (was24_wwtp_data_ds['date'] > np.datetime64('2012-12-31')) & (was24_wwtp_data_ds['date.year'] < 2016)
-# # replace the 2013-2015 flow data with nan for Clover Point WWTP
-# wwtp_index = int(was24_wwtp_data_ds.where(was24_wwtp_data_ds['name'] == 'Clover Point', drop=True)['source'])
-# # replace 2012-2014 flow data with nans
-# for key in keys:
-#     was24_wwtp_data_ds[key].loc[dict(source=wwtp_index, date=mask_2013_2015)] = np.nan
+
+#################################################################################
+#              Mask older years if WWTPs changed loads over time                #
+#################################################################################
+
+# Alderwood STP
+# create a mask for the years 2005-2009
+mask_2005_2009 = (was24_wwtp_data_ds['date'] > np.datetime64('2005-01-01')) & (was24_wwtp_data_ds['date.year'] < 2010)
+# replace with nans
+wwtp_index = int(was24_wwtp_data_ds.where(was24_wwtp_data_ds['name'] == 'ALDERWOOD STP', drop=True)['source'])
+# replace 2012-2014 flow data with nans
+for key in keys:
+    was24_wwtp_data_ds[key].loc[dict(source=wwtp_index, date=mask_2005_2009)] = np.nan
+
+# Brightwater
+# create a mask for the years 2005-2013
+mask_2005_2013 = (was24_wwtp_data_ds['date'] > np.datetime64('2005-01-01')) & (was24_wwtp_data_ds['date.year'] < 2014)
+# replace with nans
+wwtp_index = int(was24_wwtp_data_ds.where(was24_wwtp_data_ds['name'] == 'King County Brightwater WWTP', drop=True)['source'])
+# replace 2012-2014 flow data with nans
+for key in keys:
+    was24_wwtp_data_ds[key].loc[dict(source=wwtp_index, date=mask_2005_2013)] = np.nan
+
+# Central Kitsap & McNeil Island Special Commitment Center WWTP & Tacoma Central No 1
+# create a mask for the years 2005-2010
+mask_2005_2010 = (was24_wwtp_data_ds['date'] > np.datetime64('2005-01-01')) & (was24_wwtp_data_ds['date.year'] < 2011)
+# replace with nans
+wwtp_index_1 = int(was24_wwtp_data_ds.where(was24_wwtp_data_ds['name'] == 'Kitsap County Central Kitsap WWTP', drop=True)['source'])
+wwtp_index_2 = int(was24_wwtp_data_ds.where(was24_wwtp_data_ds['name'] == 'McNeil Island Special Commitment Center WWTP', drop=True)['source'])
+wwtp_index_3 = int(was24_wwtp_data_ds.where(was24_wwtp_data_ds['name'] == 'TACOMA CENTRAL NO 1', drop=True)['source'])
+# replace 2012-2014 flow data with nans
+for key in keys:
+    was24_wwtp_data_ds[key].loc[dict(source=wwtp_index_1, date=mask_2005_2010)] = np.nan
+    was24_wwtp_data_ds[key].loc[dict(source=wwtp_index_2, date=mask_2005_2010)] = np.nan
+    was24_wwtp_data_ds[key].loc[dict(source=wwtp_index_3, date=mask_2005_2010)] = np.nan
+
+# Mt Vernon
+# create a mask for the years 2005-207
+mask_2005_2007 = (was24_wwtp_data_ds['date'] > np.datetime64('2005-01-01')) & (was24_wwtp_data_ds['date.year'] < 2008)
+# replace with nans
+wwtp_index = int(was24_wwtp_data_ds.where(was24_wwtp_data_ds['name'] == 'MT VERNON WWTP', drop=True)['source'])
+# replace 2012-2014 flow data with nans
+for key in keys:
+    was24_wwtp_data_ds[key].loc[dict(source=wwtp_index, date=mask_2005_2007)] = np.nan
+
+# Port Gamble WWTP
+# set all values to zero (WWTP closed in 2017)
+wwtp_index = int(was24_wwtp_data_ds.where(was24_wwtp_data_ds['name'] == 'Port Gamble WWTP', drop=True)['source'])
+was24_wwtp_data_ds['flow'].loc[dict(source=wwtp_index)] = 0
+
+# Warm Beach Campground WWTP
+# set all values to zero (WWTP closed in 2013)
+wwtp_index = int(was24_wwtp_data_ds.where(was24_wwtp_data_ds['name'] == 'WARM BEACH CAMPGROUND WWTP', drop=True)['source'])
+was24_wwtp_data_ds['flow'].loc[dict(source=wwtp_index)] = 0
 
 #################################################################################
 #                          Calculate climatologies                              #
@@ -286,7 +333,10 @@ if args.testing == True:
                         color='black', linewidth=1)
             
             # set y-axis
-            ax[i].set_ylim([0,1.3*np.nanmax(values_to_plot)])
+            if np.isnan(np.nanmax(values_to_plot)):
+                ax[i].set_ylim([0,1])
+            else:
+                ax[i].set_ylim([0,1.3*np.nanmax(values_to_plot)])
             
             # add legend
             if i == 0:
