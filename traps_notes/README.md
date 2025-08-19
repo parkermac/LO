@@ -221,6 +221,38 @@ The raw data for Clover Point WWTP, and our climatology with 2013 - 2015 data om
 
 </details>
 
+</details>
+
+<details><summary><strong>WWTPs in Wasielewski et al. (2024) with step-change in loads</strong></summary>
+
+Some WWTPs in the Wasieleski et al. (2024) dataset had loads that appeared to have a step change. These WWTPs are handled individually in LO/pre/trapsP01/make_climatology_was24_wwtp.py under the section titled "Mask older years if WWTPs changed loads over time".
+
+If there was a step change in the load, we omit data prior to the change in data, such that the most recent mean loads are retained.
+
+The figure below shows an example of one such WWTP, the Tacoma Central No 1 WWTP:
+
+<p style="text-align:center;"><img src="tacoma_central_no1.png" width="800"/></p>
+
+The WWTPs handled in this section are:
+- Alderwood STP
+	- Omit everything before 2010.
+- Brightwater
+	- Omit data before 2014
+- Kitsap County Central Kitsap WWTP
+	- Omit data before 2011
+- McNeil Island
+	- Omit data before 2011
+- Mt Vernon
+	- Omit data before 2008
+- Tacoma Central
+	- Omit data before 2011
+
+The code in this climatology script also handles two WWTPs that closed during the 2005 - 2020 time period of the Wasielewski et al. (2024) dataset. For these WWTPs, we set flow to zero, such that these WWTPs will not discharge anything post 2020. The closed WWTPs are:
+- Warm Beach Campground
+- Port Gamble
+
+</details>
+
 ---
 ## Update Notes
 

@@ -51,7 +51,7 @@ Output figures from this script are saved to **LO_output/loading_test/point_sour
 
 <details><summary><strong><code>post_ncfile_processing_figures.py</code></strong></summary>
 
-This script was created to verify that the processing script, rawdata_2netCDF, generated the correct datasets.
+This script was created to verify that the processing scripts, ```rawdata_2netCDF.py``` and ```climatology_all_source_types.sh```, generated the correct datasets.
 
 Output figures from this script are saved to **LO_output/point_source_integration/final_WWTP_loads**
 
