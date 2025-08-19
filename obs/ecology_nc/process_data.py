@@ -24,7 +24,8 @@ testing = False
 if testing:
     year_list = [2023]
 else:
-    year_list = range(1999,2024)
+    # year_list = range(1999,2024)
+    year_list = [2005,2006,2007,2024]
 
 # output locations are created at the end because we do both ctd and
 # bottle cases from the same input file

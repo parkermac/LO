@@ -68,14 +68,14 @@ Here is an example of the contents of one of the ecology_nc DataFrames:
 
 Note: After you download these to your laptop you can get a quick look at the data by running LO/obs/plot_ctd_bottle.py.
 
-Folders on perigee in `/data1/parker/LO_output/obs` and on apogee in `/dat1/parker/LO_output/obs`:
+Folders on apogee in `/dat1/parker/LO_output/obs` (I am maintaining these only on apogee, not perigee, so the upkeep is simpler):
 
 - **dfo1** Canadian data from a large database created by Susan Allen's group. The original data came from: https://data.cioospacific.ca/erddap/index.html. This replaces the older "dfo" that was parsed from an SQL database.
   - bottle 1930-2021 with gaps in the early years, has some Chl data
   - ctd 1965-2021
 
-- **ecology_nc** Department of Ecology monthly repeat station data. Covers 1999-2023 for both bottle and ctd casts. 200-400 casts per year, monthly at up to ~50 stations in Puget Sound and the coastal estuaries. See the README in the associated folder for details. NOTE: this replaces the "ecology" source what was originally here.
-  - bottle and ctd 1999-2023
+- **ecology_nc** Department of Ecology monthly repeat station data. Covers 1999-2024 for both bottle and ctd casts. 200-400 casts per year, monthly at up to ~50 stations in Puget Sound and the coastal estuaries. See the README in the associated folder for details. NOTE: this replaces the "ecology" source what was originally here.
+  - bottle and ctd 1999-2024
 
 - **nceiSalish** Data from WOAC and other cruises, mainly in Puget sound and JdF. The original data came from: https://www.ncei.noaa.gov/access/ocean-carbon-acidification-data-system/oceans/SalishCruise_DataPackage.html.
   - bottle 2008-2018, good DIC and TA, 40-199 casts per year
