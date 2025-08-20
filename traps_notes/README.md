@@ -106,7 +106,7 @@ run make_climatology_was24_wwtp.py -test True
 
 The "test" option will create a subfolder in LO_output/pre/trapsP01/[source type]/lo_base/Data_historical/climatology_plots with a climatology figure for each source. An example figure for Burley Creek is shown below.
 
-![Burley Cr](https://github.com/ajleeson/LO_user/assets/15829099/adc0456f-f855-4428-82c5-63f5aa1fa5b0)
+<p style="text-align:center;"><img src="Burley Cr.png" width="800"/></p>
 
 </details>
 
