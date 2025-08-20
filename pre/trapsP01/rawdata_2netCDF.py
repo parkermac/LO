@@ -257,6 +257,10 @@ with open(this_dir / 'traps_data_ver.csv','r') as f:
     for ver in f:
         trapsD = ver
 
+# where to put output figures
+out_dir = Ldir['data'] / trapsD / 'processed_data'
+Lfun.make_dir(out_dir)
+
 #################################################################################
 #                     Old WWTP data (Mohamedali et al., 2020)                   #
 #################################################################################
