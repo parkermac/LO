@@ -38,11 +38,11 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
 
         # define directory for point_source climatology
         wwtp_dir = Ldir['LOo'] / 'pre' / trapsP / 'moh20_wwtps' /ctag
-        traps_type = 'wwtp'  
+        traps_type = 'moh20wwtp'  
 
         # get climatological data
-        clim_fns = ['Cflow_wwtp_fn', 'Ctemp_wwtp_fn', 'CDO_wwtp_fn',
-                    'CNH4_wwtp_fn', 'CNO3_wwtp_fn', 'CTalk_wwtp_fn', 'CTIC_wwtp_fn']
+        clim_fns = ['Cflow_moh20wwtp_fn', 'Ctemp_moh20wwtp_fn', 'CDO_moh20wwtp_fn',
+                    'CNH4_moh20wwtp_fn', 'CNO3_moh20wwtp_fn', 'CTalk_moh20wwtp_fn', 'CTIC_moh20wwtp_fn']
         clim_vns = ['flow', 'temp', 'DO', 'NH4', 'NO3', 'Talk', 'TIC']
         for i, clim_fn in enumerate(clim_fns):
             Ldir[clim_fn] = wwtp_dir / 'Data_historical' / ('CLIM_'+clim_vns[i]+'.p')
@@ -56,7 +56,7 @@ def make_forcing(N,NT,NRIV,NTRIV,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD
         gwi_df = pd.read_csv(gwi_fn, index_col='rname')
         # if testing, only look at a few sources
         if Ldir['testing']:
-            gwi_df = gwi_df.loc[['LOTT', 'Iona'],:]
+            gwi_df = gwi_df.loc[['Swinomish', 'Iona'],:]
         
 #################################################################################
 #       Combine name of sources that are located at the same grid cell          #

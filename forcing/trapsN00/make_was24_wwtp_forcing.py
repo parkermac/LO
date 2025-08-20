@@ -20,7 +20,7 @@ import trapsfun
 #                   Initialize function and empty dataset                       #
 #################################################################################
 
-def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsD):
+def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,trapsP,trapsD,ctag):
 
     # Start Dataset
     wwtp_ds = xr.Dataset()
@@ -29,8 +29,16 @@ def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,tra
     # get year list
     years = [fulldate.year for fulldate in dt_ind]
 
+    # get pre-2020 dates and post-2020 dates:
+    dt_ind_thru2020  = dt_ind[dt_ind.year < 2021]
+    dt_ind_post2020 = dt_ind[dt_ind.year > 2020]
+    yd_ind_thru2020  = [year for date, year in zip(dt_ind, yd_ind) if date.year < 2021]
+    yd_ind_post2020 = [year for date, year in zip(dt_ind, yd_ind) if date.year > 2020]
+
     # adjust date format
     dt_ind = dt_ind.normalize()
+    dt_ind_thru2020 = dt_ind_thru2020.normalize()
+    dt_ind_post2020 = dt_ind_post2020.normalize()
 
 #################################################################################
 #                                Get data                                       #
@@ -77,6 +85,18 @@ def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,tra
         else:
             print("WWTPs in Mohamedali et al. (2020) and Wasielewski et al. (2024) mapped to unique grid cells")
 
+        # define directory for point_source climatology
+        wwtp_dir = Ldir['LOo'] / 'pre' / trapsP / 'was24_wwtps' /ctag
+        traps_type = 'was24wwtp'  
+
+        # get climatological data
+        clim_fns = ['Cflow_was24wwtp_fn', 'Ctemp_was24wwtp_fn', 'CDO_was24wwtp_fn',
+                    'CNH4_was24wwtp_fn', 'CNO3_was24wwtp_fn', 'CTalk_was24wwtp_fn', 'CTIC_was24wwtp_fn']
+        clim_vns = ['flow', 'temp', 'DO', 'NH4', 'NO3', 'Talk', 'TIC']
+        for i, clim_fn in enumerate(clim_fns):
+            Ldir[clim_fn] = wwtp_dir / 'Data_historical' / ('CLIM_'+clim_vns[i]+'.p')
+
+
 #################################################################################
 #       Combine name of sources that are located at the same grid cell          #
 #################################################################################
@@ -112,6 +132,9 @@ def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,tra
 
         # get number of wwtps after consolidating overlapping ones
         NWWTP = len(gri_df_no_ovrlp)
+
+        # get the flow, temperature, and nutrient data for these days, is later than 2020
+        qtbio_wwtp_df_dict = trapsfun.get_qtbio(gwi_df, dt_ind_post2020, yd_ind_post2020, Ldir, traps_type, trapsD)
 
         # Add time coordinate
         wwtp_ds['river_time'] = (('river_time',), ot_vec)
@@ -181,18 +204,46 @@ def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,tra
                 # split into individual point sources
                 [wwtp1,wwtp2] = rn.split('+')
                 # get individual point source flowrates
-                flow1 = was24_wwtp_data_ds.flow.sel(source=
-                    was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == wwtp1].item(),
-                    date=dt_ind).values
-                flow2 = was24_wwtp_data_ds.flow.sel(source=
-                    was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == wwtp2].item(),
-                    date=dt_ind).values
+
+                # get flow through 2020 from actual data
+                if len(dt_ind_thru2020) == 0:
+                    flow1_thru2020 = np.array([])
+                else:
+                    flow1_thru2020 = was24_wwtp_data_ds.flow.sel(source=
+                        was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == wwtp1].item(),
+                        date=dt_ind_thru2020).values     
+                # get flow post 2020 from climatologies         
+                flow1_post2020 = qtbio_wwtp_df_dict[wwtp1]['flow'].values
+                # concatenate the flows
+                flow1 = np.concatenate([flow1_thru2020, flow1_post2020])
+
+                # get flow through 2020 from actual data
+                if len(dt_ind_thru2020) == 0:
+                    flow2_thru2020 = np.array([])
+                else:
+                    flow2_thru2020 = was24_wwtp_data_ds.flow.sel(source=
+                        was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == wwtp2].item(),
+                        date=dt_ind_thru2020).values
+                # get flow post 2020 from climatologies         
+                flow2_post2020 = qtbio_wwtp_df_dict[wwtp2]['flow'].values
+                # concatenate the flows
+                flow2 = np.concatenate([flow2_thru2020, flow2_post2020])
+                
                 # combine point source flow
                 flow = flow1 + flow2
             else:
-                flow = was24_wwtp_data_ds.flow.sel(source=
-                    was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == rn].item(),
-                    date=dt_ind).values
+                # get flow through 2020 from actual data
+                if len(dt_ind_thru2020) == 0:
+                    flow_thru2020 = np.array([])
+                else:
+                    flow_thru2020 = was24_wwtp_data_ds.flow.sel(source=
+                        was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == rn].item(),
+                        date=dt_ind_thru2020).values
+                # get flow post 2020 from climatologies
+                flow_post2020 = qtbio_wwtp_df_dict[rn]['flow'].values
+                # concatenate the flows
+                flow = np.concatenate([flow_thru2020, flow_post2020])
+                
             # update flowrate
             Q_mat[:,rr] = flow
         # add metadata
@@ -220,11 +271,29 @@ def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,tra
                         # split into individual point sources
                         [wwtp1,wwtp2] = rn.split('+')
                         # calculate weighted average (based on flowrate)
-                        temps = trapsfun.weighted_average_ds('temp', dt_ind, was24_wwtp_data_ds, wwtp1, wwtp2)
+                        # get temp through 2020 from actual data
+                        if len(dt_ind_thru2020) == 0:
+                            temps_thru2020 = np.array([])
+                        else:
+                            temps_thru2020 = trapsfun.weighted_average_ds('temp', dt_ind_thru2020, was24_wwtp_data_ds, wwtp1, wwtp2)
+                        # get temp post 2020 from climatologies
+                        temps_post2020 = trapsfun.weighted_average('temp',qtbio_wwtp_df_dict[wwtp1], qtbio_wwtp_df_dict[wwtp2])
+                        # concatenate the temps
+                        temps = np.concatenate([temps_thru2020, temps_post2020])
+
                     else:
-                        temps = was24_wwtp_data_ds.temp.sel(source=
-                            was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == rn].item(),
-                            date=dt_ind).values
+                        # get temp through 2020 from actual data
+                        if len(dt_ind_thru2020) == 0:
+                            temps_thru2020 = np.array([])
+                        else:
+                            temps_thru2020 = was24_wwtp_data_ds.temp.sel(source=
+                                was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == rn].item(),
+                                date=dt_ind_thru2020).values
+                        # get temp post 2020 from climatologies
+                        temps_post2020 = qtbio_wwtp_df_dict[rn]['temp'].values
+                        # concatenate the temps
+                        temps = np.concatenate([temps_thru2020, temps_post2020])
+                        
                     print('-- {}: filled from raw Wasielewski et al. (2024) dataset'.format(rn))
                     for nn in range(N):
                         TS_mat[:, nn, rr] = temps
@@ -244,6 +313,7 @@ def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,tra
         # Add biologeochemistry parameters
         for var in ['NO3', 'NH4', 'TIC', 'TAlk', 'Oxyg']:
         # for var in ['NO3', 'NH4', 'TIC', 'Talk', 'DO']:
+            var_post = var
             vn = 'river_' + var
             vinfo = zrfun.get_varinfo(vn, vartype='climatology')
             dims = (vinfo['time'],) + ('s_rho', 'river')
@@ -259,11 +329,28 @@ def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,tra
                     # split into individual point sources
                     [wwtp1,wwtp2] = rn.split('+')
                     # calculate weighted average (based on flowrate)
-                    bvals = trapsfun.weighted_average_ds(var, dt_ind, was24_wwtp_data_ds, wwtp1, wwtp2)
+                    # get values through 2020 from actual data
+                    if len(dt_ind_thru2020) == 0:
+                        bvals_thru2020 = np.array([])
+                    else:
+                        bvals_thru2020 = trapsfun.weighted_average_ds(var, dt_ind_thru2020, was24_wwtp_data_ds, wwtp1, wwtp2)
+                    # get values post 2020 from climatologies
+                    bvals_post2020 = trapsfun.weighted_average(var_post,qtbio_wwtp_df_dict[wwtp1], qtbio_wwtp_df_dict[wwtp2])
+                    # concatenate the values
+                    bvals = np.concatenate([bvals_thru2020, bvals_post2020])
                 else:
-                    bvals = was24_wwtp_data_ds[var].sel(
-                            source=was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == rn].item(),
-                            date=dt_ind)
+                    # get values through 2020 from actual data
+                    if len(dt_ind_thru2020) == 0:
+                        bvals_thru2020 = np.array([])
+                    else:
+                        bvals_thru2020 = was24_wwtp_data_ds[var].sel(
+                                source=was24_wwtp_data_ds.source[was24_wwtp_data_ds.name == rn].item(),
+                                date=dt_ind_thru2020)
+                    # get values post 2020 from climatologies
+                    bvals_post2020 = qtbio_wwtp_df_dict[rn][var_post].values
+                    # concatenate the values
+                    bvals = np.concatenate([bvals_thru2020, bvals_post2020])
+                    
                 for nn in range(N):
                     B_mat[:, nn, rr] = bvals
             # check for nans

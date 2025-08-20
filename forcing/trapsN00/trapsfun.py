@@ -35,9 +35,7 @@ def get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD):
     CTIC_df  = pd.read_pickle(Ldir['CTIC_'+traps_type+'_fn'])
 
     # year day index starts from 1. Convert to start from 0 to work with python
-    yd_ind = yd_ind - 1
-    # create a mutable copy that we can manipulate one element at a time
-    yd_ind = yd_ind.copy().to_numpy()
+    yd_ind = np.array(yd_ind) - 1
     # and shift yearday by one if it is after Feb 28 and it is not a leap year
     # since climatologies are generated with 366 days per year
     for i, date in enumerate(dt_ind):
@@ -70,7 +68,10 @@ def get_qtbio(gri_df, dt_ind, yd_ind, Ldir, traps_type, trapsD):
         qtbio_df.loc[:, 'NO3']  = CNO3_df.loc[yd_ind,rn].values
         qtbio_df.loc[:, 'TAlk'] = CTalk_df.loc[yd_ind,rn].values
         qtbio_df.loc[:, 'TIC']  = CTIC_df.loc[yd_ind,rn].values
-        sout += 'filled from climatology (Mohamedali et al., 2020 dataset)'
+        if traps_type == 'was24wwtp':
+            sout += 'filled from climatology (Wasielewski et al., 2024 dataset)'
+        else:
+            sout += 'filled from climatology (Mohamedali et al., 2020 dataset)'
           
         # save in the dict
         qtbio_df_dict[rn] = qtbio_df

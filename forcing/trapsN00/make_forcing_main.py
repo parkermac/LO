@@ -72,7 +72,7 @@ ctag = 'lo_base'
 
 # get correct version of Ecology data (based on what is saved in LO/pre/trapsP##)
 this_dir = Path(__file__).absolute().parent.parent.parent.parent
-with open(this_dir / 'LO' / 'pre' / trapsP / 'traps_data_ver.csv','r') as f:
+with open(this_dir / 'LO_forked' / 'pre' / trapsP / 'traps_data_ver.csv','r') as f:
     for ver in f:
         trapsD = ver
 
@@ -134,16 +134,16 @@ try:
     wwtp_ds, NWWTP_moh = wwtp_moh20.make_forcing(N,NT,NRIV,NTRIV,dt_ind,yd_ind,ot_vec,Ldir,enable_wwtps,trapsP,trapsD,ctag)
     ds_to_merge.append(wwtp_ds)
 except Exception as e:
-    print('Error creating wwtp: maybe there are none.')
+    print('Error creating moh20 wwtp: maybe there are none.')
     print(e)
     NWWTP_moh = 0
 
-# generate forcing for marine point sources (Mohamedali et al., 2020)
+# generate forcing for marine point sources (Wasielewski et al., 2024)
 try:
-    wwtp_ds, NWWTP_was = wwtp_was24.make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind,yd_ind,ot_vec,Ldir,enable_wwtps,trapsD)
+    wwtp_ds, NWWTP_was = wwtp_was24.make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind,yd_ind,ot_vec,Ldir,enable_wwtps,trapsP,trapsD,ctag)
     ds_to_merge.append(wwtp_ds)
 except Exception as e:
-    print('Error creating wwtp: maybe there are none.')
+    print('Error creating was24 wwtp: maybe there are none.')
     print(e)
     NWWTP_was = 0
 
