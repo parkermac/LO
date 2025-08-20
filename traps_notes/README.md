@@ -72,6 +72,11 @@ In LO/pre/trapsP01/traps_data_ver.csv, specify the version of LO_data you want t
     
 *Note: User does not need to run this step. It is listed here for completion. During TRAPS development and testing, the developer already ran this script. Users can skip to step 2. However, if the user decides to run this script, it is advised that they run it on their remote machine (or wherever they plan to generate forcing).*
 
+From LO/pre/trapsP01 in ipython:
+```
+run rawdata_2netCDF.py
+```
+
 This step runs one script which consolidates all data into netCDF files with daily resolution from Jan 1999 - Jul 2017 for Mohamedali et al. (2020) data, and Jan 2005 - Dec 2020 for Wasielewski et al. (2024) .data
 
 These new files are stored in LO_data/processed_data.
