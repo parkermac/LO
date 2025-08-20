@@ -25,9 +25,7 @@ def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,tra
     # Start Dataset
     wwtp_ds = xr.Dataset()
     NWWTP = 0
-
-    print('HELLOOOOO')
-
+    
     # get year list
     years = [fulldate.year for fulldate in dt_ind]
 
