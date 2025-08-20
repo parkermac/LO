@@ -45,7 +45,7 @@ reload(wwtp_was24)
 #################################################################################
 
 # LOGICAL SWITCH TO ENABLE OR DISABLE TINY RIVERS OR WWTPS
-enable_trivs = True
+enable_trivs = False
 enable_wwtps = True
 
 #################################################################################
