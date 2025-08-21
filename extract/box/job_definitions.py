@@ -134,5 +134,8 @@ def get_box(job, Lon, Lat):
     elif job == 'lundquist':
         aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
         vn_list = 'h,f,pm,pn,mask_rho,temp,zeta'
+    elif job == 'henderson': # Cassandra Henderson - Willapa
+        aa = [Lon[0], Lon[-1], Lat[0], Lat[-1]]
+        vn_list = 'h,f,pm,pn,mask_rho,zeta,u,v,mask_u,mask_v,wetdry_mask_rho,wetdry_mask_u,wetdry_mask_v'
         
     return aa, vn_list
