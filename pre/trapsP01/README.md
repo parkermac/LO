@@ -1,42 +1,76 @@
-# LO/pre/trapsP##
+# LO/trapsP01
 
-This folder contains the scripts that generate climatologies for TRAPS and that map TRAPS to the model grid. Details of each can be found below.
-
----
-## ecology_excel2netCDF.py
-
-This script converts all of Ecology's raw data from excel format to netCDF format.
-
-Note: Users do not need to run this script. It was already run during TRAPS development, and users can simply use the output .nc files provided on perigee in auroral's LO_data folder. The script is provided here for completion only.
+This README describes the processing scripts which converts raw point source (WWTP) and nonpoint source (river) data into a netCDF file for easy incorporation into the LiveOcean model.
 
 ---
-## traps_data_ver.csv
+## Data Processing Steps
 
-This is a config file that allows for modularity. This file contains the name of the LO_data/trapsD## that the user wants to use for climatology generation.
+<details><summary><strong><code>rawdata_2netCDF.py</code></strong></summary>
 
-In theory, different versions of trapsD## allows the user to pick different versions of Ecology data to use, should updates be released in the future. However, there is currently only one traps data version: **trapsD00**
+This script compiles all of the excel files from Mohamedali et al. (2020) and the csv files from Wasielewski et al. (2024) into three netCDF files. These .nc files are used for later processing in the TRAPS integration workflow.
+
+Inputs:
+- The script reads raw data from the two datasets in:
+    - LO_data/trapsD01/mohamedali_etal2020
+    - LO_data/trapsD01/wasielewski_etal2024
+- It also takes in metadata from the excel files located in LO_data/trapsD01:
+    - **SSM_source_info.xlsx** contains metadata, and importantly lat/lon coordinates, for the rivers and point sources in Mohamedali et al. (2020)
+    - **wwtp_names.xlsx** contains a list of all WWTPs in Mohamedali et al. (2020), with the corresponding names of WWTPs in the Wasielewski et al. (2024) dataset.
+    - **LiveOcean_SSM_rivers.xlsx** contains a list of pre-existing rivers in LiveOcean, and their corresponding river names in the Mohamedali et al. (2020) dataset.
+
+Outputs (which are saved in LO_data/trapsD01/processed_data):
+- **river_data_mohamedali_etal_2020.nc** contains daily river data from the Mohamedali et al. (2020) dataset
+- **wwtp_data_mohamedali_etal_2020.nc** contains daily WWTP data from the Mohamedali et al. (2020) dataset
+- **wwtp_data_wasielewski_etal_2024.nc** contains daily WWTP data from the Wasielewski et al. (2024) dataset
+
+Note that the WWTP data in the two .nc files are unique. This script already handles the nuances of cases in which the same WWTP is present in both datasets.
+
+In theory, this script only needs to be run once.
+Then, the netCDF files can be referenced to generate climatologies
+
+This script takes about 15 minutes to run on my local machine.
+
+</details>
 
 ---
-## climatology_all_source_types.sh
+## Testing scripts
 
-This shellscript automates the climatology generation process.
+Files located in **trapsP01/testing/scripts**
 
-To use TRAPS, users need to generate climatology for three TRAPS types: point sources, tiny rivers, and pre-existing LO rivers. Running this script will automatically step through the make_climatology scripts for each of these sources types (so users do not need to independently run three different climatology scripts).
+*Note: these scripts are not necessary to the TRAPS workflow. However, they are here as testing and exploratory tools for the WWTPs in the two datasets.*
+
+<details><summary><strong><code>explore_loading_profiles_before_trapsP01_processing.py</code></strong></summary>
+
+This script was created prior to writing the processing scripts in trapsP01. The intention of this script was to explore the point source loading data in Mohamedali et al. (2020) and Wasielewski et al. (2024).
+
+The decisions to omit and keep certain WWTPs from the different datasets were directly informed by the analysis in this script. (See [LO/traps_notes/data_notes](https://github.com/parkermac/LO/tree/main/traps_notes/data_notes) for more information on which WWTPs were kept and which were omitted).
+
+Output figures from this script are saved to **LO_output/loading_test/point_source_integration**
+
+</details>
+
+<details><summary><strong><code>post_ncfile_processing_figures.py</code></strong></summary>
+
+This script was created to verify that the processing scripts, ```rawdata_2netCDF.py``` and ```climatology_all_source_types.sh```, generated the correct datasets.
+
+Output figures from this script are saved to **LO_output/point_source_integration/final_WWTP_loads**
+
+</details>
 
 ---
 ## make_climatology scripts
 
-The climatology scripts condense the 1999-2017 Ecology timeseries data into yearly climatologies for each source. This section describes how these scripts work.
+The climatology scripts condense the Mohamedali et al. (2020) and the Wasielewski et al. (2024) timeseries data into yearly climatologies for each source. This section describes how these scripts work.
 
 <details><summary><strong>Summary</strong></summary>
 
 There are three main climatology scripts:
 
-- `make_climatology_pointsources.py`: Creates climatology files for all point sources using Ecology's data in LO_traps/data/all_point_source_data.nc
-- `make_climatology_tinyrivers.py`: Creates climatology files for river mouths using Ecology's data in LO_traps/data/all_nonpoint_source_data.nc. This script does not generate climatology for pre-existing rivers in LiveOcean.
-- `make_climatology_LOrivbio.py`: Creates biogeochemistry climatology files for all pre-existing LiveOcean rivers for which Ecology has data in LO_traps/data/all_nonpoint_source_data.nc. This script does not generate climatology for tiny rivers, nor does it generate flowrate or temperature climatology.
+- `make_climatology_moh20_wwtp.py`: Creates climatology files for all point sources using Mohamedali et al. (2020) data in LO_data/processed_data/wwtp_data_mohamedali_etal_2020.nc
+- `make_climatology_moh20_tinyrivs.py`: Creates climatology files for river mouths using Mohamedali et al. (2020) data in LO_data/processed_data/river_data_mohamedali_etal_2020.nc. This script does not generate climatology for pre-existing rivers in LiveOcean.
+- `make_climatology_moh20_LOrivbio.py`: Creates biogeochemistry climatology files for all pre-existing LiveOcean rivers for which Mohamedali et al. (2020) has data in LO_data/processed_data/river_data_mohamedali_etal_2020.nc. This script does not generate climatology for tiny rivers, nor does it generate flowrate or temperature climatology.
 
-These scripts generate climatology pickle files in LO_output/pre/trapsP##/[source type]/lo_base/Data_historical.
+These scripts generate climatology pickle files in LO_output/pre/trapsP01/[source type]/lo_base/Data_historical.
 
 Climatologies are generated for the following variables:
 - flow (TRAPS only)
@@ -51,13 +85,13 @@ Climatologies are generated for the following variables:
 
 <details><summary><strong>Algorithm</strong></summary>
 
-The structure of these scripts are all similar, so they will be explained generally. There are a few nuances in `make_climatology_tinyrivers.py` which are discussed explicitly.
+The structure of these scripts are all similar, so they will be explained generally. There are a few nuances in `make_climatology_moh20_tinyrivs.py` which are discussed explicitly.
 
-1. First, raw data are read from LO_data/trapsD##/all_nonpoint_source_data.nc and LO_data/trapsD##/all_point_source_data.nc. 
+1. First, raw data are read from LO_data/trapsD01/processed_data. 
 
->>> **River notes:** For rivers, the script also reads the list of pre-existing LO rivers from LO_data/trapsD##/LiveOcean_SSM_rivers.xlsx. The pre-existing rivers are omitted from  tinyriver climatology. The non-pre-existing rivers are omitted from LOrivbio climatology.
+>>> **River notes:** For rivers, the script also reads the list of pre-existing LO rivers from LO_data/trapsD01/LiveOcean_SSM_rivers.xlsx. The pre-existing rivers are omitted from  tinyriver climatology. The non-pre-existing rivers are omitted from LOrivbio climatology.
 
->>> **Tiny river notes:** In the raw Ecology data, there are several tiny rivers with unrealistic biogeochemistry parameters (i.e. zero DO, negative TIC, etc.). These "weird rivers" are temporarily removed from climatology generation. They are handled separately in Step 4.
+>>> **Tiny river notes:** In the raw Mohamedali et al. (2020) data, there are several tiny rivers with unrealistic biogeochemistry parameters (i.e. zero DO, negative TIC, etc.). These "weird rivers" are temporarily removed from climatology generation. They are handled separately in Step 4.
 
 2. Then, the script creates empty dataframes for DO, discharge, temperature, NO3, NH4, TIC, and TAlk. For every source, the script then fills these dataframes with the average yearly climatology of the full 1999-2017 timeseries from Ecology. Essentially, climatologies are the "average year" of each source. The script also calculates the standard deviations of these climatologies.
 
@@ -68,6 +102,20 @@ The structure of these scripts are all similar, so they will be explained genera
 5. Finally, the script saves climatology dataframes as pickle files.
 
 </details>
+
+---
+## traps_data_ver.csv
+
+This is a config file that allows for modularity. This file contains the name of the LO_data/trapsD## that the user wants to use for climatology generation.
+
+In theory, different versions of trapsD## allows the user to pick different versions of Ecology data to use, should updates be released in the future. The current set of code is compatible with data version: **trapsD01**
+
+---
+## climatology_all_source_types.sh
+
+This shellscript automates the climatology generation process.
+
+To use TRAPS, users need to generate climatology for three TRAPS types: WWTPs, tiny rivers, and pre-existing LO rivers. Running this script will automatically step through the make_climatology scripts for each of these sources types (so users do not need to independently run multiple different climatology scripts).
 
 ---
 ## traps_placement.py & traps_helper.py
@@ -166,3 +214,4 @@ A grid cell of interest is determined in `get_nearest_coatal_cell_wwtp` before b
 
 This function is the point source equivalent of `get_cell_info_riv`, except it is much simpler. In general, point sources are easier to handle than tiny rivers because point sources can be located on an water cell (including in open water), whereas rivers must be located on a land-adjacent water cell. Furthermore, rivers need an associated flow direction, but point sources do not. Thus, this function only needs to check whether the grid cell of interest is a water cell. If so, the function returns the i,j-indices of the grid cell of interest as well as the distance from the center of the grid cell to the point source. If the grid cell of interest is not a water cell, then nothing is returned.
 </details><br>
+

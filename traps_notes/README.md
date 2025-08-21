@@ -8,7 +8,9 @@ LO_traps is a module that contains all data and scripts required to add TRAPS to
 
 The TRAPS integration module is a work in progress. If you encounter any bugs or have general feedback, please email auroral@uw.edu. Thanks!
 
-All data and source locations have been downloaded from Washington State Department of Ecology's [website](https://fortress.wa.gov/ecy/ezshare/EAP/SalishSea/SalishSeaModelBoundingScenarios.html). These data are also used in the Salish Sea Model.
+<!-- All data and source locations have been downloaded from Washington State Department of Ecology's [website](https://fortress.wa.gov/ecy/ezshare/EAP/SalishSea/SalishSeaModelBoundingScenarios.html). These data are also used in the Salish Sea Model. -->
+
+For information on the data sources used and how they are handled in LiveOcean, please visit [LO/traps_notes/data_notes](https://github.com/parkermac/LO/tree/main/traps_notes/data_notes).
 
 ---
 ## Getting set up
@@ -20,10 +22,10 @@ To enable TRAPS, you need to git pull on the LO repo to get the latest functiona
 The most important folders to look for are:
 
 So you should have:
-- LO/pre/trapsP00
-- LO/forcing/trapsF00
+- LO/pre/trapsP01
+- LO/forcing/trapsN00
 
-Feel free to copy LO/forcing/trapsF00 into your LO_user repo, and modify as desired. The TRAPS workflow should still work fine.
+Feel free to copy LO/forcing/trapsN00 into your LO_user repo, and modify as desired. The TRAPS workflow should still work fine.
 
 </details>
 
@@ -31,15 +33,17 @@ Feel free to copy LO/forcing/trapsF00 into your LO_user repo, and modify as desi
 
 The data used to generate TRAPS forcing is stored on Perigee.
 
-On Perigee, copy the **files** in /data1/auroral/LO_data/trapsD00* folder into LO_data/trapsD00 on your computer and whichever machine you will use to generate forcing (Perigee or Apogee). **You do not need to copy the folders titled nonpoint_sources and point_sources. These folders contain bulky raw Ecology data. The two .nc files contain the condensed version of these data that are used by the TRAPS code**
+On Apogee, copy the files in /dat1/auroral/LO_data/trapsD01 folder into LO_data/trapsD01 on your computer and whichever machine you will use to generate forcing (Perigee or Apogee). **You do not need to copy the folders titled "wasielewski_etal2024" and "mohamedali_etal2020". These folders contain raw data. The files in "processed_data" contain the condensed version of these data that are used by the TRAPS code**
 
-Once this is complete you should have an LO_data/trapsD00 folder with the following files:
+Once this is complete you should have an LO_data/trapsD01 folder with the following files:
 - **LiveOcean_SSM_rivers.xlsx:** Excel sheet with list of duplicate rivers in LiveOcean and the Salish Sea Model. When you create TRAPS climatology and when you generate forcing, the scripts will look at this excel sheet to determine which rivers to omit from LiveOcean. This ensures that TRAPS does not add duplicate rivers to LiveOcean.
-- **wwtp_open_close_dates.xlsx:** Excel sheet with a list of WWTPs and the year that they closed or opened.
-- **all_nonpoint_source_data.nc**: Ecology's timeseries data of state variables and lat/lon coordinates for all river mouths. Used in LO_traps/user/pre/trapsP## to generate climatology files.
-- **all_point_source_data.nc:** Ecology's timeseries data of state variables and lat/lon coordinates for all point sources. Used in LO_traps/user/pre/trapsP## to generate climatology files.
+- **wwtp_names.xlsx:** Excel sheet with list of WWTPs in the Mohamedali et al. (2020) and Wasielewski et al. (2024) datasets. The naming convention is slightly different between the two datasets, so this file is used to look up the different names for the same WWTPs.
+- **SSM_source_info.xlsx:** Downloaded metadata from the Mohamedali et al. (2020) dataset
+- **processed_data/river_data_mohamedali_etal_2020.nc**: Processed Mohamedali et al. (2020) imeseries data of state variables and lat/lon coordinates for all river mouths. Used in LO/pre/trapsP01 to generate climatology files.
+- **processed_data/wwtp_data_mohamedali_etal_2020.nc**: Processed Mohamedali et al. (2020) imeseries data of state variables and lat/lon coordinates for all WWTPs. Used in LO/pre/trapsP01 to generate climatology files.
+- **processed_data/wwtp_data_wasielewski_etal_2024.nc**: Processed Wasielewski et al. (2024) timeseries data of state variables and lat/lon coordinates for all WWTPs. Used in LO/pre/trapsP01 to generate climatology files and in LO/forcing/trapsN00 to generate forcing.
 
-*Note: trapsD00 is the current version of Ecology data used to generate traps climatologies and forcing. If new data becomes available, I will increment the version number to be trapsD01.
+*Note: trapsD01 is the current version of data used to generate traps climatologies and forcing. Please see [LO/traps_notes/data_notes](https://github.com/parkermac/LO/tree/main/traps_notes/data_notes) for more information on thow these data were handled.
 
 </details>
 
@@ -50,7 +54,7 @@ After getting the required files, users should be able to add TRAPS to their mod
 
 <details><summary><strong>TRAPS workflow diagram</strong></summary>
 
-![traps-top-level-diagram-v7](https://github.com/ajleeson/LO_user/assets/15829099/c8534744-5240-476e-807d-7c7d44793a1f)
+<p style="text-align:center;"><img src="traps_workflow_diagram_v8.png" width="800"/></p>
 
 </details>
 
@@ -58,55 +62,62 @@ After getting the required files, users should be able to add TRAPS to their mod
 
 <details><summary>1. Specify data folder name</summary>
     
-In LO/pre/trapsP##/traps_data_ver.csv, specify the version of LO_data you want to use to generate climatologies.
+In LO/pre/trapsP01/traps_data_ver.csv, specify the version of LO_data you want to use to generate climatologies.
 
-Note that currently, only trapsD00 is available for use. However, this config file creates modularity which will make it easy to switch to a new version of Ecology data in the future (ie. simply update traps_data_ver.csv to be trapsD01)
+*Note that the latest WWTP upgrades are included in version trapsD01. The code is not backwards-compatible, so trapsP01 must be used with trapsD01 (you cannot mix trapsP01 with trapsD00).*
 
 </details>
 
-<details><summary>1.5. Convert raw Ecology data from excel file to netCDF</summary>
+<details><summary>1.5. Convert raw data to netCDF</summary>
     
 *Note: User does not need to run this step. It is listed here for completion. During TRAPS development and testing, the developer already ran this script. Users can skip to step 2. However, if the user decides to run this script, it is advised that they run it on their remote machine (or wherever they plan to generate forcing).*
 
-This step runs one script which consolidates all of Ecology's raw data (in excel format) into netCDF files with daily resolution from Jan 1999 - Jul 2017.
+From LO/pre/trapsP01 in ipython:
+```
+run rawdata_2netCDF.py
+```
 
-These new files are all_nonpoint_source_data.nc and all_point_source_data.nc stored in LO_data.
+This step runs one script which consolidates all data into netCDF files with daily resolution from Jan 1999 - Jul 2017 for Mohamedali et al. (2020) data, and Jan 2005 - Dec 2020 for Wasielewski et al. (2024) .data
+
+These new files are stored in LO_data/processed_data.
 
 </details>
 
 <details><summary>2. Generate climatologies</summary>
     
 This step generates climatology files for each of the TRAPS.
-From your **remote machine** (or whichever machine you will use to generate forcing) in LO/pre/trapsP##:
+From your **remote machine** (or whichever machine you will use to generate forcing) in LO/pre/trapsP01:
 
 ```
 bash climatology_all_source_types.sh
 ```
-This shellscript runs climatology scripts for all source types (tiny rivers, pre-existing LiveOcean rivers, and point sources).
+This shellscript runs climatology scripts for all source types (tiny rivers, pre-existing LiveOcean rivers, and WWTPs from both datasets).
 
-Climatology pickle files will be generated and saved in three folders in LO_output/pre/trapsP##:
+Climatology pickle files will be generated and saved in four folders in LO_output/pre/trapsP##:
 
-- **point_sources:** Climatology files for point sources
-- **tiny_rivers:** Climatology files for tiny rivers
-- **LO_rivbio:** Climatology files for pre-existing LO rivers
+- **was24_wwtps:** Climatology files for WWTPs from Wasielewski et al. (2024)
+- **moh20_wwtps:** Climatology files for WWTPs from Mohamedali et al. (2020)
+- **moh20_tinyrivers:** Climatology files for tiny rivers from Mohamedali et al. (2020)
+- **moh20_LOrivbio:** Climatology files for pre-existing LO rivers from Mohamedali et al. (2020)
   
 If you want to look at timeseries figures of the climatologies, then run the following commands **on your local machine** from LO/pre/trapsP### in ipython:
 
 ```
-run make_climatology_tinyrivs.py -test True
-run make_climatology_pointsources.py -test True
-run make_climatology_LOrivbio.py -test True
+run make_climatology_moh20_tinyrivs.py -test True
+run make_climatology_moh20_LOrivbio.py -test True
+run make_climatology_moh20_wwtp.py -test True
+run make_climatology_was24_wwtp.py -test True
 ```
 
-The "test" option will create a subfolder in LO_output/pre/trapsP##/[source type]/lo_base/Data_historical/climatology_plots with a climatology figure for each source. An example figure for Burley Creek is shown below.
+The "test" option will create a subfolder in LO_output/pre/trapsP01/[source type]/lo_base/Data_historical/climatology_plots with a climatology figure for each source. An example figure for Burley Creek is shown below.
 
-![Burley Cr](https://github.com/ajleeson/LO_user/assets/15829099/adc0456f-f855-4428-82c5-63f5aa1fa5b0)
+<p style="text-align:center;"><img src="Burley Cr.png" width="800"/></p>
 
 </details>
 
 <details><summary>3. Map TRAPS to the grid</summary>
 
-This step uses the lat/lon coordinates of TRAPS to map each source to the nearest appropriate grid cell. Tiny rivers are mapped to the nearest coastal grid cell. Point sources are mapped to the nearest water cell. From your remote maching in LO/pre/trapsP## in ipython:
+This step uses the lat/lon coordinates of TRAPS to map each source to the nearest appropriate grid cell. Tiny rivers are mapped to the nearest coastal grid cell. Point sources are mapped to the nearest water cell. From your remote maching in LO/pre/trapsP01 in ipython:
 
 ```
 run traps_placement.py -g [gridname]
@@ -114,7 +125,7 @@ run traps_placement.py -g [gridname]
 
 Csv files with river directions and grid indices for the sources will be generated and saved in LO_data/grid/[gridname]
 
-To look at where the TRAPS get mapped, run with run with ```-test True``` on your local machine. This option will create an interactive figure that you can zoom into. And example screenshot is shown below.
+To look at where the TRAPS get mapped, run with ```-test True``` on your local machine. This option will create an interactive figure that you can zoom into. An example screenshot is shown below.
 
 ![traps-placements](https://github.com/ajleeson/LO_user/assets/15829099/9cb89ea3-1372-48e6-bddc-e0a979385b8e)
 
@@ -127,12 +138,13 @@ This step generates a rivers.nc files with forcing for all pre-existing LO river
 From your remote machine in LO/driver:
 
 ```
-python driver_forcing3.py -g [gridname] -r backfill -s new -0 2017.01.01 -1 2017.01.02 -tP trapsP## -f trapsF##
+python driver_forcing3.py -g [gridname] -r backfill -s newcontinuation -0 2017.01.01 -1 2017.01.03 -tP trapsP## -f trapsN##
 ```
 
-where trapsP## is the version of LO/pre/trapsP## you want to use (default to trapsP00).
+where trapsP## is the version of LO/pre/trapsP## you want to use (default to trapsP01).
 
-Likewise, trapsF## is the traps forcing version you want to use.
+Likewise, trapsN## is the traps forcing version you want to use.
+(trapsN00 represented realistic conditions)
 
 </details>
 
@@ -158,7 +170,7 @@ After completing this change, run the model as you normally would.
 
 Ammonium (NO4) climatology generated from Ecology's data for the Fraser River is a constant value of 0.074 mmol/m3. This concentration is lower than I expected. Since the Fraser River is so large, it is important to get this value right. I reached out to Susan Allen at UBC to learn what NO4 concentration her group uses for the Fraser. She recommended a constant concentration of 4.43 mmol/m3 which is the mean measurement from Environmental Canada ([Olson et al, 2020](https://agupubs.onlinelibrary.wiley.com/action/downloadSupplement?doi=10.1029%2F2019JC015766&file=jgrc24099-sup-0001-Text_SI-S01.pdf)).
 
-The 4.43 mmol/m3 NO4 concentration is implemented as an ```if``` statement in the depths of LO/forcing/trapsV##/make_LOriv_forcing.py code.
+The 4.43 mmol/m3 NO4 concentration is implemented as an ```if``` statement in the depths of LO/forcing/trapsN00/make_moh20_LOriv_forcing.py code.
 
 ![fraser-nh4-code](https://github.com/ajleeson/LO_user/assets/15829099/353472de-8444-48e6-a016-8ae12aca7b30)
 
@@ -168,7 +180,7 @@ The 4.43 mmol/m3 NO4 concentration is implemented as an ```if``` statement in th
 
 Several Hood Canal rivers in Ecology's data, like Union River, get their flow data from the Big Beef Creek USGS river gage. However, the Big Beef Creek gage became inactive in mid-2012. As a result, from mid-2012 through the end of 2014, river data for these Hood Canal rivers are a copy of prior year data. These copied data also appear to be shifted by 3 months.
 
-To prevent river climatologies from being biased by these shifted, copied data, I have removed data from mid-2012 through the end of 2014 for the affected Hood Canal rivers. This "data cropping" is implemented in LO_traps/user/pre/trapsV##/make_climatology_tinyrivs.py.
+To prevent river climatologies from being biased by these shifted, copied data, I have removed data from mid-2012 through the end of 2014 for the affected Hood Canal rivers. This "data cropping" is implemented in LO_traps/user/pre/trapsP##/make_climatology_moh20_tinyrivs.py.
 
 An example hydrograph for Union River is shown below before and after the data were cropped.
 
@@ -176,36 +188,97 @@ An example hydrograph for Union River is shown below before and after the data w
 
 </details>
 
-<details><summary><strong>WWTP open and close dates</strong></summary>
+<!-- <details><summary><strong>WWTP open and close dates</strong></summary>
 
 LO_data/trapsD00/wwtp_open_close_dates.xlsx is a user-modifiable sheet with the open and close dates of the WWTPs (with a yearly resolution). The information in this excel sheet is read by the LO_traps/user/forcing/trapsV##/make_wwtp_forcing.py script and turned into a series of ``if`` statements. When the user generates forcing for a year in which a WWTP is closed, then the scripts will still add the WWTP to the model grid. However, the script will set the discharge rate to be 0 m3/s.
 
-</details>
+</details> -->
 
-<details><summary><strong>Overlapping sources and the Lake Stevens WWTPs</strong></summary>
+<!-- <details><summary><strong>Overlapping sources and the Lake Stevens WWTPs</strong></summary>
 
 For the cas7 grid, several pairs of tiny river and pairs of WWTPs get mapped to the same grid cell (despite having different lat/lon coordinates). These pairs of sources are called "overlapping" sources. To prevent ROMS from getting confused, the forcing scripts consolidate overlapping sources into a single source. The scripts sum the flowrates of both sources, and calculates a weighted average for the other state variables (e.g. temperature) based on flowrate. Even if users are not using the cas7 grid, the TRAPS forcing script will identify and consolidate overlapping sources. Note that this script can only consolidate a pair of overlapping tiny rivers, or a pair of overlapping WWTPs. The script is not able to identify whether a tiny river and WWTP are overlapping. Luckily, this scenario does not occur in the cas7 grid.
 
 The Lake Stevens 001 and Lake Stevens 002 WWTPs overlap on the cas7 grid. However, these WWTPs are never open concurrently-- Lake Stevens 002 opens after Lake Stevens 001 closes. Thus, there is a conditional statement in the LO_traps/user/forcing/trapsV##/make_wwtp_forcing.py script that <i>un-</i>consolidates these WWTPs.
 
-</details>
+</details> -->
 
 <details><summary><strong>Willamette River</strong></summary>
 
 Willamette River is included in the Ecology data, and it is not explicitly a duplicate pre-existing LiveOcean river. However, Willamette River discharges into the Columbia River. The Columbia River was pre-existing to LiveOcean, and its USGS gauge is downstream of the Willamette River (meaning that the pre-existing Columbia River already includes contribution from the Willamette). Therefore, the TRAPS code needs to remove the Willamette River from being incorporated into LiveOcean.
 
-This exception is handled in LO/pre/trapsV##/make_climatology_tinyrivs.py:
+This exception is handled in LO/pre/trapsP##/make_climatology_moh20_tinyrivs.py:
 
 ![Willamette](https://github.com/ajleeson/LO_user/assets/15829099/8271fb86-d892-4148-9cc7-8b0bfd2cdb75)
 
-And also in LO/pre/trapsV##/traps_placement.py:
+And also in LO/pre/trapsP##/traps_placement.py:
 
 ![remove_willamette](https://github.com/ajleeson/LO_user/assets/15829099/bbdc8f44-db1c-4734-aac6-fcd8ab4c54a0)
 
 </details>
 
+<details><summary><strong>Clover Point WWTP</strong></summary>
+
+Data for Clover Point WWTP had seemingly anomalously high nutrient loads during 2013 - 2015. To prevent these data from biasing the Clover Point climatologies towards a higher-than-normal discharge, we omitted data from 2013 - 2015 prior to calculating climatologies. This case was handled in LO/pre/trapsP01/make_climatology_moh20_wwtp.py
+
+The raw data for Clover Point WWTP, and our climatology with 2013 - 2015 data omitted are shown below:
+
+<p style="text-align:center;"><img src="clover_point.png" width="800"/></p>
+
+</details>
+
+</details>
+
+<details><summary><strong>WWTPs in Wasielewski et al. (2024) with step-change in loads</strong></summary>
+
+Some WWTPs in the Wasieleski et al. (2024) dataset had loads that appeared to have a step change. These WWTPs are handled individually in LO/pre/trapsP01/make_climatology_was24_wwtp.py under the section titled "Mask older years if WWTPs changed loads over time".
+
+If there was a step change in the load, we omit data prior to the change in data, such that the most recent mean loads are retained.
+
+The figure below shows an example of one such WWTP, the Tacoma Central No 1 WWTP:
+
+<p style="text-align:center;"><img src="tacoma_central_no1.png" width="800"/></p>
+
+The WWTPs handled in this section are:
+- Alderwood STP
+	- Omit everything before 2010.
+- Brightwater
+	- Omit data before 2014
+- Kitsap County Central Kitsap WWTP
+	- Omit data before 2011
+- McNeil Island
+	- Omit data before 2011
+- Mt Vernon
+	- Omit data before 2008
+- Tacoma Central
+	- Omit data before 2011
+
+The code in this climatology script also handles two WWTPs that closed during the 2005 - 2020 time period of the Wasielewski et al. (2024) dataset. For these WWTPs, we set flow to zero, such that these WWTPs will not discharge anything post 2020. The closed WWTPs are:
+- Warm Beach Campground
+- Port Gamble
+
+</details>
+
 ---
 ## Update Notes
+
+<details><summary><strong>2025.08.08 update</strong></summary>
+
+**Incoporated new WWTP loading dataset**
+
+In this update, we incorporated a new WWTP loading dataset from [Wasielewski et al. (2024)](https://www.sciencebase.gov/catalog/item/64762b37d34e4e58932d9d81).
+
+These data were combined with the prior Ecology data ([Mohamedali et al., 2020](https://fortress.wa.gov/ecy/ezshare/EAP/SalishSea/SalishSeaModelBoundingScenarios.html); October 2020 version) to improve WWTP loads. 
+
+Please see [LO/traps_notes/data_notes](https://github.com/parkermac/LO/tree/main/traps_notes/data_notes). for more details on how these data were processed and consolidated.
+
+All modules of the TRAPS code were updated to accomodate the new data integration.
+
+The following file versions were updated:
+- trapsD00 --> trapsD01
+- trapsP00 --> trapsP01
+- trapsF00 --> trapsN00
+
+</details>
 
 <details><summary><strong>2024.03.01 update</strong></summary>
 
