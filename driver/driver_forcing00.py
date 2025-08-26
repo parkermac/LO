@@ -128,7 +128,6 @@ while dt <= dt1:
                 '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing),
                 '-test_planB', str(args.test_planB),
                 '-gtx', args.gtagex, '-ro', str(args.roms_out_num), '-do_bio', str(args.do_bio)]
-    print(cmd_list) # debugging
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     with open(out_dir / 'Info' / 'screen_output.txt', 'w') as fout:
