@@ -7,13 +7,25 @@ To turn them off, set lines 41 and 42 to be = False
 
 Test in ipython:
 run make_forcing_main.py -g cas7 -r backfill -d 2019.07.10 -tP trapsP01 -f trapsN00
+run make_forcing_main.py -g cas7 -r forecast -d [today's date string] -tP trapsP01 -f trapsN00
 
 where tP is the traps climatology folder
 and f is the forcing name (current folder)
 
-2024.10.15 Parker moved the specification of the ctag to a single place, around line 67.
-Also added code to catch cases where a grid might not have one or more river types.
-These changes were prompted by wanting to use this code for a nested grid.
+NOTES:
+
+I. There are three things you have to do before this can run:
+
+(1) Copy LO_data/trapsD01 (e.g. from /dat1/parker on apogee) into your own LO_data.
+(2) Run LO/pre/trapsP01/traps_placement.py once for each grid. I did not have to reprocess any of the raw data in trapsD01 to do this, but you might have to at some point.
+(3) Run LO/pre/trapsP01/climatology_all_source_types.sh to create climatologies. To do this you will likely have to do:
+  chmod u+x ./climatology_all_source_types.sh
+and then
+  ./climatology_all_source_types.sh.
+(4) THEN you can run the test command for make_forcing_main.py.
+
+II. This code has been modified (2025.08.26 Parker) to write forcing to separate day folders when the run_type = forecast.
+
 """
 
 #################################################################################
@@ -60,8 +72,8 @@ result_dict['start_dt'] = datetime.now()
 #                    Get required data to generate forcing                      #
 #################################################################################
 
-date_string = Ldir['date_string']
-out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + date_string) / Ldir['frc']
+# date_string = Ldir['date_string']
+# out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + date_string) / Ldir['frc']
 
 # get correct version of traps climatology output
 trapsP = Ldir['trapsP']
@@ -76,19 +88,15 @@ with open(this_dir / 'LO' / 'pre' / trapsP / 'traps_data_ver.csv','r') as f:
     for ver in f:
         trapsD = ver
 
-trapsD = 'trapsD01'
-
 if Ldir['testing']:
     reload(zrfun)
     reload(rivfun)
 
-out_fn = out_dir / 'rivers.nc'
-out_fn.unlink(missing_ok=True)
-
-# set up the time index for the record
+# Set up the time index for the record.
+# By default we make it long enough to do a daily forecast.
 dsf = Ldir['ds_fmt']
 dt0 = datetime.strptime(Ldir['date_string'],dsf) - timedelta(days=2.5)
-dt1 = datetime.strptime(Ldir['date_string'],dsf) + timedelta(days=4.5)
+dt1 = datetime.strptime(Ldir['date_string'],dsf) + timedelta(days=Ldir['forecast_days']+1.5)
 days = (dt0, dt1)
     
 # pandas Index objects
@@ -160,15 +168,35 @@ elif len(ds_to_merge) == 1:
 else:
     all_ds = xr.merge(ds_to_merge)
 
-# Save to NetCDF
-all_ds.to_netcdf(out_fn)
+# If we are doing a forecast just copy the results to subsequent days.
+date_string_list = []
+if Ldir['run_type'] == 'backfill':
+    date_string_list.append(Ldir['date_string'])
+elif Ldir['run_type'] == 'forecast':
+            ds00 = Ldir['date_string']
+            dt00 = datetime.strptime(ds00, Ldir['ds_fmt'])
+            for day in range(Ldir['forecast_days']):
+                dt0 = dt00 + timedelta(days=day)
+                ds0 = datetime.strftime(dt0, format=Ldir['ds_fmt'])
+                date_string_list.append(ds0)
+out_fn_list = []
+for date_string in date_string_list:
+    print('\nWorking on ' + date_string)
+    out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + date_string) / Ldir['frc']
+    Lfun.make_dir(out_dir)
+    out_fn = out_dir / 'rivers.nc'
+    out_fn_list.append(out_fn) # used at the end to check results
+    out_fn.unlink(missing_ok=True)
+    # Save to NetCDF
+    all_ds.to_netcdf(out_fn)
 all_ds.close()
 
 # test for success
-if out_fn.is_file():
-    result_dict['result'] = 'SUCCESS'
-else:
-    result_dict['result'] = 'FAIL'
+result = 'SUCCESS'
+for fn in out_fn_list:
+    if not fn.is_file():
+        result = 'FAIL'
+result_dict['result'] = result
 
 result_dict['end_dt'] = datetime.now()
 ffun.finale(Ldir, result_dict)

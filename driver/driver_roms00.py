@@ -9,6 +9,10 @@ pinging squeue.
 
 It relies on LO/driver/batch/klone00_make_batch.py and klone00_batch_BLANK.sh.
 
+NOTE:
+For run_type = forecast it assumes we are using the new (2025.08.26) scheme
+in which foring always goes in individual day folders.
+
 For testing/debugging these flags can be very useful:
 -v True (verbose screen output)
 --get_forcing False (don't get the forcing files, e.g. if they are already on klone)
@@ -197,7 +201,6 @@ while dt <= dt1:
         start_type = 'continuation'
         
     f_string = 'f' + dt.strftime(Lfun.ds_fmt)
-    f_string0 = 'f' + dt0.strftime(Lfun.ds_fmt) # used for forcing a forecast
     print('')
     print((' ' + f_string + ' ').center(Ncenter,'='))
     print(' > started at %s' % (datetime.now().strftime('%Y.%m.%d %H:%M:%S')))
@@ -245,12 +248,8 @@ while dt <= dt1:
                 pass
             else:
                 force_choice = force_dict[force]
-                if (args.run_type == 'backfill') or (force_choice == 'ocnN'):
-                    F_string = f_string
-                elif args.run_type == 'forecast':
-                    F_string = f_string0
                 cmd_list = ['scp','-r',
-                    remote_dir + '/LO_output/forcing/' + Ldir['gridname'] + '/' + F_string + '/' + force_choice,
+                    remote_dir + '/LO_output/forcing/' + Ldir['gridname'] + '/' + f_string + '/' + force_choice,
                     str(force_dir)]
                 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
                 stdout, stderr = proc.communicate()

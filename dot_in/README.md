@@ -25,6 +25,7 @@ We keep forcing_list.csv as a separate file because it is also used by `driver_r
 - `cas7_t0_x4b` Primary forecast and long hindcast (late 2021 to June 2025). Uses traps rivers and increased light attenuation in the Salish Sea
 
 #### Current development runs
+- `cas7_t2_x11b` like cas7_t1_x11b but uses forecast forcing organized in separate days (ocnG01, tide01, atm01, trapsN00).
 - `cas7_dye0_x11b` like cas7_t1_x11b but with NPT = 2. This is to experiment with adding dye tracers in preparation for using them for BGC "twin" experiments.
 - `cas7_t1_x11ab` **Leading edge of our development**, with bio code from x10ab. Has changed TIDE_START. Uses new ROMS (4.3) presumably with Harcourt turbulence/advection improvements. Uses OMEGA_IMPLICIT and smaller GLS_Kmin. These allow DT = 50 sec instead of 40. 
 - `cas7_t1_x10ab` experiment along the way to x11ab. Has 50% burial of particles (including Carbon) in the Salish Sea, 2017 run used for validation. The validation results look great, even for pCO2. I saved a version of 2017 output from  and earlier version of this that used HSIMT for bio tracers and renamed it cas7_hsimt_x10ab. (on apogee). The "a" in the executable name implies that we use daily saves for speed and low storage and create a daily **average** for validation.

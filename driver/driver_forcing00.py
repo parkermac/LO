@@ -21,7 +21,7 @@ Thus for a forecast, we now populate three separate day folders instead of one.
 Because of this change you should ONLY use this driver for forcing which has
 this new forecast organization scheme implemented.
 
-Current examples of compliant forcing are: atm01, ocnG01, riv01, tide01, trapsF??
+Current examples of compliant forcing are: atm01, ocnG01, tide01, trapsN00,
 and ocnN.
 
 This is meant to then be paired with driver_roms00.py which will expect forecasts
