@@ -50,7 +50,7 @@ parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_strin
 parser.add_argument('-test_planB', default=False, type=zfun.boolean_string)
 
 # optional arguments used only for ocnN, to determine what to nest inside
-parser.add_argument('-gtx', '--gtagex', type=str) # e.g. cas7_t1_x11b
+parser.add_argument('-gtx', '--gtagex', default='cas7_t1_x11b', type=str) # e.g. cas7_t1_x11b
 parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 0 = Ldir['roms_out1'], etc.
 parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocnN forcing
 
