@@ -52,10 +52,6 @@ def default_choices():
     dch['t_dir'] = Ldir['data'] / 'topo'
     # list of topo files: coarsest to finest
     dch['t_list'] = ['srtm15plus', 'cascadia','psdem','ttp_patch',]
-    # dch['t_list'] = [t_dir / 'srtm15' / 'topo15.nc',
-    #           t_dir / 'cascadia' / 'cascadia_gridded.nc',
-    #          t_dir / 'psdem' / 'PS_183m.nc',
-    #          t_dir / 'ttp_patch' / 'TTP_Regional_27m_patch.nc']
  
     # MASKING
     # list of existing masks to work from
@@ -80,6 +76,7 @@ def default_choices():
     # decide what to exclude, and then start again, before putting a lot of
     # time in to edit_mask.py.
     dch['excluded_rivers'] = []
+
     # As of 2024.12.03 we also allow for tiny rivers and wwtp's.
     # Like for rivers, you would populate these lists by hand in gfun_user
     # after running the code once to see what is there. The new version of
@@ -87,9 +84,13 @@ def default_choices():
     # We exclude the rivers at the grid_to_LO step where we first run
     # LO/pre/trapsP00/traps_placement.py and then the code will clip
     # out the excluded triv and wwtp from the csv files in LO_data/grids/[gridname].
-    dch['do_traps'] = False
-    dch['excluded_triv'] = []
-    dch['excluded_wwtp'] = []
+    # dch['do_traps'] = False
+    # dch['excluded_triv'] = []
+    # dch['excluded_wwtp'] = []
+    # DEPRECATED as of 2025.08.27 This was too complicated and difficult to
+    # maintain with changing traps versions. This functionality has been instead
+    # built into a custom tool that only operates after the grid_to_LO step,
+    # called add_and_edit_traps.py
 
     # SMOOTHING
     dch['use_min_depth'] = True # Should always be true. I should probably remove this choice.

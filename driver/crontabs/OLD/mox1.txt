@@ -1,3 +1,0 @@
-LOd="/gscratch/macc/parker/LO/driver"
-#00 11 * * * source ~/.bashrc; python3 $LOd/driver_roms3.py -g cas6 -t traps2 -x x2b -r forecast -np 84 -N 28 -sfw False -s perfect < /dev/null > $LOd/forecast_new.log &
-00 20 * * * crontab <<< $(crontab -l)

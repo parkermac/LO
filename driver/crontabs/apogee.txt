@@ -8,24 +8,24 @@ LOa=/dat1/parker/LO_data/accounts
 00 04 * * * source ~/.bashrc; $LOa/getwrf.csh
 
 # cas7 forcing
-15 00 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f ocnG00 -do_bio True > $LOd/ocnG00_cas7.log
-00 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f tide00 > $LOd/tide00_cas7.log
-05 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -tP trapsP00 -f trapsF00 > $LOd/trapsF00_cas7.log
-55 02 * * * source ~/.bashrc; python $LOd/driver_forcing3.py -g cas7 -r forecast -f atm00 > $LOd/atm00_cas7.log
+15 00 * * * source ~/.bashrc; python $LOd/driver_forcing00.py -g cas7 -r forecast -f ocnG01 -do_bio True > $LOd/ocnG01_cas7.log
+00 02 * * * source ~/.bashrc; python $LOd/driver_forcing00.py -g cas7 -r forecast -f tide01 > $LOd/tide01_cas7.log
+05 02 * * * source ~/.bashrc; python $LOd/driver_forcing00.py -g cas7 -r forecast -tP trapsP01 -f trapsN00 > $LOd/trapsN00_cas7.log
+55 02 * * * source ~/.bashrc; python $LOd/driver_forcing00.py -g cas7 -r forecast -f atm01 > $LOd/atm01_cas7.log
 00 04 * * * source ~/.bashrc; cat $LOd/*cas7.log | mail -s 'apogee cas7 forcing' pmacc@uw.edu
 01 04 * * * source ~/.bashrc; cat $LOd/*cas7.log | mail -s 'apogee cas7 forcing' kmhewett@uw.edu
 
 # post1
-00 05 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas7_t1_x11b -ro 0 -r forecast < /dev/null > $LOd/post11.log
+00 05 * * * source ~/.bashrc; python $LOd/driver_post1.py -gtx cas7_t2_x11b -ro 0 -r forecast < /dev/null > $LOd/post11.log
 30 07 * * * source ~/.bashrc; mail -s 'apogee post1' pmacc@uw.edu < $LOd/post11.log
 31 07 * * * source ~/.bashrc; mail -s 'apogee post1' kmhewett@uw.edu < $LOd/post11.log
 
 # post2
-00 08 * * * source ~/.bashrc; python $LOd/driver_post2.py -gtx wgh2_t1_xn11b -ro 0 -r forecast < /dev/null > $LOd/post22.log
+00 08 * * * source ~/.bashrc; python $LOd/driver_post2.py -gtx wgh2_t2_xn11b -ro 0 -r forecast < /dev/null > $LOd/post22.log
 00 09 * * * source ~/.bashrc; mail -s 'apogee post2' pmacc@uw.edu < $LOd/post22.log
 01 09 * * * source ~/.bashrc; mail -s 'apogee post2' kmhewett@uw.edu < $LOd/post22.log
 
 # post3
-00 11 * * * source ~/.bashrc; python $LOd/driver_post3.py -gtx oly2_t1_xn11b -ro 0 -r forecast < /dev/null > $LOd/post33.log
+00 11 * * * source ~/.bashrc; python $LOd/driver_post3.py -gtx oly2_t2_xn11b -ro 0 -r forecast < /dev/null > $LOd/post33.log
 00 12 * * * source ~/.bashrc; mail -s 'apogee post3' pmacc@uw.edu < $LOd/post33.log
 01 12 * * * source ~/.bashrc; mail -s 'apogee post3' kmhewett@uw.edu < $LOd/post33.log

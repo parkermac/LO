@@ -71,9 +71,10 @@ NOTE: you may want to run `carve_rivers.py` again at this point just to make jus
 It copies or creates: grid.nc, nudgcoef.nc, river_info.csv, S_COORDINATE_INFO.csv, XY_COORDINATE_INFO.csv. NOTE: the river_info.csv file contains the index and direction info used by ROMS. Don't confuse it with the file of the same name (sorry) that is in LO_output/pre/river. As of 2024.12.03 it also can create and trim triv_info.csv and wwtp_info.csv.
 - nudging_edges
 - nudging_days
-- do_traps
-- excluded_triv
-- excluded_wwtp
+
+(10) `add_and_edit_traps.py` works on the output file in LO_data/grids, adding traps and editing them.
+
+If you are using traps you will need to make sure this is using the correct version of pre/traps and that the list of things to exclude it right for your grid. You can use plot_grid with -show_names True to check on the names of things you might want to exclude.
 
 ---
 

@@ -1,17 +1,20 @@
 """
 This runs ROMS for one or more days, allowing for either a forecast or backfill.
 
+NOTES:
+
 This version is intended to be an improvement on our previous drivers
 (driver_roms[3,4,5,5a].py) with clearer handling of input parameters,
-klone resource use, and error trapping. In particular I am experimenting
-with using subprocess to watch for the end of a run, instead of
-pinging squeue.
+klone resource use, and error trapping.
 
-It relies on LO/driver/batch/klone00_make_batch.py and klone00_batch_BLANK.sh.
+It uses subprocess to watch for the end of a run, instead of pinging squeue.
 
-NOTE:
+It relies on LO/driver/batch/klone00_batch_BLANK.sh.
+
 For run_type = forecast it assumes we are using the new (2025.08.26) scheme
 in which foring always goes in individual day folders.
+
+It sends the done_tags to their own folder LO/driver/done_tags
 
 For testing/debugging these flags can be very useful:
 -v True (verbose screen output)

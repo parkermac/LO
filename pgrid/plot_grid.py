@@ -53,19 +53,7 @@ if riv_fn0.is_file():
 elif riv_fn1.is_file():
     riv_df = pd.read_csv(riv_fn1, index_col='rname')
     do_riv = True
-# also look to see if tiny rivers and wwtp's have been created
-#
-do_triv = False
-triv_fn = Ldir['grid'] / 'triv_info.csv'
-if triv_fn.is_file():
-    triv_df = pd.read_csv(triv_fn, index_col='rname')
-    do_triv = True
-#
-do_wwtp = False
-wwtp_fn = Ldir['grid'] / 'wwtp_info.csv'
-if wwtp_fn.is_file():
-    wwtp_df = pd.read_csv(wwtp_fn, index_col='rname')
-    do_wwtp = True
+
 
 # load the data
 ds = xr.open_dataset(in_fn)
@@ -109,10 +97,18 @@ ax.text(.95, .05, str(mask_rho.shape), ha='right', transform=ax.transAxes, bbox=
 if do_riv:
     gfp.add_riv(riv_df, ds, ax, show_names=args.show_names)
     gfp.add_riv_tracks(Gr, riv_df, ax)
-if do_triv:
-    gfp.add_triv(triv_df, ds, ax, show_names=args.show_names)
-if do_wwtp:
-    gfp.add_wwtp(wwtp_df, ds, ax, show_names=args.show_names)
+
+# Also look to see if tiny rivers and wwtp's have been created.
+# This is a kludgey step because it depends on having the latest traps names.
+traps_list = ['moh20_triv','moh20_wwtp','was24_wwtp'] # from LO/pre/trapsP01 2025.08.27
+for traps in traps_list:
+    traps_fn = Ldir['grid'] / (traps + '_info.csv')
+    if traps_fn.is_file():
+        traps_df = pd.read_csv(traps_fn, index_col='rname')
+        if 'wwtp' in traps:
+            gfp.add_wwtp(traps_df, ds, ax, show_names=args.show_names)
+        elif 'triv' in traps:
+            gfp.add_triv(traps_df, ds, ax, show_names=args.show_names)
 
 if False:    
     # mask
