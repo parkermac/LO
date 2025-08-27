@@ -59,7 +59,7 @@ python driver_forcing3.py -g wgh2 -r forecast -f riv00 > riv00_wgh2.log &
 # make forcing
 
 tt0 = time()
-cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
+cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
     '-do_bio', 'True', '-r', 'backfill', '-s', 'perfect',
     '-0', ds0, '-1', ds1, '-f', 'ocnN']
@@ -71,24 +71,43 @@ if len(stderr) > 0:
     result_dict['note'] = 'ocnN problem'
 print('Elapsed time = %0.2f sec' % (time()-tt0))
 
-for frc in ['atm00', 'riv00']:
-    tt0 = time()
-    if Ldir['run_type'] == 'forecast':
-        cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
-            '-r', 'forecast', '-f', frc]
-    elif Ldir['run_type'] == 'backfill':
-        cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
-            '-r', 'backfill', '-0', ds0, '-f', frc]
-    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    stdout, stderr = proc.communicate()
-    print(stdout.decode())
-    if len(stderr) > 0:
-        print(stderr.decode())
-        if 'note' in result_dict.keys():
-            result_dict['note'] += ', ' + frc + ' problem'
-        else:
-            result_dict['note'] = frc + ' problem'
-    print('Elapsed time = %0.2f sec' % (time()-tt0))
+frc = 'atm01'
+tt0 = time()
+if Ldir['run_type'] == 'forecast':
+    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
+        '-r', 'forecast', '-f', frc]
+elif Ldir['run_type'] == 'backfill':
+    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
+        '-r', 'backfill', '-0', ds0, '-f', frc]
+proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+stdout, stderr = proc.communicate()
+print(stdout.decode())
+if len(stderr) > 0:
+    print(stderr.decode())
+    if 'note' in result_dict.keys():
+        result_dict['note'] += ', ' + frc + ' problem'
+    else:
+        result_dict['note'] = frc + ' problem'
+print('Elapsed time = %0.2f sec' % (time()-tt0))
+
+frc = 'trapsN00'
+tt0 = time()
+if Ldir['run_type'] == 'forecast':
+    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
+        '-r', 'forecast', '-f', frc, '-tP', 'trapsP01']
+elif Ldir['run_type'] == 'backfill':
+    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
+        '-r', 'backfill', '-0', ds0, '-f', frc, '-tP', 'trapsP01']
+proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+stdout, stderr = proc.communicate()
+print(stdout.decode())
+if len(stderr) > 0:
+    print(stderr.decode())
+    if 'note' in result_dict.keys():
+        result_dict['note'] += ', ' + frc + ' problem'
+    else:
+        result_dict['note'] = frc + ' problem'
+print('Elapsed time = %0.2f sec' % (time()-tt0))
 
 
 # -------------------------------------------------------

@@ -67,7 +67,7 @@ python driver_forcing3.py -g oly2 -r forecast -tP trapsP00 -f trapsF00 > trapsF0
 # make forcing
 
 tt0 = time()
-cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
+cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
     '-gtx', Ldir['gtagex'], '-ro', str(Ldir['roms_out_num']),
     '-do_bio', 'True', '-r', 'backfill', '-s', 'continuation',
     '-0', ds0, '-1', ds1, '-f', 'ocnN']
@@ -79,13 +79,13 @@ if len(stderr) > 0:
     result_dict['note'] = 'ocnN problem'
 print('Elapsed time = %0.2f sec' % (time()-tt0))
 
-frc = 'atm00'
+frc = 'atm01'
 tt0 = time()
 if Ldir['run_type'] == 'forecast':
-    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
+    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
         '-r', 'forecast', '-f', frc]
 elif Ldir['run_type'] == 'backfill':
-    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
+    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
         '-r', 'backfill', '-0', ds0, '-f', frc]
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
@@ -98,14 +98,14 @@ if len(stderr) > 0:
         result_dict['note'] = frc + ' problem'
 print('Elapsed time = %0.2f sec' % (time()-tt0))
 
-frc = 'trapsF00'
+frc = 'trapsN00'
 tt0 = time()
 if Ldir['run_type'] == 'forecast':
-    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
-        '-r', 'forecast', '-f', frc, '-tP', 'trapsP00']
+    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
+        '-r', 'forecast', '-f', frc, '-tP', 'trapsP01']
 elif Ldir['run_type'] == 'backfill':
-    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing3.py'), '-g', nest_gridname,
-        '-r', 'backfill', '-0', ds0, '-f', frc, '-tP', 'trapsP00']
+    cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
+        '-r', 'backfill', '-0', ds0, '-f', frc, '-tP', 'trapsP01']
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
 print(stdout.decode())
