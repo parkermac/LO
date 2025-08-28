@@ -68,9 +68,9 @@ Then copy LO_data/grids/ae0 from your laptop to the remote machine.  You could u
 
 Working on a remote machine like apogee or perigee, go to `LO/driver` and execute these three commands from the linux command line (sequence doesn't matter):
 ```
-python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f rivA0
-python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f ocnA0 -s new
-python driver_forcing3.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f tideA0
+python driver_forcing00.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f rivA0
+python driver_forcing00.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f ocnA0 -s new
+python driver_forcing00.py -g ae0 -0 2020.01.01 -1 2020.01.02 -f tideA0
 ```
 These will make files in `LO_output/forcing/ae0/f2020.01.01` and `f2020.01.02`. These are the NetCDF files ROMS will need to force the run for two days.
 
