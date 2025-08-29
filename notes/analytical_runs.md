@@ -88,5 +88,8 @@ scp -r [username]@apogee.ocean.washington.edu:/dat1/[username]/LO_data/grids/ae0
 ```
 Run the analytical case, from the head node, with a command like this.
 ```
-python3 driver_roms00.py -g ae0 -t t0 -x xa0 -s newcontinuation -0 2020.01.01 -1 2020.01.02 -grp macc -cpu -np 40 -np 40 < /dev/null > ae.log &
+python3 driver_roms00.py -g ae0 -t t0 -x xa0 -s newcontinuation -0 2020.01.01 -1 2020.01.02 -grp macc -cpu compute -np 40 < /dev/null > ae.log &
 ```
+It takes about 16 minutes to run the two days the last time I checked. You can check on its progress by looking in ae.log.
+
+This is a good point to look carefully at the early sections of driver_roms00 to see what all the possible input flags are and what they do, especially for the compute resource allocation (grp, cpu, np flags). This driver does a lot of things: loading forcing files from apogee, making the dot_in file for each day, making the sbatch script, running roms for each day, sending the roms output to apogee, and cleaning up excess files on klone if you run more than a few days. The driver also has several optional flags that can be very useful for testing.
