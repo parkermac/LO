@@ -225,7 +225,7 @@ In the fields below:
 - 2 = perigee or apogee
 - 3 = klone
 
-| Folder | How created | Put where | Purpose |
+| Folder or Other | How created | Put where | Purpose |
 | --- | --- | --- | --- |
 | LO   | Clone from parkermac | 1,2,3  | Primary tools for LiveOcean  |
 | loenv   | See instructions above - each user creates their own from scratch  | 1,2  | python environment  |
@@ -245,7 +245,7 @@ In the fields below:
 Things that I type in [ ] below mean that they would be replaced by specific strings, for example when using them as command line arguments.
 
 - [gridname] is the name of the grid (e.g. cas7)
-- [tag] is a name to identify any of the things that are controlled by a "dot_in" instance (e.g. t1)
+- [tag] is a name to identify any of the things that are controlled by a "dot_in" instance (e.g. t2)
 - [ex_name] is the name of the ROMS executable (e.g. x11b)
 - [fstring] is a date string of the form fYYYY.MM.DD (e.g. f2021.07.04)
 - [date_string] is a date string of the form YYYY.MM.DD (e.g. 2021.07.04)
@@ -253,7 +253,7 @@ Things that I type in [ ] below mean that they would be replaced by specific str
 
 Grids are just identified by [gridname].
 
-Collections of forcing files are identified by [gridname] since they are always created for a specific grid. Note that you can accumulate many different types of forcing inside a certain [gridname], e.g. ocn00, ocn01, etc. This naming logic was introduced with `driver_forcing3.py` and the associated `driver_roms3.py`.
+Collections of forcing files are identified by [gridname] since they are always created for a specific grid. Note that you can accumulate many different types of forcing inside a certain [gridname], e.g. ocnG00, ocnG01, etc.
 
 A specific run is identified by [gridname]\_[tag]\_[ex_name] which is also referred to as [gtagex] or Ldir['gtagex']. The [tag] is only introduced in the creation of a dot_in instance, which is in a folder named LO/dot_in/[gtagex]. The [tag] represents the specific set of forcing files and other dot_in choices that define a run.
 
