@@ -81,7 +81,7 @@ elif Ldir['run_type'] == 'forecast':
     ndays = Ldir['forecast_days']
     dt1 = dt0 + timedelta(days=ndays-1)
     ds1 = dt1.strftime(Lfun.ds_fmt)
-his_fn_list = Lfun.get_fn_list('hourly', Ldir, ds0, ds1)
+his_fn_list = Lfun.get_fn_list('hourly0', Ldir, ds0, ds1)
 
 all_found = False
 ntries = 0
