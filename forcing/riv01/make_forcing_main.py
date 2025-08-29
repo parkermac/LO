@@ -9,7 +9,10 @@ This is the first code to use the new design where forcing goes into a [gridname
 
 Test on mac in ipython:
 
-run make_forcing_main.py -g cas6 -r backfill -d 2019.07.04 -f riv01 -test True
+run make_forcing_main.py -g wgh2 -r backfill -d 2019.07.04 -f riv01
+run make_forcing_main.py -g wgh2 -r forecast -d [today's date string] -f riv01
+
+This code has been modified (2025.08.29 Parker) to write forcing to separate day folders when the run_type = forecast.
 
 """
 
@@ -25,17 +28,11 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
-date_string = Ldir['date_string']
-out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + date_string) / Ldir['frc']
-
 import xarray as xr
 from lo_tools import Lfun, zrfun
 import numpy as np
 import pandas as pd
 import rivfun
-
-out_fn = out_dir / 'rivers.nc'
-out_fn.unlink(missing_ok=True)
 
 # set up the time index for the record
 dsf = Ldir['ds_fmt']
@@ -57,12 +54,9 @@ N = S['N']
 grid_fn = Ldir['grid'] / 'grid.nc'
 G = zrfun.get_basic_info(grid_fn, only_G=True)
 
-# Load a dataframe with info for rivers to get
-if Ldir['gridname'] == 'cas6':
-    ctag = 'lo_base'
-else:
-    print('You need to specify a gridname for this ctag.')
-    sys.exit()
+# Specify which "ctag" to use. This is related to the collections for which we have
+# river and point source climatologies.
+ctag = 'lo_base'
 
 ri_dir = Ldir['LOo'] / 'pre' / 'river1' / ctag
 ri_df_fn = ri_dir / 'river_info.p'
@@ -197,17 +191,38 @@ for bvn in bvn_list:
     ds[vn].attrs['long_name'] = vinfo['long_name']
     ds[vn].attrs['units'] = vinfo['units']
 
-# Save to NetCDF
-ds.to_netcdf(out_fn)
+# If we are doing a forecast just copy the results to subsequent days.
+date_string_list = []
+if Ldir['run_type'] == 'backfill':
+    date_string_list.append(Ldir['date_string'])
+elif Ldir['run_type'] == 'forecast':
+            ds00 = Ldir['date_string']
+            dt00 = datetime.strptime(ds00, Ldir['ds_fmt'])
+            for day in range(Ldir['forecast_days']):
+                dt0 = dt00 + timedelta(days=day)
+                ds0 = datetime.strftime(dt0, format=Ldir['ds_fmt'])
+                date_string_list.append(ds0)
+out_fn_list = []
+for date_string in date_string_list:
+    print('\nWorking on ' + date_string)
+    out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + date_string) / Ldir['frc']
+    Lfun.make_dir(out_dir)
+    out_fn = out_dir / 'rivers.nc'
+    out_fn_list.append(out_fn) # used at the end to check results
+    out_fn.unlink(missing_ok=True)
+    # Save to NetCDF
+    ds.to_netcdf(out_fn)
 ds.close()
 
-# -------------------------------------------------------
-
 # test for success
-if out_fn.is_file():
-    result_dict['result'] = 'success' # success or fail
-else:
-    result_dict['result'] = 'fail'
+result = 'SUCCESS'
+for fn in out_fn_list:
+    if not fn.is_file():
+        result = 'FAIL'
+result_dict['result'] = result
+
+result_dict['end_dt'] = datetime.now()
+ffun.finale(Ldir, result_dict)
 
 # *******************************************************
 

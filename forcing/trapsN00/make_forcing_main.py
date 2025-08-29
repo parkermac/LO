@@ -72,9 +72,6 @@ result_dict['start_dt'] = datetime.now()
 #                    Get required data to generate forcing                      #
 #################################################################################
 
-# date_string = Ldir['date_string']
-# out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / ('f' + date_string) / Ldir['frc']
-
 # get correct version of traps climatology output
 trapsP = Ldir['trapsP']
 
