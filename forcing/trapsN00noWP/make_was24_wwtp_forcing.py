@@ -350,7 +350,12 @@ def make_forcing(N,NT,NRIV,NTRIV,NWWTP_moh,dt_ind, yd_ind,ot_vec,Ldir,enable,tra
                     bvals_post2020 = qtbio_wwtp_df_dict[rn][var_post].values
                     # concatenate the values
                     bvals = np.concatenate([bvals_thru2020, bvals_post2020])
-                    
+                
+                # Make West Point loads zero
+                if rn == 'King County West Point WWTP' and var in ['NO3', 'NH4']:
+                    print('Zeroing out %s for %s' % (var,rn))
+                    bvals = bvals*0
+
                 for nn in range(N):
                     B_mat[:, nn, rr] = bvals
             # check for nans
