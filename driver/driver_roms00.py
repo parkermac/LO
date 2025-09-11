@@ -333,7 +333,8 @@ while dt <= dt1:
                 print('Info for sbatch script:')
                 for k in in_dict.keys():
                     print(' %s: %s' % (k, str(in_dict[k])))
-
+                sys.stdout.flush()
+                
             for line in f:
                 for var in in_dict.keys():
                     if '$'+var+'$' in line: 
