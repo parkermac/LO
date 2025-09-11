@@ -109,6 +109,26 @@ Folders on apogee in `/dat1/parker/LO_output/obs` (I am maintaining these only o
   - ctd 2004-2023, contains DO data
   - bottle None
 
+- **ecology_his** Historical Department of Ecology repeat station data, acquired via Ecology Records Request by Dakota Mascarenas. Processed by Dakota Mascarenas. See the README in the associated folder for details.
+  - ctd 1989-1998
+  - bottle 1973-1998 
+  
+- **kc** King County monitoring data from modern stations. Station information was downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/WLRD-Sites/wbhs-bbzf. Bottle data was downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/Water-Quality/vwmt-pvjw. CTD data was received via email from Greg Ikeda, King County, to Dakota Mascarenas. Processed by Dakota Mascarenas. See the README in the associated folder for details. 
+  - ctd 1998-2024
+  - bottle 1965-2023
+
+- **kc_his** King County monitoring data from historical stations. Received via email from Taylor Martin, King County, to Dakota Mascarenas. Processed by Dakota Mascarenas. See the README in the associated folder for details. Please note that temperature data for the full time range is included in both CTD and bottles, but comes from CTD cast. Salinity for the full time range is only in bottle data, but some CTD-measured salinity is included in ctd data at the end of the time range.
+  - ctd 1965-2000
+  - bottle 1965-2000
+  
+- **kc_pointJefferson** King County data collected near Point Jefferson. Received via email from Taylor Martin, King County, to Dakota Mascarenas. Station information was downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/WLRD-Sites/wbhs-bbzf. Processed by Dakota Mascarenas. See the README in the associated folder for details.
+  - ctd 1970-2023
+  - bottle 1970-2023
+  
+- **kc_whidbeyBasin** King County data collected in Whidbey Basin. CTD data downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/Whidbey-Basin-CTD-Casts/uz4m-4d96. Processed by Dakota Mascarenas. See the README in the associated folder for details.
+  - ctd 2022-2024
+  - bottle None
+
 #### Notes on usage [2024.03.21 these notes need to be updated to reflect new additions to the collection: LineP, nceiPNW, NHL, and WOD]:
 - 2017 is a good year for validation, with bottle coverage from several sources.
 - If you are interested in Chl, you will only find it in dfo1-bottle and ecology_nc.
