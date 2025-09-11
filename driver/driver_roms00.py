@@ -359,11 +359,13 @@ while dt <= dt1:
                     str(roms_out_dir / 'klone_batch.sh')]
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
-            if proc.returncode != 0:
-                # Halt the program if there is a non-zero returncode from sbatch.
-                print('EXITING due to sbatch error')
-                print('sbatch returncode = %d' % (proc.returncode))
-                sys.exit()
+            # if proc.returncode != 0:
+            #     # Halt the program if there is a non-zero returncode from sbatch.
+            #     print('EXITING due to sbatch error')
+            #     print('sbatch returncode = %d' % (proc.returncode))
+            #     sys.exit()
+            # 2025.09.11 This turned out to be a bad idea because it would return 128 when
+            # ROMS blew up!
             messages(stdout, stderr, 'Run ROMS', args.verbose)
             print(' - time to run ROMS = %d sec' % (time()-tt0))
                     
