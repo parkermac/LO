@@ -58,7 +58,7 @@ days_to_run = 1.0
 
 # time step in seconds (should fit evenly into 3600 sec)
 if Ldir['blow_ups'] == 0:
-    dtsec = 25
+    dtsec = 50
 elif Ldir['blow_ups'] == 1:
     dtsec = 40
 elif Ldir['blow_ups'] == 2:
