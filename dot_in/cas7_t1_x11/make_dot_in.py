@@ -74,7 +74,7 @@ else:
 
 D['ndtfast'] = 20
     
-his_interval = 600 # seconds to define and write to history files (also averages and diagnostics)
+his_interval = 3600 # seconds to define and write to history files (also averages and diagnostics)
 rst_interval = 0 # days between writing to the restart file (e.g. 1)
 
 # Find which forcings to look for (search the csv file in this directory).
