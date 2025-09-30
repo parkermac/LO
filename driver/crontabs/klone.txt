@@ -22,8 +22,8 @@ LOd=/gscratch/macc/parker/LO/driver
 01 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' kmhewett@uw.edu < $LOd/oly2_forecast.log
 
 # long hindcast
-30 05 * * * source ~/.bashrc; tail -n 30 $LOd/long_hindcast_x11ab_2.log | mail -s 'long hindcast' pmacc@uw.edu
-30 15 * * * source ~/.bashrc; tail -n 30 $LOd/long_hindcast_x11ab_2.log | mail -s 'long hindcast' pmacc@uw.edu
+# 30 05 * * * source ~/.bashrc; tail -n 30 $LOd/long_hindcast_x11ab_2.log | mail -s 'long hindcast' pmacc@uw.edu
+# 30 15 * * * source ~/.bashrc; tail -n 30 $LOd/long_hindcast_x11ab_2.log | mail -s 'long hindcast' pmacc@uw.edu
 
 # refresh this crontab
 00 12 * * * crontab <<< $(crontab -l)
