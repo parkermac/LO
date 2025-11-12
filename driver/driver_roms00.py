@@ -313,7 +313,8 @@ while dt <= dt1:
             if args.exclusive:
                 # only run this job on the node, and use all memory
                 sbatch_exclusive_line = '#SBATCH --exclusive'
-                sbatch_mem = '0'
+                #sbatch_mem = '0'
+                sbatch_mem = '128G'
             else:
                 sbatch_exclusive_line = ''
                 sbatch_mem = '128G'
