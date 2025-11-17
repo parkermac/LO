@@ -13,10 +13,10 @@
 # Currently you have to edit this by hand to change the year(s).
 
 # Example run command:
-# ./multi_source_cast_extraction.sh cas7_t0_x4b 2 lowpass > cas7.log &
+# ./multi_source_cast_extraction.sh cas7_t0_x4b 2 lowpass > x4b_2014.log &
 
 # for year in 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023
-list_type=$3
+#list_type=$3
 for year in 2014
 do
 
@@ -24,14 +24,14 @@ do
     # for source in nceiCoastal LineP nceiPNW WOD
     for source in dfo1 ecology_nc nceiSalish nceiCoastal LineP nceiPNW WOD kc kc_pointJefferson
     do
-    python ./extract_casts_fast.py -gtx $1 -ro $2 -lt $list_type -source $source -otype $otype -year $year > ./$1"_"$source"_"$otype"_"$year.log
+    python ./extract_casts_fast.py -gtx $1 -ro $2 -lt $3 -source $source -otype $otype -year $year > ./$1"_"$source"_"$otype"_"$year.log
     done
 
     otype=ctd
     # for source in LineP NHL
     for source in dfo1 ecology_nc LineP NHL ocnms_ctd kc kc_pointJefferson
     do
-    python ./extract_casts_fast.py -gtx $1 -ro $2 -lt $list_type -source $source -otype $otype -year $year > ./$1"_"$source"_"$otype"_"$year.log
+    python ./extract_casts_fast.py -gtx $1 -ro $2 -lt $3 -source $source -otype $otype -year $year > ./$1"_"$source"_"$otype"_"$year.log
     done
 
 done
