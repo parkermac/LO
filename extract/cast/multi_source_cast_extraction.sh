@@ -5,15 +5,18 @@
 # required, otherwise bash thinks I am referencing the variables $source_ and $otype_
 # which do not exist.
 
-# Example run commands:
-# ./multi_source_cast_extraction.sh cas7_t0_x4b 0 > cas7.log &
+# The three REQUIRED command line arguments are:
+# 1. gtagex [e.g. cas7_t0_x4b]
+# 2. roms out number [1-4]
+# 3. list_type [lowpass, average, hourly]
 
-# The two required command line arguments are:
-# 1. gtagex
-# 2. roms out number
+# Currently you have to edit this by hand to change the year(s).
+
+# Example run command:
+# ./multi_source_cast_extraction.sh cas7_t0_x4b 2 lowpass > cas7.log &
 
 # for year in 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023
-list_type=average
+list_type=$3
 for year in 2014
 do
 
