@@ -192,14 +192,21 @@ if args.run_type == 'forecast':
             # Inspect the contents of post11.log to decide whether or not to run the nested forecast.
             do_nested_forecast = False
             if postfile_local.is_file():
-                with open(postfile_local, 'r') as f:
-                    for line in f:
-                        print(line) # debugging
-                        ll = line.split(' ')
-                        if ll[0] == 'nest_' + nestgrid:
+                try:
+                    with open(postfile_local, 'r') as f:
+                        for line in f:
+                            print(line) # debugging
+                            ll = line.split(' ')
+                            print(ll) # debugging
+                            if ll[0] == 'nest_' + nestgrid:
+                                print(ll[0])
+                                print('found ll0') # debugging
                                 if (ll[1] == ds0) and (ll[2] == 'SUCCESS'):
+                                    print('found ll1 and ll2') # debugging
                                     do_nested_forecast = True
                                     break # break from 'for line in f' right?
+                except Exception as e:
+                    print(e)
             else:
                 print('Forecast forcing not finished - exiting')
                 sys.exit()
