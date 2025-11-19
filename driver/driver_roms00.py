@@ -198,10 +198,10 @@ if args.run_type == 'forecast':
                             print(line) # debugging
                             ll = line.split(' ')
                             print(ll) # debugging
-                            if ll[0] == 'nest_' + nestgrid:
+                            if (ll[0] == 'nest_' + nestgrid) and (len(ll) == 3):
                                 print(ll[0])
                                 print('found ll0') # debugging
-                                if (ll[1] == ds0) and (ll[2] == 'SUCCESS'):
+                                if (ll[1] == ds0) and (ll[2].strip() == 'SUCCESS'):
                                     print('found ll1 and ll2') # debugging
                                     do_nested_forecast = True
                                     break # break from 'for line in f' right?
