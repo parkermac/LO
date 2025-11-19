@@ -194,6 +194,7 @@ if args.run_type == 'forecast':
             if postfile_local.is_file():
                 with open(postfile_local, 'r') as f:
                     for line in f:
+                        print(line) # debugging
                         ll = line.split(' ')
                         if ll[0] == 'nest_' + nestgrid:
                                 if (ll[1] == ds0) and (ll[2] == 'SUCCESS'):
