@@ -14,6 +14,11 @@ It relies on LO/driver/batch/klone00_batch_BLANK.sh.
 For run_type = forecast it assumes we are using the new (2025.08.26) scheme
 in which foring always goes in individual day folders.
 
+As of 2025.11.19, for the nested forecasts, we now inspect post11.log on apogee
+to see of their forcing has been created. This is to prevent them from running
+days 1 and 2 (for which the forcing was created the days before) but then
+failing to run day 3. This keeps our use of klone resources tidier.
+
 It sends the done_tags to their own folder LO/driver/done_tags
 
 For testing/debugging these flags can be very useful:
@@ -137,6 +142,21 @@ remote_machine = Ldir['remote_machine']
 remote_dir0 = Ldir['remote_dir0'] # NOTE: this is a string, not a Path object
 local_user = Ldir['local_user']
 
+Ncenter = 30
+def messages(stdout, stderr, mtitle, verbose):
+    # utility function for displaying subprocess info
+    if verbose:
+        print((' ' + mtitle + ' ').center(Ncenter,'='))
+        if len(stdout) > 0:
+            print(' sdtout '.center(Ncenter,'-'))
+            print(stdout.decode())
+    if len(stderr) > 0:
+        print((' ' + mtitle + ' ').center(Ncenter,'='))
+        # always print errors
+        print(' stderr '.center(Ncenter,'-'))
+        print(stderr.decode())
+    sys.stdout.flush()
+
 # set time range to process
 if args.run_type == 'forecast':
     ds0 = datetime.now().strftime(Lfun.ds_fmt)
@@ -156,6 +176,42 @@ if args.run_type == 'forecast':
         print('Forecast has already run successfully - exiting')
         print(str(done_fn))
         sys.exit()
+    # ********************************************************
+    # If this is a nested forecast (identified by gridname) then check to see
+    # if the forcing has been created on apogee, and if not, then exit.
+    for nestgrid in ['wgh','oly']:
+        if nestgrid in args.gridname:
+            # Get the post11.log file from apogee, if it exists.
+            postfile_remote = remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO/driver/post11.log'
+            postfile_local = Ldir['LO'] / 'driver' / 'post11.log'
+            postfile_local.unlink(missing_ok=True) # remove local version if it exists
+            cmd_list = ['scp', postfile_remote, str(postfile_local)]
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            messages(stdout, stderr, 'Getting post11.log', args.verbose)
+            # Inspect the contents of post11.log to decide whether or not to run the nested forecast.
+            do_nested_forecast = False
+            if postfile_local.is_file():
+                with open(postfile_local, 'r') as f:
+                    for line in f:
+                        ll = line.split(' ')
+                        if ll[0] == 'nest_' + nestgrid:
+                                if (ll[1] == ds0) and (ll[2] == 'SUCCESS'):
+                                    do_nested_forecast = True
+                                    break # break from 'for line in f' right?
+            else:
+                print('Forecast forcing not finished - exiting')
+                sys.exit()
+            # Implement the decision.
+            if do_nested_forecast == True:
+                print('Doing nested forecast for ' + args.gridname)
+                break # break from nestgrid list iteration, right?
+                # Doing this means that the rest of the code is allowed to run.
+            elif do_nested_forecast == False:
+                print('Forecast forcing not finished - exiting')
+                sys.exit()
+    # ********************************************************
+
 elif args.run_type == 'backfill': # you have to provide at least ds0 for backfill
     ds0 = args.ds0
     if args.ds1 == None:
@@ -169,21 +225,6 @@ else:
     sys.exit()
 print('Running ROMS %s %s-%s' % (args.run_type, ds0, ds1))
 sys.stdout.flush()
-
-Ncenter = 30
-def messages(stdout, stderr, mtitle, verbose):
-    # utility function for displaying subprocess info
-    if verbose:
-        print((' ' + mtitle + ' ').center(Ncenter,'='))
-        if len(stdout) > 0:
-            print(' sdtout '.center(Ncenter,'-'))
-            print(stdout.decode())
-    if len(stderr) > 0:
-        print((' ' + mtitle + ' ').center(Ncenter,'='))
-        # always print errors
-        print(' stderr '.center(Ncenter,'-'))
-        print(stderr.decode())
-    sys.stdout.flush()
 
 # RUNNING ROMS: Loop over days
 dt = dt0
