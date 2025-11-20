@@ -195,14 +195,9 @@ if args.run_type == 'forecast':
                 try:
                     with open(postfile_local, 'r') as f:
                         for line in f:
-                            print(line) # debugging
                             ll = line.split(' ')
-                            print(ll) # debugging
                             if (ll[0] == 'nest_' + nestgrid) and (len(ll) == 3):
-                                print(ll[0])
-                                print('found ll0') # debugging
                                 if (ll[1] == ds0) and (ll[2].strip() == 'SUCCESS'):
-                                    print('found ll1 and ll2') # debugging
                                     do_nested_forecast = True
                                     break # break from 'for line in f' right?
                 except Exception as e:
@@ -219,7 +214,6 @@ if args.run_type == 'forecast':
                 print('Forecast forcing not finished - exiting')
                 sys.exit()
     # ********************************************************
-
 elif args.run_type == 'backfill': # you have to provide at least ds0 for backfill
     ds0 = args.ds0
     if args.ds1 == None:
