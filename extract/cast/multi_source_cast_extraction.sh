@@ -8,15 +8,17 @@
 # The three REQUIRED command line arguments are:
 # 1. gtagex [e.g. cas7_t0_x4b]
 # 2. roms out number [1-4]
-# 3. list_type [lowpass, average, hourly]
+# 3. list_type [average, hourly]
+
+# NOTE there is a problem with using list_type = lowpass because these are missing the
+# requested variable "chlorophyll" (and maybe others).
 
 # Currently you have to edit this by hand to change the year(s).
 
 # Example run command:
-# ./multi_source_cast_extraction.sh cas7_t0_x4b 2 lowpass > x4b_2014.log &
+# ./multi_source_cast_extraction.sh cas7_t0_x4b 2 hourly > x4b_2014.log &
 
 # for year in 2013 2014 2015 2016 2017 2018 2019 2020 2021 2022 2023
-#list_type=$3
 for year in 2014
 do
 
