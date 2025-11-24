@@ -7,6 +7,8 @@ Initial author date: 2024/03/29
 
 Finalized for group use: 2025/09/05
 
+Last updated: 2025/11/24 to correct conversion unit error for nitrogen species
+
 Written by: Dakota Mascarenas
 
 NOTE: "field" data and temperature are from CTD. Here we consider just bottle data (and CTD temperature concurrently).

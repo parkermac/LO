@@ -2,7 +2,9 @@
 
 Author: Dakota Mascarenas
 
-Last updated: 2025/09/05
+Finalized: 202/09/05
+
+Last updated: 2025/11/24
 
 These files are from King County's marine offshore monitoring water column samples, both bottle and CTD.
 
