@@ -7,7 +7,7 @@ Initial author date: 2024/03/29
 
 Finalized for group use: 2025/09/05
 
-Last updated: 2025/11/24 to correct conversion unit error for nitrogen species
+Last updated: 2025/11/25 to correct conversion unit errors for N, P, and Si
 
 Written by: Dakota Mascarenas
 
@@ -129,9 +129,9 @@ for year in year_list:
     if 'NO3 (mg -L)' in df.columns:
         df['NO3 (uM)'] = (1000/62) * df['NO3 (mg -L)']
     if 'SiO4 (mg -L)' in df.columns:
-        df['SiO4 (uM)'] = (1000/92) * df['SiO4 (mg -L)']
+        df['SiO4 (uM)'] = (1000/28.0855) * df['SiO4 (mg -L)']
     if 'PO4 (mg -L)' in df.columns:
-        df['PO4 (uM)'] = (1000/95) * df['PO4 (mg -L)']
+        df['PO4 (uM)'] = (1000/30.973762) * df['PO4 (mg -L)']
     if 'Chl (ug -L)' in df.columns:
         df['Chl (mg m-3)'] = df['Chl (ug -L)']
     for vn in ['TA','DIC']:
