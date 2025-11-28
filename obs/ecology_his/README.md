@@ -2,7 +2,9 @@
 
 Author: Dakota Mascarenas
 
-Last updated: 2025/09/03
+Finalized: 2025/09/03
+
+Last updated: 2025/11/25
 
 These files are WA Dept. of Ecology water column samples, both bottle and CTD. These were acquired via Public Records Request #P019860-042924 initiated 2024/04/29 by Dakota Mascarenas.
 
