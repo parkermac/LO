@@ -4,12 +4,17 @@ This is the main program for making the ATM forcing file.
 Test on mac in ipython:
 
 test a forecast (wgh2 runs faster than cas7):
-run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm0 -test True
+run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm01 -test True
+
+Hour 19 of 2014.06.18 was bad for d3 (nans in the gridded files) so it is a useful test:
+run make_forcing_main.py -g wgh2 -r backfill -d 2014.06.18 -f atm01 -test True
+I used this on my mac to test new planB edits, either using or skipping (by renaming)
+the bad d3 file.
 
 test a forecast that will go to planB:
-run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.05 -f atm0 -test True
+run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.05 -f atm01 -test True
 or
-run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm0 -test True -test_planB True
+run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm01 -test True -test_planB True
 
 NEW 2025.07.30: For start_type = forecast this writes the forcing files
 to separate day folders.
@@ -265,7 +270,14 @@ if planB == False:
                 v[M4] = v4[M4]
             if np.sum(np.isnan(v)) > 0:
                 print('** WARNING Nans in combined output ' + ovn)
+                print('Going to planB part 1')
+                planB = True
+                break # break from outvar_list loop
             ovc_dict[ovn] = v
+
+        if planB == True:
+            print('Going to planB part 2')
+            break # break from dall_list loop
     
         # save to dict
         tt = d2i_dict[fn2]
@@ -396,6 +408,9 @@ if planB == True:
     B_out_dir = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / \
         ('f' + out_dstr) / Ldir['frc']
     Lfun.make_dir(B_out_dir, clean=True)
+    # make the Info directory
+    Lfun.make_dir(B_out_dir / 'Info')
+
     
     outvar_list = afun.outvar_list
     for ovn in outvar_list:
