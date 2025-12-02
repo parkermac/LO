@@ -7,7 +7,7 @@ Initial author date: 2024/03/29
 
 Finalized for group use: 2025/09/05
 
-Last updated: 2025/11/25 to correct conversion unit errors for N, P, and Si
+Last updated: 2025/12/01 to correct conversion unit errors for N, P, and Si
 
 Written by: Dakota Mascarenas
 
@@ -125,9 +125,9 @@ for year in year_list:
     if 'DO (mg -L)' in df.columns:
         df['DO (uM)'] = (1000/32) * df['DO (mg -L)']
     if 'NH4 (mg -L)' in df.columns:
-        df['NH4 (uM)'] = (1000/18) * df['NH4 (mg -L)']
+        df['NH4 (uM)'] = (1000/14) * df['NH4 (mg -L)']
     if 'NO3 (mg -L)' in df.columns:
-        df['NO3 (uM)'] = (1000/62) * df['NO3 (mg -L)']
+        df['NO3 (uM)'] = (1000/14) * df['NO3 (mg -L)']
     if 'SiO4 (mg -L)' in df.columns:
         df['SiO4 (uM)'] = (1000/28.0855) * df['SiO4 (mg -L)']
     if 'PO4 (mg -L)' in df.columns:
