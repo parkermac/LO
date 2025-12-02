@@ -9,6 +9,8 @@ Initial author date: 2024/04/04
 
 Finalized for public use: 2025/09/05
 
+Last updated: 2025/11/24 to correct conversion unit error for nitrogen species
+
 Written by: Dakota Mascarenas
 
 """
@@ -111,7 +113,7 @@ for year in year_list:
     if 'DO (mg -L)' in df.columns:
         df['DO (uM)'] = (1000/32) * df['DO (mg -L)']
     if 'NO3 (mg -L)' in df.columns:
-        df['NO3 (uM)'] = (1000/62) * df['NO3 (mg -L)']
+        df['NO3 (uM)'] = (1000/14) * df['NO3 (mg -L)']
     if 'Chl (ug -L)' in df.columns:
         df['Chl (mg m-3)'] = df['Chl (ug -L)']
     # retain only selected variables             

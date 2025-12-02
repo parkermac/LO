@@ -7,6 +7,8 @@ Initial author date: 2024/07/10
 
 Finalized for group use: 2025/09/03
 
+Last updated: 2025/11/25 to correct conversion unit errors for N, P, and Si
+
 Written by: Dakota Mascarenas
 
 NOTE: Despite the labeling on the Excel files received from WA Dept. of Ecology records request, we consider only data in this set to be CTD data. Email requests for information were sent on 2025/05/06 with follow up on 2025/09/03.
@@ -103,13 +105,13 @@ for year in year_list:
     if 'DO (mg -L)' in df.columns:
         df['DO (uM)'] = (1000/32) * df['DO (mg -L)']
     if 'NH4 (mg -L)' in df.columns:
-        df['NH4 (uM)'] = (1000/18) * df['NH4 (mg -L)']
+        df['NH4 (uM)'] = (1000/14) * df['NH4 (mg -L)']
     if 'NO3 (mg -L)' in df.columns:
-        df['NO3 (uM)'] = (1000/62) * df['NO3 (mg -L)']
+        df['NO3 (uM)'] = (1000/14) * df['NO3 (mg -L)']
     if 'SiO4 (mg -L)' in df.columns:
-        df['SiO4 (uM)'] = (1000/92) * df['SiO4 (mg -L)']
+        df['SiO4 (uM)'] = (1000/28.0855) * df['SiO4 (mg -L)']
     if 'PO4 (mg -L)' in df.columns:
-        df['PO4 (uM)'] = (1000/95) * df['PO4 (mg -L)']
+        df['PO4 (uM)'] = (1000/30.973762) * df['PO4 (mg -L)']
     if 'Chl (ug -L)' in df.columns:
         df['Chl (mg m-3)'] = df['Chl (ug -L)']
     for vn in ['TA','DIC']:

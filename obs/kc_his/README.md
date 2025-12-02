@@ -2,7 +2,9 @@
 
 Author: Dakota Mascarenas
 
-Last updated: 2025/09/05
+Finalized: 2025/09/05
+
+Last updated: 2025/12/01
 
 These files are from King County's monitoring of the water column near Point Jefferson, both bottle samples at now-defunct historical stations.
 
