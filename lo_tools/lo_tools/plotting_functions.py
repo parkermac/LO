@@ -701,13 +701,33 @@ def get_sect(fn, vn, x_e, y_e):
                     + rowf*(colff*fld0[row1, col0] + colf*fld0[row1, col1]))
         return fld_s
 
+    def get_sect_no_nan(x, y, fld, lon, lat):
+        # Interpolate a 2-D or 3-D field along a 2-D track
+        # defined by lon and lat vectors x and y.
+        # We assume that the lon, lat arrays are plaid.
+        #
+        # This is an old version of get_sect that dropped too many field
+        # points if we were close to land. It is the right thing to use
+        # for getting zw_se.
+        col0, col1, colf = zfun.get_interpolant(x, lon[1,:])
+        row0, row1, rowf = zfun.get_interpolant(y, lat[:,1])
+        colff = 1 - colf
+        rowff = 1 - rowf
+        if len(fld.shape) == 3:
+            fld_s = (rowff*(colff*fld[:, row0, col0] + colf*fld[:, row0, col1])
+                + rowf*(colff*fld[:, row1, col0] + colf*fld[:, row1, col1]))
+        elif len(fld.shape) == 2:
+            fld_s = (rowff*(colff*fld[row0, col0] + colf*fld[row0, col1])
+                + rowf*(colff*fld[row1, col0] + colf*fld[row1, col1]))
+        return fld_s
+
     # Do the section extractions for zw (edges) and sv (centers)
-    zw_se = get_sect_utility(x_e, y_e, zw, lon, lat)
+    zw_se = get_sect_no_nan(x_e, y_e, zw, lon, lat)
     fld_s = get_sect_utility(x, y, fld, lon, lat )
 
     # Also generate top and bottom lines, with appropriate masking
-    zbot = -get_sect_utility(x, y, h, lon, lat )
-    ztop = get_sect_utility(x, y, zeta, lon, lat )
+    zbot = -get_sect_no_nan(x, y, h, lon, lat )
+    ztop = get_sect_no_nan(x, y, zeta, lon, lat )
     zbot[np.isnan(fld_s[-1,:])] = 0
     ztop[np.isnan(fld_s[-1,:])] = 0
     

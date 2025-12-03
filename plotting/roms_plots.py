@@ -1342,10 +1342,10 @@ def P_sect(in_dict):
     G, S, T = zrfun.get_basic_info(in_dict['fn'])
     # CREATE THE SECTION
     # create track by hand
-    if False:
+    if True:
         lon = G['lon_rho']
         lat = G['lat_rho']
-        zdeep = -300
+        zdeep = -150
         x_e = np.linspace(-124, -123, 500)
         y_e = 48.368 * np.ones(x_e.shape)
     # or read in a section (or list of sections)
@@ -1408,9 +1408,8 @@ def P_sect(in_dict):
 
     # section
     ax = fig.add_subplot(1, 3, (2, 3))
-    
-    ax.plot(dist_se[0,:], zw_se[0,:], '-k', linewidth=2)
-    ax.plot(dist_se[-1,:], zw_se[-1,:], '-k', linewidth=1)
+    ax.plot(dist_e, zw_se[0,:], '-k', linewidth=2)
+    ax.plot(dist_e, zw_se[-1,:], '-k', linewidth=1)
     ax.set_xlim(dist.min(), dist.max())
     ax.set_ylim(zdeep, 5)
     
@@ -1530,7 +1529,6 @@ def P_sect_CR(in_dict):
 
     # section
     ax = fig.add_subplot(1, 3, (2, 3))
-    
     ax.plot(dist_e, zw_se[0,:], '-k', linewidth=2)
     ax.plot(dist_e, zw_se[-1,:], '-k', linewidth=1)
     ax.set_xlim(dist_e.min(), dist_e.max())
@@ -1660,7 +1658,6 @@ def P_sect_hc(in_dict):
 
     # section
     ax = fig.add_subplot(1, 3, (2, 3))
-    
     ax.plot(dist_se[0,:], zw_se[0,:], '-k', linewidth=2)
     ax.plot(dist_se[-1,:], zw_se[-1,:], '-k', linewidth=1)
     ax.set_xlim(dist.min(), dist.max())
