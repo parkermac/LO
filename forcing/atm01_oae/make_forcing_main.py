@@ -1,27 +1,17 @@
 """
 This is the main program for making the ATM forcing file.
 
+It includes surface alkalinity forcing at the end, for OAE experiments.
+It creates two extra files:
+- alkalinity_sflux.nc
+- other_bgc_sflux.nc (all zeros)
+
+*** Only works for backfill. ***
+
 Test on mac in ipython:
 
-test a forecast (wgh2 runs faster than cas7):
-run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm01 -test True
-
-Hour 19 of 2014.06.18 was bad for d3 (nans in the gridded files) so it is a useful test:
-run make_forcing_main.py -g wgh2 -r backfill -d 2014.06.18 -f atm01 -test True
-I used this on my mac to test new planB edits, either using or skipping (by renaming)
-the bad d3 file.
-
-test a forecast that will go to planB:
-run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.05 -f atm01 -test True
-or
-run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm01 -test True -test_planB True
-
-NEW 2025.07.30: For start_type = forecast this writes the forcing files
-to separate day folders.
-
-NOTE: atm_fun.py calls the old seawater routines in order to use the
-"dist" method for getting grid angles for vector wind rotation.
-Eventually we should just do this by hand.
+test a day:
+run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -f atm01_oae -test True
 
 NOTE: Only effect of -test True is to be verbose.
 
@@ -39,7 +29,7 @@ result_dict['start_dt'] = datetime.now()
 
 # ****************** CASE-SPECIFIC CODE *****************
 
-import os
+import os, sys
 import time
 import shutil
 import xarray as xr
@@ -72,6 +62,10 @@ if 'apogee' in Ldir['lo_env']:
 if Ldir['run_type'] == 'backfill':
     hr_vec = range(25)
 elif Ldir['run_type'] == 'forecast':
+    # The OAE code at the end is not yet compatible with this
+    # run type, so I am disabling that capability.
+    print('ERROR: cannot use run_type = forecast. Exiting')
+    sys.exit()
     hr_max = Ldir['forecast_days'] * 24
     hr_vec = range(hr_max + 1)
     
@@ -452,3 +446,72 @@ for fn in out_fn_list:
 
 result_dict['end_dt'] = datetime.now()
 ffun.finale(Ldir, result_dict)
+
+# >>>>>>> OAE Code, from Jilian and Aurora <<<<<<<<<<<<<<<<<<
+"""
+This is not yet compatible with the forecast run type, so I disabled
+that capability near the start.
+
+Also it is completely HARDWIRED for a specific injection location, time, and size.
+
+This needs to be made into a tool instead of a hack.
+"""
+# generate alkalinity_sflux.nc
+vn0 = 'Tair'
+fn0 = out_dir / (vn0 + '.nc')
+ds0 = xr.open_dataset(fn0)
+
+vn = 'alkalinity_sflux'
+ds = xr.Dataset()
+dims = ('time','eta_rho','xi_rho')
+val = ds0[vn0].values *0
+#if ds0.tair_time.values[0] == np.datetime64('2015-08-01T12:00:00.000000000'): # target OAE moment
+# val[12,463,353] = 0.05597058575390731*14 # mmol m-2 s-1, add at 12:00, 2013.07.01
+val[8,463,353] = 0.05597058575390731*14*100 # mmol m-2 s-1, add at 8:00am, 2013.07.01
+ds[vn] = (dims, val)
+ds[vn].attrs['units'] = "milliequivalents meter-2 second-1"
+ds[vn].attrs['lon_name'] = 'Surface flux of total alkalinity'
+ds[vn].attrs['time'] = 'time'
+# time coordinate
+ds['time'] = (('time',), mod_time_vec)
+ds['time'].attrs['units'] = Lfun.roms_time_units
+ds['time'].attrs['long_name'] = 'ocean time'
+# and save to NetCDF
+out_fn = out_dir / (vn + '.nc')
+Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
+ds.to_netcdf(out_fn, encoding=Enc_dict)
+ds.close()
+
+# generate other sflux
+ds = xr.Dataset()
+dims = ('time','eta_rho','xi_rho')
+# time coordinate
+ds['time'] = (('time',), mod_time_vec)
+ds['time'].attrs['units'] = Lfun.roms_time_units
+ds['time'].attrs['long_name'] = 'ocean time'
+val = ds0[vn0].values *0
+
+info = {'NO3_sflux': {'units': 'millimole-nitrogen meter-2 second-1', 'long_name': 'surface net NO3 flux'},
+        'NH4_sflux': {'units': 'millimole-nitrogen meter-2 second-1', 'long_name': 'surface net NH4 flux'},
+        'SdetritusN_sflux': {'units': 'millimole-nitrogen meter-2 second-1', 'long_name': 'surface net SdetritusN flux'},
+        'LdetritusN_sflux': {'units': 'millimole-nitrogen meter-2 second-1', 'long_name': 'surface net LdetritusN flux'},
+        'SdetritusC_sflux': {'units': 'millimole-carbon meter-2 second-1', 'long_name': 'surface net SdetritusC flux'},
+        'LdetritusC_sflux': {'units': 'millimole-carbon meter-2 second-1', 'long_name': 'surface net LdetritusC flux'},
+        'oxygen_sflux': {'units': 'millimole-oxygen meter-2 second-1', 'long_name': 'surface net oxygen flux'},
+        'chlorophyll_sflux': {'units': 'millimole-nitrogen(?) meter-2 second-1', 'long_name': 'surface net chlorophyll flux'},
+        'phytoplankton_sflux': {'units': 'millimole-nitrogen meter-2 second-1', 'long_name': 'surface net nitrogen flux'},
+        'zooplankton_sflux': {'units': 'millimole-nitrogen meter-2 second-1', 'long_name': 'surface net zooplankton flux'},
+        'TIC_sflux': {'units': 'millimole-carbon meter-2 second-1', 'long_name': 'surface net TIC flux'},
+       }
+
+for vn in info.keys():
+    ds[vn] = (dims, val)
+    ds[vn].attrs['units'] = info[vn]['units']
+    ds[vn].attrs['long_name'] = info[vn]['long_name']
+    ds[vn].attrs['time'] = 'time'
+
+# and save to NetCDF
+out_fn = out_dir / ('other_bgc_sflux.nc')
+Enc_dict = {vn:zrfun.enc_dict for vn in ds.data_vars}
+ds.to_netcdf(out_fn, encoding=Enc_dict)
+ds.close()

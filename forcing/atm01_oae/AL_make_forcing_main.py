@@ -287,7 +287,7 @@ if planB == False:
         ds.close()
 
 if planB == True:
-    # We make this an in instead of elif because planB might have been set to True
+    # We make this an if instead of elif because planB might have been set to True
     # in the if planB == True section above.  Not great coding but I'm not sure how to
     # handle it more cleanly.
     result_dict['note'] = 'planB'
