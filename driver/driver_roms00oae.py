@@ -274,7 +274,7 @@ while dt <= dt1:
     f_string_y = 'f' + dt_y.strftime(Lfun.ds_fmt)
     roms_out_dir_y = Ldir['roms_out'] / Ldir['gtagex'] / f_string_y
     orig_fn = roms_out_dir_y / 'ORIG_ocean_his_0002.nc'
-    spiked_fn = roms_out_dir_y 'ocean_his_0002.nc'
+    spiked_fn = roms_out_dir_y / 'ocean_his_0002.nc'
     if orig_fn.is_file():
         pass # assume we have already spiked this day
     else:
