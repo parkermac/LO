@@ -1048,7 +1048,7 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
 ! continuation (\) or a vertical bar (|) symbol after each entry, except
 ! the last one.
 
-     NFFILES == 10                          ! number of unique forcing files
+     NFFILES == 8                          ! number of unique forcing files
 
      FRCNAME == $force_dir$/$atm$/lwrad_down.nc \
                 $force_dir$/$atm$/Pair.nc \
@@ -1057,9 +1057,7 @@ PIO_I2C_Preq = 65                 ! Maximum pending I2C requests
                 $force_dir$/$atm$/swrad.nc \
                 $force_dir$/$atm$/Tair.nc \
                 $force_dir$/$atm$/Uwind.nc \
-                $force_dir$/$atm$/Vwind.nc \
-                $force_dir$/$atm$/alkalinity_sflux.nc \
-                $force_dir$/$atm$/other_bgc_sflux.nc  
+                $force_dir$/$atm$/Vwind.nc  
 
 ! Output NetCDF file names, [1:Ngrids].
 
