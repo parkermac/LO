@@ -276,10 +276,20 @@ while dt <= dt1:
     orig_fn = roms_out_dir_y / 'ORIG_ocean_his_0002.nc'
     spiked_fn = roms_out_dir_y / 'ocean_his_0002.nc'
     if orig_fn.is_file():
-        pass # assume we have already spiked this day
+        # assume we have already spiked this day, AND that
+        # ORIG_ocean_his_0002.nc is UNSPIKED
+        pass
     else:
-        shutil.copyfile(str(spiked_fn),str(orig_fn))
-    # In either case we now have the ORIG_ file and we assume it is unspiked.
+        # assume we have NOT already spiked this day, AND that
+        # ocean_his_0002.nc is UNSPIKED
+        tt0 = time()
+        shutil.move(str(spiked_fn),str(orig_fn))
+        print('Time to move file = %0.1f sec' % (time()-tt0))
+    # In either case we now have the ORIG_ file and we assume it is unspiked,
+    # and we will add a spike to it.
+    # I need to think carefully if there are cases where these assumptions might
+    # be incorrect, e.g. if I run an experiment multiple times.
+    tt0 = time()
     ds = xr.open_dataset(orig_fn)
     # Columbia River mouth
     lon = -124.11
@@ -304,10 +314,12 @@ while dt <= dt1:
         print('ERROR: point on land mask. Exiting.')
         sys.exit()
     # add alkalinity and save to a new file
-    spiked_fn.unlink(missing_ok=True)
-    ds.alkalinity[0,-1,iy,ix] += dalk
+    # In this case we are adding to the top 5 m over a 2.5 km x 2.5 km square.
+    xypad = 2
+    ds.alkalinity[0,-16:,iy-xypad:iy+xypad+1,ix-xypad:ix+xypad+1] += dalk
     ds.to_netcdf(spiked_fn)
     ds.close()
+    print('Time to spike and save file = %0.1f sec' % (time()-tt0))
     # now we have a new initial condition for this day!
     # >>>>>>>>>>> End OAE Code <<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<
     
