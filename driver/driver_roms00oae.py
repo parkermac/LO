@@ -287,7 +287,7 @@ while dt <= dt1:
     # Amount to increase alkalinity concentration
     dalk = 2000 # mmol m-3, same as ROMS units
     # find cell location
-    G, S, T = zrfun.get_basic_info(in_fn)
+    G, S, T = zrfun.get_basic_info(orig_fn)
     Lon = G['lon_rho'][0,:]
     Lat = G['lat_rho'][:,0]
     # error checking
