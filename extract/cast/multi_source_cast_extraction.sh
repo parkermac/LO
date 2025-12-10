@@ -33,14 +33,14 @@ do
     for source in dfo1 ecology_nc nceiSalish nceiCoastal LineP nceiPNW WOD
     do
     echo "Executed ./extract_casts_fast.py -gtx $gtx -ro $ro -lt $lt -source $source -otype $otype -year $year > ./$gtx"_"$source"_"$otype"_"$year.log"
-    ./extract_casts_fast.py -gtx $gtx -ro $ro -lt $lt -source $source -otype $otype -year $year > ./$gtx"_"$source"_"$otype"_"$year.log
+    python ./extract_casts_fast.py -gtx $gtx -ro $ro -lt $lt -source $source -otype $otype -year $year > ./$gtx"_"$source"_"$otype"_"$year.log
     done
 
     otype=ctd
     for source in dfo1 ecology_nc LineP NHL ocnms_ctd
     do
     echo "Executed ./extract_casts_fast.py -gtx $gtx -ro $ro -lt $lt -source $source -otype $otype -year $year > ./$gtx"_"$source"_"$otype"_"$year.log"
-    ./extract_casts_fast.py -gtx $gtx -ro $ro -lt $lt -source $source -otype $otype -year $year > ./$gtx"_"$source"_"$otype"_"$year.log
+    python ./extract_casts_fast.py -gtx $gtx -ro $ro -lt $lt -source $source -otype $otype -year $year > ./$gtx"_"$source"_"$otype"_"$year.log
     done
 
 done
