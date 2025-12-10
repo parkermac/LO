@@ -18,7 +18,7 @@
 
 # Example run command:
 # ./multi_source_cast_extraction.sh cas7_t0_x4b 2 hourly 2016 2016 > x4b_2016.log &
-# ./multi_source_cast_extraction.sh cas7_t1_x11ab 2 average 2016 2016 > x11ab_2016.log &
+# ./multi_source_cast_extraction.sh cas7_t1_x11ab 1 average 2016 2016 > x11ab_2016.log &
 
 gtx=$1
 ro=$2
