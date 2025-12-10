@@ -5,7 +5,7 @@ This runs ROMS for one or more days, allowing for either a forecast or backfill.
 Currently it is hardwired to work with runs that have daily (not hourly) saves.
 It moves ocean_his_0002.nc from the yesterday folder to ORIG_ocean_his_0002.nc,
 if that file does not already exist.
-Then it opens that file, adds alkalinity to a surface cell, and saves it as
+Then it opens that file, adds alkalinity to a one or more cells, and saves it as
 ocean_his_0002.nc. All this happens before it runs a given day.
 
 NOTES:
