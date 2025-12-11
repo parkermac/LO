@@ -41,7 +41,7 @@ fn = glob.glob(str(in_dir0) + '/' + otype + '/*.csv')
 # Initial clean.
 big_df_raw = pd.DataFrame()
 for f in fn:
-    raw = pd.read_csv(f, encoding='cp1252')
+    raw = pd.read_csv(f, encoding='cp1252',low_memory=False)
     if 'ï»¿Locator' in raw.columns:
         raw = raw.rename(columns={'ï»¿Locator':'Locator'})
     if big_df_raw.empty:
