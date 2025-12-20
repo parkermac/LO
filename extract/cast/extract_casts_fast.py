@@ -67,7 +67,7 @@ if info_fn.is_file():
             
             # Nproc controls how many subprocesses we allow to stack up
             # before we require them all to finish.
-            cmd_list = ['python','cast_worker.py',
+            cmd_list = ['python',str(Ldir['LO'] / 'extract' / 'cast' / 'cast_worker.py'),
             '-out_fn',str(out_fn),
             '-fn',str(fn),
             '-lon',str(lon),
