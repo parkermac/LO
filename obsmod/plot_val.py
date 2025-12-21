@@ -8,48 +8,59 @@ import sys
 import pandas as pd
 import numpy as np
 import pickle
-import matplotlib.pyplot as plt
 from lo_tools import plotting_functions as pfun
 from lo_tools import Lfun, zfun, zrfun
 
+import argparse
+parser = argparse.ArgumentParser()
+# which run to use
+parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas7_t1_x11ab
+parser.add_argument('-sources', type=str, default='all') # e.g. all, or other user-defined list
+parser.add_argument('-otype', type=str, default='bottle') # observation type, e.g. ctd, bottle, etc.
+parser.add_argument('-year', type=int) # e.g. 2019
+# get the args and put into Ldir
+args = parser.parse_args()
+
 Ldir = Lfun.Lstart()
-in_dir = Ldir['parent'] / 'LPM_output' / 'obsmod'
+
+if '_mac' in Ldir['lo_env']: # mac version
+    pass
+else: # remote linux version
+    import matplotlib as mpl
+    mpl.use('Agg')
+import matplotlib.pyplot as plt
+
+in_dir = Ldir['LOo'] / 'obsmod'
 
 # plotting choices
 testing = False
 small = False # True for laptop size plot
 
 # run choices
-year = '2016'
-# gtx = 'cas6_v0_live'
-# gtx = 'cas6_traps2_x2b'
-# gtx = 'cas2k_v0_x2b'
-#gtx = 'cas7_trapsV00_meV00'
-gtx = 'cas7_t0_x4b'
-#gtx = 'cas7_t1_x11ab'
-#gtx = 'cas7_hsimt_x10ab'
+year = str(args.year)
+gtx = args.gtagex
 
 # data choices
-otype = 'bottle'
-#source = 'nceiSalish'
-source = 'all'
+otype = args.otype
+source = args.sources
+
 H = 10 # dividing depth for deep and shallow
 
-# specify input (created by process_multi_bottle.py)
+# specify input
 in_fn = in_dir / ('combined_' + otype + '_' + year + '_' + gtx + '.p')
 df0_dict = pickle.load(open(in_fn, 'rb'))
 
 # where to put output figures
-out_dir = Ldir['parent'] / 'LPM_output' / 'obsmod_val_plots'
+out_dir = Ldir['LOo'] / 'obsmod_val_plots'
 Lfun.make_dir(out_dir)
 
-# add DIN field
-for gtxo in df0_dict.keys():
-    if gtxo == 'cas6_v0_live':
-        df0_dict[gtxo]['DIN (uM)'] = df0_dict[gtxo]['NO3 (uM)']
-        df0_dict[gtxo]['NO3 (uM)'] = np.nan
-    else:
-        df0_dict[gtxo]['DIN (uM)'] = df0_dict[gtxo]['NO3 (uM)'] + df0_dict[gtxo]['NH4 (uM)']
+# # add DIN field
+# for gtxo in df0_dict.keys():
+#     if gtxo == 'cas6_v0_live':
+#         df0_dict[gtxo]['DIN (uM)'] = df0_dict[gtxo]['NO3 (uM)']
+#         df0_dict[gtxo]['NO3 (uM)'] = np.nan
+#     else:
+#         df0_dict[gtxo]['DIN (uM)'] = df0_dict[gtxo]['NO3 (uM)'] + df0_dict[gtxo]['NH4 (uM)']
 
 # ========= SET FILTERS =============================================
 
@@ -327,8 +338,8 @@ fig.tight_layout()
 print('Plotting ' + ff_str)
 sys.stdout.flush()
 
-plt.show()
-if not testing:
-    plt.savefig(out_dir / (ff_str + '.png'))
+# plt.show()
+# if not testing:
+plt.savefig(out_dir / (ff_str + '.png'))
 
     

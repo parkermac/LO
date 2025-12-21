@@ -12,6 +12,7 @@ from subprocess import PIPE as Pi
 import sys
 
 from lo_tools import Lfun
+import obsmod_functions as omfun
 
 parser = argparse.ArgumentParser()
 # which run to use
@@ -49,14 +50,13 @@ if Ldir['year1'] == 0:
 year_list = list(range(Ldir['year0'],Ldir['year1']))
 
 # Get the list of obs sources to use
-if Ldir['sources'] == 'all':
-    source_list = ['dfo1', 'ecology_nc', 'nceiSalish', 'nceiCoastal',
-        'LineP', 'nceiPNW', 'WOD', 'kc', 'kc_pointJefferson']
+source_list = omfun.source_dict[Ldir['sources']]
 
 # Loop over years:
 for year in year_list:
     print('\n' + str(year) + '\n')
 
+    tt0 = time()
     # - Do the cast extractions for each source
     for source in source_list:
         cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'cast' / 'extract_casts_fast.py'),
@@ -82,7 +82,54 @@ for year in year_list:
             if len(stderr) > 0:
                 print('\n' + ' stderr '.center(60,'-'))
                 print(stderr.decode())
+    print('---Time for all cast extractions = %0.1f sec' % (time()-tt0))
 
-# - Combine the cast extractions with obs values into a single DataFrame
+    # - Combine the cast extractions with obs values into a single DataFrame
+    tt0 = time()
+    cmd_list = ['python', str(Ldir['LO'] / 'obsmod' / 'combine_obs_mod.py'),
+        '-gtx', Ldir['gtagex'],
+        '-sources', Ldir['sources'],
+        '-otype', Ldir['otype'],
+        '-year', str(year)]
 
-# - Plot the results and save as a png.
+    if Ldir['testing']:
+        print(cmd_list)
+    else:
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        print(' ' + source)
+        if len(stdout) > 0:
+            print('\n' + ' stdout '.center(60,'-'))
+            a = stdout.decode()
+            print(a)
+        else:
+            print('  no stdout')
+        if len(stderr) > 0:
+            print('\n' + ' stderr '.center(60,'-'))
+            print(stderr.decode())
+    print('---Time to combine model and obs casts = %0.1f sec' % (time()-tt0))
+
+    # - Plot the results and save as a png.
+    tt0 = time()
+    cmd_list = ['python', str(Ldir['LO'] / 'obsmod' / 'plot_val.py'),
+        '-gtx', Ldir['gtagex'],
+        '-sources', Ldir['sources'],
+        '-otype', Ldir['otype'],
+        '-year', str(year)]
+
+    if Ldir['testing']:
+        print(cmd_list)
+    else:
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        print(' ' + source)
+        if len(stdout) > 0:
+            print('\n' + ' stdout '.center(60,'-'))
+            a = stdout.decode()
+            print(a)
+        else:
+            print('  no stdout')
+        if len(stderr) > 0:
+            print('\n' + ' stderr '.center(60,'-'))
+            print(stderr.decode())
+    print('---Time to make val plot = %0.1f sec' % (time()-tt0))
