@@ -3,7 +3,7 @@ Code to combine observed and modeled bottle values for a collection
 of sources. This is designed to work for one gtagex, and assumes the
 model run is using the newer ROMS bgc code, with NH4.
 
-It does both bottle and ctd by default, saving the output in files named:
+It does either bottle or ctd, saving the output in files named:
 combined_[bottle,ctd]_[year]_[gtagex].p
 
 It should also work automatically for runs with no bgc, but that is untested.
@@ -14,7 +14,15 @@ and model values: df_dict['obs'] and df_dict[[gtagex]]
 Each DataFrame has EXACTLY the same rows, except for the data values.
 
 It assumes you have run cast extractions for the given gtagex(s) for
-all the years and sources you will be using.
+all the sources and year you will be using.
+
+It can be run by the driver one_step_bottle_val_plot.py or on its own.
+
+For -test True it makes obs_df and mod_df available for inspection, and
+does not save df_dict.
+
+Testing on mac:
+run combine_obs_mod -gtx cas7_t0_x4b -year 2017 -test True
 
 """
 
@@ -29,14 +37,14 @@ import pickle
 from lo_tools import Lfun, zfun, zrfun
 import obsmod_functions as omfun
 
+# command line arguments
 import argparse
 parser = argparse.ArgumentParser()
-# which run to use
 parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas7_t1_x11ab
 parser.add_argument('-sources', type=str, default='all') # e.g. all, or other user-defined list
 parser.add_argument('-otype', type=str, default='bottle') # observation type, e.g. ctd, bottle, etc.
 parser.add_argument('-year', type=int) # e.g. 2019
-# get the args and put into Ldir
+parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
 
 Ldir = Lfun.Lstart()
@@ -67,7 +75,7 @@ cid0 = 0
 vn_list0 = ['cid', 'cruise', 'time', 'lat', 'lon', 'name', 'z', 'source']
 # these are all the non-data columns.
 
-vn_list = ['CT', 'SA','Chl (mg m-3)', 'DO (uM)', 'Chl (mg m-3)',
+vn_list = ['CT', 'SA', 'DO (uM)', 'Chl (mg m-3)',
         'NO3 (uM)', 'NH4 (uM)', 'TA (uM)', 'DIC (uM)']
 vn_list_no_bgc = ['CT', 'SA']
 # these are all the model (and possibly obs) data columns for a run with or without bgc
@@ -98,10 +106,7 @@ for source in source_list:
         # this will work even if there are fewer than the requested cid's.
     else:
         cid_list = list(info_df.index)
-        
-    vn_list = ['CT', 'SA', 'DO (uM)', 'Chl (mg m-3)',
-        'NO3 (uM)', 'NH4 (uM)', 'TA (uM)', 'DIC (uM)']
-    
+            
     mod_dir = (Ldir['LOo'] / 'extract' / gtx / 'cast' / (source + '_' + otype + '_' + year))
 
     # Fill DataFrames with model extractions,
@@ -178,9 +183,17 @@ for source in source_list:
     df_dict['obs'] = pd.concat((df_dict['obs'], obs_df.copy()), ignore_index=True)
     cid0 = obs_df.cid.max() + 1
     
-# Drop rows with SA = nan
+# Drop rows with SA = nan.
+# This is needed in order to clean up in cases, e.g. when testing, where we
+# may have many fewer extracted casts than are possible from the observations.
+# The assumption is that SA = nan is a good test for a missing cast.
 msa = df_dict[gtx].loc[:,'SA']
 mask = msa.notna()
 df_dict['obs'] = df_dict['obs'].loc[mask,:]
 df_dict[gtx] = df_dict[gtx].loc[mask,:]
-pickle.dump(df_dict, open(out_fn, 'wb'))
+
+if args.testing == True:
+    mod_df = df_dict[gtx]
+    obs_df = df_dict['obs']
+elif args.testing == False:
+    pickle.dump(df_dict, open(out_fn, 'wb'))

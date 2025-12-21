@@ -1,6 +1,8 @@
 """
 Driver code to do a cast extraction, combine the results with bottle data, and plot the results to a png.
 
+For -test True it plots to the screen instead of a png.
+
 Testing on mac:
 run one_step_bottle_val_plot -gtx cas7_t0_x4b -lt hourly -year0 2017 -test True
 """
@@ -113,16 +115,13 @@ for year in year_list:
     tt0 = time()
     cmd_list = ['python', str(Ldir['LO'] / 'obsmod' / 'plot_val.py'),
         '-gtx', Ldir['gtagex'],
-        '-sources', Ldir['sources'],
         '-otype', Ldir['otype'],
         '-year', str(year)]
-
     if Ldir['testing']:
         print(cmd_list)
     else:
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
-        print(' ' + source)
         if len(stdout) > 0:
             print('\n' + ' stdout '.center(60,'-'))
             a = stdout.decode()
