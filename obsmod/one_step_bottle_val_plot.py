@@ -4,7 +4,12 @@ Driver code to do a cast extraction, combine the results with bottle data, and p
 For -test True it plots to the screen instead of a png.
 
 Testing on mac:
-run one_step_bottle_val_plot -gtx cas7_t0_x4b -lt hourly -year0 2017 -test True
+run one_step_bottle_val_plot -gtx cas7_t0_x4b -lt hourly -year0 2017
+
+Production runs on apogee:
+python one_step_bottle_val_plot.py -gtx cas7_t0_x4b -lt hourly -year0 2017 > one_step_test.log &
+python one_step_bottle_val_plot.py -gtx cas7_t1_x11ab -lt average -year0 2017 > one_step_test.log &
+python one_step_bottle_val_plot.py -gtx cas7_t1_x11ab -lt average -year0 2013 -year1 2024 > one_step_test.log &
 """
 
 import argparse
@@ -56,7 +61,8 @@ source_list = omfun.source_dict[Ldir['sources']]
 
 # Loop over years:
 for year in year_list:
-    print('\n' + str(year) + '\n')
+
+    print('\n' + (' ' + str(year) + ' Cast Extractions ').center(40,'*') + '\n')
 
     tt0 = time()
     # - Do the cast extractions for each source
@@ -84,9 +90,12 @@ for year in year_list:
             if len(stderr) > 0:
                 print('\n' + ' stderr '.center(60,'-'))
                 print(stderr.decode())
-    print('---Time for all cast extractions = %0.1f sec' % (time()-tt0))
+            sys.stdout.flush()
+    print('\n---Time for all cast extractions = %0.1f sec' % (time()-tt0))
 
     # - Combine the cast extractions with obs values into a single DataFrame
+    print('\n' + (' ' + str(year) + ' Combining obs+mod ').center(40,'*') + '\n')
+
     tt0 = time()
     cmd_list = ['python', str(Ldir['LO'] / 'obsmod' / 'combine_obs_mod.py'),
         '-gtx', Ldir['gtagex'],
@@ -99,19 +108,21 @@ for year in year_list:
     else:
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
-        print(' ' + source)
         if len(stdout) > 0:
-            print('\n' + ' stdout '.center(60,'-'))
+            print(' stdout '.center(20,'-'))
             a = stdout.decode()
             print(a)
         else:
             print('  no stdout')
         if len(stderr) > 0:
-            print('\n' + ' stderr '.center(60,'-'))
+            print(' stderr '.center(20,'-'))
             print(stderr.decode())
     print('---Time to combine model and obs casts = %0.1f sec' % (time()-tt0))
+    sys.stdout.flush()
 
     # - Plot the results and save as a png.
+    print('\n' + (' ' + str(year) + ' Making Val Plot ').center(40,'*') + '\n')
+
     tt0 = time()
     cmd_list = ['python', str(Ldir['LO'] / 'obsmod' / 'plot_val.py'),
         '-gtx', Ldir['gtagex'],
@@ -123,12 +134,13 @@ for year in year_list:
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
         if len(stdout) > 0:
-            print('\n' + ' stdout '.center(60,'-'))
+            print(' stdout '.center(20,'-'))
             a = stdout.decode()
             print(a)
         else:
             print('  no stdout')
         if len(stderr) > 0:
-            print('\n' + ' stderr '.center(60,'-'))
+            print(' stderr '.center(20,'-'))
             print(stderr.decode())
     print('---Time to make val plot = %0.1f sec' % (time()-tt0))
+    sys.stdout.flush()

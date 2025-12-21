@@ -56,8 +56,6 @@ gtx = args.gtagex
 year = str(args.year)
 otype = args.otype
 
-print('\n===== ' + year + ' ==========')
-
 out_dir = Ldir['LOo'] / 'obsmod'
 Lfun.make_dir(out_dir)
 out_fn = out_dir / ('combined_' + otype + '_' + year + '_' + gtx + '.p')
