@@ -302,6 +302,15 @@ if planB == False:
             rrmat[:-1,:,:] = np.diff(rmat, axis=0) / 3600
             rrmat[-1,:,:] = rrmat[-2,:,:]
             D[vn] = rrmat
+
+        # HACK 2025.12.23 for negative Qair that showed up in a small patch
+        # and runined the forecast.
+        if vn == 'Qair':
+            qmat = D[vn].copy()
+            qmat[qmat<30] = 30
+            D[vn] = qmat
+        # END HACK
+        
         ds[vn] = (dims, D[vn])
         ds[vn].attrs['units'] = vinfo['units']
         ds[vn].attrs['long_name'] = vinfo['long_name']
