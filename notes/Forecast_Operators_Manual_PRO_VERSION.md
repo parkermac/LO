@@ -28,6 +28,10 @@ Also, it would be good in the near future to develop "**ocn04**" which would use
 
 Similarly we should develop **new atm forcing code** that uses one of the national or international weather models as a backup to our UW WRF output, which may go away someday.
 
+## WRF issues
+
+Contact David Ovens ovens@atmos.washington.edu
+
 ## post-processing problems
 
 Sometimes it can happen that when you get the email about post1.log from apogee it only shows the first job (currently the wgh nest forcing) as having completed, and then nothing else, even though it had plenty of time.
