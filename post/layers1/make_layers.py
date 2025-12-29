@@ -23,9 +23,9 @@ from lo_tools import plotting_functions as pfun
 from lo_tools import Lfun
 Ldir = Lfun.Lstart()
 in_fn = (Ldir['roms_out'] /
-    'cas6_v0_live' / 'f2019.07.04' / 'ocean_his_0002.nc')
+    'cas7_t1_x11b' / 'f2025.06.20' / 'ocean_his_0001.nc')
 out_fn = (Ldir['parent'] / 'LO_output' / 'post' /
-    'cas6_v0_live' / 'f2019.07.04' / 'layers0' / 'tempfiles' / 'layers_000000.nc')
+    'cas7_t1_x11b' / 'f2025.06.20' / 'layers0' / 'tempfiles' / 'layers_000000.nc')
 # in_fn = (Ldir['roms_out'] /
 #     'cas6_v00_uu0mb' / 'f2021.07.04' / 'ocean_his_0002.nc')
 # out_fn = (Ldir['parent'] / 'LO_output' / 'post' /
@@ -65,7 +65,9 @@ for vn in vn_list:
 if testing:
     depth_list = ['10']
 else:
-    depth_list = ['surface', '10', '20', '30', '50', 'bottom']
+    # depth_list = ['surface', '10', '20', '30', '50', 'bottom']
+    depth_list = ['surface', '10', '20', '30', '50',
+        '100', '500', '1000', '1500', '2000', '2500', 'bottom']
 
 tag_dict = dict()
 for depth in depth_list:
