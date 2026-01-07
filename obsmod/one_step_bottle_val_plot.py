@@ -53,8 +53,8 @@ elif Ldir['roms_out_num'] > 0:
     Ldir['roms_out'] = Ldir['roms_out' + str(Ldir['roms_out_num'])]
 # set year range
 if Ldir['year1'] == 0:
-    Ldir['year1'] = Ldir['year0'] + 1
-year_list = list(range(Ldir['year0'],Ldir['year1']))
+    Ldir['year1'] = Ldir['year0']
+year_list = list(range(Ldir['year0'],Ldir['year1']+1))
 
 # Get the list of obs sources to use
 source_list = omfun.source_dict[Ldir['sources']]
