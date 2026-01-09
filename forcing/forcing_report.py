@@ -78,6 +78,6 @@ for d in d_list:
                         vv = ds[v].values
                         nt = vv.shape[0]
                         for tt in range(nt):
-                            print('     - time %d: %d nans' % (tt, int(np.sum(np.isnan(vv)))))
+                            print('     - time %3d: %d nans' % (tt, int(np.sum(np.isnan(vv)))))
 
             ds.close()
