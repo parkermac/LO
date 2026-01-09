@@ -71,13 +71,13 @@ for d in d_list:
             for v in vlist:
                 dim_list = [dim for dim in ds[v].dims if 'time' in dim]
                 if len(dim_list) > 0:
-                    print('    %s %s' % (v, ds[v].dims))
+                    print('\n    %s %s' % (v, ds[v].dims))
                     print('     max=%0.3f min=%0.3f' % (ds[v].max(), ds[v].min()))
                     if args.show_nansum:
                         # assumes time is the first index
                         vv = ds[v].values
                         nt = vv.shape[0]
                         for tt in range(nt):
-                            print(' - time %d: %d nans' % (tt, int(np.sum(np.isnan(vv)))))
+                            print('     - time %d: %d nans' % (tt, int(np.sum(np.isnan(vv)))))
 
             ds.close()
