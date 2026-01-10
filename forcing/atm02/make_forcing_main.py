@@ -9,15 +9,8 @@ Test on mac in ipython:
 test a forecast (wgh2 runs faster than cas7):
 run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm02 -test True
 
-Hour 19 of 2014.06.18 was bad for d3 (nans in the gridded files) so it is a useful test:
-run make_forcing_main.py -g wgh2 -r backfill -d 2014.06.18 -f atm01 -test True
-I used this on my mac to test new planB edits, either using or skipping (by renaming)
-the bad d3 file.
-
-test a forecast that will go to planB:
-run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.05 -f atm01 -test True
-or
-run make_forcing_main.py -g wgh2 -r forecast -d 2019.07.04 -f atm01 -test True -test_planB True
+test backfill day
+run make_forcing_main.py -g cas7 -r backfill -d 2019.07.04 -f atm02 -test True
 
 NEW 2025.07.30: For start_type = forecast this writes the forcing files
 to separate day folders.
