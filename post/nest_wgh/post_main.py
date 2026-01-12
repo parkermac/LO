@@ -71,7 +71,7 @@ if len(stderr) > 0:
     result_dict['note'] = 'ocnN problem'
 print('Elapsed time = %0.2f sec' % (time()-tt0))
 
-frc = 'atm01'
+frc = 'atm02'
 tt0 = time()
 if Ldir['run_type'] == 'forecast':
     cmd_list = ['python', str(Ldir['LO'] / 'driver' / 'driver_forcing00.py'), '-g', nest_gridname,
