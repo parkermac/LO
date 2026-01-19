@@ -282,7 +282,7 @@ if planB == False:
             #this_field[G['mask_rho']==0] = np.nan
             D[vn][tt,:,:] = this_field
     
-    # combine verything into a single dataset and save to Data
+    # combine everything into a single dataset and save to Data
     for vn in outvar_list:
         out_fn = out_dir_data / (vn + '.nc')
         out_fn.unlink(missing_ok=True)
