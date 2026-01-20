@@ -536,7 +536,7 @@ while dt <= dt1:
             cmd_list = ['s3cmd','sync',str(roms_out_dir),'s3://liveocean-forecast/' + f_string + '/','--acl-public']
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
+            messages(stdout, stderr, 'To kopah messages:', args.verbose)
             print(' - time to copy to kopah = %d sec' % (time()-tt0))
             sys.stdout.flush()
             
