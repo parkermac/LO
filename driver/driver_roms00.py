@@ -112,6 +112,11 @@ parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
 # Specialized flag, only for top-priority jobs like the daily forecasts 
 parser.add_argument('-vip','--exclusive', default=False, type=Lfun.boolean_string)
 
+# Specialized flags to send output to kopah. I expect these will only be used for the
+# main forecast.
+parser.add_argument('-k','--to_kopah', default=False, type=Lfun.boolean_string)
+parser.add_argument('-ktest','--test_to_kopah', default=False, type=Lfun.boolean_string)
+
 # >>> END Command Line Arguments <<<
 
 args = parser.parse_args()
@@ -131,6 +136,13 @@ if (argsd['cpu_choice'] == 'compute') and (argsd['group_choice'] != 'macc'):
 if (argsd['run_type'] == 'backfill') and (argsd['ds0'] == None):
     print('*** Need at least -0 YYYY.MM.DD for -r backfill')
     sys.exit()
+
+# Override some flags when testing to_kopah
+if args.test_to_kopah:
+    args.get_forcing = False
+    args.run_dot_in = False
+    args.run_roms = False
+    args.move_his = False
 
 # get Ldir
 Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
@@ -511,6 +523,20 @@ while dt <= dt1:
         if (dt == dt1) and (args.run_type == 'forecast'):
             with open(done_fn, 'w') as ffout:
                 ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
+
+        # New code to send output to kopah. 1/20/2026 PM
+        # Anyone can access files using a URL like:
+        # https://s3.kopah.uw.edu/liveocean-forecast/f[date string]/ocean_his_00[01-25].nc and etc.
+        # NOTE: I created the bucket initially by hand using this command:
+        # s3cmd mb s3://liveocean-forecast
+        if args.to_kopah:
+            tt0 = time()
+            cmd_list = ['s3cmd','sync',str(roms_out_dir),'s3://liveocean-forecast/' + f_string,'--acl-public']
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
+            print(' - time to copy to kopah = %d sec' % (time()-tt0))
+            sys.stdout.flush()
             
         dt += timedelta(days=1)
     else:

@@ -147,7 +147,7 @@ def copy_to_kopah(Ldir, out_fn, subdir=''):
             Lfun.messages(stdout, stderr, 'Copying extraction to ' + share_dir)
             is_done = True
         except Exception as e:
-            print('Problem moving file to kopak')
+            print('Problem moving file to kopah')
             print(e)
         
         if is_done:
