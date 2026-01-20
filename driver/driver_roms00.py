@@ -533,7 +533,7 @@ while dt <= dt1:
         # s3cmd mb s3://liveocean-forecast
         if args.to_kopah:
             tt0 = time()
-            cmd_list = ['s3cmd','sync',str(roms_out_dir),'s3://liveocean-forecast/' + f_string,'--acl-public']
+            cmd_list = ['s3cmd','sync',str(roms_out_dir),'s3://liveocean-forecast/' + f_string + '/','--acl-public']
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
