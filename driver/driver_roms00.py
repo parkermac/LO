@@ -30,6 +30,8 @@ For testing/debugging these flags can be very useful:
 Testing on mac
 run driver_roms00 -g cas7 -t t1 -x x11b -r backfill -0 2025.07.04 -s continuation -np 192 -cpu cpu-g2 -grp macc -vip True -v True --get_forcing False --run_roms False --move_his False
 
+Test to_kopah capability on klone:
+... -g cas7 -t t2 -x x11b -r backfill -0 2026.01.20 -s continuation -np 192 -cpu cpu-g2 -grp macc -v True -to_kopah True -test_to_kopah True
 """
 
 import sys, os
