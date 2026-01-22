@@ -170,6 +170,15 @@ def get_sta_dict(job_name):
             'Calvert': (-127.966,51.65)
         }
 
+    elif job_name == 'Burkeolator2':
+        # Info from Yayla Sezginer <yayla.sezginer@cioospacific.ca> for 2015 - 2022 Sensor stations
+        sta_dict = {
+            'Bute': (-127.9663,51.6499),
+            'Folger': (-125.2815,48.8082916667),
+            'Baynes': (-124.7693,49.487)
+            'SoG_Central': (-123.41742662750096,49.04686630066777)
+        }
+
     else:
         print('Unsupported job name!')
         a = dict()
