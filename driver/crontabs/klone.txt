@@ -2,9 +2,9 @@ LANG=en-US.UTF-8
 LOd=/gscratch/macc/parker/LO/driver
 
 # main forecast
-00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k True < /dev/null > $LOd/cas7_forecast.log
-00 08 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k True < /dev/null > $LOd/cas7_forecast_2.log
-# 00 13 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k True < /dev/null > $LOd/cas7_forecast_3.log
+00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k False < /dev/null > $LOd/cas7_forecast.log
+00 08 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k False < /dev/null > $LOd/cas7_forecast_2.log
+# 00 13 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k False < /dev/null > $LOd/cas7_forecast_3.log
 00 06 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' pmacc@uw.edu < $LOd/cas7_forecast.log
 00 07 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' pmacc@uw.edu < $LOd/cas7_forecast.log
 01 06 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' kmhewett@uw.edu < $LOd/cas7_forecast.log
