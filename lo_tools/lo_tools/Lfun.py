@@ -437,11 +437,11 @@ if __name__ == '__main__':
         print(' TESTING file_to_kopah() '.center(60,'-'))
         Ldir = Lstart()
         fn = Ldir['LO'] / 'misc' / 'kopah_test.txt'
-        fn.unlink(missing_okay=True)
+        fn.unlink(missing_ok=True)
         with open(fn, 'w') as file:
             file.write('hi')
         file_to_kopah(fn, 'liveocean-test')
-        fn.unlink(missing_okay=True)
+        fn.unlink(missing_ok=True)
     
     
 
