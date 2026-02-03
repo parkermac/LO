@@ -340,10 +340,14 @@ def file_to_kopah(fn, bucket_name):
     assumes you want the output to be public.
     
     INPUT
+
     fn = full path to the file. This can be a string or Path object.
+
     bucket_name = the bucket to put it in. Okay if it already exist,
     but it is required. If the bucket name has a sub-folder: bucket/folder
     the code first creates the bucket and then writes to the folder.
+    NOTE: there are rules about bucket names, in particular you cannot use
+    and underscore, hence I use a dash in the name for testing below.
 
     OUTPUT
     The URL for a user to get the file.
