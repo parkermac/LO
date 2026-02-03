@@ -351,6 +351,9 @@ def file_to_kopah(fn, bucket_name):
     """
     from subprocess import Popen as Po
     from subprocess import PIPE as Pi
+    import warnings
+    # Ignore all warnings: This was for a missing python-magic warning
+    warnings.filterwarnings("ignore")
 
     fn = str(fn)
     bucket_name = str(bucket_name)
@@ -371,7 +374,7 @@ def file_to_kopah(fn, bucket_name):
         sys.stdout.flush()
 
     # Copy the file
-    cmd_list = ['s3cmd','put',fn,'s3://'+str(bucket_name)+'/','--acl-public']
+    cmd_list = ['s3cmd','put',fn,'s3://'+str(bucket_name)+'/','--acl-public','--no-mime-magic']
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     stdout, stderr = proc.communicate()
@@ -379,8 +382,7 @@ def file_to_kopah(fn, bucket_name):
         print(' file_to_kopah: put stderr '.center(60,'-'))
         print(stderr.decode())
         sys.stdout.flush()
-    print('Correct URL to use:')
-    print('https://s3.kopah.uw.edu/'+bucket_name+'/'+fn.split('/')[-1])
+    print('URL https://s3.kopah.uw.edu/'+bucket_name+'/'+fn.split('/')[-1])
 
 if __name__ == '__main__':
     # TESTING: run Lfun will execute these (don't import Lfun first)
@@ -440,7 +442,15 @@ if __name__ == '__main__':
         fn.unlink(missing_ok=True)
         with open(fn, 'w') as file:
             file.write('hi')
+        print('')
+        print(' TESTING file_to_kopah() file to bucket '.center(60,'-'))
         file_to_kopah(fn, 'liveocean-test')
+        print('')
+        print(' TESTING file_to_kopah() file to sub-bucket '.center(60,'-'))
+        file_to_kopah(fn, 'liveocean-test/subfolder')
+        print('')
+        print(' TESTING file_to_kopah() file to mis-named bucket: throws error '.center(60,'-'))
+        file_to_kopah(fn, 'liveocean_test')
         fn.unlink(missing_ok=True)
     
     
