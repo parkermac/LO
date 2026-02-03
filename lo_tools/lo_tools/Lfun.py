@@ -441,6 +441,7 @@ if __name__ == '__main__':
         with open(fn, 'w') as file:
             file.write('hi')
         file_to_kopah(fn, 'liveocean-test')
+        fn.unlink(missing_okay=True)
     
     
 
