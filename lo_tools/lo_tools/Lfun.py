@@ -333,6 +333,55 @@ def module_from_file(module_name, file_path):
     spec.loader.exec_module(module)
     return module
 
+def file_to_kopah(fn, bucket_name):
+    """
+    This copies a file to an s3 bucket on kopah. You need kopah credentials
+    in order to run it. Ask Parker or Kate for these credentials. It
+    assumes you want the output to be public.
+    
+    INPUT
+    fn = full path to the file. This can be a string or Path object.
+    bucket_name = the bucket to put it in. Okay if it already exist,
+    but it is required. If the bucket name has a sub-folder: bucket/folder
+    the code first creates the bucket and then writes to the folder.
+
+    OUTPUT
+    The URL for a user to get the file.
+
+    """
+    from subprocess import Popen as Po
+    from subprocess import PIPE as Pi
+
+    fn = str(fn)
+    bucket_name = str(bucket_name)
+
+    bucket_list = bucket_name.split('/')
+    if len(bucket_list) > 1:
+        bucket_name0 = bucket_list[0]
+    else:
+        bucket_name0 = bucket_name
+
+    # Create the bucket, if needed
+    cmd_list = ['s3cmd','mb','s3://'+str(bucket_name0)]
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+    stdout, stderr = proc.communicate()
+    if len(stderr) > 0:
+        print(' file_to_kopah: mb stderr '.center(60,'-'))
+        print(stderr.decode())
+        sys.stdout.flush()
+
+    # Copy the file
+    cmd_list = ['s3cmd','put',fn,'s3://'+str(bucket_name)+'/','--acl-public']
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+    stdout, stderr = proc.communicate()
+    stdout, stderr = proc.communicate()
+    if len(stderr) > 0:
+        print(' file_to_kopah: put stderr '.center(60,'-'))
+        print(stderr.decode())
+        sys.stdout.flush()
+    print('Correct URL to use:')
+    print('https://s3.kopah.uw.edu/'+bucket_name+'/'+fn.split('/')[-1])
+
 if __name__ == '__main__':
     # TESTING: run Lfun will execute these (don't import Lfun first)
     
@@ -366,7 +415,7 @@ if __name__ == '__main__':
             print('EXCEPTION')
             print(az_dict['exception'])
             
-    if True:
+    if False:
         print(' TESTING get_fn_list() '.center(60,'-'))
         Ldir = Lstart(gridname='cas6', tag='v0', ex_name='live')
         ds0 = '2019.07.04'
@@ -383,6 +432,15 @@ if __name__ == '__main__':
         in_dir = Ldir['roms_out1'] / Ldir['gtagex'] / 'f2019.07.04'
         my_item = choose_item(in_dir, tag='.nc', exclude_tag='')
         print(my_item)
+
+    if True:
+        print(' TESTING file_to_kopah() '.center(60,'-'))
+        Ldir = Lstart()
+        fn = Ldir['LO'] / 'misc' / 'kopah_test.txt'
+        fn.unlink(missing_okay=True)
+        with open(fn, 'w') as file:
+            file.write('hi')
+        file_to_kopah(fn, 'liveocean-test')
     
     
 
