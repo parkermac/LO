@@ -333,11 +333,12 @@ def module_from_file(module_name, file_path):
     spec.loader.exec_module(module)
     return module
 
-def file_to_kopah(fn, bucket_name):
+def file_to_kopah(fn, bucket_name, public=True):
     """
     This copies a file to an s3 bucket on kopah. You need kopah credentials
     in order to run it. Ask Parker or Kate for these credentials. It
-    assumes you want the output to be public.
+    assumes you want the output to be public, but you can override this with
+    public=False.
     
     INPUT
 
@@ -346,8 +347,11 @@ def file_to_kopah(fn, bucket_name):
     bucket_name = the bucket to put it in. Okay if it already exist,
     but it is required. If the bucket name has a sub-folder: bucket/folder
     the code first creates the bucket and then writes to the folder.
+    
     NOTE: there are rules about bucket names, in particular you cannot use
-    and underscore, hence I use a dash in the name for testing below.
+    an underscore, hence I use a dash in the name for testing below in the
+    case that is intended to fail. You can use underscores in the sub-folder
+    names.
 
     OUTPUT
     The URL for a user to get the file.
@@ -378,7 +382,9 @@ def file_to_kopah(fn, bucket_name):
         sys.stdout.flush()
 
     # Copy the file
-    cmd_list = ['s3cmd','put',fn,'s3://'+str(bucket_name)+'/','--acl-public','--no-mime-magic']
+    cmd_list = ['s3cmd','put',fn,'s3://'+str(bucket_name)+'/','--no-mime-magic']
+    if public == True:
+        cmd_list.append('--acl-public')
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     stdout, stderr = proc.communicate()
@@ -386,7 +392,10 @@ def file_to_kopah(fn, bucket_name):
         print(' file_to_kopah: put stderr '.center(60,'-'))
         print(stderr.decode())
         sys.stdout.flush()
-    print('URL https://s3.kopah.uw.edu/'+bucket_name+'/'+fn.split('/')[-1])
+
+    # return the URL to get the file
+    url_str = 'https://s3.kopah.uw.edu/'+bucket_name+'/'+fn.split('/')[-1]
+    return url_str
 
 if __name__ == '__main__':
     # TESTING: run Lfun will execute these (don't import Lfun first)
@@ -445,16 +454,16 @@ if __name__ == '__main__':
         fn = Ldir['LO'] / 'misc' / 'kopah_test.txt'
         fn.unlink(missing_ok=True)
         with open(fn, 'w') as file:
-            file.write('hi')
+            file.write(Ldir['lo_env'])
         print('')
         print(' TESTING file_to_kopah() file to bucket '.center(60,'-'))
-        file_to_kopah(fn, 'liveocean-test')
-        print('')
+        url_str = file_to_kopah(fn, 'liveocean-test')
+        print(url_str + '\n')
         print(' TESTING file_to_kopah() file to sub-bucket '.center(60,'-'))
-        file_to_kopah(fn, 'liveocean-test/subfolder')
-        print('')
+        url_str = file_to_kopah(fn, 'liveocean-test/sub_folder')
+        print(url_str + '\n')
         print(' TESTING file_to_kopah() file to mis-named bucket: throws error '.center(60,'-'))
-        file_to_kopah(fn, 'liveocean_test')
+        url_str = file_to_kopah(fn, 'liveocean_test')
         fn.unlink(missing_ok=True)
     
     
