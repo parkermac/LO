@@ -340,7 +340,7 @@ def file_to_kopah(fn, bucket_name, public=True):
     assumes you want the output to be public, but you can override this with
     public=False.
     
-    INPUT
+    INPUT:
 
     fn = full path to the file. This can be a string or Path object.
 
@@ -353,7 +353,8 @@ def file_to_kopah(fn, bucket_name, public=True):
     case that is intended to fail. You can use underscores in the sub-folder
     names.
 
-    OUTPUT
+    OUTPUT:
+
     The URL for a user to get the file.
 
     """
@@ -467,6 +468,3 @@ if __name__ == '__main__':
         fn.unlink(missing_ok=True)
     
     
-
-
-
