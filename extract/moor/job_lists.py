@@ -179,6 +179,13 @@ def get_sta_dict(job_name):
             'SoG_Central': (-123.41742662750096,49.04686630066777)
         }
 
+    elif job_name == 'saratoga22':
+        # Mooring locations for an experiment in October 2022
+        # for Lucy Brock.
+        sta_dict = {
+            'HY': (-122.532548, 48.13375) # Hydrophone
+        }
+
     else:
         print('Unsupported job name!')
         a = dict()
