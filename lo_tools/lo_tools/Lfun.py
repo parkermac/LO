@@ -325,7 +325,7 @@ def messages(stdout, stderr, mtitle, test_flag=True):
         
 def module_from_file(module_name, file_path):
     """
-    This is used for the hook ot LO_user.  It allows you to import a module from a
+    This is used for the hooks to LO_user.  It allows you to import a module from a
     specific path, even if a module of the same name exists in the current directory.
     """
     spec = importlib.util.spec_from_file_location(module_name, file_path)

@@ -15,3 +15,5 @@ of sources.
 
 **obsmod_functions.py** is a module of things that might be useful for more than one piece of code here. This is where the list of observational data sources to loop over is specified.
 
+NOTE: all of programs called by one_step_bottle_val_plot.py have hooks to look for different versions in LO_user.
+

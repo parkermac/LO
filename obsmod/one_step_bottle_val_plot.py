@@ -4,7 +4,7 @@ Driver code to do a cast extraction, combine the results with bottle data, and p
 For -test True it plots to the screen instead of a png.
 
 Testing on mac:
-run one_step_bottle_val_plot -gtx cas7_t0_x4b -lt hourly -year0 2017
+run one_step_bottle_val_plot -gtx cas7_t0_x4b -lt hourly -year0 2017 -test True
 
 Production runs on apogee:
 python one_step_bottle_val_plot.py -gtx cas7_t0_x4b -lt hourly -year0 2017 > one_step_test.log &
@@ -56,6 +56,16 @@ if Ldir['year1'] == 0:
     Ldir['year1'] = Ldir['year0']
 year_list = list(range(Ldir['year0'],Ldir['year1']+1))
 
+# Set up hooks to look in LO_user
+ff = 'obsmod_functions.py'
+fn = Ldir['LO'] / 'obsmod' / ff
+ufn = Ldir['LOu'] / 'obsmod' / ff
+if ufn.is_file():
+    print('Importing %s from LO_user' % (ff))
+    omfun = Lfun.module_from_file('obsmod_functions', ufn)
+else:
+    omfun = Lfun.module_from_file('obsmod_functions', fn)
+
 # Get the list of obs sources to use
 source_list = omfun.source_dict[Ldir['sources']]
 
@@ -66,8 +76,14 @@ for year in year_list:
 
     tt0 = time()
     # - Do the cast extractions for each source
+    # Hook to LO_user
+    fn = Ldir['LO'] / 'extract' / 'cast' / 'extract_casts_fast.py'
+    ufn = Ldir['LOu'] / 'extract' / 'cast' / 'extract_casts_fast.py'
+    if ufn.is_file():
+        fn = ufn
+    # End Hook
     for source in source_list:
-        cmd_list = ['python', str(Ldir['LO'] / 'extract' / 'cast' / 'extract_casts_fast.py'),
+        cmd_list = ['python', str(fn),
         '-gtx', Ldir['gtagex'],
         '-ro', str(Ldir['roms_out_num']),
         '-lt', Ldir['list_type'],
@@ -97,7 +113,13 @@ for year in year_list:
     print('\n' + (' ' + str(year) + ' Combining obs+mod ').center(40,'*') + '\n')
 
     tt0 = time()
-    cmd_list = ['python', str(Ldir['LO'] / 'obsmod' / 'combine_obs_mod.py'),
+    # Hook to LO_user
+    fn = Ldir['LO'] / 'obsmod' / 'combine_obs_mod.py'
+    ufn = Ldir['LOu'] / 'obsmod' / 'combine_obs_mod.py'
+    if ufn.is_file():
+        fn = ufn
+    # End Hook
+    cmd_list = ['python', str(fn),
         '-gtx', Ldir['gtagex'],
         '-sources', Ldir['sources'],
         '-otype', Ldir['otype'],
@@ -124,7 +146,13 @@ for year in year_list:
     print('\n' + (' ' + str(year) + ' Making Val Plot ').center(40,'*') + '\n')
 
     tt0 = time()
-    cmd_list = ['python', str(Ldir['LO'] / 'obsmod' / 'plot_val.py'),
+    # Hook to LO_user
+    fn = Ldir['LO'] / 'obsmod' / 'plot_val.py'
+    ufn = Ldir['LOu'] / 'obsmod' / 'plot_val.py'
+    if ufn.is_file():
+        fn = ufn
+    # End Hook
+    cmd_list = ['python', str(fn),
         '-gtx', Ldir['gtagex'],
         '-otype', Ldir['otype'],
         '-year', str(year)]
