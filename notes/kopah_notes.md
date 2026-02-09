@@ -14,6 +14,7 @@ This resource is already being used in the LiveOcean system to make forecast ext
 
 To use this system you need to add a file ~/.s3cfg to any machine you use (klone, your laptop, etc.). The file has these lines:
 ```
+[default]
 host_base = s3.kopah.orci.washington.edu
 host_bucket = s3.kopah.orci.washington.edu/%(bucket)
 use_https = True
