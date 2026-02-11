@@ -535,7 +535,7 @@ while dt <= dt1:
         if args.to_kopah:
             tt0 = time()
             # cmd_list = ['s3cmd','sync',str(roms_out_dir),'s3://liveocean-forecast/','--acl-public']
-            cmd_list = ['s5cmd','sync',str(roms_out_dir)+'/','s3://liveocean-forecast/','--acl','public-read']
+            cmd_list = ['s5cmd','sync','--acl','public-read',str(roms_out_dir)+'/','s3://liveocean-forecast/']
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'To kopah messages:', args.verbose)
