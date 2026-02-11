@@ -170,7 +170,7 @@ for og in ['obs',gtx]:
     df0_dict[og]['DO (mg L-1)'] = (32 / 1000) * df0_dict[og]['DO (uM)']
 if do_arag:
     import gsw
-    from PyCO2SYS import CO2SYS
+    #from PyCO2SYS import CO2SYS
     # calculate and add Aragonite Saturation State
     for og in ['obs',gtx]:
         # load data to vectors
