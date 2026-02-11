@@ -32,7 +32,7 @@ run driver_roms00 -g cas7 -t t1 -x x11b -r backfill -0 2025.07.04 -s continuatio
 
 Test to_kopah capability on klone:
 ... -g cas7 -t t2 -x x11b -r backfill -0 2026.01.20 -s continuation -np 192 -cpu cpu-g2 -grp macc -v True -k True -ktest True
-PERFORMANCE: 212 sec for a day of hourly cas7 files
+PERFORMANCE: 17 sec for a day of hourly cas7 files using s5cmd (wow!)
 """
 
 import sys, os
@@ -536,6 +536,7 @@ while dt <= dt1:
             tt0 = time()
             # cmd_list = ['s3cmd','sync',str(roms_out_dir),'s3://liveocean-forecast/','--acl-public']
             cmd_list = ['s5cmd','sync','--acl','public-read',str(roms_out_dir),'s3://liveocean-forecast/']
+            # RESULT 2026.02.11 s5cmd was MUCH faster, 17 sec vs. 192 sec!!!
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'To kopah messages:', args.verbose)
