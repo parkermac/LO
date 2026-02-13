@@ -87,7 +87,7 @@ two_d['salt_surf'] = ds.salt[0,-1,:,:].values
 # units:           watt meter-2
 # negative_value:  upward flux, cooling
 # positive_value:  downward flux, heating
-if 'sh_flux' in ds.data_vars:
+if 'shflux' in ds.data_vars:
     two_d['shflux'] = ds.shflux[0,:,:].values
 
 # set list of variables to extract
