@@ -22,14 +22,17 @@ for product in dsid_dict.keys():
     print('\n'+product)
     dsid = dsid_dict[product]
     print(dsid)
-    data = cm.open_dataset(dataset_id=dsid,
-        username=cred_dict['username'],
-        password=cred_dict['password'])
-    if 'time' in data.dims:
-        start_date = data['time'][0].values
-        end_date = data['time'][-1].values
-    dt0 = pd.Timestamp(start_date)
-    dt1 = pd.Timestamp(end_date)
-    print('Range: %s to %s' % (dt0.strftime(Lfun.ds_fmt),dt1.strftime(Lfun.ds_fmt)))
+    try:
+        data = cm.open_dataset(dataset_id=dsid,
+            username=cred_dict['username'],
+            password=cred_dict['password'])
+        if 'time' in data.dims:
+            start_date = data['time'][0].values
+            end_date = data['time'][-1].values
+        dt0 = pd.Timestamp(start_date)
+        dt1 = pd.Timestamp(end_date)
+        print('Range: %s to %s' % (dt0.strftime(Lfun.ds_fmt),dt1.strftime(Lfun.ds_fmt)))
+    except Exception as e:
+        print(e)
 
 
