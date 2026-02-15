@@ -29,7 +29,7 @@ dstr = datetime.now().strftime('%Y%m%d') + '00'
 out_dir = out_dir0 / dstr
 Lfun.make_dir(out_dir)
 
-print(dstr)
+print(out_dir)
 
 acct_dict = Lfun.csv_to_dict(Ldir['data'] / 'accounts' / 'wrf_pm_2026.02.15.csv')
 
