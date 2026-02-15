@@ -44,5 +44,6 @@ proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
 if len(stderr) > 0:
     print('Error getting WRF files for %s' % (dstr))
+    print(stderr.decode())
 print('Time to get WRF files = %0.1f sec' % (time()-tt0))
 
