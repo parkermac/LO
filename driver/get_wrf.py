@@ -37,8 +37,8 @@ cmd_list = ['wget','--no-check-certificate','-e','robots=off','-r','--level=1','
     '--http-user='+acct_dict['username'],
     '--http-passwd='+acct_dict['password'],
     '-P',str(out_dir),
-    'https://a.atmos.uw.edu/mm5rt/puget_sound/'+dstr+'/',
-    '>','&',str(Ldir['LO'] / 'driver' / 'wrf.txt')]
+    '-o',str(Ldir['LO'] / 'driver' / 'wrf.txt'),
+    'https://a.atmos.uw.edu/mm5rt/puget_sound/'+dstr+'/']
 
 tt0 = time()
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
