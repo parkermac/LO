@@ -33,7 +33,7 @@ print(dstr)
 
 acct_dict = Lfun.csv_to_dict(Ldir['data'] / 'accounts' / 'wrf_pm_2026.02.15.csv')
 
-cmd_list = ['wget','--no-check-certificate','-e','robots=off','-r','--level=1','--accept','0000','-nc','-c',
+cmd_list = ['wget','--no-check-certificate','-e','robots=off','-r','--level=1','--accept','0000','-nd','-nc','-c',
     '--http-user='+acct_dict['username'],
     '--http-passwd='+acct_dict['password'],
     '-P',str(out_dir),
