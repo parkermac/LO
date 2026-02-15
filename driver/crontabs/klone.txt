@@ -1,6 +1,9 @@
 LANG=en-US.UTF-8
 LOd=/gscratch/macc/parker/LO/driver
 
+# get WRF files
+32 13 * * * source ~/.bashrc; python3 $LOd/get_wrf.py < /dev/null > $LOd/wrf.log
+
 # main forecast
 00 03 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k False < /dev/null > $LOd/cas7_forecast.log
 00 08 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k False < /dev/null > $LOd/cas7_forecast_2.log
