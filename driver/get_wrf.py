@@ -1,5 +1,10 @@
 """
-Code to download WRF forcing files from Atm. Sci. server.
+Code to download WRF forcing files from AtmSci server.
+
+Intended to run on klone, but it is generic.
+
+Intended to be run every morning by cron, just for that day, although
+in principle I think you could use it to get whatever days are on the AtmSci server.
 """
 
 import sys, os
