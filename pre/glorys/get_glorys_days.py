@@ -18,7 +18,7 @@ parser = argparse.ArgumentParser()
 # arguments without defaults are required
 parser.add_argument('-0', '--ds0', type=str)        # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str, default='') # is set to ds0 if omitted
-parser.add_argument('-src', '--source', type=str) # hindcast, interim, or forecast
+parser.add_argument('-src', '--source', type=str) # hindcast or forecast (interim is no longer supported)
 parser.add_argument('-r', '--region', type=str, default='region7')
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
 args = parser.parse_args()
@@ -50,12 +50,16 @@ else:
 dt0 = datetime.strptime(ds0, Lfun.ds_fmt)
 dt1 = datetime.strptime(ds1, Lfun.ds_fmt)
 
+if source == 'interim':
+    print('source = interim is no longer supported')
+    sys.exit()
+
 # loop over all days
 dt = dt0
 while dt <= dt1:
     tt0 = time()
     dstr = dt.strftime(Lfun.ds_fmt)
-    if source in ['hindcast','interim']:
+    if source == 'hindcast':
         # creates a single file
         out_dir = Ldir['data'] / 'glorys' / region
         Lfun.make_dir(out_dir)
