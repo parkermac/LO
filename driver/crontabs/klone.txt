@@ -2,7 +2,7 @@ LANG=en-US.UTF-8
 LOd=/gscratch/macc/parker/LO/driver
 
 # testing
-#* * * * * source ~/.bashrc; sbatch -p cpu-g2 -A macc $LOd/test_batch.sh
+* * * * * source ~/.bashrc; sbatch -p cpu-g2 -A macc $LOd/test_sbatch.sh
 
 # get WRF files
 40 02 * * * source ~/.bashrc; python3 $LOd/get_wrf.py < /dev/null > $LOd/wrf.log
