@@ -16,4 +16,4 @@
 # Do not return until the job is finished
 #SBATCH --wait
 
-echo -e "Pre: $(date)\n" > /gscratch/macc/parker/sbatch_test.txt
+echo -e "Pre: $(date)\n" > /gscratch/macc/parker/LO/driver/sbatch_test.txt
