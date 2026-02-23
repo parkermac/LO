@@ -1,6 +1,9 @@
 LANG=en-US.UTF-8
 LOd=/gscratch/macc/parker/LO/driver
 
+# testing
+* * * * * source ~/.bashrc && conda activate loenv && sbatch -p cpu-g2 -A macc $LOd/test_batch.sh
+
 # get WRF files
 40 02 * * * source ~/.bashrc; python3 $LOd/get_wrf.py < /dev/null > $LOd/wrf.log
 
