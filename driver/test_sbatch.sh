@@ -16,4 +16,9 @@
 # Do not return until the job is finished
 #SBATCH --wait
 
+source /gscratch/macc/parker/miniconda3/etc/profile.d/conda.sh
+
+conda activate loenv
+
 echo -e "Pre: $(date)\n" > /gscratch/macc/parker/LO/driver/sbatch_test.txt
+conda list >> /gscratch/macc/parker/LO/driver/sbatch_test.txt
