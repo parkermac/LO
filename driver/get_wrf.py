@@ -43,8 +43,11 @@ cmd_list = ['wget','--no-check-certificate','-e','robots=off','-r','--level=1','
 tt0 = time()
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
-# if len(stderr) > 0:
-#     print('Error getting WRF files for %s' % (dstr))
-#     print(stderr.decode())
+if len(stdout) > 0:
+    print('geet_wrf stdout %s' % (dstr))
+    print(stdout.decode())
+if len(stderr) > 0:
+    print('Error getting WRF files for %s' % (dstr))
+    print(stderr.decode())
 print('Time to get WRF files = %0.1f sec' % (time()-tt0))
 
