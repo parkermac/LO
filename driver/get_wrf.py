@@ -44,7 +44,7 @@ tt0 = time()
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
 if len(stdout) > 0:
-    print('geet_wrf stdout %s' % (dstr))
+    print('get_wrf stdout %s' % (dstr))
     print(stdout.decode())
 if len(stderr) > 0:
     print('Error getting WRF files for %s' % (dstr))
