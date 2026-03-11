@@ -308,18 +308,29 @@ while dt <= dt1:
             if force == 'open':
                 pass
             else:
-                force_choice = force_dict[force]
-                cmd_list = ['scp','-r',
-                    remote_dir + '/LO_output/forcing/' + Ldir['gridname'] + '/' + f_string + '/' + force_choice,
-                    str(force_dir)]
-                proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-                stdout, stderr = proc.communicate()
-                if len(stderr) > 0:
-                    print('Error getting forcing %s' % (force))
-                    sys.exit()
-                    # got_forcing = False
-
-                messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
+                # We will try several times since this was throwing errors occasionally 3/2026 PM
+                ntries = 1
+                ntries_max = 3
+                got_forcing = False
+                while ntries <= ntries_max:
+                    if got_forcing == True:
+                        break # should break from while loop and go to next forcing type
+                    else:
+                        force_choice = force_dict[force]
+                        cmd_list = ['scp','-r',
+                            remote_dir + '/LO_output/forcing/' + Ldir['gridname'] + '/' + f_string + '/' + force_choice,
+                            str(force_dir)]
+                        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+                        stdout, stderr = proc.communicate()
+                        messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
+                        if (len(stderr) > 0):
+                            got_forcing == False
+                        else:
+                            got_forcing == True
+                        if (len(stderr) > 0) and (ntries == ntries_max):
+                            print('Error getting forcing %s' % (force))
+                            sys.exit()
+                        ntries += 1
         print(' - time to get forcing = %d sec' % (time()-tt0))
     else:
         print(' ** skipped getting forcing')
