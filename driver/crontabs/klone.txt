@@ -5,6 +5,8 @@ LOd=/gscratch/macc/parker/LO/driver
 #* * * * * source ~/.bashrc; sbatch -p cpu-g2 -A macc $LOd/test_sbatch.sh
 
 # get WRF files
+30 01 * * * source ~/.bashrc; python3 $LOd/get_wrf.py < /dev/null > $LOd/wrf.log
+10 02 * * * source ~/.bashrc; python3 $LOd/get_wrf.py < /dev/null > $LOd/wrf.log
 40 02 * * * source ~/.bashrc; python3 $LOd/get_wrf.py < /dev/null > $LOd/wrf.log
 
 # main forecast
@@ -28,8 +30,8 @@ LOd=/gscratch/macc/parker/LO/driver
 01 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' kmhewett@uw.edu < $LOd/oly2_forecast.log
 
 # long hindcast
-30 05 * * * source ~/.bashrc; tail -n 30 $LOd/long_hindcast_x11ab.log | mail -s 'long hindcast' pmacc@uw.edu
-30 15 * * * source ~/.bashrc; tail -n 30 $LOd/long_hindcast_x11ab.log | mail -s 'long hindcast' pmacc@uw.edu
+# 30 05 * * * source ~/.bashrc; tail -n 30 $LOd/long_hindcast_x11ab.log | mail -s 'long hindcast' pmacc@uw.edu
+# 30 15 * * * source ~/.bashrc; tail -n 30 $LOd/long_hindcast_x11ab.log | mail -s 'long hindcast' pmacc@uw.edu
 
 # refresh this crontab
 00 12 * * * crontab <<< $(crontab -l)
