@@ -324,9 +324,9 @@ while dt <= dt1:
                         stdout, stderr = proc.communicate()
                         messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
                         if (len(stderr) > 0):
-                            got_forcing == False
+                            got_forcing = False
                         else:
-                            got_forcing == True
+                            got_forcing = True
                         if (len(stderr) > 0) and (ntries == ntries_max):
                             print('Error getting forcing %s' % (force))
                             sys.exit()
