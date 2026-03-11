@@ -349,7 +349,7 @@ def file_to_kopah(fn, bucket_name, public=True):
     the code first creates the bucket and then writes to the folder.
     
     NOTE: there are rules about bucket names, in particular you cannot use
-    an underscore, hence I use a dash in the name for testing below in the
+    an underscore, hence I use am underscore in the name for testing below in the
     case that is intended to fail. You can use underscores in the sub-folder
     names.
 
