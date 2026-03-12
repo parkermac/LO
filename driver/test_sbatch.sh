@@ -23,4 +23,8 @@ conda activate loenv
 # echo -e "Pre: $(date)\n" > /gscratch/macc/parker/LO/driver/sbatch_test.txt
 # conda list >> /gscratch/macc/parker/LO/driver/sbatch_test.txt
 
-python3 /gscratch/macc/parker/LO/driver/driver_forcing00.py -g cas7 -r forecast -f atm02 > /gscratch/macc/parker/LO/driver/atm02_cas7.log
+LOd=/gscratch/macc/parker/LO/driver
+
+python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f tide01 > $LOd/tide01_cas7.log
+
+# python3 /gscratch/macc/parker/LO/driver/driver_forcing00.py -g cas7 -r forecast -f atm02 > /gscratch/macc/parker/LO/driver/atm02_cas7.log
