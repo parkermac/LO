@@ -27,4 +27,4 @@ LOd=/gscratch/macc/parker/LO/driver
 
 python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f tide01 > $LOd/tide01_cas7.log
 
-# python3 /gscratch/macc/parker/LO/driver/driver_forcing00.py -g cas7 -r forecast -f atm02 > /gscratch/macc/parker/LO/driver/atm02_cas7.log
+python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f atm02 > $LOd/atm02_cas7.log
