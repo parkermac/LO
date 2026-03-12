@@ -26,4 +26,4 @@ conda activate loenv
 LOd=/gscratch/macc/parker/LO/driver
 source ~/.bashrc
 
-python $LOd/driver_forcing00.py -g cas7 -r forecast -f atm02 > $LOd/atm02_cas7.log
+python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f atm02 > $LOd/atm02_cas7.log
