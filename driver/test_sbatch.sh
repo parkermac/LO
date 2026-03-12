@@ -25,6 +25,10 @@ conda activate loenv
 
 LOd=/gscratch/macc/parker/LO/driver
 
-python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f tide01 > $LOd/tide01_cas7.log
+#python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f tide01 > $LOd/tide01_cas7.log
 
-python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f atm02 > $LOd/atm02_cas7.log
+#python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f atm02 > $LOd/atm02_cas7.log
+
+#python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f ocnG01 -do_bio True > $LOd/ocnG01_cas7.log
+
+python3 $LOd/driver_forcing00.py -g cas7 -r forecast -tP trapsP01 -f trapsN00 > $LOd/trapsN00_cas7.log
