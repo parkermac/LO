@@ -90,6 +90,10 @@ H = args.dividing_depth # dividing depth [m] for deep and shallow
 
 # Calculate  and plot values of aragonite saturation state and pCO2
 do_arag = args.do_arag
+if 'DIC (uM)' in df0_dict['obs'].columns:
+    do_arag = args.do_arag
+else:
+    do_arag = False
 # Otherwise it plots DIN and Chl
 
 # (3) Filtering choices
@@ -153,7 +157,7 @@ plt.close('all')
 
 if not do_arag:
     vn_list = ['SA','CT','DO (uM)','NO3 (uM)','NH4 (uM)','DIN (uM)',
-        'DIC (uM)', 'TA (uM)', 'Chl (mg m-3)']
+        'Chl (mg m-3)']
 else:
     vn_list = ['SA','CT','DO (mg L-1)','NO3 (uM)','NH4 (uM)','pCO2 (uatm)',
         'DIC (uM)', 'TA (uM)', 'Omega']
@@ -168,6 +172,7 @@ lim_dict = {'SA':(14,36),'CT':(0,20),'DO (uM)':(0,500),'DO (mg L-1)':(0,15),
 # create DO (mg L-1) and pCO2 (uatm)
 for og in ['obs',gtx]:
     df0_dict[og]['DO (mg L-1)'] = (32 / 1000) * df0_dict[og]['DO (uM)']
+
 if do_arag:
     import gsw
     #from PyCO2SYS import CO2SYS
