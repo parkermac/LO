@@ -90,7 +90,7 @@ def get_dt_local(dt, tzl='US/Pacific'):
     dt_local = dt_utc.astimezone(tz_local)
     return dt_local
 
-# CONVERT TO JSON AND SCP TO HOMER
+# CONVERT TO JSON AND COPY to KOPAH
 for exp in exp_list:
 
     in_fn = out_fn_dict[exp]
@@ -125,9 +125,9 @@ for exp in exp_list:
 
         # copy file to kopah
     try:
-        url_str = Lfun.file_to_kopah(out_json_dict0[exp],'liveocean-web/'+exp+'_tracks.json')
+        url_str = Lfun.file_to_kopah(out_json_dict0[exp],'liveocean-web')
         print(url_str)
-        url_str = Lfun.file_to_kopah(out_json_dict0[exp],'liveocean-web/'+exp+'_times.json')
+        url_str = Lfun.file_to_kopah(out_json_dict1[exp],'liveocean-web')
         print(url_str)
         result = 'success'
     except Exception as e:
