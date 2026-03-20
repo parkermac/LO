@@ -116,7 +116,7 @@ for moviename in moviename_list:
         url_str = Lfun.file_to_kopah(input_filename,'liveocean-web')
         print(url_str)
         result = 'success'
-    except Exception as e
+    except Exception as e:
         print(e)
         result = 'fail'
 

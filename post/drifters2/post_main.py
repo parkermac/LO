@@ -130,7 +130,7 @@ for exp in exp_list:
         url_str = Lfun.file_to_kopah(out_json_dict0[exp],'liveocean-web/'+exp+'_times.json')
         print(url_str)
         result = 'success'
-    except Exception as e
+    except Exception as e:
         print(e)
         result = 'fail'
     
