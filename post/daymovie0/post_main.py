@@ -111,9 +111,16 @@ for moviename in moviename_list:
     input_filename = Ldir['LOo'] / 'daymovie' / Ldir['gtagex'] / moviename / 'movie.mp4'
     output_filename = moviename + '.mp4'
 
+    # and save a local copy
+    try:
+        shutil.copyfile(input_filename, out_dir / output_filename)
+    except Exception as e:
+        print(' error saving local copy of movie')
+        print(e)
+
     # copy file to kopah
     try:
-        url_str = Lfun.file_to_kopah(input_filename,'liveocean-web')
+        url_str = Lfun.file_to_kopah(out_dir / output_filename,'liveocean-web')
         print(url_str)
         result = 'success'
     except Exception as e:
@@ -145,12 +152,7 @@ for moviename in moviename_list:
     # else:
     #     print(' - testing: did not copy files to homer')
 
-    # and save a local copy
-    try:
-        shutil.copyfile(input_filename, out_dir / output_filename)
-    except Exception as e:
-        print(' error saving local copy of movie')
-        print(e)
+
         
     sleep(2)
         
