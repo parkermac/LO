@@ -4,8 +4,8 @@
 #SBATCH --nodes=1
 
 ## Tasks per node
-#CBATCH --ntasks=10
-#SBATCH --ntasks-per-node=10
+#CBATCH --ntasks=1
+#SBATCH --ntasks-per-node=1
 
 ## Walltime 
 #SBATCH --time=01:00:00
@@ -16,7 +16,7 @@
 # Do not return until the job is finished
 #SBATCH --wait
 
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=20
 
 source /gscratch/macc/parker/miniconda3/etc/profile.d/conda.sh
 
