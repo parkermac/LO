@@ -16,7 +16,7 @@
 # Do not return until the job is finished
 #SBATCH --wait
 
-#SBATCH --cpus-per-task=1
+#SBATCH --cpus-per-task=10
 
 source /gscratch/macc/parker/miniconda3/etc/profile.d/conda.sh
 
