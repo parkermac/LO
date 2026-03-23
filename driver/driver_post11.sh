@@ -33,6 +33,6 @@ export NUMEXPR_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 LOd=/gscratch/macc/parker/LO/driver
 
-python3 $LOd/driver_post11.py -gtx cas7_t2_x11b -ro 0 -r forecast -test True -override_cmd_list_test True < /dev/null > $LOd/post11.log
+# python3 $LOd/driver_post11.py -gtx cas7_t2_x11b -ro 0 -r forecast -test True -override_cmd_list_test True < /dev/null > $LOd/post11.log
 
-# python3 $LOd/driver_post11.py -gtx cas7_t2_x11b -ro 0 -r forecast < /dev/null > $LOd/post11.log
+python3 $LOd/driver_post11.py -gtx cas7_t2_x11b -ro 0 -r forecast < /dev/null > $LOd/post11.log
