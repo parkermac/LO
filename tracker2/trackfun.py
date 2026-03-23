@@ -320,7 +320,7 @@ def get_tracks(fn_list, plon0, plat0, pcs0, TR, trim_loc=False):
                 xy = np.array((plon0,plat0)).T
                 #print(' ++ making pmask')
                 #print(maskr.shape)
-                pmask = maskr[xyT_rho_un.query(xy, workers=-1)[1]]
+                pmask = maskr[xyT_rho_un.query(xy, workers=10)[1]]
                 #print(pmask)
                 # keep only points with pmask >= maskr_crit
                 pcond = pmask >= maskr_crit
@@ -530,7 +530,7 @@ def update_position_lonlat(dxg, dyg, maskr, V, dt_sec, plon, plat):   #jx
     # Experiments with "trap0" to explore trapping in the Skokomish
     # showed that ## = 0.5 is a reasonable choice.
     xy = np.array((Plon,Plat)).T
-    pmask = maskr[xyT_rho_un.query(xy, workers=-1)[1]]
+    pmask = maskr[xyT_rho_un.query(xy, workers=10)[1]]
     pcond = pmask < maskr_crit # a Boolean mask
     if len(pcond) > 0:
         # these randint calls give random vectors of -1,0,1 (note the 2!)
@@ -541,11 +541,11 @@ def update_position_lonlat(dxg, dyg, maskr, V, dt_sec, plon, plat):   #jx
         
     # move any particles on land to the middle of the nearest good rho point.
     xy = np.array((Plon,Plat)).T
-    pmask = maskr[xyT_rho_un.query(xy, workers=-1)[1]]
+    pmask = maskr[xyT_rho_un.query(xy, workers=10)[1]]
     pcond = pmask < maskr_crit # a Boolean mask
     if len(pcond) > 0:
-        Plon_NEW = lonrf[xyT_rho.query(xy, workers=-1)[1]]
-        Plat_NEW = latrf[xyT_rho.query(xy, workers=-1)[1]]
+        Plon_NEW = lonrf[xyT_rho.query(xy, workers=10)[1]]
+        Plat_NEW = latrf[xyT_rho.query(xy, workers=10)[1]]
         Plon[pcond] = Plon_NEW[pcond]
         Plat[pcond] = Plat_NEW[pcond]
     return Plon, Plat
@@ -616,7 +616,7 @@ def update_position(dxg, dyg, maskr, V, ZH, S, dt_sec, plon, plat, pcs, surface)
     # Experiments with "trap0" to explore trapping in the Skokomish
     # showed that ## = 0.5 is a reasonable choice.
     xy = np.array((Plon,Plat)).T
-    pmask = maskr[xyT_rho_un.query(xy, workers=-1)[1]]
+    pmask = maskr[xyT_rho_un.query(xy, workers=10)[1]]
     pcond = pmask < maskr_crit # a Boolean mask
     if len(pcond) > 0:
         # these randint calls give random vectors of -1,0,1 (note the 2!)
@@ -627,11 +627,11 @@ def update_position(dxg, dyg, maskr, V, ZH, S, dt_sec, plon, plat, pcs, surface)
         
     # move any particles on land to the middle of the nearest good rho point.
     xy = np.array((Plon,Plat)).T
-    pmask = maskr[xyT_rho_un.query(xy, workers=-1)[1]]
+    pmask = maskr[xyT_rho_un.query(xy, workers=10)[1]]
     pcond = pmask < maskr_crit # a Boolean mask
     if len(pcond) > 0:
-        Plon_NEW = lonrf[xyT_rho.query(xy, workers=-1)[1]]
-        Plat_NEW = latrf[xyT_rho.query(xy, workers=-1)[1]]
+        Plon_NEW = lonrf[xyT_rho.query(xy, workers=10)[1]]
+        Plat_NEW = latrf[xyT_rho.query(xy, workers=10)[1]]
         Plon[pcond] = Plon_NEW[pcond]
         Plat[pcond] = Plat_NEW[pcond]
         
@@ -676,11 +676,11 @@ def get_vel(uf0,uf1,vf0,vf1,wf0,wf1, plon, plat, pcs, frac, surface, use_new_tre
     V = np.zeros((NP,3))
     if surface == True:
         xy = np.array((plon,plat)).T
-        # use workers=-1 to use all available cores
-        ui0 = uf0[xyT_u.query(xy, workers=-1)[1]]
-        vi0 = vf0[xyT_v.query(xy, workers=-1)[1]]
-        ui1 = uf1[xyT_u.query(xy, workers=-1)[1]]
-        vi1 = vf1[xyT_v.query(xy, workers=-1)[1]]
+        # use workers=10 to use all available cores
+        ui0 = uf0[xyT_u.query(xy, workers=10)[1]]
+        vi0 = vf0[xyT_v.query(xy, workers=10)[1]]
+        ui1 = uf1[xyT_u.query(xy, workers=10)[1]]
+        vi1 = vf1[xyT_v.query(xy, workers=10)[1]]
         ui = (1 - frac)*ui0 + frac*ui1
         vi = (1 - frac)*vi0 + frac*vi1
         V[:,0] = ui
@@ -692,35 +692,35 @@ def get_vel(uf0,uf1,vf0,vf1,wf0,wf1, plon, plat, pcs, frac, surface, use_new_tre
             pcs_m = ZH[:,1] * pcs # in meter 
             plon_m, plat_m = zfun.ll2xy(plon, plat, x_c, y_c) # in meter
             xys_m = np.array((plon_m,plat_m,pcs_m)).T
-            ui0 = uf0[xyzT_u_m.query(xys_m, workers=-1)[1]]
-            vi0 = vf0[xyzT_v_m.query(xys_m, workers=-1)[1]]
+            ui0 = uf0[xyzT_u_m.query(xys_m, workers=10)[1]]
+            vi0 = vf0[xyzT_v_m.query(xys_m, workers=10)[1]]
             if average_W:
-                wi0tmp = wf0[xyzT_w_m.query(xys_m, k=k_nei, workers=-1)[1]]
+                wi0tmp = wf0[xyzT_w_m.query(xys_m, k=k_nei, workers=10)[1]]
                 if k_nei==1:
                     wi0 = wi0tmp.mean()
                 else:
                     wi0 = wi0tmp.mean(axis=1)
             else:
-                wi0 = wf0[xyzT_w_m.query(xys_m, workers=-1)[1]]
-            ui1 = uf1[xyzT_u_m.query(xys_m, workers=-1)[1]]
-            vi1 = vf1[xyzT_v_m.query(xys_m, workers=-1)[1]]
+                wi0 = wf0[xyzT_w_m.query(xys_m, workers=10)[1]]
+            ui1 = uf1[xyzT_u_m.query(xys_m, workers=10)[1]]
+            vi1 = vf1[xyzT_v_m.query(xys_m, workers=10)[1]]
             if average_W:
-                wi1tmp = wf1[xyzT_w_m.query(xys_m, k=k_nei, workers=-1)[1]]
+                wi1tmp = wf1[xyzT_w_m.query(xys_m, k=k_nei, workers=10)[1]]
                 if k_nei==1:
                     wi1 = wi1tmp.mean()
                 else:    
                     wi1 = wi1tmp.mean(axis=1)
             else:
-                wi1 = wf1[xyzT_w_m.query(xys_m, workers=-1)[1]]
+                wi1 = wf1[xyzT_w_m.query(xys_m, workers=10)[1]]
         
         else:
             xys = np.array((plon,plat,pcs)).T
-            ui0 = uf0[xyzT_u.query(xys, workers=-1)[1]]
-            vi0 = vf0[xyzT_v.query(xys, workers=-1)[1]]
-            wi0 = wf0[xyzT_w.query(xys, workers=-1)[1]]
-            ui1 = uf1[xyzT_u.query(xys, workers=-1)[1]]
-            vi1 = vf1[xyzT_v.query(xys, workers=-1)[1]]
-            wi1 = wf1[xyzT_w.query(xys, workers=-1)[1]]
+            ui0 = uf0[xyzT_u.query(xys, workers=10)[1]]
+            vi0 = vf0[xyzT_v.query(xys, workers=10)[1]]
+            wi0 = wf0[xyzT_w.query(xys, workers=10)[1]]
+            ui1 = uf1[xyzT_u.query(xys, workers=10)[1]]
+            vi1 = vf1[xyzT_v.query(xys, workers=10)[1]]
+            wi1 = wf1[xyzT_w.query(xys, workers=10)[1]]
             
         ui = (1 - frac)*ui0 + frac*ui1
         vi = (1 - frac)*vi0 + frac*vi1
@@ -736,9 +736,9 @@ def get_zh(zf0,zf1,hf, plon, plat, frac):
     # Get zeta and h at all points, at an arbitrary time between two saves
     NP = len(plon)
     xy = np.array((plon,plat)).T
-    zi0 = zf0[xyT_rho.query(xy, workers=-1)[1]]
-    zi1 = zf1[xyT_rho.query(xy, workers=-1)[1]]
-    hi = hf[xyT_rho.query(xy, workers=-1)[1]]
+    zi0 = zf0[xyT_rho.query(xy, workers=10)[1]]
+    zi1 = zf1[xyT_rho.query(xy, workers=10)[1]]
+    hi = hf[xyT_rho.query(xy, workers=10)[1]]
     zi = (1 - frac)*zi0 + frac*zi1
     ZH = np.zeros((NP,2))
     ZH[:,0] = zi
@@ -749,8 +749,8 @@ def get_VR(tf0,tf1, plon, plat, pcs, frac, surface, use_new_tree,zf0,zf1,hf,x_c,
     # Get a variable on the z_rho grid at all points.
     if surface == True:
         xy = np.array((plon,plat)).T
-        ti0 = tf0[xyT_rho.query(xy, workers=-1)[1]]
-        ti1 = tf1[xyT_rho.query(xy, workers=-1)[1]]
+        ti0 = tf0[xyT_rho.query(xy, workers=10)[1]]
+        ti1 = tf1[xyT_rho.query(xy, workers=10)[1]]
     else:
         if use_new_tree:
             ZH = get_zh(zf0,zf1,hf, plon, plat, frac)
@@ -758,12 +758,12 @@ def get_VR(tf0,tf1, plon, plat, pcs, frac, surface, use_new_tree,zf0,zf1,hf,x_c,
             pcs_m = ZH[:,1] * pcs # in meter
             plon_m, plat_m = zfun.ll2xy(plon, plat, x_c, y_c) # in meter
             xys_m = np.array((plon_m,plat_m,pcs_m)).T
-            ti0 = tf0[xyzT_rho_m.query(xys_m, workers=-1)[1]]
-            ti1 = tf1[xyzT_rho_m.query(xys_m, workers=-1)[1]]
+            ti0 = tf0[xyzT_rho_m.query(xys_m, workers=10)[1]]
+            ti1 = tf1[xyzT_rho_m.query(xys_m, workers=10)[1]]
         else:
             xys = np.array((plon,plat,pcs)).T
-            ti0 = tf0[xyzT_rho.query(xys, workers=-1)[1]]
-            ti1 = tf1[xyzT_rho.query(xys, workers=-1)[1]]
+            ti0 = tf0[xyzT_rho.query(xys, workers=10)[1]]
+            ti1 = tf1[xyzT_rho.query(xys, workers=10)[1]]
     ti = (1 - frac)*ti0 + frac*ti1
     return ti
     
@@ -772,11 +772,11 @@ def get_wind(Uwindf0, Uwindf1, Vwindf0, Vwindf1, plon, plat, frac, windage):
     NP = len(plon)
     Vwind3 = np.zeros((NP,3))
     xy = np.array((plon,plat)).T
-    Uwind00 = Uwindf0[xyT_rho.query(xy, workers=-1)[1]]
-    Uwind11 = Uwindf1[xyT_rho.query(xy, workers=-1)[1]]
+    Uwind00 = Uwindf0[xyT_rho.query(xy, workers=10)[1]]
+    Uwind11 = Uwindf1[xyT_rho.query(xy, workers=10)[1]]
     Uwind = (1 - frac)*Uwind00 + frac*Uwind11
-    Vwind00 = Vwindf0[xyT_rho.query(xy, workers=-1)[1]]
-    Vwind11 = Vwindf1[xyT_rho.query(xy, workers=-1)[1]]
+    Vwind00 = Vwindf0[xyT_rho.query(xy, workers=10)[1]]
+    Vwind11 = Vwindf1[xyT_rho.query(xy, workers=10)[1]]
     Vwind = (1 - frac)*Vwind00 + frac*Vwind11
     Vwind3[:,0] = windage*Uwind
     Vwind3[:,1] = windage*Vwind
@@ -790,10 +790,10 @@ def get_AKs(AKsf, plon, plat, pcs, frac, use_new_tree,zf0,zf1,hf,x_c,y_c):
         pcs_m = ZH[:,1] * pcs #
         plon_m, plat_m = zfun.ll2xy(plon, plat, x_c, y_c) # in meter
         xys_m = np.array((plon_m,plat_m,pcs_m)).T
-        AKsi = AKsf[xyzT_w_m.query(xys_m, workers=-1)[1]]
+        AKsi = AKsf[xyzT_w_m.query(xys_m, workers=10)[1]]
     else:
         xys = np.array((plon,plat,pcs)).T
-        AKsi = AKsf[xyzT_w.query(xys, workers=-1)[1]]
+        AKsi = AKsf[xyzT_w.query(xys, workers=10)[1]]
     return AKsi
     
 def get_dAKs_new(dKdzf0, dKdzf1, plon, plat, pcs, frac, use_new_tree,zf0,zf1,hf,x_c,y_c):
@@ -803,12 +803,12 @@ def get_dAKs_new(dKdzf0, dKdzf1, plon, plat, pcs, frac, use_new_tree,zf0,zf1,hf,
         pcs_m = ZH[:,1] * pcs #
         plon_m, plat_m = zfun.ll2xy(plon, plat, x_c, y_c) # in meter
         xys_m = np.array((plon_m,plat_m,pcs_m)).T
-        dKdzi0 = dKdzf0[xyzT_rho_m.query(xys_m, workers=-1)[1]]
-        dKdzi1 = dKdzf1[xyzT_rho_m.query(xys_m, workers=-1)[1]]
+        dKdzi0 = dKdzf0[xyzT_rho_m.query(xys_m, workers=10)[1]]
+        dKdzi1 = dKdzf1[xyzT_rho_m.query(xys_m, workers=10)[1]]
     else:
         xys = np.array((plon,plat,pcs)).T
-        dKdzi0 = dKdzf0[xyzT_rho.query(xys, workers=-1)[1]]
-        dKdzi1 = dKdzf1[xyzT_rho.query(xys, workers=-1)[1]]
+        dKdzi0 = dKdzf0[xyzT_rho.query(xys, workers=10)[1]]
+        dKdzi1 = dKdzf1[xyzT_rho.query(xys, workers=10)[1]]
         
     dKdzi = (1 - frac)*dKdzi0 + frac*dKdzi1
     return dKdzi
