@@ -109,7 +109,7 @@ if Ldir['testing'] == False:
 tt0 = time()
 # loop over all jobs
 if Ldir['testing'] == True:
-    job_list = ['drifters2']
+    job_list = ['lowpass0']
 else:
     job_list = ['ubc1', 'layers1', 'nest_wgh', 'daymovie0', 'surface1', 'sequim1',
         'nest_oly', 'drifters2','lowpass0']

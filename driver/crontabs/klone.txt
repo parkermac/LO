@@ -10,11 +10,11 @@ LOd=/gscratch/macc/parker/LO/driver
 50 02 * * * source ~/.bashrc; sbatch -p cpu-g2 -A macc $LOd/driver_forecast_forcing.sh
 
 # main forecast
-20 03 * * * source ~/.bashrc; python3 $LOd/driver_roms01.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k False < /dev/null > $LOd/cas7_forecast.log
+20 03 * * * source ~/.bashrc; python3 $LOd/K_driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k False < /dev/null > $LOd/cas7_forecast.log
 
 # post processing
-# 00 06 * * * source ~/.bashrc; sbatch -p cpu-g2 -A macc $LOd/driver_post11.sh
-
+00 06 * * * source ~/.bashrc; sbatch -p cpu-g2 -A macc $LOd/K_driver_post1.sh
+00 07 * * * source ~/.bashrc; mail -s 'post_K1' pmacc@uw.edu < $LOd/post_K1.log
 
 00 08 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k False < /dev/null > $LOd/cas7_forecast_2.log
 # 00 13 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 -k False < /dev/null > $LOd/cas7_forecast_3.log
@@ -24,12 +24,12 @@ LOd=/gscratch/macc/parker/LO/driver
 01 07 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' kmhewett@uw.edu < $LOd/cas7_forecast.log
 
 # nested forecasts
-30 07 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g wgh2 -t t2 -x xn11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done w11 < /dev/null > $LOd/wgh2_forecast.log
-00 17 * * * source ~/.bashrc; python3 $LOd/driver_roms01.py -g wgh2 -t t2 -x xn11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done w11 < /dev/null > $LOd/wgh2_forecast_2.log
+30 07 * * * source ~/.bashrc; python3 $LOd/K_driver_roms00.py -g wgh2 -t t2 -x xn11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done w11 < /dev/null > $LOd/wgh2_forecast.log
+00 17 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g wgh2 -t t2 -x xn11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done w11 < /dev/null > $LOd/wgh2_forecast_2.log
 00 09 * * * source ~/.bashrc; mail -s 'wgh forecast klone' pmacc@uw.edu < $LOd/wgh2_forecast.log
 01 09 * * * source ~/.bashrc; mail -s 'wgh forecast klone' kmhewett@uw.edu < $LOd/wgh2_forecast.log
 
-00 09 * * * source ~/.bashrc; python3 $LOd/driver_roms00.py -g oly2 -t t2 -x xn11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done o11 < /dev/null > $LOd/oly2_forecast.log
+00 09 * * * source ~/.bashrc; python3 $LOd/K_driver_roms00.py -g oly2 -t t2 -x xn11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done o11 < /dev/null > $LOd/oly2_forecast.log
 00 19 * * * source ~/.bashrc; python3 $LOd/driver_roms01.py -g oly2 -t t2 -x xn11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done o11 < /dev/null > $LOd/oly2_forecast_2.log
 00 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' pmacc@uw.edu < $LOd/oly2_forecast.log
 01 12 * * * source ~/.bashrc; mail -s 'oly forecast klone' kmhewett@uw.edu < $LOd/oly2_forecast.log

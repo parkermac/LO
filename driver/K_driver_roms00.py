@@ -206,16 +206,17 @@ if args.run_type == 'forecast':
     # if the forcing has been created on apogee, and if not, then exit.
     for nestgrid in ['wgh','oly']:
         if nestgrid in args.gridname:
-            # Get the post11.log file from apogee, if it exists.
-            postfile_remote = remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO/driver/post11.log'
-            postfile_local = Ldir['LO'] / 'driver' / 'post11.log'
-            postfile_local.unlink(missing_ok=True) # remove local version if it exists
-            cmd_list = ['scp', postfile_remote, str(postfile_local)]
-            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-            stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Getting post11.log', args.verbose)
+            # # Get the post11.log file from apogee, if it exists.
+            # postfile_remote = remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO/driver/post11.log'
+            # postfile_local = Ldir['LO'] / 'driver' / 'post11.log'
+            # postfile_local.unlink(missing_ok=True) # remove local version if it exists
+            # cmd_list = ['scp', postfile_remote, str(postfile_local)]
+            # proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            # stdout, stderr = proc.communicate()
+            # messages(stdout, stderr, 'Getting post11.log', args.verbose)
             # Inspect the contents of post11.log to decide whether or not to run the nested forecast.
             do_nested_forecast = False
+            postfile_local = Ldir['LO'] / 'driver' / 'post_K1.log'
             if postfile_local.is_file():
                 try:
                     with open(postfile_local, 'r') as f:
