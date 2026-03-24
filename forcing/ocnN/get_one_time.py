@@ -121,7 +121,7 @@ for vn in vn_dict.keys():
     if dm == 2:
         vtrim = ds[vn][0,iy0[tag]:iy1[tag], ix0[tag]:ix1[tag]].values
         vv = np.nan * np.ones(xx[tag].shape)
-        vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
+        vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=10)[1]]
         # note that "workers" has replaced "n_jobs"
         
         if vn == 'zeta':
@@ -140,7 +140,7 @@ for vn in vn_dict.keys():
         for nn in range(N):
             vtrim = ds[vn][0,nn,iy0[tag]:iy1[tag], ix0[tag]:ix1[tag]].values
             vv = np.nan * np.ones(xx[tag].shape) 
-            vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=-1)[1]]
+            vv[mm[tag]==1] = vtrim[mtrim[tag]==1][xyT[tag].query(xynew[tag], workers=10)[1]]
             data_dict[vn][nn, :, :] = vv
 ds.close()
     
