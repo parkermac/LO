@@ -37,9 +37,6 @@ For testing/debugging these flags can be very useful:
 --short_roms True (do a very short run, just a few timesteps)
 --move_his False (don't move the results to apogee)
 
-Testing on mac
-run driver_roms01 -g cas7 -t t1 -x x11b -r backfill -0 2025.07.04 -s continuation -np 192 -cpu cpu-g2 -grp macc -vip True -v True --get_forcing False --run_roms False --move_his False
-
 Test to_kopah capability on klone:
 ... -g cas7 -t t2 -x x11b -r backfill -0 2026.01.20 -s continuation -np 192 -cpu cpu-g2 -grp macc -v True -k True -ktest True
 PERFORMANCE: 17 sec for a day of hourly cas7 files using s5cmd (wow!)
