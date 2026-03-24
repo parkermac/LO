@@ -33,6 +33,10 @@ def make_info_df(df):
     for cid in df.cid.unique():
         info_df.loc[cid,col_list] = df.loc[df.cid==cid,col_list].iloc[0,:]
     info_df.index.name = 'cid'
-    info_df.loc[:,'time'] = pd.to_datetime(info_df['time'])
+    tt = []
+    for ttt in info_df['time']:
+        tt.append(pd.to_datetime(ttt,  utc=True))
+    info_df.loc[:,'time'] = pd.to_datetime(tt)
+    info_df['time'] = pd.to_datetime(info_df['time']).dt.tz_localize(None)
     
     return info_df
