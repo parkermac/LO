@@ -20,6 +20,7 @@ source /gscratch/macc/parker/miniconda3/etc/profile.d/conda.sh
 
 conda activate loenv
 
+# These lines were used in testing to see if the conda environment loaded correctly.
 # echo -e "Pre: $(date)\n" > /gscratch/macc/parker/LO/driver/sbatch_test.txt
 # conda list >> /gscratch/macc/parker/LO/driver/sbatch_test.txt
 

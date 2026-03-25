@@ -112,36 +112,21 @@ for moviename in moviename_list:
     input_filename = Ldir['LOo'] / 'daymovie' / Ldir['gtagex'] / moviename / 'movie.mp4'
     output_filename = moviename + '.mp4'
 
-    if Ldir['testing'] == False:
-        # send file to homer (only works from apogee)
-        print(' - copying '+output_filename+' to homer')
-        sys.stdout.flush()
-    
-        try:
-            cmd_list = ['scp',input_filename,
-                'pmacc@homer.u.washington.edu:/hw00/d47/pmacc/LO/Figs_active_forecast/'+output_filename]
-            proc = Po(cmd_list,stdout=Pi, stderr=Pi)
-            stdout, stderr = proc.communicate()
-            if len(stdout) > 0:
-                print(' sdtout '.center(60,'-'))
-                print(stdout.decode())
-            if len(stderr) > 0:
-                print(' stderr '.center(60,'-'))
-                print(stderr.decode())
-            sys.stdout.flush()
-        except Exception as e:
-            print(' error saving movie to homer')
-            print(e)
-            result = 'fail'
-    else:
-        print(' - testing: did not copy files to homer')
-
     # and save a local copy
     try:
         shutil.copyfile(input_filename, out_dir / output_filename)
     except Exception as e:
         print(' error saving local copy of movie')
         print(e)
+
+    # copy file to kopah
+    try:
+        url_str = Lfun.file_to_kopah(out_dir / output_filename,'liveocean-web')
+        print(url_str)
+        result = 'success'
+    except Exception as e:
+        print(e)
+        result = 'fail'
         
     sleep(2)
         

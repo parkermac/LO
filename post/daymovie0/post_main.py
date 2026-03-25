@@ -126,33 +126,6 @@ for moviename in moviename_list:
     except Exception as e:
         print(e)
         result = 'fail'
-
-    # if True: #Ldir['testing'] == False:
-
-    #     # send file to homer (only works from apogee)
-    #     print(' - copying '+output_filename+' to homer')
-    #     sys.stdout.flush()
-    
-    #     try:
-    #         cmd_list = ['scp',input_filename,
-    #             'pmacc@homer.u.washington.edu:/hw00/d47/pmacc/LO/Figs_active_forecast/'+output_filename]
-    #         proc = Po(cmd_list,stdout=Pi, stderr=Pi)
-    #         stdout, stderr = proc.communicate()
-    #         if len(stdout) > 0:
-    #             print(' sdtout '.center(60,'-'))
-    #             print(stdout.decode())
-    #         if len(stderr) > 0:
-    #             print(' stderr '.center(60,'-'))
-    #             print(stderr.decode())
-    #         sys.stdout.flush()
-    #     except Exception as e:
-    #         print(' error saving movie to homer')
-    #         print(e)
-    #         result = 'fail'
-    # else:
-    #     print(' - testing: did not copy files to homer')
-
-
         
     sleep(2)
         

@@ -22,17 +22,19 @@ source /gscratch/macc/parker/miniconda3/etc/profile.d/conda.sh
 
 conda activate loenv
 
+# These exports, along with the cpus-per-task set above
+# (and workers=10 in the nearest neighbor code, e.g. in tracker2)
+# allow fast multi-threading in python.
+
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK      # For OpenMP
 export OPENBLAS_NUM_THREADS=$SLURM_CPUS_PER_TASK # For OpenBLAS
 export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK      # For Intel MKL
 export VECLIB_MAXIMUM_THREADS=$SLURM_CPUS_PER_TASK
 export NUMEXPR_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
-# echo -e "Pre: $(date)\n" > /gscratch/macc/parker/LO/driver/sbatch_test.txt
-# conda list >> /gscratch/macc/parker/LO/driver/sbatch_test.txt
-
 LOd=/gscratch/macc/parker/LO/driver
 
+# For testing
 # python3 $LOd/K_driver_post1.py -gtx cas7_t2_x11b -ro 0 -r forecast -test True -override_cmd_list_test True < /dev/null > $LOd/post_K1.log
 
 python3 $LOd/K_driver_post1.py -gtx cas7_t2_x11b -ro 0 -r forecast < /dev/null > $LOd/post_K1.log

@@ -8,7 +8,7 @@
 #SBATCH --ntasks-per-node=5
 
 ## Walltime 
-#SBATCH --time=01:00:00
+#SBATCH --time=05:00:00
 
 ## Use all memory on the node [0 to use all, or 128G]
 #SBATCH --mem=64G

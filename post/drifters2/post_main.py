@@ -1,6 +1,6 @@
 """
 This is the main program for doing a tracker run, converting it
-to JSON files, and pushing them to my website for some interactive js.
+to JSON files, and pushing them to kopah for some interactive js.
 
 Testing on mac:
 
@@ -123,7 +123,7 @@ for exp in exp_list:
     tt = [{'t': tt_list}]
     json.dump(tt, open(out_fn1, 'w'))
 
-        # copy file to kopah
+    # copy file to kopah
     try:
         url_str = Lfun.file_to_kopah(out_json_dict0[exp],'liveocean-web')
         print(url_str)
@@ -133,38 +133,7 @@ for exp in exp_list:
     except Exception as e:
         print(e)
         result = 'fail'
-    
-    # if Ldir['testing']== False:
-        
-    #     # send to homer
-    #     cmd2 = ['scp',str(out_json_dict0[exp]),
-    #         'pmacc@homer.u.washington.edu:/hw00/d47/pmacc/LO/tracks2/'+exp+'_tracks.json']
-    #     proc = Po(cmd2,stdout=Pi, stderr=Pi)
-    #     stdout, stderr = proc.communicate()
-    #     if len(stdout) > 0:
-    #         print(' sdtout '.center(60,'-'))
-    #         print(stdout.decode())
-    #     if len(stderr) > 0:
-    #         print('WARNING: problem moving tracks to homer ' + out_json_dict0[exp].name)
-    #         print(' stderr '.center(60,'-'))
-    #         print(stderr.decode())
-    #         result = 'FAIL'
-
-    #     cmd2 = ['scp',str(out_json_dict1[exp]),
-    #         'pmacc@homer.u.washington.edu:/hw00/d47/pmacc/LO/tracks2/'+exp+'_times.json']
-    #     proc = Po(cmd2,stdout=Pi, stderr=Pi)
-    #     stdout, stderr = proc.communicate()
-    #     if len(stdout) > 0:
-    #         print(' sdtout '.center(60,'-'))
-    #         print(stdout.decode())
-    #     if len(stderr) > 0:
-    #         print('WARNING: problem moving times to homer ' + out_json_dict1[exp].name)
-    #         print(' stderr '.center(60,'-'))
-    #         print(stderr.decode())
-    #         result = 'FAIL'
-        
-    # else:
-    #     print('Skipped sending files to homer')
+            
 # END CONVERT AND SCP
 # -------------------------------------------------------
 
