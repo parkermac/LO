@@ -42,7 +42,7 @@ Get detailed info for an object (file), including URL.
 ```
 s3cmd info s3://[bucket]/[folder]/[object]
 ```
-**Note that this reports http in the URL when it should be https!**
+**Note that this reports http://s3.kopah.orci.washington.edu/ in the URL when it should be https://s3.kopah.uw.edu/! (https NOT http)**
 
 ---
 Create a bucket. I think you need to create the bucket before you start putting things in it, but I am not sure.

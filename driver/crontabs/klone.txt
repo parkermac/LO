@@ -8,6 +8,7 @@ LOd=/gscratch/macc/parker/LO/driver
 
 # create forecast forcing
 50 02 * * * source ~/.bashrc; sbatch -p cpu-g2 -A macc $LOd/K_driver_forecast_forcing.sh
+00 04 * * * source ~/.bashrc; cat $LOd/*cas7.log | mail -s 'klone cas7 forcing' pmacc@uw.edu
 
 # main forecast
 20 03 * * * source ~/.bashrc; python3 $LOd/K_driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -cpu cpu-g2 -np 192 -vip True -done c11 < /dev/null > $LOd/cas7_forecast.log
