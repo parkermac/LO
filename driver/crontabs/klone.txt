@@ -1,6 +1,9 @@
 LANG=en-US.UTF-8
 LOd=/gscratch/macc/parker/LO/driver
 
+# testing
+* * * * * source ~/.bashrc; echo $USER > $LOd/user_test.log
+
 # get WRF files
 30 01 * * * source ~/.bashrc; python3 $LOd/get_wrf.py < /dev/null > $LOd/wrf.log
 10 02 * * * source ~/.bashrc; python3 $LOd/get_wrf.py < /dev/null > $LOd/wrf.log
