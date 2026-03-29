@@ -8,7 +8,7 @@ from lo_tools import Lfun
 
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
-fromtime import time
+from time import time
 
 def intro():
     parser = argparse.ArgumentParser()

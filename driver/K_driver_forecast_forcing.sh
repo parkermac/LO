@@ -4,21 +4,33 @@
 #SBATCH --nodes=1
 
 ## Tasks per node
-#CBATCH --ntasks=10
-#SBATCH --ntasks-per-node=10
+#CBATCH --ntasks=3
+#SBATCH --ntasks-per-node=3
 
 ## Walltime 
 #SBATCH --time=01:00:00
 
 ## Use all memory on the node [0 to use all, or 128G]
-#SBATCH --mem=32G
+#SBATCH --mem=64G
 
 # Do not return until the job is finished
 #SBATCH --wait
 
+#SBATCH --cpus-per-task=10
+
 source /gscratch/macc/parker/miniconda3/etc/profile.d/conda.sh
 
 conda activate loenv
+
+# These exports, along with the cpus-per-task set above
+# (and workers=10 in the nearest neighbor code, e.g. in tracker2)
+# allow fast multi-threading in python.
+
+export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK      # For OpenMP
+export OPENBLAS_NUM_THREADS=$SLURM_CPUS_PER_TASK # For OpenBLAS
+export MKL_NUM_THREADS=$SLURM_CPUS_PER_TASK      # For Intel MKL
+export VECLIB_MAXIMUM_THREADS=$SLURM_CPUS_PER_TASK
+export NUMEXPR_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 # These lines were used in testing to see if the conda environment loaded correctly.
 # echo -e "Pre: $(date)\n" > /gscratch/macc/parker/LO/driver/sbatch_test.txt
@@ -28,8 +40,8 @@ LOd=/gscratch/macc/parker/LO/driver
 
 python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f tide01 -k True > $LOd/tide01_cas7.log
 
-python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f atm02 -k True > $LOd/atm02_cas7.log
+# python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f atm02 -k True > $LOd/atm02_cas7.log
 
-python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f ocnG01 -do_bio True -k True > $LOd/ocnG01_cas7.log
+# python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f ocnG01 -do_bio True -k True > $LOd/ocnG01_cas7.log
 
-python3 $LOd/driver_forcing00.py -g cas7 -r forecast -tP trapsP01 -f trapsN00 -k True > $LOd/trapsN00_cas7.log
+# python3 $LOd/driver_forcing00.py -g cas7 -r forecast -tP trapsP01 -f trapsN00 -k True > $LOd/trapsN00_cas7.log
