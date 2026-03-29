@@ -87,8 +87,12 @@ def finale(Ldir, result_dict):
     # I think this will only write the output of the first day of a forecast. Is that okay?
     if Ldir['to_kopah']:
         tt0 = time()
-        cmd_list = ['s5cmd','sync','--acl','public-read',str(out_dir)+'/',
-            's3://liveocean-pmacc/LO_output/forcing/'+Ldir['gridname']+'/f'+Ldir['date_string']+'/'+Ldir['frc']+'/']
+        # cmd_list = ['s3cmd','sync',str(roms_out_dir),'s3://liveocean-forecast/','--acl-public']
+        # cmd_list = ['s5cmd','sync','--acl','public-read',str(out_dir)+'/',
+        #     's3://liveocean-pmacc/LO_output/forcing/'+Ldir['gridname']+'/f'+Ldir['date_string']+'/'+Ldir['frc']+'/']
+        cmd_list = ['s3cmd','sync',str(out_dir)+'/',
+            's3://liveocean-pmacc/LO_output/forcing/'+Ldir['gridname']+'/f'+Ldir['date_string']+'/'+Ldir['frc']+'/',
+            '--acl-public']
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
         messages(stdout, stderr, 'To kopah messages:', args.verbose)
