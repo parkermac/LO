@@ -19,7 +19,7 @@ LOd=/gscratch/macc/parker/LO/driver
 # emails
 00 06 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' pmacc@uw.edu < $LOd/cas7_forecast.log
 01 06 * * * source ~/.bashrc; mail -s 'cas7 forecast klone' kmhewett@uw.edu < $LOd/cas7_forecast.log
-30 06 * * * source ~/.bashrc; mail -s 'post_K1' pmacc@uw.edu < $LOd/post_K1.log
+50 06 * * * source ~/.bashrc; mail -s 'post_K1' pmacc@uw.edu < $LOd/post_K1.log
 
 # nested forecasts
 
