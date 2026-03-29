@@ -6,6 +6,10 @@ import argparse
 import sys
 from lo_tools import Lfun
 
+from subprocess import Popen as Po
+from subprocess import PIPE as Pi
+fromtime import time
+
 def intro():
     parser = argparse.ArgumentParser()
     # required arguments
@@ -23,6 +27,10 @@ def intro():
     parser.add_argument('-gtx', '--gtagex', default='cas7_t1_x11b', type=str) # e.g. cas7_t1_x11b
     parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
     parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocn forcing
+
+    # Specialized flags to send output to kopah.
+    parser.add_argument('-k','--to_kopah', default=False, type=Lfun.boolean_string)
+    parser.add_argument('-ktest','--test_to_kopah', default=False, type=Lfun.boolean_string)
     
     # get the args
     args = parser.parse_args()
@@ -38,7 +46,7 @@ def intro():
     Ldir = Lfun.Lstart(gridname=args.gridname)
     # add more entries to Ldir for use by make_forcing_main.py
     for a in ['frc', 'run_type', 'start_type', 'date_string', 'testing','test_planB',
-    'gtagex','roms_out_num','do_bio','trapsP']:
+    'gtagex','roms_out_num','do_bio','trapsP','to_kopah','test_to_kopah']:
         Ldir[a] = argsd[a]
     # set where to look for model output
     if Ldir['roms_out_num'] == 0:
@@ -74,5 +82,17 @@ def finale(Ldir, result_dict):
     
     with open(out_dir / 'Info' / 'results.txt', 'w') as ffout:
         ffout.write(s1 + s2 + s3)
+
+    # copy the forcing to kopah
+    # I think this will only write the output of the first day of a forecast. Is that okay?
+    if Ldir['to_kopah']:
+        tt0 = time()
+        cmd_list = ['s5cmd','sync','--acl','public-read',str(out_dir)+'/',
+            's3://liveocean-pmacc/LO_output/forcing/'+Ldir['gridname']+'/f'+Ldir['date_string']+'/'+Ldir['frc']+'/']
+        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        stdout, stderr = proc.communicate()
+        messages(stdout, stderr, 'To kopah messages:', args.verbose)
+        print(' - time to copy to kopah = %d sec' % (time()-tt0))
+        sys.stdout.flush()
     
 
