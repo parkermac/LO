@@ -57,6 +57,10 @@ parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True t
 # optional argument to select different version of traps pre
 parser.add_argument('-tP', '--trapsP', type=str, default='trapsP00') # LO/pre/trapsP## version
 
+# Specialized flags to send output to kopah.
+parser.add_argument('-k','--to_kopah', default=False, type=Lfun.boolean_string)
+parser.add_argument('-ktest','--test_to_kopah', default=False, type=Lfun.boolean_string)
+
 args = parser.parse_args()
 
 # check for required arguments
@@ -127,7 +131,7 @@ while dt <= dt1:
                 '-tP', args.trapsP,
                 '-d', dt.strftime(Lfun.ds_fmt), '-test', str(args.testing),
                 '-test_planB', str(args.test_planB),
-                '-gtx', args.gtagex, '-ro', str(args.roms_out_num), '-do_bio', str(args.do_bio)]
+                '-gtx', args.gtagex, '-ro', str(args.roms_out_num), '-do_bio', str(args.do_bio), '-k', str(args.to_kopah)]
     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
     stdout, stderr = proc.communicate()
     with open(out_dir / 'Info' / 'screen_output.txt', 'w') as fout:
