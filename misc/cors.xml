@@ -1,0 +1,7 @@
+<CORSConfiguration>
+  <CORSRule>
+    <AllowedOrigin>https://faculty.washington.edu</AllowedOrigin>
+    <AllowedMethod>GET</AllowedMethod>
+    <AllowedHeader>*</AllowedHeader>
+  </CORSRule>
+</CORSConfiguration>
