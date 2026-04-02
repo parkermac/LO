@@ -391,10 +391,10 @@ while dt <= dt1:
                 # only run this job on the node, and use all memory
                 sbatch_exclusive_line = '#SBATCH --exclusive'
                 #sbatch_mem = '0'
-                sbatch_mem = '128G'
+                sbatch_mem = '750G'
             else:
                 sbatch_exclusive_line = ''
-                sbatch_mem = '128G'
+                sbatch_mem = '750G'
                 
             in_dict = {
                 'jobname':jobname,
