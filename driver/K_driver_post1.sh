@@ -36,6 +36,6 @@ LOd=/gscratch/macc/parker/LO/driver
 
 # For testing
 #python3 $LOd/driver_post1.py -gtx cas7_t2_x11b -ro 0 -r forecast -test True -override_cmd_list_test True < /dev/null > $LOd/post_K1.log
-python3 $LOd/driver_post1.py -gtx cas7_t2_x11b -ro 0 -r forecast -test True < /dev/null > $LOd/post_K1.log
+# python3 $LOd/driver_post1.py -gtx cas7_t2_x11b -ro 0 -r forecast -test True < /dev/null > $LOd/post_K1.log
 
-# python3 $LOd/driver_post1.py -gtx cas7_t2_x11b -ro 0 -r forecast < /dev/null > $LOd/post_K1.log
+python3 $LOd/driver_post1.py -gtx cas7_t2_x11b -ro 0 -r forecast < /dev/null > $LOd/post_K1.log
