@@ -131,7 +131,7 @@ for moviename in moviename_list:
     if moviename == 'Phab_full_salt_top':
         # Save a single movie frame for Ryan for the HAB Bulletin
 
-        HAB_input_filename = Ldir['LOo'] / 'daymovie' / Ldir['gtagex'] / moviename / 'plot_0072.nc'
+        HAB_input_filename = Ldir['LOo'] / 'daymovie' / Ldir['gtagex'] / moviename / 'plot_0072.png'
 
         # copy file to kopah
         try:
