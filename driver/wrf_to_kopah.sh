@@ -5,5 +5,5 @@
 dstr=`date -u +%Y%m%d`00
 indir0=/gscratch/macc/parker/LO_data/wrf/
 indir=$indir0$dstr/
-# echo $indir
-s5cmd sync $indir s3://liveocean-pmacc/LO_data/wrf/$dstr/ > /gscratch/macc/parker/LO/driver/wrf_to_kopah.log
+echo $indir > /gscratch/macc/parker/LO/driver/wrf_to_kopah.log
+s5cmd sync $indir s3://liveocean-pmacc/LO_data/wrf/$dstr/ >> /gscratch/macc/parker/LO/driver/wrf_to_kopah.log
