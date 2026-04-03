@@ -1,8 +1,9 @@
 """
 This is the main program for making the daymovies and pushing them to homer.
 
-Testing on apogee:
-run post_main.py -gtx cas7_t0_x4b -ro 0 -d 2024.12.05 -job daymovie0 -test True
+Testing on klone:
+conda activate loenv
+python3 post_main.py -gtx cas7_t2_x11b -ro 0 -d 2026.04.03 -job daymovie0 -test True > test.log &
 
 """
 
@@ -126,6 +127,20 @@ for moviename in moviename_list:
     except Exception as e:
         print(e)
         result = 'fail'
+
+    if moviename == 'Phab_full_salt_top':
+        # Save a single movie frame for Ryan for the HAB Bulletin
+
+        HAB_input_filename = Ldir['LOo'] / 'daymovie' / Ldir['gtagex'] / moviename / 'plot_0072.nc'
+
+        # copy file to kopah
+        try:
+            url_str = Lfun.file_to_kopah(HAB_input_filename,'liveocean-web')
+            print(url_str)
+            result = 'success'
+        except Exception as e:
+            print(e)
+            result = 'fail'
         
     sleep(2)
         
