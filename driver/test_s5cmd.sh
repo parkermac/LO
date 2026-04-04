@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## run as
+## sbatch -p cpu-g2 -A macc ./test_s5cmd.sh
+
 ## Nodes
 #SBATCH --nodes=1
 
