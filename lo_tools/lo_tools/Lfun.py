@@ -228,6 +228,17 @@ def get_fn_list(list_type, Ldir, ds0, ds1, his_num=2):
             f_string = 'f' + dl
             fn = dir0 / f_string / 'ocean_avg_0001.nc'
             fn_list.append(fn)
+    elif list_type == 'hisX':
+        # list of history files over a date range for history files associated with his_num entry. 
+        # his_num default = 2, therefore will grab ocean_his_0002 over a date range of saved data
+        his_string = ('0000' + str(his_num))[-4:]
+        fn_list = []
+        date_list = date_list_utility(dt0, dt1)
+        for dl in date_list:
+            f_string = 'f' + dl
+            fn = dir0 / f_string / ('ocean_his_' + his_string + '.nc') 
+            #fn = dir0 / f_string / 'ocean_his_0002.nc'
+            fn_list.append(fn)
     elif list_type == 'weekly':
         # like "daily" but at 7-day intervals
         fn_list = []
