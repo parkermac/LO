@@ -310,7 +310,7 @@ while dt <= dt1:
                 bucket_name = 'liveocean-' + Ldir['local_user']
                 cmd_list = ['s5cmd','sync',
                     's3://'+bucket_name+'/LO_output/forcing/'+Ldir['gridname']+'/'+f_string+'/'+force_choice+'/*',
-                    str(force_dir)+'/']
+                    str(force_dir)+'/'+force_choice+'/']
                 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
                 stdout, stderr = proc.communicate()
                 messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
