@@ -10,8 +10,8 @@
 ## Walltime 
 #SBATCH --time=01:00:00
 
-## Use all memory on the node [0 to use all, or 128G]
-#SBATCH --mem=64G
+## Set memory use. Each slice (32 cores) has 256G
+#SBATCH --mem=128G
 
 # Do not return until the job is finished
 #SBATCH --wait
