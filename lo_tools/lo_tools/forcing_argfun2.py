@@ -84,13 +84,12 @@ def finale(Ldir, result_dict):
         ffout.write(s1 + s2 + s3)
 
     # copy the forcing to kopah
-    # I think this will only write the output of the first day of a forecast. Is that okay?
+    # This will only write the output of the first day of a forecast.
     if Ldir['to_kopah']:
         tt0 = time()
-        # cmd_list = ['s5cmd','sync','--acl','public-read',str(out_dir)+'/',
-        #     's3://liveocean-pmacc/LO_output/forcing/'+Ldir['gridname']+'/f'+Ldir['date_string']+'/'+Ldir['frc']+'/']
+        bucket_name = 'liveocean-' + Ldir['local_user']
         cmd_list = ['s3cmd','sync',str(out_dir)+'/',
-            's3://liveocean-pmacc/LO_output/forcing/'+Ldir['gridname']+'/f'+Ldir['date_string']+'/'+Ldir['frc']+'/',
+            's3://'+bucket_name+'/LO_output/forcing/'+Ldir['gridname']+'/f'+Ldir['date_string']+'/'+Ldir['frc']+'/',
             '--acl-public']
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
