@@ -35,7 +35,7 @@ For testing/debugging these flags can be very useful:
 -v True (verbose screen output)
 --get_forcing False (don't get the forcing files, e.g. if they are already on klone)
 --short_roms True (do a very short run, just a few timesteps)
---move_his False (don't move the results to apogee)
+--move_his False (don't move the results to apogee) OBSOLETE
 
 Test to_kopah capability on klone:
 ... -g cas7 -t t2 -x x11b -r backfill -0 2026.01.20 -s continuation -np 192 -cpu cpu-g2 -grp macc -v True -k True -ktest True
@@ -113,18 +113,17 @@ parser.add_argument('-done','--done_tag', type=str, default='00')
 
 # Optional flags to facilitate testing.
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
-#parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
+# parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
 parser.add_argument('--short_roms', default=False, type=Lfun.boolean_string)
 parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
 parser.add_argument('--run_roms', default=True, type=Lfun.boolean_string)
-parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
+# parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
 
 # Specialized flag, only for top-priority jobs like the daily forecasts 
 parser.add_argument('-vip','--exclusive', default=False, type=Lfun.boolean_string)
 
-# Specialized flags to send output to kopah. I expect these will only be used for the
-# main forecast.
-parser.add_argument('-k','--to_kopah', default=False, type=Lfun.boolean_string)
+# Specialized flags to send output to kopah.
+parser.add_argument('-k','--to_kopah', default=True, type=Lfun.boolean_string)
 parser.add_argument('-ktest','--test_to_kopah', default=False, type=Lfun.boolean_string)
 
 # >>> END Command Line Arguments <<<
@@ -152,16 +151,16 @@ if args.test_to_kopah:
     #args.get_forcing = False
     args.run_dot_in = False
     args.run_roms = False
-    args.move_his = False
+    # args.move_his = False
 
 # get Ldir
 Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
 
 # Assign some variables related to the remote machine.  These are user-specific
 # and are specified in get_lo_info.py.
-remote_user = Ldir['remote_user']
-remote_machine = Ldir['remote_machine']
-remote_dir0 = Ldir['remote_dir0'] # NOTE: this is a string, not a Path object
+# remote_user = Ldir['remote_user']
+# remote_machine = Ldir['remote_machine']
+# remote_dir0 = Ldir['remote_dir0'] # NOTE: this is a string, not a Path object
 local_user = Ldir['local_user']
 
 Ncenter = 30
@@ -203,15 +202,7 @@ if args.run_type == 'forecast':
     # if the forcing has been created on apogee, and if not, then exit.
     for nestgrid in ['wgh','oly']:
         if nestgrid in args.gridname:
-            # # Get the post11.log file from apogee, if it exists.
-            # postfile_remote = remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO/driver/post11.log'
-            # postfile_local = Ldir['LO'] / 'driver' / 'post11.log'
-            # postfile_local.unlink(missing_ok=True) # remove local version if it exists
-            # cmd_list = ['scp', postfile_remote, str(postfile_local)]
-            # proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-            # stdout, stderr = proc.communicate()
-            # messages(stdout, stderr, 'Getting post11.log', args.verbose)
-            # Inspect the contents of post11.log to decide whether or not to run the nested forecast.
+            # Inspect the contents of post_K1.log to decide whether or not to run the nested forecast.
             do_nested_forecast = False
             postfile_local = Ldir['LO'] / 'driver' / 'post_K1.log'
             if postfile_local.is_file():
@@ -305,43 +296,27 @@ while dt <= dt1:
             which_force, force_choice = line.strip().split(',')
             force_dict[which_force] = force_choice
     
-    # # Get the forcing
-    # if args.get_forcing:
-    #     tt0 = time()
-    #     # Name the place where the forcing files will be copied from
-    #     remote_dir = remote_user + '@' + remote_machine + ':' + remote_dir0
-    #     Lfun.make_dir(force_dir, clean=True)
-    #     # Copy the forcing files, one folder at a time.
-    #     for force in force_dict.keys():
-    #         if force == 'open':
-    #             pass
-    #         else:
-    #             # We will try several times since this was throwing errors occasionally 3/2026 PM
-    #             ntries = 1
-    #             ntries_max = 3
-    #             got_forcing = False
-    #             while ntries <= ntries_max:
-    #                 if got_forcing == True:
-    #                     break # should break from while loop and go to next forcing type
-    #                 else:
-    #                     force_choice = force_dict[force]
-    #                     cmd_list = ['scp','-r',
-    #                         remote_dir + '/LO_output/forcing/' + Ldir['gridname'] + '/' + f_string + '/' + force_choice,
-    #                         str(force_dir)]
-    #                     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-    #                     stdout, stderr = proc.communicate()
-    #                     messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
-    #                     if (len(stderr) > 0):
-    #                         got_forcing = False
-    #                     else:
-    #                         got_forcing = True
-    #                     if (len(stderr) > 0) and (ntries == ntries_max):
-    #                         print('Error getting forcing %s' % (force))
-    #                         sys.exit()
-    #                     ntries += 1
-    #     print(' - time to get forcing = %d sec' % (time()-tt0))
-    # else:
-    #     print(' ** skipped getting forcing')
+    # Get the forcing from kopah, backfill only. For the forecast we assume it was
+    # just created on klone (could change this later so we always get it from kopah)
+    if args.run_type == 'backfill':
+        tt0 = time()
+        Lfun.make_dir(force_dir, clean=True)
+        # Copy the forcing files, one folder at a time.
+        for force in force_dict.keys():
+            if force == 'open':
+                pass
+            else:
+                force_choice = force_dict[force]
+                bucket_name = 'liveocean-' + Ldir['local_user']
+                cmd_list = ['s5cmd','sync',
+                    's3://'+bucket_name+'/LO_output/forcing/'+Ldir['gridname']+'/'+f_string+'/'+force_choice+'/*',
+                    str(force_dir)+'/']
+                proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+                stdout, stderr = proc.communicate()
+                messages(stdout, stderr, 'Copy forcing ' + force_choice, args.verbose)
+        print(' - time to get forcing = %d sec' % (time()-tt0))
+    else:
+        print(' ** skipped getting forcing')
         
     # Run ROMS. Loop over blow ups.
     blow_ups = 0
@@ -438,13 +413,6 @@ while dt <= dt1:
                     str(roms_out_dir / 'klone_batch.sh')]
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
-            # if proc.returncode != 0:
-            #     # Halt the program if there is a non-zero returncode from sbatch.
-            #     print('EXITING due to sbatch error')
-            #     print('sbatch returncode = %d' % (proc.returncode))
-            #     sys.exit()
-            # 2025.09.11 This turned out to be a bad idea because it would return 128 when
-            # ROMS blew up!
             messages(stdout, stderr, 'Run ROMS', args.verbose)
             print(' - time to run ROMS = %d sec' % (time()-tt0))
                     
@@ -512,50 +480,48 @@ while dt <= dt1:
             break # escape from blow_ups loop
 
     if roms_worked:
-        if args.move_his:
-            tt0 = time()
-            # Copy history files to the remote machine and clean up
-            # (i) make sure the output directory exists
-            cmd_list = ['ssh', remote_user + '@' + remote_machine,
-                'mkdir -p ' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
-            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-            stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Make output directory on ' + remote_machine, args.verbose)
-            # (ii) move the contents of roms_out_dir
-            cmd_list = ['scp','-r',str(roms_out_dir),
-            remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
-            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-            stdout, stderr = proc.communicate()
-            messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
-            # (iii) delete roms_out_dir and forcing files from several days in the past
-            dt_prev = dt - timedelta(days=6)
-            f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
-            roms_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / f_string_prev
-            roms_bu_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / (f_string_prev + '_blowup')
-            force_dir_prev = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / f_string_prev
-            shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
-            shutil.rmtree(str(roms_bu_out_dir_prev), ignore_errors=True)
-            shutil.rmtree(str(force_dir_prev), ignore_errors=True)
-            print(' - copy & clean up = %d sec' % (time()-tt0))
-            sys.stdout.flush()
-        else:
-            print(' ** skipped moving history files')
+        # if args.move_his:
+        #     tt0 = time()
+        #     # Copy history files to the remote machine and clean up
+        #     # (i) make sure the output directory exists
+        #     cmd_list = ['ssh', remote_user + '@' + remote_machine,
+        #         'mkdir -p ' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
+        #     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        #     stdout, stderr = proc.communicate()
+        #     messages(stdout, stderr, 'Make output directory on ' + remote_machine, args.verbose)
+        #     # (ii) move the contents of roms_out_dir
+        #     cmd_list = ['scp','-r',str(roms_out_dir),
+        #     remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
+        #     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+        #     stdout, stderr = proc.communicate()
+        #     messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
+        #     # (iii) delete roms_out_dir and forcing files from several days in the past
+        #     dt_prev = dt - timedelta(days=6)
+        #     f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
+        #     roms_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / f_string_prev
+        #     roms_bu_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / (f_string_prev + '_blowup')
+        #     force_dir_prev = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / f_string_prev
+        #     shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
+        #     shutil.rmtree(str(roms_bu_out_dir_prev), ignore_errors=True)
+        #     shutil.rmtree(str(force_dir_prev), ignore_errors=True)
+        #     print(' - copy & clean up = %d sec' % (time()-tt0))
+        #     sys.stdout.flush()
+        # else:
+        #     print(' ** skipped moving history files')
             
         # Write a "done" file so that we know not to run the forecast again.
         if (dt == dt1) and (args.run_type == 'forecast'):
             with open(done_fn, 'w') as ffout:
                 ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
 
-        # New code to send output to kopah. 1/20/2026 PM
-        # Anyone can access files using a URL like:
+        # New code to send output to kopah.
+        # Anyone in the group can access files using a URL like:
         # https://s3.kopah.uw.edu/liveocean-forecast/f[date string]/ocean_his_00[01-25].nc and etc.
-        # NOTE: I created the bucket initially by hand using this command:
-        # s3cmd mb s3://liveocean-forecast
         if args.to_kopah:
             tt0 = time()
-            # cmd_list = ['s3cmd','sync',str(roms_out_dir),'s3://liveocean-forecast/','--acl-public']
-            cmd_list = ['s5cmd','sync','--acl','public-read',str(roms_out_dir),'s3://liveocean-forecast/']
-            # RESULT 2026.02.11 s5cmd was MUCH faster, 17 sec vs. 192 sec!!!
+            bucket_name = 'liveocean-' + Ldir['local_user']
+            cmd_list = ['s5cmd','sync',str(roms_out_dir)+'/*',
+                's3://'+bucket_name+'/LO_roms/'+Ldir['gtagex']+'/'+f_string+'/']
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'To kopah messages:', args.verbose)
