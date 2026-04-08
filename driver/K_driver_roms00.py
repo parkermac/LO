@@ -334,9 +334,9 @@ while dt <= dt1:
 
             # name slurm output file
             if args.run_type == 'forecast':
-                slurm_out_dir = Ldir['LO'] / 'slurm_forecast'
+                slurm_out_dir = Ldir['LO'] / 'driver' / 'slurm_forecast'
             elif args.run_type == 'backfill':
-                slurm_out_dir = Ldir['LO'] / 'slurm_backfill'
+                slurm_out_dir = Ldir['LO'] / 'driver' / 'slurm_backfill'
             Lfun.make_dir(slurm_out_dir)
             slurm_out_file = str(slurm_out_dir / (Ldir['gtagex']+'_'+f_string+'.txt'))
                 
@@ -463,7 +463,7 @@ while dt <= dt1:
             tt0 = time()
             bucket_name = 'liveocean-' + Ldir['local_user']
             # make the bucket if needed
-            cmd_list = ['s5cmd','mb',bucket_name]
+            cmd_list = ['s5cmd','mb','s3://'+bucket_name]
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
             stdout, stderr = proc.communicate()
             messages(stdout, stderr, 'Create Kopah bucket:', args.verbose)
