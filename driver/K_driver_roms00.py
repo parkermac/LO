@@ -333,9 +333,9 @@ while dt <= dt1:
                 sbatch_mem = '750G'
 
             # name slurm output file
-            if Ldir['run_type'] == 'forecast':
+            if args.run_type == 'forecast':
                 slurm_out_dir = Ldir['LO'] / 'slurm_forecast'
-            elif Ldir['run_type'] == 'backfill':
+            elif args.run_type == 'backfill':
                 slurm_out_dir = Ldir['LO'] / 'slurm_backfill'
             Lfun.make_dir(slurm_out_dir)
             slurm_out_file = str(slurm_out_dir / (Ldir['gtagex']+'_'+f_string+'.txt'))
