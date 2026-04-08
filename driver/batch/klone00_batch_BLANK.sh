@@ -17,8 +17,11 @@
 ## Use all memory on the node [0 to use all, or 128G]
 #SBATCH --mem=$sbatch_mem$
 
-# Do not return until the job is finished
+## Do not return until the job is finished
 #SBATCH --wait
+
+## Where to send slurm output file
+#SBATCH --output=$slurm_out_file$
 
 ## Request the entire node by using #SBATCH --exclusive
 $sbatch_exclusive_line$

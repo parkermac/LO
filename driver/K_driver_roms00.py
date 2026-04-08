@@ -1,45 +1,14 @@
 """
 This runs ROMS for one or more days, allowing for either a forecast or backfill.
 
-NOTES:
+It is designed to work solely on klone + kopah, so not using apogee at all.
 
-****
+Forcing files are pulled from kopah (backfill) or klone (forecast, because
+they were just created there). History files are synced to kopah using s5cmd.
 
-2026.03.15 This version is based on driver_roms00.py but is designed to work
-after the "klone+kopah transition." In this case that means that it does not get the
-forcing from apogee, but instead assumes it was created locally by
-driver_forecast_forcing.sh on klone. Eventually it will also not push the history 
-files to apogee.
+You will NEED to set up your access to kopah before using this.
+See: LO/notes/kopah_notes.md.
 
-****
-
-This version is intended to be an improvement on our previous drivers
-(driver_roms[3,4,5,5a].py) with clearer handling of input parameters,
-klone resource use, and error trapping.
-
-It uses subprocess to watch for the end of a run, instead of pinging squeue.
-
-It relies on LO/driver/batch/klone00_batch_BLANK.sh.
-
-For run_type = forecast it assumes we are using the new (2025.08.26) scheme
-in which foring always goes in individual day folders.
-
-As of 2025.11.19, for the nested forecasts, we now inspect post11.log on apogee
-to see of their forcing has been created. This is to prevent them from running
-days 1 and 2 (for which the forcing was created the days before) but then
-failing to run day 3. This keeps our use of klone resources tidier.
-
-It sends the done_tags to their own folder LO/driver/done_tags
-
-For testing/debugging these flags can be very useful:
--v True (verbose screen output)
---get_forcing False (don't get the forcing files, e.g. if they are already on klone)
---short_roms True (do a very short run, just a few timesteps)
---move_his False (don't move the results to apogee) OBSOLETE
-
-Test to_kopah capability on klone:
-... -g cas7 -t t2 -x x11b -r backfill -0 2026.01.20 -s continuation -np 192 -cpu cpu-g2 -grp macc -v True -k True -ktest True
-PERFORMANCE: 17 sec for a day of hourly cas7 files using s5cmd (wow!)
 """
 
 import sys, os
@@ -68,12 +37,12 @@ import Lfun
 
 parser = argparse.ArgumentParser()
 # Typically when you use these at the command line you can use the short version,
-# like "-g" but the long version works as well "--gridname". In the code the longname
+# like "-g" but the long version works as well "--gridname". In the code the long name
 # is what is used.
 
 # Basic info to specify which model configuration to run
 parser.add_argument('-g', '--gridname', type=str)   # e.g. cas7
-parser.add_argument('-t', '--tag', type=str)        # e.g. t1
+parser.add_argument('-t', '--tag', type=str)        # e.g. t2
 parser.add_argument('-x', '--ex_name', type=str)    # e.g. x11b
 
 # Set the run_type
@@ -95,16 +64,16 @@ parser.add_argument('-1', '--ds1', type=str) #  this is set to ds0 if omitted
 # The next two/three flags are needed for compute resource allocation.
 #
 # Set how many cpu's (cores) to use.
-parser.add_argument('-np', '--np_num', type=int) # e.g. 160, number of cores
+parser.add_argument('-np', '--np_num', type=int) # e.g. 192, number of cores
 #
 # Choose which type of computer resource
-parser.add_argument('-cpu','--cpu_choice', type=str) # used in the sbatch script
+parser.add_argument('-cpu','--cpu_choice', default='cpu-g2', type=str) # used in the sbatch script
 # Choices: cpu-g2, compute, or ckpt-g2
 #
 # Choose which group (not needed when using --cpu_choice ckpt_g2)
 parser.add_argument('-grp','--group_choice', type=str) # used in the sbatch script
 # Choices: macc, coenv
-# NOTE: Check with Parker before using macc or coenv.
+# NOTE: Check with Kate or Parker before using macc or coenv.
 
 # Optional flag used only for forecasts, so that they leave a clue if they are done for a given day.
 # This allows a backup job in the crontab to exist but only run if needed. By using different
@@ -113,16 +82,14 @@ parser.add_argument('-done','--done_tag', type=str, default='00')
 
 # Optional flags to facilitate testing.
 parser.add_argument('-v', '--verbose', default=False, type=Lfun.boolean_string)
-# parser.add_argument('--get_forcing', default=True, type=Lfun.boolean_string)
 parser.add_argument('--short_roms', default=False, type=Lfun.boolean_string)
 parser.add_argument('--run_dot_in', default=True, type=Lfun.boolean_string)
 parser.add_argument('--run_roms', default=True, type=Lfun.boolean_string)
-# parser.add_argument('--move_his', default=True, type=Lfun.boolean_string)
 
-# Specialized flag, only for top-priority jobs like the daily forecasts 
+# You should use this for larger runs that use a full node (192 cores). 
 parser.add_argument('-vip','--exclusive', default=False, type=Lfun.boolean_string)
 
-# Specialized flags to send output to kopah.
+# Flags to send output to kopah.
 parser.add_argument('-k','--to_kopah', default=True, type=Lfun.boolean_string)
 parser.add_argument('-ktest','--test_to_kopah', default=False, type=Lfun.boolean_string)
 
@@ -148,20 +115,15 @@ if (argsd['run_type'] == 'backfill') and (argsd['ds0'] == None):
 
 # Override some flags when testing to_kopah
 if args.test_to_kopah:
-    #args.get_forcing = False
     args.run_dot_in = False
     args.run_roms = False
-    # args.move_his = False
 
 # get Ldir
 Ldir = Lfun.Lstart(gridname=args.gridname, tag=args.tag, ex_name=args.ex_name)
 
 # Assign some variables related to the remote machine.  These are user-specific
 # and are specified in get_lo_info.py.
-# remote_user = Ldir['remote_user']
-# remote_machine = Ldir['remote_machine']
-# remote_dir0 = Ldir['remote_dir0'] # NOTE: this is a string, not a Path object
-local_user = Ldir['local_user']
+local_user = Ldir['local_user'] # used to create kopah bucket name
 
 Ncenter = 30
 def messages(stdout, stderr, mtitle, verbose):
@@ -199,7 +161,7 @@ if args.run_type == 'forecast':
         sys.exit()
     # ********************************************************
     # If this is a nested forecast (identified by gridname) then check to see
-    # if the forcing has been created on apogee, and if not, then exit.
+    # if the forcing has been created, and if not, then exit.
     for nestgrid in ['wgh','oly']:
         if nestgrid in args.gridname:
             # Inspect the contents of post_K1.log to decide whether or not to run the nested forecast.
@@ -222,7 +184,7 @@ if args.run_type == 'forecast':
             # Implement the decision.
             if do_nested_forecast == True:
                 print('Doing nested forecast for ' + args.gridname)
-                break # break from nestgrid list iteration, right?
+                break # Break from nestgrid list iteration.
                 # Doing this means that the rest of the code is allowed to run.
             elif do_nested_forecast == False:
                 print('Forecast forcing not finished - exiting')
@@ -297,7 +259,7 @@ while dt <= dt1:
             force_dict[which_force] = force_choice
     
     # Get the forcing from kopah, backfill only. For the forecast we assume it was
-    # just created on klone (could change this later so we always get it from kopah)
+    # just created on klone (could change this later so we always get it from kopah).
     if args.run_type == 'backfill':
         tt0 = time()
         Lfun.make_dir(force_dir, clean=True)
@@ -365,11 +327,18 @@ while dt <= dt1:
             if args.exclusive:
                 # only run this job on the node, and use all memory
                 sbatch_exclusive_line = '#SBATCH --exclusive'
-                #sbatch_mem = '0'
                 sbatch_mem = '750G'
             else:
                 sbatch_exclusive_line = ''
                 sbatch_mem = '750G'
+
+            # name slurm output file
+            if Ldir['run_type'] == 'forecast':
+                slurm_out_dir = Ldir['LO'] / 'slurm_forecast'
+            elif Ldir['run_type'] == 'backfill':
+                slurm_out_dir = Ldir['LO'] / 'slurm_backfill'
+            Lfun.make_dir(slurm_out_dir)
+            slurm_out_file = str(slurm_out_dir / (Ldir['gtagex']+'_'+f_string+'.txt'))
                 
             in_dict = {
                 'jobname':jobname,
@@ -381,6 +350,7 @@ while dt <= dt1:
                 'roms_ex_dir':roms_ex_dir,
                 'roms_ex_name':roms_ex_name,
                 'roms_out_dir':roms_out_dir,
+                'slurm_out_file':slurm_out_file,
             }
             if args.verbose:
                 print('Info for sbatch script:')
@@ -480,46 +450,24 @@ while dt <= dt1:
             break # escape from blow_ups loop
 
     if roms_worked:
-        # if args.move_his:
-        #     tt0 = time()
-        #     # Copy history files to the remote machine and clean up
-        #     # (i) make sure the output directory exists
-        #     cmd_list = ['ssh', remote_user + '@' + remote_machine,
-        #         'mkdir -p ' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
-        #     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-        #     stdout, stderr = proc.communicate()
-        #     messages(stdout, stderr, 'Make output directory on ' + remote_machine, args.verbose)
-        #     # (ii) move the contents of roms_out_dir
-        #     cmd_list = ['scp','-r',str(roms_out_dir),
-        #     remote_user + '@' + remote_machine + ':' + remote_dir0 + '/LO_roms/' + Ldir['gtagex']]
-        #     proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-        #     stdout, stderr = proc.communicate()
-        #     messages(stdout, stderr, 'Copy ROMS output to ' + remote_machine, args.verbose)
-        #     # (iii) delete roms_out_dir and forcing files from several days in the past
-        #     dt_prev = dt - timedelta(days=6)
-        #     f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
-        #     roms_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / f_string_prev
-        #     roms_bu_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / (f_string_prev + '_blowup')
-        #     force_dir_prev = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / f_string_prev
-        #     shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
-        #     shutil.rmtree(str(roms_bu_out_dir_prev), ignore_errors=True)
-        #     shutil.rmtree(str(force_dir_prev), ignore_errors=True)
-        #     print(' - copy & clean up = %d sec' % (time()-tt0))
-        #     sys.stdout.flush()
-        # else:
-        #     print(' ** skipped moving history files')
             
         # Write a "done" file so that we know not to run the forecast again.
         if (dt == dt1) and (args.run_type == 'forecast'):
             with open(done_fn, 'w') as ffout:
                 ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
 
-        # New code to send output to kopah.
+        # Sync output to kopah.
         # Anyone in the group can access files using a URL like:
         # https://s3.kopah.uw.edu/liveocean-forecast/f[date string]/ocean_his_00[01-25].nc and etc.
         if args.to_kopah:
             tt0 = time()
             bucket_name = 'liveocean-' + Ldir['local_user']
+            # make the bucket if needed
+            cmd_list = ['s5cmd','mb',bucket_name]
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            messages(stdout, stderr, 'Create Kopah bucket:', args.verbose)
+            # sync to the bucket, using the standard LO directory structure
             cmd_list = ['s5cmd','sync',str(roms_out_dir)+'/*',
                 's3://'+bucket_name+'/LO_roms/'+Ldir['gtagex']+'/'+f_string+'/']
             proc = Po(cmd_list, stdout=Pi, stderr=Pi)
