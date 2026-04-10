@@ -49,4 +49,5 @@ dependencies:
   # and some non-python tools
   - ffmpeg
   - nco
+  - s5cmd
   
