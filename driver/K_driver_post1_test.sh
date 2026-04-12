@@ -4,7 +4,7 @@
 #SBATCH --nodes=1
 
 ## Tasks per node
-#CBATCH --ntasks=3
+## #CBATCH --ntasks=3
 #SBATCH --ntasks-per-node=3
 
 ## Walltime 
@@ -15,6 +15,8 @@
 
 # Do not return until the job is finished
 #SBATCH --wait
+
+#SBATCH --exclusive
 
 #SBATCH --cpus-per-task=10
 
