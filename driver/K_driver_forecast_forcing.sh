@@ -4,7 +4,6 @@
 #SBATCH --nodes=1
 
 ## Tasks per node
-#CBATCH --ntasks=3
 #SBATCH --ntasks-per-node=3
 
 ## Walltime 

@@ -4,13 +4,12 @@
 #SBATCH --nodes=1
 
 ## Tasks per node
-#CBATCH --ntasks=3
 #SBATCH --ntasks-per-node=3
 
 ## Walltime 
-#SBATCH --time=02:00:00
+#SBATCH --time=03:00:00
 
-## Use all memory on the node [0 to use all, or 128G]
+## Set memory use. Each slice (32 cores) has 256G
 #SBATCH --mem=128G
 
 # Do not return until the job is finished
