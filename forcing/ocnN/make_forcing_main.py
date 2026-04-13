@@ -45,7 +45,7 @@ in_dir = Ldir['roms_out'] / Ldir['gtagex'] / ('f' + Ldir['date_string'])
 this_dt = datetime.strptime(Ldir['date_string'], Lfun.ds_fmt)
 
 # list of history files from the original grid to work from (all Path objects)
-h_list = Lfun.get_fn_list('hourly', Ldir, Ldir['date_string'], Ldir['date_string'])
+h_list = Lfun.get_fn_list('hourly0', Ldir, Ldir['date_string'], Ldir['date_string'])
 
 verbose = False
 if Ldir['testing']:
