@@ -63,6 +63,11 @@ do_d4 = True
 wrf_dir = Ldir['data'] / 'wrf' # the default
 if 'apogee' in Ldir['lo_env']:
     wrf_dir = Path('/dat1/parker/LO_data/wrf')
+
+# If needed for working on klone copy in the wrf data temporarily
+get_from_kopah = False
+if ('klone' in in Ldir['lo_env']) and (Ldir['run_type'] == 'backfill'):
+    get_from_kopah = True
     
 # Create list of hours
 if Ldir['run_type'] == 'backfill':
@@ -76,6 +81,19 @@ elif Ldir['run_type'] == 'forecast':
 # path to each file (Path objects).
 d_str = Ldir['date_string'].replace('.','')
 in_dir = wrf_dir / (d_str + '00')
+
+if get_from_kopah:
+    Lfun.make_dir(in_dir)
+    bucket_name = 'liveocean-pmacc' # everyone in the group can use this
+    cmd_list = ['s5cmd','sync',
+        's3://'+bucket_name+'/LO_data/wrf/'+d_str+'/*',
+        str(in_dir)+'/']
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+    stdout, stderr = proc.communicate()
+    if len(stderr) > 0:
+        print(stderr.decode())
+        sys.exit()
+
 d2_list = []
 d3_list = []
 d4_list = []
@@ -437,6 +455,11 @@ if planB == True:
         B_ds.to_netcdf(B_out_fn)
         B_ds.close()
         
+# cleaning up
+if get_from_kopah:
+    print('need to clean up in_dir')
+    print(str(in_dir))
+    
 # -------------------------------------------------------
 
 # debugging
