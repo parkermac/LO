@@ -458,13 +458,6 @@ if planB == True:
         B_ds.to_netcdf(B_out_fn)
         B_ds.close()
         
-# cleaning up
-if get_from_kopah:
-    print('Cleaning up by deleting:')
-    print(str(in_dir_to_clean))
-    Lfun.make_dir(in_dir_to_clean, clean=True)
-    in_dir_to_clean.rmdir()
-
 # -------------------------------------------------------
 
 # debugging
@@ -489,3 +482,11 @@ for fn in out_fn_list:
 
 result_dict['end_dt'] = datetime.now()
 ffun.finale(Ldir, result_dict)
+
+# cleaning up
+if get_from_kopah:
+    print('Cleaning up by deleting:')
+    print(str(in_dir_to_clean))
+    Lfun.make_dir(in_dir_to_clean, clean=True)
+    in_dir_to_clean.rmdir()
+
