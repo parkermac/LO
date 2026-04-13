@@ -9,9 +9,9 @@ Initial author date: 2023/07/13
 
 Finalized for public use: 2025/09/04
 
-Last updated: 2025/11/25 to correct conversion unit errors for N, P, and Si
-
 Written by: Dakota Mascarenas
+
+Most recent update: 2026/04/13
 
 """
 
@@ -41,7 +41,7 @@ fn = glob.glob(str(in_dir0) + '/' + otype + '/*.csv')
 # Initial clean.
 big_df_raw = pd.DataFrame()
 for f in fn:
-    raw = pd.read_csv(f, encoding='cp1252',low_memory=False)
+    raw = pd.read_csv(f, encoding='cp1252')
     if 'ï»¿Locator' in raw.columns:
         raw = raw.rename(columns={'ï»¿Locator':'Locator'})
     if big_df_raw.empty:
@@ -74,6 +74,8 @@ v_list = np.array(list(v_dict_use.keys()))
 # Clean column names.
 big_df_use6 = big_df_use0.copy()
 big_df_use6['time'] = pd.DatetimeIndex(big_df_use6['Sampledate'])
+# Convert from PST (UTC-8, no daylight savings adjustment) to UTC.
+big_df_use6['time'] = big_df_use6['time'].dt.tz_localize('Etc/GMT+8').dt.tz_convert('UTC')
 
 # Create unique cast IDs (cid).
 big_df_use6['cid'] = np.nan
@@ -129,13 +131,13 @@ for year in year_list:
     if 'DO (mg -L)' in df.columns:
         df['DO (uM)'] = (1000/32) * df['DO (mg -L)']
     if 'NH4 (mg -L)' in df.columns:
-        df['NH4 (uM)'] = (1000/14) * df['NH4 (mg -L)']
+        df['NH4 (uM)'] = (1000/18) * df['NH4 (mg -L)']
     if 'NO3 (mg -L)' in df.columns:
-        df['NO3 (uM)'] = (1000/14) * df['NO3 (mg -L)']
+        df['NO3 (uM)'] = (1000/62) * df['NO3 (mg -L)']
     if 'SiO4 (mg -L)' in df.columns:
-        df['SiO4 (uM)'] = (1000/28.0855) * df['SiO4 (mg -L)']
+        df['SiO4 (uM)'] = (1000/92) * df['SiO4 (mg -L)']
     if 'PO4 (mg -L)' in df.columns:
-        df['PO4 (uM)'] = (1000/30.973762) * df['PO4 (mg -L)']
+        df['PO4 (uM)'] = (1000/95) * df['PO4 (mg -L)']
     if 'Chl (ug -L)' in df.columns:
         df['Chl (mg m-3)'] = df['Chl (ug -L)']
     for vn in ['TA','DIC']:

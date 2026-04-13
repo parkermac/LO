@@ -2,9 +2,7 @@
 
 Author: Dakota Mascarenas
 
-Finalized: 2025/09/05
-
-Last updated: 2025/11/24
+Last updated: 2025/09/05
 
 These files are from King County's marine offshore monitoring water column CTD samples in Whidbey Basin.
 
@@ -21,6 +19,8 @@ Two email correspondences are attached for further metadata:
 NOTE: Light transmission is currently not considered in this data processing.
 
 NOTE: Whidbey Basin bottle samples from this time period are included in the kc bottle data.
+
+NOTE: Timestamps in the raw data are assumed to be in PST. The processing script converts these to timezone-aware UTC (+8 hours) for consistency with other LO observation sources.
 
 CTD data availability:
 * CT: 2022-2024
