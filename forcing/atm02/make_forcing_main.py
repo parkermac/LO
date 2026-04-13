@@ -66,8 +66,9 @@ if 'apogee' in Ldir['lo_env']:
 
 # If needed for working on klone copy in the wrf data temporarily
 get_from_kopah = False
-if ('klone' in in Ldir['lo_env']) and (Ldir['run_type'] == 'backfill'):
+if ('klone' in Ldir['lo_env']) and (Ldir['run_type'] == 'backfill'):
     get_from_kopah = True
+    print('syncing from kopah')
     
 # Create list of hours
 if Ldir['run_type'] == 'backfill':
@@ -459,7 +460,7 @@ if planB == True:
 if get_from_kopah:
     print('need to clean up in_dir')
     print(str(in_dir))
-    
+
 # -------------------------------------------------------
 
 # debugging
