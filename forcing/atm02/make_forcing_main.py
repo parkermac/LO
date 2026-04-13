@@ -86,6 +86,7 @@ in_dir = wrf_dir / d_str00
 
 if get_from_kopah:
     Lfun.make_dir(in_dir)
+    in_dir_to_clean = in_dir
     bucket_name = 'liveocean-pmacc' # everyone in the group can use this
     cmd_list = ['s5cmd','sync',
         's3://'+bucket_name+'/LO_data/wrf/'+d_str00+'/*',
@@ -459,8 +460,10 @@ if planB == True:
         
 # cleaning up
 if get_from_kopah:
-    print('need to clean up in_dir')
-    print(str(in_dir))
+    print('Cleaning up by deleting:')
+    print(str(in_dir_to_clean))
+    Lfun.make_dir(in_dir_to_clean, clean=True)
+    in_dir_to_clean.rmdir()
 
 # -------------------------------------------------------
 
