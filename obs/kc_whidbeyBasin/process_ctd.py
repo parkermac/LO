@@ -9,9 +9,9 @@ Initial author date: 2024/04/04
 
 Finalized for public use: 2025/09/05
 
-Last updated: 2025/11/24 to correct conversion unit error for nitrogen species
-
 Written by: Dakota Mascarenas
+
+Most recent update: 2026/04/13
 
 """
 
@@ -33,7 +33,7 @@ out_dir = Ldir['LOo'] / 'obs' / source / otype
 Lfun.make_dir(out_dir)
 
 # Load big data set and stations.
-big_df_raw = pd.read_csv(in_dir0/ 'Whidbey_Basin_CTD_Casts_April2024.csv', low_memory=False)
+big_df_raw = pd.read_csv(in_dir0/ 'Whidbey_Basin_CTD_Casts_April2024.csv')
 sta_df = pd.read_csv(in_dir0 / 'WLRD_Sites_March2024.csv')
 
 # Merge station data.
@@ -58,6 +58,8 @@ v_list = np.array(list(v_dict_use.keys())) #redundant but fine
 # Clean column names.
 big_df_use6 = big_df_use0.copy()
 big_df_use6['time'] = pd.DatetimeIndex(big_df_use6['Sample Date'])
+# Convert from PST (UTC-8, no daylight savings adjustment) to UTC.
+big_df_use6['time'] = big_df_use6['time'].dt.tz_localize('Etc/GMT+8').dt.tz_convert('UTC')
 
 # Create unique cast IDs (cid).
 big_df_use6['cid'] = np.nan
@@ -113,7 +115,7 @@ for year in year_list:
     if 'DO (mg -L)' in df.columns:
         df['DO (uM)'] = (1000/32) * df['DO (mg -L)']
     if 'NO3 (mg -L)' in df.columns:
-        df['NO3 (uM)'] = (1000/14) * df['NO3 (mg -L)']
+        df['NO3 (uM)'] = (1000/62) * df['NO3 (mg -L)']
     if 'Chl (ug -L)' in df.columns:
         df['Chl (mg m-3)'] = df['Chl (ug -L)']
     # retain only selected variables             
