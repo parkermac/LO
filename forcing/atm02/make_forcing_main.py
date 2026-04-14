@@ -21,6 +21,8 @@ Eventually we should just do this by hand.
 
 NOTE: Only effect of -test True is to be verbose.
 
+NOTE: Use -k True to have forcing_argfun2.finale() coyy forcing to kopah.
+
 """
 
 from pathlib import Path
@@ -64,11 +66,10 @@ wrf_dir = Ldir['data'] / 'wrf' # the default
 if 'apogee' in Ldir['lo_env']:
     wrf_dir = Path('/dat1/parker/LO_data/wrf')
 
-# If needed for working on klone copy in the wrf data temporarily
-get_from_kopah = False
-if ('klone' in Ldir['lo_env']) and (Ldir['run_type'] == 'backfill'):
+# Copy in the wrf data temporarily (only for backfill)
+if Ldir['to_kopah'] and (Ldir['run_type'] == 'backfill'):
     get_from_kopah = True
-    print('syncing from kopah')
+    print('Syncing WRF files from kopah.')
     
 # Create list of hours
 if Ldir['run_type'] == 'backfill':
