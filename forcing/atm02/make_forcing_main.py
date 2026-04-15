@@ -67,6 +67,7 @@ if 'apogee' in Ldir['lo_env']:
     wrf_dir = Path('/dat1/parker/LO_data/wrf')
 
 # Copy in the wrf data temporarily (only for backfill)
+get_from_kopah = False
 if Ldir['to_kopah'] and (Ldir['run_type'] == 'backfill'):
     get_from_kopah = True
     print('Syncing WRF files from kopah.')
