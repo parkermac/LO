@@ -2,7 +2,7 @@
 
 # This is a command line tool for forcing generation on klone.
 # It is meant to be run as a batch job using a command like:
-# sbatch -p cpu-g2 -A macc ./K_driver_backfill_forcing.sh wgh2 2019.07.04 2019.07.05 tide01
+# sbatch -p cpu-g2 -A macc ./K_driver_backfill_forcing.sh wgh2 2019.07.04 2019.07.05 tide01 &
 # Thus there are 4 required arguments that would usually go with the flags
 # -g -0 -1 -f when using driver_forcing00.py.
 
