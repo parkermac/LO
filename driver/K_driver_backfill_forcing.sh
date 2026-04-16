@@ -2,7 +2,7 @@
 
 # This is a command line tool for forcing generation on klone.
 # It is meant to be run as a batch job using a command like:
-# sbatch -p cpu-g2 -A macc ./K_driver_backfill_forcing.sh wgh2 2019.07.04 2019.07.04 tide01
+# sbatch -p cpu-g2 -A macc ./K_driver_backfill_forcing.sh wgh2 2019.07.04 2019.07.04 tide01 $conda_source
 # Thus there are 4 required arguments that would usually go with the flags
 # -g -0 -1 -f when using driver_forcing00.py.
 
@@ -24,7 +24,7 @@
 #SBATCH --cpus-per-task=10
 
 # source /gscratch/macc/parker/miniconda3/etc/profile.d/conda.sh
-source $conda_source
+source $5
 
 conda activate loenv
 
@@ -42,14 +42,14 @@ export NUMEXPR_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # LOd=/gscratch/macc/parker/LO/driver
 
 # Assumes you are running it in driver
-# LOd=$PWD
+LOd=$PWD
 
 gridname=$1
 ds0=$2
 ds1=$3
 frc=$4
 
-python3 $LOd/driver_forcing00.py -g $gridname -r backfill -0 $ds0 -1 $ds1 -f $frc -k True > $LOd"/"$gridname"_"$frc"_"$ds0"_"$ds1".log"
+python3 $LOd/driver_forcing00.py -g $gridname -r backfill -0 $ds0 -1 $ds1 -f $frc -k True > $LOd"/backfill_forcing_"$gridname"_"$frc"_"$ds0"_"$ds1".log"
 
 # python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f atm02 -k True > $LOd/atm02_cas7.log
 
