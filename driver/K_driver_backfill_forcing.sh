@@ -27,7 +27,7 @@
 
 #SBATCH --cpus-per-task=10
 
-#SBATCH --job-name='frc_backfill'
+#SBATCH --job-name='frc_back'
 
 # We defined and exported conda_source and LOd in .bashrc
 source ${conda_source}
@@ -49,7 +49,7 @@ ds1=$3
 frc=$4
 gtx=$5
 
-python3 $LOd/driver_forcing00.py -g $gridname -r backfill -0 $ds0 -1 $ds1 -f $frc -k True -gtx $gtx > $LOd"/backfill_forcing_"$gridname"_"$frc"_"$ds0"_"$ds1".log"
+python3 $LOd/driver_forcing00.py -g $gridname -r backfill -0 $ds0 -1 $ds1 -f $frc -k True -gtx $gtx > $LOd"/frc_"$gridname"_"$frc"_"$ds0"_"$ds1".log"
 
 # python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f atm02 -k True > $LOd/atm02_cas7.log
 
