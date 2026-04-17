@@ -3,7 +3,7 @@ LOd=/gscratch/macc/parker/LO/driver
 
 # testing
 # * * * * * source ~/.bashrc; echo ${conda_source} > $LOd/cs_test.txt
-* * * * * source ~/.bashrc; sbatch -p cpu-g2 -A macc ${LOd}/K_driver_backfill_forcing.sh wgh2 2019.07.04 2019.07.04 tide01
+# * * * * * source ~/.bashrc; sbatch -p cpu-g2 -A macc ${LOd}/K_driver_backfill_forcing.sh wgh2 2019.07.04 2019.07.04 tide01
 
 # get WRF files
 30 01 * * * source ~/.bashrc; python3 $LOd/get_wrf.py < /dev/null > $LOd/wrf.log
