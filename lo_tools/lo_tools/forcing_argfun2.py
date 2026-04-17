@@ -15,7 +15,7 @@ def intro():
     # required arguments
     parser.add_argument('-g', '--gridname', type=str)   # e.g. cas6
     parser.add_argument('-f', '--frc', type=str)        # e.g. tide
-    parser.add_argument('-tP', '--trapsP', type=str, default='trapsP00') # LO/pre/trapsP## version
+    parser.add_argument('-tP', '--trapsP', type=str, default='trapsP01') # LO/pre/trapsP## version
     parser.add_argument('-r', '--run_type', type=str)   # backfill or forecast
     parser.add_argument('-s', '--start_type', type=str, default='continuation') # new, continuation, or perfect
     parser.add_argument('-d', '--date_string', type=str) # e.g. 2019.07.04
@@ -24,9 +24,9 @@ def intro():
     parser.add_argument('-test_planB', default=False, type=Lfun.boolean_string)
     
     # optional arguments used only for ocnN, to determine what to nest inside
-    parser.add_argument('-gtx', '--gtagex', default='cas7_t1_x11b', type=str) # e.g. cas7_t1_x11b
+    parser.add_argument('-gtx', '--gtagex', default='cas7_t2_x11b', type=str) # e.g. cas7_t2_x11b
     parser.add_argument('-ro', '--roms_out_num', type=int, default=0) # 1 = Ldir['roms_out1'], etc.
-    parser.add_argument('-do_bio', default=False, type=Lfun.boolean_string) # True to add bio vars to ocn forcing
+    parser.add_argument('-do_bio', default=True, type=Lfun.boolean_string) # True to add bio vars to ocn forcing
 
     # Specialized flags to send output to kopah.
     parser.add_argument('-k','--to_kopah', default=False, type=Lfun.boolean_string)
