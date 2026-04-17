@@ -54,9 +54,6 @@ ds0=$2
 ds1=$3
 frc=$4
 
-## Name the job
-#SBATCH --job-name=${gridname}_${frc}
-
 # python3 $LOd/driver_forcing00.py -g $gridname -r backfill -0 $ds0 -1 $ds1 -f $frc -k True > $LOd"/backfill_forcing_"$gridname"_"$frc"_"$ds0"_"$ds1".log"
 
 # python3 $LOd/driver_forcing00.py -g cas7 -r forecast -f atm02 -k True > $LOd/atm02_cas7.log
