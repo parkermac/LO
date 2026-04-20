@@ -456,6 +456,19 @@ while dt <= dt1:
             with open(done_fn, 'w') as ffout:
                 ffout.write(datetime.now().strftime('%Y.%m.%d %H:%M:%S'))
 
+        # Delete roms_out_dir and forcing files from a day in the past to
+        # avoid accumulating too much on the disk.
+        dt_prev = dt - timedelta(days=10) # This sets how far back to go.
+        f_string_prev = 'f' + dt_prev.strftime(Lfun.ds_fmt)
+        roms_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / f_string_prev
+        roms_bu_out_dir_prev = Ldir['roms_out'] / Ldir['gtagex'] / (f_string_prev + '_blowup')
+        force_dir_prev = Ldir['LOo'] / 'forcing' / Ldir['gridname'] / f_string_prev
+        # Note that forcing is always archived to kopah, so you can still get it
+        # by running with run_type = backfill.
+        shutil.rmtree(str(roms_out_dir_prev), ignore_errors=True)
+        shutil.rmtree(str(roms_bu_out_dir_prev), ignore_errors=True)
+        shutil.rmtree(str(force_dir_prev), ignore_errors=True)
+
         # Sync output to kopah.
         # Anyone in the group can access files using a URL like:
         # https://s3.kopah.uw.edu/liveocean-forecast/f[date string]/ocean_his_00[01-25].nc and etc.
