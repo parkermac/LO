@@ -44,12 +44,20 @@ These are are an 8-year sequence of quasi-continuous runs (first PM ran each yea
 
 ## LiveOcean Runs (results stored in day folders like f2020.01.26)
 
+**kopah: s3://liveocean-pmacc/LO_roms/**
+
+- cas7_t1_x11ab Long hindcast 2012.10.07-2025.12.31, daily
+- cas7_t2_x11b Current daily forecast 2024.01.01-present, hourly
+- oly2_t2_xn11b Current daily forecast, hourly
+- wgh2_t2_xn11b Current daily forecast, hourly
+
+**NOTE: Soon all the runs below will either be deleted or archived on kopah. apogee and perigee are being decomissioned in 2026.**
+
 **apogee: /dat1/parker/LO_roms/**
 
-- cas7_t0_x4b This is the **CURRENT FORECAST** Late 2012-present. [100 TB and growing] NOTE: as of November 2024 the years 2012-2019 are in /dat2/parker/LO_roms so that we don't run out of space on /dat1.
-- **OBSOLETE:** cas6_traps2_x2b This was the current forecast 2024.07.01-2024.08.25. It lands here before being archived into cas6_v1_live on perigee [1 TB]
+- cas7_t2_x11b This is the current forecast, however this is a duplicate archove that is no longer being added to. It has 2024.01.01-2026.04.09. [hourly, 15 TB] The same files exist in s3://liveocean-pmacc/LO_roms on kopah, and those extend through the present. I am only keeping these around for Dakota to make nested runs from.
+- cas7_t0_x4b This is a previous forecast. Late 2020.01.01-2025.06.23. [hourly, 46 TB] The years 2012-2019 are in /dat2/parker/LO_roms so that we don't run out of space on /dat1.
 - wgh2_t0_xn0b Nested model Willapa Bay and Grays Harbor, running as part of the daily forecast, 2023.08.07-now. [238 GB and growing]
-- cas2k_v0_x2b A low-resolution version of cas6 (2 km grid) designed for long coastal runs. [2 TB]
 - Various other nested or analytical runs: ae0, ai0, hc0, so0.
 
 **perigee: /data1/parker/LO_roms/**
@@ -63,10 +71,5 @@ These are are an 8-year sequence of quasi-continuous runs (first PM ran each yea
 - aestus1_A1_ae1 An idealized estuary used (I think) in the JPO Variance paper. Three months long. Has averages and diagnostics. [297 GB] 2013.01.01-2013.03.31
 - cas6_v3_lo8da A re-run of cas6_v3_lo8b for two months, but with diagnostics and averages saved, and no biology [21 TB] Downwelling: 2017.03.01-2017.04.01, Upwelling: 2018.05.15-2018.06.16
 - sj0_v0_lo8nest This is a model of the San Juan Islands, physics only, 100 m resolution, one-way nested inside of cas6_v3_lo8b. It was created for the FHL 2019 Summer School. [1.2 TB] 2019.07.22-2019.12.25
-
-**boiler: /data1/parker/LiveOcean_roms/output**
-- NOTE: This machine is deprecated: don't expect any of these files to be available
-- cas6_v3_lo8b This was the original cas6 forecast, 500 m grid in the Salish Sea, 45 rivers, full NPZDO+Carbon. [15 TB per year] 2021.01.01-late 2021. This was copied to cas6_v0_live on perigee, described above, and is no longer active.
-- cas6_v3_lo8dye Has dye in Hood Canal [2.4 TB] 2019.07.03-2019.10.04
 
 ---
