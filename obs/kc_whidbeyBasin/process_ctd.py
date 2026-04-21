@@ -26,7 +26,7 @@ Ldir = Lfun.Lstart()
 source = 'kc_whidbeyBasin'
 otype = 'ctd'
 in_dir0 = Ldir['data'] / 'obs' / source / otype
-year_list = range(2022,2025)
+year_list = range(2022,2027)
 
 # output location
 out_dir = Ldir['LOo'] / 'obs' / source / otype
