@@ -127,13 +127,13 @@ for year in year_list:
     if 'DO (mg -L)' in df.columns:
         df['DO (uM)'] = (1000/32) * df['DO (mg -L)']
     if 'NH4 (mg -L)' in df.columns:
-        df['NH4 (uM)'] = (1000/18) * df['NH4 (mg -L)']
+        df['NH4 (uM)'] = (1000/14) * df['NH4 (mg -L)']  # N atomic weight
     if 'NO3 (mg -L)' in df.columns:
-        df['NO3 (uM)'] = (1000/62) * df['NO3 (mg -L)']
+        df['NO3 (uM)'] = (1000/14) * df['NO3 (mg -L)']  # N atomic weight
     if 'SiO4 (mg -L)' in df.columns:
-        df['SiO4 (uM)'] = (1000/92) * df['SiO4 (mg -L)']
+        df['SiO4 (uM)'] = (1000/28.0855) * df['SiO4 (mg -L)']  # Si atomic weight
     if 'PO4 (mg -L)' in df.columns:
-        df['PO4 (uM)'] = (1000/95) * df['PO4 (mg -L)']
+        df['PO4 (uM)'] = (1000/30.973762) * df['PO4 (mg -L)']  # P atomic weight
     if 'Chl (ug -L)' in df.columns:
         df['Chl (mg m-3)'] = df['Chl (ug -L)']
     for vn in ['TA','DIC']:

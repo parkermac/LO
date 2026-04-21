@@ -2,15 +2,15 @@
 
 Author: Dakota Mascarenas
 
-Last updated: 2026/04/13
+Last updated: 2026/04/21
 
 These files are from King County's marine offshore monitoring water column samples, both bottle and CTD.
 
-Bottle data is publically-accessible and was downloaded with data up to March 2024 by Dakota Mascarenas from https://data.kingcounty.gov/Environment-Waste-Management/Water-Quality/vwmt-pvjw.
+Bottle data is publically-accessible and was downloaded with data up to April 2026 by Dakota Mascarenas from https://data.kingcounty.gov/Environment-Waste-Management/Water-Quality/vwmt-pvjw.
 
 CTD data was received by Dakota Mascarenas from Greg Ikeda, King County, via file transfer on 2024/04/05.
 
-Station information downloaded in March 2024 by Dakota Mascarenas from: https://data.kingcounty.gov/Environment-Waste-Management/WLRD-Sites/wbhs-bbzf
+Station information downloaded in April 2026 by Dakota Mascarenas from: https://data.kingcounty.gov/Environment-Waste-Management/WLRD-Sites/wbhs-bbzf
 
 Sampling analysis plans and methods are included in the corresponding data folder.
 
@@ -19,6 +19,8 @@ Two email correspondences are attached for further metadata:
 * "his_methods_email - TM to DM 20250117.pdf" - explains sampling method change overtime especially for dissolved oxygen
 
 NOTE: Timestamps in the raw data are assumed to be in PST. The processing scripts convert these to timezone-aware UTC (+8 hours) for consistency with other LO observation sources.
+
+NOTE: This includes bottle data replicated in the folder kc_whidbeyBasin bottle data, but is included here since this is the format that King County maintains.
 
 NOTE: Light transmission is currently not considered in this data processing. However, for future use, reference https://green2.kingcounty.gov/marine/Monitoring/OffshoreCTD: "Light Transmission data prior to May 19, 2014 were referenced to air. After this date, all Light Transmission data are referenced to water. To convert the pre-May 19, 2014 data to ‘referenced to water’, multiply the values by 1.095."
 
@@ -30,13 +32,13 @@ CTD data availability:
 * SA: 1998-2024
 
 Bottle data availability
-* CT: 1965-1986, 1989, 1997-2023
-* Chl: 1997-2023
+* CT: 1965-2026
+* Chl: 1997-2026
 * DIC: 2015
-* DO: 1965-1973, 1997-2000
-* NH4: 1996-2023
-* NO3: 1997-2023
+* DO: 1965-2026
+* NH4: 1996-2026
+* NO3: 1997-2026
 * PO4: 1997-2010
-* SA: 1965-1986, 1989, 1997-2023
-* SiO4: 1997-2023
+* SA: 1965-2026
+* SiO4: 1997-2026
 * TA: 2015
