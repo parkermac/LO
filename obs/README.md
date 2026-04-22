@@ -115,19 +115,19 @@ Folders on apogee in `/dat1/parker/LO_output/obs` (I am maintaining these only o
   
 - **kc** King County monitoring data from modern stations. Station information was downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/WLRD-Sites/wbhs-bbzf. Bottle data was downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/Water-Quality/vwmt-pvjw. CTD data was received via email from Greg Ikeda, King County, to Dakota Mascarenas. Processed by Dakota Mascarenas. See the README in the associated folder for details. 
   - ctd 1998-2024
-  - bottle 1965-2023
+  - bottle 1965-2026 (NOTE: This inclues data duplicated in kc_whidbeyBasin, but is maintained here for consistency with King County's data management.)
 
 - **kc_his** King County monitoring data from historical stations. Received via email from Taylor Martin, King County, to Dakota Mascarenas. Processed by Dakota Mascarenas. See the README in the associated folder for details. Please note that temperature data for the full time range is included in both CTD and bottles, but comes from CTD cast. Salinity for the full time range is only in bottle data, but some CTD-measured salinity is included in ctd data at the end of the time range.
   - ctd 1965-2000
-  - bottle 1965-2000
+  - bottle 1965-2000 
   
 - **kc_pointJefferson** King County data collected near Point Jefferson. Received via email from Taylor Martin, King County, to Dakota Mascarenas. Station information was downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/WLRD-Sites/wbhs-bbzf. Processed by Dakota Mascarenas. See the README in the associated folder for details.
   - ctd 1970-2023
   - bottle 1970-2023
   
-- **kc_whidbeyBasin** King County data collected in Whidbey Basin. CTD data downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/Whidbey-Basin-CTD-Casts/uz4m-4d96. Processed by Dakota Mascarenas. See the README in the associated folder for details.
-  - ctd 2022-2024
-  - bottle None
+- **kc_whidbeyBasin** King County data collected in Whidbey Basin. Station information was downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/WLRD-Sites/wbhs-bbzf. CTD data downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/Whidbey-Basin-CTD-Casts/uz4m-4d96. Bottle data downloaded from: https://data.kingcounty.gov/Environment-Waste-Management/Whidbey-Bottle-Data/vuu8-t6kc. Processed by Dakota Mascarenas. See the README in the associated folder for details.
+  - ctd 2022-2026
+  - bottle 2022-2026 (NOTE: This is duplicated in kc, but is maintained here for consistency with King County's data management.)
 
 #### Notes on usage [2024.03.21 these notes need to be updated to reflect new additions to the collection: LineP, nceiPNW, NHL, and WOD]:
 - 2017 is a good year for validation, with bottle coverage from several sources.
@@ -191,3 +191,7 @@ Attributes:
     - CE = Cape Elizabeth
   - **Naming convention:** The mooring depth is listed with its site id, e.g., CE042 is placed at ~42m; KL027 at ~27m; and CE015 is placed at ~15m.
 ![OCNMS Mooring Data](readme_plots/ocnms_2011_2023.png)
+
+- **pcRaft** Penn Cove mussel raft sonde data from the work conducted and discussed in, or adjacent to, Roberts & Carrington (2023): https://doi.org/10.1016/j.jembe.2023.151927. Data received from Emily Carrington. Processed by Dakota Mascarenas. See the README in the associated folder for details. Two stations are processed:
+  - `raft_main`: 2014-2019, hourly. Variables: CT, SA, DO (uM), PH, Chl (mg m-3).
+  - `raft_hiRes`: July-December 2017, hourly temperature profiles at 0.5-7 m depth (8 levels). Salinity is not directly measured (set to NaN); conservative temperature (CT) was computed using absolute salinity (SA) interpolated from `raft_main`.

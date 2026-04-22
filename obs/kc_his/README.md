@@ -2,9 +2,7 @@
 
 Author: Dakota Mascarenas
 
-Finalized: 2025/09/05
-
-Last updated: 2025/12/01
+Last updated: 2026/04/13
 
 These files are from King County's monitoring of the water column near Point Jefferson, both bottle samples at now-defunct historical stations.
 
@@ -13,6 +11,8 @@ Data was received via email from Taylor Martin, King County, to Dakota Mascarena
 Email correspondences is included in the corresponding data folder for methods information: "his_methods_email - TM to DM 20250117.pdf"
 
 NOTE: "field" data and temperature are from CTD and others are from bottle. I use temperature from CTD for bottles for ease of use in observation/model comparison.This is all included in "bottle_DO_data_for_Dakota.csv" despite the name.
+
+NOTE: Timestamps in the raw data are mostly date-only (midnight), assumed to be in PST. The processing scripts convert these to timezone-aware UTC (+8 hours) for consistency with other LO observation sources.
 
 CTD data availability:
 * Chl: 1998-2000
