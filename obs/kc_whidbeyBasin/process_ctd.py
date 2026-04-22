@@ -33,7 +33,7 @@ out_dir = Ldir['LOo'] / 'obs' / source / otype
 Lfun.make_dir(out_dir)
 
 # Load big data set and stations.
-big_df_raw = pd.read_csv(in_dir0/ 'Whidbey_Basin_CTD_Casts_20260420.csv') # updated 20260421
+big_df_raw = pd.read_csv(in_dir0/ 'Whidbey_Basin_CTD_Casts_20260420.csv', low_memory=False) # updated 20260421
 sta_df = pd.read_csv(Ldir['data'] / 'obs' / source / 'WLRD_Sites_20260421.csv')
 
 # Merge station data.
