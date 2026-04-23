@@ -10,21 +10,21 @@
 #SBATCH --time=06:00:00
 
 ## Set memory use (what is best for compute nodes?)
-#SBATCH --mem=128G
+#SBATCH --mem=0
 
 # Do not return until the job is finished
 #SBATCH --wait
 
 #SBATCH --exclusive
 
-#SBATCH --cpus-per-task=10
+#SBATCH --cpus-per-task=40
 
 source /gscratch/macc/parker/miniconda3/etc/profile.d/conda.sh
 
 conda activate loenv
 
 # These exports, along with the cpus-per-task set above
-# (and workers=10 in the nearest neighbor code, e.g. in tracker2)
+# (and workers=-1 in the nearest neighbor code, e.g. in tracker2)
 # allow fast multi-threading in python.
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK      # For OpenMP
