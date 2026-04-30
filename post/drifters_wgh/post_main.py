@@ -46,7 +46,7 @@ else:
 
 # RUN TRACKER JOBS
 tt0 = time()
-exp_list = ['wgh0','willapa25']
+exp_list = ['wgh0'] #,'willapa25']
 three_flag_dict = {'wgh0':'True', 'willapa25':'False'}
 for exp in exp_list:
     three_flag = three_flag_dict[exp]
