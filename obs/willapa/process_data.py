@@ -49,6 +49,8 @@ for year in year_list:
     elif year == 2024:
         fn_dict = {
             'Nahcotta':'Nah 2024 TSDO.xlsx'
+            # NOTE 2026.04.30 There is also a new one for Toke Point in the data folder
+            # That I have not processed yet.
         }
 
     sta_dict = {
