@@ -22,7 +22,7 @@ else:
 tt0 = time()
 
 fs = fsspec.filesystem('https')
-ds = xr.open_dataset(fs.open(url))
+ds = xr.open_dataset(fs.open(fn0))
 a = ds.salt.values
 b = a*a
 ds.close()
