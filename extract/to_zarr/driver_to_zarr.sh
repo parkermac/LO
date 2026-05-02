@@ -32,7 +32,7 @@ export VECLIB_MAXIMUM_THREADS=$SLURM_CPUS_PER_TASK
 export NUMEXPR_NUM_THREADS=$SLURM_CPUS_PER_TASK
 
 dir0='/gscratch/macc/parker'
-dir1=${dir0}'/extract/to_zarr'
+dir1=${dir0}'/LO/extract/to_zarr'
 
 gtx='cas7_t2_x11b'
 ds0='2026.05.01'
