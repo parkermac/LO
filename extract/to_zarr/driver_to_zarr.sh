@@ -1,8 +1,7 @@
 #!/bin/bash
 
 ## run using
-# pmsrun2
-# sbatch -p cpu-g2 -A macc $LOd/driver_to_zarr.sh &
+# sbatch -p cpu-g2 -A macc ./driver_to_zarr.sh &
 
 ## Nodes
 #SBATCH --nodes=1
@@ -37,7 +36,7 @@ dir1=${dir0}'/extract/to_zarr'
 
 gtx='cas7_t2_x11b'
 ds0='2026.05.01'
-his_srt='01'
+his_str='01'
 
 # put the file in /var/tmp
 bucket='liveocean-pmacc'
