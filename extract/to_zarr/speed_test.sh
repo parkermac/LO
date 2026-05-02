@@ -34,5 +34,7 @@ export NUMEXPR_NUM_THREADS=$SLURM_CPUS_PER_TASK
 dir0='/gscratch/macc/parker'
 dir1=${dir0}'/LO/extract/to_zarr'
 
+s5cmd cp 's3://liveocean-pmacc/LO_roms/cas7_t2_x11b_zarr/f2026.05.01/h_01.zarr' '/var/tmp/'
+
 python3 ${dir1}/speed_test.py > ${dir1}/speed_test.log
 

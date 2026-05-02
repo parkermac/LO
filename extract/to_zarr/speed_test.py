@@ -1,12 +1,6 @@
 """
 Code to test speed of accessing netcdf vs. zarr arrays.
 
-run as
-
-pmsrun2
-conda activate loenv
-python3 speed_test.py
-
 """
 
 from time import time
@@ -17,7 +11,9 @@ Ldir = Lfun.Lstart()
 
 fn0 = Ldir['roms_out'] / 'cas7_t2_x11b' / 'f2026.05.01' / 'ocean_his_0001.nc'
 
-fn1 = 'https://s3.kopah.uw.edu/liveocean-pmacc/LO_roms/cas7_t2_x11b_zarr/f2026.05.01/h_01.zarr'
+#fn1 = 'https://s3.kopah.uw.edu/liveocean-pmacc/LO_roms/cas7_t2_x11b_zarr/f2026.05.01/h_01.zarr'
+
+fn1 = '/var/tmp/h_01.zarr'
 
 tt0 = time()
 ds = xr.open_dataset(fn0)
