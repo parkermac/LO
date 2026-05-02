@@ -44,4 +44,4 @@ s5cmd cp "s3://"${bucket}"/LO_roms/"${gtx}"/f"${ds0}"/ocean_his_00"${his_str}".n
 
 python3 ${dir1}/worker_to_zarr.py -his_str ${his_str} > ${dir1}/test.log
 
-s5cmd cp "/var/tmp/h_"${his_num}".zarr" "s3://"${bucket}"/LO_roms/"${gtx}"_zarr/f"${ds0}"/ocean_his_00"${his_str}".zarr"
+s5cmd cp "/var/tmp/h_"${his_str}".zarr" "s3://"${bucket}"/LO_roms/"${gtx}"_zarr/f"${ds0}"/ocean_his_00"${his_str}".zarr"
