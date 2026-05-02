@@ -10,7 +10,9 @@ import fsspec
 
 Ldir = Lfun.Lstart()
 
-if False:
+local = True
+
+if local:
     # local version
     fn0 = Ldir['roms_out'] / 'cas7_t2_x11b' / 'f2026.05.01' / 'ocean_his_0001.nc'
     fn1 = '/gscratch/macc/parker/tmp/h_01.zarr'
@@ -21,8 +23,12 @@ else:
 
 tt0 = time()
 
-fs = fsspec.filesystem('https')
-ds = xr.open_dataset(fs.open(fn0))
+if local:
+    ds = xr.open_dataset(fn0)
+else:
+    fs = fsspec.filesystem('https')
+    ds = xr.open_dataset(fs.open(fn0))
+    
 a = ds.salt.values
 b = a*a
 ds.close()
