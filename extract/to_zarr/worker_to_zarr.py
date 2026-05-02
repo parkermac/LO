@@ -13,6 +13,7 @@ from lo_tools import Lfun
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-his_str', type=str, default='01')
+args = parser.parse_args()
 
 tt0 = time()
 
