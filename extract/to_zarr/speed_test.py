@@ -6,6 +6,7 @@ Code to test speed of accessing netcdf vs. zarr arrays.
 from time import time
 import xarray as xr
 from lo_tools import Lfun
+import fsspec
 
 Ldir = Lfun.Lstart()
 
@@ -19,7 +20,9 @@ else:
     fn1 = 'https://s3.kopah.uw.edu/liveocean-pmacc/LO_roms/cas7_t2_x11b_zarr/f2026.05.01/h_01.zarr'
 
 tt0 = time()
-ds = xr.open_dataset(fn0)
+
+fs = fsspec.filesystem('https')
+ds = xr.open_dataset(fs.open(url))
 a = ds.salt.values
 b = a*a
 ds.close()
