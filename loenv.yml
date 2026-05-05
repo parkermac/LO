@@ -44,7 +44,6 @@ dependencies:
   - pip
   - pip:
     - -e lo_tools # package of local modules
-    - azure-storage-blob
     - s3cmd >= 2.4.0 # AWS S3 tools: this one is linux command line
   # and some non-python tools
   - ffmpeg
