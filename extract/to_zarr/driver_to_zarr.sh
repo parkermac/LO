@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## run using
-# sbatch --array1-25 ./driver_to_zarr.sh  cas7_t2_x11b 2026.05.01 &
+# sbatch --array=1-25 ./driver_to_zarr.sh cas7_t2_x11b 2026.05.01 &
 
 ## Group
 #SBATCH -A macc
