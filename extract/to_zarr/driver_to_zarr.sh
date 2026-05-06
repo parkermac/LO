@@ -13,23 +13,20 @@
 #SBATCH --nodes=1
 
 ## Tasks per node (number of history files in a day)
-#SBATCH --ntasks-per-node=25
+#SBATCH --ntasks-per-node=1
 
 ## Walltime 
 #SBATCH --time=01:00:00
 
 ## Set memory use. Each slice (32 cores) has 256G. Use 0 to use all.
-#SBATCH --mem=0
+## #SBATCH --mem=0
 
 # Do not return until the job is finished
-#SBATCH --wait
+## #SBATCH --wait
 
 ## Assume some python code uses multi-threading.
 #SBATCH --cpus-per-task=6
-## Note: 25*6 = 150, which is less than the 192 coes we have on a node.
-
-## Reserve all the cores on this node.
-#SBATCH --exclusive
+## Note: 25*6 = 150, which is less than the 192 cores we have on a node.
 
 source /gscratch/macc/parker/miniconda3/etc/profile.d/conda.sh
 conda activate loenv
