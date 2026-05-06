@@ -10,7 +10,7 @@ import fsspec
 
 Ldir = Lfun.Lstart()
 
-local = True
+local = False
 
 if local:
     # local version
@@ -19,7 +19,7 @@ if local:
 else:
     # kopah version
     fn0 = 'https://s3.kopah.uw.edu/liveocean-pmacc/tmp/ocean_his_0001.nc'
-    fn1 = 'https://s3.kopah.uw.edu/liveocean-pmacc/LO_roms/cas7_t2_x11b_zarr/f2026.05.01/h_01.zarr'
+    fn1 = 'https://s3.kopah.uw.edu/liveocean-pmacc/LO_roms/cas7_t2_x11b_zarr/f2026.05.01/ocean_his_0001.zarr'
 
 tt0 = time()
 
