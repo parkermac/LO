@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## run using
-# sbatch --array=1-25 ./driver_to_zarr.sh cas7_t2_x11b 2026.05.01 &
+# sbatch --array=1-25 ./driver_to_zarr.sh cas7_t2_x11b 2026.05.01
 
 ## Group
 #SBATCH -A macc
@@ -21,7 +21,7 @@
 ## Set memory use. Each slice (32 cores) has 256G. Use 0 to use all.
 ## #SBATCH --mem=0
 
-# Do not return until the job is finished
+# Do not return until the job is finished (use with & on the command line)
 ## #SBATCH --wait
 
 ## Assume some python code uses multi-threading.
@@ -41,14 +41,7 @@ export NUMEXPR_NUM_THREADS=$SLURM_CPUS_PER_TASK
 # Path to this directory
 dir0='/gscratch/macc/parker'
 dir1=${dir0}'/LO/extract/to_zarr'
-
+# Run the converter
 gtx=$1
 ds0=$2
-
-# put the files for this day in /var/tmp
-bucket='liveocean-pmacc'
-s5cmd sync "s3://"${bucket}"/LO_roms/"${gtx}"/f"${ds0}"/*.nc" "/var/tmp/"
-
-python3 ${dir1}/worker_to_zarr.py -his_str $SLURM_ARRAY_TASK_ID > ${dir1}"/test_"$SLURM_ARRAY_TASK_ID".log"
-
-s5cmd sync --acl public-read "/var/tmp/*.zarr" "s3://"${bucket}"/LO_roms/"${gtx}"_zarr/f"${ds0}"/"
+python3 ${dir1}/worker_to_zarr.py -his_str $SLURM_ARRAY_TASK_ID -gtx ${gtx} -ds0 ${ds0} > ${dir1}"/test_"$SLURM_ARRAY_TASK_ID".log"
