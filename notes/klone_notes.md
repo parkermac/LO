@@ -34,8 +34,8 @@ So the total annual slot fees are $6k, I estimate.
 ### Thinking of these resources from a computing standpoint
 - You have to have a job reside in a "Group".
 - Assume a job takes one full node = 6 slices = 192 cpu
-- in the coenv group we have 12 slices = 2 nodes
-- in the macc group we have 25 slices = 4 nodes + one extra slice (all cpu-g2)
+- **in the coenv group we have 12 slices = 2 nodes**
+- **in the macc group we have 25 slices = 4 nodes + one extra slice (all cpu-g2)**
 - we also have 5 of the old compute nodes, but these should be replaced as soon as we can, like May 2027.
 - All told, we have resource for 6 full-node jobs to be running at the same time!
 - In terms of disk space on klone I think we have 30 TB in the macc group, and 12 TB (?) in the coenv group.

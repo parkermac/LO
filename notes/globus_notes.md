@@ -13,7 +13,7 @@ It easily and reliably handles huge transfers (many terrabytes!). You simply ini
 
 ---
 
-## Setup
+### Setup
 
 Parker, end eventually Kate, needs to request mapping of your UW NetID to the macc kopah storage account. We do this by sending an email to help@uw.edu with "Kopah + Globus" in the subject line.
 
@@ -61,8 +61,12 @@ more config-paths
 ```
 Of course you will need to add your own info here, not David's!
 
-Once you get this going you will need to get "Globus mapped to Kopah". It basically entails writing UW-IT and requesting this (the "Setup" step above).
+---
 
-See https://hyak.uw.edu/docs/storage/gui for details.
+### GUI
+
+The next step is to start using the web-based GUI for moving files across systems. This is a lot like a file transfer app like Transmit, but much more powerful. Most importantly it works with klone and kopah as well as your laptio and our servers.
+
+See https://hyak.uw.edu/docs/storage/gui for instructions.
 
 
