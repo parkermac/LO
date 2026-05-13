@@ -20,7 +20,7 @@ LOd=/gscratch/macc/parker/LO/driver
 # main forecast
 20 03 * * * source ~/.bashrc; python3 $LOd/K_driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -np 192 -vip True -done c11 < /dev/null > $LOd/cas7_forecast.log
 00 08 * * * source ~/.bashrc; python3 $LOd/K_driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -np 192 -vip True -done c11 < /dev/null > $LOd/cas7_forecast_2.log
-00 13 * * * source ~/.bashrc; python3 $LOd/K_driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -np 192 -vip True -done c11 < /dev/null > $LOd/cas7_forecast_3.log
+00 14 * * * source ~/.bashrc; python3 $LOd/K_driver_roms00.py -g cas7 -t t2 -x x11b -r forecast -s continuation -grp macc -np 192 -vip True -done c11 < /dev/null > $LOd/cas7_forecast_3.log
 # post processing
 30 05 * * * source ~/.bashrc; sbatch -p cpu-g2 -A macc $LOd/K_driver_post1.sh
 # emails
