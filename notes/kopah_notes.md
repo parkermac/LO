@@ -36,11 +36,80 @@ Both s3cmd and s5cmd are installed on klone, and they are also installed in the 
 
 ---
 
+### Bucket Naming Rules
+
+- Bucket names must be between 3 (min) and 63 (max) characters long.
+- Bucket names can consist only of lowercase letters, numbers, periods (.), and hyphens (-).
+- Bucket names must begin and end with a letter or number.
+- **You should start by making a bucket called liveocean-[your UW NetID].**
+
+---
+
 ### s5cmd
 
-This pretty much does everything that s3cmd (described below) does except: There is no direct "info" command in s5cmd that provides detailed metadata (like ACLs or headers) similar to s3cmd info. s5cmd is primarily optimized for high-performance bulk operations and lacks a specific metadata inspection sub-command.
+This pretty much does everything that s3cmd (described below) does except there is no direct "info" command in s5cmd that provides detailed metadata (like ACLs or headers) similar to s3cmd info. s5cmd is primarily optimized for high-performance bulk operations and lacks a specific metadata inspection sub-command.
 
-[describe commands]
+**In general you should use quotes around paths, and include the trailing / for folders.**
+
+One great advantage of s5cmd over s3cmd is that it accepts wildcards (*) in paths.
+
+Example commands:
+
+**Get help:**
+```
+s5cmd -h
+```
+**Get help with a specific command:**
+```
+s5cmd cp -h
+```
+**Get a summary of disk space used by a bucket or subdirectory:**
+```
+s5cmd du -H "s3://[bucket]/[dir]/*"
+```
+NOTE: "-H" means "human-readable"
+
+**Make a bucket (required before writing to it):**
+```
+s5cmd mb "s3://[bucket]"
+```
+**List contents of a bucket or subdirectory:**
+```
+s5cmd ls -H "s3://[bucket]/"
+```
+**List every directory and file in a bucket or subdirectory:**
+```
+s5cmd ls -H "s3://[bucket]/[dir]/*"
+```
+- Note that "*" expands recursively to include everything!
+- Note that [dir] stands in here for a longer path, like [dir0]/[dir1]/[dir2].
+
+**Copy a single file to kopah, allowing public access:**
+```
+s5cmd cp --acl public-read "[file]" "s3://[bucket]/[dir]/"
+```
+- Note that [file] means the full or relative string path to the file.
+Only use "--acl public-read" when needed.
+- The resulting URL that someone would use to access the file is:
+- https://s3.kopah.uw.edu/[bucket]/[dir]/[file]
+- Note that s5cmd will create [dir] in [bucket] if it does not exist.
+
+The most powerful command is "sync" which copies everything in a directory. It only copies if needed, e.g. the file is not there yet or it is an older version.
+
+**Sync to kopah:**
+```
+s5cmd sync --acl public-read "[dir1/*]" "s3://[bucket]/[dir2]/"
+```
+- This puts everything in dir1 into bucket/dir2. This is the form I use at the end of K_driver_roms00.py (without public-read) to archive a ROMS run.
+- Performance note: this takes about 17 sec for a day of hourly cas7 files (18 GB).
+
+**Sync from kopah:**
+```
+s5cmd sync "s3://[bucket]/[dir]/*" "[dir]/"
+```
+- Performance note: this takes about 1 minute for a day of hourly cas7 files (18 GB), so it is slower to get files back from kopah than it is to put them there.
+
+At first I had trouble getting used to these commands, but they made more sense to me after understanding that they are just very literal: tell s5cmd exactly what you want copied and exactly where you want it to go.
 
 ---
 
@@ -79,11 +148,6 @@ Create a bucket. I think you need to create the bucket before you start putting 
 ```
 s3cmd mb s3://[bucket name]
 ```
-Bucket naming rules:
-- Bucket names must be between 3 (min) and 63 (max) characters long.
-- Bucket names can consist only of lowercase letters, numbers, periods (.), and hyphens (-).
-- Bucket names must begin and end with a letter or number.
-- You should start by making a bucket called liveocean-[your UW NetID].
 
 Copy a file to a bucket:
 ```
