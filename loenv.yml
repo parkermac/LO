@@ -4,7 +4,7 @@ channels:
 dependencies:
   # from Rob Hetland
   - cf_xarray
-  # - dask
+  - dask
   # - jupyter
   # - jupyterlab
   - netcdf4
@@ -19,7 +19,7 @@ dependencies:
   # - holoviews
   # - hvplot
   - matplotlib
-  # - zarr
+  - zarr
   - nodejs
   # - dask-labextension
   # my additions
