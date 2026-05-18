@@ -18,7 +18,7 @@ if local:
 else:
     # s3 version with direct access
     fn0 = 's3://liveocean-pmacc/tmp/ocean_his_0001.nc'
-    fn1 = 's3://liveocean-test/LO_roms/cas7_t2_x11b_zarr/f2026.05.01/ocean_his_0001.zarr'
+    fn1 = 's3://liveocean-test/cas7_t2_x11b_zarr/f2026.05.01/ocean_his_0001.zarr'
     fn1alt = 'https://s3.kopah.uw.edu/liveocean-test/cas7_t2_x11b_zarr/f2026.05.01/ocean_his_0001.zarr'
     storage_options = {'client_kwargs': {'endpoint_url': 'https://s3.kopah.uw.edu'}, 'anon': True}
 
