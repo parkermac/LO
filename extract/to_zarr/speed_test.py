@@ -38,8 +38,8 @@ tt0 = time()
 if local:
     ds = xr.open_zarr(fn1)
 else:
-    # ds = xr.open_zarr(fn1, storage_options=storage_options)
-    ds = xr.open_zarr(fn1alt)
+    ds = xr.open_zarr(fn1, storage_options=storage_options)
+    #ds = xr.open_zarr(fn1alt)
 a = ds.salt[0,:,10,10].values
 b = a*a
 ds.close()
