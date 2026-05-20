@@ -98,7 +98,7 @@ The most powerful command is "sync" which copies everything in a directory. It o
 
 **Sync to kopah:**
 ```
-s5cmd sync --acl public-read "[dir1/*]" "s3://[bucket]/[dir2]/"
+s5cmd sync --acl public-read "[dir1/]" "s3://[bucket]/[dir2]/"
 ```
 - This puts everything in dir1 into bucket/dir2. This is the form I use at the end of K_driver_roms00.py (without public-read) to archive a ROMS run.
 - Performance note: this takes about 17 sec for a day of hourly cas7 files (18 GB).
