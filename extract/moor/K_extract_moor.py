@@ -233,29 +233,49 @@ if __name__ == '__main__':
     # returns a tiny in-memory dataset. block_size=2**22 (4 MB) front-loads the
     # HDF5 metadata in one HTTP range request instead of dozens of small ones.
     def fetch_one(fn):
-        with fs.open(fn, 'rb', cache_type='blockcache', block_size=2**22) as f:
-            with xr.open_dataset(f, engine='h5netcdf') as ds:
-                ds = ds[[v for v in vn_list if v in ds.data_vars]]
-                isel_kw = {}
-                if 'eta_rho' in ds.dims: isel_kw['eta_rho'] = ilat_rho
-                if 'xi_rho'  in ds.dims: isel_kw['xi_rho']  = ilon_rho
-                if 'eta_u'   in ds.dims: isel_kw['eta_u']   = ilat_u
-                if 'xi_u'    in ds.dims: isel_kw['xi_u']    = ilon_u
-                if 'eta_v'   in ds.dims: isel_kw['eta_v']   = ilat_v
-                if 'xi_v'    in ds.dims: isel_kw['xi_v']    = ilon_v
-                return ds.isel(**isel_kw).load()
+        try:
+            with fs.open(fn, 'rb', cache_type='blockcache', block_size=2**22) as f:
+                with xr.open_dataset(f, engine='h5netcdf') as ds:
+                    ds = ds[[v for v in vn_list if v in ds.data_vars]]
+                    isel_kw = {}
+                    if 'eta_rho' in ds.dims: isel_kw['eta_rho'] = ilat_rho
+                    if 'xi_rho'  in ds.dims: isel_kw['xi_rho']  = ilon_rho
+                    if 'eta_u'   in ds.dims: isel_kw['eta_u']   = ilat_u
+                    if 'xi_u'    in ds.dims: isel_kw['xi_u']    = ilon_u
+                    if 'eta_v'   in ds.dims: isel_kw['eta_v']   = ilat_v
+                    if 'xi_v'    in ds.dims: isel_kw['xi_v']    = ilon_v
+                    return ds.isel(**isel_kw).load()
+        except Exception as e:
+            print('WARNING: skipping %s: %s' % (fn, e))
+            return None
 
     tt_open = time()
     with ThreadPoolExecutor(max_workers=Ldir['Nproc']) as pool:
-        slices = list(pool.map(fetch_one, fn_list))
+        raw = list(pool.map(fetch_one, fn_list))
+    n_skip = sum(1 for x in raw if x is None)
+    if n_skip:
+        print('WARNING: %d/%d files skipped (missing or corrupt)' % (n_skip, len(fn_list)))
+    slices = [x for x in raw if x is not None]
+    if not slices:
+        print('ERROR: no files successfully read'); sys.exit()
     print(' - fetch all files: %0.2f sec' % (time() - tt_open))
 
     # ── concatenate and write ─────────────────────────────────────────────────────
+    # Hierarchical concat: first join within each day-sized chunk, then join
+    # chunks. For 8000+ files this is much faster than one flat xr.concat because
+    # xarray's coordinate alignment cost is O(N) in the number of datasets.
     tt_write = time()
-    ds = xr.concat(slices, dim='ocean_time').squeeze()
+    CHUNK = 100
+    if len(slices) > CHUNK:
+        chunks = [xr.concat(slices[i:i+CHUNK], dim='ocean_time')
+                  for i in range(0, len(slices), CHUNK)]
+        ds = xr.concat(chunks, dim='ocean_time')
+    else:
+        ds = xr.concat(slices, dim='ocean_time')
+    ds = ds.squeeze()
     ds.to_netcdf(moor_fn)
     ds.close()
-    print(' - write to netcdf: %0.2f sec' % (time() - tt_write))
+    print(' - concat + write: %0.2f sec' % (time() - tt_write))
 
     # ── add z coordinates (mirrors extract_moor.py exactly) ──────────────────────
     ds   = xr.load_dataset(moor_fn)
