@@ -12,6 +12,7 @@ run K_extract_moor -gtx cas7_t0_x4b -test True
 The same job would be run with flags as:
 python K_extract_moor.py -gtx cas7_t2_x11b -ro 0 -0 2025.07.04 -1 2025.07.05 -lt hourly -sn test -lon ' -125' -lat 47 -get_all True -bucket liveocean-pmacc > test.log &
 run K_extract_moor.py -gtx cas7_t2_x11b -ro 0 -0 2025.07.04 -1 2025.07.05 -lt hourly -sn test -lon ' -125' -lat 47 -get_all True -bucket liveocean-pmacc
+run K_extract_moor.py -gtx cas7_t1_x11ab -ro 0 -0 2025.07.04 -1 2025.07.05 -lt average -sn test -lon ' -125' -lat 47 -get_all True -bucket liveocean-pmacc
 
 NOTE: the quotes and space are required to feed it a negative longitude.
 """
@@ -244,7 +245,7 @@ if __name__ == '__main__':
 
     # ── open dataset across all files ────────────────────────────────────────────
     # Use n_workers=Nproc; on a 192-core klone node try Nproc=64 or higher.
-    cluster = LocalCluster(n_workers=Ldir['Nproc'], threads_per_worker=2)
+    cluster = LocalCluster(n_workers=Ldir['Nproc'], threads_per_worker=2, memory_limit=0)
     client  = Client(cluster)
     print('Dask dashboard: ' + client.dashboard_link)
 
