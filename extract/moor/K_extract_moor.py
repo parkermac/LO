@@ -1,7 +1,7 @@
 """
 S3-backed mooring extractor. Mirrors extract_moor.py but reads ROMS history/
 average files from kopah S3 instead of local disk, replacing the ncks/ncrcat
-subprocess pipeline with xarray + h5netcdf + fsspec + Dask.
+subprocess pipeline with xarray + h5netcdf + fsspec + ThreadPoolExecutor.
 
 Requires AWS credentials in the environment:
     AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY
@@ -20,22 +20,17 @@ NOTE: the quotes and space are required to feed it a negative longitude.
 import sys
 import os
 import argparse
-import multiprocessing
+from concurrent.futures import ThreadPoolExecutor
 from time import time
 
 import numpy as np
 import pandas as pd
 import xarray as xr
 import s3fs
-from dask.distributed import LocalCluster, Client
 
 from lo_tools import Lfun, zrfun, zfun
 
 if __name__ == '__main__':
-
-    # Python 3.12+ changed the default spawn start method on some platforms;
-    # fork is correct on Linux HPC (avoids the __spec__ AttributeError in 3.13).
-    multiprocessing.set_start_method('fork', force=True)
 
     # ── command line arguments ────────────────────────────────────────────────────
     parser = argparse.ArgumentParser()
@@ -59,7 +54,7 @@ if __name__ == '__main__':
     parser.add_argument('-get_all',      type=zfun.boolean_string, default=False)
     # S3 options
     parser.add_argument('-bucket', type=str, default='liveocean')
-    # Nproc maps to n_workers in the LocalCluster (increase to 64+ on klone)
+    # number of parallel threads for S3 reads
     parser.add_argument('-Nproc', type=int, default=10)
     # optional testing
     parser.add_argument('-test', '--testing', default=False, type=zfun.boolean_string)
@@ -104,15 +99,10 @@ if __name__ == '__main__':
 
     # ── S3 setup ──────────────────────────────────────────────────────────────────
     ENDPOINT = 'https://s3.kopah.uw.edu'
-    storage_options = {
-        'key':    os.environ['AWS_ACCESS_KEY_ID'],
-        'secret': os.environ['AWS_SECRET_ACCESS_KEY'],
-        'client_kwargs': {'endpoint_url': ENDPOINT},
-    }
     fs = s3fs.S3FileSystem(
-        key=storage_options['key'],
-        secret=storage_options['secret'],
-        client_kwargs=storage_options['client_kwargs'],
+        key=os.environ['AWS_ACCESS_KEY_ID'],
+        secret=os.environ['AWS_SECRET_ACCESS_KEY'],
+        client_kwargs={'endpoint_url': ENDPOINT},
     )
 
     BUCKET = Ldir['bucket']
@@ -145,7 +135,9 @@ if __name__ == '__main__':
 
     # ── read grid info and sigma params from first S3 file ────────────────────────
     # Replaces zrfun.get_basic_info(), which expects a local path.
-    with fs.open(fn_list[0]) as f:
+    # block_size=2**22 (4 MB) fetches HDF5 metadata in one range request instead
+    # of the ~dozens of small round trips h5py needs by default over S3.
+    with fs.open(fn_list[0], 'rb', cache_type='blockcache', block_size=2**22) as f:
         ds0 = xr.open_dataset(f, engine='h5netcdf')
 
         G = {
@@ -157,7 +149,7 @@ if __name__ == '__main__':
         }
         S = {
             's_rho':       ds0['s_rho'].values,
-            's_w':       ds0['s_w'].values,
+            's_w':         ds0['s_w'].values,
             'N':           ds0.sizes['s_rho'],
             'Cs_r':        ds0['Cs_r'].values,
             'Cs_w':        ds0['Cs_w'].values,
@@ -235,42 +227,32 @@ if __name__ == '__main__':
     ilat_u,   ilon_u   = find_good(ilat_rho, ilon_rho, 'u')
     ilat_v,   ilon_v   = find_good(ilat_rho, ilon_rho, 'v')
 
-    # ── preprocess: applied to each file before concatenation ────────────────────
-    # Selects only the requested variables and the single mooring grid point.
-    # xarray's isel applies each dimension index only to variables that have it,
-    # so rho/u/v-grid variables are correctly indexed by their own dimension names.
-    def preprocess(ds):
-        ds = ds[[v for v in vn_list if v in ds.data_vars]]
-        isel_kw = {}
-        if 'eta_rho' in ds.dims: isel_kw['eta_rho'] = ilat_rho
-        if 'xi_rho'  in ds.dims: isel_kw['xi_rho']  = ilon_rho
-        if 'eta_u'   in ds.dims: isel_kw['eta_u']   = ilat_u
-        if 'xi_u'    in ds.dims: isel_kw['xi_u']    = ilon_u
-        if 'eta_v'   in ds.dims: isel_kw['eta_v']   = ilat_v
-        if 'xi_v'    in ds.dims: isel_kw['xi_v']    = ilon_v
-        return ds.isel(**isel_kw)
-
-    # ── open dataset across all files ────────────────────────────────────────────
-    # Use n_workers=Nproc; on a 192-core klone node try Nproc=64 or higher.
-    cluster = LocalCluster(n_workers=Ldir['Nproc'], threads_per_worker=2, memory_limit=0)
-    client  = Client(cluster)
-    print('Dask dashboard: ' + client.dashboard_link)
+    # ── per-file fetch: open, slice to mooring point, load into memory ────────────
+    # ThreadPoolExecutor (not Dask) is used because the work is I/O-bound: each
+    # thread independently opens one S3 file, extracts the single grid point, and
+    # returns a tiny in-memory dataset. block_size=2**22 (4 MB) front-loads the
+    # HDF5 metadata in one HTTP range request instead of dozens of small ones.
+    def fetch_one(fn):
+        with fs.open(fn, 'rb', cache_type='blockcache', block_size=2**22) as f:
+            with xr.open_dataset(f, engine='h5netcdf') as ds:
+                ds = ds[[v for v in vn_list if v in ds.data_vars]]
+                isel_kw = {}
+                if 'eta_rho' in ds.dims: isel_kw['eta_rho'] = ilat_rho
+                if 'xi_rho'  in ds.dims: isel_kw['xi_rho']  = ilon_rho
+                if 'eta_u'   in ds.dims: isel_kw['eta_u']   = ilat_u
+                if 'xi_u'    in ds.dims: isel_kw['xi_u']    = ilon_u
+                if 'eta_v'   in ds.dims: isel_kw['eta_v']   = ilat_v
+                if 'xi_v'    in ds.dims: isel_kw['xi_v']    = ilon_v
+                return ds.isel(**isel_kw).load()
 
     tt_open = time()
-    ds = xr.open_mfdataset(
-        fn_list,
-        engine='h5netcdf',
-        combine='nested',
-        concat_dim='ocean_time',
-        parallel=True,
-        preprocess=preprocess,
-        storage_options=storage_options,
-    )
-    print(' - open_mfdataset: %0.2f sec' % (time() - tt_open))
+    with ThreadPoolExecutor(max_workers=Ldir['Nproc']) as pool:
+        slices = list(pool.map(fetch_one, fn_list))
+    print(' - fetch all files: %0.2f sec' % (time() - tt_open))
 
-    # ── write extracted mooring to disk (triggers computation) ───────────────────
+    # ── concatenate and write ─────────────────────────────────────────────────────
     tt_write = time()
-    ds = ds.squeeze()
+    ds = xr.concat(slices, dim='ocean_time').squeeze()
     ds.to_netcdf(moor_fn)
     ds.close()
     print(' - write to netcdf: %0.2f sec' % (time() - tt_write))
@@ -296,7 +278,7 @@ if __name__ == '__main__':
 
     # ── copy attributes from source file ─────────────────────────────────────────
     ds = xr.load_dataset(moor_fn)  # load into memory so we can overwrite the file
-    with fs.open(fn_list[0]) as f:
+    with fs.open(fn_list[0], 'rb', cache_type='blockcache', block_size=2**22) as f:
         ds_src = xr.open_dataset(f, engine='h5netcdf')
         for vn in list(ds_src.data_vars):
             if vn not in ds.data_vars:
@@ -309,9 +291,6 @@ if __name__ == '__main__':
         ds_src.close()
     ds.to_netcdf(moor_fn)
     ds.close()
-
-    client.close()
-    cluster.close()
 
     print('- total elapsed time was %0.2f sec' % (time() - tt00))
     print('Path to file:\n%s' % str(moor_fn))
