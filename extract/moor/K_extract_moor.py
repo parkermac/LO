@@ -152,6 +152,7 @@ if __name__ == '__main__':
         }
         S = {
             's_rho':       ds0['s_rho'].values,
+            's_w':       ds0['s_w'].values,
             'N':           ds0.sizes['s_rho'],
             'Cs_r':        ds0['Cs_r'].values,
             'Cs_w':        ds0['Cs_w'].values,
