@@ -20,6 +20,7 @@ NOTE: the quotes and space are required to feed it a negative longitude.
 import sys
 import os
 import argparse
+import multiprocessing
 from time import time
 
 import numpy as np
@@ -31,6 +32,10 @@ from dask.distributed import LocalCluster, Client
 from lo_tools import Lfun, zrfun, zfun
 
 if __name__ == '__main__':
+
+    # Python 3.12+ changed the default spawn start method on some platforms;
+    # fork is correct on Linux HPC (avoids the __spec__ AttributeError in 3.13).
+    multiprocessing.set_start_method('fork', force=True)
 
     # ── command line arguments ────────────────────────────────────────────────────
     parser = argparse.ArgumentParser()
