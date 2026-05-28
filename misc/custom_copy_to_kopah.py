@@ -21,7 +21,7 @@ else:
 
 for t in tvec:
     tstr = t.strftime('%Y.%m.%d')
-    in_fn = 's3://liveocean-pmacc/LO_roms/cas7_t1_x11ab/f' + tstr + '/ocean_avg.nc'
+    in_fn = 's3://liveocean-pmacc/LO_roms/cas7_t1_x11ab/f' + tstr + '/ocean_avg_0001.nc'
     out_dir = 's3://pm-share/jung2024/f' + tstr +'/'
 
     tt0 = time()
@@ -36,5 +36,5 @@ for t in tvec:
         print('stderr:')
         print(stderr.decode())
     print('Time to copy: %0.1f sec' % (time()-tt0))
-    print("URL = " + out_dir.replace('s3://','https://s3.kopah.uw.edu/') + 'ocean_avg.nc')
+    print("URL = " + out_dir.replace('s3://','https://s3.kopah.uw.edu/') + 'ocean_avg_0001.nc')
     print('')
