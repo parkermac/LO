@@ -8,6 +8,7 @@ import pandas as pd
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 from time import time
+import sys
 
 # step through a sequence of files, copying each from an s3 bucket to a new s3 bucket
 # with public access, using s5cmd.
@@ -17,7 +18,7 @@ testing = False
 if testing:
     tvec = pd.date_range('2024-01-01','2024-01-02')
 else:
-    tvec = pd.date_range('2024-01-01','2024-01-02')
+    tvec = pd.date_range('2024-01-01','2024-12-31')
 
 for t in tvec:
     tstr = t.strftime('%Y.%m.%d')
@@ -31,10 +32,11 @@ for t in tvec:
     else:
         proc = Po(cmd_list, stdout=Pi, stderr=Pi)
         stdout, stderr = proc.communicate()
-        print('stdout:')
-        print(stdout.decode())
-        print('stderr:')
-        print(stderr.decode())
+        # print('stdout:')
+        # print(stdout.decode())
+        # print('stderr:')
+        # print(stderr.decode())
     print('Time to copy: %0.1f sec' % (time()-tt0))
     print("URL = " + out_dir.replace('s3://','https://s3.kopah.uw.edu/') + 'ocean_avg_0001.nc')
     print('')
+    sys.stdout.flush()
