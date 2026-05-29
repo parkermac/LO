@@ -2,6 +2,13 @@
 Custom code to copy files to kopah.
 
 Initially created for a request from Jihun Jung at OSU.
+
+I ran this on klone, using:
+ conda activate loenv
+ python3 custom_copy_to_kopah.py > custom.log &
+and it was fine to logout.
+
+Takes about 7 sec per average file, so under an hour per year.
 """
 
 import pandas as pd
