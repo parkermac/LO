@@ -2,6 +2,11 @@ name: loenv
 channels:
   - conda-forge
 dependencies:
+  # for icechunk 5/2026
+  - icechunk
+  - obspec_utils
+  - obstore
+  - virtualizarr
   # from Rob Hetland
   - cf_xarray
   - dask
