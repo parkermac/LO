@@ -120,7 +120,7 @@ def make_source_registry() -> ObjectStoreRegistry:
 def make_target_s3_credentials():
     access_key_id = os.environ.get("AWS_ACCESS_KEY_ID")
     secret_access_key = os.environ.get("AWS_SECRET_ACCESS_KEY")
-    session_token = os.environ.get("AWS_SESSION_TOKEN")
+    # session_token = os.environ.get("AWS_SESSION_TOKEN")
 
     missing = [
         name
@@ -139,7 +139,7 @@ def make_target_s3_credentials():
     return icechunk.s3_credentials(
         access_key_id=access_key_id,
         secret_access_key=secret_access_key,
-        session_token=session_token,
+        # session_token=session_token,
     )
 
 
