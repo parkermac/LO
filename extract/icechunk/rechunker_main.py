@@ -79,7 +79,6 @@ dt_dict = dict(zip(dt0_ind, dt1_ind))
 # name some things to pass to the subprocess
 gtagex = args.gtagex
 indir = 's3://' + bucket_name + '/LO_roms/' + gtagex
-# NOTE the hard-coded outdir is a problem
 outdir = str(Ldir['LOo']) + '/icechunk_temp'
 list_type = args.list_type
 
