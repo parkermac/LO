@@ -125,8 +125,11 @@ use_https = True
 access_key = [get it from Parker or Kate]
 secret_key = [get it from Parker or Kate]
 ```
+Note: do not use single quotes (') or double quotes (") around your access key or secret key in the .s3cfg file. The configuration parser reads everything after the equals sign (=) as the literal key value. 
 
-s3cmd is already one of the things installed by loenv.yml, and it is already on klone (so you don't need to be in loenv to use it on klone). We needed version 2.4.0 or better.
+*[not sure if this step was necessary: After making the .s3cfg file (manually) Kate ran: $ chmod 600 ~/.s3cfg to restrict its permissions and keep credentials secure]*
+
+s3cmd is already one of the things installed by loenv.yml, and it is already on klone (so you don't need to be in loenv to use it on klone). We needed version 2.4.0 or better.  
 
 #### Examples of usage (all from the linux command line)
 
