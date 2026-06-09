@@ -27,22 +27,21 @@ but when adding to it later you should use hourly.
 # imports
 import sys
 import argparse
-from lo_tools import Lfun, zfun, zrfun
+from lo_tools import Lfun
 from subprocess import Popen as Po
 from subprocess import PIPE as Pi
 import os
 from time import time
-import numpy as np
-import xarray as xr
 import pandas as pd
-from pathlib import Path
 from datetime import datetime, timedelta
 
 pid = os.getpid()
 print(' rechunker_main '.center(60,'='))
 print('PID for this job = ' + str(pid))
 
-# command line arugments
+# Command line arugments
+
+# REQUIRED
 parser = argparse.ArgumentParser()
 # which run to use
 parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas7_t2_x11b
@@ -50,10 +49,13 @@ parser.add_argument('-gtx', '--gtagex', type=str)   # e.g. cas7_t2_x11b
 parser.add_argument('-0', '--ds0', type=str) # e.g. 2019.07.04
 parser.add_argument('-1', '--ds1', type=str) # e.g. 2019.07.06
 parser.add_argument('-lt', '--list_type', type=str)# hourly, hourly0, average
+
+# OPTIONAL
 # set this to True to interpolate all u, and v fields to the rho-grid
-parser.add_argument('-uv_to_rho', default=True, type=Lfun.boolean_string)
-# Optional: for testing
+parser.add_argument('-uv_to_rho', default=False, type=Lfun.boolean_string)
+# for testing
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+
 # get the args and put into Ldir
 args = parser.parse_args()
 
@@ -72,22 +74,26 @@ if args.list_type in ['hourly','hourly0']:
     dt0_ind = pd.date_range(args.ds0,args.ds1,freq='D') # a DatetimeIndex
     dt1_ind = dt0_ind + timedelta(days=1)
 elif args.list_type == 'average':
-    dt0_ind = pd.date_range(args.ds0,args.ds1,freq='MS')
-    dt1_ind = pd.date_range(args.ds0,args.ds1,freq='ME')
+    dt0_ind = pd.date_range(args.ds0,args.ds1,freq='MS') # month start
+    dt1_ind = pd.date_range(args.ds0,args.ds1,freq='ME') # month end
 dt_dict = dict(zip(dt0_ind, dt1_ind))
 
 # name some things to pass to the subprocess
 gtagex = args.gtagex
 indir = 's3://' + bucket_name + '/LO_roms/' + gtagex
-outdir = str(Ldir['LOo']) + '/icechunk_temp'
+outdir0 = str(Ldir['LOo']) + '/icechunk_temp'
 list_type = args.list_type
-
-# create a clean directory for the output
-if not args.testing:
-    Lfun.make_dir(outdir, clean=True)
 
 # loop over the subsets
 for dt0 in dt0_ind:
+
+    tt0 = time()
+
+    outdir = str(outdir0) + '/' + 'sub_' + dt0.strftime(Ldir['ds_fmt']) + '_' + list_type
+
+    # create a clean directory for the output
+    if not args.testing:
+        Lfun.make_dir(outdir, clean=True)
 
     if (list_type == 'hourly0') and (dt0 > dt0_ind[0]):
         list_type = 'hourly'
@@ -124,6 +130,7 @@ for dt0 in dt0_ind:
             print('\nSTDERR')
             print(stderr.decode())
 
-# dt_list = pd.date_range(dt,dt+timedelta(days=1),freq='h')
-# dt_list = pd.date_range(dt,bin_dict[dt],freq='D')
+    print('time for %s: %0.1f' % (outdir, time()-tt0))
+    sys.stdout.flush()
+
 

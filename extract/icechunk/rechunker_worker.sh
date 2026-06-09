@@ -31,19 +31,23 @@ conda activate loenv
 # make a unique directory for each task
 export TMPDIR=/var/tmp/$USER/$SLURM_ARRAY_JOB_ID_$SLURM_ARRAY_TASK_ID
 mkdir -p $TMPDIR
+# NOTE: exported variables are available to all jobs launched from this shell
 
 # paths
 dir0='/gscratch/macc/parker'
-dir1=${dir0}'/LO/extract/to_zarr'
+dir1=${dir0}'/LO/extract/icechunk'
 
 # rename command line arguments for clarity
-gtx=$1
-ds0=$2
-ds1=$3
-list_type=$4
-
-# run the worker
-# python3 ${dir1}/rechunker_worker_one_time.py -his_str $SLURM_ARRAY_TASK_ID -gtx ${gtx} -ds0 ${ds0} > ${dir1}"/test_"$SLURM_ARRAY_TASK_ID".log"
+indir, outdir, gtagex,
+                this_ds0, this_ds1, list_type
+indir=$1
+outdir=$2
+gtagex=$3
+this_ds0=$4
+this_ds1=$5
+list_type=$6
 
 # Run the worker
-python3 ${in_dir}/worker.py -tid $SLURM_ARRAY_TASK_ID -gtx ${gtx} -dstr ${dstr} -lt ${lt} -out_dir ${out_dir}
+python3 ${dir1}/rechunker_worker_one_time.py -tid ${SLURM_ARRAY_TASK_ID} -gtagex ${gtagex} \
+    -indir ${indir} -outdir ${outdir} \
+    -this_ds0 ${this_ds0} -this_ds1 ${this_ds1} -list_type ${list_type} > ${dir1}"/test_"${SLURM_ARRAY_TASK_ID}".log"
