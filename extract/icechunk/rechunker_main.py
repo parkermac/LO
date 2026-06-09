@@ -38,6 +38,7 @@ import os
 from time import time
 import pandas as pd
 from datetime import datetime, timedelta
+from pathlib import Path
 
 pid = os.getpid()
 print(' rechunker_main '.center(60,'='))
@@ -136,5 +137,17 @@ for dt0 in dt0_ind:
 
     print('time for %s: %0.1f' % (outdir, time()-tt0))
     sys.stdout.flush()
+
+    # Cleaning up the slurm.out files
+    if True:
+        # Specify the directory
+        directory = Path("./")
+        # Loop through files matching the wildcard pattern (e.g., all .tmp files)
+        for file_path in directory.glob("slurm*.out"):
+            try:
+                file_path.unlink()  # .unlink() deletes the file
+                print(f"Deleted: {file_path}")
+            except OSError as e:
+                print(f"Error deleting {file_path}: {e}")
 
 

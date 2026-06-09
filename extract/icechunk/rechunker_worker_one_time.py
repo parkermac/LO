@@ -71,11 +71,8 @@ cmd_list = ['s5cmd','cp', fn, os.environ['TMPDIR'] + '/']
 proc = Po(cmd_list, stdout=Pi, stderr=Pi)
 stdout, stderr = proc.communicate()
 
-
-# 2. Use xarray (ncks) to make a new Dataset with only selected variables 
+# 2. Use xarray or ncks to make a new Dataset with only selected variables 
 # and save it to a folder in /gscratch
-
-ds = xr.open_dataset(os.environ['TMPDIR'] + '/' + fn0)
 
 get_tsa = True
 get_vel = True
@@ -107,12 +104,22 @@ if get_bio:
 if get_surfbot:
     vn_list += ',Pair,Uwind,Vwind,shflux,ssflux,latent,sensible,lwrad,swrad,sustr,svstr,bustr,bvstr'
 
-# do a final check to drop missing variables from the list
-vn_list = (',').join([item for item in vn_list.split(',') if item in ds.data_vars])
+in_fn = os.environ['TMPDIR'] + '/' + fn0
+out_fn = args.outdir + '/subset_' + args.tid + '.nc'
 
-ds_out = ds[vn_list.split(',')]
-
-ds_out.to_netcdf(args.outdir + '/subset_' + args.tid + '.nc')
-
+if False:
+    # method 1: use xarray
+    ds = xr.open_dataset(in_fn)
+    # do a final check to drop missing variables from the list
+    vn_list = (',').join([item for item in vn_list.split(',') if item in ds.data_vars])
+    ds_out = ds[vn_list.split(',')]
+    ds_out.to_netcdf(out_fn)
+else:
+    # Method 2: use ncks
+    cmd_list = ['ncks',
+            '-v', vn_list,
+            '--mk_rec_dim', 'ocean_time','-O', str(in_fn), str(out_fn)]
+    proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+    proc.communicate()
 
 
