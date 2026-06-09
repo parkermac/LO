@@ -10,11 +10,15 @@ This is designed to work on klone, accessing model output from kopah.
 
 The smaller subset will be all the hours in a day for hourly list_type, or all the days in a month for average list_type.
 
-Testing:
-
+Testing on mac:
 run rechunker_main -gtx cas7_t2_x11b -0 2024.01.01 -1 2024.01.02 -lt hourly0 -test True
-
 run rechunker_main -gtx cas7_t1_x11ab -0 2024.01.01 -1 2024.02.29 -lt average -test True
+
+Testing on klone:
+pmsrun2
+conda activate loenv
+python3 rechunker_main.py -gtx cas7_t2_x11b -0 2024.01.01 -1 2024.01.01 -lt hourly0
+python3 rechunker_main.py -gtx cas7_t1_x11ab -0 2024.01.01 -1 2024.01.31 -lt average
 
 Note, using list_type = hourly0 zero means that on the first day we will get 25 hours (0:24)
 and on subsequent days it will revert to hourly, getting 24 hours (1:24).
