@@ -38,8 +38,6 @@ dir0='/gscratch/macc/parker'
 dir1=${dir0}'/LO/extract/icechunk'
 
 # rename command line arguments for clarity
-indir, outdir, gtagex,
-                this_ds0, this_ds1, list_type
 indir=$1
 outdir=$2
 gtagex=$3
@@ -50,4 +48,4 @@ list_type=$6
 # Run the worker
 python3 ${dir1}/rechunker_worker_one_time.py -tid ${SLURM_ARRAY_TASK_ID} -gtagex ${gtagex} \
     -indir ${indir} -outdir ${outdir} \
-    -this_ds0 ${this_ds0} -this_ds1 ${this_ds1} -list_type ${list_type} > ${dir1}"/test_"${SLURM_ARRAY_TASK_ID}".log"
+    -this_ds0 ${this_ds0} -this_ds1 ${this_ds1} -list_type ${list_type}
