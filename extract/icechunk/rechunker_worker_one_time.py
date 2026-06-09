@@ -105,7 +105,8 @@ if get_surfbot:
     vn_list += ',Pair,Uwind,Vwind,shflux,ssflux,latent,sensible,lwrad,swrad,sustr,svstr,bustr,bvstr'
 
 in_fn = os.environ['TMPDIR'] + '/' + fn0
-out_fn = args.outdir + '/subset_' + args.tid + '.nc'
+padded_tid = ('000' + args.tid)[-4:]
+out_fn = args.outdir + '/subset_' + padded_tid + '.nc'
 
 if False:
     # method 1: use xarray
