@@ -2,6 +2,7 @@
 Process a single history file.
 """
 
+import os
 import xarray as xr
 import pandas as pd
 from time import time
