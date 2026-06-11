@@ -39,6 +39,8 @@ from time import time
 import pandas as pd
 from datetime import datetime, timedelta
 from pathlib import Path
+import glob
+import xarray as xr
 
 pid = os.getpid()
 print(' rechunker_main '.center(60,'='))
@@ -134,6 +136,36 @@ for dt0 in dt0_ind:
         if len(stderr) > 0:
             print('\nSTDERR')
             print(stderr.decode())
+
+        # Concatenate subset files into a single rechunked NetCDF.
+        # open_mfdataset(parallel=True) reads files concurrently via dask,
+        # then to_netcdf makes one sequential write pass — faster than ncrcat.
+        subset_files = sorted(glob.glob(outdir + '/subset_*.nc'))
+        if subset_files:
+            tt1 = time()
+            n_times = len(subset_files)
+            ds = xr.open_mfdataset(
+                subset_files,
+                concat_dim='ocean_time',
+                combine='nested',
+                parallel=True,
+                chunks={},
+            )
+            # Set ocean_time chunk = full time extent; keep spatial dims unchunked.
+            encoding = {
+                var: {'chunksizes': tuple(
+                    n_times if d == 'ocean_time' else ds.sizes[d]
+                    for d in ds[var].dims
+                )}
+                for var in list(ds.data_vars) + list(ds.coords)
+                if 'ocean_time' in ds[var].dims
+            }
+            out_nc = str(outdir0) + '/' + Path(outdir).name.replace('sub_', 'rechunked_') + '.nc'
+            ds.to_netcdf(out_nc, encoding=encoding)
+            ds.close()
+            print('Concatenation: %0.1f s  ->  %s' % (time() - tt1, out_nc))
+            # for f in subset_files:
+            #     Path(f).unlink()
 
     print('time for %s: %0.1f' % (outdir, time()-tt0))
     sys.stdout.flush()
