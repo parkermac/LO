@@ -15,6 +15,7 @@ import os
 from pathlib import Path
 
 # defaults that should work on all machines
+# NOTE: could try .resolve() instead of .absolute()
 parent = Path(__file__).absolute().parent.parent
 LO = parent / 'LO'
 LOo = parent / 'LO_output'
