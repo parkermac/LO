@@ -17,7 +17,7 @@ run rechunker_main -gtx cas7_t1_x11ab -0 2024.01.01 -1 2024.02.29 -lt average -t
 Testing on klone:
 pmsrun2
 conda activate loenv
-python3 rechunker_main.py -gtx cas7_t2_x11b -0 2024.01.01 -1 2024.01.01 -lt hourly0
+python3 rechunker_main.py -gtx cas7_t2_x11b -0 2024.01.01 -1 2024.01.01 -lt hourly0 -test2 True
 python3 rechunker_main.py -gtx cas7_t1_x11ab -0 2024.01.01 -1 2024.01.31 -lt average
 
 Note, using list_type = hourly0 zero means that on the first day we will get 25 hours (0:24)
@@ -62,6 +62,7 @@ parser.add_argument('-lt', '--list_type', type=str)# hourly, hourly0, average
 parser.add_argument('-uv_to_rho', default=False, type=Lfun.boolean_string)
 # for testing
 parser.add_argument('-test', '--testing', default=False, type=Lfun.boolean_string)
+parser.add_argument('-test2', '--testing2', default=False, type=Lfun.boolean_string)
 
 # get the args and put into Ldir
 args = parser.parse_args()
@@ -99,7 +100,7 @@ for dt0 in dt0_ind:
     outdir = str(outdir0) + '/' + 'sub_' + dt0.strftime(Ldir['ds_fmt']) + '_' + list_type
 
     # create a clean directory for the output
-    if not args.testing:
+    if not args.testing2:
         Lfun.make_dir(outdir, clean=True)
 
     if (list_type == 'hourly0') and (dt0 > dt0_ind[0]):
@@ -128,14 +129,18 @@ for dt0 in dt0_ind:
         print(' '.join(cmd_list))
         print(sub_ind)
     else:
-        proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-        stdout, stderr = proc.communicate()
-        if len(stdout) > 0:
-            print('\nSTDOUT')
-            print(stdout.decode())
-        if len(stderr) > 0:
-            print('\nSTDERR')
-            print(stderr.decode())
+        if not args.testing2:
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            if len(stdout) > 0:
+                print('\nSTDOUT')
+                print(stdout.decode())
+            if len(stderr) > 0:
+                print('\nSTDERR')
+                print(stderr.decode())
+        else:
+            print('skipping extraction step')
+            sys.stdout.flush()
 
         # Concatenate subset files into a single rechunked NetCDF.
         # open_mfdataset(parallel=True) reads files concurrently via dask,
@@ -144,13 +149,19 @@ for dt0 in dt0_ind:
         if subset_files:
             tt1 = time()
             n_times = len(subset_files)
-            ds = xr.open_mfdataset(
-                subset_files,
-                concat_dim='ocean_time',
-                combine='nested',
-                parallel=True,
-                chunks={},
-            )
+
+            # Open and immediately load each file into RAM, then merge
+            datasets = [xr.open_dataset(f).load() for f in subset_files]
+            ds = xr.concat(datasets, dim="ocean_time")
+
+            # ds = xr.open_mfdataset(
+            #     subset_files,
+            #     concat_dim='ocean_time',
+            #     combine='nested',
+            #     parallel=True,
+            #     chunks={},
+            # )
+
             # Set ocean_time chunk = full time extent; keep spatial dims unchunked.
             encoding = {
                 var: {'chunksizes': tuple(
@@ -164,6 +175,7 @@ for dt0 in dt0_ind:
             ds.to_netcdf(out_nc, encoding=encoding)
             ds.close()
             print('Concatenation: %0.1f s  ->  %s' % (time() - tt1, out_nc))
+            sys.stdout.flush()
             # for f in subset_files:
             #     Path(f).unlink()
 
