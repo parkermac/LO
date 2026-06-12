@@ -488,6 +488,25 @@ while dt <= dt1:
             messages(stdout, stderr, 'To kopah messages:', args.verbose)
             print(' - time to copy to kopah = %d sec' % (time()-tt0))
             sys.stdout.flush()
+
+        if (dt == dt1) and (args.run_type == 'forecast'):
+            # Start post processing
+            tt0 = time()
+            if args.gridname == 'cas7':
+                postname = 'K_driver_post1.sh'
+            elif args.gridname == 'wgh2':
+                postname = 'K_driver_post2.sh'
+            elif args.gridname == 'oly2':
+                postname = 'K_driver_post3.sh'
+            else:
+                print('unsupported post processing choice')
+            cmd_list = ['sbatch','-p','cpu-g2','-A','macc',
+                str(Ldir['LO'] / 'driver') + '/' + postname]
+            proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+            stdout, stderr = proc.communicate()
+            messages(stdout, stderr, postname + ' messages:', args.verbose)
+            print(' - time for post1 = %d sec' % (time()-tt0))
+            sys.stdout.flush()
             
         dt += timedelta(days=1)
     else:
