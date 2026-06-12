@@ -43,6 +43,7 @@ import glob
 import xarray as xr
 
 pid = os.getpid()
+
 print(' rechunker_main '.center(60,'='))
 print('PID for this job = ' + str(pid))
 
