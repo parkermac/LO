@@ -6,5 +6,8 @@
 # Complete path or relative path of the input file
 in_fn=$1
 
+# simple way to get the filename
+filename=$(basename "$1")
+
 s5cmd cp --acl public-read $1 s3://pm-share/
-echo "URL = https://s3.kopah.uw.edu/pm-share/[file name]"
+echo "URL = https://s3.kopah.uw.edu/pm-share/${filename}"
