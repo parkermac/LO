@@ -17,8 +17,6 @@
 
 #SBATCH --cpus-per-task=10
 
-#SBATCH --exclusive
-
 source /gscratch/macc/parker/miniconda3/etc/profile.d/conda.sh
 
 conda activate loenv
