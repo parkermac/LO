@@ -48,11 +48,14 @@ https://www.anaconda.com/docs/getting-started/miniconda/install#linux, using the
 The only change you must make is that instead of installing everything in ~ as they suggest, put things in:
 - /data1/[username] on perigee
 - /dat1/[username] on apogee
-- and /Users/[username] is what I used on my mac,
-- and /gscratch/macc/[username] for klone (optional)
-This is important because ~ has very little room on apogee and perigee. You can use the command `whoami` to find your [username] on any system.
+- /Users/[username] is what I used on my mac,
+- /gscratch/macc/[username] for klone
+
+This folder shoice is important because ~ has very little room, especially on apogee and perigee. You can use the command `whoami` to find your [username] on any system.
 
 The initialization adds some lines to your ~/.bashrc, or ~/.bash_profile on a mac. After you "source" this you should have (base) appended to your bash prompt, and this tells you that you are in the (base) conda environment so you can run python - but not much else, yet.
+
+NOTE: In some notes from 2025 I notice I did "conda init --all" at the end. Not sure if this is still needed.
 
 Then for good measure do:
 ```
