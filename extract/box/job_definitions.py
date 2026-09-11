@@ -145,5 +145,5 @@ def get_box(job, Lon, Lat):
         vn_list = 'h,f,pm,pn,mask_rho,salt,temp,zeta,u,v,ubar,vbar,oxygen,NO3,phytoplankton,Uwind,Vwind'
     elif job == 'kelly': # Lydia Kelly and Peter Brodsky (APL)
         aa = [-122.30, -122.58, 47.25, 47.75]
-        vn_list = 'h,f,pm,pn,mask_rho,salt,temp,zeta,u,v'
+        vn_list = 'h,f,pm,pn,mask_rho,salt,temp,zeta,u,v,w'
     return aa, vn_list
