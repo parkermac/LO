@@ -54,8 +54,10 @@ print('time for fs_s3.open = %0.1f sec' % (time()-tt0))
 
 # this works
 tt1 = time()
-ssh_ds = xr.open_dataset(s3_file_obj, engine='h5netcdf')
+ds = xr.open_dataset(s3_file_obj, engine='h5netcdf',cache_type='blockcache', block_size=2**22)
 print('time for xr.open_dataset = %0.1f sec' % (time()-tt1))
+
+ds.salt[0,:,10,10].values
 
 # tt_ncks = time()
 # cmd_list += ['-O', str(fn), str(out_fn)]
