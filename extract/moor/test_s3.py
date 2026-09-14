@@ -15,7 +15,7 @@ print('time for imports = %0.1f sec' % (time()-tt00))
 # took 25 sec
 
 gtx = 'cas7_t1_x11ab'
-fstr = 'f2013.07.02'
+fstr = 'f2013.07.03'
 fname = 'ocean_avg_0001.nc'
 
 Ldir = Lfun.Lstart()
