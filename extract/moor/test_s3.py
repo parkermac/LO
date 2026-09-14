@@ -49,12 +49,12 @@ fs_s3 = s3fs.S3FileSystem(
 s3_url = 's3://liveocean-pmacc/LO_roms/' + gtx + '/' + fstr + '/' + fname
 
 tt0 = time()
-s3_file_obj = fs_s3.open(s3_url, mode='rb')
+s3_file_obj = fs_s3.open(s3_url, mode='rb',cache_type='blockcache', block_size=2**22)
 print('time for fs_s3.open = %0.1f sec' % (time()-tt0))
 
 # this works
 tt1 = time()
-ds = xr.open_dataset(s3_file_obj, engine='h5netcdf',cache_type='blockcache', block_size=2**22)
+ds = xr.open_dataset(s3_file_obj, engine='h5netcdf')
 print('time for xr.open_dataset = %0.1f sec' % (time()-tt1))
 
 ds.salt[0,:,10,10].values
