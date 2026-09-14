@@ -57,7 +57,8 @@ tt1 = time()
 ds = xr.open_dataset(s3_file_obj, engine='h5netcdf')
 print('time for xr.open_dataset = %0.1f sec' % (time()-tt1))
 
-ds.salt[0,:,10,10].values
+a = ds.salt[0,:,10,10].values
+print(a)
 
 # tt_ncks = time()
 # cmd_list += ['-O', str(fn), str(out_fn)]
