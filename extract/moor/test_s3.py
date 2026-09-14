@@ -53,15 +53,17 @@ s3_file_obj = fs_s3.open(s3_url, mode='rb')
 print('time for fs_s3.open = %0.1f sec' % (time()-tt0))
 
 # this works
-# ssh_ds = xr.open_dataset(s3_file_obj, engine='h5netcdf')
+tt1 = time()
+ssh_ds = xr.open_dataset(s3_file_obj, engine='h5netcdf')
+print('time for xr.open_dataset = %0.1f sec' % (time()-tt1))
 
-tt_ncks = time()
-cmd_list += ['-O', str(fn), str(out_fn)]
-proc = Po(cmd_list, stdout=Pi, stderr=Pi)
-stdout, stderr = proc.communicate()
-print(' - time for ncks %0.2f sec' % (time()-tt_ncks))
+# tt_ncks = time()
+# cmd_list += ['-O', str(fn), str(out_fn)]
+# proc = Po(cmd_list, stdout=Pi, stderr=Pi)
+# stdout, stderr = proc.communicate()
+# print(' - time for ncks %0.2f sec' % (time()-tt_ncks))
 
-# check results
-ds = xr.open_dataset(out_fn)
-a = ds.salt.to_numpy().squeeze()
-print(a)
+# # check results
+# ds = xr.open_dataset(out_fn)
+# a = ds.salt.to_numpy().squeeze()
+# print(a)
