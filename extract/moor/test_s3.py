@@ -11,16 +11,14 @@ from lo_tools import Lfun
 import xarray as xr
 import s3fs
 
-print('time imports = %0.1f sec' % (time()-tt00))
-
+print('time for imports = %0.1f sec' % (time()-tt00))
+# took 25 sec
 
 gtx = 'cas7_t1_x11ab'
 fstr = 'f2013.07.02'
 fname = 'ocean_avg_0001.nc'
 
 Ldir = Lfun.Lstart()
-
-#fn = Ldir['roms_out'] / gtx / fstr / fname
 
 out_dir = Ldir['LOo'] / 'test_s3'
 Lfun.make_dir(out_dir)
@@ -44,9 +42,10 @@ print('time for fs_s3.open = %0.1f sec' % (time()-tt0))
 tt0 = time()
 ds = xr.open_dataset(s3_file_obj, engine='h5netcdf')
 print('time for xr.open_dataset = %0.1f sec' % (time()-tt0))
-# result: less than 3 sec
+# result:  3-5 sec
 
 tt0 = time()
 a = ds.salt[0,:,10,10].values
 print(a)
 print('time to get salt profile = %0.1f sec' % (time()-tt0))
+# result: 6 sec
